@@ -97,10 +97,8 @@ class TripOfferViewMapper
             $skillSlugs = $rawSkillLevel ? [(string) $rawSkillLevel] : [];
         }
 
-        $skillLevelFormatted = !empty($skillSlugs)
-            ? implode(' / ', array_map([$this, 'titleCase'], $skillSlugs))
-            : null;
-        $fishingStyleFormatted = $trip->fishing_style ? $this->titleCase($trip->fishing_style) : null;
+        $skillLevelFormatted = $this->formatSkillLevelForDisplay($skillSlugs);
+        $fishingStyleFormatted = $this->formatFishingStyleForDisplay($trip->fishing_style ? (string) $trip->fishing_style : null);
 
         $bestSeasonFromLabel = $this->formatMonthLabel($trip->best_season_from);
         $bestSeasonToLabel = $this->formatMonthLabel($trip->best_season_to);
@@ -363,6 +361,49 @@ class TripOfferViewMapper
     private function titleCase(string $value): string
     {
         return \Illuminate\Support\Str::title(str_replace('_', ' ', $value));
+    }
+
+    /**
+     * @param  list<string|null>  $slugs
+     */
+    private function formatSkillLevelForDisplay(array $slugs): ?string
+    {
+        if ($slugs === []) {
+            return null;
+        }
+
+        $parts = [];
+        foreach ($slugs as $slug) {
+            if ($slug === null || $slug === '') {
+                continue;
+            }
+            $normalized = strtolower(str_replace([' ', '-'], '_', trim((string) $slug)));
+            $parts[] = match ($normalized) {
+                'beginner' => __('trips.skill_level_beginner'),
+                'intermediate' => __('trips.skill_level_intermediate'),
+                'advanced' => __('trips.skill_level_advanced'),
+                'all_levels', 'alllevels', 'all' => __('trips.skill_level_all_levels'),
+                default => $this->titleCase((string) $slug),
+            };
+        }
+
+        return $parts === [] ? null : implode(' / ', $parts);
+    }
+
+    private function formatFishingStyleForDisplay(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $normalized = strtolower(str_replace([' ', '-'], '_', trim($value)));
+
+        return match ($normalized) {
+            'active' => __('trips.fishing_style_active'),
+            'passive' => __('trips.fishing_style_passive'),
+            'both' => __('trips.fishing_style_both'),
+            default => $this->titleCase($value),
+        };
     }
 
     private function formatMonthLabel(?string $value): ?string

@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
 @endpush
 
-@section('title', $tripView['title'] ?? 'Trip')
+@section('title', $tripView['title'] ?? __('trips.page_title_fallback'))
 @section('description', \Illuminate\Support\Str::limit(strip_tags($tripView['description']['full'] ?? ''), 155))
 
 @section('content')
@@ -30,20 +30,20 @@
                 <div class="camp-gallery">
                     <div class="camp-gallery__main" data-gallery-index="0">
                         @if($primaryImage)
-                            <img src="{{ $primaryImage }}" alt="{{ $tripView['title'] }}">
+                            <img src="{{ $primaryImage }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}">
                         @endif
                     </div>
                     <div class="camp-gallery__right">
                         @foreach ($topRightImages as $index => $image)
                             <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
-                                <img src="{{ $image }}" alt="{{ $tripView['title'] }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}">
                             </div>
                         @endforeach
                     </div>
                     <div class="camp-gallery__bottom">
                         @foreach ($bottomStripImages as $index => $image)
                             <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
-                                <img src="{{ $image }}" alt="{{ $tripView['title'] }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 4]) }}">
                                 @if($loop->last && $remainingGalleryCount > 0)
                                     <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
                                 @endif
@@ -60,7 +60,7 @@
                     <div class="camp-gallery__mobile-carousel-scroll">
                         @foreach($mobileCarouselImages as $index => $image)
                             <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
-                                <img src="{{ $image }}" alt="{{ $tripView['title'] }} - Image {{ $index + 2 }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}">
                             </div>
                         @endforeach
                     </div>
@@ -796,10 +796,10 @@
         <!-- Gallery Modal (matches Camp offer page) -->
         <div id="galleryModal" class="gallery-modal">
             <div class="gallery-modal__content">
-                <button class="gallery-modal__close">&times;</button>
-                <button class="gallery-modal__prev">&#10094;</button>
-                <button class="gallery-modal__next">&#10095;</button>
-                <img id="galleryModalImage" src="" alt="{{ $tripView['title'] }}">
+                <button type="button" class="gallery-modal__close" aria-label="{{ __('cookie.close-btn') }}">&times;</button>
+                <button type="button" class="gallery-modal__prev" aria-label="{{ __('vacations.previous') }}">&#10094;</button>
+                <button type="button" class="gallery-modal__next" aria-label="{{ __('vacations.next') }}">&#10095;</button>
+                <img id="galleryModalImage" src="" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}">
                 <div class="gallery-modal__counter">
                     <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
                 </div>
@@ -812,7 +812,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="tripContactModalLabel">{{ $contactModalTitle ?? __('contact.shareYourQuestion') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('cookie.close-btn') }}"></button>
                     </div>
                     <div class="modal-body">
                         {!! ReCaptcha::htmlScriptTagJsApi() !!}
@@ -910,9 +910,9 @@
                         <div id="tripContactLoadingOverlay" style="display: none;">
                             <div class="d-flex justify-content-center align-items-center flex-column p-4">
                                 <div class="spinner-border text-orange mb-3" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                                    <span class="visually-hidden">{{ __('vacations.loading') }}</span>
                                 </div>
-                                <p class="text-center">{{ __('contact.submitting') }}...</p>
+                                <p class="text-center">{{ __('contact.submitting') }}</p>
                             </div>
                         </div>
 
@@ -930,6 +930,10 @@
 @section('js_after')
     <script type="application/json" id="trip-offer-data">{!! json_encode($tripOfferData ?? ['gallery' => [], 'map' => null], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!}</script>
     <script>
+        var tripOfferPageI18n = @json([
+            'mapDefaultTitle' => __('trips.map_marker_fallback'),
+            'contactError' => __('contact.errorMessage'),
+        ]);
         document.addEventListener('DOMContentLoaded', function () {
             const page = document.querySelector('.trip-offer-page');
             if (!page) return;

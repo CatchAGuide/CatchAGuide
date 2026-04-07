@@ -494,6 +494,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/updatelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatelevel'])->name('updatelevel');
             Route::get('/deletelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletelevel'])->name('deletelevel');
 
+            Route::get('/boat-extras', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'boatExtrasIndex'])->name('boat-extras.index');
+            Route::post('/boat-extras', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeBoatExtra'])->name('boat-extras.store');
+            Route::put('/boat-extras/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateBoatExtra'])->name('boat-extras.update');
+            Route::delete('/boat-extras/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteBoatExtra'])->name('boat-extras.destroy');
+
+            Route::get('/facilities', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'facilitiesIndex'])->name('facilities.index');
+            Route::post('/facilities', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeFacility'])->name('facilities.store');
+            Route::put('/facilities/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateFacility'])->name('facilities.update');
+            Route::delete('/facilities/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteFacility'])->name('facilities.destroy');
+
+            Route::get('/kitchen-equipment', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'kitchenEquipmentIndex'])->name('kitchen-equipment.index');
+            Route::post('/kitchen-equipment', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeKitchenEquipment'])->name('kitchen-equipment.store');
+            Route::put('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateKitchenEquipment'])->name('kitchen-equipment.update');
+            Route::delete('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteKitchenEquipment'])->name('kitchen-equipment.destroy');
+
             Route::get('/emailmaintenance', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailmaintenance'])->name('emailmaintenance');
             Route::get('/email-preview/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreview'])->name('email.preview');
             Route::get('/email-preview-ajax/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreviewAjax'])->name('email.preview.ajax');

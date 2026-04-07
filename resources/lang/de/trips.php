@@ -185,6 +185,11 @@ return [
     'outbound_label'               => 'Hinflug',
     'return_label'                 => 'Rückflug',
 
+    // Public offer page (meta & UI)
+    'page_title_fallback' => 'Reise',
+    'gallery_image_alt'   => ':title — Bild :num',
+    'map_marker_fallback' => 'Reiseort',
+
     // Common
     'create'           => 'Reise erstellen',
     'edit'             => 'Reise bearbeiten',

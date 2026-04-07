@@ -28,81 +28,59 @@ namespace App\Models{
  * @property string $region
  * @property string|null $lat
  * @property string|null $lng
- * @property string|null $description
  * @property string $accommodation_type
- * @property string|null $condition_or_style
- * @property int|null $living_area_sqm
- * @property string|null $floor_layout
  * @property int|null $max_occupancy
- * @property int|null $number_of_bedrooms
- * @property array|null $bed_types
  * @property array|null $amenities
  * @property array|null $kitchen_equipment
  * @property array|null $bathroom_amenities
- * @property array|null $policies
+ * @property array<int, array<string, mixed>> $accommodation_details
+ * @property array<int, array<string, mixed>> $room_configurations
+ * @property array<int, array<string, mixed>> $policies
  * @property array|null $rental_conditions
  * @property array|null $per_person_pricing
- * @property string|null $price_type
- * @property string|null $kitchen_type
- * @property int|null $bathroom
- * @property string|null $location_description
- * @property int|null $distance_to_water_m
- * @property int|null $distance_to_boat_berth_m
+ * @property string|null $distance_to_water_m
+ * @property string|null $distance_to_boat_berth_m
  * @property string|null $distance_to_shop_km
- * @property int|null $distance_to_parking_m
- * @property string|null $distance_to_nearest_town_km
- * @property string|null $distance_to_airport_km
- * @property string|null $distance_to_ferry_port_km
- * @property string|null $changeover_day
+ * @property string|null $distance_to_parking_m
  * @property int|null $minimum_stay_nights
- * @property string|null $price_per_night
- * @property string|null $price_per_week
  * @property string $currency
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property array|null $extras
+ * @property array|null $inclusives
+ * @property-read \App\Models\AccommodationType|null $accommodationType
+ * @property-read mixed $name
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereAccommodationDetails($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereAccommodationType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereAmenities($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereBathroom($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereBathroomAmenities($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereBedTypes($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereChangeoverDay($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereCity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereConditionOrStyle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereCurrency($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToAirportKm($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToBoatBerthM($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToFerryPortKm($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToNearestTownKm($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToParkingM($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToShopKm($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereDistanceToWaterM($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereFloorLayout($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereExtras($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereGalleryImages($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereInclusives($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereKitchenEquipment($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereKitchenType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereLat($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereLivingAreaSqm($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereLng($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereLocation($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereLocationDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereMaxOccupancy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereMinimumStayNights($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereNumberOfBedrooms($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation wherePerPersonPricing($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation wherePolicies($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation wherePricePerNight($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation wherePricePerWeek($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Accommodation wherePriceType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereRegion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereRentalConditions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereRoomConfigurations($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereThumbnailPath($value)
@@ -111,6 +89,236 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Accommodation whereUserId($value)
  */
 	class Accommodation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationDetail
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property string $input_type
+ * @property string|null $placeholder
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereInputType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail wherePlaceholder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationDetail whereUpdatedAt($value)
+ */
+	class AccommodationDetail extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationExtra
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationExtra whereUpdatedAt($value)
+ */
+	class AccommodationExtra extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationInclusive
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationInclusive whereUpdatedAt($value)
+ */
+	class AccommodationInclusive extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationPolicy
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationPolicy whereUpdatedAt($value)
+ */
+	class AccommodationPolicy extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationRentalCondition
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_en
+ * @property string $input_type
+ * @property string|null $placeholder
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereInputType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition wherePlaceholder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationRentalCondition whereUpdatedAt($value)
+ */
+	class AccommodationRentalCondition extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AccommodationType
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AccommodationType whereUpdatedAt($value)
+ */
+	class AccommodationType extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\AdminNotification
+ *
+ * @property int $id
+ * @property string $type
+ * @property string $title
+ * @property string|null $body
+ * @property string $level
+ * @property string|null $link
+ * @property array|null $meta
+ * @property bool $is_read
+ * @property int|null $created_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereBody($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereIsRead($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereLink($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereMeta($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AdminNotification whereUpdatedAt($value)
+ */
+	class AdminNotification extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\BathroomAmenity
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity active()
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity query()
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|BathroomAmenity whereUpdatedAt($value)
+ */
+	class BathroomAmenity extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -190,6 +398,9 @@ namespace App\Models{
  * @property int $count_of_users
  * @property float|null $price
  * @property int $is_paid
+ * @property string|null $guide_invoice_sent_at
+ * @property int $is_guide_billed
+ * @property string|null $guide_billed_at
  * @property int|null $user_id
  * @property int|null $guiding_id
  * @property int|null $blocked_event_id
@@ -210,6 +421,8 @@ namespace App\Models{
  * @property string|null $language
  * @property string|null $email
  * @property int|null $last_employee_id
+ * @property int|null $created_by_id
+ * @property string|null $created_source
  * @property int $is_guest
  * @property int $is_reviewed
  * @property int $is_rescheduled
@@ -217,7 +430,9 @@ namespace App\Models{
  * @property int|null $parent_id
  * @property-read \App\Models\BlockedEvent|null $blocked_event
  * @property-read \App\Models\CalendarSchedule|null $calendar_schedule
+ * @property-read \App\Models\Employee|null $createdBy
  * @property-read \App\Models\Employee|null $employee
+ * @property-read \App\Models\FinanceItem|null $financeItem
  * @property-read \App\Models\Guiding|null $guiding
  * @property-read \App\Models\Rating|null $rating
  * @property-read \App\Models\Review|null $review
@@ -233,12 +448,17 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCagPercent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCountOfUsers($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCreatedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereCreatedSource($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereExpiresAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereExtras($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereGuideBilledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereGuideInvoiceSentAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereGuidingId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsGuest($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsGuideBilled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsPaid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsRescheduled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Booking whereIsReviewed($value)
@@ -338,6 +558,147 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|CalendarSchedule whereVacationId($value)
  */
 	class CalendarSchedule extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Camp
+ *
+ * @property int $id
+ * @property string $title
+ * @property string|null $slug
+ * @property string $description_camp
+ * @property string $description_area
+ * @property string $description_fishing
+ * @property string $location
+ * @property string|null $latitude
+ * @property string|null $longitude
+ * @property string|null $country
+ * @property string|null $city
+ * @property string|null $region
+ * @property string|null $distance_to_store
+ * @property string|null $distance_to_nearest_town
+ * @property string|null $distance_to_airport
+ * @property string|null $distance_to_ferry_port
+ * @property string|null $policies_regulations
+ * @property array|null $target_fish
+ * @property array|null $best_travel_times
+ * @property string|null $travel_information
+ * @property string|null $extras
+ * @property string|null $thumbnail_path
+ * @property array|null $gallery_images
+ * @property string $status
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Accommodation> $accommodations
+ * @property-read int|null $accommodations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CampFacility> $facilities
+ * @property-read int|null $facilities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Guiding> $guidings
+ * @property-read int|null $guidings_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RentalBoat> $rentalBoats
+ * @property-read int|null $rental_boats_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SpecialOffer> $specialOffers
+ * @property-read int|null $special_offers_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereBestTravelTimes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDescriptionArea($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDescriptionCamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDescriptionFishing($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDistanceToAirport($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDistanceToFerryPort($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDistanceToNearestTown($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereDistanceToStore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereExtras($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereGalleryImages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp wherePoliciesRegulations($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereRegion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereTargetFish($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereTravelInformation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Camp whereUserId($value)
+ */
+	class Camp extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\CampFacility
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_de
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Camp> $camps
+ * @property-read int|null $camps_count
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereNameDe($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampFacility whereUpdatedAt($value)
+ */
+	class CampFacility extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\CampVacationBooking
+ *
+ * @property int $id
+ * @property string $source_type
+ * @property int $source_id
+ * @property \Illuminate\Support\Carbon $preferred_date
+ * @property int $number_of_persons
+ * @property string $name
+ * @property string $email
+ * @property string $phone_country_code
+ * @property string $phone
+ * @property string $message
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\FinanceItem|null $financeItem
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereNumberOfPersons($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking wherePhoneCountryCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking wherePreferredDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereSourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereSourceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CampVacationBooking whereUpdatedAt($value)
+ */
+	class CampVacationBooking extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -565,6 +926,101 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\City
+ *
+ * @property int $id
+ * @property int $country_id
+ * @property int|null $region_id
+ * @property string $name
+ * @property string $slug
+ * @property array|null $filters
+ * @property string|null $thumbnail_path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Models\Country $country
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFaq> $faqs
+ * @property-read int|null $faqs_count
+ * @property-read mixed $content
+ * @property-read mixed $faq_title
+ * @property-read mixed $fish_avail_intro
+ * @property-read mixed $fish_avail_title
+ * @property-read mixed $introduction
+ * @property-read mixed $size_limit_intro
+ * @property-read mixed $size_limit_title
+ * @property-read mixed $sub_title
+ * @property-read mixed $time_limit_intro
+ * @property-read mixed $time_limit_title
+ * @property-read mixed $title
+ * @property-read \App\Models\Region|null $region
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CityTranslation> $translations
+ * @property-read int|null $translations_count
+ * @method static \Illuminate\Database\Eloquent\Builder|City newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|City newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|City onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|City query()
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereCountryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereFilters($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereRegionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|City withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|City withoutTrashed()
+ */
+	class City extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\CityTranslation
+ *
+ * @property int $id
+ * @property int $city_id
+ * @property string $language
+ * @property string|null $title
+ * @property string|null $sub_title
+ * @property string|null $introduction
+ * @property string|null $content
+ * @property string|null $fish_avail_title
+ * @property string|null $fish_avail_intro
+ * @property string|null $size_limit_title
+ * @property string|null $size_limit_intro
+ * @property string|null $time_limit_title
+ * @property string|null $time_limit_intro
+ * @property string|null $faq_title
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\City $city
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereCityId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereFaqTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereFishAvailIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereFishAvailTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereIntroduction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereLanguage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereSizeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereSizeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereSubTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereTimeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereTimeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CityTranslation whereUpdatedAt($value)
+ */
+	class CityTranslation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\ContactRequest
  *
  * @property int $id
@@ -603,6 +1059,7 @@ namespace App\Models{
  * @property string $description
  * @property string|null $source_type
  * @property int|null $source_id
+ * @property string $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission newModelQuery()
@@ -616,9 +1073,176 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission whereSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission whereSourceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ContactSubmission whereUpdatedAt($value)
  */
 	class ContactSubmission extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Country
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $countrycode
+ * @property array|null $filters
+ * @property string|null $thumbnail_path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\City> $cities
+ * @property-read int|null $cities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFaq> $faqs
+ * @property-read int|null $faqs_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishChart> $fish_charts
+ * @property-read int|null $fish_charts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishSizeLimit> $fish_size_limits
+ * @property-read int|null $fish_size_limits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishTimeLimit> $fish_time_limits
+ * @property-read int|null $fish_time_limits_count
+ * @property-read mixed $content
+ * @property-read mixed $faq_title
+ * @property-read mixed $fish_avail_intro
+ * @property-read mixed $fish_avail_title
+ * @property-read mixed $introduction
+ * @property-read mixed $size_limit_intro
+ * @property-read mixed $size_limit_title
+ * @property-read mixed $sub_title
+ * @property-read mixed $time_limit_intro
+ * @property-read mixed $time_limit_title
+ * @property-read mixed $title
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Region> $regions
+ * @property-read int|null $regions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CountryTranslation> $translations
+ * @property-read int|null $translations_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Country newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereCountrycode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereFilters($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Country withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Country withoutTrashed()
+ */
+	class Country extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\CountryTranslation
+ *
+ * @property int $id
+ * @property int $country_id
+ * @property string $language
+ * @property string|null $title
+ * @property string|null $sub_title
+ * @property string|null $introduction
+ * @property string|null $content
+ * @property string|null $fish_avail_title
+ * @property string|null $fish_avail_intro
+ * @property string|null $size_limit_title
+ * @property string|null $size_limit_intro
+ * @property string|null $time_limit_title
+ * @property string|null $time_limit_intro
+ * @property string|null $faq_title
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Country $country
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereCountryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereFaqTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereFishAvailIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereFishAvailTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereIntroduction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereLanguage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereSizeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereSizeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereSubTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereTimeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereTimeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CountryTranslation whereUpdatedAt($value)
+ */
+	class CountryTranslation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\CustomCampOffer
+ *
+ * @property int $id
+ * @property string|null $name
+ * @property string $recipient_type
+ * @property int|null $customer_id
+ * @property string $recipient_email
+ * @property string|null $recipient_name
+ * @property string|null $recipient_phone
+ * @property array|null $camp_ids
+ * @property array|null $accommodation_ids
+ * @property array|null $boat_ids
+ * @property array|null $guiding_ids
+ * @property string|null $date_from
+ * @property string|null $date_to
+ * @property string|null $number_of_persons
+ * @property string|null $price
+ * @property string|null $additional_info
+ * @property string|null $free_text
+ * @property array|null $offers
+ * @property string $locale
+ * @property int|null $created_by
+ * @property \Illuminate\Support\Carbon|null $sent_at
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $creator
+ * @property-read \App\Models\User|null $customer
+ * @property-read mixed $accommodations
+ * @property-read mixed $guidings
+ * @property-read mixed $rental_boats
+ * @property-read array $resolved_offers
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereAccommodationIds($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereAdditionalInfo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereBoatIds($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereCampIds($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereCustomerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereDateFrom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereDateTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereFreeText($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereGuidingIds($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereNumberOfPersons($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereOffers($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereRecipientEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereRecipientName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereRecipientPhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereRecipientType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomCampOffer whereUpdatedAt($value)
+ */
+	class CustomCampOffer extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -701,6 +1325,7 @@ namespace App\Models{
  *
  * @property int $id
  * @property int $destination_id
+ * @property string|null $destination_type
  * @property string $question
  * @property string $answer
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -713,6 +1338,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereAnswer($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereDestinationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereDestinationType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereLanguage($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFaq whereQuestion($value)
@@ -727,6 +1353,7 @@ namespace App\Models{
  *
  * @property int $id
  * @property int $destination_id
+ * @property string|null $destination_type
  * @property string $fish
  * @property int $jan
  * @property int $feb
@@ -752,6 +1379,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereDec($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereDestinationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereDestinationType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereFeb($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereFish($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishChart whereId($value)
@@ -775,6 +1403,7 @@ namespace App\Models{
  *
  * @property int $id
  * @property int $destination_id
+ * @property string|null $destination_type
  * @property string $fish
  * @property string $data
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -787,6 +1416,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereData($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereDestinationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereDestinationType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereFish($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishSizeLimit whereLanguage($value)
@@ -801,6 +1431,7 @@ namespace App\Models{
  *
  * @property int $id
  * @property int $destination_id
+ * @property string|null $destination_type
  * @property string $fish
  * @property string $data
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -813,6 +1444,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereData($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereDestinationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereDestinationType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereFish($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DestinationFishTimeLimit whereLanguage($value)
@@ -862,24 +1494,37 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $password_reset_at
+ * @property int|null $password_reset_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $deleted_by
+ * @property-read Employee|null $deletedByUser
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
+ * @property-read Employee|null $passwordResetByUser
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
  * @method static \Database\Factories\EmployeeFactory factory(...$parameters)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Employee newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Employee query()
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee whereDeletedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee wherePasswordResetAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee wherePasswordResetBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Employee whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Employee withoutTrashed()
  */
 	class Employee extends \Eloquent {}
 }
@@ -978,6 +1623,33 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\Facility
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility active()
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Facility whereUpdatedAt($value)
+ */
+	class Facility extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Faq
  *
  * @property int $id
@@ -1001,6 +1673,38 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Faq whereUpdatedAt($value)
  */
 	class Faq extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\FinanceItem
+ *
+ * @property int $id
+ * @property string $billable_type
+ * @property int $billable_id
+ * @property string $invoice_status
+ * @property \Illuminate\Support\Carbon|null $invoice_sent_at
+ * @property string|null $invoice_number
+ * @property string $paid_status
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $billable
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem query()
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereBillableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereBillableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereInvoiceNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereInvoiceSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereInvoiceStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem wherePaidAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem wherePaidStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FinanceItem whereUpdatedAt($value)
+ */
+	class FinanceItem extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -1251,6 +1955,8 @@ namespace App\Models{
  * @property-read int|null $images_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Inclussion> $inclussions
  * @property-read int|null $inclussions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Language> $languageTranslations
+ * @property-read int|null $language_translations_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Levels> $levels
  * @property-read int|null $levels_count
  * @property-read int|null $methods_count
@@ -1260,6 +1966,7 @@ namespace App\Models{
  * @property-read int|null $reviews_count
  * @property-read int|null $target_fish_count
  * @property-read \App\Models\Media|null $thumbnail
+ * @property-read \App\Models\Language|null $translationForCurrentLocale
  * @property-read \App\Models\User $user
  * @property-read int|null $water_types_count
  * @method static \Database\Factories\GuidingFactory factory(...$parameters)
@@ -1734,6 +2441,33 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\KitchenEquipment
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment active()
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment query()
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KitchenEquipment whereUpdatedAt($value)
+ */
+	class KitchenEquipment extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Language
  *
  * @property int $id
@@ -2062,6 +2796,106 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\Region
+ *
+ * @property int $id
+ * @property int $country_id
+ * @property string $name
+ * @property string $slug
+ * @property array|null $filters
+ * @property string|null $thumbnail_path
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\City> $cities
+ * @property-read int|null $cities_count
+ * @property-read \App\Models\Country $country
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFaq> $faqs
+ * @property-read int|null $faqs_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishChart> $fish_charts
+ * @property-read int|null $fish_charts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishSizeLimit> $fish_size_limits
+ * @property-read int|null $fish_size_limits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\DestinationFishTimeLimit> $fish_time_limits
+ * @property-read int|null $fish_time_limits_count
+ * @property-read mixed $content
+ * @property-read mixed $faq_title
+ * @property-read mixed $fish_avail_intro
+ * @property-read mixed $fish_avail_title
+ * @property-read mixed $introduction
+ * @property-read mixed $size_limit_intro
+ * @property-read mixed $size_limit_title
+ * @property-read mixed $sub_title
+ * @property-read mixed $time_limit_intro
+ * @property-read mixed $time_limit_title
+ * @property-read mixed $title
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RegionTranslation> $translations
+ * @property-read int|null $translations_count
+ * @method static \Illuminate\Database\Eloquent\Builder|Region newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Region newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Region onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Region query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereCountryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereFilters($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Region withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Region withoutTrashed()
+ */
+	class Region extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\RegionTranslation
+ *
+ * @property int $id
+ * @property int $region_id
+ * @property string $language
+ * @property string|null $title
+ * @property string|null $sub_title
+ * @property string|null $introduction
+ * @property string|null $content
+ * @property string|null $fish_avail_title
+ * @property string|null $fish_avail_intro
+ * @property string|null $size_limit_title
+ * @property string|null $size_limit_intro
+ * @property string|null $time_limit_title
+ * @property string|null $time_limit_intro
+ * @property string|null $faq_title
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Region $region
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation query()
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereFaqTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereFishAvailIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereFishAvailTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereIntroduction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereLanguage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereRegionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereSizeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereSizeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereSubTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereTimeLimitIntro($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereTimeLimitTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RegionTranslation whereUpdatedAt($value)
+ */
+	class RegionTranslation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\RentalBoat
  *
  * @property int $id
@@ -2078,8 +2912,9 @@ namespace App\Models{
  * @property string|null $lat
  * @property string|null $lng
  * @property string $boat_type
+ * @property int|null $max_persons
  * @property string $desc_of_boat
- * @property string|null $requirements
+ * @property array|null $requirements
  * @property array|null $boat_information
  * @property array|null $boat_extras
  * @property string $price_type
@@ -2106,6 +2941,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat whereLat($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat whereLng($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat whereLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat whereMaxPersons($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat wherePriceType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat wherePrices($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RentalBoat wherePricingExtra($value)
@@ -2123,6 +2959,39 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\RentalBoatRequirement
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $name_en
+ * @property string $input_type
+ * @property string|null $placeholder
+ * @property string|null $placeholder_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement active()
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement query()
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereInputType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement wherePlaceholder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement wherePlaceholderEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RentalBoatRequirement whereUpdatedAt($value)
+ */
+	class RentalBoatRequirement extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * App\Models\Review
  *
  * @property int $id
@@ -2135,6 +3004,7 @@ namespace App\Models{
  * @property int $guide_id
  * @property int $booking_id
  * @property int $guiding_id
+ * @property bool $is_automatic
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Booking $booking
@@ -2151,12 +3021,40 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereGuideScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereGuidingId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Review whereIsAutomatic($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereOverallScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereRegionWaterScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Review whereUserId($value)
  */
 	class Review extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\RoomConfiguration
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $name_en
+ * @property bool $is_active
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration active()
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration query()
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereNameEn($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|RoomConfiguration whereUpdatedAt($value)
+ */
+	class RoomConfiguration extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -2208,6 +3106,64 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|SearchRequest whereUpdatedAt($value)
  */
 	class SearchRequest extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\SpecialOffer
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $slug
+ * @property string $location
+ * @property string|null $latitude
+ * @property string|null $longitude
+ * @property string|null $country
+ * @property string|null $city
+ * @property string|null $region
+ * @property string|null $thumbnail_path
+ * @property array|null $gallery_images
+ * @property array|null $whats_included
+ * @property array|null $pricing
+ * @property string|null $price_type
+ * @property string $currency
+ * @property string $status
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Accommodation> $accommodations
+ * @property-read int|null $accommodations_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Camp> $camps
+ * @property-read int|null $camps_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Guiding> $guidings
+ * @property-read int|null $guidings_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\RentalBoat> $rentalBoats
+ * @property-read int|null $rental_boats_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer query()
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereCurrency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereGalleryImages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer wherePriceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer wherePricing($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereRegion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SpecialOffer whereWhatsIncluded($value)
+ */
+	class SpecialOffer extends \Eloquent {}
 }
 
 namespace App\Models{
@@ -2268,6 +3224,194 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Thread whereUpdatedAt($value)
  */
 	class Thread extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Trip
+ *
+ * @property int $id
+ * @property string $title
+ * @property string $slug
+ * @property string $location
+ * @property string|null $latitude
+ * @property string|null $longitude
+ * @property string|null $country
+ * @property string|null $city
+ * @property string|null $region
+ * @property string|null $thumbnail_path
+ * @property array|null $gallery_images
+ * @property array|null $target_species
+ * @property array|null $fishing_methods
+ * @property string|null $fishing_style
+ * @property array|null $water_types
+ * @property array|null $skill_level
+ * @property int|null $duration_nights
+ * @property int|null $duration_days
+ * @property int|null $group_size_min
+ * @property int|null $group_size_max
+ * @property array|null $trip_schedule
+ * @property string|null $meeting_point
+ * @property string|null $best_season_from
+ * @property string|null $best_season_to
+ * @property array|null $catering
+ * @property string|null $best_arrival_options
+ * @property string|null $arrival_day
+ * @property string|null $boat_type
+ * @property array|null $boat_features
+ * @property string|null $boat_information
+ * @property string|null $accommodation_description
+ * @property string|null $accommodation_type
+ * @property array|null $room_types
+ * @property string|null $distance_to_water
+ * @property string|null $nearest_airport
+ * @property string|null $provider_name
+ * @property string|null $provider_photo
+ * @property string|null $provider_experience
+ * @property string|null $provider_certifications
+ * @property string|null $boat_staff
+ * @property array|null $guide_languages
+ * @property string|null $description
+ * @property array|null $trip_highlights
+ * @property array|null $included
+ * @property array|null $excluded
+ * @property array|null $additional_info
+ * @property string|null $cancellation_policy
+ * @property string|null $price_per_person
+ * @property string|null $price_single_room_addition
+ * @property string|null $downpayment_policy
+ * @property string|null $currency
+ * @property string $status
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TripAvailabilityDate> $availabilityDates
+ * @property-read int|null $availability_dates_count
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereAccommodationDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereAccommodationType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereAdditionalInfo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereArrivalDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBestArrivalOptions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBestSeasonFrom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBestSeasonTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBoatFeatures($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBoatInformation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBoatStaff($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereBoatType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCancellationPolicy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCatering($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereCurrency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereDistanceToWater($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereDownpaymentPolicy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereDurationDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereDurationNights($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereExcluded($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereFishingMethods($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereFishingStyle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereGalleryImages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereGroupSizeMax($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereGroupSizeMin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereGuideLanguages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereIncluded($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereLocation($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereMeetingPoint($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereNearestAirport($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip wherePricePerPerson($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip wherePriceSingleRoomAddition($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereProviderCertifications($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereProviderExperience($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereProviderName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereProviderPhoto($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereRegion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereRoomTypes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereSkillLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereTargetSpecies($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereThumbnailPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereTripHighlights($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereTripSchedule($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Trip whereWaterTypes($value)
+ */
+	class Trip extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\TripAvailabilityDate
+ *
+ * @property int $id
+ * @property int $trip_id
+ * @property \Illuminate\Support\Carbon $departure_date
+ * @property int $spots_available
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Trip $trip
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereDepartureDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereSpotsAvailable($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereTripId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripAvailabilityDate whereUpdatedAt($value)
+ */
+	class TripAvailabilityDate extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\TripBooking
+ *
+ * @property int $id
+ * @property string $source_type
+ * @property int $source_id
+ * @property \Illuminate\Support\Carbon $preferred_date
+ * @property int $number_of_persons
+ * @property string $name
+ * @property string $email
+ * @property string $phone_country_code
+ * @property string $phone
+ * @property string $message
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\FinanceItem|null $financeItem
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereNumberOfPersons($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking wherePhoneCountryCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking wherePreferredDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereSourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereSourceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TripBooking whereUpdatedAt($value)
+ */
+	class TripBooking extends \Eloquent {}
 }
 
 namespace App\Models{

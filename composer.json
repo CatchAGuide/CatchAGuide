@@ -13,6 +13,7 @@
         "biscolab/google-maps-php-sdk": "^0.9.0",
         "biscolab/laravel-recaptcha": "^5.4",
         "fruitcake/laravel-cors": "^2.0",
+        "google/analytics-data": "^0.23.3",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.7",
         "jenssegers/agent": "^2.6",

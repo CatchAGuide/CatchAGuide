@@ -29,7 +29,11 @@ class TripOfferController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
-        $tripView = $this->cache->rememberTripOfferViewModel($slug, fn () => $this->mapper->map($trip));
+        $tripView = $this->cache->rememberTripOfferViewModel(
+            $slug,
+            app()->getLocale(),
+            fn () => $this->mapper->map($trip)
+        );
 
         $gallery = $this->buildGallery($trip);
         $presentation = $this->cache->rememberTripOfferPresentationData(
@@ -173,9 +177,9 @@ class TripOfferController extends Controller
             };
 
             return [
-                'month' => $date ? $date->format('M') : null,
+                'month' => $date ? $date->copy()->locale($locale)->isoFormat('MMM') : null,
                 'day' => $date ? $date->format('d') : null,
-                'weekday' => $date ? $date->format('D') : null,
+                'weekday' => $date ? $date->copy()->locale($locale)->isoFormat('ddd') : null,
                 'date_formatted' => $formatShort($date),
                 'departure_date' => $date?->toDateString(),
                 'return_date_formatted' => $formatShort($returnDate),

@@ -10,10 +10,188 @@ use App\Models\Levels;
 use App\Models\Inclussion;
 use App\Models\FishingType;
 use App\Models\FishingFrom;
+use App\Models\FishingEquipment;
+use App\Models\BoatExtras;
+use App\Models\Facility;
+use App\Models\KitchenEquipment;
 use Illuminate\Http\Request;
 
 class GuidingsSettingController extends Controller
 {
+    public function equipmentIndex()
+    {
+        $equipment = FishingEquipment::query()->orderBy('id', 'desc')->get();
+        return view('admin.pages.setting.equipment.index', compact('equipment'));
+    }
+
+    public function storeequipment(Request $request)
+    {
+        $request->validate([
+            'name' => 'nullable|string',
+            'name_en' => 'nullable|string',
+        ]);
+
+        FishingEquipment::create($request->only(['name', 'name_en']));
+
+        return back()->with('success', 'Fishing equipment was successfully added');
+    }
+
+    public function updatefishingequipment(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'nullable|string',
+            'name_en' => 'nullable|string',
+        ]);
+
+        $row = FishingEquipment::findOrFail($id);
+        $row->update($request->only(['name', 'name_en']));
+
+        return back()->with('success', 'Fishing equipment was successfully updated');
+    }
+
+    public function deleteequipment($id)
+    {
+        FishingEquipment::findOrFail($id)->delete();
+        return back()->with('success', 'Fishing equipment was successfully deleted');
+    }
+
+    public function boatExtrasIndex()
+    {
+        $extras = BoatExtras::query()->orderBy('id', 'desc')->get();
+        return view('admin.pages.setting.boat-extras.index', compact('extras'));
+    }
+
+    public function storeBoatExtra(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+        ]);
+
+        BoatExtras::create($request->only(['name', 'name_en']));
+        return back()->with('success', 'Boat extra was successfully added');
+    }
+
+    public function updateBoatExtra(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+        ]);
+
+        $row = BoatExtras::findOrFail($id);
+        $row->update($request->only(['name', 'name_en']));
+
+        return back()->with('success', 'Boat extra was successfully updated');
+    }
+
+    public function deleteBoatExtra($id)
+    {
+        BoatExtras::findOrFail($id)->delete();
+        return back()->with('success', 'Boat extra was successfully deleted');
+    }
+
+    public function facilitiesIndex()
+    {
+        $facilities = Facility::query()->orderBy('sort_order')->orderBy('id')->get();
+        return view('admin.pages.setting.facilities.index', compact('facilities'));
+    }
+
+    public function storeFacility(Request $request)
+    {
+        $request->validate([
+            'value' => 'required|string|max:255',
+            'value_de' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        Facility::create([
+            'value' => $request->value,
+            'value_de' => $request->value_de,
+            'is_active' => (bool)($request->boolean('is_active', true)),
+            'sort_order' => (int)($request->input('sort_order', 0)),
+        ]);
+
+        return back()->with('success', 'Facility was successfully added');
+    }
+
+    public function updateFacility(Request $request, $id)
+    {
+        $request->validate([
+            'value' => 'required|string|max:255',
+            'value_de' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $row = Facility::findOrFail($id);
+        $row->update([
+            'value' => $request->value,
+            'value_de' => $request->value_de,
+            'is_active' => (bool)($request->boolean('is_active', true)),
+            'sort_order' => (int)($request->input('sort_order', 0)),
+        ]);
+
+        return back()->with('success', 'Facility was successfully updated');
+    }
+
+    public function deleteFacility($id)
+    {
+        Facility::findOrFail($id)->delete();
+        return back()->with('success', 'Facility was successfully deleted');
+    }
+
+    public function kitchenEquipmentIndex()
+    {
+        $equipment = KitchenEquipment::query()->orderBy('sort_order')->orderBy('id')->get();
+        return view('admin.pages.setting.kitchen-equipment.index', compact('equipment'));
+    }
+
+    public function storeKitchenEquipment(Request $request)
+    {
+        $request->validate([
+            'value' => 'required|string|max:255',
+            'value_de' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        KitchenEquipment::create([
+            'value' => $request->value,
+            'value_de' => $request->value_de,
+            'is_active' => (bool)($request->boolean('is_active', true)),
+            'sort_order' => (int)($request->input('sort_order', 0)),
+        ]);
+
+        return back()->with('success', 'Kitchen equipment was successfully added');
+    }
+
+    public function updateKitchenEquipment(Request $request, $id)
+    {
+        $request->validate([
+            'value' => 'required|string|max:255',
+            'value_de' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer',
+        ]);
+
+        $row = KitchenEquipment::findOrFail($id);
+        $row->update([
+            'value' => $request->value,
+            'value_de' => $request->value_de,
+            'is_active' => (bool)($request->boolean('is_active', true)),
+            'sort_order' => (int)($request->input('sort_order', 0)),
+        ]);
+
+        return back()->with('success', 'Kitchen equipment was successfully updated');
+    }
+
+    public function deleteKitchenEquipment($id)
+    {
+        KitchenEquipment::findOrFail($id)->delete();
+        return back()->with('success', 'Kitchen equipment was successfully deleted');
+    }
 
     public function targetIndex(){
         

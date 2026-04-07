@@ -185,6 +185,11 @@ return [
     'outbound_label'               => 'Outbound',
     'return_label'                 => 'Return',
 
+    // Public offer page (meta & UI)
+    'page_title_fallback' => 'Trip',
+    'gallery_image_alt'   => ':title — image :num',
+    'map_marker_fallback' => 'Trip location',
+
     // Common
     'create'           => 'Create Trip',
     'edit'             => 'Edit Trip',
