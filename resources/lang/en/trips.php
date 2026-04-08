@@ -227,5 +227,18 @@ return [
     'language_portuguese' => 'Portuguese',
 
     'please_provide_your_details_for_booking_the_trip' => 'Please provide your details for booking the trip: :title',
+
+    // Public catalog (trip location categories — destinations.type=trips)
+    'catalog_title' => 'Fishing trips by destination',
+    'catalog_header_title' => 'Fishing trips',
+    'catalog_header_sub_title' => 'Choose a destination to see available all-inclusive trips.',
+    'catalog_breadcrumb' => 'Fishing trips',
+    'catalog_intro' => 'Browse trip destinations below. Each region has its own information page and a live list of active trips.',
+    'catalog_no_locations' => 'No trip destinations are published for this language yet.',
+    'catalog_browser_title_prefix' => 'Trips | ',
+    'catalog_list_heading' => 'Trips in :place',
+    'catalog_result_count' => ':count trip(s) match this destination.',
+    'catalog_empty_category' => 'No active trips are linked to this destination yet. Set each trip’s Country field to this page’s slug in the admin.',
+    'catalog_sort_price_desc' => 'High to low price',
 ];
 

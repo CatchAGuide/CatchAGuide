@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
+use App\Http\Controllers\Admin\Category\AdminCategoryTripLocationController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
@@ -45,6 +46,7 @@ use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\TripOfferController;
+use App\Http\Controllers\TripsCatalogController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\GuideThreadController;
 use App\Http\Controllers\Blog\ThreadsController;
@@ -269,6 +271,9 @@ Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
+// NOTE: /trips is a real public directory (used for trip images). Use a non-conflicting prefix for the public catalog.
+Route::get('trips-destinations', [TripsCatalogController::class, 'index'])->name('trips.index')->middleware('ddos:search');
+Route::get('trips-destinations/c/{location}', [TripsCatalogController::class, 'category'])->name('trips.category')->middleware('ddos:search');
 Route::get('trips/{slug}', [TripOfferController::class, 'show'])
     ->name('trips.show')
     ->middleware('ddos:search');
@@ -542,6 +547,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
             Route::resource('country', AdminCategoryCountryController::class);
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
+            Route::resource('trip-location', AdminCategoryTripLocationController::class)->except(['show']);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
             Route::resource('methods', AdminCategoryMethodsController::class);

@@ -153,6 +153,7 @@
                         <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}">Posts (guide blog)</a></li>
                         <li><a href="{{ route('admin.category.country.index') }}" class="slide-item {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}">Country</a></li>
                         <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}">Vacation country</a></li>
+                        <li><a href="{{ route('admin.category.trip-location.index') }}" class="slide-item {{ request()->routeIs('admin.category.trip-location.*') ? 'active' : '' }}">Trip locations</a></li>
                         <li><a href="{{ route('admin.category.region.index') }}" class="slide-item {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}">Region</a></li>
                         <li><a href="{{ route('admin.category.city.index') }}" class="slide-item {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}">City</a></li>
                     </ul>

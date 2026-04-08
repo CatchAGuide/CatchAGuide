@@ -227,5 +227,18 @@ return [
     'language_portuguese' => 'Portugiesisch',
 
     'please_provide_your_details_for_booking_the_trip' => 'Bitte gib deine Daten zur Buchung der Reise an: :title',
+
+    // Public catalog (trip location categories)
+    'catalog_title' => 'Angeltrips nach Reiseziel',
+    'catalog_header_title' => 'Angeltrips',
+    'catalog_header_sub_title' => 'Wähle ein Reiseziel, um verfügbare All-inclusive-Trips zu sehen.',
+    'catalog_breadcrumb' => 'Angeltrips',
+    'catalog_intro' => 'Wähle unten ein Reiseziel. Jede Region hat eine eigene Infoseite und eine aktuelle Liste der Trips.',
+    'catalog_no_locations' => 'Für diese Sprache sind noch keine Trip-Reiseziele veröffentlicht.',
+    'catalog_browser_title_prefix' => 'Trips | ',
+    'catalog_list_heading' => 'Trips in :place',
+    'catalog_result_count' => ':count Trip(s) passen zu diesem Reiseziel.',
+    'catalog_empty_category' => 'Noch keine aktiven Trips verknüpft. Im Admin muss beim Trip das Feld Land dem Slug dieser Kategorieseite entsprechen.',
+    'catalog_sort_price_desc' => 'Preis (höchster zuerst)',
 ];
 
