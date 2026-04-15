@@ -211,6 +211,11 @@
                                                             </button>
                                                             <ul class="dropdown-menu dropdown-menu-end booking-table__more-menu" aria-labelledby="booking-more-{{ $booking->id }}">
                                                                 <li>
+                                                                    <button class="dropdown-item" type="button" onclick="showBookingNotesModal({{ $booking->id }})">
+                                                                        <i class="fa fa-sticky-note me-2"></i> Notes
+                                                                    </button>
+                                                                </li>
+                                                                <li>
                                                                     <button class="dropdown-item" type="button" onclick="showEmailPreview({{ $booking->id }})">
                                                                         <i class="fa fa-envelope me-2"></i> Preview emails
                                                                     </button>
@@ -874,6 +879,31 @@
         </div>
     </div>
 
+    <!-- Booking Notes Modal -->
+    <div class="modal fade" id="bookingNotesModal" tabindex="-1" aria-labelledby="bookingNotesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingNotesModalLabel">Booking notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="booking-notes-id" value="">
+                    <div class="mb-2 text-muted small">
+                        Internal only. Use this to track contact attempts, open TODOs, etc.
+                    </div>
+                    <textarea id="booking-notes-text" class="form-control" rows="6" placeholder="e.g. 2026-04-16: Called customer, waiting for reply. TODO: confirm arrival time."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBookingNotes()">
+                        Save notes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function validateManualBookingForm() {
             const guidingId = document.getElementById('guiding-id-input').value;
@@ -1278,6 +1308,72 @@
                 });
         }
 
+        // Auto-save status changes from the dropdown and refresh the table
+        let editBookingModalIsHydrating = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusEl = document.getElementById('edit-booking-status');
+            if (!statusEl) return;
+
+            statusEl.addEventListener('change', () => {
+                if (editBookingModalIsHydrating) return;
+                const statusGroup = document.getElementById('edit-booking-status-group');
+                if (statusGroup && statusGroup.style.display === 'none') return;
+                saveBookingEdit();
+            });
+        });
+
+        function adminBookingSaveUrl(bookingId) {
+            return `{{ url('/admin/bookings') }}/${bookingId}/save`;
+        }
+
+        function showBookingNotesModal(bookingId) {
+            fetch(`/admin/bookings/${bookingId}/edit`, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('booking-notes-id').value = data.id;
+                    document.getElementById('booking-notes-text').value = data.admin_comment || '';
+                    var modal = new bootstrap.Modal(document.getElementById('bookingNotesModal'));
+                    modal.show();
+                })
+                .catch(() => alert('Failed to load booking notes.'));
+        }
+
+        function saveBookingNotes() {
+            const bookingId = document.getElementById('booking-notes-id').value;
+            const adminComment = document.getElementById('booking-notes-text').value;
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            fetch(adminBookingSaveUrl(bookingId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ admin_comment: adminComment })
+            })
+            .then(response => {
+                if (!response.ok) return response.text().then(t => { throw new Error(t || response.status); });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    var el = document.getElementById('bookingNotesModal');
+                    var instance = bootstrap.Modal.getInstance(el);
+                    if (instance) instance.hide();
+                    location.reload();
+                } else {
+                    alert('Failed to save notes: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Error saving notes.'));
+        }
+
         function showEditBookingModal(bookingId) {
             fetch(`/admin/bookings/${bookingId}/edit`)
                 .then(response => response.json())
@@ -1285,6 +1381,7 @@
                     document.getElementById('edit-booking-id').value = data.id;
                     document.getElementById('edit-booking-email').value = data.email || '';
                     document.getElementById('edit-booking-phone').value = data.phone || '';
+                    editBookingModalIsHydrating = true;
                     document.getElementById('edit-booking-status').value = data.status;
                     if (data.allowed_status_edit) {
                         document.getElementById('edit-booking-status-group').style.display = '';
@@ -1293,6 +1390,7 @@
                     }
                     var modal = new bootstrap.Modal(document.getElementById('editBookingModal'));
                     modal.show();
+                    setTimeout(() => { editBookingModalIsHydrating = false; }, 0);
                 })
                 .catch(error => {
                     alert('Failed to load booking data.');
@@ -1316,21 +1414,24 @@
             const csrfToken = csrfTokenElement.getAttribute('content');
             const payload = { email, phone };
             if (typeof status !== 'undefined') payload.status = status;
-            fetch(`/admin/bookings/${bookingId}`, {
-                method: 'PUT',
+            fetch(adminBookingSaveUrl(bookingId), {
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) return response.text().then(t => { throw new Error(t || response.status); });
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     alert('Booking updated successfully.');
-                    // Optionally update the table row here
-                    location.reload(); // For simplicity, reload the page
+                    location.reload();
                 } else {
                     alert('Failed to update booking: ' + (data.message || 'Unknown error'));
                 }

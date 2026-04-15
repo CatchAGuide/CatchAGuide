@@ -36,6 +36,7 @@ class Booking extends Model
         'token',
         'book_date',
         'additional_information',
+        'admin_comment',
         'phone',
         'phone_country_code',
         'email',

@@ -20,6 +20,10 @@ class BookingAcceptedListener  implements ShouldQueue
 
     public function handle(BookingStatusChanged $event)
     {   
+        if (app()->environment('local')) {
+            return;
+        }
+
         $bookingUserEmail = $event->booking->email ? $event->booking->email : $event->booking->user->email;
         if ($event->status === 'accepted') {
             if (!CheckEmailLog('booking_accept_mail', 'booking_' . $event->booking->id, $bookingUserEmail)) {

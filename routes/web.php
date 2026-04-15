@@ -403,6 +403,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/bookings/guidings-search', [BookingsController::class, 'searchGuidings'])->name('bookings.guidings-search');
         Route::resource('bookings', BookingsController::class);
+        // Same handler as resource update — some hosts only allow GET/POST (not PUT/PATCH) for AJAX
+        Route::post('/bookings/{booking}/save', [BookingsController::class, 'update'])->name('bookings.save');
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::get('/bookings/{booking}/guide-invoice-preview', [BookingsController::class, 'guideInvoicePreview'])->name('bookings.guide-invoice-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
@@ -422,7 +424,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('camp-vacation-bookings/{campVacationBooking}/email-history', [CampVacationBookingsController::class, 'emailHistory'])->name('camp-vacation-bookings.email-history');
 
         Route::get('trip-bookings', [\App\Http\Controllers\Admin\TripBookingsController::class, 'index'])->name('trip-bookings.index');
-        Route::patch('trip-bookings/{tripBooking}/status', [\App\Http\Controllers\Admin\TripBookingsController::class, 'updateStatus'])->name('trip-bookings.update-status');
+        Route::get('trip-bookings/{tripBooking}/comment', [\App\Http\Controllers\Admin\TripBookingsController::class, 'showComment'])->name('trip-bookings.comment.show');
+        Route::post('trip-bookings/{tripBooking}/comment', [\App\Http\Controllers\Admin\TripBookingsController::class, 'updateComment'])->name('trip-bookings.comment.update');
+        Route::match(['patch', 'post'], 'trip-bookings/{tripBooking}/status', [\App\Http\Controllers\Admin\TripBookingsController::class, 'updateStatus'])->name('trip-bookings.update-status');
         Route::post('trip-bookings/reply', [\App\Http\Controllers\Admin\TripBookingsController::class, 'sendReply'])->name('trip-bookings.reply');
         Route::get('trip-bookings/{tripBooking}/email-history', [\App\Http\Controllers\Admin\TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
 
@@ -537,6 +541,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
+        Route::get('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'showComment'])->name('contact-requests.comment.show');
+        Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');
         Route::post('contact-requests/reply', [ContactRequestsController::class, 'sendReply'])->name('contact-requests.reply');
         Route::patch('contact-requests/{contactSubmission}/status', [ContactRequestsController::class, 'updateStatus'])->name('contact-requests.update-status');
 

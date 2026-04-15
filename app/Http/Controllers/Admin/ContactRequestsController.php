@@ -18,6 +18,30 @@ class ContactRequestsController extends Controller
         return view('admin.pages.contact-requests.index', compact('contactRequests'));
     }
 
+    public function showComment(ContactSubmission $contactSubmission)
+    {
+        return response()->json([
+            'id' => $contactSubmission->id,
+            'admin_comment' => $contactSubmission->admin_comment,
+        ]);
+    }
+
+    public function updateComment(Request $request, ContactSubmission $contactSubmission)
+    {
+        $validated = $request->validate([
+            'admin_comment' => ['nullable', 'string'],
+        ]);
+
+        $contactSubmission->update([
+            'admin_comment' => $validated['admin_comment'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment saved.',
+        ]);
+    }
+
     public function sendReply(Request $request)
     {
         $validated = $request->validate([

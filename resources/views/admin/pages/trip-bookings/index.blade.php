@@ -224,6 +224,12 @@
                                                             title="View message">
                                                         <i class="fa fa-eye"></i>
                                                     </button>
+                                                    <button type="button"
+                                                            class="btn {{ $request->admin_comment ? 'btn-warning' : 'btn-outline-secondary' }}"
+                                                            onclick="showTripBookingCommentModal({{ $request->id }})"
+                                                            title="Admin comment (internal)">
+                                                        <i class="fa fa-comment"></i><span class="d-none d-lg-inline"></span>
+                                                    </button>
                                                     @if(!empty($request->email))
                                                         <button type="button"
                                                                 class="btn btn-outline-primary js-reply-btn"
@@ -467,10 +473,82 @@
         </div>
     </div>
 </div>
+
+<!-- Admin comment modal (trip booking request) -->
+<div class="modal fade" id="tripBookingCommentModal" tabindex="-1" aria-labelledby="tripBookingCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tripBookingCommentModalLabel">Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="trip-booking-comment-id" value="">
+                <label for="trip-booking-comment-text" class="form-label">Internal notes (plain text)</label>
+                <textarea class="form-control" id="trip-booking-comment-text" rows="6" placeholder="Contacted guest, follow-ups, open todos…"></textarea>
+                <p class="form-text text-muted small mb-0">Not sent to guests.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveTripBookingComment()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js_after')
 <script>
+function tripBookingCommentUrl(id) {
+    return `{{ url('/admin/trip-bookings') }}/${id}/comment`;
+}
+
+function showTripBookingCommentModal(id) {
+    fetch(tripBookingCommentUrl(id), {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        document.getElementById('trip-booking-comment-id').value = data.id;
+        document.getElementById('trip-booking-comment-text').value = data.admin_comment || '';
+        var el = document.getElementById('tripBookingCommentModal');
+        new bootstrap.Modal(el).show();
+    })
+    .catch(function () { alert('Failed to load comment.'); });
+}
+
+function saveTripBookingComment() {
+    var id = document.getElementById('trip-booking-comment-id').value;
+    var text = document.getElementById('trip-booking-comment-text').value;
+    var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    fetch(tripBookingCommentUrl(id), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({ admin_comment: text })
+    })
+    .then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(t || r.status); });
+        return r.json();
+    })
+    .then(function (data) {
+        if (data && data.success) {
+            var modalEl = document.getElementById('tripBookingCommentModal');
+            var inst = bootstrap.Modal.getInstance(modalEl);
+            if (inst) inst.hide();
+            window.location.reload();
+        }
+    })
+    .catch(function () { alert('Failed to save comment.'); });
+}
+
 function validateManualTripBookingForm() {
     const tripId = document.getElementById('trip-id-input')?.value;
     const errorEl = document.getElementById('trip-error');
@@ -537,22 +615,22 @@ document.addEventListener('DOMContentLoaded', function () {
             var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             fetch(url, {
-                method: 'PATCH',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': token
                 },
                 body: JSON.stringify({ status: status })
             })
-            .then(function(r){ return r.json(); })
+            .then(function(r){
+                if (!r.ok) return r.text().then(function(t){ throw new Error(t || r.status); });
+                return r.json();
+            })
             .then(function(data){
                 if (!data || !data.success) return;
-                btn.classList.remove('btn-status-open', 'btn-status-in_process', 'btn-status-done');
-                btn.classList.add('btn-status-' + data.status);
-                btn.setAttribute('data-status', data.status);
-                var labelEl = btn.querySelector('.js-status-btn-text');
-                if (labelEl) labelEl.textContent = data.status_label || data.status;
+                window.location.reload();
             })
             .catch(function(){});
         });

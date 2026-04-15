@@ -175,6 +175,7 @@ class ContactSubmission extends Model
         'description',
         'source_type',
         'source_id',
+        'admin_comment',
         'status',
     ];
 }

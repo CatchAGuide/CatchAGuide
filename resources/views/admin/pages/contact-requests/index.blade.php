@@ -180,6 +180,12 @@
                                             <td class="pe-3 text-end">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" class="btn btn-outline-info js-view-message" data-message="{{ e($request->description) }}" data-bs-toggle="modal" data-bs-target="#messageModal" title="View message"><i class="fa fa-eye"></i></button>
+                                                    <button type="button"
+                                                            class="btn {{ $request->admin_comment ? 'btn-warning' : 'btn-outline-secondary' }}"
+                                                            onclick="showContactRequestCommentModal({{ $request->id }})"
+                                                            title="Admin comment (internal)">
+                                                        <i class="fa fa-comment"></i>
+                                                    </button>
                                                     @if(!empty($request->email))
                                                         <button type="button" class="btn btn-outline-primary js-reply-btn" data-id="{{ $request->id }}" data-name="{{ e($request->name ?? '') }}" data-email="{{ e($request->email) }}" data-subject="{{ e('Re: Your contact request') }}" data-bs-toggle="modal" data-bs-target="#replyModal" title="Reply"><i class="fa fa-reply"></i></button>
                                                     @endif
@@ -256,10 +262,82 @@
         </div>
     </div>
 </div>
+
+<!-- Admin comment modal -->
+<div class="modal fade" id="contactRequestCommentModal" tabindex="-1" aria-labelledby="contactRequestCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactRequestCommentModalLabel">Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="contact-request-comment-id" value="">
+                <label for="contact-request-comment-text" class="form-label">Internal notes (plain text)</label>
+                <textarea class="form-control" id="contact-request-comment-text" rows="6" placeholder="Internal notes for the team…"></textarea>
+                <p class="form-text text-muted small mb-0">Not sent to guests.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveContactRequestComment()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js_after')
 <script>
+    function contactRequestCommentUrl(id) {
+        return `{{ url('/admin/contact-requests') }}/${id}/comment`;
+    }
+
+    function showContactRequestCommentModal(id) {
+        fetch(contactRequestCommentUrl(id), {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            document.getElementById('contact-request-comment-id').value = data.id;
+            document.getElementById('contact-request-comment-text').value = data.admin_comment || '';
+            var el = document.getElementById('contactRequestCommentModal');
+            new bootstrap.Modal(el).show();
+        })
+        .catch(function () { alert('Failed to load comment.'); });
+    }
+
+    function saveContactRequestComment() {
+        var id = document.getElementById('contact-request-comment-id').value;
+        var text = document.getElementById('contact-request-comment-text').value;
+        var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        fetch(contactRequestCommentUrl(id), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ admin_comment: text })
+        })
+        .then(function (r) {
+            if (!r.ok) return r.text().then(function (t) { throw new Error(t || r.status); });
+            return r.json();
+        })
+        .then(function (data) {
+            if (data && data.success) {
+                var modalEl = document.getElementById('contactRequestCommentModal');
+                var inst = bootstrap.Modal.getInstance(modalEl);
+                if (inst) inst.hide();
+                window.location.reload();
+            }
+        })
+        .catch(function () { alert('Failed to save comment.'); });
+    }
+
     $(function () {
         var $table = $('#contact-requests-datatable');
         if ($table.length && $.fn.DataTable) {

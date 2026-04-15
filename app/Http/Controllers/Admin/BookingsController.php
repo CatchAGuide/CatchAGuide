@@ -108,7 +108,8 @@ class BookingsController extends Controller
             'email' => $booking->email,
             'phone' => $booking->phone,
             'status' => $booking->status,
-            'allowed_status_edit' => in_array($booking->status, ['cancelled', 'rejected']),
+            'admin_comment' => $booking->admin_comment,
+            'allowed_status_edit' => in_array($booking->status, ['pending', 'cancelled', 'rejected']),
         ]);
     }
 
@@ -118,6 +119,7 @@ class BookingsController extends Controller
             'email' => 'nullable|email',
             'phone' => 'nullable|string|max:255',
             'status' => 'nullable|string|in:pending,accepted,rejected,cancelled',
+            'admin_comment' => 'nullable|string|max:10000',
         ]);
 
         $updated = false;
@@ -131,8 +133,11 @@ class BookingsController extends Controller
             $booking->phone = $data['phone'];
             $updated = true;
         }
-        // Only allow status change if initial status is cancelled or rejected
-        if (isset($data['status']) && in_array($booking->status, ['cancelled', 'rejected'])) {
+        if (array_key_exists('admin_comment', $data)) {
+            $booking->admin_comment = $data['admin_comment'];
+            $updated = true;
+        }
+        if (isset($data['status']) && in_array($booking->status, ['pending', 'cancelled', 'rejected'])) {
             $booking->status = $data['status'];
             $statusChanged = true;
             $updated = true;
@@ -163,6 +168,7 @@ class BookingsController extends Controller
                 'email' => $booking->email,
                 'phone' => $booking->phone,
                 'status' => $booking->status,
+                'admin_comment' => $booking->admin_comment,
             ]
         ]);
     }

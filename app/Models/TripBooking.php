@@ -28,6 +28,7 @@ class TripBooking extends Model
         'phone_country_code',
         'phone',
         'message',
+        'admin_comment',
         'status',
     ];
 

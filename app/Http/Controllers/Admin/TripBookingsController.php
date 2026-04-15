@@ -24,6 +24,30 @@ class TripBookingsController extends Controller
         return view('admin.pages.trip-bookings.index', compact('bookingRequests'));
     }
 
+    public function showComment(TripBooking $tripBooking)
+    {
+        return response()->json([
+            'id' => $tripBooking->id,
+            'admin_comment' => $tripBooking->admin_comment,
+        ]);
+    }
+
+    public function updateComment(Request $request, TripBooking $tripBooking)
+    {
+        $data = $request->validate([
+            'admin_comment' => 'nullable|string',
+        ]);
+
+        $tripBooking->update([
+            'admin_comment' => $data['admin_comment'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment saved.',
+        ]);
+    }
+
     public function updateStatus(Request $request, TripBooking $tripBooking)
     {
         $validated = $request->validate([
