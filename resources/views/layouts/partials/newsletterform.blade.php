@@ -1,4 +1,4 @@
-{{-- {!! ReCaptcha::htmlScriptTagJsApi() !!} --}}
+{{-- <x-recaptcha /> --}}
 <div class="footer-widget__column footer-widget__newsletter">
     <h3 class="footer-widget__title mb-md-4 mb-2">Newsletter</h3>
     <form id="newsletter-form" action="{{route('sendnewsletter')}}" method="POST">
@@ -18,7 +18,7 @@
                     @lang('message.agree')
                 </label>
             </div>
-            {!! htmlFormSnippet() !!}
+            <x-recaptcha />
             <button type="submit"
                     class="footer-widget__newsletter-btn">@lang('message.subscribe')
             </button>

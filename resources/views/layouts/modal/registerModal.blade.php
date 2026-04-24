@@ -103,8 +103,7 @@
                     </div>
 
                     @production
-                        {!! ReCaptcha::htmlScriptTagJsApi() !!}
-                        {!! htmlFormSnippet() !!}
+                        <x-recaptcha />
                     @endproduction
 
                     <div class="d-grid mt-3">

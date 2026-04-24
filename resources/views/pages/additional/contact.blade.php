@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-    {!! ReCaptcha::htmlScriptTagJsApi() !!}
+    {{-- reCAPTCHA script is rendered by the component --}}
     <!--Page Header Start-->
     <!-- <section class="page-header">
         <div class="page-header__top">
@@ -80,7 +80,7 @@
                                             <textarea name="description" placeholder="@lang('contact.feedback')" required></textarea>
                                         </div>
                                         <div class="submit-container">
-                                            {!! htmlFormSnippet() !!}
+                                            <x-recaptcha />
                                             <button type="submit" class="thm-btn comment-form__btn">@lang('contact.btnSend')</button>
                                         </div>
                                     </div>

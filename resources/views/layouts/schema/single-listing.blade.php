@@ -1,25 +1,25 @@
 <script type="application/ld+json">
     {
-      "@context": "http://schema.org",
-      "@type": "Service",
+      "@@context": "http://schema.org",
+      "@@type": "Service",
       "serviceType": "Fishing Guiding",
       "provider": {
-        "@type": "LocalBusiness",
-        "name": "{{ config('app.name') }}",
-        "address": "{{ $guiding->location }}"
+        "@@type": "LocalBusiness",
+        "name": @json(config('app.name')),
+        "address": @json($guiding->location)
       },
-      "name": "{{ $guiding->title }}",
-      "description": "{{ $guiding->description }}",
+      "name": @json($guiding->title),
+      "description": @json($guiding->description),
       "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "priceCurrency": "EUR",
-        "price": "{{ $guiding->price }}",
+        "price": @json($guiding->price),
         "availability": "http://schema.org/InStock"
       },
       "provider": {
-        "@type": "Person",
-        "name": "{{ $guiding->user->firstname }}"
+        "@@type": "Person",
+        "name": @json($guiding->user->firstname)
       },
-      "url": "{{ route('guidings.show', [$guiding->id,$guiding->slug]) }}"
+      "url": @json(route('guidings.show', [$guiding->id,$guiding->slug]))
     }
 </script>
