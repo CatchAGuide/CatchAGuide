@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Contracts\Assistant\LLMClientInterface;
 use App\Http\Resources\EventResource;
+use App\Services\Assistant\GroqHttpClient;
+use App\Services\Assistant\UnavailableLLMClient;
 use App\Services\AdminNotificationService;
 use App\Services\Asset;
 use App\Services\GuidingService;
@@ -24,7 +27,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(LLMClientInterface::class, function () {
+            if (!config('booking_assistant.enabled')) {
+                return new UnavailableLLMClient();
+            }
+
+            $driver = (string) config('booking_assistant.driver', 'groq');
+            $groqKey = (string) config('booking_assistant.providers.groq.api_key', '');
+
+            if ($driver === 'groq' && $groqKey !== '') {
+                return new GroqHttpClient();
+            }
+
+            return new UnavailableLLMClient();
+        });
     }
 
     /**

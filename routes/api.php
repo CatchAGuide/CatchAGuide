@@ -53,6 +53,7 @@ Route::prefix('catalog')
         Route::get('/trips', [CatalogController::class, 'trips']);
         Route::get('/guidings', [CatalogController::class, 'guidings']);
         Route::get('/vacations', [CatalogController::class, 'vacations']);
+        Route::get('/camps', [CatalogController::class, 'camps']);
     });
 
 

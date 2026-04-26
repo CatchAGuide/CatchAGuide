@@ -249,3 +249,5 @@
         });
     });
 </script>
+
+<x-booking-assistant-widget />

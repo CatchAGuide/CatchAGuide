@@ -56,5 +56,19 @@ class CatalogController extends Controller
             'trips' => $trips,
         ]);
     }
+
+    /**
+     * Camps-only view of the catalog (same item shape as other trip entries, type=camp).
+     */
+    public function camps(): JsonResponse
+    {
+        $trips = $this->tripCatalogService->getCampTrips();
+
+        return response()->json([
+            'version' => '1.0',
+            'generated_at' => now()->toIso8601String(),
+            'trips' => $trips,
+        ]);
+    }
 }
 

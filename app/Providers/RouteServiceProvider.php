@@ -77,5 +77,11 @@ class RouteServiceProvider extends ServiceProvider
                             ], 429);
                         });
         });
+
+        RateLimiter::for('booking-assistant', function (Request $request) {
+            $perMinute = (int) config('booking_assistant.rate_limit.per_minute', 15);
+
+            return Limit::perMinute(max(1, $perMinute))->by($request->ip());
+        });
     }
 }
