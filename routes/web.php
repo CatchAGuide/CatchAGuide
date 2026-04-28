@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
@@ -450,6 +451,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('{source}/{id}/paid', [FinanceController::class, 'updatePaid'])
                 ->where('source', '^(booking|trip|camp_vacation)$')
                 ->name('update-paid');
+        });
+
+        Route::prefix('strategy')->name('strategy.')->group(function () {
+            Route::get('/', [StrategyController::class, 'index'])->name('index');
+            Route::get('/supply-gaps', [StrategyController::class, 'supplyGaps'])->name('supply-gaps');
+            Route::get('/content-coverage', [StrategyController::class, 'contentCoverage'])->name('content-coverage');
         });
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');

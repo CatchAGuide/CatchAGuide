@@ -101,15 +101,36 @@
             <div class="page-header fkpi-header">
                 <div>
                     <h1 class="page-title mb-1">@yield('title')</h1>
-                    <p class="text-muted mb-0 small">{{ $t['page_subtitle'] }}</p>
+                    <p class="text-muted mb-0 small">
+                        {{ $t['page_subtitle'] }}
+                        <span class="ms-2 badge rounded-pill bg-light text-dark border">
+                            @if(($analytics['date_basis'] ?? 'reservation') === 'booking')
+                                {{ app()->getLocale() === 'de' ? 'Basis: Buchungsdatum (created_at)' : 'Basis: Booking date (created_at)' }}
+                            @else
+                                {{ app()->getLocale() === 'de' ? 'Basis: Reservierungsdatum (Tourdatum)' : 'Basis: Reservation date (tour date)' }}
+                            @endif
+                        </span>
+                    </p>
                 </div>
-                <div class="fkpi-year-pills">
+                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                    <div class="fkpi-year-pills">
                     <span class="small text-muted text-uppercase fw-bold me-1" style="font-size:0.65rem;letter-spacing:0.08em;">{{ $t['time_range'] }}</span>
                     <template x-for="y in yearOptionsList" :key="y.key">
                         <button type="button" class="fkpi-year-pill" :class="{ 'is-active': year === y.key }" @click="year = y.key">
                             <span x-text="y.label"></span>
                         </button>
                     </template>
+                </div>
+                    <div class="d-flex gap-1 align-items-center">
+                        <a class="fkpi-year-pill {{ ($analytics['date_basis'] ?? 'reservation') === 'reservation' ? 'is-active' : '' }}"
+                           href="{{ route('admin.finance.analytics', ['date_basis' => 'reservation']) }}">
+                            {{ app()->getLocale() === 'de' ? 'Reservierung' : 'Reservation' }}
+                        </a>
+                        <a class="fkpi-year-pill {{ ($analytics['date_basis'] ?? 'reservation') === 'booking' ? 'is-active' : '' }}"
+                           href="{{ route('admin.finance.analytics', ['date_basis' => 'booking']) }}">
+                            {{ app()->getLocale() === 'de' ? 'Buchung' : 'Booking' }}
+                        </a>
+                    </div>
                 </div>
             </div>
 

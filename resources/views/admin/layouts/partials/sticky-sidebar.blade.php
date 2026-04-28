@@ -56,6 +56,19 @@
                     </ul>
                 </li>
 
+                <li class="slide {{ request()->routeIs('admin.strategy.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.strategy.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-bar-chart-2"></i>
+                        <span class="side-menu__label">Strategy</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.strategy.index') }}" class="slide-item {{ request()->routeIs('admin.strategy.index') ? 'active' : '' }}">Overview</a></li>
+                        <li><a href="{{ route('admin.strategy.supply-gaps') }}" class="slide-item {{ request()->routeIs('admin.strategy.supply-gaps') ? 'active' : '' }}">Supply gaps</a></li>
+                        <li><a href="{{ route('admin.strategy.content-coverage') }}" class="slide-item {{ request()->routeIs('admin.strategy.content-coverage') ? 'active' : '' }}">Content coverage</a></li>
+                    </ul>
+                </li>
+
                 <li class="sub-category">
                     <h3>Partners &amp; catalog</h3>
                 </li>
