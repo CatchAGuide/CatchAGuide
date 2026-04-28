@@ -6,7 +6,8 @@
         'admin.accommodations.*',
         'admin.special-offers.*',
         'admin.camps.*',
-        'admin.trips.*'
+        'admin.trips.*',
+        'admin.listings.consolidated.*'
     );
 @endphp
 <div class="sticky">
@@ -78,6 +79,7 @@
                         <i class="angle fe fe-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
+                        <li><a href="{{ route('admin.listings.consolidated.index') }}" class="slide-item {{ request()->routeIs('admin.listings.consolidated.*') ? 'active' : '' }}">All listings</a></li>
                         <li><a href="{{ route('admin.guidings.index') }}" class="slide-item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}">Guidings</a></li>
                         <li><a href="{{ route('admin.rental-boats.index') }}" class="slide-item {{ request()->routeIs('admin.rental-boats.*') ? 'active' : '' }}">Rental boats</a></li>
                         <li><a href="{{ route('admin.accommodations.index') }}" class="slide-item {{ request()->routeIs('admin.accommodations.*') ? 'active' : '' }}">Accommodations</a></li>

@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\AccommodationsController as AdminAccommodationsCo
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
+use App\Http\Controllers\Admin\ConsolidatedListingsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
 use App\Http\Controllers\Admin\Category\AdminCategoryTripLocationController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
@@ -396,6 +397,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('accommodations', AdminAccommodationsController::class);
         Route::get('accommodations/change-status/{id}', [AdminAccommodationsController::class, 'changeStatus'])->name('accommodations.change-status');
+
+        Route::prefix('listings')->name('listings.')->group(function () {
+            Route::get('consolidated', [ConsolidatedListingsController::class, 'index'])->name('consolidated.index');
+            Route::get('consolidated/export', [ConsolidatedListingsController::class, 'export'])->name('consolidated.export');
+        });
 
         Route::resource('camps', \App\Http\Controllers\Admin\CampsController::class);
         Route::get('camps/change-status/{id}', [\App\Http\Controllers\Admin\CampsController::class, 'changeStatus'])->name('camps.change-status');
