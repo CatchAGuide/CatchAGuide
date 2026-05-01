@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
@@ -27,7 +28,9 @@ use App\Http\Controllers\Admin\AccommodationsController as AdminAccommodationsCo
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
+use App\Http\Controllers\Admin\ConsolidatedListingsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
+use App\Http\Controllers\Admin\Category\AdminCategoryTripLocationController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
@@ -46,6 +49,7 @@ use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\TripOfferController;
+use App\Http\Controllers\TripsCatalogController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\GuideThreadController;
 use App\Http\Controllers\Blog\ThreadsController;
@@ -274,6 +278,9 @@ Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
+// NOTE: /trips is a real public directory (used for trip images). Use a non-conflicting prefix for the public catalog.
+Route::get('trips-destinations', [TripsCatalogController::class, 'index'])->name('trips.index')->middleware('ddos:search');
+Route::get('trips-destinations/c/{location}', [TripsCatalogController::class, 'category'])->name('trips.category')->middleware('ddos:search');
 Route::get('trips/{slug}', [TripOfferController::class, 'show'])
     ->name('trips.show')
     ->middleware('ddos:search');
@@ -397,6 +404,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('accommodations', AdminAccommodationsController::class);
         Route::get('accommodations/change-status/{id}', [AdminAccommodationsController::class, 'changeStatus'])->name('accommodations.change-status');
 
+        Route::prefix('listings')->name('listings.')->group(function () {
+            Route::get('consolidated', [ConsolidatedListingsController::class, 'index'])->name('consolidated.index');
+            Route::get('consolidated/export', [ConsolidatedListingsController::class, 'export'])->name('consolidated.export');
+        });
+
         Route::resource('camps', \App\Http\Controllers\Admin\CampsController::class);
         Route::get('camps/change-status/{id}', [\App\Http\Controllers\Admin\CampsController::class, 'changeStatus'])->name('camps.change-status');
 
@@ -444,6 +456,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('{source}/{id}/paid', [FinanceController::class, 'updatePaid'])
                 ->where('source', '^(booking|trip|camp_vacation)$')
                 ->name('update-paid');
+        });
+
+        Route::prefix('strategy')->name('strategy.')->group(function () {
+            Route::get('/', [StrategyController::class, 'index'])->name('index');
+            Route::get('/supply-gaps', [StrategyController::class, 'supplyGaps'])->name('supply-gaps');
+            Route::get('/content-coverage', [StrategyController::class, 'contentCoverage'])->name('content-coverage');
         });
         Route::prefix('payments')->name('payments.')->group(function () {
             Route::get('/', [AdminPaymentsController::class, 'index'])->name('index');
@@ -499,6 +517,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/updatelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updatelevel'])->name('updatelevel');
             Route::get('/deletelevel/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deletelevel'])->name('deletelevel');
 
+            Route::get('/boat-extras', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'boatExtrasIndex'])->name('boat-extras.index');
+            Route::post('/boat-extras', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeBoatExtra'])->name('boat-extras.store');
+            Route::put('/boat-extras/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateBoatExtra'])->name('boat-extras.update');
+            Route::delete('/boat-extras/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteBoatExtra'])->name('boat-extras.destroy');
+
+            Route::get('/facilities', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'facilitiesIndex'])->name('facilities.index');
+            Route::post('/facilities', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeFacility'])->name('facilities.store');
+            Route::put('/facilities/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateFacility'])->name('facilities.update');
+            Route::delete('/facilities/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteFacility'])->name('facilities.destroy');
+
+            Route::get('/kitchen-equipment', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'kitchenEquipmentIndex'])->name('kitchen-equipment.index');
+            Route::post('/kitchen-equipment', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'storeKitchenEquipment'])->name('kitchen-equipment.store');
+            Route::put('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateKitchenEquipment'])->name('kitchen-equipment.update');
+            Route::delete('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteKitchenEquipment'])->name('kitchen-equipment.destroy');
+
             Route::get('/emailmaintenance', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailmaintenance'])->name('emailmaintenance');
             Route::get('/email-preview/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreview'])->name('email.preview');
             Route::get('/email-preview-ajax/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreviewAjax'])->name('email.preview.ajax');
@@ -532,6 +565,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
             Route::resource('country', AdminCategoryCountryController::class);
             Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
+            Route::resource('trip-location', AdminCategoryTripLocationController::class)->except(['show']);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
             Route::resource('methods', AdminCategoryMethodsController::class);

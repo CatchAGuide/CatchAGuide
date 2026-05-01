@@ -89,14 +89,15 @@
                                     @endforeach
                                 </select>
                             </form>
+                            @php($employeeUser = Auth::guard('employees')->user())
                             <div class="dropdown d-flex profile-1">
                                 <a href="#" data-bs-toggle="dropdown" class="nav-link leading-none d-flex admin-header-user">
-                                    <span class="admin-header-user-name"><i class="fe fe-user me-1"></i>{{ Auth::guard('employees')->user()->name }}</span>
+                                    <span class="admin-header-user-name"><i class="fe fe-user me-1"></i>{{ $employeeUser->name ?? __('Admin') }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                     <div class="drop-heading">
                                         <div class="text-center">
-                                            <h5 class="admin-dropdown-heading mb-0 fs-14 fw-semibold">{{ Auth::guard('employees')->user()->name }}</h5>
+                                            <h5 class="admin-dropdown-heading mb-0 fs-14 fw-semibold">{{ $employeeUser->name ?? __('Admin') }}</h5>
                                             <small class="text-muted">Administrator</small>
                                         </div>
                                     </div>

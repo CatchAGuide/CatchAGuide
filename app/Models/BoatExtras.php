@@ -9,8 +9,15 @@ class BoatExtras extends Model
 {
     use HasFactory;
 
-    public function getNameAttribute()
+    protected $fillable = [
+        'name',
+        'name_en',
+    ];
+
+    public function getNameAttribute(): string
     {
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+        return app()->getLocale() == 'en'
+            ? (string)($this->attributes['name_en'] ?? '')
+            : (string)($this->attributes['name'] ?? '');
     }
 }

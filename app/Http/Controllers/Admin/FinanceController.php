@@ -15,10 +15,12 @@ use Illuminate\Http\JsonResponse;
 
 class FinanceController extends Controller
 {
-    public function analytics(FinanceAnalyticsService $financeAnalytics)
+    public function analytics(Request $request, FinanceAnalyticsService $financeAnalytics)
     {
         return view('admin.pages.finance.analytics.index', [
-            'analytics' => $financeAnalytics->buildPayload(),
+            'analytics' => $financeAnalytics->buildPayload(
+                dateBasis: (string) $request->query('date_basis', 'reservation')
+            ),
         ]);
     }
 

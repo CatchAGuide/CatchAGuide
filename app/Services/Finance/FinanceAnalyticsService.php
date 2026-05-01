@@ -28,8 +28,11 @@ class FinanceAnalyticsService
     /**
      * @return array<string, mixed>
      */
-    public function buildPayload(): array
+    public function buildPayload(string $dateBasis = 'reservation'): array
     {
+        // reservation = booking date (calendar/blocked/book_date), booking = created_at (sales timing)
+        $dateBasis = in_array($dateBasis, ['reservation', 'booking'], true) ? $dateBasis : 'reservation';
+
         $bookings = Booking::query()
             ->where('status', 'accepted')
             ->with(['guiding', 'calendar_schedule', 'blocked_event'])
@@ -42,7 +45,7 @@ class FinanceAnalyticsService
         $unknownCountryLabel = __('admin.finance_analytics.unknown_country');
 
         foreach ($bookings as $booking) {
-            $date = $booking->getBookingDate();
+            $date = $dateBasis === 'booking' ? $booking->created_at : $booking->getBookingDate();
             if (!$date instanceof Carbon) {
                 continue;
             }
@@ -281,6 +284,7 @@ class FinanceAnalyticsService
         $supplyHistory = $this->buildSupplyHistorySeries();
 
         return [
+            'date_basis' => $dateBasis,
             'generated_at' => now()->toIso8601String(),
             'currency' => '€',
             'months' => $months,

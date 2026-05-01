@@ -11,6 +11,20 @@ class FishingEquipment extends Model
 {
     use HasFactory;
 
+    protected $table = 'fishing_equipment';
+
+    protected $fillable = [
+        'name',
+        'name_en',
+    ];
+
+    public function getNameAttribute(): string
+    {
+        return app()->getLocale() == 'en'
+            ? (string)($this->attributes['name_en'] ?? '')
+            : (string)($this->attributes['name'] ?? '');
+    }
+
     public function guiding(): BelongsTo
     {
         return $this->belongsTo(Guiding::class);

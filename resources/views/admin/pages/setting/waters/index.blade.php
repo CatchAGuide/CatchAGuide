@@ -5,10 +5,8 @@
 @section('content')
     <div class="side-app">
 
-        <!-- CONTAINER -->
         <div class="main-container container-fluid">
 
-            <!-- PAGE-HEADER -->
             <div class="page-header">
                 <h1 class="page-title">@yield('title')</h1>
                 <div>
@@ -19,8 +17,6 @@
                 </div>
             </div>
 
-            <!-- PAGE-HEADER END -->
-            <!-- Row -->
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -37,28 +33,41 @@
                                     <th scope="col">Name</th>
                                     <th scope="col">Name English</th>
                                     <th scope="col">Aktion</th>
-
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($waters as $water)
-                                    @include('admin.pages.setting.modals.editwatermodal')
-                                    @include('admin.pages.setting.modals.deletewatermodal')
                                     <tr>
                                         <td>
                                             <div>
-                                                   <span class="fi fi-de"></span><span class="px-2">{{$water->name}}</span>
-
+                                                <span class="fi fi-de"></span><span class="px-2">{{ $water->name }}</span>
                                             </div>
                                         </td>
                                         <td>
                                             <div>
-                                                <span class="fi fi-gb"></span><span class="px-2">{{$water->name_en ? $water->name_en : null }}</span>
+                                                <span class="fi fi-gb"></span><span class="px-2">{{ $water->name_en ?: '' }}</span>
                                             </div>
                                         </td>
                                         <td>
-                                            <i style="font-size: 20px; color: red; cursor: pointer" class="side-menu__icon fe fe-trash" data-bs-toggle="modal" data-bs-target="#deletewater{{$water->id}}"></i>
-                                            <i style="font-size: 20px; color: blue; cursor: pointer" class="side-menu__icon fe fe-edit" data-bs-toggle="modal" data-bs-target="#editwater{{$water->id}}"></i>
+                                            <button type="button"
+                                                    class="btn btn-link p-0 me-2 align-baseline text-danger"
+                                                    title="Löschen"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteWaterModal"
+                                                    data-delete-href="{{ route('admin.settings.deletewater', $water->id) }}"
+                                                    data-label="Gewässer {{ $water->name }} wirklich löschen?">
+                                                <i style="font-size: 20px" class="side-menu__icon fe fe-trash"></i>
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-link p-0 align-baseline text-primary"
+                                                    title="Bearbeiten"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editWaterModal"
+                                                    data-form-action="{{ route('admin.settings.updatewater', $water->id) }}"
+                                                    data-name-de="{{ $water->getRawOriginal('name') }}"
+                                                    data-name-en="{{ $water->getRawOriginal('name_en') }}">
+                                                <i style="font-size: 20px" class="side-menu__icon fe fe-edit"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -68,9 +77,53 @@
                     </div>
                 </div>
             </div>
-            <!-- End Row -->
         </div>
-        <!-- CONTAINER CLOSED -->
+
+        <div class="modal fade" id="editWaterModal" tabindex="-1" aria-labelledby="editWaterModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editWaterModalLabel">Gewässer bearbeiten</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editWaterForm" action="#" method="post">
+                            @csrf
+                            @method('PUT')
+                            <div class="mb-3">
+                                <label for="editWaterNameDe" class="form-label">Name des Gewässers</label>
+                                <input type="text" class="form-control" id="editWaterNameDe" name="name" required>
+                                <label for="editWaterNameEn" class="form-label mt-2">Name des Gewässers (en)</label>
+                                <input type="text" class="form-control" id="editWaterNameEn" name="name_en">
+                                <div class="form-text text-danger">Diese taucht dann in den Suchen und als Option für Guides auf.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="deleteWaterModal" tabindex="-1" aria-labelledby="deleteWaterModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteWaterModalLabel">Gewässer löschen</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Vorsicht! Dieser Vorgang kann nicht rückgängig gemacht werden!
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zurück</button>
+                        <a id="deleteWaterLink" href="#" class="btn btn-danger">LÖSCHEN</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 @endsection
@@ -79,5 +132,23 @@
 @section('js_after')
 <script>
     let watertable = new DataTable('#watertable');
+
+    document.getElementById('editWaterModal').addEventListener('show.bs.modal', function (event) {
+        const btn = event.relatedTarget;
+        if (!btn) return;
+        document.getElementById('editWaterForm').action = btn.getAttribute('data-form-action');
+        document.getElementById('editWaterNameDe').value = btn.getAttribute('data-name-de') || '';
+        document.getElementById('editWaterNameEn').value = btn.getAttribute('data-name-en') || '';
+    });
+
+    document.getElementById('deleteWaterModal').addEventListener('show.bs.modal', function (event) {
+        const btn = event.relatedTarget;
+        if (!btn) return;
+        document.getElementById('deleteWaterLink').href = btn.getAttribute('data-delete-href');
+        const label = btn.getAttribute('data-label');
+        if (label) {
+            document.getElementById('deleteWaterModalLabel').textContent = label;
+        }
+    });
 </script>
 @endsection

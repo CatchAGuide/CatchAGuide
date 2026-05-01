@@ -572,6 +572,9 @@ $admin-shell-gradient-strong: #4f46e5;
 // ---------------------------------------------------------------------------
 @import "./bookings-table";
 
+// Consolidated listings page (admin)
+@import "./consolidated-listings";
+
 @keyframes admin-shell-pulse {
   0% {
     transform: scale(0.9);

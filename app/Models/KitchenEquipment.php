@@ -9,9 +9,11 @@ class KitchenEquipment extends Model
 {
     use HasFactory;
 
+    protected $table = 'kitchen_equipment';
+
     protected $fillable = [
-        'name',
-        'name_en',
+        'value',
+        'value_de',
         'is_active',
         'sort_order',
     ];
@@ -20,10 +22,14 @@ class KitchenEquipment extends Model
         'is_active' => 'boolean',
     ];
 
-    // Get name based on current locale
-    public function getNameAttribute()
+    public function getNameAttribute(): string
     {
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+        $locale = app()->getLocale();
+        if ($locale === 'en') {
+            return (string)($this->attributes['value'] ?? '');
+        }
+
+        return (string)($this->attributes['value_de'] ?? $this->attributes['value'] ?? '');
     }
 
     // Scope for active equipment

@@ -1,4 +1,15 @@
 <!--APP-SIDEBAR-->
+@php
+    $listingsActive = request()->routeIs(
+        'admin.guidings.*',
+        'admin.rental-boats.*',
+        'admin.accommodations.*',
+        'admin.special-offers.*',
+        'admin.camps.*',
+        'admin.trips.*',
+        'admin.listings.consolidated.*'
+    );
+@endphp
 <div class="sticky">
     <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
     <div class="app-sidebar">
@@ -23,72 +34,86 @@
                 </li>
                 <li class="slide {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-dollar-sign"></i>
+                        <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Bookings</span>
                         <i class="angle fe fe-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.bookings.index') }}" class="slide-item  {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}"> Guidings</a></li>
-                        <li><a href="{{ route('admin.camp-vacation-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.camp-vacation-bookings.*') ? 'active' : '' }}"> Camps/Vacations</a></li>
-                        <li><a href="{{ route('admin.trip-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}"> Trips</a></li>
-                        {{-- <li><a href="{{ route('admin.vacations.bookings') }}" class="slide-item  {{ request()->routeIs('admin.vacations.bookings') ? 'active' : '' }} text-secondary"> Vacations (Old)</a></li> --}}
+                        <li><a href="{{ route('admin.bookings.index') }}" class="slide-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">Guidings</a></li>
+                        <li><a href="{{ route('admin.camp-vacation-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.camp-vacation-bookings.*') ? 'active' : '' }}">Camps / vacations</a></li>
+                        <li><a href="{{ route('admin.trip-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}">Trips</a></li>
                     </ul>
                 </li>
-
                 <li class="slide {{ request()->routeIs('admin.finance.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.finance.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-briefcase"></i>
+                        <i class="side-menu__icon fe fe-trending-up"></i>
                         <span class="side-menu__label">Finance</span>
                         <i class="angle fe fe-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.finance.analytics') }}" class="slide-item {{ request()->routeIs('admin.finance.analytics') ? 'active' : '' }}"> Analytics</a></li>
-                        <li><a href="{{ route('admin.finance.invoices') }}" class="slide-item {{ request()->routeIs('admin.finance.invoices') ? 'active' : '' }}"> Invoice</a></li>
+                        <li><a href="{{ route('admin.finance.analytics') }}" class="slide-item {{ request()->routeIs('admin.finance.analytics') ? 'active' : '' }}">Analytics</a></li>
+                        <li><a href="{{ route('admin.finance.invoices') }}" class="slide-item {{ request()->routeIs('admin.finance.invoices') ? 'active' : '' }}">Invoices</a></li>
+                    </ul>
+                </li>
+
+                <li class="slide {{ request()->routeIs('admin.strategy.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.strategy.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-bar-chart-2"></i>
+                        <span class="side-menu__label">Strategy</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.strategy.index') }}" class="slide-item {{ request()->routeIs('admin.strategy.index') ? 'active' : '' }}">Overview</a></li>
+                        <li><a href="{{ route('admin.strategy.supply-gaps') }}" class="slide-item {{ request()->routeIs('admin.strategy.supply-gaps') ? 'active' : '' }}">Supply gaps</a></li>
+                        <li><a href="{{ route('admin.strategy.content-coverage') }}" class="slide-item {{ request()->routeIs('admin.strategy.content-coverage') ? 'active' : '' }}">Content coverage</a></li>
                     </ul>
                 </li>
 
                 <li class="sub-category">
-                    <h3>Inventory</h3>
+                    <h3>Partners &amp; catalog</h3>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-anchor"></i><span class="side-menu__label">Guides & Tours</span><i class="angle fe fe-chevron-right"></i></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-anchor"></i>
+                        <span class="side-menu__label">Guides &amp; tours</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.guides.index') }}" class="slide-item {{ request()->routeIs('admin.guides.index') && !request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guides</a></li>
                         <li><a href="{{ route('admin.guides.index') }}" class="slide-item">Providers</a></li>
-                        <li><a href="{{ route('admin.guide-requests.index') }}" class="slide-item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}">Guide Requests</a></li>
-                        <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide Analytics</a></li>
+                        <li><a href="{{ route('admin.guide-requests.index') }}" class="slide-item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}">Guide requests</a></li>
+                        <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide analytics</a></li>
                     </ul>
                 </li>
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.guidings.index') }}"><i class="side-menu__icon fe fe-briefcase"></i><span class="side-menu__label">Guidings</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.rental-boats.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.rental-boats.index') }}"><i class="side-menu__icon fas fa-ship"></i><span class="side-menu__label">Rental Boats</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.accommodations.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.accommodations.index') }}"><i class="side-menu__icon fas fa-hotel"></i><span class="side-menu__label">Accommodations</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.special-offers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.special-offers.index') }}"><i class="side-menu__icon fas fa-gift"></i><span class="side-menu__label">Special Offers</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.camps.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.camps.index') }}"><i class="side-menu__icon fas fa-campground"></i><span class="side-menu__label">Camps</span></a>
-                    <a class="side-menu__item {{ request()->routeIs('admin.trips.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.trips.index') }}"><i class="side-menu__icon fas fa-suitcase-rolling"></i><span class="side-menu__label">Trips</span></a>
-                    {{-- <a class="side-menu__item {{ request()->routeIs('admin.holidays.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacations.index') }}"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Vacations (Old)</span></a> --}}
+                <li class="slide {{ $listingsActive ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ $listingsActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-package"></i>
+                        <span class="side-menu__label">Listings</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.listings.consolidated.index') }}" class="slide-item {{ request()->routeIs('admin.listings.consolidated.*') ? 'active' : '' }}">All listings</a></li>
+                        <li><a href="{{ route('admin.guidings.index') }}" class="slide-item {{ request()->routeIs('admin.guidings.*') ? 'active' : '' }}">Guidings</a></li>
+                        <li><a href="{{ route('admin.rental-boats.index') }}" class="slide-item {{ request()->routeIs('admin.rental-boats.*') ? 'active' : '' }}">Rental boats</a></li>
+                        <li><a href="{{ route('admin.accommodations.index') }}" class="slide-item {{ request()->routeIs('admin.accommodations.*') ? 'active' : '' }}">Accommodations</a></li>
+                        <li><a href="{{ route('admin.special-offers.index') }}" class="slide-item {{ request()->routeIs('admin.special-offers.*') ? 'active' : '' }}">Special offers</a></li>
+                        <li><a href="{{ route('admin.camps.index') }}" class="slide-item {{ request()->routeIs('admin.camps.*') ? 'active' : '' }}">Camps</a></li>
+                        <li><a href="{{ route('admin.trips.index') }}" class="slide-item {{ request()->routeIs('admin.trips.*') ? 'active' : '' }}">Trips</a></li>
+                    </ul>
                 </li>
 
                 <li class="sub-category">
-                    <h3>System</h3>
+                    <h3>Communications</h3>
                 </li>
-
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Contact Request</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
                 </li>
-
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.offer-sendout.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.offer-sendout.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">Custom Camp Offers</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.offer-sendout.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.offer-sendout.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">Custom camp offers</span></a>
                 </li>
-
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email Logs</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email logs</span></a>
                 </li>
-
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.employees.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Employees</span></a>
-                </li>
-
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <i class="side-menu__icon fe fe-bell"></i>
@@ -99,59 +124,89 @@
                     </a>
                 </li>
 
-                <li class="slide {{ request()->routeIs('admin.settings.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}  "
-                       data-bs-toggle="slide"
-                       href="">
-                        <i class="side-menu__icon fe fe-settings"></i>
-                        <span class="side-menu__label">Guiding Settings</span>
-                    </a>
-                    <ul class="slide-menu ">
-                        <li><a href="{{route('admin.settings.levelindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.levelindex') ? 'active' : '' }}" class="slide-item">Fishing Level</a></li>
-                        <li><a href="{{route('admin.settings.fishingtypeindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.fishingtypeindex') ? 'active' : '' }}" class="slide-item">Fishing Type</a></li>
-                        <li><a href="{{route('admin.settings.equipmentindex')}}" class="slide-item " class="slide-item">Fishing Equipment</a></li>
-                        <li><a href="{{route('admin.settings.fishingfromindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.fishingfromindex') ? 'active' : '' }}" class="slide-item">Fishing From</a></li>
-                        <li><a href="{{route('admin.settings.inclussionindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.inclussionindex') ? 'active' : '' }}" class="slide-item">Included</a></li>
-                        <li><a href="{{route('admin.settings.methodindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.methodindex') ? 'active' : '' }}" class="slide-item">Method</a></li>
-                        <li><a href="{{route('admin.settings.waterindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.waterindex') ? 'active' : '' }}" class="slide-item">Water Types</a></li>
-                        <li><a href="{{route('admin.settings.targetindex')}}" class="slide-item  {{ request()->routeIs('admin.settings.targetindex') ? 'active' : '' }}"> Target Fish</a></li>
-                        <li><a href="{{route('admin.settings.emailmaintenance')}}" class="slide-item  {{ request()->routeIs('admin.settings.emailmaintenance') ? 'active' : '' }}"> Email Maintenance</a></li>
-                    </ul>
+                <li class="sub-category">
+                    <h3>Team</h3>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.employees.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.employees.index') }}"><i class="side-menu__icon fe fe-user"></i><span class="side-menu__label">Employees</span></a>
                 </li>
 
-                {{-- <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.faq.index') }}"><i class="side-menu__icon fe fe-help-circle"></i><span class="side-menu__label">Faq's</span></a>
-                </li> --}}
+                <li class="sub-category">
+                    <h3>Content</h3>
+                </li>
                 <li class="slide {{ request()->routeIs('admin.faq.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Faq</span><i class="angle fe fe-chevron-right"></i></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-help-circle"></i>
+                        <span class="side-menu__label">FAQ</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.faq.home') }}" class="slide-item  {{ request()->routeIs('admin.faq.home') ? 'active' : '' }}">Home</a></li>
-                        <li><a href="{{ route('admin.faq.searchrequest') }}" class="slide-item  {{ request()->routeIs('admin.faq.search-request') ? 'active' : '' }}">Search Request</a></li>
+                        <li><a href="{{ route('admin.faq.home') }}" class="slide-item {{ request()->routeIs('admin.faq.home') ? 'active' : '' }}">Home</a></li>
+                        <li><a href="{{ route('admin.faq.searchrequest') }}" class="slide-item {{ request()->routeIs('admin.faq.searchrequest') ? 'active' : '' }}">Search request</a></li>
                     </ul>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Blog</span><i class="angle fe fe-chevron-right"></i></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-book-open"></i>
+                        <span class="side-menu__label">Blog</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.blog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.blog.threads.*') ? 'active' : '' }}"> Posts</a></li>
-                        <li><a href="{{ route('admin.blog.categories.index') }}" class="slide-item  {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}"> Categories</a></li>
+                        <li><a href="{{ route('admin.blog.threads.index') }}" class="slide-item {{ request()->routeIs('admin.blog.threads.*') ? 'active' : '' }}">Posts</a></li>
+                        <li><a href="{{ route('admin.blog.categories.index') }}" class="slide-item {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}">Categories</a></li>
                     </ul>
                 </li>
-                <a class="side-menu__item {{ request()->routeIs('admin.newblog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Category</span><i class="angle fe fe-chevron-right"></i></a>
-                <ul class="slide-menu">
-                    <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item  {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}"> Target Fish</a></li>
-                    <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item  {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}"> Methods</a></li>
-                    <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item  {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}"> Posts</a></li>
-                    <li><a href="{{ route('admin.category.country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}"> Country</a></li>
-                    <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item  {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}"> Vacation Country</a></li>
-                    <li><a href="{{ route('admin.category.region.index') }}" class="slide-item  {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}"> Region</a></li>
-                    <li><a href="{{ route('admin.category.city.index') }}" class="slide-item  {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}"> City</a></li>
-                </ul>
-            </li>
-                <li class="slide {{ request()->routeIs('admin.page-attribute.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.page-attribute.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#"><i class="side-menu__icon fe fe-book-open"></i><span class="side-menu__label">Page Attribute</span><i class="angle fe fe-chevron-right"></i></a>
+                <li class="slide {{ (request()->routeIs('admin.category.*') || request()->routeIs('admin.newblog.*')) ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ (request()->routeIs('admin.category.*') || request()->routeIs('admin.newblog.*')) ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-layers"></i>
+                        <span class="side-menu__label">Category pages</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.page-attribute.en') }}" class="slide-item  {{ request()->routeIs('admin.page-attribute.en') ? 'active' : '' }}"> Catchaguide.com</a></li>
-                        <li><a href="{{ route('admin.page-attribute.de') }}" class="slide-item  {{ request()->routeIs('admin.page-attribute.de') ? 'active' : '' }}"> Catchaguide.de</a></li>
+                        <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}">Target fish</a></li>
+                        <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}">Methods</a></li>
+                        <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}">Posts (guide blog)</a></li>
+                        <li><a href="{{ route('admin.category.country.index') }}" class="slide-item {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}">Country</a></li>
+                        <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}">Vacation country</a></li>
+                        <li><a href="{{ route('admin.category.trip-location.index') }}" class="slide-item {{ request()->routeIs('admin.category.trip-location.*') ? 'active' : '' }}">Trip locations</a></li>
+                        <li><a href="{{ route('admin.category.region.index') }}" class="slide-item {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}">Region</a></li>
+                        <li><a href="{{ route('admin.category.city.index') }}" class="slide-item {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}">City</a></li>
+                    </ul>
+                </li>
+                <li class="slide {{ request()->routeIs('admin.page-attribute.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.page-attribute.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-layout"></i>
+                        <span class="side-menu__label">Page attributes</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.page-attribute.en') }}" class="slide-item {{ request()->routeIs('admin.page-attribute.en') ? 'active' : '' }}">Catchaguide.com</a></li>
+                        <li><a href="{{ route('admin.page-attribute.de') }}" class="slide-item {{ request()->routeIs('admin.page-attribute.de') ? 'active' : '' }}">Catchaguide.de</a></li>
+                    </ul>
+                </li>
+
+                <li class="sub-category">
+                    <h3>Guiding setup</h3>
+                </li>
+                <li class="slide {{ request()->routeIs('admin.settings.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-settings"></i>
+                        <span class="side-menu__label">Guiding attributes</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.settings.levelindex') }}" class="slide-item {{ request()->routeIs('admin.settings.levelindex') ? 'active' : '' }}">Fishing level</a></li>
+                        <li><a href="{{ route('admin.settings.fishingtypeindex') }}" class="slide-item {{ request()->routeIs('admin.settings.fishingtypeindex') ? 'active' : '' }}">Fishing type</a></li>
+                        <li><a href="{{ route('admin.settings.equipmentindex') }}" class="slide-item {{ request()->routeIs('admin.settings.equipmentindex') ? 'active' : '' }}">Fishing equipment</a></li>
+                        <li><a href="{{ route('admin.settings.fishingfromindex') }}" class="slide-item {{ request()->routeIs('admin.settings.fishingfromindex') ? 'active' : '' }}">Fishing from</a></li>
+                        <li><a href="{{ route('admin.settings.inclussionindex') }}" class="slide-item {{ request()->routeIs('admin.settings.inclussionindex') ? 'active' : '' }}">Included</a></li>
+                        <li><a href="{{ route('admin.settings.methodindex') }}" class="slide-item {{ request()->routeIs('admin.settings.methodindex') ? 'active' : '' }}">Method</a></li>
+                        <li><a href="{{ route('admin.settings.waterindex') }}" class="slide-item {{ request()->routeIs('admin.settings.waterindex') ? 'active' : '' }}">Water types</a></li>
+                        <li><a href="{{ route('admin.settings.targetindex') }}" class="slide-item {{ request()->routeIs('admin.settings.targetindex') ? 'active' : '' }}">Target fish</a></li>
+                        <li><a href="{{ route('admin.settings.boat-extras.index') }}" class="slide-item {{ request()->routeIs('admin.settings.boat-extras.*') ? 'active' : '' }}">Boat extras</a></li>
+                        <li><a href="{{ route('admin.settings.facilities.index') }}" class="slide-item {{ request()->routeIs('admin.settings.facilities.*') ? 'active' : '' }}">Facilities</a></li>
+                        <li><a href="{{ route('admin.settings.kitchen-equipment.index') }}" class="slide-item {{ request()->routeIs('admin.settings.kitchen-equipment.*') ? 'active' : '' }}">Kitchen equipment</a></li>
+                        <li><a href="{{ route('admin.settings.emailmaintenance') }}" class="slide-item {{ request()->routeIs('admin.settings.emailmaintenance') ? 'active' : '' }}">Email maintenance</a></li>
                     </ul>
                 </li>
             </ul>
