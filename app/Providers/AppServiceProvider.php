@@ -2,8 +2,15 @@
 
 namespace App\Providers;
 
+use App\Contracts\Assistant\AssistantUiEnvelopeParserInterface;
+use App\Contracts\Assistant\AssistantUiPayloadNormalizerInterface;
+use App\Contracts\Assistant\AssistantVisibleReplySanitizerInterface;
 use App\Contracts\Assistant\LLMClientInterface;
 use App\Http\Resources\EventResource;
+use App\Services\Assistant\AssistantUiEnvelopeParser;
+use App\Services\Assistant\AssistantUiPayloadNormalizer;
+use App\Services\Assistant\AssistantVisibleReplySanitizer;
+use App\Services\Assistant\BalancedJsonObjectExtractor;
 use App\Services\Assistant\GroqHttpClient;
 use App\Services\Assistant\UnavailableLLMClient;
 use App\Services\AdminNotificationService;
@@ -41,6 +48,11 @@ class AppServiceProvider extends ServiceProvider
 
             return new UnavailableLLMClient();
         });
+
+        $this->app->singleton(BalancedJsonObjectExtractor::class);
+        $this->app->singleton(AssistantUiPayloadNormalizerInterface::class, AssistantUiPayloadNormalizer::class);
+        $this->app->singleton(AssistantUiEnvelopeParserInterface::class, AssistantUiEnvelopeParser::class);
+        $this->app->singleton(AssistantVisibleReplySanitizerInterface::class, AssistantVisibleReplySanitizer::class);
     }
 
     /**
