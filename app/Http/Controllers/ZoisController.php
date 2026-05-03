@@ -17,20 +17,23 @@ class ZoisController extends Controller
 {
     public function sendcontact(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'countryCode' => 'required|string|max:10',
             'phone' => 'required|string|max:20',
-            'preferred_date' => 'required|date',
-            'number_of_persons' => 'required|integer|min:1|max:99',
+            'preferred_date' => ['nullable', 'date'],
+            'number_of_persons' => ['nullable', 'integer', 'min:1', 'max:99'],
             'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
         ]);
 
         // Get source information if available
         $sourceType = $request->input('source_type', null);
         $sourceId = $request->input('source_id', null);
+
+        $hasBookingDetails = $request->filled('preferred_date')
+            && $request->filled('number_of_persons');
         
         // Add source information to the description if available (emails)
         $description = $request->description;
@@ -39,8 +42,8 @@ class ZoisController extends Controller
             $description .= $sourceInfo;
         }
 
-        // Save to database
-        if (in_array(strtolower((string) $sourceType), [CampVacationBooking::SOURCE_CAMP, CampVacationBooking::SOURCE_VACATION], true) && $sourceId) {
+        // Save to database (structured booking rows only when date + party size are provided)
+        if (in_array(strtolower((string) $sourceType), [CampVacationBooking::SOURCE_CAMP, CampVacationBooking::SOURCE_VACATION], true) && $sourceId && $hasBookingDetails) {
             CampVacationBooking::create([
                 'source_type' => strtolower((string) $sourceType),
                 'source_id' => (int) $sourceId,
@@ -53,7 +56,7 @@ class ZoisController extends Controller
                 'message' => $request->description,
                 'status' => CampVacationBooking::STATUS_OPEN,
             ]);
-        } elseif (strtolower((string) $sourceType) === TripBooking::SOURCE_TRIP && $sourceId) {
+        } elseif (strtolower((string) $sourceType) === TripBooking::SOURCE_TRIP && $sourceId && $hasBookingDetails) {
             TripBooking::create([
                 'source_type' => TripBooking::SOURCE_TRIP,
                 'source_id' => (int) $sourceId,

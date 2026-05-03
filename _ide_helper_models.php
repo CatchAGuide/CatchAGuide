@@ -3577,7 +3577,7 @@ namespace App\Models{
  * @property array<array-key, mixed>|null $dynamic_fields
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationAccommodation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationAccommodation newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationAccommodation query()
@@ -3603,7 +3603,7 @@ namespace App\Models{
  * @property array<array-key, mixed>|null $dynamic_fields
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBoat newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBoat newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBoat query()
@@ -3655,7 +3655,7 @@ namespace App\Models{
  * @property-read int|null $extras_count
  * @property-read \App\Models\VacationGuiding|null $guiding
  * @property-read \App\Models\VacationPackage|null $package
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBooking newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBooking newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationBooking query()
@@ -3700,7 +3700,7 @@ namespace App\Models{
  * @property numeric $price
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @property-read \App\Models\VacationBooking|null $vacationBooking
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationExtra newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationExtra newQuery()
@@ -3726,7 +3726,7 @@ namespace App\Models{
  * @property array<array-key, mixed>|null $dynamic_fields
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationGuiding newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationGuiding newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationGuiding query()
@@ -3752,7 +3752,7 @@ namespace App\Models{
  * @property array<array-key, mixed>|null $dynamic_fields
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Vacation|null $vacation
+ * @property-read \App\Models\Vacation $vacation
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationPackage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationPackage newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationPackage query()
@@ -3794,8 +3794,8 @@ namespace App\Models{
  * @property int $id
  * @property int $user_id
  * @property int $guiding_id
- * @property-read \App\Models\Guiding|null $guiding
- * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\Guiding $guiding
+ * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WishlistItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WishlistItem newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WishlistItem query()
