@@ -16,10 +16,14 @@
         "postcss": "^8.1.14",
         "resolve-url-loader": "^4.0.0",
         "sass": "^1.55.0",
-        "sass-loader": "^12.6.0"
+        "sass-loader": "^12.6.0",
+        "webpackbar": "^7.0.0"
     },
     "dependencies": {
         "autoprefixer": "10.4.5",
         "lucide": "^0.453.0"
+    },
+    "overrides": {
+        "webpackbar": "^7.0.0"
     }
 }

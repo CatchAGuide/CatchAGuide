@@ -2,6 +2,7 @@
 
 namespace App\Services\Catalog;
 
+use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Vacation;
 use Illuminate\Support\Facades\Cache;
@@ -575,6 +576,104 @@ class TripCatalogService
         }
 
         return array_values(array_unique($categories));
+    }
+
+    /**
+     * Fishing camps (active listings) in the same catalog shape as guidings/vacations.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getCampTrips(): array
+    {
+        $cacheKey = 'catalog_camps_' . app()->getLocale();
+
+        return Cache::remember($cacheKey, 600, function () {
+            /** @var \Illuminate\Support\Collection<int, \App\Models\Camp> $camps */
+            $camps = Camp::query()
+                ->where('status', 'active')
+                ->whereNotNull('title')
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->limit(500)
+                ->get();
+
+            return $camps->map(function (Camp $camp): array {
+                $minPrice = null;
+                try {
+                    $low = $camp->getLowestPrice();
+                    $minPrice = $low > 0 ? (float) $low : null;
+                } catch (\Throwable) {
+                    $minPrice = null;
+                }
+
+                $bestTimes = $camp->best_travel_times;
+                $availability = null;
+                if (is_array($bestTimes) && $bestTimes !== []) {
+                    $availability = implode(', ', array_filter($bestTimes, 'is_string'));
+                } elseif (is_string($bestTimes) && $bestTimes !== '') {
+                    $availability = $bestTimes;
+                }
+
+                $targetFish = $camp->target_fish;
+                $categories = [];
+                if (is_array($targetFish)) {
+                    foreach ($targetFish as $item) {
+                        if (!empty($item) && is_string($item)) {
+                            $categories[] = $item;
+                        }
+                    }
+                }
+
+                return [
+                    'type' => 'camp',
+                    'title' => (string) $camp->title,
+                    'slug' => (string) $camp->slug,
+                    'url' => $this->buildCampUrl($camp),
+                    'language' => (string) app()->getLocale(),
+                    'country' => $camp->country ?? null,
+                    'region' => $camp->region ?? null,
+                    'city' => $camp->city ?? null,
+                    'categories' => array_values(array_unique($categories)),
+                    'min_price' => $minPrice,
+                    'currency' => 'EUR',
+                    'duration' => null,
+                    'availability_summary' => $availability,
+                    'short_description' => $camp->description_camp
+                        ?: $camp->description_fishing
+                        ?: $camp->description_area,
+                    'images' => $this->buildCampImages($camp),
+                ];
+            })->all();
+        });
+    }
+
+    protected function buildCampUrl(Camp $camp): string
+    {
+        try {
+            return route('vacations.v2', ['campId' => $camp->id]);
+        } catch (\Throwable) {
+            return url('/vacations-v2/' . $camp->id);
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function buildCampImages(Camp $camp): array
+    {
+        $out = [];
+        if (!empty($camp->thumbnail_path)) {
+            $out[] = $this->normalizeImagePath((string) $camp->thumbnail_path);
+        }
+        if (is_array($camp->gallery_images)) {
+            foreach ($camp->gallery_images as $path) {
+                if (is_string($path) && $path !== '') {
+                    $out[] = $this->normalizeImagePath($path);
+                }
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 
     protected function normalizeImagePath(string $path): string

@@ -815,7 +815,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('cookie.close-btn') }}"></button>
                     </div>
                     <div class="modal-body">
-                        {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                        {{-- reCAPTCHA script is rendered by the component --}}
                         <div id="tripContactFormContainer">
                             <form id="tripContactModalForm">
                                 @csrf
@@ -896,7 +896,7 @@
 
                                 <div class="trip-contact-submit-row">
                                     <div class="trip-contact-captcha-wrap">
-                                        {!! htmlFormSnippet() !!}
+                                        <x-recaptcha />
                                     </div>
                                     <div class="trip-contact-submit-wrap">
                                         <button type="button" id="tripContactSubmitBtn" class="btn btn-orange">

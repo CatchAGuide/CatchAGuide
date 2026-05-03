@@ -461,29 +461,29 @@
 <!-- Structured Data for Search Results -->
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "{{ $filteredTitle }}",
-    "description": "{{ $description }}",
-    "url": "{{ request()->url() }}",
+    "@@context": "https://schema.org",
+    "@@type": "ItemList",
+    "name": @json($filteredTitle),
+    "description": @json($description),
+    "url": @json(request()->url()),
     "numberOfItems": {{ $guidings->total() }},
     "itemListElement": [
         @foreach($guidings as $index => $guiding)
         {
-            "@type": "ListItem",
+            "@@type": "ListItem",
             "position": {{ ($guidings->currentPage() - 1) * $guidings->perPage() + $index + 1 }},
             "item": {
-                "@type": "TouristAttraction",
-                "name": "{{ translate($guiding->title) }}",
-                "description": "{{ translate($guiding->excerpt ?? '') }}",
-                "url": "{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}",
+                "@@type": "TouristAttraction",
+                "name": @json(translate($guiding->title)),
+                "description": @json(translate($guiding->excerpt ?? '')),
+                "url": @json(route('guidings.show', [$guiding->id, $guiding->slug])),
                 "location": {
-                    "@type": "Place",
-                    "name": "{{ $guiding->location }}"
+                    "@@type": "Place",
+                    "name": @json($guiding->location)
                 },
                 "offers": {
-                    "@type": "Offer",
-                    "price": "{{ $guiding->getLowestPrice() }}",
+                    "@@type": "Offer",
+                    "price": @json($guiding->getLowestPrice()),
                     "priceCurrency": "EUR"
                 }
             }

@@ -712,7 +712,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {!! ReCaptcha::htmlScriptTagJsApi() !!}
+                {{-- reCAPTCHA script is rendered by the component --}}
                 <div id="contactFormContainer">
                     <form id="contactModalForm">
                         @csrf
@@ -768,7 +768,7 @@
                             <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
-                            {!! htmlFormSnippet() !!}
+                            <x-recaptcha />
                             <button type="button" id="contactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
                         </div>
                     </form>

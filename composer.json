@@ -5,38 +5,34 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^8.0",
+        "php": "^8.5",
         "ext-curl": "*",
         "akuechler/laravel-geoly": "^1.0",
-        "barryvdh/laravel-ide-helper": "^2.11",
-        "bavix/laravel-wallet": "^7.3",
+        "barryvdh/laravel-ide-helper": "^3.7",
+        "bavix/laravel-wallet": "^11.0",
         "biscolab/google-maps-php-sdk": "^0.9.0",
-        "biscolab/laravel-recaptcha": "^5.4",
-        "fruitcake/laravel-cors": "^2.0",
-        "google/analytics-data": "^0.23.3",
+        "google/recaptcha": "1.4",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.7",
         "jenssegers/agent": "^2.6",
-        "laravel/framework": "^8.75",
-        "laravel/sanctum": "^2.11",
-        "laravel/tinker": "^2.5",
-        "laravel/ui": "^3.4",
-        "livewire/livewire": "^2.10",
+        "laravel/framework": "^13.0",
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^3.0",
+        "laravel/ui": "^4.0",
+        "livewire/livewire": "^3.0",
         "sabre/vobject": "^4.5",
-        "spatie/geocoder": "^3.16",
+        "spatie/geocoder": "^4.0",
         "spatie/laravel-cookie-consent": "^3.2",
-        "spatie/laravel-sitemap": "^6.4",
         "spatie/laravel-sluggable": "^3.3",
-        "stichoza/google-translate-php": "^5.1",
-        "toin0u/geocoder-laravel": "^4.6"
+        "stichoza/google-translate-php": "^5.1"
     },
     "require-dev": {
-        "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
-        "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^5.10",
-        "phpunit/phpunit": "^9.5"
+        "mockery/mockery": "^1.6.12",
+        "nunomaduro/collision": "^8.0",
+        "spatie/laravel-ignition": "^2.0",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -84,10 +80,13 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "audit": {
+            "block-insecure": false
+        },
         "allow-plugins": {
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }

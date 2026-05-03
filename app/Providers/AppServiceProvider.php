@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Contracts\Assistant\LLMClientInterface;
 use App\Http\Resources\EventResource;
+use App\Services\Assistant\GroqHttpClient;
+use App\Services\Assistant\UnavailableLLMClient;
 use App\Services\AdminNotificationService;
 use App\Services\Asset;
 use App\Services\GuidingService;
 use App\Services\LanguageService;
+use App\Services\Recaptcha\RecaptchaVerifier;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -22,7 +27,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(LLMClientInterface::class, function () {
+            if (!config('booking_assistant.enabled')) {
+                return new UnavailableLLMClient();
+            }
+
+            $driver = (string) config('booking_assistant.driver', 'groq');
+            $groqKey = (string) config('booking_assistant.providers.groq.api_key', '');
+
+            if ($driver === 'groq' && $groqKey !== '') {
+                return new GroqHttpClient();
+            }
+
+            return new UnavailableLLMClient();
+        });
     }
 
     /**
@@ -34,6 +52,23 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
         EventResource::withoutWrapping();
+
+        Validator::extend('recaptcha', function (string $attribute, mixed $value, array $parameters, $validator): bool {
+            // In case config caching or env is misconfigured, fail closed.
+            if (config('recaptcha.api_secret_key', '') === '') {
+                return false;
+            }
+
+            $ip = request()?->ip();
+            $skip = (array) config('recaptcha.skip_ip', []);
+            if ($ip && in_array($ip, $skip, true)) {
+                return true;
+            }
+
+            $resp = app(RecaptchaVerifier::class)->verify(is_string($value) ? $value : null, $ip);
+
+            return $resp->isSuccess();
+        }, trans(config('recaptcha.error_message_key', 'validation.recaptcha')));
 
 
         $this->app->singleton('language', function(){

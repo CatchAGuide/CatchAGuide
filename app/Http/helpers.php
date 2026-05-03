@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-use GuzzleHttp\Client;
 
 if (!function_exists('two')) {
     function two($number) {
@@ -315,7 +314,7 @@ if (!function_exists('getLocationDetailsGoogle')) {
             if (!empty($searchString)) {
                 $resolved = getLocationDetails($searchString);
                 if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
-                    Log::info('Google Places fallback successful in getLocationDetailsGoogle', ['resolved' => $resolved]);
+                    \Log::info('Google Places fallback successful in getLocationDetailsGoogle', ['resolved' => $resolved]);
                     return [
                         'city' => $resolved['city'] ?? null,
                         'country' => $resolved['country'] ?? null,
