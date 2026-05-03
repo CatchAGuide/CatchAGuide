@@ -15,6 +15,11 @@
     $browseGuidingsUrl = \Illuminate\Support\Facades\Route::has('guidings.index')
         ? route('guidings.index')
         : url('/guidings');
+    $bookingAssistantWelcomeSuggestions = [
+        'Help me plan a guided fishing trip',
+        'Show packages, camps, or guidings for my dates',
+        "What's included in a guiding package?",
+    ];
 @endphp
 <div id="booking-assistant-root" data-endpoint="{{ url('/assistant/chat') }}" data-csrf="{{ csrf_token() }}" data-page-context="{{ e($ctx) }}">
     <button type="button" class="booking-assistant-fab" id="booking-assistant-toggle" aria-expanded="false" aria-controls="booking-assistant-modal" title="{{ __('booking-assistant.widget_open') }}">
@@ -972,11 +977,7 @@
         });
     }
 
-    var suggestions = @json([
-        'Help me plan a guided fishing trip',
-        'Show available trips for my dates',
-        'What’s included in a guiding package?'
-    ]);
+    var suggestions = @json($bookingAssistantWelcomeSuggestions);
     function renderSuggestions() {
         if (!suggestionsEl) return;
         suggestionsEl.innerHTML = '';
