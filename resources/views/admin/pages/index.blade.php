@@ -407,7 +407,8 @@
                                     <th>ID</th>
                                     <th>Customer</th>
                                     <th>Tour</th>
-                                    <th>Date</th>
+                                    <th>Tour date</th>
+                                    <th>Request created</th>
                                     <th>Price</th>
                                     <th>Status</th>
                                     <th>Billing</th>
@@ -420,6 +421,7 @@
                                         <td>{{ $booking['customer'] }}</td>
                                         <td>{{ $booking['tour'] }}</td>
                                         <td>{{ $booking['date'] }}</td>
+                                        <td class="text-muted small">{{ $booking['request_created_at'] ?? '—' }}</td>
                                         <td>${{ number_format($booking['price'], 2) }}</td>
                                         <td>
                                             <span class="badge bg-{{ $booking['status_color'] }}">
@@ -436,7 +438,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">No completed approved bookings</td>
+                                        <td colspan="8" class="text-center">No completed approved bookings</td>
                                     </tr>
                                 @endforelse
                             </tbody>

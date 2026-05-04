@@ -189,6 +189,7 @@ class AdminController extends Controller
                     'tour' => $booking->guiding?->title,
                     'price' => $booking->price + ($booking->total_extra_price ?? 0),
                     'date' => $booking->getFormattedBookingDate('d.m.Y H:i'),
+                    'request_created_at' => $booking->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i'),
                     'status' => $booking->status,
                     'status_color' => $this->getStatusColor($booking->status),
                     'is_guide_billed' => (bool) $booking->is_guide_billed,

@@ -102,8 +102,8 @@
                                         <th class="wd-15p border-bottom-0">Anteil Guide</th>
                                         <th class="wd-15p border-bottom-0">Anteil CaG</th>
                                         <th class="wd-15p border-bottom-0">Status</th>
-                                        <th class="wd-15p border-bottom-0">Buchungsdatum</th>
-                                        <th class="wd-15p border-bottom-0">Guidingsdatum</th>
+                                        <th class="wd-15p border-bottom-0">Tour date</th>
+                                        <th class="wd-15p border-bottom-0">Request created</th>
                                         <th class="wd-15p border-bottom-0">ID Guide</th>
                                         <th class="wd-15p border-bottom-0">ID Guiding</th>
                                     </tr>
@@ -118,8 +118,8 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td>{{$booking->created_at->format('d.m.Y')}}</td>
-                                            <td>{{$booking->blocked_event->created_at->format('d.m.Y')}}</td>
+                                            <td>{{ $booking->book_date ? \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') : '—' }}</td>
+                                            <td>{{ $booking->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
                                             <td>{{$booking->user->id}}</td>
                                             <td>{{$booking->guiding->id}}</td>
                                         </tr>

@@ -140,9 +140,9 @@
                                         <th width="18%">Guest</th>
                                         <th width="18%">Contact</th>
                                         <th width="26%">Camp/Vacation</th>
-                                        <th width="10%">Preferred date</th>
+                                        <th width="10%">Preferred tour date</th>
                                         <th width="8%">Persons</th>
-                                        <th width="10%">Created</th>
+                                        <th width="10%">Request created</th>
                                         <th width="10%">Status</th>
                                         <th width="8%" class="text-end">Actions</th>
                                     </tr>

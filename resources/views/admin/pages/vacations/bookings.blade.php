@@ -87,6 +87,7 @@
                                     <tr>
                                         <th class="wd-15p border-bottom-0">ID</th>
                                         <th class="wd-15p border-bottom-0">Guest Name</th>
+                                        <th class="wd-12p border-bottom-0">Stay / request</th>
                                         <th class="wd-10p border-bottom-0">Contact Information</th>
                                         <th class="wd-10p border-bottom-0">Booking Details</th>
                                         <th class="wd-10p border-bottom-0">Total Booking Price</th>
@@ -100,6 +101,12 @@
                                         <td>{{$booking->id}}</td>
                                         <td>
                                             {{$booking->title}} {{$booking->name}} {{$booking->surname}}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column small">
+                                                <span><i class="fa fa-calendar-check-o me-1 text-muted"></i>{{ $booking->start_date?->format('d.m.Y') }} – {{ $booking->end_date?->format('d.m.Y') }}</span>
+                                                <span class="text-muted mt-1"><i class="fa fa-inbox me-1"></i>Request: {{ $booking->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i') ?? '—' }}</span>
+                                            </div>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column">

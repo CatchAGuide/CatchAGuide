@@ -111,6 +111,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
+                                <div class="detail-label">Request submitted</div>
+                                <div class="detail-value">
+                                    {{ $booking->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i') ?? '—' }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="detail-label">Number of Persons</div>
                                 <div class="detail-value">{{ $booking->number_of_persons }}</div>
                             </div>

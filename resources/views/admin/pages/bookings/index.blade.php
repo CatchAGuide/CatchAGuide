@@ -33,7 +33,7 @@
                                         <tr>
                                             <th class="wd-20p border-bottom-0 col-id">ID</th>
                                             <th class="wd-20p border-bottom-0 col-customer">Customer</th>
-                                            <th class="wd-15p border-bottom-0">Date / Checkout</th>
+                                            <th class="wd-15p border-bottom-0">Tour date / Request</th>
                                             <th class="wd-15p border-bottom-0">Price / Shares</th>
                                             <th class="wd-15p border-bottom-0">Status</th>
                                             <th class="wd-20p border-bottom-0">Guide / Tour</th>
@@ -88,6 +88,10 @@
                                                         <div class="booking-table__checkout-date">
                                                             <i class="fa fa-calendar-alt me-1"></i>
                                                             {{ \Carbon\Carbon::parse($booking->book_date)->format('d.m.Y') }}
+                                                        </div>
+                                                        <div class="text-muted small mt-1">
+                                                            <i class="fa fa-inbox me-1"></i>
+                                                            Request: {{ $booking->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i') ?? '—' }}
                                                         </div>
                                                     </div>
                                                 </td>
