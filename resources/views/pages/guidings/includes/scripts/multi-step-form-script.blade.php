@@ -1763,14 +1763,19 @@
             } catch (error) {
                 console.error('Failed to save draft before proceeding:', error);
                 hideLoadingScreen();
-                // Show error message to user
                 const errorContainer = document.getElementById('error-container');
                 if (errorContainer) {
                     errorContainer.style.display = 'block';
-                    errorContainer.innerHTML = '<div class="alert alert-danger">Failed to save progress. Please try again.</div>';
+                    const alertEl = document.createElement('div');
+                    alertEl.className = 'alert alert-danger';
+                    alertEl.textContent = (error && error.message)
+                        ? error.message
+                        : 'Failed to save progress. Please try again.';
+                    errorContainer.innerHTML = '';
+                    errorContainer.appendChild(alertEl);
                     scrollToFormCenter();
                 }
-                return; // Don't proceed if save failed
+                return;
             }
         }
 
@@ -2188,17 +2193,39 @@
                 }
             }
 
-            // Use synchronous saving for step progression to avoid status timing issues
+            // Use synchronous saving for step progression to avoid status timing issues.
+            // Accept: application/json so Laravel returns JSON validation errors (422) instead of HTML.
             fetch(window.saveDraftSyncUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => {
+            .then(async (response) => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    let msg = `Could not save (${response.status}). Please try again.`;
+                    const ct = response.headers.get('content-type') || '';
+                    if (ct.includes('application/json')) {
+                        try {
+                            const errData = await response.json();
+                            if (errData.errors) {
+                                const first = Object.values(errData.errors).flat()[0];
+                                if (first) {
+                                    msg = first;
+                                }
+                            } else if (errData.message) {
+                                msg = errData.message;
+                            } else if (errData.error) {
+                                msg = typeof errData.error === 'string' ? errData.error : msg;
+                            }
+                        } catch (e) {
+                            /* keep generic msg */
+                        }
+                    }
+                    throw new Error(msg);
                 }
                 return response.json();
             })
@@ -2207,11 +2234,11 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
-                resolve(data); // Resolve the promise on success
+                resolve(data);
             })
             .catch(error => {
                 console.error('Failed to save draft:', error);
-                reject(error); // Reject the promise on error
+                reject(error);
             });
         });
     }
