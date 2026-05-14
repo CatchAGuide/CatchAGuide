@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use Illuminate\Mail\Events\MessageSent;
 use App\Models\EmailLog;
-use Illuminate\Support\Facades\Log;
+use Symfony\Component\Mime\Address;
 
 class LogSentEmail
 {
@@ -29,9 +29,9 @@ class LogSentEmail
         $message = $event->message;
         $data = $event->data;
         
-        // Extract recipient
-        $to = $message->getTo();
-        $recipient = array_keys($to)[0] ?? '';
+        // Symfony Mailer: getTo() is Address[] with numeric keys (not email-keyed).
+        $to = $message->getTo() ?? [];
+        $recipient = $this->firstRecipientAddress($to);
         
         // Extract subject
         $subject = $message->getSubject();
@@ -58,5 +58,27 @@ class LogSentEmail
                 'data' => $data,
             ]),
         ]);
+    }
+
+    /**
+     * @param  array<int|string, Address|string>  $to
+     */
+    private function firstRecipientAddress(array $to): string
+    {
+        if ($to === []) {
+            return '';
+        }
+
+        $first = reset($to);
+        if ($first instanceof Address) {
+            return $first->getAddress();
+        }
+
+        $key = array_key_first($to);
+        if (is_string($key) && $key !== '') {
+            return $key;
+        }
+
+        return is_string($first) ? $first : '';
     }
 }
