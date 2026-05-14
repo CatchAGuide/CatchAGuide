@@ -285,6 +285,9 @@ window.GoogleMapsManager = (function() {
                 city: '',
                 country: '',
                 region: '',
+                postal_code: '',
+                country_short: '',
+                region_short: '',
                 name: place.name || ''
             };
 
@@ -300,9 +303,14 @@ window.GoogleMapsManager = (function() {
                 }
                 if (types.includes('country')) {
                     location.country = component.long_name;
+                    location.country_short = component.short_name || '';
                 }
                 if (types.includes('administrative_area_level_1')) {
                     location.region = component.long_name;
+                    location.region_short = component.short_name || '';
+                }
+                if (types.includes('postal_code')) {
+                    location.postal_code = component.long_name;
                 }
             });
 

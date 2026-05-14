@@ -152,6 +152,56 @@
     }
 
     // Config for mobile search modal (searchPlace) – initialized only when modal is shown so dropdown works on mobile
+    const guidingSearchPlaceLogUrl = @json(route('guidings.search-place-log.store'));
+
+    /**
+     * Persist Google Places selection from the navbar / header search (guidings flow).
+     * Server records client IP, app locale, and structured place fields.
+     */
+    function postGuidingSearchPlaceLog(place, config, MapsManager) {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token || !MapsManager || typeof MapsManager.extractLocationData !== 'function') {
+            return;
+        }
+        let locationData;
+        try {
+            locationData = MapsManager.extractLocationData(place);
+        } catch (e) {
+            return;
+        }
+        const inputEl = typeof config.input === 'string' ? document.getElementById(config.input) : config.input;
+        const payload = {
+            place_query: (place && place.name) || (inputEl && inputEl.value) || null,
+            place_id: place.place_id || null,
+            formatted_address: place.formatted_address || null,
+            latitude: locationData.lat,
+            longitude: locationData.lng,
+            city: locationData.city || null,
+            country: locationData.country || null,
+            region: locationData.region || null,
+            postal_code: locationData.postal_code || null,
+            country_short: locationData.country_short || null,
+            region_short: locationData.region_short || null,
+            place_types: place.types || [],
+            browser_language: typeof navigator !== 'undefined' ? navigator.language : null,
+            browser_languages: typeof navigator !== 'undefined' && Array.isArray(navigator.languages) ? navigator.languages.slice(0, 20) : null,
+            source_input_id: typeof config.input === 'string' ? config.input : null,
+            context: 'guiding_navbar'
+        };
+
+        fetch(guidingSearchPlaceLogUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(payload),
+            keepalive: true
+        }).catch(function () {});
+    }
+
     const searchModalPlaceConfig = {
         input: 'searchPlace',
         lat: 'LocationLat',
@@ -183,6 +233,7 @@
                 if (cityInput) cityInput.value = locationData.city || '';
                 if (countryInput) countryInput.value = locationData.country || '';
                 if (regionInput) regionInput.value = locationData.region || '';
+                postGuidingSearchPlaceLog(place, config, MapsManager);
             };
         }
         MapsManager.initAutocomplete(config.input, callback);

@@ -134,6 +134,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30, // Keep DDoS alert logs for 30 days
         ],
+
+        'guiding_search_places' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/guiding-search-places.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => 30,
+        ],
     ],
 
 ];
