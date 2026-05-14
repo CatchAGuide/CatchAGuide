@@ -4,97 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Accommodation;
-use App\Models\Booking;
 use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Trip;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class StrategyController extends Controller
 {
     public function index()
     {
-        $guidingsActive = (int) Guiding::query()->where('status', 1)->count();
-        $tripsActive = (int) Trip::query()->where('status', 'active')->count();
-        $campsActive = (int) Camp::query()->where('status', 'active')->count();
-        $accommodationsActive = (int) Accommodation::query()->where('status', 'active')->count();
-
-        $missing = [
-            'guidings' => [
-                'thumbnail' => (int) Guiding::query()->where('status', 1)->where(function ($q) {
-                    $q->whereNull('thumbnail_path')->orWhere('thumbnail_path', '');
-                })->count(),
-                'description' => (int) Guiding::query()->where('status', 1)->where(function ($q) {
-                    $q->whereNull('description')->orWhere('description', '');
-                })->count(),
-                'country' => (int) Guiding::query()->where('status', 1)->where(function ($q) {
-                    $q->whereNull('country')->orWhere('country', '');
-                })->count(),
-            ],
-            'trips' => [
-                'thumbnail' => (int) Trip::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('thumbnail_path')->orWhere('thumbnail_path', '');
-                })->count(),
-                'description' => (int) Trip::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('description')->orWhere('description', '');
-                })->count(),
-                'country' => (int) Trip::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('country')->orWhere('country', '');
-                })->count(),
-                // JSON-empty checks are DB-dependent; keep this lightweight
-                'gallery_empty' => (int) Trip::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('gallery_images')->orWhere('gallery_images', '')->orWhere('gallery_images', '[]');
-                })->count(),
-            ],
-            'camps' => [
-                'thumbnail' => (int) Camp::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('thumbnail_path')->orWhere('thumbnail_path', '');
-                })->count(),
-                'description' => (int) Camp::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('description_camp')->orWhere('description_camp', '');
-                })->count(),
-                'country' => (int) Camp::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('country')->orWhere('country', '');
-                })->count(),
-                'gallery_empty' => (int) Camp::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('gallery_images')->orWhere('gallery_images', '')->orWhere('gallery_images', '[]');
-                })->count(),
-            ],
-            'accommodations' => [
-                'thumbnail' => (int) Accommodation::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('thumbnail_path')->orWhere('thumbnail_path', '');
-                })->count(),
-                'details' => (int) Accommodation::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('accommodation_details')->orWhere('accommodation_details', '')->orWhere('accommodation_details', '[]');
-                })->count(),
-                'pricing' => (int) Accommodation::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('per_person_pricing')->orWhere('per_person_pricing', '')->orWhere('per_person_pricing', '[]');
-                })->count(),
-                'country' => (int) Accommodation::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('country')->orWhere('country', '');
-                })->count(),
-                'gallery_empty' => (int) Accommodation::query()->where('status', 'active')->where(function ($q) {
-                    $q->whereNull('gallery_images')->orWhere('gallery_images', '')->orWhere('gallery_images', '[]');
-                })->count(),
-            ],
-        ];
-
-        $contentTasks =
-            $missing['guidings']['thumbnail'] + $missing['guidings']['description'] + $missing['guidings']['country']
-            + $missing['trips']['thumbnail'] + $missing['trips']['description'] + $missing['trips']['country'] + $missing['trips']['gallery_empty']
-            + $missing['camps']['thumbnail'] + $missing['camps']['description'] + $missing['camps']['country'] + $missing['camps']['gallery_empty']
-            + $missing['accommodations']['thumbnail'] + $missing['accommodations']['details'] + $missing['accommodations']['pricing'] + $missing['accommodations']['country'] + $missing['accommodations']['gallery_empty'];
-
-        return view('admin.pages.strategy.index', [
-            'guidingsActive' => $guidingsActive,
-            'tripsActive' => $tripsActive,
-            'campsActive' => $campsActive,
-            'accommodationsActive' => $accommodationsActive,
-            'contentTasks' => $contentTasks,
-            'missing' => $missing,
-        ]);
+        return redirect()->route('admin.strategy.supply-gaps');
     }
 
     public function supplyGaps(Request $request)

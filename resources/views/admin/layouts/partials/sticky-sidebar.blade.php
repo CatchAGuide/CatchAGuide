@@ -9,6 +9,11 @@
         'admin.trips.*',
         'admin.listings.consolidated.*'
     );
+    $financeStrategyActive = request()->routeIs(
+        'admin.finance.*',
+        'admin.financial.*',
+        'admin.strategy.*',
+    );
 @endphp
 <div class="sticky">
     <div class="app-sidebar__overlay" data-bs-toggle="sidebar"></div>
@@ -32,6 +37,18 @@
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.customers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Customers</span></a>
                 </li>
+                <li class="slide {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-anchor"></i>
+                        <span class="side-menu__label">Guides</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.guides.index') }}" class="slide-item {{ request()->routeIs('admin.guides.*') && !request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">All guides</a></li>
+                        <li><a href="{{ route('admin.guide-requests.index') }}" class="slide-item {{ request()->routeIs('admin.guide-requests.*') ? 'active' : '' }}">Guide requests</a></li>
+                        <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide analytics</a></li>
+                    </ul>
+                </li>
                 <li class="slide {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-calendar"></i>
@@ -44,46 +61,22 @@
                         <li><a href="{{ route('admin.trip-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}">Trips</a></li>
                     </ul>
                 </li>
-                <li class="slide {{ request()->routeIs('admin.finance.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.finance.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-trending-up"></i>
-                        <span class="side-menu__label">Finance</span>
+                <li class="slide {{ $financeStrategyActive ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ $financeStrategyActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-layers"></i>
+                        <span class="side-menu__label">Finance &amp; strategy</span>
                         <i class="angle fe fe-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
+                        <li><a href="{{ route('admin.financial.dashboard') }}" class="slide-item {{ request()->routeIs('admin.financial.dashboard') ? 'active' : '' }}">Tracking dashboard</a></li>
                         <li><a href="{{ route('admin.finance.analytics') }}" class="slide-item {{ request()->routeIs('admin.finance.analytics') ? 'active' : '' }}">Analytics</a></li>
                         <li><a href="{{ route('admin.finance.invoices') }}" class="slide-item {{ request()->routeIs('admin.finance.invoices') ? 'active' : '' }}">Invoices</a></li>
-                    </ul>
-                </li>
-
-                <li class="slide {{ request()->routeIs('admin.strategy.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.strategy.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-bar-chart-2"></i>
-                        <span class="side-menu__label">Strategy</span>
-                        <i class="angle fe fe-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('admin.strategy.index') }}" class="slide-item {{ request()->routeIs('admin.strategy.index') ? 'active' : '' }}">Overview</a></li>
-                        <li><a href="{{ route('admin.strategy.supply-gaps') }}" class="slide-item {{ request()->routeIs('admin.strategy.supply-gaps') ? 'active' : '' }}">Supply gaps</a></li>
-                        <li><a href="{{ route('admin.strategy.content-coverage') }}" class="slide-item {{ request()->routeIs('admin.strategy.content-coverage') ? 'active' : '' }}">Content coverage</a></li>
+                        <li><a href="{{ route('admin.strategy.supply-gaps') }}" class="slide-item {{ request()->routeIs('admin.strategy.*') ? 'active' : '' }}">Strategy</a></li>
                     </ul>
                 </li>
 
                 <li class="sub-category">
-                    <h3>Partners &amp; catalog</h3>
-                </li>
-                <li class="slide {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.guides.*') || request()->routeIs('admin.guide-requests.*') || request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-anchor"></i>
-                        <span class="side-menu__label">Guides &amp; tours</span>
-                        <i class="angle fe fe-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('admin.guides.index') }}" class="slide-item {{ request()->routeIs('admin.guides.index') && !request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guides</a></li>
-                        <li><a href="{{ route('admin.guides.index') }}" class="slide-item">Providers</a></li>
-                        <li><a href="{{ route('admin.guide-requests.index') }}" class="slide-item {{ request()->routeIs('admin.guide-requests.index') ? 'active' : '' }}">Guide requests</a></li>
-                        <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide analytics</a></li>
-                    </ul>
+                    <h3>Catalog</h3>
                 </li>
                 <li class="slide {{ $listingsActive ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ $listingsActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">

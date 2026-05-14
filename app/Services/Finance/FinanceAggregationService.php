@@ -112,15 +112,7 @@ class FinanceAggregationService
             if ($dateFilter === 'booking') {
                 $bookingsQuery->whereBetween('created_at', [$from, $to]);
             } else {
-                // Reservation Date:
-                // - Booking: calendar_schedule.date OR blocked_event.from OR bookings.book_date
-                $bookingsQuery->where(function ($q) use ($from, $to) {
-                    $q->whereHas('calendar_schedule', function ($sq) use ($from, $to) {
-                        $sq->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
-                    })->orWhereHas('blocked_event', function ($sq) use ($from, $to) {
-                        $sq->whereBetween('from', [$from, $to]);
-                    })->orWhereBetween('book_date', [$from, $to]);
-                });
+                $bookingsQuery->whereReservationDateBetween($from, $to);
             }
         }
 
@@ -150,10 +142,21 @@ class FinanceAggregationService
             $guideEmail = $booking->guiding && $booking->guiding->user ? ($booking->guiding->user->email ?? null) : null;
 
             $price = $booking->price !== null ? (float) $booking->price : null;
-            $provision = $this->provisionCalculator->getProvisionAmount($price);
+            $extras = $booking->total_extra_price !== null ? (float) $booking->total_extra_price : 0.0;
+            $gross = $price !== null ? ($price + $extras) : null;
+
+            $provision = $this->provisionCalculator->getProvisionAmount($gross);
             $tax = $this->provisionCalculator->getTaxAmount($provision);
 
             $reservationDate = $booking->getBookingDate();
+            $invoiceSentAt = $finance?->invoice_sent_at;
+            $invoiceDueAt = $finance?->invoice_due_at;
+            $paidAt = $finance?->paid_at;
+            $paidStatus = $finance?->paid_status ?? 'unpaid';
+            $overdueDays = 0;
+            if ($paidStatus !== 'paid' && $invoiceDueAt && $invoiceDueAt->isPast()) {
+                $overdueDays = $invoiceDueAt->diffInDays(now());
+            }
 
             return [
                 'source_key' => 'booking',
@@ -168,14 +171,19 @@ class FinanceAggregationService
                 'guest_phone' => $guestPhone ?: '—',
                 'guide_name' => $guideName ?: '—',
                 'guide_email' => $guideEmail ?: '—',
-                'price' => $price,
+                'price' => $gross,
                 'provision' => $provision,
                 'tax' => $tax,
                 'acceptance_status' => $booking->status ?? '—',
                 'invoice_sent' => (bool) ($finance && $finance->invoice_status === 'sent'),
-                'invoice_sent_at' => $finance?->invoice_sent_at,
-                'paid_status' => $finance?->paid_status ?? 'unpaid',
-                'paid_at' => $finance?->paid_at,
+                'invoice_sent_at' => $invoiceSentAt,
+                'invoice_sent_at_iso' => $invoiceSentAt ? $invoiceSentAt->toDateTimeString() : null,
+                'invoice_due_at' => $invoiceDueAt,
+                'invoice_due_at_iso' => $invoiceDueAt ? $invoiceDueAt->toDateTimeString() : null,
+                'paid_status' => $paidStatus,
+                'paid_at' => $paidAt,
+                'paid_at_iso' => $paidAt ? $paidAt->toDateTimeString() : null,
+                'overdue_days' => $overdueDays,
                 'reservation_date' => $reservationDate ? $reservationDate->format('Y-m-d') : '—',
                 'reservation_date_iso' => $reservationDate ? $reservationDate->format('Y-m-d') : null,
             ];
@@ -221,6 +229,15 @@ class FinanceAggregationService
             $provision = $this->provisionCalculator->getProvisionAmount($price);
             $tax = $this->provisionCalculator->getTaxAmount($provision);
 
+            $invoiceSentAt = $finance?->invoice_sent_at;
+            $invoiceDueAt = $finance?->invoice_due_at;
+            $paidAt = $finance?->paid_at;
+            $paidStatus = $finance?->paid_status ?? 'unpaid';
+            $overdueDays = 0;
+            if ($paidStatus !== 'paid' && $invoiceDueAt && $invoiceDueAt->isPast()) {
+                $overdueDays = $invoiceDueAt->diffInDays(now());
+            }
+
             $guestPhone = trim(($req->phone_country_code ?? '') . ' ' . ($req->phone ?? ''));
 
             return [
@@ -241,9 +258,14 @@ class FinanceAggregationService
                 'tax' => $tax,
                 'acceptance_status' => $req->status ?? '—',
                 'invoice_sent' => (bool) ($finance && $finance->invoice_status === 'sent'),
-                'invoice_sent_at' => $finance?->invoice_sent_at,
-                'paid_status' => $finance?->paid_status ?? 'unpaid',
-                'paid_at' => $finance?->paid_at,
+                'invoice_sent_at' => $invoiceSentAt,
+                'invoice_sent_at_iso' => $invoiceSentAt ? $invoiceSentAt->toDateTimeString() : null,
+                'invoice_due_at' => $invoiceDueAt,
+                'invoice_due_at_iso' => $invoiceDueAt ? $invoiceDueAt->toDateTimeString() : null,
+                'paid_status' => $paidStatus,
+                'paid_at' => $paidAt,
+                'paid_at_iso' => $paidAt ? $paidAt->toDateTimeString() : null,
+                'overdue_days' => $overdueDays,
                 'reservation_date' => optional($req->preferred_date)->format('Y-m-d') ?: '—',
                 'reservation_date_iso' => optional($req->preferred_date)->format('Y-m-d') ?: null,
             ];
@@ -299,6 +321,15 @@ class FinanceAggregationService
             $provision = $this->provisionCalculator->getProvisionAmount($price);
             $tax = $this->provisionCalculator->getTaxAmount($provision);
 
+            $invoiceSentAt = $finance?->invoice_sent_at;
+            $invoiceDueAt = $finance?->invoice_due_at;
+            $paidAt = $finance?->paid_at;
+            $paidStatus = $finance?->paid_status ?? 'unpaid';
+            $overdueDays = 0;
+            if ($paidStatus !== 'paid' && $invoiceDueAt && $invoiceDueAt->isPast()) {
+                $overdueDays = $invoiceDueAt->diffInDays(now());
+            }
+
             $guestPhone = trim(($req->phone_country_code ?? '') . ' ' . ($req->phone ?? ''));
             $sourceLabel = ucfirst($sourceType ?: 'Camp/Vacation');
 
@@ -320,9 +351,14 @@ class FinanceAggregationService
                 'tax' => $tax,
                 'acceptance_status' => $req->status ?? '—',
                 'invoice_sent' => (bool) ($finance && $finance->invoice_status === 'sent'),
-                'invoice_sent_at' => $finance?->invoice_sent_at,
-                'paid_status' => $finance?->paid_status ?? 'unpaid',
-                'paid_at' => $finance?->paid_at,
+                'invoice_sent_at' => $invoiceSentAt,
+                'invoice_sent_at_iso' => $invoiceSentAt ? $invoiceSentAt->toDateTimeString() : null,
+                'invoice_due_at' => $invoiceDueAt,
+                'invoice_due_at_iso' => $invoiceDueAt ? $invoiceDueAt->toDateTimeString() : null,
+                'paid_status' => $paidStatus,
+                'paid_at' => $paidAt,
+                'paid_at_iso' => $paidAt ? $paidAt->toDateTimeString() : null,
+                'overdue_days' => $overdueDays,
                 'reservation_date' => optional($req->preferred_date)->format('Y-m-d') ?: '—',
                 'reservation_date_iso' => optional($req->preferred_date)->format('Y-m-d') ?: null,
             ];

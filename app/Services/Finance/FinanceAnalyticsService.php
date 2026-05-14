@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\DB;
  */
 class FinanceAnalyticsService
 {
+    public function __construct(
+        private readonly CountryNormalizer $countryNormalizer,
+    ) {}
+
     private const COUNTRY_PALETTE = [
         ['key' => 'indigo', 'hex' => '#4f46e5'],
         ['key' => 'amber', 'hex' => '#d97706'],
@@ -50,7 +54,9 @@ class FinanceAnalyticsService
                 continue;
             }
             $ym = $date->format('Y-m');
-            $price = (float) ($booking->price ?? 0);
+            $price = method_exists($booking, 'getGrossAmount')
+                ? (float) $booking->getGrossAmount()
+                : ((float) ($booking->price ?? 0) + (float) ($booking->total_extra_price ?? 0));
             $platform = (float) ($booking->cag_percent ?? 0);
             $guide = max(0, $price - $platform);
 
@@ -63,7 +69,7 @@ class FinanceAnalyticsService
             $monthBuckets[$ym]['guide'] += $guide;
 
             $guiding = $booking->guiding;
-            $countryKey = $this->countryKey($guiding?->country, $unknownCountryLabel);
+            $countryKey = $this->countryNormalizer->canonicalKey($guiding?->country);
             $countryLabel = $this->displayCountry($guiding?->country, $unknownCountryLabel);
 
             if (!isset($countryBuckets[$countryKey])) {
@@ -304,28 +310,6 @@ class FinanceAnalyticsService
         ];
     }
 
-    private function countryKey(?string $country, string $unknownLabel): string
-    {
-        $c = trim((string) $country);
-        if ($c === '') {
-            return '__unknown__';
-        }
-
-        $lower = mb_strtolower($c);
-        $canonical = match (true) {
-            str_contains($lower, 'germany') || str_contains($lower, 'deutschland') || $lower === 'de' => 'germany',
-            str_contains($lower, 'netherlands') || str_contains($lower, 'niederlande') || str_contains($lower, 'holland') || $lower === 'nl' => 'netherlands',
-            str_contains($lower, 'sweden') || str_contains($lower, 'schweden') || $lower === 'se' => 'sweden',
-            str_contains($lower, 'spain') || str_contains($lower, 'spanien') || str_contains($lower, 'españa') || $lower === 'es' => 'spain',
-            str_contains($lower, 'portugal') || $lower === 'pt' => 'portugal',
-            str_contains($lower, 'croatia') || str_contains($lower, 'kroatien') || $lower === 'hr' => 'croatia',
-            str_contains($lower, 'norway') || str_contains($lower, 'norwegen') || $lower === 'no' => 'norway',
-            default => 'c_'.md5($lower),
-        };
-
-        return $canonical;
-    }
-
     private function displayCountry(?string $country, string $unknownLabel): string
     {
         $c = trim((string) $country);
@@ -343,7 +327,7 @@ class FinanceAnalyticsService
 
         $out = [];
         foreach ($rows as $g) {
-            $ck = $this->countryKey($g->country, $unknownCountryLabel);
+            $ck = $this->countryNormalizer->canonicalKey($g->country);
             $label = $this->displayCountry($g->country, $unknownCountryLabel);
             if (!isset($out[$ck])) {
                 $out[$ck] = [

@@ -99,11 +99,11 @@
                                                     <div class="booking-table__money-row">
                                                         <div class="booking-table__money-line">
                                                             <span class="booking-table__money-label">Total</span>
-                                                            <span class="booking-table__money-value">{{ two($booking->price) }} €</span>
+                                                            <span class="booking-table__money-value">{{ two($booking->getGrossAmount()) }} €</span>
                                                         </div>
                                                         <div class="booking-table__money-line">
                                                             <span class="booking-table__money-label">Guide</span>
-                                                            <span class="booking-table__money-value">{{ two($booking->price - $booking->cag_percent) }} €</span>
+                                                            <span class="booking-table__money-value">{{ two($booking->getGuideShareAmount()) }} €</span>
                                                         </div>
                                                         <div class="booking-table__money-line">
                                                             <span class="booking-table__money-label">CaG</span>

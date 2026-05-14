@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\GuideAnalyticsController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CampVacationBookingsController;
 use App\Http\Controllers\Admin\FinanceController;
+use App\Http\Controllers\Admin\FinancialDashboardController;
 use App\Http\Controllers\Admin\CustomersController;
 use App\Http\Controllers\Admin\EmployeesController;
 use App\Http\Controllers\Admin\EmailLogsController;
@@ -450,6 +451,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('finance')->name('finance.')->group(function () {
             Route::get('analytics', [FinanceController::class, 'analytics'])->name('analytics');
             Route::get('invoices', [FinanceController::class, 'invoices'])->name('invoices');
+            Route::get('invoices/export', [FinanceController::class, 'exportInvoices'])->name('invoices.export');
             Route::patch('{source}/{id}/invoice', [FinanceController::class, 'updateInvoice'])
                 ->where('source', '^(booking|trip|camp_vacation)$')
                 ->name('update-invoice');
@@ -457,6 +459,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->where('source', '^(booking|trip|camp_vacation)$')
                 ->name('update-paid');
         });
+
+        Route::get('financial/dashboard', [FinancialDashboardController::class, 'index'])->name('financial.dashboard');
+        Route::get('financial/dashboard/export', [FinancialDashboardController::class, 'export'])->name('financial.dashboard.export');
 
         Route::prefix('strategy')->name('strategy.')->group(function () {
             Route::get('/', [StrategyController::class, 'index'])->name('index');
@@ -596,6 +601,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/send', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'send'])->name('send');
         });
     });
+});
+
+Route::middleware(['web', 'auth:employees'])->group(function () {
+    Route::get('/api/admin/financial-dashboard', [FinancialDashboardController::class, 'data'])
+        ->name('admin.api.financial-dashboard');
 });
 
 Route::name('category.')->group(function(){

@@ -76,9 +76,16 @@
                                     <input type="hidden" name="quarter" value="{{ request('quarter') }}">
                                 </form>
 
-                                <div class="text-muted small">
-                                    Filters apply to <strong>{{ $dateFilter === 'booking' ? 'Booking date' : 'Reservation date' }}</strong>.
+                                <div class="d-flex gap-2 align-items-center">
+                                    <a class="btn btn-sm btn-outline-secondary"
+                                       href="{{ route('admin.finance.invoices.export', request()->query()) }}">
+                                        <i class="fa fa-download me-1"></i> Export CSV
+                                    </a>
+                                    <div class="text-muted small">
+                                        Filters apply to <strong>{{ $dateFilter === 'booking' ? 'Booking date' : 'Reservation date' }}</strong>.
+                                    </div>
                                 </div>
+
                             </div>
 
                             <div class="table-responsive" style="overflow-x: auto;">
@@ -91,9 +98,13 @@
                                         <th>Guide</th>
                                         <th class="text-end">Price</th>
                                         <th class="text-end">Provision</th>
-                                        <th class="text-end">Tax (19%)</th>
+                                        @php
+                                            $taxPct = (float) config('finance.tax_rate', 0.19) * 100;
+                                        @endphp
+                                        <th class="text-end">Tax ({{ rtrim(rtrim(number_format($taxPct, 2, '.', ''), '0'), '.') }}%)</th>
                                         <th>Invoice sent</th>
                                         <th>Paid status</th>
+                                        <th>Due</th>
                                         <th>Booking date</th>
                                         <th class="text-end">Actions</th>
                                     </tr>
@@ -197,6 +208,26 @@
                                             </td>
                                             <td>
                                                 @php
+                                                    $dueIso = $row['invoice_due_at_iso'] ?? null;
+                                                    $overdueDays = (int) ($row['overdue_days'] ?? 0);
+                                                @endphp
+                                                @if($paidStatus === 'paid')
+                                                    <span class="badge bg-success">Paid</span>
+                                                @elseif($dueIso)
+                                                    <div class="small">
+                                                        <span class="text-muted">{{ \Carbon\Carbon::parse($dueIso)->format('Y-m-d') }}</span>
+                                                        @if($overdueDays > 0)
+                                                            <span class="badge bg-danger ms-1">{{ $overdueDays }}d overdue</span>
+                                                        @else
+                                                            <span class="badge bg-light text-dark border ms-1">due</span>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    —
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @php
                                                     $bookDate = $row['booking_date'] ?? '—';
                                                     $bookIso = $row['booking_date_iso'] ?? '';
                                                 @endphp
@@ -212,7 +243,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="11" class="text-center text-muted py-4">
+                                            <td colspan="12" class="text-center text-muted py-4">
                                                 No finance rows found.
                                             </td>
                                         </tr>
@@ -224,14 +255,17 @@
                                         <th class="text-end"><span id="finance-total-price">0,00 €</span></th>
                                         <th class="text-end"><span id="finance-total-provision">0,00 €</span></th>
                                         <th class="text-end"><span id="finance-total-tax">0,00 €</span></th>
-                                        <th colspan="4"></th>
+                                        <th colspan="5"></th>
                                     </tr>
                                     </tfoot>
                                 </table>
                             </div>
 
                             <div class="mt-3 text-muted" style="font-size: 0.9rem;">
-                                Provision tiers: 10% (≤ €350), 7.5% (€350–€1,500), 3% (> €1,500). Tax is provision × 19%.
+                                @php
+                                    $taxPct = (float) config('finance.tax_rate', 0.19) * 100;
+                                @endphp
+                                Provision tiers: 10% (≤ €350), 7.5% (€350–€1,500), 3% (> €1,500). Tax is provision × {{ rtrim(rtrim(number_format($taxPct, 2, '.', ''), '0'), '.') }}%.
                             </div>
                         </div>
                     </div>

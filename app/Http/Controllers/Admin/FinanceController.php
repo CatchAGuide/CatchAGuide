@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\CampVacationBooking;
+use App\Models\Employee;
 use App\Models\FinanceItem;
+use App\Models\FinanceItemEvent;
 use App\Models\TripBooking;
 use App\Services\Finance\FinanceAggregationService;
 use App\Services\Finance\FinanceAnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FinanceController extends Controller
 {
@@ -33,6 +36,66 @@ class FinanceController extends Controller
         ]);
     }
 
+    public function exportInvoices(Request $request, FinanceAggregationService $aggregation): StreamedResponse
+    {
+        $rows = $aggregation->getInvoiceRows($request);
+        $filename = 'finance_invoices_' . now()->format('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        return response()->stream(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            if ($out === false) {
+                return;
+            }
+
+            fwrite($out, "\xEF\xBB\xBF");
+
+            fputcsv($out, [
+                'Source',
+                'ID',
+                'Reservation date',
+                'Booking date',
+                'Guest',
+                'Guide',
+                'Gross amount',
+                'Provision',
+                'Tax',
+                'Invoice status',
+                'Invoice sent at',
+                'Invoice due at',
+                'Paid status',
+                'Paid at',
+                'Overdue days',
+            ]);
+
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $r['source'] ?? '',
+                    $r['id'] ?? '',
+                    $r['reservation_date'] ?? '',
+                    $r['booking_date'] ?? '',
+                    $r['guest_name'] ?? '',
+                    $r['guide_name'] ?? '',
+                    $r['price'] ?? '',
+                    $r['provision'] ?? '',
+                    $r['tax'] ?? '',
+                    ($r['invoice_sent'] ?? false) ? 'sent' : 'not_sent',
+                    $r['invoice_sent_at_iso'] ?? '',
+                    $r['invoice_due_at_iso'] ?? '',
+                    $r['paid_status'] ?? 'unpaid',
+                    $r['paid_at_iso'] ?? '',
+                    $r['overdue_days'] ?? 0,
+                ]);
+            }
+
+            fclose($out);
+        }, 200, $headers);
+    }
+
     public function updateInvoice(Request $request, string $source, int $id): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
@@ -45,12 +108,23 @@ class FinanceController extends Controller
         if ($validated['invoice_sent']) {
             $financeItem->invoice_status = 'sent';
             $financeItem->invoice_sent_at = $financeItem->invoice_sent_at ?? now();
+            $financeItem->invoice_due_at = $financeItem->invoice_due_at ?? now()->addDays((int) config('finance.invoice_due_days', 10));
         } else {
             $financeItem->invoice_status = 'not_sent';
             $financeItem->invoice_sent_at = null;
+            $financeItem->invoice_due_at = null;
+            $financeItem->reminder_step = 0;
+            $financeItem->last_reminder_sent_at = null;
+            $financeItem->next_reminder_at = null;
         }
 
         $financeItem->save();
+
+        $this->syncBookingLegacyFlags($billable, $financeItem);
+        $this->logEvent($financeItem, $validated['invoice_sent'] ? 'invoice_sent' : 'invoice_unsent', [
+            'source' => $source,
+            'billable_id' => $id,
+        ]);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -78,6 +152,11 @@ class FinanceController extends Controller
             : null;
 
         $financeItem->save();
+
+        $this->logEvent($financeItem, $validated['paid_status'] === 'paid' ? 'paid_marked' : 'unpaid_marked', [
+            'source' => $source,
+            'billable_id' => $id,
+        ]);
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -109,6 +188,39 @@ class FinanceController extends Controller
         return $billable->financeItem()->firstOrCreate([], [
             'invoice_status' => 'not_sent',
             'paid_status' => 'unpaid',
+        ]);
+    }
+
+    private function syncBookingLegacyFlags($billable, FinanceItem $financeItem): void
+    {
+        if (!$billable instanceof Booking) {
+            return;
+        }
+
+        // Keep legacy booking flags in sync so existing admin pages continue to work.
+        if ($financeItem->invoice_status === 'sent') {
+            $billable->is_guide_billed = true;
+            $billable->guide_billed_at = $billable->guide_billed_at ?? now();
+            $billable->guide_invoice_sent_at = $billable->guide_invoice_sent_at ?? $financeItem->invoice_sent_at ?? now();
+        } else {
+            $billable->is_guide_billed = false;
+            $billable->guide_billed_at = null;
+        }
+
+        $billable->save();
+    }
+
+    private function logEvent(FinanceItem $financeItem, string $eventType, ?array $payload = null): void
+    {
+        $actorId = auth('employees')->id();
+        $actorType = $actorId ? Employee::class : null;
+
+        FinanceItemEvent::create([
+            'finance_item_id' => $financeItem->id,
+            'event_type' => $eventType,
+            'payload' => $payload,
+            'actor_type' => $actorType,
+            'actor_id' => $actorId,
         ]);
     }
 }

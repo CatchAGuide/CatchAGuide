@@ -4,15 +4,21 @@
 
 @section('content')
 <div class="container-fluid px-4 pt-4">
-    <div class="d-flex justify-content-between align-items-start mb-3">
+    <div class="d-flex justify-content-between align-items-start mb-2">
         <div>
-            <h1 class="h3 mb-0">Content coverage</h1>
-            <div class="text-muted small">Listings missing key content (thumbnail, gallery, description/details, pricing, country)</div>
+            <h1 class="h3 mb-0">Strategy</h1>
+            <div class="text-muted small">Supply and content tools</div>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.strategy.index') }}" class="btn btn-light btn-sm">Strategy</a>
             <a href="{{ route('admin.listings.consolidated.index') }}" class="btn btn-outline-primary btn-sm">All listings</a>
         </div>
+    </div>
+
+    @include('admin.pages.strategy._tabs')
+
+    <div class="mb-2">
+        <h2 class="h5 mb-1">Content coverage</h2>
+        <div class="text-muted small">Listings missing key content (thumbnail, gallery, description/details, pricing, country)</div>
     </div>
 
     <div class="card shadow-sm mb-3">

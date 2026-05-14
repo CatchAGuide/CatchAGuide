@@ -6,6 +6,7 @@ use App\Mail\BookingConfirmationMail;
 use App\Mail\BookingConfirmationMailGuest;
 use App\Mail\MailToCEO;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -81,6 +82,24 @@ class Booking extends Model
     }
 
     /**
+     * Tours whose reservation date falls in the inclusive range: calendar_schedule.date,
+     * blocked_event.from, or bookings.book_date (same rules as finance invoice reservation filter).
+     *
+     * @param  Builder<Booking>  $query
+     * @return Builder<Booking>
+     */
+    public function scopeWhereReservationDateBetween(Builder $query, Carbon $from, Carbon $to): Builder
+    {
+        return $query->where(function ($q) use ($from, $to) {
+            $q->whereHas('calendar_schedule', function ($sq) use ($from, $to) {
+                $sq->whereBetween('date', [$from->toDateString(), $to->toDateString()]);
+            })->orWhereHas('blocked_event', function ($sq) use ($from, $to) {
+                $sq->whereBetween('from', [$from, $to]);
+            })->orWhereBetween('book_date', [$from, $to]);
+        });
+    }
+
+    /**
      * @return BelongsTo
      */
     public function rating(): BelongsTo
@@ -111,6 +130,16 @@ class Booking extends Model
     public function getGuideSalary(): float
     {
         return $this->price - $this->cag_percent;
+    }
+
+    public function getGrossAmount(): float
+    {
+        return (float) ($this->price ?? 0) + (float) ($this->total_extra_price ?? 0);
+    }
+
+    public function getGuideShareAmount(): float
+    {
+        return max(0.0, $this->getGrossAmount() - (float) ($this->cag_percent ?? 0));
     }
 
     public function getBookingDate()

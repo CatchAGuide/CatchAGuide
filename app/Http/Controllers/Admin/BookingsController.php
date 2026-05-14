@@ -9,6 +9,9 @@ use App\Models\EmailLog;
 use App\Models\BlockedEvent;
 use App\Models\Guiding;
 use App\Models\UserGuest;
+use App\Models\FinanceItem;
+use App\Models\FinanceItemEvent;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -317,6 +320,25 @@ class BookingsController extends Controller
 
             $booking->guide_invoice_sent_at = now();
             $booking->save();
+
+            // Keep finance_items in sync (canonical invoice/paid tracking lives there)
+            $financeItem = $booking->financeItem()->firstOrCreate([], [
+                'invoice_status' => 'not_sent',
+                'paid_status' => 'unpaid',
+            ]);
+            $financeItem->invoice_status = 'sent';
+            $financeItem->invoice_sent_at = $financeItem->invoice_sent_at ?? $booking->guide_invoice_sent_at;
+            $financeItem->invoice_due_at = $financeItem->invoice_due_at ?? now()->addDays((int) config('finance.invoice_due_days', 10));
+            $financeItem->save();
+
+            $actorId = auth('employees')->id();
+            FinanceItemEvent::create([
+                'finance_item_id' => $financeItem->id,
+                'event_type' => 'invoice_sent_email',
+                'payload' => ['booking_id' => $booking->id],
+                'actor_type' => $actorId ? Employee::class : null,
+                'actor_id' => $actorId,
+            ]);
 
             return response()->json([
                 'success' => true,

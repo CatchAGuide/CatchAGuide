@@ -29,8 +29,8 @@
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_date') }}</strong> {{ $booking->getFormattedBookingDate('d.m.Y') }}</p>
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_guest') }}</strong> {{ $user->firstname ?? '' }} {{ $user->lastname ?? '' }}</p>
         <hr>
-        <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_total_price') }}</strong> {{ two($booking->price) }} &euro;</p>
-        <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_guide_share') }}</strong> {{ two($booking->price - $booking->cag_percent) }} &euro;</p>
+        <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_total_price') }}</strong> {{ two(method_exists($booking, 'getGrossAmount') ? $booking->getGrossAmount() : $booking->price) }} &euro;</p>
+        <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_guide_share') }}</strong> {{ two(method_exists($booking, 'getGuideShareAmount') ? $booking->getGuideShareAmount() : ($booking->price - $booking->cag_percent)) }} &euro;</p>
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_invoice_cag_commission') }}</strong> {{ two($booking->cag_percent) }} &euro;</p>
     </div>
 

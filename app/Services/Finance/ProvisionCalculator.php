@@ -32,7 +32,8 @@ class ProvisionCalculator
             return null;
         }
 
-        return $provisionAmount * 0.19;
+        $rate = (float) config('finance.tax_rate', 0.19);
+        return $provisionAmount * $rate;
     }
 }
 
