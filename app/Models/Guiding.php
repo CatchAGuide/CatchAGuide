@@ -712,12 +712,27 @@ class Guiding extends Model
                 }
             }
         }
+
+        // Google Places often maps administrative_area_level_1 (state/province) into the "city"
+        // parameter while also sending the same name as "region". Guidings frequently store that
+        // value only in `region` with `city` NULL, so a required city match would exclude them.
+        $isRegionLevelSearch = false;
+        if (!empty($locationParts['city']) && !empty($locationParts['region'])) {
+            if (strtolower(trim((string) $locationParts['city'])) === strtolower(trim((string) $locationParts['region']))) {
+                $isRegionLevelSearch = true;
+            }
+        }
+        if (!$isRegionLevelSearch && isset($locationParts['city_en'], $locationParts['region_en'])) {
+            if (strtolower(trim((string) $locationParts['city_en'])) === strtolower(trim((string) $locationParts['region_en']))) {
+                $isRegionLevelSearch = true;
+            }
+        }
         
         // Try direct database match based on standardized names
         $query = self::select('id')
-            ->where(function($query) use ($locationParts, $isCountryOnlySearch) {
-                // City conditions - skip if this is a country-only search
-                if ($locationParts['city'] && !$isCountryOnlySearch) {
+            ->where(function($query) use ($locationParts, $isCountryOnlySearch, $isRegionLevelSearch) {
+                // City conditions - skip for country-only or state/region-level (city duplicates region)
+                if ($locationParts['city'] && !$isCountryOnlySearch && !$isRegionLevelSearch) {
                     $query->where(function($q) use ($locationParts) {
                         $q->where('city', $locationParts['city']);
                         if (isset($locationParts['city_en'])) {
