@@ -62,11 +62,11 @@ class Kernel extends ConsoleKernel
                 ->appendOutputTo(storage_path('logs/ical-sync.log'));
 
         // Finance: auto-send guide invoices after tour date (3/7/10-day retries)
-        $schedule->command('finance:auto-send-guide-invoices')
-                ->dailyAt('03:10')
-                ->withoutOverlapping()
-                ->runInBackground()
-                ->appendOutputTo(storage_path('logs/finance-invoices.log'));
+        // $schedule->command('finance:auto-send-guide-invoices')
+        //         ->dailyAt('03:10')
+        //         ->withoutOverlapping()
+        //         ->runInBackground()
+        //         ->appendOutputTo(storage_path('logs/finance-invoices.log'));
     }
 
     /**
