@@ -179,6 +179,9 @@
             city: locationData.city || null,
             country: locationData.country || null,
             region: locationData.region || null,
+            city_local: locationData.city_local || null,
+            country_local: locationData.country_local || null,
+            region_local: locationData.region_local || null,
             postal_code: locationData.postal_code || null,
             country_short: locationData.country_short || null,
             region_short: locationData.region_short || null,
@@ -202,41 +205,60 @@
         }).catch(function () {});
     }
 
+    const guidingSearchAutocompleteOptions = {
+        fields: ['address_components', 'geometry', 'name', 'place_id', 'formatted_address', 'types']
+    };
+
     const searchModalPlaceConfig = {
         input: 'searchPlace',
         lat: 'LocationLat',
         lng: 'LocationLng',
         city: 'LocationCity',
         country: 'LocationCountry',
-        region: 'LocationRegion'
+        region: 'LocationRegion',
+        country_short: 'LocationCountryShort',
+        region_short: 'LocationRegionShort',
+        place_id: 'LocationPlaceId'
     };
 
     // Inputs that are visible on load (not inside a hidden modal) – init on page load
     const searchInputsOnLoad = [
-        { input: 'searchPlaceMobile', lat: 'LocationLatMobile', lng: 'LocationLngMobile', city: 'LocationCityMobile', country: 'LocationCountryMobile', region: 'LocationRegionMobile' },
-        { input: 'searchPlaceDesktop', lat: 'LocationLatDesktop', lng: 'LocationLngDesktop', city: 'LocationCityDesktop', country: 'LocationCountryDesktop', region: 'LocationRegionDesktop' },
-        { input: 'searchPlaceHeaderDesktop', lat: 'LocationLatHeaderDesktop', lng: 'LocationLngHeaderDesktop', city: 'LocationCityHeaderDesktop', country: 'LocationCountryHeaderDesktop', region: 'LocationRegionHeaderDesktop' },
-        { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop' }
+        { input: 'searchPlaceMobile', lat: 'LocationLatMobile', lng: 'LocationLngMobile', city: 'LocationCityMobile', country: 'LocationCountryMobile', region: 'LocationRegionMobile', country_short: 'LocationCountryShortMobile', region_short: 'LocationRegionShortMobile', place_id: 'LocationPlaceIdMobile' },
+        { input: 'searchPlaceDesktop', lat: 'LocationLatDesktop', lng: 'LocationLngDesktop', city: 'LocationCityDesktop', country: 'LocationCountryDesktop', region: 'LocationRegionDesktop', country_short: 'LocationCountryShortDesktop', region_short: 'LocationRegionShortDesktop', place_id: 'LocationPlaceIdDesktop' },
+        { input: 'searchPlaceHeaderDesktop', lat: 'LocationLatHeaderDesktop', lng: 'LocationLngHeaderDesktop', city: 'LocationCityHeaderDesktop', country: 'LocationCountryHeaderDesktop', region: 'LocationRegionHeaderDesktop', country_short: 'LocationCountryShortHeaderDesktop', region_short: 'LocationRegionShortHeaderDesktop', place_id: 'LocationPlaceIdHeaderDesktop' },
+        { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop', country_short: 'LocationCountryShortShortDesktop', region_short: 'LocationRegionShortShortDesktop', place_id: 'LocationPlaceIdShortDesktop' }
     ];
+
+    function setGuidingSearchHiddenField(fieldId, value) {
+        if (!fieldId) {
+            return;
+        }
+        const input = document.getElementById(fieldId);
+        if (input) {
+            input.value = value || '';
+        }
+    }
+
+    function applyGuidingSearchLocationFields(config, locationData, place) {
+        setGuidingSearchHiddenField(config.lat, locationData.lat);
+        setGuidingSearchHiddenField(config.lng, locationData.lng);
+        setGuidingSearchHiddenField(config.city, locationData.city || '');
+        setGuidingSearchHiddenField(config.country, locationData.country || '');
+        setGuidingSearchHiddenField(config.region, locationData.region || '');
+        setGuidingSearchHiddenField(config.country_short, locationData.country_short || '');
+        setGuidingSearchHiddenField(config.region_short, locationData.region_short || '');
+        setGuidingSearchHiddenField(config.place_id, (place && place.place_id) || '');
+    }
 
     function initAutocompleteForConfig(MapsManager, config, callback) {
         if (!callback) {
             callback = function(place) {
                 const locationData = MapsManager.extractLocationData(place);
-                const latInput = document.getElementById(config.lat);
-                const lngInput = document.getElementById(config.lng);
-                const cityInput = document.getElementById(config.city);
-                const countryInput = document.getElementById(config.country);
-                const regionInput = document.getElementById(config.region);
-                if (latInput) latInput.value = locationData.lat;
-                if (lngInput) lngInput.value = locationData.lng;
-                if (cityInput) cityInput.value = locationData.city || '';
-                if (countryInput) countryInput.value = locationData.country || '';
-                if (regionInput) regionInput.value = locationData.region || '';
+                applyGuidingSearchLocationFields(config, locationData, place);
                 postGuidingSearchPlaceLog(place, config, MapsManager);
             };
         }
-        MapsManager.initAutocomplete(config.input, callback);
+        MapsManager.initAutocomplete(config.input, callback, guidingSearchAutocompleteOptions);
     }
 
     // Initialize search inputs that are visible on page load (excludes searchPlace in modal)

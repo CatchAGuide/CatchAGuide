@@ -239,7 +239,7 @@ window.GoogleMapsManager = (function() {
          * @param {Function} onPlaceChanged - Callback when place is selected
          * @returns {Object|null} Autocomplete instance or null if unavailable
          */
-        initAutocomplete: function(inputId, onPlaceChanged) {
+        initAutocomplete: function(inputId, onPlaceChanged, options) {
             if (!window.google || !google.maps || !google.maps.places) {
                 // Silently return if Places library not available (don't log warning)
                 return null;
@@ -254,8 +254,17 @@ window.GoogleMapsManager = (function() {
                 return null;
             }
 
+            options = options || {};
+            const autocompleteOptions = {};
+            if (Array.isArray(options.fields) && options.fields.length) {
+                autocompleteOptions.fields = options.fields;
+            }
+            if (options.types) {
+                autocompleteOptions.types = options.types;
+            }
+
             try {
-                const autocomplete = new google.maps.places.Autocomplete(input);
+                const autocomplete = new google.maps.places.Autocomplete(input, autocompleteOptions);
                 
                 if (onPlaceChanged) {
                     autocomplete.addListener('place_changed', function() {
@@ -271,6 +280,48 @@ window.GoogleMapsManager = (function() {
                 console.error('Failed to initialize Places Autocomplete:', error);
                 return null;
             }
+        },
+
+        /**
+         * Resolve country/region to English using ISO codes (no Google API call).
+         * City names are usually identical across locales; DB lookup handles the rest server-side.
+         */
+        normalizeLocationNamesToEnglish: function(location) {
+            if (!location || !location.country_short || typeof Intl === 'undefined' || !Intl.DisplayNames) {
+                return location;
+            }
+
+            try {
+                const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+                const countryCode = String(location.country_short).toUpperCase();
+                const englishCountry = displayNames.of(countryCode);
+
+                if (englishCountry) {
+                    location.country = englishCountry;
+                }
+
+                if (location.region_short) {
+                    const regionAliases = { DE: { NRW: 'NW' } };
+                    let regionCode = String(location.region_short).toUpperCase();
+                    if (regionAliases[countryCode] && regionAliases[countryCode][regionCode]) {
+                        regionCode = regionAliases[countryCode][regionCode];
+                    }
+
+                    let englishRegion = displayNames.of(countryCode + '-' + regionCode);
+
+                    if (!englishRegion || englishRegion === countryCode + '-' + regionCode) {
+                        englishRegion = displayNames.of(regionCode);
+                    }
+
+                    if (englishRegion && englishRegion !== regionCode && englishRegion !== countryCode + '-' + regionCode) {
+                        location.region = englishRegion;
+                    }
+                }
+            } catch (error) {
+                // Intl.DisplayNames unavailable — server-side resolution will run on submit.
+            }
+
+            return location;
         },
 
         /**
@@ -334,7 +385,11 @@ window.GoogleMapsManager = (function() {
                 }
             }
 
-            return location;
+            location.city_local = location.city;
+            location.country_local = location.country;
+            location.region_local = location.region;
+
+            return this.normalizeLocationNamesToEnglish(location);
         },
 
         /**

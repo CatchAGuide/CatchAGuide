@@ -225,105 +225,205 @@ if (!function_exists('getCoordinatesFromLocation')) {
     }
 }
 
-if (!function_exists('getLocationDetailsGoogle')) {
-    function getLocationDetailsGoogle($city = null, $country = null, $region = null): ? array 
+if (!function_exists('englishCountryFromIso')) {
+    function englishCountryFromIso(?string $iso): ?string
     {
+        if (!$iso || strlen($iso) !== 2) {
+            return null;
+        }
+
+        $iso = strtoupper($iso);
+
+        $country = \App\Models\Country::where('countrycode', $iso)->value('name');
+        if ($country) {
+            return $country;
+        }
+
+        if (extension_loaded('intl')) {
+            $name = \Locale::getDisplayRegion('_' . $iso, 'en');
+            if ($name && strtoupper($name) !== $iso) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('englishRegionFromIso')) {
+    function englishRegionFromIso(?string $countryIso, ?string $regionIso): ?string
+    {
+        if (!$countryIso || !$regionIso) {
+            return null;
+        }
+
+        $countryIso = strtoupper($countryIso);
+        $regionIso = strtoupper($regionIso);
+
+        // Google sometimes returns non-ISO subdivision codes (e.g. NRW instead of NW for Germany).
+        $isoRegionAliases = [
+            'DE' => ['NRW' => 'NW'],
+        ];
+        if (isset($isoRegionAliases[$countryIso][$regionIso])) {
+            $regionIso = $isoRegionAliases[$countryIso][$regionIso];
+        }
+
+        if (extension_loaded('intl')) {
+            foreach ([$countryIso . '_' . $regionIso, $countryIso . '-' . $regionIso] as $locale) {
+                $name = \Locale::getDisplayRegion($locale, 'en');
+                if ($name && strtoupper($name) !== strtoupper($locale)) {
+                    return $name;
+                }
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('learnEnglishLocationFromPlaceId')) {
+    /**
+     * One Place Details request per place_id (90-day cache), used only to seed the locations table.
+     */
+    function learnEnglishLocationFromPlaceId(string $placeId): ?array
+    {
+        return \Cache::remember('google_place_en_learn_v1_' . $placeId, 60 * 60 * 24 * 90, function () use ($placeId) {
+            try {
+                $client = new \GuzzleHttp\Client(['timeout' => 5]);
+                $response = $client->get('https://maps.googleapis.com/maps/api/place/details/json', [
+                    'query' => [
+                        'place_id' => $placeId,
+                        'fields' => 'address_component',
+                        'language' => 'en',
+                        'key' => config('services.google_maps.api_key', env('GOOGLE_MAPS_API_KEY')),
+                    ],
+                ]);
+
+                $detailsResult = json_decode($response->getBody(), true);
+                if (($detailsResult['status'] ?? '') !== 'OK' || empty($detailsResult['result']['address_components'])) {
+                    return null;
+                }
+
+                $location = ['city' => null, 'country' => null, 'region' => null];
+
+                foreach ($detailsResult['result']['address_components'] as $component) {
+                    $types = $component['types'] ?? [];
+                    if (in_array('locality', $types, true) || in_array('postal_town', $types, true)) {
+                        $location['city'] = $component['long_name'];
+                    }
+                    if (in_array('administrative_area_level_1', $types, true)) {
+                        $location['region'] = $component['long_name'];
+                    }
+                    if (in_array('country', $types, true)) {
+                        $location['country'] = $component['long_name'];
+                    }
+                }
+
+                return array_filter($location) ?: null;
+            } catch (\Exception $e) {
+                \Log::error('learnEnglishLocationFromPlaceId error: ' . $e->getMessage());
+
+                return null;
+            }
+        });
+    }
+}
+
+if (!function_exists('getLocationDetailsGoogle')) {
+    /**
+     * Resolve search labels to English names for guiding filters.
+     * Uses DB first; optional one-time Google learn per place_id when configured.
+     */
+    function getLocationDetailsGoogle(
+        $city = null,
+        $country = null,
+        $region = null,
+        ?string $countryShort = null,
+        ?string $regionShort = null,
+        ?string $placeId = null,
+        ?string $cityLocal = null,
+        ?string $countryLocal = null,
+        ?string $regionLocal = null
+    ): ?array {
         $searchString = implode(', ', array_filter([$city, $country, $region], fn($val) => !empty($val)));
 
-        // First check in the locations table using JSON key lookups for translated variants
-        try {
-            $location = \App\Models\Location::where(function($query) use ($city, $country, $region) {
-                // Allow direct English matches first
-                if (!empty($city)) {
-                    $query->orWhere('city', $city);
-                }
-                if (!empty($country)) {
-                    $query->orWhere('country', $country);
-                }
-                if (!empty($region)) {
-                    $query->orWhere('region', $region);
-                }
+        $resolved = [];
 
-                // Then check if provided values exist as keys in translation JSON
-                if (!empty($city)) {
-                    $cityPath = '$.city."' . str_replace('"', '\\"', $city) . '"';
-                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$cityPath]);
-                }
-                if (!empty($country)) {
-                    $countryPath = '$.country."' . str_replace('"', '\\"', $country) . '"';
-                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$countryPath]);
-                }
-                if (!empty($region)) {
-                    $regionPath = '$.region."' . str_replace('"', '\\"', $region) . '"';
-                    $query->orWhereRaw('JSON_EXTRACT(translation, ?) IS NOT NULL', [$regionPath]);
-                }
-            })
-            ->select('city', 'country', 'region')
-            ->first();
-
-            if ($location && ($location->city || $location->country || $location->region)) {
-                return [
-                    'city' => $location->city,
-                    'country' => $location->country,
-                    'region' => $location->region
-                ];
+        if ($countryShort) {
+            $englishCountry = englishCountryFromIso($countryShort);
+            if ($englishCountry) {
+                $resolved['country'] = $englishCountry;
             }
-        } catch (\Exception $e) {
-            \Log::error('Location JSON lookup error: ' . $e->getMessage());
         }
 
-        // If not found in DB, try to translate using Gemini
-        // try {
-        //     $requestTranslate = json_encode(['city' => $city, 'country' => $country, 'region' => $region]);
-        //     $translationService = new \App\Services\Translation\GeminiTranslationService();
-            
-        //     $translationPrompt = "You are a translation API. Given a JSON with keys city, country, region, output a JSON with the same keys translated to English. Output ONLY valid JSON, no code fences or text. Input: $requestTranslate";
-
-        //     $translatedString = $translationService->translate($translationPrompt);
-        //     $translatedString = json_decode($translatedString, true);
-            
-        //     if (isset($translatedString['city']) && isset($translatedString['country']) && isset($translatedString['region'])) {
-        //         return [
-        //             'city' => $translatedString['city'],
-        //             'country' => $translatedString['country'],  
-        //             'region' => $translatedString['region']
-        //         ];
-        //     }
-        // } catch (\Exception $e) {
-        //     Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
-        // }
-
-        // As a robust fallback, use Google Places to resolve English names
-        try {
-            if (!empty($searchString)) {
-                $resolved = getLocationDetails($searchString);
-                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
-                    return [
-                        'city' => $resolved['city'] ?? null,
-                        'country' => $resolved['country'] ?? null,
-                        'region' => $resolved['region'] ?? null,
-                    ];
-                }
+        if ($countryShort && $regionShort) {
+            $englishRegion = englishRegionFromIso($countryShort, $regionShort);
+            if ($englishRegion) {
+                $resolved['region'] = $englishRegion;
             }
-        } catch (\Exception $e) {
-            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
         }
 
-        // As a robust fallback, use Google Places to resolve English names
         try {
-            if (!empty($searchString)) {
-                $resolved = getLocationDetails($searchString);
-                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
-                    \Log::info('Google Places fallback successful in getLocationDetailsGoogle', ['resolved' => $resolved]);
-                    return [
-                        'city' => $resolved['city'] ?? null,
-                        'country' => $resolved['country'] ?? null,
-                        'region' => $resolved['region'] ?? null,
-                    ];
-                }
+            $fromDatabase = \App\Models\Location::resolveEnglishNames(
+                $city,
+                $country,
+                $region,
+                $countryShort,
+                $regionShort
+            );
+
+            if ($fromDatabase) {
+                return array_filter(array_merge($resolved, $fromDatabase)) ?: null;
             }
         } catch (\Exception $e) {
-            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
+            \Log::error('Location DB resolve error in getLocationDetailsGoogle: ' . $e->getMessage());
+        }
+
+        $needsCity = !empty($city) && empty($resolved['city']);
+        $needsLearn = $needsCity || empty($resolved);
+
+        if (
+            $needsLearn
+            && $placeId
+            && config('services.google_maps.learn_location_on_miss', true)
+        ) {
+            $learned = learnEnglishLocationFromPlaceId($placeId);
+            if ($learned) {
+                \App\Models\Location::rememberFromEnglishPlaceDetails(
+                    $learned,
+                    $cityLocal ?: $city,
+                    $countryLocal ?: $country,
+                    $regionLocal ?: $region,
+                    $countryShort,
+                    $regionShort
+                );
+
+                return array_filter(array_merge($resolved, $learned)) ?: null;
+            }
+        }
+
+        if (!empty($resolved)) {
+            if (!empty($city) && empty($resolved['city'])) {
+                $resolved['city'] = $city;
+            }
+
+            return $resolved;
+        }
+
+        // Last resort: text search (multiple Google calls) — disabled by default
+        if (!empty($searchString) && config('services.google_maps.allow_location_text_search_fallback', false)) {
+            try {
+                $fromSearch = getLocationDetails($searchString);
+                if ($fromSearch && (isset($fromSearch['city']) || isset($fromSearch['country']) || isset($fromSearch['region']))) {
+                    return [
+                        'city' => $fromSearch['city'] ?? null,
+                        'country' => $fromSearch['country'] ?? null,
+                        'region' => $fromSearch['region'] ?? null,
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
+            }
         }
 
         return null;

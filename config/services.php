@@ -40,6 +40,10 @@ return [
     'google_maps' => [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
         'map_id' => env('GOOGLE_MAPS_MAP_ID', 'DEMO_MAP_ID'),
+        // Expensive multi-request text search; prefer ISO codes + locations/c_catalog tables instead.
+        'allow_location_text_search_fallback' => env('GOOGLE_MAPS_LOCATION_TEXT_SEARCH_FALLBACK', false),
+        // One cached Place Details call per new place_id when DB has no English mapping (seeds locations table).
+        'learn_location_on_miss' => env('GOOGLE_MAPS_LEARN_LOCATION_ON_MISS', true),
     ],
 
     'translation' => [

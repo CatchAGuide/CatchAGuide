@@ -157,6 +157,9 @@
                                         <input type="hidden" id="LocationCityMobile" name="city" value="{{ request()->city }}"/>
                                         <input type="hidden" id="LocationCountryMobile" name="country" value="{{ request()->country }}"/>
                                         <input type="hidden" id="LocationRegionMobile" name="region" value="{{ request()->region }}"/>
+                                        <input type="hidden" id="LocationCountryShortMobile" name="country_short" value="{{ request()->country_short }}"/>
+                                        <input type="hidden" id="LocationRegionShortMobile" name="region_short" value="{{ request()->region_short }}"/>
+                                        <input type="hidden" id="LocationPlaceIdMobile" name="place_id" value="{{ request()->place_id }}"/>
                                         <input type="hidden" id="LocationLatMobile" name="placeLat" value="{{ request()->placeLat }}"/>
                                         <input type="hidden" id="LocationLngMobile" name="placeLng" value="{{ request()->placeLng }}"/>
                                     </div>
@@ -243,6 +246,9 @@
                                 <input type="hidden" id="LocationCityDesktop" name="city" value="{{ request()->city }}"/>
                                 <input type="hidden" id="LocationCountryDesktop" name="country" value="{{ request()->country }}"/>
                                 <input type="hidden" id="LocationRegionDesktop" name="region" value="{{ request()->region }}"/>
+                                <input type="hidden" id="LocationCountryShortDesktop" name="country_short" value="{{ request()->country_short }}"/>
+                                <input type="hidden" id="LocationRegionShortDesktop" name="region_short" value="{{ request()->region_short }}"/>
+                                <input type="hidden" id="LocationPlaceIdDesktop" name="place_id" value="{{ request()->place_id }}"/>
                             </div>
                             <div class="search-input" style="width: 200px;">
                                 <i class="fa fa-user input-icon"></i>
@@ -1066,6 +1072,9 @@ input[type=number] {
                                 <input type="hidden" name="city" id="LocationCityHeaderDesktop" value="{{ request()->city }}"/>
                                 <input type="hidden" name="country" id="LocationCountryHeaderDesktop" value="{{ request()->country }}"/>
                                 <input type="hidden" name="region" id="LocationRegionHeaderDesktop" value="{{ request()->region }}"/>
+                                <input type="hidden" name="country_short" id="LocationCountryShortHeaderDesktop" value="{{ request()->country_short }}"/>
+                                <input type="hidden" name="region_short" id="LocationRegionShortHeaderDesktop" value="{{ request()->region_short }}"/>
+                                <input type="hidden" name="place_id" id="LocationPlaceIdHeaderDesktop" value="{{ request()->place_id }}"/>
                             </div>
                         </div>
 

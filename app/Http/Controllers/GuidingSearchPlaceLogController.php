@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Location;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ class GuidingSearchPlaceLogController extends Controller
     /**
      * Record a Google Places selection from the guidings navbar search (file log only).
      * Triggered only on place_changed — no server-side Google API calls.
+     * Also learns localized -> English mappings into the locations table.
      */
     public function store(Request $request): JsonResponse
     {
@@ -24,6 +26,9 @@ class GuidingSearchPlaceLogController extends Controller
             'city' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:255'],
             'region' => ['nullable', 'string', 'max:255'],
+            'city_local' => ['nullable', 'string', 'max:255'],
+            'country_local' => ['nullable', 'string', 'max:255'],
+            'region_local' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:32'],
             'country_short' => ['nullable', 'string', 'max:8'],
             'region_short' => ['nullable', 'string', 'max:32'],
@@ -45,6 +50,21 @@ class GuidingSearchPlaceLogController extends Controller
         ]);
 
         Log::channel('guiding_search_places')->info('guiding_search_place', $payload);
+
+        try {
+            Location::rememberSearchMapping(
+                $validated['city'] ?? null,
+                $validated['country'] ?? null,
+                $validated['region'] ?? null,
+                $validated['city_local'] ?? null,
+                $validated['country_local'] ?? null,
+                $validated['region_local'] ?? null,
+                $validated['country_short'] ?? null,
+                $validated['region_short'] ?? null
+            );
+        } catch (\Throwable $e) {
+            Log::warning('guiding_search_place location learn failed', ['error' => $e->getMessage()]);
+        }
 
         return response()->json(['ok' => true]);
     }

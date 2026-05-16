@@ -167,12 +167,15 @@ class GuidingsController extends Controller
         // Apply location filtering if present
         if ($this->hasLocationFilter($request)) {
             $guidingFilter = Guiding::locationFilter(
-                $request->get('city'), 
-                $request->get('country'), 
-                $request->get('region'), 
-                $request->get('radius'), 
-                $request->get('placeLat'), 
-                $request->get('placeLng')
+                $request->get('city'),
+                $request->get('country'),
+                $request->get('region'),
+                $request->get('radius'),
+                $request->get('placeLat'),
+                $request->get('placeLng'),
+                $request->get('country_short'),
+                $request->get('region_short'),
+                $request->get('place_id')
             );
             
             $searchMessage = $guidingFilter['message'];
@@ -407,12 +410,15 @@ class GuidingsController extends Controller
             // Apply location filtering if present (this can't be pre-computed)
             if ($this->hasLocationFilter($request)) {
                 $guidingFilter = Guiding::locationFilter(
-                    $request->get('city'), 
-                    $request->get('country'), 
-                    $request->get('region'), 
-                    $request->get('radius'), 
-                    $request->get('placeLat'), 
-                    $request->get('placeLng')
+                    $request->get('city'),
+                    $request->get('country'),
+                    $request->get('region'),
+                    $request->get('radius'),
+                    $request->get('placeLat'),
+                    $request->get('placeLng'),
+                    $request->get('country_short'),
+                    $request->get('region_short'),
+                    $request->get('place_id')
                 );
                 
                 $searchMessage = $guidingFilter['message'];

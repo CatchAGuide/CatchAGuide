@@ -668,10 +668,21 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
-    {
+    public static function locationFilter(
+        $city = null,
+        $country = null,
+        $region = null,
+        ?int $radius = null,
+        $placeLat = null,
+        $placeLng = null,
+        ?string $countryShort = null,
+        ?string $regionShort = null,
+        ?string $placeId = null
+    ) {
         // Create cache key for location search
-        $cacheKey = 'location_filter_' . md5(serialize([$city, $country, $region, $radius, $placeLat, $placeLng]));
+        $cacheKey = 'location_filter_' . md5(serialize([
+            $city, $country, $region, $radius, $placeLat, $placeLng, $countryShort, $regionShort, $placeId,
+        ]));
         
         // Try to get from cache first (cache for 1 hour)
         $cachedResult = \Cache::get($cacheKey);
@@ -684,7 +695,14 @@ class Guiding extends Model
             $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
             $searchString = implode(', ', $searchQuery);
             
-            $translated  = getLocationDetailsGoogle($city, $country, $region);
+            $translated = getLocationDetailsGoogle(
+                $city,
+                $country,
+                $region,
+                $countryShort,
+                $regionShort,
+                $placeId
+            );
             if ($translated) {
                 $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
             }

@@ -261,6 +261,9 @@
                                 <input type="hidden" id="LocationLatShortDesktop" name="placeLat" value="{{ request()->placeLat }}"/>
                                 <input type="hidden" id="LocationLngShortDesktop" name="placeLng" value="{{ request()->placeLng }}"/>
                                 <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
+                                <input type="hidden" id="LocationCountryShortShortDesktop" name="country_short" value="{{ request()->country_short }}"/>
+                                <input type="hidden" id="LocationRegionShortShortDesktop" name="region_short" value="{{ request()->region_short }}"/>
+                                <input type="hidden" id="LocationPlaceIdShortDesktop" name="place_id" value="{{ request()->place_id }}"/>
                                 <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
                                 <input type="hidden" id="LocationRegionShortDesktop" name="region" value="{{ request()->region }}"/>
                             </div>
@@ -1025,6 +1028,9 @@ input[type=number] {
                                 <input type="hidden" id="LocationCity" name="city" value="{{ request()->city }}"/>
                                 <input type="hidden" id="LocationCountry" name="country" value="{{ request()->country }}"/>
                                 <input type="hidden" id="LocationRegion" name="region" value="{{ request()->region }}"/>
+                                <input type="hidden" id="LocationCountryShort" name="country_short" value="{{ request()->country_short }}"/>
+                                <input type="hidden" id="LocationRegionShort" name="region_short" value="{{ request()->region_short }}"/>
+                                <input type="hidden" id="LocationPlaceId" name="place_id" value="{{ request()->place_id }}"/>
                             </div>
                         </div>
 
