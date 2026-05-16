@@ -293,9 +293,8 @@ if (!function_exists('getLocationDetailsGoogle')) {
         //     Log::error('Gemini translation error in getLocationDetailsGoogle: ' . $e->getMessage());
         // }
 
-        // As a robust fallback, use Google Places to resolve English names
-        try {
-            if (!empty($searchString)) {
+        if (config('location_search.google_rest_fallback', false) && ! empty($searchString)) {
+            try {
                 $resolved = getLocationDetails($searchString);
                 if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
                     return [
@@ -304,35 +303,55 @@ if (!function_exists('getLocationDetailsGoogle')) {
                         'region' => $resolved['region'] ?? null,
                     ];
                 }
+            } catch (\Exception $e) {
+                \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
-        }
-
-        // As a robust fallback, use Google Places to resolve English names
-        try {
-            if (!empty($searchString)) {
-                $resolved = getLocationDetails($searchString);
-                if ($resolved && (isset($resolved['city']) || isset($resolved['country']) || isset($resolved['region']))) {
-                    \Log::info('Google Places fallback successful in getLocationDetailsGoogle', ['resolved' => $resolved]);
-                    return [
-                        'city' => $resolved['city'] ?? null,
-                        'country' => $resolved['country'] ?? null,
-                        'region' => $resolved['region'] ?? null,
-                    ];
-                }
-            }
-        } catch (\Exception $e) {
-            \Log::error('Google Places fallback error in getLocationDetailsGoogle: ' . $e->getMessage());
         }
 
         return null;
     }
 }
 
+if (! function_exists('guidingLocationGeoParams')) {
+    /**
+     * Geospatial search parameters from a request (viewport bounds, place types).
+     *
+     * @return array<string, mixed>
+     */
+    function guidingLocationGeoParams($request): array
+    {
+        if (! $request instanceof \Illuminate\Http\Request) {
+            return [];
+        }
+
+        $params = [
+            'bounds_ne_lat' => $request->get('bounds_ne_lat'),
+            'bounds_ne_lng' => $request->get('bounds_ne_lng'),
+            'bounds_sw_lat' => $request->get('bounds_sw_lat'),
+            'bounds_sw_lng' => $request->get('bounds_sw_lng'),
+            'country_short' => $request->get('country_short'),
+            'place_id' => $request->get('place_id'),
+        ];
+
+        $placeTypes = $request->input('place_types');
+        if (is_string($placeTypes) && $placeTypes !== '') {
+            $decoded = json_decode($placeTypes, true);
+            $params['place_types'] = is_array($decoded) ? $decoded : $placeTypes;
+        } elseif (is_array($placeTypes)) {
+            $params['place_types'] = $placeTypes;
+        }
+
+        return array_filter($params, fn ($v) => $v !== null && $v !== '');
+    }
+}
+
 if (!function_exists('getLocationDetails')) {
     function getLocationDetails(string $searchString): ?array 
     {
+        if (! config('location_search.google_rest_fallback', false)) {
+            return null;
+        }
+
         // First check in the locations table
         $location = \App\Models\Location::where(function($query) use ($searchString) {
             $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(translation, '$.city')) = ?", [$searchString])

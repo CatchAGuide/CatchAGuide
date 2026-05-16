@@ -45,6 +45,7 @@ class Guiding extends Model
         'slug',
         'location',
         'country',
+        'country_iso',
         'language',
         'water',
         'water_sonstiges',
@@ -668,249 +669,58 @@ class Guiding extends Model
      * @param int|null $radius Search radius in kilometers
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public static function locationFilter($city = null, $country = null, $region = null, ?int $radius = null, $placeLat = null, $placeLng = null)
-    {
-        // Create cache key for location search
-        $cacheKey = 'location_filter_' . md5(serialize([$city, $country, $region, $radius, $placeLat, $placeLng]));
-        
-        // Try to get from cache first (cache for 1 hour)
+    /**
+     * @param  array<string, mixed>  $geoParams  bounds_*, place_types, country_short, place_id
+     */
+    public static function locationFilter(
+        $city = null,
+        $country = null,
+        $region = null,
+        ?int $radius = null,
+        $placeLat = null,
+        $placeLng = null,
+        array $geoParams = []
+    ) {
+        $cacheKey = 'location_filter_' . md5(serialize([
+            $city, $country, $region, $radius, $placeLat, $placeLng, $geoParams,
+        ]));
+
+        $ttl = (int) config('location_search.cache_ttl_seconds', 3600);
         $cachedResult = \Cache::get($cacheKey);
         if ($cachedResult) {
             return $cachedResult;
         }
 
-        // Get standardized English names using the helper
-        if ($city || $country) {
-            $searchQuery = array_filter([$city, $country, $region], fn($val) => !empty($val));
-            $searchString = implode(', ', $searchQuery);
-            
-            $translated  = getLocationDetailsGoogle($city, $country, $region);
-            if ($translated) {
-                $locationParts = ['city_en' => $translated['city'], 'country_en' => $translated['country'], 'region_en' => $translated['region']];
-            }
-        }
+        $locationLabel = implode(', ', array_filter([$city, $region, $country], fn ($v) => ! empty($v)));
 
-        $locationParts = array_merge(['city' => $city, 'country' => $country, 'region' => $region], $locationParts ?? []);
+        $searchParams = array_merge([
+            'city' => $city,
+            'country' => $country,
+            'region' => $region,
+            'radius' => $radius,
+            'placeLat' => $placeLat,
+            'placeLng' => $placeLng,
+        ], $geoParams);
+
+        $geoService = app(\App\Services\Location\GeospatialSearchService::class);
+        $geoResult = $geoService->search($searchParams);
+
+        $messageLevel = $geoResult['message_level'];
+        $messageKey = match ($messageLevel) {
+            1 => 'search-request.searchLevel1',
+            2 => 'search-request.searchLevel2',
+            default => 'search-request.searchLevel3',
+        };
 
         $returnData = [
-            'message' => '',
-            'ids' => []
+            'message' => str_replace('#location#', $locationLabel, __($messageKey)),
+            'ids' => $geoResult['ids'],
+            'scope' => $geoResult['scope'],
+            'area_type' => $geoResult['area_type'],
         ];
-        
-        // Detect if this is a country-level search (city equals country)
-        // This happens when Google Maps returns a country without a city component
-        $isCountryOnlySearch = false;
-        if ($locationParts['city'] && $locationParts['country']) {
-            // Check if city equals country (indicating country-level search)
-            if (strtolower(trim($locationParts['city'])) === strtolower(trim($locationParts['country']))) {
-                $isCountryOnlySearch = true;
-            }
-            // Also check translated versions
-            if (isset($locationParts['city_en']) && isset($locationParts['country_en'])) {
-                if (strtolower(trim($locationParts['city_en'])) === strtolower(trim($locationParts['country_en']))) {
-                    $isCountryOnlySearch = true;
-                }
-            }
-        }
 
-        // Google Places often maps administrative_area_level_1 (state/province) into the "city"
-        // parameter while also sending the same name as "region". Guidings frequently store that
-        // value only in `region` with `city` NULL, so a required city match would exclude them.
-        $isRegionLevelSearch = false;
-        if (!empty($locationParts['city']) && !empty($locationParts['region'])) {
-            if (strtolower(trim((string) $locationParts['city'])) === strtolower(trim((string) $locationParts['region']))) {
-                $isRegionLevelSearch = true;
-            }
-        }
-        if (!$isRegionLevelSearch && isset($locationParts['city_en'], $locationParts['region_en'])) {
-            if (strtolower(trim((string) $locationParts['city_en'])) === strtolower(trim((string) $locationParts['region_en']))) {
-                $isRegionLevelSearch = true;
-            }
-        }
-        
-        // Try direct database match based on standardized names
-        $query = self::select('id')
-            ->where(function($query) use ($locationParts, $isCountryOnlySearch, $isRegionLevelSearch) {
-                // City conditions - skip for country-only or state/region-level (city duplicates region)
-                if ($locationParts['city'] && !$isCountryOnlySearch && !$isRegionLevelSearch) {
-                    $query->where(function($q) use ($locationParts) {
-                        $q->where('city', $locationParts['city']);
-                        if (isset($locationParts['city_en'])) {
-                            $q->orWhere('city', $locationParts['city_en']);
-                        }
-                    });
-                }
-                
-                // Country conditions
-                if ($locationParts['country']) {
-                    $query->where(function($q) use ($locationParts) {
-                        $q->where('country', $locationParts['country']);
-                        if (isset($locationParts['country_en'])) {
-                            $q->orWhere('country', $locationParts['country_en']);
-                        }
-                    });
-                }
-                // Only check for region conditions
-                if ($locationParts['region']) {
-                    $query->where(function($q) use ($locationParts) {
-                        $q->where(function($subQ) use ($locationParts) {
-                            $subQ->where('region', 'LIKE', '%' . $locationParts['region'] . '%')
-                                 ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region']]);
-                        });
-                        
-                        if (isset($locationParts['region_en'])) {
-                            $q->orWhere(function($subQ) use ($locationParts) {
-                                $subQ->where('region', 'LIKE', '%' . $locationParts['region_en'] . '%')
-                                     ->orWhereRaw('? LIKE CONCAT("%", region, "%")', [$locationParts['region_en']]);
-                            });
-                        }
-                    });
-                }
-            })
-            ->where('status', 1);
+        \Cache::put($cacheKey, $returnData, $ttl);
 
-        $guidings = $query->pluck('id');
-
-        if ($guidings->isNotEmpty()) {
-            $returnData['ids'] = $guidings;
-            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel1') . ': $countReplace total');
-            
-            // Cache the result for 1 hour
-            \Cache::put($cacheKey, $returnData, 3600);
-            
-            return $returnData;
-        }
-
-        // If no direct matches, use geocoding
-        if ($placeLat && $placeLng && is_numeric($placeLat) && is_numeric($placeLng)) {
-            // Validate coordinate ranges (basic sanity check)
-            $lat = (float) $placeLat;
-            $lng = (float) $placeLng;
-            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                $coordinates = ['lat' => $lat, 'lng' => $lng];
-            } else {
-                Log::warning('Invalid coordinates provided', ['lat' => $placeLat, 'lng' => $placeLng]);
-                $coordinates = null;
-            }
-        } else {
-            $coordinates = null;
-        }
-        
-        // If no valid coordinates provided, try geocoding
-        if (!$coordinates) {
-            $locationString = implode(', ', array_filter([$city, $region, $country]));
-            $coordinates = self::getCoordinatesFromLocation($locationString);
-            
-            // If geocoding fails, use fallback coordinates (Munich, Germany)
-            if (!$coordinates) {
-                $coordinates = ['lat' => 48.1373, 'lng' => 11.5755];
-            }
-        }
-
-        // Log::info('guidings', ['guidings' => $guidings]); // Removed for performance
-        
-        if (!$coordinates) {
-            return collect();
-        }
-
-        // Try radius search
-        $searchRadius = $radius ?? 200;
-        try {
-            $guidingsRadius = self::select('id')
-                ->selectRaw("ST_Distance_Sphere(
-                    point(lng, lat),
-                    point(?, ?)
-                ) as distance", [
-                    $coordinates['lng'],
-                    $coordinates['lat']
-                ])
-                ->whereRaw("ST_Distance_Sphere(
-                    point(lng, lat),
-                    point(?, ?)
-                ) <= ?", [
-                    $coordinates['lng'],
-                    $coordinates['lat'],
-                    $searchRadius * 1000
-                ])
-                ->where('status', 1)
-                ->whereNotNull('lat')
-                ->whereNotNull('lng')
-                ->where('lat', '!=', 0)
-                ->where('lng', '!=', 0)
-                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-                ->orderBy('distance')  // Sort by distance ascending
-                ->limit(100) // Reasonable limit for radius search
-                ->pluck('id');
-        } catch (\Exception $e) {
-            Log::error('Radius search failed in locationFilter', [
-                'error' => $e->getMessage(),
-                'coordinates' => $coordinates,
-                'radius' => $searchRadius
-            ]);
-            $guidingsRadius = collect(); // Empty collection on error
-        }
-
-        if ($guidingsRadius->isNotEmpty()) {
-            $returnData['ids'] = $guidingsRadius;
-            $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel2'));
-            
-            // Cache the result for 1 hour
-            \Cache::put($cacheKey, $returnData, 3600);
-            
-            return $returnData;
-        }
-
-        // If still no results, find nearest guidings (limited to reasonable number)
-        try {
-            $returnData['ids'] = self::select('id')
-                ->selectRaw("ST_Distance_Sphere(
-                    point(lng, lat),
-                    point(?, ?)
-                ) as distance", [
-                    $coordinates['lng'],
-                    $coordinates['lat']
-                ])
-                ->where('status', 1)
-                ->whereNotNull('lat')
-                ->whereNotNull('lng')
-                ->where('lat', '!=', 0)
-                ->where('lng', '!=', 0)
-                ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
-                ->orderBy('distance')
-                ->limit(50) // Limit to 50 nearest guidings
-                ->pluck('id');
-        } catch (\Exception $e) {
-            Log::error('Distance calculation failed in locationFilter', [
-                'error' => $e->getMessage(),
-                'coordinates' => $coordinates,
-                'city' => $city,
-                'country' => $country
-            ]);
-            
-            // Fallback: return recent guidings if distance calculation fails
-            $returnData['ids'] = self::where('status', 1)
-                ->whereNotNull('lat')
-                ->whereNotNull('lng')
-                ->orderBy('created_at', 'desc')
-                ->limit(20)
-                ->pluck('id');
-        }
-        
-        $returnData['message'] = str_replace('#location#', $city . ', ' . $country, __('search-request.searchLevel3'));
-        
-        // Final safety check: if we still have no results, return the most recent guidings
-        if (empty($returnData['ids'])) {
-            Log::warning('All location search methods failed, returning recent guidings as last resort');
-            $returnData['ids'] = self::where('status', 1)
-                ->orderBy('created_at', 'desc')
-                ->limit(20)
-                ->pluck('id');
-            $returnData['message'] = 'Showing recent guidings';
-        }
-        
-        // Cache the result for 1 hour
-        \Cache::put($cacheKey, $returnData, 3600);
-        
         return $returnData;
     }
 

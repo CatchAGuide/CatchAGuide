@@ -8,7 +8,6 @@ use App\Models\Target;
 use App\Models\Method;
 use App\Models\Water;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class GenerateGuidingFilters extends Command
@@ -45,7 +44,7 @@ class GenerateGuidingFilters extends Command
         $this->info("Processing {$guidings->count()} guidings...");
 
         // Initialize arrays for all possible filter values
-        $this->initializeFilterArrays($filterMapping);
+        $this->initializeFilterArrays($filterMapping, $guidings);
 
         // Process each guiding
         foreach ($guidings as $guiding) {
@@ -120,7 +119,7 @@ class GenerateGuidingFilters extends Command
         return 0;
     }
 
-    private function initializeFilterArrays(&$filterMapping)
+    private function initializeFilterArrays(&$filterMapping, $guidings)
     {
         // Initialize all target fish IDs
         $targetIds = Target::pluck('id')->toArray();
@@ -151,36 +150,56 @@ class GenerateGuidingFilters extends Command
             $filterMapping['person_ranges'][$i] = [];
         }
 
-        // Initialize price ranges (we'll calculate max price dynamically)
-        $maxPrice = $this->getMaxPrice();
-        for ($i = 50; $i <= $maxPrice; $i += 50) {
-            $rangeKey = $i . '-' . min($i + 50, $maxPrice);
+        $priceBounds = $this->getPriceBounds($guidings);
+        $filterMapping['metadata']['minPrice'] = $priceBounds['min'];
+        $filterMapping['metadata']['maxPrice'] = $priceBounds['max'];
+
+        // Price filter buckets always start at €50 (UI default)
+        $bucketFloor = 50;
+        for ($i = $bucketFloor; $i <= $priceBounds['max']; $i += 50) {
+            $rangeKey = $i . '-' . min($i + 50, $priceBounds['max']);
             $filterMapping['price_ranges'][$rangeKey] = [];
         }
     }
 
-    private function calculateLowestPrice($guiding)
+    /**
+     * Per-guiding lowest price — mirrors the SQL CASE + JSON_TABLE + MIN logic:
+     * valid JSON prices → min(per-person tier), else fallback to `price` column.
+     */
+    private function resolveLowestPrice($guiding): ?float
     {
         if ($guiding->prices) {
             $prices = json_decode($guiding->prices, true);
-            if (is_array($prices) && count($prices) > 0) {
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($prices) && count($prices) > 0) {
                 $lowestPrice = null;
+
                 foreach ($prices as $priceData) {
-                    if (isset($priceData['person']) && isset($priceData['amount'])) {
-                        $pricePerPerson = $priceData['person'] > 1 
-                            ? $priceData['amount'] / $priceData['person']
-                            : $priceData['amount'];
-                        
-                        if ($lowestPrice === null || $pricePerPerson < $lowestPrice) {
-                            $lowestPrice = $pricePerPerson;
-                        }
+                    if (!isset($priceData['person'], $priceData['amount'])) {
+                        continue;
+                    }
+
+                    $person = (int) $priceData['person'];
+                    $amount = (float) $priceData['amount'];
+                    $pricePerPerson = $person > 1 ? $amount / $person : $amount;
+
+                    if ($lowestPrice === null || $pricePerPerson < $lowestPrice) {
+                        $lowestPrice = $pricePerPerson;
                     }
                 }
-                return $lowestPrice ?? $guiding->price;
+
+                if ($lowestPrice !== null) {
+                    return $lowestPrice;
+                }
             }
         }
-        
-        return $guiding->price ?? 0;
+
+        return $guiding->price !== null ? (float) $guiding->price : null;
+    }
+
+    private function calculateLowestPrice($guiding)
+    {
+        return $this->resolveLowestPrice($guiding) ?? 0;
     }
 
     private function getPriceRange($price)
@@ -193,33 +212,40 @@ class GenerateGuidingFilters extends Command
         return $rangeStart . '-' . $rangeEnd;
     }
 
-    private function getMaxPrice()
+    /**
+     * Catalog-wide bounds: MIN/MAX of each guiding's resolveLowestPrice(),
+     * rounded to €50 steps (same rounding as the former JSON_TABLE query).
+     *
+     * @return array{min: int, max: int}
+     */
+    private function getPriceBounds($guidings): array
     {
-        $maxPriceResult = DB::table('guidings')
-            ->selectRaw('MAX(
-                CASE 
-                    WHEN JSON_VALID(prices) THEN (
-                        SELECT MIN(
-                            CASE 
-                                WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                ELSE CAST(amount AS DECIMAL(10,2))
-                            END
-                        )
-                        FROM JSON_TABLE(
-                            prices,
-                            "$[*]" COLUMNS(
-                                person INT PATH "$.person",
-                                amount DECIMAL(10,2) PATH "$.amount"
-                            )
-                        ) as price_data
-                    )
-                    ELSE price
-                END
-            ) as max_price')
-            ->where('status', 1)
-            ->first();
+        $minPrice = null;
+        $maxPrice = 0;
 
-        return ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
+        foreach ($guidings as $guiding) {
+            $lowestPrice = $this->resolveLowestPrice($guiding);
+
+            if ($lowestPrice === null || $lowestPrice <= 0) {
+                continue;
+            }
+
+            if ($minPrice === null || $lowestPrice < $minPrice) {
+                $minPrice = $lowestPrice;
+            }
+
+            if ($lowestPrice > $maxPrice) {
+                $maxPrice = $lowestPrice;
+            }
+        }
+
+        $minPrice = $minPrice ?? 50;
+        $maxPrice = $maxPrice ?: 5000;
+
+        return [
+            'min' => (int) max(50, floor($minPrice / 50) * 50),
+            'max' => (int) ceil($maxPrice / 50) * 50,
+        ];
     }
 
     private function addFilterCounts(&$filterMapping)
@@ -258,19 +284,9 @@ class GenerateGuidingFilters extends Command
             $filterMapping['metadata']['counts']['price_ranges'][$range] = count($guidingIds);
         }
 
-        // Add price range metadata for easier access
-        $maxPrice = 0;
-        foreach (array_keys($filterMapping['price_ranges']) as $range) {
-            if (strpos($range, '-') !== false) {
-                list($min, $max) = explode('-', $range);
-                if ((int)$max > $maxPrice) {
-                    $maxPrice = (int)$max;
-                }
-            }
-        }
-        
-        $filterMapping['metadata']['maxPrice'] = $maxPrice ?: 1000;
-        $filterMapping['metadata']['minPrice'] = 50;
+        // minPrice / maxPrice are set in initializeFilterArrays via getPriceBounds()
+        $minPrice = $filterMapping['metadata']['minPrice'] ?? 50;
+        $maxPrice = $filterMapping['metadata']['maxPrice'] ?? 1000;
         
         // Add some debug info
         $this->info('Filter counts summary:');
@@ -283,9 +299,9 @@ class GenerateGuidingFilters extends Command
         
         // Cache price ranges in a separate cache key for quick access
         Cache::put('guiding_price_ranges', [
-            'maxPrice' => $maxPrice ?: 1000,
-            'minPrice' => 50,
-            'ranges' => array_keys($filterMapping['price_ranges'])
+            'minPrice' => $minPrice,
+            'maxPrice' => $maxPrice,
+            'ranges' => array_keys($filterMapping['price_ranges']),
         ], 7200); // 2 hours cache
     }
 } 

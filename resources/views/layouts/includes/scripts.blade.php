@@ -223,6 +223,8 @@
         if (!callback) {
             callback = function(place) {
                 const locationData = MapsManager.extractLocationData(place);
+                const inputEl = typeof config.input === 'string' ? document.getElementById(config.input) : config.input;
+                const form = inputEl ? inputEl.closest('form') : null;
                 const latInput = document.getElementById(config.lat);
                 const lngInput = document.getElementById(config.lng);
                 const cityInput = document.getElementById(config.city);
@@ -233,6 +235,9 @@
                 if (cityInput) cityInput.value = locationData.city || '';
                 if (countryInput) countryInput.value = locationData.country || '';
                 if (regionInput) regionInput.value = locationData.region || '';
+                if (form && typeof MapsManager.fillGeosearchFormFields === 'function') {
+                    MapsManager.fillGeosearchFormFields(form, locationData, place);
+                }
                 postGuidingSearchPlaceLog(place, config, MapsManager);
             };
         }

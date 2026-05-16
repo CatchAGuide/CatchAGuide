@@ -263,6 +263,7 @@
                                 <input type="hidden" id="LocationCityShortDesktop" name="city" value="{{ request()->city }}"/>
                                 <input type="hidden" id="LocationCountryShortDesktop" name="country" value="{{ request()->country }}"/>
                                 <input type="hidden" id="LocationRegionShortDesktop" name="region" value="{{ request()->region }}"/>
+                                @include('layouts.partials.geosearch-hidden-fields')
                             </div>
                             <div class="search-input" style="width: 200px;">
                                 <i class="fa fa-user input-icon"></i>
@@ -1025,6 +1026,7 @@ input[type=number] {
                                 <input type="hidden" id="LocationCity" name="city" value="{{ request()->city }}"/>
                                 <input type="hidden" id="LocationCountry" name="country" value="{{ request()->country }}"/>
                                 <input type="hidden" id="LocationRegion" name="region" value="{{ request()->region }}"/>
+                                @include('layouts.partials.geosearch-hidden-fields')
                             </div>
                         </div>
 

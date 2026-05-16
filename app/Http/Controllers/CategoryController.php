@@ -362,7 +362,15 @@ class CategoryController extends Controller
         if(!empty($placeLat) && !empty($placeLng)){
             $title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ' | ';
             $filter_title .= __('guidings.Coordinates') . ' Lat ' . $placeLat . ' Lang ' . $placeLng . ', ';
-            $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng);
+            $geoParams = array_filter([
+                'bounds_ne_lat' => $filterData['bounds_ne_lat'] ?? null,
+                'bounds_ne_lng' => $filterData['bounds_ne_lng'] ?? null,
+                'bounds_sw_lat' => $filterData['bounds_sw_lat'] ?? null,
+                'bounds_sw_lng' => $filterData['bounds_sw_lng'] ?? null,
+                'country_short' => $filterData['country_short'] ?? null,
+                'place_types' => $filterData['place_types'] ?? null,
+            ], fn ($v) => $v !== null && $v !== '');
+            $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng, $geoParams);
             $searchMessage = $guidingFilter['message'];
             
             // Add a subquery to order by the position in the filtered IDs array

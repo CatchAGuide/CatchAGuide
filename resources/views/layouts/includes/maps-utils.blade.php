@@ -255,8 +255,14 @@ window.GoogleMapsManager = (function() {
             }
 
             try {
-                const autocomplete = new google.maps.places.Autocomplete(input);
-                
+                const autocomplete = new google.maps.places.Autocomplete(input, {
+                    fields: ['place_id', 'geometry', 'address_components', 'name', 'formatted_address', 'types'],
+                });
+
+                if (typeof autocomplete.setFields === 'function') {
+                    autocomplete.setFields(['place_id', 'geometry', 'address_components', 'name', 'formatted_address', 'types']);
+                }
+
                 if (onPlaceChanged) {
                     autocomplete.addListener('place_changed', function() {
                         const place = autocomplete.getPlace();
@@ -334,7 +340,43 @@ window.GoogleMapsManager = (function() {
                 }
             }
 
+            location.place_types = placeTypes;
+
+            const boundsSource = place.geometry && (place.geometry.viewport || place.geometry.bounds);
+            if (boundsSource) {
+                const ne = boundsSource.getNorthEast ? boundsSource.getNorthEast() : boundsSource.northeast;
+                const sw = boundsSource.getSouthWest ? boundsSource.getSouthWest() : boundsSource.southwest;
+                if (ne && sw) {
+                    location.bounds_ne_lat = typeof ne.lat === 'function' ? ne.lat() : ne.lat;
+                    location.bounds_ne_lng = typeof ne.lng === 'function' ? ne.lng() : ne.lng;
+                    location.bounds_sw_lat = typeof sw.lat === 'function' ? sw.lat() : sw.lat;
+                    location.bounds_sw_lng = typeof sw.lng === 'function' ? sw.lng() : sw.lng;
+                }
+            }
+
             return location;
+        },
+
+        /**
+         * Write geospatial hidden fields on the search form that contains the place input.
+         */
+        fillGeosearchFormFields: function(form, locationData, place) {
+            if (!form || !locationData) {
+                return;
+            }
+            const setField = function(name, value) {
+                const el = form.querySelector('[data-geosearch="' + name + '"], [name="' + name + '"]');
+                if (el) {
+                    el.value = value != null && value !== undefined ? value : '';
+                }
+            };
+            setField('bounds_ne_lat', locationData.bounds_ne_lat);
+            setField('bounds_ne_lng', locationData.bounds_ne_lng);
+            setField('bounds_sw_lat', locationData.bounds_sw_lat);
+            setField('bounds_sw_lng', locationData.bounds_sw_lng);
+            setField('country_short', locationData.country_short);
+            const types = (place && place.types) || locationData.place_types || [];
+            setField('place_types', JSON.stringify(types));
         },
 
         /**
