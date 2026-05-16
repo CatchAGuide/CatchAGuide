@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Services\ScheduledTaskService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -9,6 +10,9 @@ class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
+     *
+     * All tasks are configured in config/scheduled_tasks.php and managed from
+     * Admin → Guiding attributes → Scheduled tasks.
      *
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
@@ -67,6 +71,11 @@ class Kernel extends ConsoleKernel
         //         ->withoutOverlapping()
         //         ->runInBackground()
         //         ->appendOutputTo(storage_path('logs/finance-invoices.log'));
+
+
+
+        /// FOR ADMIN SIDE SCHEDULER CONFIGURATION
+        // app(ScheduledTaskService::class)->register($schedule);
     }
 
     /**

@@ -541,6 +541,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'updateKitchenEquipment'])->name('kitchen-equipment.update');
             Route::delete('/kitchen-equipment/{id}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'deleteKitchenEquipment'])->name('kitchen-equipment.destroy');
 
+            Route::post('/scheduled-tasks/custom', [\App\Http\Controllers\Admin\ScheduledTasksController::class, 'storeCustom'])->name('scheduled-tasks.custom.store');
+            Route::put('/scheduled-tasks/custom/{customScheduledTask}', [\App\Http\Controllers\Admin\ScheduledTasksController::class, 'updateCustom'])->name('scheduled-tasks.custom.update');
+            Route::delete('/scheduled-tasks/custom/{customScheduledTask}', [\App\Http\Controllers\Admin\ScheduledTasksController::class, 'destroyCustom'])->name('scheduled-tasks.custom.destroy');
+
+            Route::get('/scheduled-tasks', [\App\Http\Controllers\Admin\ScheduledTasksController::class, 'index'])->name('scheduled-tasks.index');
+            Route::put('/scheduled-tasks/{key}', [\App\Http\Controllers\Admin\ScheduledTasksController::class, 'update'])->name('scheduled-tasks.update');
+
             Route::get('/emailmaintenance', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailmaintenance'])->name('emailmaintenance');
             Route::get('/email-preview/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreview'])->name('email.preview');
             Route::get('/email-preview-ajax/{template}/{locale}', [\App\Http\Controllers\Admin\GuidingsSettingController::class, 'emailPreviewAjax'])->name('email.preview.ajax');

@@ -199,6 +199,7 @@
                         <li><a href="{{ route('admin.settings.boat-extras.index') }}" class="slide-item {{ request()->routeIs('admin.settings.boat-extras.*') ? 'active' : '' }}">Boat extras</a></li>
                         <li><a href="{{ route('admin.settings.facilities.index') }}" class="slide-item {{ request()->routeIs('admin.settings.facilities.*') ? 'active' : '' }}">Facilities</a></li>
                         <li><a href="{{ route('admin.settings.kitchen-equipment.index') }}" class="slide-item {{ request()->routeIs('admin.settings.kitchen-equipment.*') ? 'active' : '' }}">Kitchen equipment</a></li>
+                        <li><a href="{{ route('admin.settings.scheduled-tasks.index') }}" class="slide-item {{ request()->routeIs('admin.settings.scheduled-tasks.*') ? 'active' : '' }}">Scheduled tasks</a></li>
                         <li><a href="{{ route('admin.settings.emailmaintenance') }}" class="slide-item {{ request()->routeIs('admin.settings.emailmaintenance') ? 'active' : '' }}">Email maintenance</a></li>
                     </ul>
                 </li>
