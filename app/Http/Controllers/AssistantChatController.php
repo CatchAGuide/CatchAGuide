@@ -12,13 +12,6 @@ class AssistantChatController extends Controller
 {
     public function __invoke(AssistantChatRequest $request, BookingAssistantOrchestrator $orchestrator): JsonResponse
     {
-        if (!config('booking_assistant.enabled')) {
-            return response()->json([
-                'message' => null,
-                'error' => 'disabled',
-            ], 503);
-        }
-
         try {
             $result = $orchestrator->run(
                 $request->messagesPayload(),

@@ -1,7 +1,8 @@
 @props(['pageContext' => null])
 @php
-    $enabled = (bool) config('booking_assistant.enabled');
-    if (! $enabled) {
+    use App\Support\BookingAssistantVisibility;
+
+    if (! BookingAssistantVisibility::shouldRenderWidget()) {
         return;
     }
 @endphp

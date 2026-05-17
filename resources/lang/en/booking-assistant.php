@@ -39,4 +39,9 @@ return [
     'widget_error' => 'Could not reach the assistant. Try again later.',
     'widget_thinking' => 'Thinking…',
     'widget_listings_intro' => 'Here are some options from our listings:',
+
+    'preview_page_label' => 'Internal preview',
+    'preview_page_title' => 'Booking assistant preview',
+    'preview_page_description' => 'Internal booking assistant preview.',
+    'preview_page_note' => 'The chat assistant is hidden on the public site. Use the widget in the corner to test it here.',
 ];

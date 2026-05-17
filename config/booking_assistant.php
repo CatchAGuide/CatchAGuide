@@ -2,7 +2,17 @@
 
 return [
 
-    'enabled' => env('BOOKING_ASSISTANT_ENABLED', false),
+    'enabled' => filter_var(env('BOOKING_ASSISTANT_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+
+    /*
+    | When false, the floater is hidden site-wide. Use the secret preview URL
+    | (see preview_token) for internal testing while keeping the API available there.
+    */
+    'widget_visible' => filter_var(env('BOOKING_ASSISTANT_WIDGET_VISIBLE', false), FILTER_VALIDATE_BOOLEAN),
+
+    'preview_token' => env('BOOKING_ASSISTANT_PREVIEW_TOKEN'),
+
+    'preview_path' => env('BOOKING_ASSISTANT_PREVIEW_PATH', 'hub/cag-ba-preview'),
 
     'driver' => env('BOOKING_ASSISTANT_DRIVER', 'groq'),
 

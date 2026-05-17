@@ -68,5 +68,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check_domain' => \App\Http\Middleware\CheckDomain::class,
         'ddos' => \App\Http\Middleware\DDoSProtectionMiddleware::class,
+        'booking.assistant.access' => \App\Http\Middleware\EnsureBookingAssistantAccessible::class,
     ];
 }

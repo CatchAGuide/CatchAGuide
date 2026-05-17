@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\AssistantChatController;
+use App\Http\Controllers\BookingAssistantPreviewController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\RatingsController;
@@ -220,8 +221,11 @@ if (app()->environment('production')) {
 Route::post('/search', [\App\Http\Controllers\SearchController::class, 'search'])->name('search');
 
 Route::post('/assistant/chat', AssistantChatController::class)
-    ->middleware('throttle:booking-assistant')
+    ->middleware(['throttle:booking-assistant', 'booking.assistant.access'])
     ->name('assistant.chat');
+
+Route::get('/hub/cag-ba-preview/{token}', BookingAssistantPreviewController::class)
+    ->name('booking-assistant.preview');
 Route::prefix('guides')->name('guides.')->group(function () {});
 
 // OLD CHECKOUT ROUTES - BACKED UP

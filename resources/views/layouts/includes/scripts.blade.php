@@ -306,4 +306,6 @@
     });
 </script>
 
-<x-booking-assistant-widget />
+@if(\App\Support\BookingAssistantVisibility::shouldRenderWidget())
+    <x-booking-assistant-widget />
+@endif

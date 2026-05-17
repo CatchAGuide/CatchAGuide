@@ -39,4 +39,9 @@ return [
     'widget_error' => 'Assistent nicht erreichbar. Bitte später erneut versuchen.',
     'widget_thinking' => 'Denke nach…',
     'widget_listings_intro' => 'Hier passende Angebote aus unserem Katalog:',
+
+    'preview_page_label' => 'Interne Vorschau',
+    'preview_page_title' => 'Buchungsassistent – Vorschau',
+    'preview_page_description' => 'Interne Vorschau des Buchungsassistenten.',
+    'preview_page_note' => 'Der Chat-Assistent ist auf der öffentlichen Website ausgeblendet. Nutze das Widget unten rechts zum Testen.',
 ];
