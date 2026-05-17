@@ -215,6 +215,104 @@ class BookingService
         return $newBooking;
     }
 
+    /**
+     * Move an existing booking to a new date in-place (same booking record).
+     * Releases the old calendar hold, blocks the new date, resets to pending,
+     * and optionally dispatches booking-request emails.
+     */
+    public function rescheduleGuidingBookingInPlace(
+        Booking $booking,
+        string $selectedDate,
+        bool $sendEmails = true,
+        ?int $employeeId = null,
+        string $createdSource = 'admin'
+    ): Booking {
+        $guiding = $booking->guiding;
+        if (!$guiding) {
+            throw new InvalidArgumentException('Booking has no associated guiding.');
+        }
+
+        $selectedDate = Carbon::parse($selectedDate)->toDateString();
+        $currentDate = $booking->book_date
+            ? Carbon::parse($booking->book_date)->toDateString()
+            : null;
+
+        if ($currentDate === $selectedDate) {
+            throw new InvalidArgumentException('The selected date is the same as the current booking date.');
+        }
+
+        if ($guiding->isDateBlocked($selectedDate, $booking->blocked_event_id)) {
+            throw new InvalidArgumentException('The selected date is not available for this guiding.');
+        }
+
+        $user = $booking->user;
+        $excludeScheduleId = $booking->blocked_event_id;
+
+        $this->releaseBookingCalendarSlot($booking);
+
+        $eventService = app(EventService::class);
+        $calendarSchedule = $eventService->createBlockedEvent(
+            '00:00',
+            $selectedDate,
+            $guiding,
+            'tour_request',
+            $user
+        );
+
+        $booking->book_date = $selectedDate;
+        $booking->blocked_event_id = $calendarSchedule->id;
+        $booking->status = 'pending';
+        $booking->expires_at = $this->calculateExpirationTime($selectedDate);
+        $booking->token = $this->generateBookingToken($calendarSchedule->id);
+        $booking->alternative_dates = null;
+
+        if ($employeeId !== null) {
+            $booking->last_employee_id = $employeeId;
+        }
+
+        $booking->save();
+
+        $calendarSchedule->booking_id = $booking->id;
+        $calendarSchedule->save();
+
+        if ($sendEmails && !app()->environment('local')) {
+            SendCheckoutEmail::dispatch($booking, $user, $guiding, $guiding->user);
+        }
+
+        event(new BookingCreated($booking, $sendEmails, $createdSource));
+
+        return $booking->fresh(['guiding.user', 'calendar_schedule']);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function adminReschedulableStatuses(): array
+    {
+        return ['rejected', 'cancelled', 'pending'];
+    }
+
+    private function releaseBookingCalendarSlot(Booking $booking): void
+    {
+        if (!$booking->blocked_event_id) {
+            return;
+        }
+
+        $schedule = CalendarSchedule::find($booking->blocked_event_id);
+        if (!$schedule) {
+            return;
+        }
+
+        $ownsSlot = (int) ($schedule->booking_id ?? 0) === (int) $booking->id
+            || $schedule->type === 'tour_request';
+
+        if (!$ownsSlot) {
+            return;
+        }
+
+        $schedule->delete();
+    }
+
     private function assertRequiredKeys(array $data, array $keys): void
     {
         $missing = [];

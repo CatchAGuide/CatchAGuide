@@ -424,6 +424,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('special-offers/change-status/{id}', [\App\Http\Controllers\Admin\SpecialOffersController::class, 'changeStatus'])->name('special-offers.change-status');
 
         Route::get('/bookings/guidings-search', [BookingsController::class, 'searchGuidings'])->name('bookings.guidings-search');
+        Route::get('/bookings/{booking}/reschedule-data', [BookingsController::class, 'rescheduleData'])->name('bookings.reschedule-data');
+        Route::post('/bookings/{booking}/reschedule', [BookingsController::class, 'rescheduleInPlace'])->name('bookings.reschedule');
         Route::resource('bookings', BookingsController::class);
         // Same handler as resource update — some hosts only allow GET/POST (not PUT/PATCH) for AJAX
         Route::post('/bookings/{booking}/save', [BookingsController::class, 'update'])->name('bookings.save');

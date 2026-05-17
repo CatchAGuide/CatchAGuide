@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RescheduleBookingRequest;
 use App\Http\Requests\Admin\StoreManualBookingRequest;
 use App\Models\Booking;
 use App\Models\EmailLog;
@@ -182,7 +183,126 @@ class BookingsController extends Controller
         return redirect()->back();
     }
 
-    public function sendBookingRequestEmails(Booking $booking)
+    public function rescheduleData(Booking $booking)
+    {
+        $booking->loadMissing(['guiding.user', 'user']);
+
+        if (!in_array($booking->status, BookingService::adminReschedulableStatuses(), true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only pending, rejected, or cancelled bookings can be rescheduled.',
+            ], 422);
+        }
+
+        if (!$booking->guiding) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking has no associated guiding.',
+            ], 422);
+        }
+
+        $alternativeDates = [];
+        if (!empty($booking->alternative_dates)) {
+            $decoded = json_decode($booking->alternative_dates, true);
+            if (is_array($decoded)) {
+                $alternativeDates = array_values($decoded);
+            }
+        }
+
+        $guestUser = $booking->user;
+        $guestName = $guestUser
+            ? trim(($guestUser->firstname ?? '') . ' ' . ($guestUser->lastname ?? ''))
+            : 'Guest';
+        if ($guestName === '') {
+            $guestName = 'Guest';
+        }
+
+        $guideUser = $booking->guiding->user;
+
+        return response()->json([
+            'success' => true,
+            'booking' => [
+                'id' => $booking->id,
+                'status' => $booking->status,
+                'book_date' => $booking->book_date
+                    ? Carbon::parse($booking->book_date)->toDateString()
+                    : null,
+                'count_of_users' => $booking->count_of_users,
+                'alternative_dates' => $alternativeDates,
+                'guest_name' => $guestName,
+                'guest_email' => $booking->email ?: ($guestUser->email ?? null),
+                'phone' => $booking->phone,
+                'is_guest' => (bool) $booking->is_guest,
+                'total_price' => two($booking->getGrossAmount()),
+                'created_at' => $booking->created_at?->timezone(config('app.timezone'))->format('d.m.Y H:i'),
+            ],
+            'guiding' => [
+                'id' => $booking->guiding->id,
+                'title' => $booking->guiding->title,
+                'location' => $booking->guiding->location,
+                'guide_name' => $guideUser?->full_name,
+                'guide_email' => $guideUser?->email,
+            ],
+            'blocked_events' => $booking->guiding->getBlockedEvents($booking->blocked_event_id),
+        ]);
+    }
+
+    public function rescheduleInPlace(
+        RescheduleBookingRequest $request,
+        Booking $booking,
+        BookingService $bookingService
+    ) {
+        $booking->loadMissing(['guiding.user', 'user']);
+
+        try {
+            $sendEmails = $request->boolean('send_emails', true);
+
+            $booking = $bookingService->rescheduleGuidingBookingInPlace(
+                $booking,
+                $request->input('selected_date'),
+                sendEmails: false,
+                employeeId: auth('employees')->id(),
+                createdSource: 'admin'
+            );
+
+            if ($sendEmails) {
+                $this->sendBookingRequestEmails($booking, force: true);
+            }
+
+            $message = $sendEmails
+                ? 'Booking rescheduled successfully. Status is pending and booking-request emails were sent.'
+                : 'Booking rescheduled successfully. Status is pending. No emails were sent.';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'emails_sent' => $sendEmails,
+                'booking' => [
+                    'id' => $booking->id,
+                    'status' => $booking->status,
+                    'book_date' => $booking->book_date
+                        ? Carbon::parse($booking->book_date)->toDateString()
+                        : null,
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Admin in-place booking reschedule failed: ' . $e->getMessage(), [
+                'booking_id' => $booking->id ?? null,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reschedule booking: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function sendBookingRequestEmails(Booking $booking, bool $force = false)
     {
         try {
             // Validate booking has required relationships
@@ -226,7 +346,7 @@ class BookingsController extends Controller
             $emailsSkipped = [];
             
             // Check and send guest booking request email
-            $guestEmailLog = CheckEmailLog('guest_booking_request', 'booking_' . $booking->id, $guestEmail);
+            $guestEmailLog = !$force && CheckEmailLog('guest_booking_request', 'booking_' . $booking->id, $guestEmail);
             if (!$guestEmailLog) {
                 Mail::to($guestEmail)->send(new GuestBookingRequestMail($booking, $user, $guiding, $guide));
                 $emailsSent[] = 'Guest email sent to ' . $guestEmail;
@@ -235,7 +355,7 @@ class BookingsController extends Controller
             }
             
             // Check and send guide booking request email
-            $guideEmailLog = CheckEmailLog('guide_booking_request', 'guide_' . $guide->id . '_booking_' . $booking->id, $guideEmail);
+            $guideEmailLog = !$force && CheckEmailLog('guide_booking_request', 'guide_' . $guide->id . '_booking_' . $booking->id, $guideEmail);
             if (!$guideEmailLog) {
                 Mail::to($guideEmail)->locale($guide->language ?? app()->getLocale())->send(new GuideBookingRequestMail($booking, $user, $guiding, $guide));
                 $emailsSent[] = 'Guide email sent to ' . $guideEmail;

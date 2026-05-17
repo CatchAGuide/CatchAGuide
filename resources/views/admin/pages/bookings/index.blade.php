@@ -214,6 +214,13 @@
                                                                 <i class="fa fa-ellipsis-h"></i>
                                                             </button>
                                                             <ul class="dropdown-menu dropdown-menu-end booking-table__more-menu" aria-labelledby="booking-more-{{ $booking->id }}">
+                                                                @if(in_array($booking->status, \App\Services\BookingService::adminReschedulableStatuses(), true))
+                                                                    <li>
+                                                                        <button class="dropdown-item" type="button" onclick="showRescheduleBookingModal({{ $booking->id }})">
+                                                                            <i class="fa fa-calendar-day me-2"></i> Reschedule date
+                                                                        </button>
+                                                                    </li>
+                                                                @endif
                                                                 <li>
                                                                     <button class="dropdown-item" type="button" onclick="showBookingNotesModal({{ $booking->id }})">
                                                                         <i class="fa fa-sticky-note me-2"></i> Notes
@@ -839,11 +846,30 @@
             border-color: #4f46e5;
         }
 
+
+        .reschedule-summary__label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin-bottom: 0.15rem;
+        }
+        .reschedule-summary__value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .reschedule-summary__meta {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
         #manualBookingModal .form-check-input:focus {
             border-color: rgba(79, 70, 229, 0.6);
             box-shadow: 0 0 0 0.15rem rgba(79, 70, 229, 0.18);
         }
     </style>
+
+    @include('admin.pages.bookings.partials.reschedule-modal')
 
     <!-- Edit Booking Modal -->
     <div class="modal fade" id="editBookingModal" tabindex="-1" role="dialog" aria-labelledby="editBookingModalLabel" aria-hidden="true">
@@ -1443,6 +1469,285 @@
             .catch(error => {
                 alert('Error updating booking.');
             });
+        }
+
+        let rescheduleBookingId = null;
+        let rescheduleBlockedEvents = [];
+        let rescheduleCurrentDate = null;
+
+        function getRescheduleSubmitLabel() {
+            const send = document.getElementById('reschedule-send-emails')?.checked;
+            return send ? 'Reschedule & notify' : 'Reschedule without emails';
+        }
+
+        function setRescheduleSubmitLoading(loading) {
+            const submitBtn = document.getElementById('reschedule-submit-btn');
+            const modal = document.getElementById('rescheduleBookingModal');
+            const cancelBtn = modal?.querySelector('.modal-footer .btn-secondary');
+            const formWrap = document.getElementById('reschedule-form-wrap');
+
+            if (!submitBtn) {
+                return;
+            }
+
+            if (loading) {
+                submitBtn.dataset.loading = '1';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Rescheduling…';
+                submitBtn.disabled = true;
+                if (cancelBtn) {
+                    cancelBtn.disabled = true;
+                }
+                if (formWrap) {
+                    formWrap.classList.add('pe-none', 'opacity-50');
+                }
+            } else {
+                delete submitBtn.dataset.loading;
+                submitBtn.textContent = getRescheduleSubmitLabel();
+                if (cancelBtn) {
+                    cancelBtn.disabled = false;
+                }
+                if (formWrap) {
+                    formWrap.classList.remove('pe-none', 'opacity-50');
+                }
+                validateRescheduleDateInput();
+            }
+        }
+
+        function updateRescheduleEmailUi() {
+            const btn = document.getElementById('reschedule-submit-btn');
+            if (btn?.dataset.loading === '1') {
+                return;
+            }
+            if (btn) {
+                btn.textContent = getRescheduleSubmitLabel();
+            }
+            const hint = document.getElementById('reschedule-email-hint');
+            const sendEmails = document.getElementById('reschedule-send-emails')?.checked;
+            if (hint) {
+                hint.textContent = sendEmails
+                    ? 'When checked, guest, guide, and CEO booking-request emails are sent after rescheduling.'
+                    : 'Unchecked: only the date and calendar are updated — no booking-request emails are sent.';
+            }
+        }
+
+        function setRescheduleStatusBadge(status) {
+            const badge = document.getElementById('reschedule-status-badge');
+            if (!badge) return;
+            badge.textContent = (status || '').toUpperCase();
+            const classMap = {
+                accepted: ['badge', 'bg-success'],
+                rejected: ['badge', 'bg-danger'],
+                cancelled: ['badge', 'bg-secondary'],
+                pending: ['badge', 'bg-warning', 'text-dark'],
+            };
+            badge.className = (classMap[status] || ['badge', 'bg-warning', 'text-dark']).join(' ');
+        }
+
+        function populateRescheduleSummary(data) {
+            const b = data.booking;
+            const g = data.guiding;
+            document.getElementById('reschedule-header-id').textContent = '#' + b.id;
+            document.getElementById('reschedule-guest-name').textContent = b.guest_name || '—';
+            document.getElementById('reschedule-guest-email').textContent = b.guest_email || '—';
+            const phoneEl = document.getElementById('reschedule-guest-phone');
+            if (b.phone) {
+                phoneEl.textContent = b.phone;
+                phoneEl.style.display = '';
+            } else {
+                phoneEl.textContent = '';
+                phoneEl.style.display = 'none';
+            }
+            document.getElementById('reschedule-guest-type').textContent = b.is_guest ? 'Guest checkout' : 'Registered account';
+            document.getElementById('reschedule-guide-name').textContent = g.guide_name || '—';
+            document.getElementById('reschedule-guiding-title').textContent = g.title || '—';
+            const locEl = document.getElementById('reschedule-guiding-location');
+            if (g.location) {
+                locEl.textContent = g.location;
+                locEl.style.display = '';
+            } else {
+                locEl.textContent = '';
+                locEl.style.display = 'none';
+            }
+            setRescheduleStatusBadge(b.status);
+            document.getElementById('reschedule-guests-price').textContent =
+                (b.count_of_users || '—') + ' guests · ' + (b.total_price || '—') + ' €';
+            document.getElementById('reschedule-requested-at').textContent = b.created_at || '—';
+        }
+
+
+        function isRescheduleDateBlocked(isoDate) {
+            if (!isoDate) return true;
+            return rescheduleBlockedEvents.some(function (range) {
+                if (!range || !range.from || !range.due) return false;
+                return isoDate >= range.from && isoDate <= range.due;
+            });
+        }
+
+        function validateRescheduleDateInput() {
+            const input = document.getElementById('reschedule-selected-date');
+            const errorEl = document.getElementById('reschedule-date-error');
+            const submitBtn = document.getElementById('reschedule-submit-btn');
+            const value = input ? input.value : '';
+
+            if (!value) {
+                errorEl.textContent = 'Please select a new tour date.';
+                errorEl.classList.remove('d-none');
+                submitBtn.disabled = true;
+                return false;
+            }
+
+            if (rescheduleCurrentDate && value === rescheduleCurrentDate) {
+                errorEl.textContent = 'Please choose a different date than the current tour date.';
+                errorEl.classList.remove('d-none');
+                submitBtn.disabled = true;
+                return false;
+            }
+
+            if (isRescheduleDateBlocked(value)) {
+                errorEl.textContent = 'This date is not available (blocked by calendar or guiding rules).';
+                errorEl.classList.remove('d-none');
+                submitBtn.disabled = true;
+                return false;
+            }
+
+            errorEl.classList.add('d-none');
+            submitBtn.disabled = false;
+            updateRescheduleEmailUi();
+            return true;
+        }
+
+        function showRescheduleBookingModal(bookingId) {
+            rescheduleBookingId = bookingId;
+            rescheduleBlockedEvents = [];
+            rescheduleCurrentDate = null;
+
+            const loadingEl = document.getElementById('reschedule-loading');
+            const formWrap = document.getElementById('reschedule-form-wrap');
+            const dateInput = document.getElementById('reschedule-selected-date');
+            const submitBtn = document.getElementById('reschedule-submit-btn');
+
+            loadingEl.classList.remove('d-none');
+            formWrap.classList.add('d-none');
+            dateInput.value = '';
+            submitBtn.disabled = true;
+            document.getElementById('reschedule-date-error').classList.add('d-none');
+            const sendEmailsCheckbox = document.getElementById('reschedule-send-emails');
+            if (sendEmailsCheckbox) {
+                sendEmailsCheckbox.checked = true;
+            }
+            updateRescheduleEmailUi();
+
+            const modal = new bootstrap.Modal(document.getElementById('rescheduleBookingModal'));
+            modal.show();
+
+            fetch(`/admin/bookings/${bookingId}/reschedule-data`, {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        return response.json().then(function (data) {
+                            throw new Error(data.message || 'Failed to load reschedule data.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    rescheduleBlockedEvents = data.blocked_events || [];
+                    rescheduleCurrentDate = data.booking.book_date || null;
+
+                    populateRescheduleSummary(data);
+                    updateRescheduleEmailUi();
+
+                    document.getElementById('reschedule-current-date').textContent =
+                        rescheduleCurrentDate
+                            ? new Date(rescheduleCurrentDate + 'T12:00:00').toLocaleDateString('de-DE')
+                            : '—';
+
+                    const altWrap = document.getElementById('reschedule-alternative-dates-wrap');
+                    const altContainer = document.getElementById('reschedule-alternative-dates');
+                    altContainer.innerHTML = '';
+
+                    const alternatives = data.booking.alternative_dates || [];
+                    if (alternatives.length > 0) {
+                        altWrap.style.display = '';
+                        alternatives.forEach(function (isoDate) {
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'btn btn-sm btn-outline-primary';
+                            btn.textContent = new Date(isoDate + 'T12:00:00').toLocaleDateString('de-DE');
+                            btn.addEventListener('click', function () {
+                                dateInput.value = isoDate;
+                                validateRescheduleDateInput();
+                            });
+                            altContainer.appendChild(btn);
+                        });
+                    } else {
+                        altWrap.style.display = 'none';
+                    }
+
+                    loadingEl.classList.add('d-none');
+                    formWrap.classList.remove('d-none');
+                })
+                .catch(function (error) {
+                    loadingEl.classList.add('d-none');
+                    alert(error.message || 'Failed to load reschedule data.');
+                    bootstrap.Modal.getInstance(document.getElementById('rescheduleBookingModal'))?.hide();
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const rescheduleDateInput = document.getElementById('reschedule-selected-date');
+            if (rescheduleDateInput) {
+                rescheduleDateInput.addEventListener('change', validateRescheduleDateInput);
+                rescheduleDateInput.addEventListener('input', validateRescheduleDateInput);
+            }
+            const sendEmailsEl = document.getElementById('reschedule-send-emails');
+            if (sendEmailsEl) {
+                sendEmailsEl.addEventListener('change', updateRescheduleEmailUi);
+            }
+        });
+
+        function submitRescheduleBooking() {
+            if (!rescheduleBookingId || !validateRescheduleDateInput()) {
+                return;
+            }
+
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+
+            setRescheduleSubmitLoading(true);
+
+            fetch(`/admin/bookings/${rescheduleBookingId}/reschedule`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenElement.getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    selected_date: document.getElementById('reschedule-selected-date').value,
+                    send_emails: document.getElementById('reschedule-send-emails').checked
+                })
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Reschedule failed.');
+                        }
+                        return data;
+                    });
+                })
+                .then(function () {
+                    location.reload();
+                })
+                .catch(function (error) {
+                    setRescheduleSubmitLoading(false);
+                    alert(error.message || 'Error rescheduling booking.');
+                });
         }
 
         function showInvoiceConfirmModal(bookingId, guideName, guideEmail, tourDateTime, totalPrice, guideShare, cagShare) {

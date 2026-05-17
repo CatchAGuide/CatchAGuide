@@ -496,7 +496,7 @@ class Guiding extends Model
         return round(min($singlePrice ?? PHP_FLOAT_MAX, $minPrice ?? PHP_FLOAT_MAX));
     }
 
-    public function getBlockedEvents()
+    public function getBlockedEvents(?int $excludeCalendarScheduleId = null)
     {
         // IMPORTANT:
         // CalendarSchedule rows are shared across multiple guidings of the same guide user.
@@ -593,7 +593,27 @@ class Guiding extends Model
             ];
         }
 
+        if ($excludeCalendarScheduleId !== null) {
+            $blocked_events = array_values(array_filter(
+                $blocked_events,
+                fn (array $range) => (int) ($range['id'] ?? 0) !== $excludeCalendarScheduleId
+            ));
+        }
+
         return $blocked_events;
+    }
+
+    public function isDateBlocked(string $date, ?int $excludeCalendarScheduleId = null): bool
+    {
+        $day = \Carbon\Carbon::parse($date)->toDateString();
+
+        foreach ($this->getBlockedEvents($excludeCalendarScheduleId) as $range) {
+            if ($day >= $range['from'] && $day <= $range['due']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
