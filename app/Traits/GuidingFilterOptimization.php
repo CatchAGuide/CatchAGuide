@@ -360,6 +360,17 @@ trait GuidingFilterOptimization
     }
 
     /**
+     * Whether to load the nearby / other guidings block for the current main result set.
+     */
+    protected function shouldLoadOtherGuidings($allGuidings): bool
+    {
+        $count = $allGuidings instanceof \Countable ? count($allGuidings) : 0;
+        $max = (int) config('location_search.nearby_section_max_main_results', 12);
+
+        return $count === 0 || $count <= $max;
+    }
+
+    /**
      * Get other guidings (fallback when no results)
      */
     protected function getOtherGuidings()

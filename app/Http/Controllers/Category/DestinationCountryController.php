@@ -386,7 +386,7 @@ class DestinationCountryController extends Controller
 
         // 5. Get other guidings if needed
         $otherguidings = [];
-        if($allGuidings->count() == 0 || $allGuidings->count() <= 10){
+        if ($this->shouldLoadOtherGuidings($allGuidings)) {
             if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
                 $latitude = $cleanedRequest->get('placeLat');
                 $longitude = $cleanedRequest->get('placeLng');

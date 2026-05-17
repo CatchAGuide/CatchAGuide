@@ -447,7 +447,7 @@ class CategoryTargetFishController extends Controller
 
         // 5. Get other guidings if needed
         $otherguidings = [];
-        if($allGuidings->isEmpty() || count($allGuidings) <= 10){
+        if ($allGuidings->isEmpty() || count($allGuidings) <= (int) config('location_search.nearby_section_max_main_results', 12)) {
             if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
                 $latitude = $cleanedRequest->get('placeLat');
                 $longitude = $cleanedRequest->get('placeLng');

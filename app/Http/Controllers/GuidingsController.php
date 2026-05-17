@@ -259,7 +259,7 @@ class GuidingsController extends Controller
 
         // Get other guidings if needed (only for very small result sets)
         $otherguidings = [];
-        if($allGuidings->isEmpty() || count($allGuidings) <= 3){
+        if ($this->shouldLoadOtherGuidings($allGuidings)) {
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
             } else {
@@ -503,7 +503,7 @@ class GuidingsController extends Controller
 
         // Get other guidings if needed (only for very small result sets)
         $otherguidings = [];
-        if($allGuidings->isEmpty() || count($allGuidings) <= 3){
+        if ($this->shouldLoadOtherGuidings($allGuidings)) {
             if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
                 $otherguidings = $this->getOtherGuidingsBasedByLocation($request->get('placeLat'), $request->get('placeLng'), $allGuidings);
             } else {

@@ -19,6 +19,11 @@ return [
     'nearest_fallback_limit' => 50,
 
     /*
+    | Show "Additional Fishing Tour close to…" when main location results are at or below this count.
+    */
+    'nearby_section_max_main_results' => (int) env('LOCATION_SEARCH_NEARBY_MAX_MAIN_RESULTS', 12),
+
+    /*
     | When the user picks a place with a known country (country_short / country name),
     | only guidings in that country are returned. Prevents cross-border false positives
     | inside rectangular region/country bounding boxes (e.g. NRW viewport vs Limburg, NL).
