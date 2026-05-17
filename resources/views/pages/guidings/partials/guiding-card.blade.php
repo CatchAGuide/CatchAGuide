@@ -110,8 +110,6 @@
                                 </div>
                                 <span class="mb-1">({{ $reviewCount }} reviews)</span>
                             </div>
-                        @else
-                            <div class="no-reviews"><span>@lang('guidings.no_reviews')</span></div>
                         @endif
                     </div>
 
