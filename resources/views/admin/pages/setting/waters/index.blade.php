@@ -131,10 +131,29 @@
 
 @section('js_after')
 <script>
-    let watertable = new DataTable('#watertable');
+    $('#watertable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json'
+        }
+    });
+
+    let lastEditWaterBtn = null;
+    let lastDeleteWaterBtn = null;
+
+    document.querySelector('#watertable tbody').addEventListener('click', function (event) {
+        const editBtn = event.target.closest('button[data-bs-target="#editWaterModal"]');
+        if (editBtn) {
+            lastEditWaterBtn = editBtn;
+        }
+        const deleteBtn = event.target.closest('button[data-bs-target="#deleteWaterModal"]');
+        if (deleteBtn) {
+            lastDeleteWaterBtn = deleteBtn;
+        }
+    });
 
     document.getElementById('editWaterModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#editWaterModal"]')
+            || lastEditWaterBtn;
         if (!btn) return;
         document.getElementById('editWaterForm').action = btn.getAttribute('data-form-action');
         document.getElementById('editWaterNameDe').value = btn.getAttribute('data-name-de') || '';
@@ -142,7 +161,8 @@
     });
 
     document.getElementById('deleteWaterModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#deleteWaterModal"]')
+            || lastDeleteWaterBtn;
         if (!btn) return;
         document.getElementById('deleteWaterLink').href = btn.getAttribute('data-delete-href');
         const label = btn.getAttribute('data-label');

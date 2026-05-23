@@ -137,10 +137,29 @@
 
 @section('js_after')
 <script>
-    let targettable = new DataTable('#targettable');
+    $('#targettable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json'
+        }
+    });
+
+    let lastEditTargetBtn = null;
+    let lastDeleteTargetBtn = null;
+
+    document.querySelector('#targettable tbody').addEventListener('click', function (event) {
+        const editBtn = event.target.closest('button[data-bs-target="#editTargetModal"]');
+        if (editBtn) {
+            lastEditTargetBtn = editBtn;
+        }
+        const deleteBtn = event.target.closest('button[data-bs-target="#deleteTargetModal"]');
+        if (deleteBtn) {
+            lastDeleteTargetBtn = deleteBtn;
+        }
+    });
 
     document.getElementById('editTargetModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#editTargetModal"]')
+            || lastEditTargetBtn;
         if (!btn) return;
         const form = document.getElementById('editTargetForm');
         form.action = btn.getAttribute('data-form-action');
@@ -149,7 +168,8 @@
     });
 
     document.getElementById('deleteTargetModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#deleteTargetModal"]')
+            || lastDeleteTargetBtn;
         if (!btn) return;
         document.getElementById('deleteTargetLink').href = btn.getAttribute('data-delete-href');
         const label = btn.getAttribute('data-label');

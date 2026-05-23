@@ -130,10 +130,29 @@
 
 @section('js_after')
 <script>
-    let inclussion = new DataTable('#inclussion');
+    $('#inclussion').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json'
+        }
+    });
+
+    let lastEditInclussionBtn = null;
+    let lastDeleteInclussionBtn = null;
+
+    document.querySelector('#inclussion tbody').addEventListener('click', function (event) {
+        const editBtn = event.target.closest('button[data-bs-target="#editInclussionModal"]');
+        if (editBtn) {
+            lastEditInclussionBtn = editBtn;
+        }
+        const deleteBtn = event.target.closest('button[data-bs-target="#deleteInclussionModal"]');
+        if (deleteBtn) {
+            lastDeleteInclussionBtn = deleteBtn;
+        }
+    });
 
     document.getElementById('editInclussionModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#editInclussionModal"]')
+            || lastEditInclussionBtn;
         if (!btn) return;
         document.getElementById('editInclussionForm').action = btn.getAttribute('data-form-action');
         document.getElementById('editInclussionNameDe').value = btn.getAttribute('data-name-de') || '';
@@ -141,7 +160,8 @@
     });
 
     document.getElementById('deleteInclussionModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#deleteInclussionModal"]')
+            || lastDeleteInclussionBtn;
         if (!btn) return;
         document.getElementById('deleteInclussionLink').href = btn.getAttribute('data-delete-href');
         const label = btn.getAttribute('data-label');

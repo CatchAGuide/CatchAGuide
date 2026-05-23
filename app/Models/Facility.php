@@ -10,8 +10,8 @@ class Facility extends Model
     use HasFactory;
 
     protected $fillable = [
-        'value',
-        'value_de',
+        'name',
+        'name_en',
         'is_active',
         'sort_order',
     ];
@@ -20,14 +20,9 @@ class Facility extends Model
         'is_active' => 'boolean',
     ];
 
-    public function getNameAttribute(): string
+    public function getNameAttribute()
     {
-        $locale = app()->getLocale();
-        if ($locale === 'en') {
-            return (string)($this->attributes['value'] ?? '');
-        }
-
-        return (string)($this->attributes['value_de'] ?? $this->attributes['value'] ?? '');
+        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
     }
 
     // Scope for active facilities

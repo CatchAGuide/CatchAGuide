@@ -100,15 +100,15 @@ class GuidingsSettingController extends Controller
     public function storeFacility(Request $request)
     {
         $request->validate([
-            'value' => 'required|string|max:255',
-            'value_de' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
 
         Facility::create([
-            'value' => $request->value,
-            'value_de' => $request->value_de,
+            'name' => $request->name,
+            'name_en' => $request->name_en,
             'is_active' => (bool)($request->boolean('is_active', true)),
             'sort_order' => (int)($request->input('sort_order', 0)),
         ]);
@@ -119,16 +119,16 @@ class GuidingsSettingController extends Controller
     public function updateFacility(Request $request, $id)
     {
         $request->validate([
-            'value' => 'required|string|max:255',
-            'value_de' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
 
         $row = Facility::findOrFail($id);
         $row->update([
-            'value' => $request->value,
-            'value_de' => $request->value_de,
+            'name' => $request->name,
+            'name_en' => $request->name_en,
             'is_active' => (bool)($request->boolean('is_active', true)),
             'sort_order' => (int)($request->input('sort_order', 0)),
         ]);
@@ -151,15 +151,15 @@ class GuidingsSettingController extends Controller
     public function storeKitchenEquipment(Request $request)
     {
         $request->validate([
-            'value' => 'required|string|max:255',
-            'value_de' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
 
         KitchenEquipment::create([
-            'value' => $request->value,
-            'value_de' => $request->value_de,
+            'name' => $request->name,
+            'name_en' => $request->name_en,
             'is_active' => (bool)($request->boolean('is_active', true)),
             'sort_order' => (int)($request->input('sort_order', 0)),
         ]);
@@ -170,16 +170,16 @@ class GuidingsSettingController extends Controller
     public function updateKitchenEquipment(Request $request, $id)
     {
         $request->validate([
-            'value' => 'required|string|max:255',
-            'value_de' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'sort_order' => 'nullable|integer',
         ]);
 
         $row = KitchenEquipment::findOrFail($id);
         $row->update([
-            'value' => $request->value,
-            'value_de' => $request->value_de,
+            'name' => $request->name,
+            'name_en' => $request->name_en,
             'is_active' => (bool)($request->boolean('is_active', true)),
             'sort_order' => (int)($request->input('sort_order', 0)),
         ]);

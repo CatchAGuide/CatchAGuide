@@ -37,8 +37,8 @@
                                 <tbody>
                                 @foreach($equipment as $row)
                                     <tr>
-                                        <td>{{ $row->getRawOriginal('value') }}</td>
-                                        <td>{{ $row->getRawOriginal('value_de') }}</td>
+                                        <td>{{ $row->getRawOriginal('name_en') }}</td>
+                                        <td>{{ $row->getRawOriginal('name') }}</td>
                                         <td>{{ $row->is_active ? 'Yes' : 'No' }}</td>
                                         <td>{{ $row->sort_order }}</td>
                                         <td>
@@ -60,11 +60,11 @@
                                                     <div class="modal-body">
                                                         <div class="mb-3">
                                                             <label class="form-label">Value (EN)</label>
-                                                            <input type="text" name="value" class="form-control" value="{{ $row->getRawOriginal('value') }}" required>
+                                                            <input type="text" name="name_en" class="form-control" value="{{ $row->getRawOriginal('name_en') }}" required>
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label">Value (DE)</label>
-                                                            <input type="text" name="value_de" class="form-control" value="{{ $row->getRawOriginal('value_de') }}">
+                                                            <input type="text" name="name" class="form-control" value="{{ $row->getRawOriginal('name') }}">
                                                         </div>
                                                         <div class="row">
                                                             <div class="col-md-6 mb-3">
@@ -97,7 +97,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Are you sure you want to delete <strong>{{ $row->getRawOriginal('value') }}</strong>?
+                                                    Are you sure you want to delete <strong>{{ $row->getRawOriginal('name') ?: $row->getRawOriginal('name_en') }}</strong>?
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
@@ -132,11 +132,11 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Value (EN)</label>
-                            <input type="text" name="value" class="form-control" required>
+                            <input type="text" name="name_en" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Value (DE)</label>
-                            <input type="text" name="value_de" class="form-control">
+                            <input type="text" name="name" class="form-control">
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -164,7 +164,11 @@
 
 @section('js_after')
 <script>
-    let kitchenequipmenttable = new DataTable('#kitchenequipmenttable');
+    $('#kitchenequipmenttable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json'
+        }
+    });
 </script>
 @endsection
 

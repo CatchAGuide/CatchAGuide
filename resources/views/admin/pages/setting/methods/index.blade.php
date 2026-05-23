@@ -131,10 +131,29 @@
 
 @section('js_after')
 <script>
-    let methodtable = new DataTable('#methodtable');
+    $('#methodtable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json'
+        }
+    });
+
+    let lastEditMethodBtn = null;
+    let lastDeleteMethodBtn = null;
+
+    document.querySelector('#methodtable tbody').addEventListener('click', function (event) {
+        const editBtn = event.target.closest('button[data-bs-target="#editMethodModal"]');
+        if (editBtn) {
+            lastEditMethodBtn = editBtn;
+        }
+        const deleteBtn = event.target.closest('button[data-bs-target="#deleteMethodModal"]');
+        if (deleteBtn) {
+            lastDeleteMethodBtn = deleteBtn;
+        }
+    });
 
     document.getElementById('editMethodModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#editMethodModal"]')
+            || lastEditMethodBtn;
         if (!btn) return;
         document.getElementById('editMethodForm').action = btn.getAttribute('data-form-action');
         document.getElementById('editMethodNameDe').value = btn.getAttribute('data-name-de') || '';
@@ -142,7 +161,8 @@
     });
 
     document.getElementById('deleteMethodModal').addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
+        const btn = event.relatedTarget?.closest('button[data-bs-target="#deleteMethodModal"]')
+            || lastDeleteMethodBtn;
         if (!btn) return;
         document.getElementById('deleteMethodLink').href = btn.getAttribute('data-delete-href');
         const label = btn.getAttribute('data-label');
