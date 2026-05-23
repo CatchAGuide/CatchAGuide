@@ -179,15 +179,16 @@ class GuidingsController extends Controller
             $searchMessage = $guidingFilter['message'];
             
             // Apply location filter by restricting to location-filtered IDs
-            if (!empty($guidingFilter['ids'])) {
-                $baseQuery->whereIn('id', $guidingFilter['ids']);
+            $locationIds = collect($guidingFilter['ids'] ?? []);
+            if ($locationIds->isNotEmpty()) {
+                $baseQuery->whereIn('id', $locationIds->all());
                 
                 // Add location-based ordering
                 $orderByCase = 'CASE id ';
-                foreach($guidingFilter['ids'] as $position => $id) {
+                foreach ($locationIds as $position => $id) {
                     $orderByCase .= "WHEN $id THEN $position ";
                 }
-                $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
+                $orderByCase .= 'ELSE ' . $locationIds->count() . ' END';
                 $baseQuery->orderByRaw($orderByCase);
             } else {
                 // No location matches found, return empty results
@@ -420,15 +421,16 @@ class GuidingsController extends Controller
                 $searchMessage = $guidingFilter['message'];
                 
                 // Apply location filter by restricting to location-filtered IDs
-                if (!empty($guidingFilter['ids'])) {
-                    $baseQuery->whereIn('id', $guidingFilter['ids']);
+                $locationIds = collect($guidingFilter['ids'] ?? []);
+                if ($locationIds->isNotEmpty()) {
+                    $baseQuery->whereIn('id', $locationIds->all());
                     
                     // Add location-based ordering
                     $orderByCase = 'CASE id ';
-                    foreach($guidingFilter['ids'] as $position => $id) {
+                    foreach ($locationIds as $position => $id) {
                         $orderByCase .= "WHEN $id THEN $position ";
                     }
-                    $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
+                    $orderByCase .= 'ELSE ' . $locationIds->count() . ' END';
                     $baseQuery->orderByRaw($orderByCase);
                 } else {
                     // No location matches found, return empty results

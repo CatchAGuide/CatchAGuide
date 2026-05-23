@@ -734,7 +734,7 @@ class Guiding extends Model
 
         $returnData = [
             'message' => str_replace('#location#', $locationLabel, __($messageKey)),
-            'ids' => $geoResult['ids'],
+            'ids' => $geoResult['ids']->values()->all(),
             'scope' => $geoResult['scope'],
             'area_type' => $geoResult['area_type'],
         ];

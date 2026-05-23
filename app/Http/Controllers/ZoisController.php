@@ -80,8 +80,34 @@ class ZoisController extends Controller
             ]);
         }
 
-        Mail::send(new ContactMail($request->name, $request->email, $description, $request->phone, $request->countryCode));
-        Mail::send(new CustomerContactMail($request->name, $request->email, $description));
+        $sourceTypeLower = strtolower((string) $sourceType);
+        $sourceTitle = ContactSubmission::resolveSourceTitle($sourceType, $sourceId);
+        $contactMailExtra = array_filter([
+            'contact_message' => $request->description,
+            'preferred_date' => $request->filled('preferred_date') ? $request->input('preferred_date') : null,
+            'number_of_persons' => $request->filled('number_of_persons') ? (int) $request->input('number_of_persons') : null,
+            'source_type' => $sourceType,
+            'source_id' => $sourceId ? (int) $sourceId : null,
+            'camp_id' => ($sourceTypeLower === ContactSubmission::SOURCE_CAMP && $sourceId) ? (int) $sourceId : null,
+            'source_title' => $sourceTitle,
+        ], fn ($value) => $value !== null && $value !== '');
+
+        Mail::send(new ContactMail(
+            $request->name,
+            $request->email,
+            $request->description,
+            $request->phone,
+            $request->countryCode,
+            $contactMailExtra
+        ));
+        Mail::send(new CustomerContactMail(
+            $request->name,
+            $request->email,
+            $request->description,
+            $request->phone,
+            $request->countryCode,
+            $contactMailExtra
+        ));
         
         // If it's an AJAX request or from a modal, return JSON
         if ($request->ajax() || $request->has('source_type')) {

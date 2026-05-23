@@ -326,16 +326,20 @@ class DestinationCountryController extends Controller
             ], fn ($v) => $v !== null && $v !== '');
             $guidingFilter = Guiding::locationFilter($city, $country, $region, $radius, $placeLat, $placeLng, $geoParams);
             $searchMessage = $guidingFilter['message'];
-            
-            // Add a subquery to order by the position in the filtered IDs array
-            $orderByCase = 'CASE guidings.id ';
-            foreach($guidingFilter['ids'] as $position => $id) {
-                $orderByCase .= "WHEN $id THEN $position ";
+
+            $locationIds = collect($guidingFilter['ids'] ?? []);
+            if ($locationIds->isNotEmpty()) {
+                $orderByCase = 'CASE guidings.id ';
+                foreach ($locationIds as $position => $id) {
+                    $orderByCase .= "WHEN $id THEN $position ";
+                }
+                $orderByCase .= 'ELSE ' . $locationIds->count() . ' END';
+
+                $filteredQuery->whereIn('guidings.id', $locationIds->all())
+                    ->orderByRaw($orderByCase);
+            } else {
+                $filteredQuery->whereRaw('0 = 1');
             }
-            $orderByCase .= 'ELSE ' . count($guidingFilter['ids']) . ' END';
-            
-            $filteredQuery->whereIn('guidings.id', $guidingFilter['ids'])
-                  ->orderByRaw($orderByCase);
         }
 
         

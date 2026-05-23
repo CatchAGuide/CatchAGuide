@@ -28,6 +28,21 @@ class ContactSubmission extends Model
     }
 
     /**
+     * Resolve display title for a source type/id pair without persisting a row.
+     */
+    public static function resolveSourceTitle(?string $sourceType, $sourceId): ?string
+    {
+        if (empty($sourceType) || empty($sourceId)) {
+            return null;
+        }
+
+        return (new self([
+            'source_type' => $sourceType,
+            'source_id' => (int) $sourceId,
+        ]))->getSourceTitle();
+    }
+
+    /**
      * Human-readable label for source type.
      */
     public static function sourceTypeLabel(string $type): string

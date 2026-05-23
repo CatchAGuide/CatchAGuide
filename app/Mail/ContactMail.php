@@ -13,37 +13,52 @@ class ContactMail extends Mailable
     public $name;
     public $email;
     public $description;
+    public $contact_message;
     public $phone;
     public $phone_country_code;
+    public $preferred_date;
+    public $number_of_persons;
+    public $source_type;
+    public $source_id;
+    public $camp_id;
+    public $source_title;
     public $language;
     public $target;
     public $type = 'contact_mail';
 
     /**
-     * Create a new message instance.
-     *
-     * @return void
+     * @param  array<string, mixed>|null  $extra
      */
-    public function __construct($name, $email, $description, $phone = null, $phone_country_code = null)
-    {
+    public function __construct(
+        $name,
+        $email,
+        $description,
+        $phone = null,
+        $phone_country_code = null,
+        ?array $extra = null
+    ) {
+        $extra = $extra ?? [];
+
         $this->name = $name;
         $this->email = $email;
         $this->description = $description;
+        $this->contact_message = $extra['contact_message'] ?? $description;
         $this->phone = $phone;
         $this->phone_country_code = $phone_country_code;
+        $this->preferred_date = $extra['preferred_date'] ?? null;
+        $this->number_of_persons = $extra['number_of_persons'] ?? null;
+        $this->source_type = $extra['source_type'] ?? null;
+        $this->source_id = $extra['source_id'] ?? null;
+        $this->camp_id = $extra['camp_id'] ?? null;
+        $this->source_title = $extra['source_title'] ?? null;
         $this->language = app()->getLocale();
         $this->target = 'contact_mail';
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
         return $this->view('mails.contactmail')
             ->to(env('TO_CEO'))
-            ->subject("Neue Kontaktanfrage");
+            ->subject(__('emails.contact_admin.subject'));
     }
 }
