@@ -134,7 +134,7 @@
     @endforeach
 @endif
 
-@if(auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
+@if(auth()->user()->canAccessGuideDashboard() && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
     @foreach($guideBookings as $gIndex => $booking)
         <div class="booking-card guide-booking" data-type="guide-booking" data-status="{{ $booking->status }}" 
              data-completed="{{ 

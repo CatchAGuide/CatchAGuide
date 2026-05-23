@@ -25,7 +25,7 @@
             </a>
         </div>
 
-        @if (Auth::user()->is_guide)
+        @if (Auth::user()->canAccessGuideDashboard())
             <div class="col-lg-4 col-md-6 mb-4">
                 <a href="{{ route('profile.myguidings') }}" class="stat-card">
                     <div class="stat-icon guidings">
@@ -71,7 +71,7 @@
     <div class="quick-actions-section">
         <h4>{{ __('profile.quick_actions') }}</h4>
         <div class="row">
-            @if (Auth::user()->is_guide)
+            @if (Auth::user()->canAccessGuideDashboard())
                 <div class="col-lg-6 col-md-12 mb-3">
                     <div class="action-card featured">
                         <div class="action-icon">

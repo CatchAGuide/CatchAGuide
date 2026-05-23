@@ -45,7 +45,7 @@ class GeospatialSearchService
 
         $bounds = $this->normalizeBounds($params);
         $areaType = 'radius';
-        $query = Guiding::query()->select('id')->where('status', 1)
+        $query = Guiding::query()->select('id')->publiclyVisible()
             ->whereNotNull('lat')
             ->whereNotNull('lng')
             ->where('lat', '!=', 0)
@@ -224,7 +224,7 @@ class GeospatialSearchService
                     'ST_Distance_Sphere(point(lng, lat), point(?, ?)) as distance',
                     [$lng, $lat]
                 )
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
                 ->where('lat', '!=', 0)
@@ -244,7 +244,7 @@ class GeospatialSearchService
                 ->pluck('id');
         } catch (\Throwable) {
             return Guiding::query()
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->orderByDesc('created_at')
                 ->limit(min($limit, 20))
                 ->pluck('id');

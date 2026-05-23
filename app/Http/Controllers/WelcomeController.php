@@ -58,7 +58,7 @@ class WelcomeController extends Controller
             ->selectRaw("(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance", [$latitude, $longitude, $latitude])
             ->orderBy('distance')
             ->limit(4)
-            ->where('status',1)
+            ->publiclyVisible()
             ->get();
 
         $nearestlistings = $nearestlistings->map(function ($listing) {

@@ -12,10 +12,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Traits\Cacheable;
+use App\Traits\HasGuideStatus;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, Cacheable;
+    use HasApiTokens, HasFactory, Notifiable, Cacheable, HasGuideStatus;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +32,10 @@ class User extends Authenticatable
         'password',
         'is_active',
         'is_guide',
+        'guide_status',
+        'guide_type',
+        'guide_submitted_at',
+        'guide_verified_at',
         'user_information_id',
         'bar_allowed',
         'banktransfer_allowed',
@@ -61,6 +66,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'guide_submitted_at' => 'datetime',
+        'guide_verified_at' => 'datetime',
     ];
 
     /**

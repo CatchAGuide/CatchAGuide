@@ -39,9 +39,15 @@
                     </div>
                     
                     @if(!$isCheckout)
+                    @if(config('guide_onboarding.new_onboarding_enabled'))
+                    <a href="{{ Auth::guard('web')->check() ? route('guide.onboarding') : route('guide.onboarding', ['fast_lane' => 1]) }}" class="nav-link become-guide-link">
+                        @lang('homepage.header-become-guide')
+                    </a>
+                    @else
                     <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#registerModal">
                         @lang('homepage.header-become-guide')
                     </a>
+                    @endif
                     @endif
                     @auth
                         <div class="header-desktop-profile dropdown">

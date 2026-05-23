@@ -664,12 +664,38 @@
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             transition: all 0.3s ease;
+            height: 100%;
 
             &:hover {
                 border-color: #313041;
                 background: rgba(49, 48, 65, 0.05);
+            }
+
+            &:has(.form-check-input:checked) {
+                border-color: #313041;
+                background: rgba(49, 48, 65, 0.06);
+                box-shadow: 0 2px 8px rgba(49, 48, 65, 0.08);
+            }
+
+            .form-check {
+                margin: 0;
+                min-height: auto;
+            }
+
+            .form-check-input {
+                width: 1.2em;
+                height: 1.2em;
+                margin-top: 0.15em;
+                cursor: pointer;
+            }
+
+            .form-check-label {
+                font-weight: 600;
+                color: #313041;
+                cursor: pointer;
+                padding-left: 0.35rem;
             }
         }
 

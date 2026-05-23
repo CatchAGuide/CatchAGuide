@@ -94,7 +94,7 @@ class CategoryTargetFishController extends Controller
                 )
                 SELECT COALESCE(lowest_pp, price) 
                 FROM price_per_person
-            ) AS lowest_price')])->where('status',1)->whereNotNull('lat')->whereNotNull('lng');
+            ) AS lowest_price')])->publiclyVisible()->whereNotNull('lat')->whereNotNull('lng');
 
         $baseQuery->where(function($query) use ($row_data) {
             $query->whereJsonContains('target_fish', (int)$row_data->source_id);
@@ -131,7 +131,7 @@ class CategoryTargetFishController extends Controller
                         ELSE price
                     END
                 ) as max_price')
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->first();
 
             $overallMaxPrice = ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
@@ -173,7 +173,7 @@ class CategoryTargetFishController extends Controller
                         ELSE price
                     END as lowest_price
                 '))
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->get();
             
             foreach ($priceResults as $guiding) {
@@ -581,7 +581,7 @@ class CategoryTargetFishController extends Controller
     }
 
     public function otherGuidings(){
-        $otherguidings = Guiding::inRandomOrder('1234')->where('status',1)->limit(10)->get();
+        $otherguidings = Guiding::inRandomOrder('1234')->publiclyVisible()->limit(10)->get();
 
         return $otherguidings;
     }

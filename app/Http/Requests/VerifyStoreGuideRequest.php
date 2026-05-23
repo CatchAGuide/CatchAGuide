@@ -6,38 +6,25 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class VerifyStoreGuideRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'firstname' => 'required',
             'lastname' => 'required',
-            'information.birthday' => 'nullable',
+            'information.birthday' => 'nullable|date',
             'information.address' => 'required',
             'information.address_number' => 'required',
             'information.postal' => 'required',
             'information.city' => 'required',
             'information.phone' => 'required',
-            'information.languages' => 'required',
-            'information.about_me' => 'required',
-            'information.favorite_fish' => 'required',
-            'information.fishing_start_year' => 'required',
+            'information.country' => 'nullable|string|max:3',
             'lawcard' => 'required',
-            'taxId' => 'nullable'
-            ];
+            'taxId' => 'nullable',
+        ];
     }
 }

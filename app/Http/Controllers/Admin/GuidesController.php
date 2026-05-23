@@ -9,6 +9,9 @@ use App\Mail\CustomerGuidesMail;
 use App\Mail\GuideEmail;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Services\Guide\GuideOnboardingService;
+use App\Services\Guide\GuideProfileService;
+use App\Services\Guide\GuideVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -61,45 +64,25 @@ class GuidesController extends Controller
      */
     public function store(VerifyStoreGuideRequest $request)
     {
-        $user = auth()->user();
-        $user->bar_allowed = $request->bar_allowed;
-        $user->banktransfer_allowed = $request->banktransfer_allowed;
-        $user->paypal_allowed = $request->paypal_allowed;
-        $user->banktransferdetails = $request->banktransferdetails;
-        $user->paypaldetails = $request->paypaldetails;
-        $user->update();
-
-        if($user->information()) {
-            $user->information->update($request['information']);
-        } else {
-            $user->information->create($request['information']);
+        if (config('guide_onboarding.new_onboarding_enabled')) {
+            return redirect()->route('guide.onboarding', ['fast_lane' => 0]);
         }
 
-        $fullname = $request->firstname . ' ' . $request->lastname;
+        $request->merge([
+            'guide_type' => $request->input('guide_type', 'private'),
+            'lawcard_nature' => $request->input('lawcard_nature', $request->lawcard),
+            'lawcard_truthful' => $request->input('lawcard_truthful', $request->lawcard),
+        ]);
 
-        Mail::send(new CustomerGuidesMail($fullname, $request->email ?? $user->email));
-        Mail::send(new GuideEmail(
-            $request->firstname,
-            $request->lastname,
-            $request->information['birthday'],
-            $request->information['address'],
-            $request->information['address_number'],
-            $request->information['postal'],
-            $request->information['city'],
-            $request->information['phone'],
-            $request->information['languages'],
-            $request->information['about_me'],
-            $request->information['favorite_fish'],
-            $request->information['fishing_start_year'],
-            $request->information['taxId']
-        ));
+        $user = app(GuideOnboardingService::class)->submit($request, false, auth()->user());
 
-        $user = User::find(auth()->user()->id);
-        $user->is_guide = "0";
-        $user->phone = $request->information['phone'];
-        $user->tax_id = $request->information['taxId'];
-        $user->save();
-        return redirect()->route('profile.index')->with('message', 'Danke für Deine Anfrage. Wir melden uns innerhalb von 24 Stunden bei Dir');
+        if ($request->has('information.languages') || $request->has('bar_allowed')) {
+            app(GuideProfileService::class)->update($user, $request);
+        }
+
+        return redirect()
+            ->route('profile.guide-profile')
+            ->with('message', __('profile.guide_application_submitted'));
     }
 
 
@@ -154,65 +137,25 @@ class GuidesController extends Controller
 
     public function changeGuideStatus(User $guide)
     {
-        if ($guide->is_guide) {
-            $guide->update(['is_guide' => 0]);
+        $verificationService = app(GuideVerificationService::class);
+
+        if ($guide->isVerifiedGuide()) {
+            app(\App\Services\Guide\GuideStatusService::class)->markPending(
+                $guide,
+                auth()->id(),
+                'Admin deactivated guide status'
+            );
+
             return redirect()->back()->with('message', 'Der Status wurde erfolgreich geändert!');
         }
 
-
-        if (!$guide->is_guide) {
-            $guide->update(['is_guide' => 1]);
-            return redirect()->back()->with('message', 'Der Status wurde erfolgreich geändert!');
+        try {
+            $verificationService->approveUserLegacy($guide, (int) auth()->id());
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->withErrors(['general' => $e->getMessage()]);
         }
 
-        /*
-        $appUrl = env('APP_URL');
-        $bankAcountPostFields = [
-            'notify_url' => $appUrl,
-            'return_url' => $appUrl
-        ];
-        if ($guide->merchant_id) {
-            $guide->information()->update(['request_as_guide' => false]);
-            if ($guide->merchant_status) {
-                $merchantStatus = $guide->merchant_status;
-                $guide->update(['is_guide' => !$guide->is_guide]);
-            } else {
-                $merchantStatus = $this->getMerchantStatus($guide);
-            }
-            if ((int)$merchantStatus < 200) {
-                $bankAccount = (new OppApiService())->createEmptyBankAccountForMerchant($guide->merchant_id, $bankAcountPostFields);
-                $guide->update(['merchant_bank' => $bankAccount->uid, 'merchant_verification_url' => $bankAccount->verification_url]);
-            }
-            return redirect()->back()->with('message', 'Der Status wurde erfolgreich geändert!');
-        } else {
-            $userInfo = UserInformation::find($guide->user_information_id);
-            $fullAddress = $userInfo->address . ' ' . $userInfo->address_number;
-            $country = 'deu';
-
-            $postFields = [
-                'type' => 'consumer',
-                'country' => $country,
-                'emailaddress' => $guide->email,
-                'notify_url' => $appUrl,
-                'return_url' => $appUrl,
-                'phone' => $userInfo->phone,
-                'addresses[0][address_line_1]' => $fullAddress,
-                'addresses[0][zipcode]' => $userInfo->postal,
-                'addresses[0][city]' => $userInfo->city,
-                'addresses[0][country]' => $country
-            ];
-
-            $merchant = (new OppApiService())->createMerchant($postFields);
-
-            if ($merchant) {
-                $guide->information()->update(['request_as_guide' => false]);
-                $bankAccount = (new OppApiService())->createEmptyBankAccountForMerchant($merchant->uid, $bankAcountPostFields);
-                $guide->update(['is_guide' => !$guide->is_guide, 'merchant_id' => $merchant->uid, 'merchant_status' => $merchant->compliance->level, 'merchant_compliance_status' => $merchant->compliance->status, 'merchant_bank' => $bankAccount->uid, 'merchant_verification_url' => $bankAccount->verification_url]);
-                return redirect()->back()->with('message', 'Der Status wurde erfolgreich geändert!');
-            }
-        }
-        return redirect()->back()->with('message', 'Fehler beim Anlegen eines neuen Merchants in OPP!');
-             */
+        return redirect()->back()->with('message', 'Der Status wurde erfolgreich geändert!');
     }
 
     /*

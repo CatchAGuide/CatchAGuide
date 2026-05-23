@@ -95,7 +95,7 @@ class GuidingsController extends Controller
     private function indexSimpleMode($request, $locale, $randomSeed, $destination)
     {
         // Ultra-simple mode for staging performance issues
-        $guidings = Guiding::where('status', 1)
+        $guidings = Guiding::publiclyVisible()
             ->orderBy('created_at', 'desc')
             ->paginate(20);
         
@@ -136,7 +136,7 @@ class GuidingsController extends Controller
         $searchMessage = "";
         
         // Build base query without filter service
-        $baseQuery = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
+        $baseQuery = Guiding::with(['boatType', 'user.reviews'])->publiclyVisible();
 
         // Handle destination filtering (new structure)
         if ($request->has('from_destination') && $request->has('destination_id') && $request->has('destination_type')) {
@@ -373,11 +373,11 @@ class GuidingsController extends Controller
                 // Use filtered IDs from JSON service
                 $baseQuery = Guiding::with(['boatType', 'user.reviews'])
                     ->whereIn('id', $checkboxFilteredIds)
-                    ->where('status', 1);
+                    ->publiclyVisible();
             } else {
                 // No checkbox filters - get all active guidings
                 $baseQuery = Guiding::with(['boatType', 'user.reviews'])
-                    ->where('status', 1);
+                    ->publiclyVisible();
             }
 
             // Handle destination filtering (new structure)
@@ -626,7 +626,7 @@ class GuidingsController extends Controller
             // Get guidings by IDs - try different status values
             // First try status = 1 (published)
             $guidings = Guiding::whereIn('id', $guidingIds)
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
                 ->get();
             
@@ -705,8 +705,14 @@ class GuidingsController extends Controller
             }
         }
 
-        if (!Auth::check()) {
-            $query = $query->where('status', 1);
+        $user = Auth::user();
+        if (! $user) {
+            $query = $query->publiclyVisible();
+        } else {
+            $query = $query->where(function ($inner) use ($user) {
+                $inner->publiclyVisible()
+                    ->orWhere('user_id', $user->id);
+            });
         }
 
         $guiding = $query->first();
@@ -732,7 +738,7 @@ class GuidingsController extends Controller
         $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
         $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
 
-        $otherGuidings = Guiding::where('status', 1)
+        $otherGuidings = Guiding::publiclyVisible()
             ->where('id', '!=', $guiding->id)
             ->where(function($query) use ($targetFish, $fishingFrom, $fishingType) {
                 $query->where(function($q) use ($targetFish, $fishingFrom, $fishingType) {
@@ -768,7 +774,7 @@ class GuidingsController extends Controller
 
         $sameGuidings = Guiding::where('user_id', $guiding->user_id)
             ->where('id', '!=', $guiding->id)
-            ->where('status', 1)
+            ->publiclyVisible()
             ->limit(10)
             ->get();
 
@@ -848,28 +854,50 @@ class GuidingsController extends Controller
             }
 
             $guiding->is_newguiding = 1;
-            
+
+            $savedAsDraftDueToPending = false;
+
             // Smart status management
             if ($isDraft) {
                 // Preserve status if it was ever published (1) or disabled (0)
                 // Only set to draft (2) if it's new or was already a draft
-                if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
+                if ($isUpdate && ((int) $originalStatus === 1 || (int) $originalStatus === 0)) {
                     $guiding->status = $originalStatus; // Keep original status (0 or 1)
                 } else {
                     $guiding->status = 2; // New guiding or was already draft
                 }
+            } elseif (! auth()->user()->canPublishGuidings()) {
+                // Pending/rejected guides: save the tour but keep it unpublished (draft)
+                if ($isUpdate && in_array((int) $originalStatus, [0, 1], true)) {
+                    $guiding->status = $originalStatus;
+                } else {
+                    $guiding->status = 2;
+                    $savedAsDraftDueToPending = true;
+                }
             } else {
-                // Final submission - set to published
                 $guiding->status = 1;
             }
 
             $guiding->save();
             DB::commit();
 
+            $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
+            if ($savedAsDraftDueToPending) {
+                $redirectUrl = route('profile.myguidings', ['notice' => 'pending_publish']);
+            }
+
+            $message = $isDraft
+                ? __('profile.guiding_draft_saved')
+                : __('profile.guiding_published_success');
+            if ($savedAsDraftDueToPending) {
+                $message = __('profile.guiding_saved_as_draft_pending_guide');
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => $isDraft ? 'Draft saved successfully!' : 'Guiding created successfully!',
-                'redirect_url' => $request->input('target_redirect') ?? route('profile.myguidings'),
+                'message' => $message,
+                'saved_as_draft_due_to_pending' => $savedAsDraftDueToPending,
+                'redirect_url' => $redirectUrl,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1701,7 +1729,7 @@ class GuidingsController extends Controller
     
     public function show($id,$slug)
     {   
-        $guiding = Guiding::where('id',$id)->where('slug',$slug)->where('status',1)->first();
+        $guiding = Guiding::where('id', $id)->where('slug', $slug)->publiclyVisible()->first();
 
         if(!$guiding){
             abort(404);
@@ -1721,7 +1749,7 @@ class GuidingsController extends Controller
         })->whereHas('fishingTypes',function($query) use($fishingtype){
             $query->where('id',$fishingtype);
         })
-        ->where('status', 1)
+        ->publiclyVisible()
         ->limit(4)
         ->get();
 

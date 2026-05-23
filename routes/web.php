@@ -146,6 +146,8 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::put('/password', [App\Http\Controllers\ProfileController::class, 'passwordUpdate'])->name('password.update');
     Route::get('/z', [App\Http\Controllers\ProfileController::class, 'abbuchen'])->name('abbuchen');
     Route::get('/becomeguide', [App\Http\Controllers\ProfileController::class, 'becomeguide'])->name('becomeguide');
+    Route::get('/guide-profile', [App\Http\Controllers\ProfileController::class, 'guideProfile'])->name('guide-profile');
+    Route::put('/guide-profile', [App\Http\Controllers\ProfileController::class, 'guideProfileUpdate'])->name('guide-profile.update');
     Route::put('/account', [App\Http\Controllers\ProfileController::class, 'accountUpdate'])->name('account');
     Route::get('/favoriteguides', [App\Http\Controllers\ProfileController::class, 'favoriteguides'])->name('favoriteguides');
     Route::get('/myguidings', [App\Http\Controllers\ProfileController::class, 'myguidings'])->name('myguidings');
@@ -182,7 +184,10 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('process-merchant-status', [App\Http\Controllers\ProfileController::class, 'processMerchantStatus'])->name('processmerchantstatus');
 });
 
-Route::post('/guide', [GuidesController::class, 'store'])->name('guide');
+Route::get('/guide/onboarding', [App\Http\Controllers\GuideOnboardingController::class, 'show'])->name('guide.onboarding');
+Route::post('/guide/onboarding', [App\Http\Controllers\GuideOnboardingController::class, 'store'])->name('guide.onboarding.store');
+
+Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');
 
 Route::get('/info',function(){
     return phpinfo();
@@ -599,6 +604,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');
+        Route::post('guide-requests/{guideRequest}/approve', [\App\Http\Controllers\Admin\GuideRequestReviewController::class, 'approve'])->name('guide-requests.approve');
+        Route::post('guide-requests/{guideRequest}/reject', [\App\Http\Controllers\Admin\GuideRequestReviewController::class, 'reject'])->name('guide-requests.reject');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
