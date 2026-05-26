@@ -60,9 +60,9 @@ class ViewServiceProvider extends ServiceProvider
 
 
         View::composer('*', function ($view) {
-            $authUser = auth()->user(); // Get the authenticated user
+            $authUser = web_guide_user();
 
-            if($authUser && $authUser->is_guide){
+            if ($authUser && $authUser->canAccessGuideDashboard()) {
                 $bookings = collect();
 
                 if ($authUser->guidings) {
@@ -124,7 +124,7 @@ class ViewServiceProvider extends ServiceProvider
                 return Guiding::whereHas('fishingTypes',function($query){
                     $query->where('id',1);
                 })
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->inRandomOrder('123')
                 ->limit(6)
                 ->get();
@@ -137,7 +137,7 @@ class ViewServiceProvider extends ServiceProvider
                 return Guiding::whereHas('guidingWaters', function ($query) {
                     $query->where('water_id', 2);
                 })
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->inRandomOrder()
                 ->limit(6)
                 ->get();
@@ -151,7 +151,7 @@ class ViewServiceProvider extends ServiceProvider
                 return Guiding::whereHas('guidingMethods', function ($query) {
                     $query->where('method_id', 3);
                 })
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->inRandomOrder()
                 ->limit(6)
                 ->get();

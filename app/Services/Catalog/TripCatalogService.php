@@ -54,7 +54,7 @@ class TripCatalogService
         return Cache::remember($cacheKey, 600, function () {
             /** @var \Illuminate\Support\Collection<int, \App\Models\Guiding> $guidings */
             $guidings = Guiding::query()
-                ->where('status', 1)
+                ->publiclyVisible()
                 ->whereNotNull('title')
                 ->whereNotNull('slug')
                 ->where('slug', '!=', '')

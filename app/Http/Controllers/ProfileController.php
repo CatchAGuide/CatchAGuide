@@ -137,7 +137,31 @@ class ProfileController extends Controller
 
     public function becomeguide()
     {
+        if (config('guide_onboarding.new_onboarding_enabled')) {
+            return redirect()->route('guide.onboarding');
+        }
+
+        if (auth()->user()->isVerifiedGuide() || auth()->user()->isPendingGuide()) {
+            return redirect()->route('profile.guide-profile');
+        }
+
         return view('pages.profile.becomeguide');
+    }
+
+    public function guideProfile()
+    {
+        if (! auth()->user()->canViewGuideTools()) {
+            return redirect()->route('profile.becomeguide');
+        }
+
+        return view('pages.profile.guide-profile');
+    }
+
+    public function guideProfileUpdate(\App\Http\Requests\Guide\GuideProfileUpdateRequest $request)
+    {
+        app(\App\Services\Guide\GuideProfileService::class)->update(auth()->user(), $request);
+
+        return redirect()->route('profile.guide-profile')->with('message', __('profile.guide_profile_saved'));
     }
 
     public function myguidings()
@@ -199,6 +223,11 @@ class ProfileController extends Controller
     //step 1
     public function newguiding()
     {
+        if (! auth()->user()->canAccessGuideDashboard()) {
+            return redirect()->route('guide.onboarding')
+                ->with('message', __('profile.guide_reapply_to_create_tours'));
+        }
+
         $pageTitle = __('profile.creategiud');
         $locale = Config::get('app.locale');
         $nameField = $locale == 'en' ? 'name_en' : 'name';
@@ -242,7 +271,7 @@ class ProfileController extends Controller
         
         // Get guide bookings if user is a guide with pagination (5 items per page) - pending first
         $guideBookings = null;
-        if(auth()->user()->is_guide) {
+        if (auth()->user()->canAccessGuideDashboard()) {
             try {
                 $guideBookings = Booking::with(['guiding', 'user', 'blocked_event', 'calendar_schedule'])
                     ->whereHas('guiding', function($query) {
@@ -288,7 +317,7 @@ class ProfileController extends Controller
                 'loadMore' => true
             ]);
         } else {
-            if (!auth()->user()->is_guide) {
+            if (! auth()->user()->canAccessGuideDashboard()) {
                 return response()->json(['error' => 'Not authorized'], 403);
             }
             
@@ -472,6 +501,10 @@ class ProfileController extends Controller
     public function activate(Guiding $guiding){
         if($guiding->user->id != auth()->user()->id){
             abort(404);
+        }
+
+        if (! auth()->user()->canPublishGuidings()) {
+            return redirect()->back()->with('message', __('profile.guiding_saved_as_draft_pending_guide'));
         }
            
         $guiding->status = '1';

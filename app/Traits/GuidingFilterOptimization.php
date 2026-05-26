@@ -379,7 +379,7 @@ trait GuidingFilterOptimization
         $cacheKey = 'other_guidings_random';
         
         return Cache::remember($cacheKey, 1800, function() {
-            return Guiding::inRandomOrder('1234')->where('status', 1)->limit(10)->get();
+            return Guiding::inRandomOrder('1234')->publiclyVisible()->limit(10)->get();
         });
     }
 
@@ -409,7 +409,7 @@ trait GuidingFilterOptimization
                 200 * 1000 // 200km converted to meters
             ])
             ->whereNotIn('id', $existingGuidingIds) // Exclude existing guidings
-            ->where('status', 1)
+            ->publiclyVisible()
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance') // Sort by nearest first
             ->limit(10)

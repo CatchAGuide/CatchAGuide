@@ -2496,7 +2496,7 @@
                                 <i class="fas fa-euro-sign me-1"></i> ${booking.price}€
                             </small>
                         </div>
-                        ${booking.status === 'pending' && {{ auth()->user()->is_guide }} ? `
+                        ${booking.status === 'pending' && {{ auth()->user()->canAccessGuideDashboard() ? 'true' : 'false' }} ? `
                             <div class="d-flex justify-content-end">
                                 <button class="btn btn-sm btn-success me-2" onclick="window.location.href='/profile/guidebookings/accept/${booking.id}'">
                                     <i class="fas fa-check"></i> Accept

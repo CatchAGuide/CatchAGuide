@@ -232,6 +232,18 @@ if (! function_exists('get_faqs_by_page')) {
     }
 }
 
+if (! function_exists('web_guide_user')) {
+    /**
+     * Authenticated front-end user (guides/customers), never admin Employee.
+     */
+    function web_guide_user(): ?\App\Models\User
+    {
+        $user = auth('web')->user();
+
+        return $user instanceof \App\Models\User ? $user : null;
+    }
+}
+
 if (!function_exists('targets')) {
     function targets()
     {

@@ -34,14 +34,14 @@ class GuideEmail extends Mailable
      *
      * @return void
      */
-    public function __construct($firstname, $lastname, $birthday, $address, $address_number, $postal, $city, $phone, $languages, $description, $favorite_fish, $years, $taxId)
+    public function __construct($firstname, $lastname, $birthday, $address, $address_number, $postal, $city, $phone, $languages, $description, $favorite_fish, $years, $taxId, ?string $email = null)
     {
         $this->firstname = $firstname;
         $this->lastname = $lastname;
         $this->birthday = $birthday;
         $this->address = $address;
         $this->address_number = $address_number;
-        $this->email = auth()->user()->email;
+        $this->email = $email ?? auth()->user()?->email;
         $this->postal = $postal;
         $this->city = $city;
         $this->phone = $phone;

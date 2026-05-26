@@ -2,6 +2,22 @@
 @section('title', __('profile.myGuides'))
 
 @section('profile-content')
+
+@if(session('message'))
+    <div class="alert alert-warning border-0 mb-4" role="alert">
+        <i class="fas fa-info-circle me-2"></i>{{ session('message') }}
+    </div>
+@endif
+
+@if(request('notice') === 'pending_publish')
+    <div class="alert alert-warning border-0 mb-4" role="alert">
+        <i class="fas fa-hourglass-half me-2"></i>
+        {{ __('profile.guiding_saved_as_draft_pending_guide') }}
+    </div>
+@endif
+
+<div id="guiding-form-notice-container"></div>
+
 <style>
     .guidings-container {
         padding: 0;
@@ -663,4 +679,20 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('js_after')
+@parent
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    try {
+        const message = sessionStorage.getItem('guidingFormNotice');
+        if (!message) return;
+        sessionStorage.removeItem('guidingFormNotice');
+        const container = document.getElementById('guiding-form-notice-container');
+        if (!container) return;
+        container.innerHTML = '<div class="alert alert-warning border-0 mb-4" role="alert"><i class="fas fa-hourglass-half me-2"></i>' + message + '</div>';
+    } catch (e) { /* ignore */ }
+});
+</script>
 @endsection

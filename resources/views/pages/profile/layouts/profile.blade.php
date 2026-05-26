@@ -289,8 +289,12 @@
                                 <div class="user-info">
                                     <h4>{{ Auth::user()->firstname ?? 'Welcome' }} {{ Auth::user()->lastname ?? 'Back' }}</h4>
                                     <p class="user-type">
-                                        @if(Auth::user()->is_guide)
+                                        @if(Auth::user()->isVerifiedGuide())
                                             <span class="badge badge-success"><i class="fas fa-fish"></i> {{ __('profile.fishing_guide') }}</span>
+                                        @elseif(Auth::user()->isPendingGuide())
+                                            <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> {{ __('profile.guide_pending_badge') }}</span>
+                                        @elseif(Auth::user()->isRejectedGuide())
+                                            <span class="badge badge-secondary"><i class="fas fa-times-circle"></i> {{ __('profile.guide_rejected_badge') }}</span>
                                         @else
                                             <span class="badge badge-primary"><i class="fas fa-user"></i> {{ __('profile.angler') }}</span>
                                         @endif
@@ -345,11 +349,11 @@
                                         </a>
                                     </li>
 
-                                    @if(Auth::user()->is_guide)
+                                    @if(Auth::user()->canViewGuideTools())
                                         <li class="nav-item">
-                                            <a href="{{ route('profile.payments') }}" class="nav-link {{ Request::routeIs('profile.payments') ? 'active' : '' }}">
-                                                <i class="fas fa-credit-card"></i>
-                                                <span>{{ __('profile.payment_information') }}</span>
+                                            <a href="{{ route('profile.guide-profile') }}" class="nav-link {{ Request::routeIs('profile.guide-profile') ? 'active' : '' }}">
+                                                <i class="fas fa-fish"></i>
+                                                <span>{{ __('profile.guide_profile') }}</span>
                                             </a>
                                         </li>
                                     @endif
@@ -366,7 +370,7 @@
                                             <span>{{ __('profile.all_bookings') }}</span>
                                         </a>
                                     </li>
-                                    @if(Auth::user()->is_guide)
+                                    @if(Auth::user()->canAccessGuideDashboard())
                                     <li class="nav-item">
                                         <a href="{{ route('profile.calendar') }}" class="nav-link {{ Request::routeIs('profile.calendar') ? 'active' : '' }}">
                                             <i class="fas fa-calendar-alt"></i>
@@ -377,7 +381,7 @@
                                 </ul>
                             </div>
 
-                            @if(Auth::user()->is_guide)
+                            @if(Auth::user()->canViewGuideTools())
                             <!-- My Guidings Section -->
                             <div class="nav-section">
                                 <h6 class="nav-section-title">{{ __('profile.my_guidings_section') }}</h6>
@@ -388,23 +392,30 @@
                                             <span>{{ __('profile.all_guidings') }}</span>
                                         </a>
                                     </li>
+                                    @if(Auth::user()->canAccessGuideDashboard())
                                     <li class="nav-item">
                                         <a href="{{ route('profile.newguiding') }}" class="nav-link highlight {{ Request::routeIs('profile.newguiding') ? 'active' : '' }}">
                                             <i class="fas fa-plus-circle"></i>
                                             <span>{{ __('profile.create_new_guiding') }}</span>
                                         </a>
                                     </li>
+                                    @endif
                                 </ul>
                             </div>
                             @endif
 
-                            @if(!Auth::user()->is_guide)
+                            @if(Auth::user()->canApplyAsGuide())
                             <!-- Become a Guide Section -->
                             <div class="nav-section">
                                 <h6 class="nav-section-title">{{ __('profile.upgrade') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
-                                        <a href="{{ route('profile.becomeguide') }}" class="nav-link {{ Request::routeIs('profile.becomeguide') ? 'active' : '' }}">
+                                        @php
+                                            $becomeGuideRoute = config('guide_onboarding.new_onboarding_enabled')
+                                                ? 'guide.onboarding'
+                                                : 'profile.becomeguide';
+                                        @endphp
+                                        <a href="{{ route($becomeGuideRoute) }}" class="nav-link {{ Request::routeIs('profile.becomeguide', 'guide.onboarding') ? 'active' : '' }}">
                                             <i class="fas fa-certificate"></i>
                                             <span>{{ __('profile.become_a_guide') }}</span>
                                         </a>
@@ -438,6 +449,8 @@
                             @endif
                         @endunless
                         
+                        <x-guide-pending-banner />
+                        <x-guide-rejected-banner />
                         @yield('profile-content')
                     </div>
                 </div>

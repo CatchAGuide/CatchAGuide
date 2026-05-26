@@ -1420,8 +1420,24 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.redirect_url) {
+                        if (data.success && data.redirect_url) {
+                            if (data.message) {
+                                try {
+                                    sessionStorage.setItem('guidingFormNotice', data.message);
+                                } catch (e) { /* ignore */ }
+                            }
                             window.location.href = data.redirect_url;
+                        } else if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else if (data.error) {
+                            const errorContainer = document.getElementById('error-container');
+                            if (errorContainer) {
+                                errorContainer.style.display = 'block';
+                                errorContainer.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+                                scrollToFormCenter();
+                            } else {
+                                alert(data.error);
+                            }
                         } else {
                             displayValidationErrors(data.errors);
                         }

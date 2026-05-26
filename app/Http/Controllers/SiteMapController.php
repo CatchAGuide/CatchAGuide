@@ -20,7 +20,7 @@ class SiteMapController extends Controller
         $content .= $this->addUrl(route('vacations.index'), '0.8', 'weekly');
         
         // Add guidings (only active ones)
-        $guidings = Guiding::where('status', 1)->get();
+        $guidings = Guiding::publiclyVisible()->get();
         foreach ($guidings as $guiding) {
             $content .= $this->addUrl(
                 route('guidings.show', [$guiding->id, $guiding->slug]),

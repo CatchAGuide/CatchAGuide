@@ -368,46 +368,11 @@
             </div>
         </div>
 
-        @if(auth()->user()->is_guide)
-            <!-- Guide Information Section -->
-            <div class="profile-section guide-section">
-                <h3 class="section-title">{{ __('profile.guide_information') }}</h3>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="form-label" for="languages">@lang('profile.language')<span class="required">*</span></label>
-                            <input type="text" class="form-control" id="languages" name="information[languages]" 
-                                   placeholder="{{translate('Sprachen')}}" value="{{auth()->user()?->information->languages ?? ''}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="form-label" for="description">@lang('profile.aboutMe')</label>
-                            <textarea class="form-control" id="description" placeholder="{{translate('Über mich')}}..." 
-                                      name="information[about_me]" rows="4" required>{{auth()->user()?->information->about_me ?? ''}}</textarea>
-                            <small class="helper-text">@lang('profile.aboutMemessage')</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label" for="favorite_fish">@lang('profile.favFish')<span class="required">*</span></label>
-                            <input type="text" class="form-control" id="favorite_fish" name="information[favorite_fish]" 
-                                   placeholder="{{translate('Lieblingsfisch')}}" value="{{auth()->user()?->information->favorite_fish ?? ''}}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label" for="fishing_start_year">@lang('profile.fishingExp')</label>
-                            <input type="number" class="form-control" placeholder="{{translate('Anglererfahrung')}}" 
-                                   id="fishing_start_year" name="information[fishing_start_year]" 
-                                   value="{{auth()->user()?->information->fishing_start_year ?? ''}}" required>
-                            <small class="helper-text">@lang('profile.fishingExpmssg')</small>
-                        </div>
-                    </div>
-                </div>
+        @if(auth()->user()->canAccessGuideDashboard())
+            <div class="alert alert-info mb-4">
+                {{ __('profile.guide_profile_on_separate_page') }}
+                <a href="{{ route('profile.guide-profile') }}">{{ __('profile.guide_profile') }}</a>
             </div>
-
-
         @endif
 
         <div class="text-center">

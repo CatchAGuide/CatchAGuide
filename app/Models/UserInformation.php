@@ -23,11 +23,20 @@ class UserInformation extends Model
         'favorite_fish',
         'fishing_start_year',
         'request_as_guide',
-        'user_id'
+        'user_id',
+        'company_name',
+        'legal_form',
+        'founded_year',
+        'contact_position',
+        'trade_register_number',
+        'trade_register_court',
+        'tax_number',
+        'company_profile',
     ];
 
     protected $casts = [
-        'birthday' => 'date'
+        'birthday' => 'date',
+        'company_profile' => 'array',
     ];
 
     /**

@@ -701,7 +701,7 @@
                 // Calculate all statistics
                 $allMyBookings = auth()->user()->bookings;
                 $allGuideBookings = collect();
-                if(auth()->user()->is_guide) {
+                if(auth()->user()->canAccessGuideDashboard()) {
                     try {
                         $allGuideBookings = \App\Models\Booking::whereHas('guiding', function($query) {
                             $query->where('user_id', auth()->user()->id);
@@ -752,7 +752,7 @@
                 <span class="stat-number">{{ $pendingRequests }}</span>
                 <span class="stat-label">{{ __('profile.pending_requests') }}</span>
             </div>
-            @if(auth()->user()->is_guide)
+            @if(auth()->user()->canAccessGuideDashboard())
                 <div class="stat-item clickable-stat" data-filter="accepted">
                     <span class="stat-number">{{ $confirmedBookings }}</span>
                     <span class="stat-label">{{ __('profile.my_confirmed') }}</span>
@@ -789,7 +789,7 @@
 
     <!-- Filters Section -->
     <div class="booking-filters">
-        @if(auth()->user()->is_guide)
+        @if(auth()->user()->canAccessGuideDashboard())
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">
                 <i class="fas fa-list"></i> {{ __('profile.all_bookings') }}
@@ -809,7 +809,7 @@
                 <option value="">{{ __('profile.all_statuses') }}</option>
                 <option value="accepted">{{ __('profile.confirmed') }}</option>
                 <option value="pending">{{ __('profile.pending_requests') }}</option>
-                @if(auth()->user()->is_guide)
+                @if(auth()->user()->canAccessGuideDashboard())
                     <option value="cancelled">{{ __('profile.cancelled') }}</option>
                     <option value="rejected">{{ __('profile.rejected') }}</option>
                 @else
@@ -824,7 +824,7 @@
     <!-- Bookings Container -->
     <div class="bookings-container" id="bookingsContainer" 
          data-has-more-my="{{ $bookings->hasMorePages() ? 'true' : 'false' }}"
-         data-has-more-guide="{{ auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'hasMorePages') ? ($guideBookings->hasMorePages() ? 'true' : 'false') : 'false' }}">
+         data-has-more-guide="{{ auth()->user()->canAccessGuideDashboard() && $guideBookings && method_exists($guideBookings, 'hasMorePages') ? ($guideBookings->hasMorePages() ? 'true' : 'false') : 'false' }}">
         @if($bookings && $bookings->count() > 0)
             <!-- {{ __('profile.my_booking') }}s -->
             @foreach($bookings as $index => $booking)
@@ -1218,7 +1218,7 @@
         @endif
 
         <!-- {{ __('profile.guide_booking') }}s -->
-        @if(auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
+        @if(auth()->user()->canAccessGuideDashboard() && $guideBookings && method_exists($guideBookings, 'count') && $guideBookings->count() > 0)
             @foreach($guideBookings as $gIndex => $booking)
                 <div class="booking-card guide-booking" data-type="guide-booking" data-status="{{ $booking->status }}" 
                      data-completed="{{ 
@@ -1598,7 +1598,7 @@
     </div>
 
     <!-- Load More Section -->
-    @if($bookings->hasMorePages() || (auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'hasMorePages') && $guideBookings->hasMorePages()))
+    @if($bookings->hasMorePages() || (auth()->user()->canAccessGuideDashboard() && $guideBookings && method_exists($guideBookings, 'hasMorePages') && $guideBookings->hasMorePages()))
         <div class="load-more-container">
             <button id="loadMoreBtn" class="btn btn-outline-primary load-more-btn">
                 <i class="fas fa-plus"></i> Load More Bookings
@@ -1622,7 +1622,7 @@
             let myBookingsPage = {{ $bookings->currentPage() }};
             let guideBookingsPage = {{ $guideBookings && method_exists($guideBookings, 'currentPage') ? $guideBookings->currentPage() : 1 }};
             let hasMoreMyBookings = {{ $bookings->hasMorePages() ? 'true' : 'false' }};
-            let hasMoreGuideBookings = {{ auth()->user()->is_guide && $guideBookings && method_exists($guideBookings, 'hasMorePages') ? ($guideBookings->hasMorePages() ? 'true' : 'false') : 'false' }};
+            let hasMoreGuideBookings = {{ auth()->user()->canAccessGuideDashboard() && $guideBookings && method_exists($guideBookings, 'hasMorePages') ? ($guideBookings->hasMorePages() ? 'true' : 'false') : 'false' }};
 
             // Get all booking cards (including dynamically loaded ones)
             function getBookingCards() {
