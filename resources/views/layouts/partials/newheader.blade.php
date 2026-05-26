@@ -1,5 +1,6 @@
 @include('layouts.modal.loginModal')
 @include('layouts.modal.registerModal')
+@include('layouts.modal.guideApplicationModal')
 @php
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
     $hideHeaderSubtitle = $isDestinationOrCategoryPage || request()->is('vacations*');
@@ -37,9 +38,21 @@
                         </form>
                     </div>
                     
-                    <a href="{{ route('login') }}" class="nav-link become-guide-link">
-                        @lang('homepage.header-become-guide')
-                    </a>
+                    @if(config('guide_onboarding.new_onboarding_enabled'))
+                        @auth
+                            <a href="{{ route('guide.onboarding') }}" class="nav-link become-guide-link">
+                                @lang('homepage.header-become-guide')
+                            </a>
+                        @else
+                            <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
+                                @lang('homepage.header-become-guide')
+                            </a>
+                        @endauth
+                    @else
+                        <a href="{{ route('login') }}" class="nav-link become-guide-link">
+                            @lang('homepage.header-become-guide')
+                        </a>
+                    @endif
                     @auth
                         <div class="header-desktop-profile dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -1186,6 +1199,12 @@ input[type=number] {
                         </form>
                     @else
                         <div class="menu-divider"></div>
+                        @if(config('guide_onboarding.new_onboarding_enabled'))
+                            <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#guideApplicationModal" onclick="closeMobileMenu()">
+                                <i class="fas fa-certificate"></i>
+                                <span>@lang('homepage.header-become-guide')</span>
+                            </a>
+                        @endif
                         <a href="#" id="singup-header" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>@lang('homepage.header-signup')</span>

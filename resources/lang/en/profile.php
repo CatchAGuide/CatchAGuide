@@ -752,6 +752,8 @@ return [
     'guide_application_already_pending' => 'Your guide application is already being reviewed.',
     'already_verified_guide' => 'You are already a verified guide.',
     'guide_email_already_registered' => 'This email is already registered. Please log in and continue from your account.',
+    'guide_existing_account_wrong_password' => 'An account with this email already exists. Please enter your existing password to continue, or log in first.',
+    'guide_logged_in_existing_account' => 'Welcome back! You have been logged in with your existing account and your application has been submitted.',
     'guide_profile_on_separate_page' => 'Guide profile and payment settings are managed on the',
     'onboarding_step_account' => 'Account',
     'onboarding_step_type' => 'Guide type',

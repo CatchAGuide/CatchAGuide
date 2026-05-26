@@ -1100,4 +1100,88 @@ class Guiding extends Model
     {
         return $this->status == 0;
     }
+
+    /**
+     * Whether this draft tour has all the data required to go public.
+     *
+     * Mirrors the not-draft validation enforced in StoreNewGuidingRequest so
+     * that approving a guide can safely auto-publish only the tours that
+     * already meet the public-listing requirements.
+     */
+    public function isCompleteForPublishing(): bool
+    {
+        if (! filled($this->title) || ! filled($this->location)) {
+            return false;
+        }
+
+        $hasItems = static function ($jsonOrArray): bool {
+            if (is_array($jsonOrArray)) {
+                return count(array_filter($jsonOrArray, static fn ($v) => filled($v))) > 0;
+            }
+            if (! is_string($jsonOrArray) || $jsonOrArray === '') {
+                return false;
+            }
+            $decoded = json_decode($jsonOrArray, true);
+            return is_array($decoded)
+                && count(array_filter($decoded, static fn ($v) => filled($v))) > 0;
+        };
+
+        if (! $hasItems($this->getAttribute('target_fish'))) {
+            return false;
+        }
+        if (! $hasItems($this->getAttribute('fishing_methods'))) {
+            return false;
+        }
+        if (! $hasItems($this->getAttribute('water_types'))) {
+            return false;
+        }
+
+        if (! filled($this->fishing_type_id)) {
+            return false;
+        }
+
+        foreach (['desc_course_of_action', 'desc_meeting_point', 'desc_tour_unique', 'desc_starting_time'] as $field) {
+            if (! filled($this->{$field})) {
+                return false;
+            }
+        }
+
+        if (! filled($this->tour_type)) {
+            return false;
+        }
+
+        if (! filled($this->duration_type) || (int) $this->duration <= 0) {
+            return false;
+        }
+
+        if ((int) $this->max_guests <= 0) {
+            return false;
+        }
+
+        if (! filled($this->price_type) || (float) $this->price <= 0) {
+            return false;
+        }
+
+        if (! filled($this->allowed_booking_advance) || ! filled($this->booking_window)) {
+            return false;
+        }
+
+        if (! filled($this->seasonal_trip)) {
+            return false;
+        }
+
+        if ((int) $this->is_boat === 1 && ! filled($this->boat_type)) {
+            return false;
+        }
+
+        $gallery = $this->gallery_images;
+        if (is_string($gallery)) {
+            $gallery = json_decode($gallery, true) ?? [];
+        }
+        if (! is_array($gallery) || count(array_filter($gallery, static fn ($v) => filled($v))) < 5) {
+            return false;
+        }
+
+        return true;
+    }
 }

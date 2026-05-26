@@ -49,8 +49,8 @@ class GuideVerificationSubmitRequest extends FormRequest
             return array_merge($rules, [
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+                'email' => 'required|email',
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'terms' => 'accepted',
                 'privacy' => 'accepted',
             ]);

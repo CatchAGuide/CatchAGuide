@@ -1,5 +1,6 @@
 @include('layouts.modal.loginModal')
 @include('layouts.modal.registerModal')
+@include('layouts.modal.guideApplicationModal')
 
 @php
     $isCheckout = (request()->is('checkout') || request()->is('checkout/thank-you/*')) ? 1 : 0;
@@ -40,9 +41,15 @@
                     
                     @if(!$isCheckout)
                     @if(config('guide_onboarding.new_onboarding_enabled'))
-                    <a href="{{ Auth::guard('web')->check() ? route('guide.onboarding') : route('guide.onboarding', ['fast_lane' => 1]) }}" class="nav-link become-guide-link">
-                        @lang('homepage.header-become-guide')
-                    </a>
+                        @auth
+                            <a href="{{ route('guide.onboarding') }}" class="nav-link become-guide-link">
+                                @lang('homepage.header-become-guide')
+                            </a>
+                        @else
+                            <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
+                                @lang('homepage.header-become-guide')
+                            </a>
+                        @endauth
                     @else
                     <a href="#" class="nav-link become-guide-link" data-bs-toggle="modal" data-bs-target="#registerModal">
                         @lang('homepage.header-become-guide')
@@ -1154,6 +1161,12 @@ input[type=number] {
                         </form>
                     @else
                         <div class="menu-divider"></div>
+                        @if(config('guide_onboarding.new_onboarding_enabled'))
+                            <a href="#" class="menu-item" data-bs-toggle="modal" data-bs-target="#guideApplicationModal" onclick="closeMobileMenu()">
+                                <i class="fas fa-certificate"></i>
+                                <span>@lang('homepage.header-become-guide')</span>
+                            </a>
+                        @endif
                         <a href="#" id="signup-header" class="menu-item" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="closeMobileMenu()">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>@lang('homepage.header-signup')</span>

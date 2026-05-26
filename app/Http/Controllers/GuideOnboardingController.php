@@ -56,28 +56,75 @@ class GuideOnboardingController extends Controller
         ]);
     }
 
-    public function store(GuideVerificationSubmitRequest $request): RedirectResponse
+    public function store(GuideVerificationSubmitRequest $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $isFastLane = $request->boolean('is_fast_lane') && ! Auth::guard('web')->check();
+        $wantsJson = $request->ajax() || $request->wantsJson();
+        $loggedInExisting = false;
 
         if (! $isFastLane && ! Auth::guard('web')->check()) {
+            if ($wantsJson) {
+                return response()->json([
+                    'success' => false,
+                    'redirect' => route('login'),
+                ], 401);
+            }
             return redirect()->route('login');
+        }
+
+        // Fast-lane: if an account already exists for this email, try to log
+        // the user in with the password they provided instead of creating a
+        // duplicate. Wrong-password attempts return a validation-style error.
+        if ($isFastLane) {
+            $existingUser = \App\Models\User::where('email', $request->input('email'))->first();
+            if ($existingUser) {
+                $credentials = [
+                    'email' => $request->input('email'),
+                    'password' => $request->input('password'),
+                ];
+
+                if (Auth::guard('web')->attempt($credentials)) {
+                    $request->session()->regenerate();
+                    $isFastLane = false;
+                    $loggedInExisting = true;
+                } else {
+                    if ($wantsJson) {
+                        return response()->json([
+                            'success' => false,
+                            'errors' => [
+                                'password' => [__('profile.guide_existing_account_wrong_password')],
+                            ],
+                        ], 422);
+                    }
+                    return back()->withInput()->withErrors([
+                        'password' => __('profile.guide_existing_account_wrong_password'),
+                    ]);
+                }
+            }
         }
 
         $webUser = Auth::guard('web')->user();
         if ($webUser?->isVerifiedGuide()) {
-            return redirect()->route('profile.index')
-                ->with('message', __('profile.already_verified_guide'));
+            $message = __('profile.already_verified_guide');
+            if ($wantsJson) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'redirect' => route('profile.index'),
+                ]);
+            }
+            return redirect()->route('profile.index')->with('message', $message);
         }
         if ($webUser?->isPendingGuide()) {
-            return redirect()->route('profile.index')
-                ->with('message', __('profile.guide_application_already_pending'));
-        }
-
-        if ($isFastLane && \App\Models\User::where('email', $request->email)->exists()) {
-            return back()->withInput()->withErrors([
-                'email' => __('profile.guide_email_already_registered'),
-            ]);
+            $message = __('profile.guide_application_already_pending');
+            if ($wantsJson) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'redirect' => route('profile.index'),
+                ]);
+            }
+            return redirect()->route('profile.index')->with('message', $message);
         }
 
         $user = $this->onboardingService->submit(
@@ -90,8 +137,20 @@ class GuideOnboardingController extends Controller
             Auth::login($user);
         }
 
+        $successMessage = $loggedInExisting
+            ? __('profile.guide_logged_in_existing_account')
+            : __('profile.guide_application_submitted');
+
+        if ($wantsJson) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+                'redirect' => route('profile.guide-profile'),
+            ]);
+        }
+
         return redirect()
             ->route('profile.guide-profile')
-            ->with('message', __('profile.guide_application_submitted'));
+            ->with('message', $successMessage);
     }
 }

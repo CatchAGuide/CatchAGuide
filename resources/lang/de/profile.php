@@ -752,6 +752,8 @@ return [
     'guide_application_already_pending' => 'Deine Guide-Anfrage wird bereits geprüft.',
     'already_verified_guide' => 'Du bist bereits als Guide freigeschaltet.',
     'guide_email_already_registered' => 'Diese E-Mail ist bereits registriert. Bitte melde Dich an und fahre in Deinem Konto fort.',
+    'guide_existing_account_wrong_password' => 'Es existiert bereits ein Konto mit dieser E-Mail. Bitte gib Dein bestehendes Passwort ein, um fortzufahren, oder melde Dich zuerst an.',
+    'guide_logged_in_existing_account' => 'Willkommen zurück! Du wurdest mit Deinem bestehenden Konto angemeldet und Deine Bewerbung wurde übermittelt.',
     'guide_profile_on_separate_page' => 'Guide-Profil und Zahlungsdaten verwaltest Du auf der Seite',
     'onboarding_step_account' => 'Konto',
     'onboarding_step_type' => 'Guide-Typ',

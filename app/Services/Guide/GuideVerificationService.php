@@ -5,6 +5,7 @@ namespace App\Services\Guide;
 use App\Mail\Guide\GuideApplicationRejectedMail;
 use App\Mail\Guide\GuideApprovedMail;
 use App\Models\GuideRequest;
+use App\Models\Guiding;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -40,6 +41,8 @@ class GuideVerificationService
             if ($user->information) {
                 $user->information->update(['request_as_guide' => false]);
             }
+
+            $this->autoPublishCompleteDrafts($user);
 
             Mail::send(new GuideApprovedMail($user));
 
@@ -112,8 +115,46 @@ class GuideVerificationService
             $user->information->update(['request_as_guide' => false]);
         }
 
+        $this->autoPublishCompleteDrafts($user);
+
         Mail::send(new GuideApprovedMail($user));
 
         return $user;
+    }
+
+    /**
+     * Publish every draft tour belonging to the user that already has all the
+     * required public-listing data. Drafts with missing data stay as drafts so
+     * the guide can finish them later.
+     *
+     * @return int The number of drafts that were promoted to published.
+     */
+    protected function autoPublishCompleteDrafts(User $user): int
+    {
+        $publishedCount = 0;
+
+        Guiding::query()
+            ->where('user_id', $user->id)
+            ->where('status', 2)
+            ->get()
+            ->each(function (Guiding $guiding) use (&$publishedCount) {
+                try {
+                    if (! $guiding->isCompleteForPublishing()) {
+                        return;
+                    }
+
+                    $guiding->status = 1;
+                    $guiding->saveQuietly();
+                    $publishedCount++;
+                } catch (\Throwable $e) {
+                    Log::warning('Auto-publish on guide approval skipped a draft', [
+                        'guiding_id' => $guiding->id,
+                        'user_id' => $guiding->user_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            });
+
+        return $publishedCount;
     }
 }
