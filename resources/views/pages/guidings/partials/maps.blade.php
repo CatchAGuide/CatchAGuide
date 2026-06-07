@@ -70,9 +70,7 @@
                 <div class="card-body border-0 p-0">
                     <div class="d-flex">
                         @php
-                            $thumbnailSrc = ($guiding->thumbnail_path && file_exists_cached($guiding->thumbnail_path)) 
-                                ? asset($guiding->thumbnail_path) 
-                                : asset('images/placeholder_guide.jpg');
+                            $thumbnailSrc = media_url($guiding->thumbnail_path);
                         @endphp
                         <img src="{{ $thumbnailSrc }}" alt="{{translate($guiding->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
                     </div>

@@ -1801,6 +1801,63 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon $submitted_at
+ * @property \Illuminate\Support\Carbon|null $reviewed_at
+ * @property int|null $reviewed_by
+ * @property string $decision
+ * @property string|null $internal_notes
+ * @property string|null $rejection_reason
+ * @property int $version
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $reviewer
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereDecision($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereInternalNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereRejectionReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereReviewedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereReviewedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereVersion($value)
+ */
+	class GuideRequest extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $from_status
+ * @property string $to_status
+ * @property int|null $changed_by
+ * @property \Illuminate\Support\Carbon $changed_at
+ * @property string|null $reason
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereChangedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereChangedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereFromStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereToStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereUserId($value)
+ */
+	class GuideStatusLog extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property string|null $language
  * @property string $title
  * @property string $slug
@@ -1967,6 +2024,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding filterByRequestValue($requestValue)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding publiclyVisible()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding radius($latitude, $longitude, $radius)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereAdditionalInfo($value)
@@ -3374,8 +3432,8 @@ namespace App\Models{
  * @property string|null $role
  * @property string|null $guide_status
  * @property string|null $guide_type
- * @property string|null $guide_submitted_at
- * @property string|null $guide_verified_at
+ * @property \Illuminate\Support\Carbon|null $guide_submitted_at
+ * @property \Illuminate\Support\Carbon|null $guide_verified_at
  * @property string|null $profil_image
  * @property int $user_information_id
  * @property string|null $remember_token
@@ -3411,6 +3469,10 @@ namespace App\Models{
  * @property-read string $full_name
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Rating> $given_ratings
  * @property-read int|null $given_ratings_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GuideRequest> $guideRequests
+ * @property-read int|null $guide_requests_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GuideStatusLog> $guideStatusLogs
+ * @property-read int|null $guide_status_logs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Guiding> $guidings
  * @property-read int|null $guidings_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ICalFeed> $icalFeeds
@@ -3568,10 +3630,18 @@ namespace App\Models{
  * @property string|null $phone_country_code
  * @property string|null $city
  * @property string|null $country
+ * @property string|null $company_name
+ * @property string|null $legal_form
+ * @property int|null $founded_year
+ * @property string|null $contact_position
+ * @property string|null $trade_register_number
+ * @property string|null $trade_register_court
+ * @property string|null $tax_number
  * @property string|null $about_me
  * @property string|null $languages
  * @property string|null $favorite_fish
  * @property int|null $fishing_start_year
+ * @property array<array-key, mixed>|null $company_profile
  * @property string|null $proof_of_identity_file_path
  * @property string|null $fishing_permit_file_path
  * @property int $request_as_guide
@@ -3586,18 +3656,26 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereAddressNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereBirthday($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCompanyName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCompanyProfile($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereContactPosition($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFavoriteFish($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFishingPermitFilePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFishingStartYear($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFoundedYear($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereLanguages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereLegalForm($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePhoneCountryCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePostal($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereProofOfIdentityFilePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereRequestAsGuide($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTaxNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTradeRegisterCourt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTradeRegisterNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereUpdatedAt($value)
  */
 	class UserInformation extends \Eloquent {}

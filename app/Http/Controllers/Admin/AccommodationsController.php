@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AccommodationRequest;
 use App\Models\Accommodation;
 use App\Services\Accommodation\AccommodationDataProcessor;
-use App\Services\Accommodation\AccommodationImageProcessor;
 use App\Services\Accommodation\AccommodationSeoService;
 use App\Services\Accommodation\AccommodationCacheService;
+use App\Services\Media\ListingGalleryImageProcessor;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,8 @@ class AccommodationsController extends Controller
 {
     public function __construct(
         private AccommodationDataProcessor $dataProcessor,
-        private AccommodationImageProcessor $imageProcessor,
+        private ListingGalleryImageProcessor $galleryProcessor,
+        private ListingMediaRelocator $mediaRelocator,
         private AccommodationSeoService $seoService,
         private AccommodationCacheService $cacheService
     ) {}
@@ -63,7 +65,7 @@ class AccommodationsController extends Controller
             $accommodationData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $accommodationData['slug'], null);
+            $imageData = $this->galleryProcessor->process($request, 'accommodation', $accommodationData['slug'], null);
             
             if ($imageData) {
                 $accommodationData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -75,7 +77,7 @@ class AccommodationsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData && $accommodation->id) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($accommodation->id, $accommodation->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('accommodation', $accommodation->id, $imageData);
                 $accommodation->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
@@ -162,7 +164,7 @@ class AccommodationsController extends Controller
             }
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $accommodation->slug, $accommodation->id);
+            $imageData = $this->galleryProcessor->process($request, 'accommodation', $accommodation->slug, $accommodation->id);
             
             if ($imageData) {
                 $accommodationData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -174,7 +176,7 @@ class AccommodationsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($accommodation->id, $accommodation->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('accommodation', $accommodation->id, $imageData);
                 $accommodation->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']

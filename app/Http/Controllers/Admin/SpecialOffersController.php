@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SpecialOfferRequest;
 use App\Models\SpecialOffer;
 use App\Services\SpecialOffer\SpecialOfferDataProcessor;
-use App\Services\SpecialOffer\SpecialOfferImageProcessor;
 use App\Services\SpecialOffer\SpecialOfferSeoService;
 use App\Services\SpecialOffer\SpecialOfferCacheService;
+use App\Services\Media\ListingGalleryImageProcessor;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,8 @@ class SpecialOffersController extends Controller
 {
     public function __construct(
         private SpecialOfferDataProcessor $dataProcessor,
-        private SpecialOfferImageProcessor $imageProcessor,
+        private ListingGalleryImageProcessor $galleryProcessor,
+        private ListingMediaRelocator $mediaRelocator,
         private SpecialOfferSeoService $seoService,
         private SpecialOfferCacheService $cacheService
     ) {}
@@ -65,7 +67,7 @@ class SpecialOffersController extends Controller
             $specialOfferData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $specialOfferData['slug'], null);
+            $imageData = $this->galleryProcessor->process($request, 'special_offer', $specialOfferData['slug'], null);
             
             if ($imageData) {
                 $specialOfferData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -80,7 +82,7 @@ class SpecialOffersController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData && $specialOffer->id) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($specialOffer->id, $specialOffer->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('special_offer', $specialOffer->id, $imageData);
                 $specialOffer->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
@@ -170,7 +172,7 @@ class SpecialOffersController extends Controller
             }
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $specialOffer->slug, $specialOffer->id);
+            $imageData = $this->galleryProcessor->process($request, 'special_offer', $specialOffer->slug, $specialOffer->id);
             
             if ($imageData) {
                 $specialOfferData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -219,7 +221,7 @@ class SpecialOffersController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($specialOffer->id, $specialOffer->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('special_offer', $specialOffer->id, $imageData);
                 $specialOffer->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\Media\MediaUrlResolver;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
 class ImageOptimizationService
@@ -13,8 +13,16 @@ class ImageOptimizationService
     private const THUMBNAIL_HEIGHT = 300;
     private const QUALITY = 80;
 
+    public function __construct(
+        private readonly MediaUrlResolver $mediaUrlResolver,
+    ) {}
+
     public function getOptimizedImage($imagePath, $width = null, $height = null)
     {
+        if ($this->shouldServeRemoteDirectly($imagePath)) {
+            return $this->mediaUrlResolver->resolve($imagePath);
+        }
+
         $cacheKey = $this->generateCacheKey($imagePath, $width, $height);
         
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($imagePath, $width, $height) {
@@ -29,6 +37,10 @@ class ImageOptimizationService
 
     private function optimizeImage($imagePath, $width = null, $height = null)
     {
+        if ($this->shouldServeRemoteDirectly($imagePath)) {
+            return $this->mediaUrlResolver->resolve($imagePath);
+        }
+
         $cacheDir = public_path('cache/guidings');
         if (!file_exists($cacheDir)) {
             mkdir($cacheDir, 0777, true);
@@ -61,6 +73,16 @@ class ImageOptimizationService
         $image->save($cacheFile);
 
         return asset('cache/guidings/' . basename($cacheFile));
+    }
+
+    private function shouldServeRemoteDirectly(?string $imagePath): bool
+    {
+        if ($imagePath === null || $imagePath === '') {
+            return false;
+        }
+
+        return $this->mediaUrlResolver->isRemoteUrl($imagePath)
+            || $this->mediaUrlResolver->isCloudPath($imagePath);
     }
 
     private function generateCacheKey($imagePath, $width = null, $height = null)

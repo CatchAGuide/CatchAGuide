@@ -6,12 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Vacation;
 use App\Models\VacationBooking;
 use App\Services\AdminChangeTracker;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class VacationsController extends Controller
 {
+    public function __construct(
+        private ListingMediaRelocator $mediaRelocator,
+    ) {}
+
     public function index()
     {
         $vacations = Vacation::all();
@@ -89,6 +94,7 @@ class VacationsController extends Controller
             $formattedData = $this->formatRequestData($request);
             
             // Handle gallery images
+            $galleryImages = null;
             if ($request->hasFile('gallery')) {
                 $galleryImages = $this->saveImages($request);
                 $formattedData['gallery'] = json_encode($galleryImages);
@@ -101,6 +107,10 @@ class VacationsController extends Controller
             try {
                 // Create the vacation
                 $vacation = Vacation::create($formattedData);
+
+                if ($galleryImages !== null) {
+                    $this->relocateVacationMediaFromTemp($vacation, $galleryImages);
+                }
 
                 // Handle Accommodations
                 if ($request->has('accommodations')) {
@@ -252,7 +262,7 @@ class VacationsController extends Controller
             
             // Handle gallery images
             if ($request->hasFile('gallery')) {
-                $galleryImages = $this->saveImages($request);
+                $galleryImages = $this->saveImages($request, (int) $id);
                 
                 // Merge with existing images if any
                 if ($request->has('existing_gallery')) {
@@ -397,19 +407,38 @@ class VacationsController extends Controller
         return redirect()->route('admin.vacations.index')->with('success', 'Vacation status changed successfully');
     }
 
-    private function saveImages($request)
+    private function saveImages($request, ?int $vacationId = null)
     {
         $galeryImages = [];
         if ($request->has('gallery')) {
+            $directory = media_listing_directory('vacation', $vacationId);
             $imageCount = count($galeryImages);
             foreach($request->file('gallery') as $index => $image){
                 $index = $index + $imageCount;
-                $webp_path = media_upload($image, 'vacations-images', $request->slug. "-". $index . "-" . time());
+                $webp_path = media_upload($image, $directory, $request->slug. "-". $index . "-" . time(), 75, $vacationId);
                 $galeryImages[] = $webp_path;
             }
         }
 
         return $galeryImages;
+    }
+
+    private function relocateVacationMediaFromTemp(Vacation $vacation, array $galleryImages): void
+    {
+        if ($vacation->id <= 0 || empty($galleryImages)) {
+            return;
+        }
+
+        $relocated = $this->mediaRelocator->promoteForListing(
+            'vacation',
+            (int) $vacation->id,
+            [
+                'gallery_images' => $galleryImages,
+                'thumbnail_path' => '',
+            ]
+        );
+
+        $vacation->update(['gallery' => json_encode($relocated['gallery_images'])]);
     }
 
     public function show(VacationBooking $booking)

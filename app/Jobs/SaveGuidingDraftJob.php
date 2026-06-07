@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Guiding;
 use App\Services\CalendarScheduleService;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,7 +36,7 @@ class SaveGuidingDraftJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(ListingMediaRelocator $mediaRelocator): void
     {
         try {
             DB::beginTransaction();
@@ -81,6 +82,22 @@ class SaveGuidingDraftJob implements ShouldQueue
             }
 
             $guiding->save();
+
+            $gallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+            if (! empty($gallery) || ! empty($guiding->thumbnail_path)) {
+                $relocated = $mediaRelocator->promoteForListing(
+                    'guiding',
+                    (int) $guiding->id,
+                    [
+                        'gallery_images' => $gallery,
+                        'thumbnail_path' => $guiding->thumbnail_path,
+                    ]
+                );
+
+                $guiding->gallery_images = json_encode($relocated['gallery_images']);
+                $guiding->thumbnail_path = $relocated['thumbnail_path'] ?: $guiding->thumbnail_path;
+                $guiding->saveQuietly();
+            }
 
             // Refresh the model to ensure we have the latest data including ID
             $guiding->refresh();

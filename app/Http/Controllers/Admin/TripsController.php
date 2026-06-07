@@ -12,7 +12,8 @@ use App\Models\Trip;
 use App\Models\Water;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripDataProcessor;
-use App\Services\Trip\TripImageProcessor;
+use App\Services\Media\ListingGalleryImageProcessor;
+use App\Services\Media\ListingMediaRelocator;
 use App\Services\Trip\TripSeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,8 @@ class TripsController extends Controller
 {
     public function __construct(
         private TripDataProcessor $dataProcessor,
-        private TripImageProcessor $imageProcessor,
+        private ListingGalleryImageProcessor $galleryProcessor,
+        private ListingMediaRelocator $mediaRelocator,
         private TripSeoService $seoService,
         private TripCacheService $cacheService
     ) {
@@ -59,7 +61,7 @@ class TripsController extends Controller
             $tripData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
             $tripData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
-            $imageData = $this->imageProcessor->processImageUploads($request, $tripData['slug'], null);
+            $imageData = $this->galleryProcessor->process($request, 'trip', $tripData['slug'], null);
             if ($imageData) {
                 $tripData['thumbnail_path'] = $imageData['thumbnail_path'];
                 $tripData['gallery_images'] = $imageData['gallery_images'];
@@ -68,7 +70,7 @@ class TripsController extends Controller
             $trip = Trip::create($tripData);
 
             if ($imageData && $trip->id) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($trip->id, $trip->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('trip', $trip->id, $imageData);
                 $trip->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path'],
@@ -76,7 +78,7 @@ class TripsController extends Controller
                 $trip->refresh();
             }
 
-            $providerPhoto = $this->imageProcessor->processProviderPhoto($request, $trip->slug, $trip->id);
+            $providerPhoto = $this->galleryProcessor->uploadExtraFile($request, 'trip', 'provider_photo', $trip->slug, $trip->id, 'provider');
             if ($providerPhoto) {
                 $trip->update(['provider_photo' => $providerPhoto]);
             }
@@ -147,7 +149,7 @@ class TripsController extends Controller
                 $tripData['slug'] = $this->seoService->generateSlug($request->title, $trip->id);
             }
 
-            $imageData = $this->imageProcessor->processImageUploads($request, $trip->slug, $trip->id);
+            $imageData = $this->galleryProcessor->process($request, 'trip', $trip->slug, $trip->id);
             if ($imageData) {
                 $tripData['thumbnail_path'] = $imageData['thumbnail_path'];
                 $tripData['gallery_images'] = $imageData['gallery_images'];
@@ -156,14 +158,14 @@ class TripsController extends Controller
             $trip->update($tripData);
 
             if ($imageData) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($trip->id, $trip->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('trip', $trip->id, $imageData);
                 $trip->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path'],
                 ]);
             }
 
-            $providerPhoto = $this->imageProcessor->processProviderPhoto($request, $trip->slug, $trip->id);
+            $providerPhoto = $this->galleryProcessor->uploadExtraFile($request, 'trip', 'provider_photo', $trip->slug, $trip->id, 'provider');
             if ($providerPhoto) {
                 $trip->update(['provider_photo' => $providerPhoto]);
             }

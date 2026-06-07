@@ -7,9 +7,10 @@ use App\Http\Requests\CampRequest;
 use App\Models\Camp;
 use App\Models\CampFacility;
 use App\Services\Camp\CampDataProcessor;
-use App\Services\Camp\CampImageProcessor;
 use App\Services\Camp\CampSeoService;
 use App\Services\Camp\CampCacheService;
+use App\Services\Media\ListingGalleryImageProcessor;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,8 @@ class CampsController extends Controller
 {
     public function __construct(
         private CampDataProcessor $dataProcessor,
-        private CampImageProcessor $imageProcessor,
+        private ListingGalleryImageProcessor $galleryProcessor,
+        private ListingMediaRelocator $mediaRelocator,
         private CampSeoService $seoService,
         private CampCacheService $cacheService
     ) {}
@@ -67,7 +69,7 @@ class CampsController extends Controller
             $campData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $campData['slug'], null);
+            $imageData = $this->galleryProcessor->process($request, 'camp', $campData['slug'], null);
             
             if ($imageData) {
                 $campData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -82,7 +84,7 @@ class CampsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData && $camp->id) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($camp->id, $camp->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('camp', $camp->id, $imageData);
                 $camp->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
@@ -183,7 +185,7 @@ class CampsController extends Controller
             }
 
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $camp->slug, $camp->id);
+            $imageData = $this->galleryProcessor->process($request, 'camp', $camp->slug, $camp->id);
             
             if ($imageData) {
                 $campData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -232,7 +234,7 @@ class CampsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($camp->id, $camp->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('camp', $camp->id, $imageData);
                 $camp->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']

@@ -24,7 +24,7 @@ trait GuidingFilterOptimization
     protected function initializeOptimizationServices()
     {
         if (!$this->imageOptimizationService) {
-            $this->imageOptimizationService = new ImageOptimizationService();
+            $this->imageOptimizationService = app(ImageOptimizationService::class);
         }
     }
 

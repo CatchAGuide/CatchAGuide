@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Media\ListingMediaRelocator;
 
 class GuidingsController extends Controller
 {
@@ -58,7 +59,10 @@ class GuidingsController extends Controller
      * - Manual disable/enable toggles between 0 and 1
      */
 
-    public function __construct(GuidingTranslationService $guidingTranslationService)
+    public function __construct(
+        GuidingTranslationService $guidingTranslationService,
+        private ListingMediaRelocator $mediaRelocator,
+    )
     {
         $this->initializeOptimizationServices();
         $this->guidingTranslationService = $guidingTranslationService;
@@ -219,7 +223,7 @@ class GuidingsController extends Controller
             $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
             $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
 
-            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap, withGallery: false);
             $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
 
             // Apply stored translations for the current locale so listing titles use manual translations
@@ -461,7 +465,7 @@ class GuidingsController extends Controller
                 $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
                 $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
 
-                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap, withGallery: false);
                 $this->preComputeGuidingData($guidings->getCollection(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
 
                 // Apply stored translations for the current locale so listing titles use manual translations
@@ -879,6 +883,7 @@ class GuidingsController extends Controller
             }
 
             $guiding->save();
+            $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
@@ -983,10 +988,11 @@ class GuidingsController extends Controller
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
             $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
+            $guidingId = (int) $request->input('guiding_id', 0);
+            $directory = media_listing_directory('guiding', $guidingId > 0 ? $guidingId : null);
             
             foreach($request->file('title_image') as $index => $image) {
                 $originalFilename = $image->getClientOriginalName();
-                $filename = 'guidings-images/'.$originalFilename;
                 
                 // Check if this image was already processed (existing image)
                 if (in_array($originalFilename, $processedFilenames)) {
@@ -994,9 +1000,9 @@ class GuidingsController extends Controller
                 }
                 
                 // Check if this image is in the image_list (new image that should be kept)
-                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
+                if (in_array($originalFilename, $imageList) || in_array('/' . $originalFilename, $imageList)) {
                     $index = $index + $imageCount;
-                    $webp_path = media_upload($image, 'guidings-images', $tempSlug. "-". $index . "-" . time());
+                    $webp_path = media_upload($image, $directory, $tempSlug. "-". $index . "-" . time());
                     $galeryImages[] = $webp_path;
                     $processedFilenames[] = $originalFilename; // Track as processed
                 }
@@ -1241,32 +1247,35 @@ class GuidingsController extends Controller
     /**
      * Pre-compute expensive view data to avoid N+1 queries and repeated function calls
      */
-    private function preComputeGuidingData($guidings, $targetsMap = null, $methodsMap = null, $watersMap = null, $inclussionsMap = null)
+    private function preComputeGuidingData($guidings, $targetsMap = null, $methodsMap = null, $watersMap = null, $inclussionsMap = null, bool $withGallery = true)
     {
         if (empty($guidings)) {
             return;
         }
         foreach ($guidings as $guiding) {
-            $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
-            $optimizedImages = [];
-            
-            if (!empty($guiding->thumbnail_path)) {
-                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
-            }
-            
-            foreach ($galleryImages as $imagePath) {
-                if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
-                    continue;
+            if ($withGallery) {
+                $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
+                $optimizedImages = [];
+
+                if (!empty($guiding->thumbnail_path)) {
+                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
                 }
-                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
+
+                foreach ($galleryImages as $imagePath) {
+                    if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
+                        continue;
+                    }
+                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
+                }
+                $guiding->cached_gallery_images = $optimizedImages;
             }
-            $guiding->cached_gallery_images = $optimizedImages;
+
             $guiding->cached_target_fish_names = $guiding->getTargetFishNames($targetsMap);
             $guiding->cached_inclusion_names = $guiding->getInclusionNames($inclussionsMap);
             $guiding->cached_review_count = $guiding->user->reviews->count();
             $guiding->cached_average_rating = $guiding->user->average_rating();
-            $guiding->cached_boat_type_name = $guiding->is_boat ? 
-                ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
+            $guiding->cached_boat_type_name = $guiding->is_boat ?
+                ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) :
                 __('guidings.shore');
         }
     }
@@ -1385,6 +1394,8 @@ class GuidingsController extends Controller
 
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
+            $directory = media_listing_directory('guiding', $guiding->id > 0 ? (int) $guiding->id : null);
+
             foreach ($request->file('title_image') as $index => $image) {
                 $originalFilename = $image->getClientOriginalName();
 
@@ -1393,7 +1404,7 @@ class GuidingsController extends Controller
                 }
 
                 $index = $index + $imageCount;
-                $webpPath = media_upload($image, 'guidings-images', $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
+                $webpPath = media_upload($image, $directory, $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
                 $webpPath = ltrim($webpPath, '/');
                 $normalizedNew = $normalizePath($webpPath);
 
@@ -2077,10 +2088,8 @@ class GuidingsController extends Controller
                 $guiding->status = 2;
             }
 
-            // Fill the guiding with form data (this was missing!)
-            $this->fillGuidingFromRequest($guiding, $request, true);
-
             $guiding->save();
+            $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
             return response()->json([
@@ -2097,6 +2106,32 @@ class GuidingsController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    private function relocateGuidingMediaFromTemp(Guiding $guiding): void
+    {
+        if ($guiding->id <= 0) {
+            return;
+        }
+
+        $gallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        if (empty($gallery) && empty($guiding->thumbnail_path)) {
+            return;
+        }
+
+        $relocated = $this->mediaRelocator->promoteForListing(
+            'guiding',
+            (int) $guiding->id,
+            [
+                'gallery_images' => $gallery,
+                'thumbnail_path' => $guiding->thumbnail_path,
+            ]
+        );
+
+        $guiding->gallery_images = json_encode($relocated['gallery_images']);
+        $guiding->thumbnail_path = $relocated['thumbnail_path'] ?: $guiding->thumbnail_path;
+        $guiding->saveQuietly();
     }
 
 

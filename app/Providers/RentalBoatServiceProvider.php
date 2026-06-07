@@ -8,7 +8,6 @@ use App\Services\RentalBoat\RentalBoatRequirementsProcessor;
 use App\Services\RentalBoat\RentalBoatInformationProcessor;
 use App\Services\RentalBoat\RentalBoatPricingProcessor;
 use App\Services\RentalBoat\RentalBoatExtrasProcessor;
-use App\Services\RentalBoat\RentalBoatImageProcessor;
 use App\Services\RentalBoat\RentalBoatSeoService;
 use App\Services\RentalBoat\RentalBoatCacheService;
 
@@ -24,7 +23,6 @@ class RentalBoatServiceProvider extends ServiceProvider
         $this->app->singleton(RentalBoatInformationProcessor::class);
         $this->app->singleton(RentalBoatPricingProcessor::class);
         $this->app->singleton(RentalBoatExtrasProcessor::class);
-        $this->app->singleton(RentalBoatImageProcessor::class);
         $this->app->singleton(RentalBoatSeoService::class);
         $this->app->singleton(RentalBoatCacheService::class);
         
