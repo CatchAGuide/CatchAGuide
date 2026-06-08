@@ -24,6 +24,34 @@
         return el && el.value === '1' && isUpdateEl && isUpdateEl.value === '1';
     }
     window.isAdminEdit = isAdminEdit;
+
+    function syncGalleryFromDraftResponse(data) {
+        if (!data || !Array.isArray(data.gallery_images)) {
+            return;
+        }
+
+        const galleryJson = JSON.stringify(data.gallery_images);
+        const existingImagesInput = document.getElementById('existing_images');
+        const imageListInput = document.getElementById('image_list');
+
+        if (existingImagesInput) {
+            existingImagesInput.value = galleryJson;
+        }
+        if (imageListInput) {
+            imageListInput.value = galleryJson;
+        }
+        if (data.thumbnail_path) {
+            const thumbnailInput = document.getElementById('thumbnail_path');
+            if (thumbnailInput) {
+                thumbnailInput.value = data.thumbnail_path;
+            }
+        }
+
+        if (window.imageManagerLoaded && typeof imageManagerLoaded.setGallerySnapshot === 'function') {
+            imageManagerLoaded.setGallerySnapshot(data.gallery_images, data.thumbnail_path || '');
+        }
+    }
+    window.syncGalleryFromDraftResponse = syncGalleryFromDraftResponse;
     window.errorMapping = window.errorMapping || {
         title: { field: 'Title', step: 1 },
         title_image: { field: 'Galery Image', step: 1 },
@@ -138,6 +166,11 @@
     }
     
     function initializeImageManager() {
+        if (window.imageManagerInitialized) {
+            return;
+        }
+        window.imageManagerInitialized = true;
+
         imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', '#cropped_image');
         
         if (document.getElementById('is_update').value === '1') {
@@ -445,6 +478,8 @@
                 // Mark that we have already sent images at least once for this draft
                 window.hasUploadedImagesInDraft = true;
             }
+
+            syncGalleryFromDraftResponse(data);
 
             if (shouldRedirect) {
                 // Redirect to my guidings page
@@ -2083,22 +2118,7 @@
             }, 100);
         });
         
-        const imageUploadInput = document.getElementById('title_image');
-        if (imageUploadInput) {
-            imageUploadInput.addEventListener('change', function(event) {
-                if (imageManagerLoaded) {
-                    try {
-                        imageManagerLoaded.handleFileSelect(event.target.files);
-                    } catch (error) {
-                        console.error('Error in handleFileSelect:', error);
-                    }
-                } else {
-                    console.error('ImageManager not initialized');
-                }
-            });
-        } else {
-            console.error('File input element not found');
-        }
+        // File input change is handled inside ImageManager.initEventListeners() — do not attach a second listener here.
 
         // Add click handlers for step buttons
         document.querySelectorAll('.step-button').forEach(button => {
@@ -2250,6 +2270,7 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
+                syncGalleryFromDraftResponse(data);
                 resolve(data);
             })
             .catch(error => {

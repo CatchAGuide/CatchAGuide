@@ -90,6 +90,11 @@ class SaveGuidingDraftJob implements ShouldQueue
 
             DB::commit();
 
+            $pathsToDelete = $this->guidingData['paths_to_delete'] ?? [];
+            foreach (array_unique(array_filter($pathsToDelete)) as $path) {
+                media_delete($path);
+            }
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error saving draft: ' . $e->getMessage());

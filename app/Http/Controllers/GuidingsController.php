@@ -43,6 +43,72 @@ class GuidingsController extends Controller
     use GuidingFilterOptimization;
     
     protected GuidingTranslationService $guidingTranslationService;
+
+    /**
+     * Normalize a guiding image path for consistent comparison (strip URL, leading slashes).
+     */
+    private function normalizeGuidingImagePath($path): ?string
+    {
+        if (is_array($path)) {
+            $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
+        }
+
+        if (!is_string($path)) {
+            return null;
+        }
+
+        $parsedPath = parse_url($path, PHP_URL_PATH);
+        if ($parsedPath) {
+            $path = $parsedPath;
+        }
+
+        return ltrim($path, '/');
+    }
+
+    /**
+     * Compare two normalized image path lists (order-independent).
+     */
+    private function guidingImageListsMatch(array $normalizedA, array $normalizedB): bool
+    {
+        $a = array_values(array_filter($normalizedA));
+        $b = array_values(array_filter($normalizedB));
+        sort($a);
+        sort($b);
+
+        return $a === $b;
+    }
+
+    /**
+     * Skip image processing when no new uploads and the client image_list matches the stored gallery.
+     */
+    private function shouldSkipGuidingImageProcessing(Guiding $guiding, StoreNewGuidingRequest $request, array $imageListNormalized): bool
+    {
+        if ($request->has('title_image')) {
+            return false;
+        }
+
+        $currentGallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        $currentNormalized = array_values(array_filter(array_map(
+            fn ($path) => $this->normalizeGuidingImagePath($path),
+            $currentGallery
+        )));
+
+        if (empty($currentNormalized) && empty($imageListNormalized)) {
+            return true;
+        }
+
+        return $this->guidingImageListsMatch($currentNormalized, $imageListNormalized);
+    }
+
+    /**
+     * Delete guiding image files from disk (called only after a successful DB commit).
+     */
+    private function deleteGuidingImagePaths(array $paths): void
+    {
+        foreach (array_unique(array_filter($paths)) as $path) {
+            media_delete($path);
+        }
+    }
     
     /**
      * Guiding Status Values:
@@ -819,12 +885,14 @@ class GuidingsController extends Controller
             // Store original status for updates
             $originalStatus = $isUpdate ? $guiding->status : null;
 
-            $this->fillGuidingFromRequest($guiding, $request, $isDraft);
-
-            // Slug generation (always for new, or if title/location changed)
+            // Slug must exist before image uploads for new guidings
             if (!$isUpdate) {
-                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
+                $guiding->slug = slugify(
+                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+                );
             }
+
+            $pathsToDelete = $this->fillGuidingFromRequest($guiding, $request, $isDraft);
 
             // Only enforce strict requirements if not draft
             // Count images based on the guiding's final gallery state
@@ -881,6 +949,8 @@ class GuidingsController extends Controller
             $guiding->save();
             DB::commit();
 
+            $this->deleteGuidingImagePaths($pathsToDelete);
+
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
             if ($savedAsDraftDueToPending) {
                 $redirectUrl = route('profile.myguidings', ['notice' => 'pending_publish']);
@@ -910,36 +980,15 @@ class GuidingsController extends Controller
     public function saveDraft(StoreNewGuidingRequest $request)
     {
         try {
-            // Handle file uploads synchronously first
-            $processedData = $this->processFileUploads($request);
-            
-            // Prepare data for the job
-            $guidingData = $this->prepareGuidingDataForJob($request, $processedData);
-            
-            $isUpdate = $request->input('is_update') == '1';
-            $guidingId = $isUpdate ? $request->input('guiding_id') : null;
-            
-            // Add original status to guiding data for the job to use
-            if ($isUpdate && $guidingId) {
-                $existingGuiding = Guiding::find($guidingId);
-                $originalStatus = $existingGuiding ? $existingGuiding->status : null;
-                $guidingData['original_status'] = $originalStatus;
-            }
-            
-            // Dispatch the job for database operations
-            \App\Jobs\SaveGuidingDraftJob::dispatch(
-                $guidingData, 
-                $request->has('user_id') && $request->input('user_id') != null && $request->input('user_id') != '' ? $request->input('user_id') : auth()->id(), 
-                $isUpdate, 
-                $guidingId
-            );
+            $result = $this->persistGuidingDraft($request);
 
             return response()->json([
                 'success' => true,
-                'guiding_id' => $guidingId,
-                'message' => 'Draft is being saved...'
+                'guiding_id' => $result['guiding_id'],
+                'gallery_images' => $result['gallery_images'],
+                'thumbnail_path' => $result['thumbnail_path'] ?? '',
+                'message' => 'Draft saved successfully.',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error in saveDraft: ' . $e->getMessage());
             return response()->json([
@@ -951,68 +1000,65 @@ class GuidingsController extends Controller
     }
 
     /**
-     * Process file uploads synchronously and return processed data
+     * Persist a guiding draft synchronously with safe deferred image deletion.
+     *
+     * @return array{guiding_id: int, gallery_images: array, thumbnail_path: string|null}
      */
-    private function processFileUploads(StoreNewGuidingRequest $request): array
+    private function persistGuidingDraft(StoreNewGuidingRequest $request): array
     {
-        $galeryImages = [];
-        $imageList = json_decode($request->input('image_list', '[]')) ?? [];
-        $thumbnailPath = '';
-        $processedFilenames = []; // Track processed filenames to prevent duplicates
+        DB::beginTransaction();
 
-        // Handle existing images for updates
-        if ($request->input('is_update') == '1') {
-            $existingImagesJson = $request->input('existing_images');
-            $existingImages = json_decode($existingImagesJson, true) ?? [];
-            $keepImages = array_filter($imageList);
+        try {
+            $isUpdate = $request->input('is_update') == '1';
+            $originalStatus = null;
 
-            foreach ($existingImages as $existingImage) {
-                $imagePath = $existingImage;
-                $imagePathWithSlash = '/' . $existingImage;
-                if (in_array($imagePath, $keepImages) || in_array($imagePathWithSlash, $keepImages)) {
-                    $galeryImages[] = $existingImage;
-                    // Track this image as processed to prevent duplicates
-                    $processedFilenames[] = basename($existingImage);
-                } else {
-                    media_delete($existingImage);
+            if ($isUpdate && $request->input('guiding_id')) {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+                $originalStatus = $guiding->status;
+            } else {
+                $guiding = Guiding::where('user_id', auth()->id())
+                    ->where('status', 2)
+                    ->where('title', $request->input('title'))
+                    ->where('city', $request->input('city'))
+                    ->where('country', $request->input('country'))
+                    ->where('region', $request->input('region'))
+                    ->first();
+
+                if (!$guiding) {
+                    $guiding = new Guiding(['user_id' => auth()->id()]);
                 }
             }
-        }
 
-        // Process new file uploads
-        if ($request->has('title_image')) {
-            $imageCount = count($galeryImages);
-            $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
-            
-            foreach($request->file('title_image') as $index => $image) {
-                $originalFilename = $image->getClientOriginalName();
-                $filename = 'guidings-images/'.$originalFilename;
-                
-                // Check if this image was already processed (existing image)
-                if (in_array($originalFilename, $processedFilenames)) {
-                    continue;
-                }
-                
-                // Check if this image is in the image_list (new image that should be kept)
-                if (in_array($filename, $imageList) || in_array('/' . $filename, $imageList)) {
-                    $index = $index + $imageCount;
-                    $webp_path = media_upload($image, 'guidings-images', $tempSlug. "-". $index . "-" . time());
-                    $galeryImages[] = $webp_path;
-                    $processedFilenames[] = $originalFilename; // Track as processed
-                }
+            if (!$isUpdate) {
+                $guiding->slug = slugify(
+                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+                );
             }
-        }
 
-        // Set the primary image if available
-        $primaryImageIndex = $request->input('primaryImage', 0);
-        if (isset($galeryImages[$primaryImageIndex])) {
-            $thumbnailPath = $galeryImages[$primaryImageIndex];
-        }
+            $pathsToDelete = $this->fillGuidingFromRequest($guiding, $request, true);
 
-        return [
-            'gallery_images' => $galeryImages,
-            'thumbnail_path' => $thumbnailPath
-        ];
+            $guiding->is_newguiding = 1;
+
+            if ($isUpdate && ((int) $originalStatus === 1 || (int) $originalStatus === 0)) {
+                $guiding->status = $originalStatus;
+            } else {
+                $guiding->status = 2;
+            }
+
+            $guiding->save();
+            DB::commit();
+
+            $this->deleteGuidingImagePaths($pathsToDelete);
+
+            return [
+                'guiding_id' => $guiding->id,
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -1321,11 +1367,12 @@ class GuidingsController extends Controller
     }
 
     /**
-     * Legacy method maintained for compatibility with guidingsStore
      * Fill a Guiding model from request data.
      * Handles both draft and final save logic.
+     *
+     * @return array<int, string> Image paths to delete after a successful DB commit
      */
-    private function fillGuidingFromRequest(Guiding $guiding, StoreNewGuidingRequest $request, bool $isDraft)
+    private function fillGuidingFromRequest(Guiding $guiding, StoreNewGuidingRequest $request, bool $isDraft): array
     {
         // Step 1: Basic fields
         $guiding->location = $request->input('location', '');
@@ -1336,109 +1383,7 @@ class GuidingsController extends Controller
         $guiding->city = $request->input('city', '');
         $guiding->region = $request->input('region', '');
 
-        // Step 1: Images
-        $galeryImages = [];
-        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
-        $processedFilenames = []; // Track processed filenames to prevent duplicates
-
-        $normalizePath = function ($path) {
-            if (is_array($path)) {
-                $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
-            }
-
-            if (!is_string($path)) {
-                return null;
-            }
-
-            $parsedPath = parse_url($path, PHP_URL_PATH);
-            if ($parsedPath) {
-                $path = $parsedPath;
-            }
-
-            return ltrim($path, '/');
-        };
-
-        $imageListNormalized = array_values(array_filter(array_map($normalizePath, (array) $imageListRaw)));
-        $imageListLookup = array_flip($imageListNormalized);
-
-        if ($request->input('is_update') == '1') {
-            $existingImagesJson = $request->input('existing_images');
-            $existingImages = json_decode($existingImagesJson, true) ?? [];
-
-            foreach ($existingImages as $existingImage) {
-                $normalizedExisting = $normalizePath($existingImage);
-
-                if (!$normalizedExisting) {
-                    continue;
-                }
-
-                if (isset($imageListLookup[$normalizedExisting])) {
-                    $galeryImages[$normalizedExisting] = $normalizedExisting === $existingImage
-                        ? $existingImage
-                        : ltrim($existingImage, '/');
-                    $processedFilenames[] = basename($normalizedExisting);
-                } else {
-                    media_delete($existingImage);
-                }
-            }
-        }
-
-        if ($request->has('title_image')) {
-            $imageCount = count($galeryImages);
-            foreach ($request->file('title_image') as $index => $image) {
-                $originalFilename = $image->getClientOriginalName();
-
-                if (in_array($originalFilename, $processedFilenames, true)) {
-                    continue;
-                }
-
-                $index = $index + $imageCount;
-                $webpPath = media_upload($image, 'guidings-images', $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
-                $webpPath = ltrim($webpPath, '/');
-                $normalizedNew = $normalizePath($webpPath);
-
-                if ($normalizedNew) {
-                    $galeryImages[$normalizedNew] = $webpPath;
-                    $processedFilenames[] = $originalFilename;
-                }
-            }
-        }
-
-        if (empty($galeryImages) && !empty($imageListNormalized)) {
-            foreach ($imageListNormalized as $normalizedPath) {
-                $galeryImages[$normalizedPath] = $normalizedPath;
-            }
-        }
-
-        if (!empty($galeryImages)) {
-            $orderedGallery = [];
-
-            if (!empty($imageListNormalized)) {
-                foreach ($imageListNormalized as $normalizedPath) {
-                    if (isset($galeryImages[$normalizedPath])) {
-                        $orderedGallery[] = $galeryImages[$normalizedPath];
-                        unset($galeryImages[$normalizedPath]);
-                    }
-                }
-            }
-
-            if (!empty($galeryImages)) {
-                $orderedGallery = array_merge($orderedGallery, array_values($galeryImages));
-            }
-
-            $orderedGallery = array_values(array_filter($orderedGallery));
-
-            if (!empty($orderedGallery)) {
-                $primaryImageIndex = (int) $request->input('primaryImage', 0);
-                if (isset($orderedGallery[$primaryImageIndex])) {
-                    $guiding->thumbnail_path = $orderedGallery[$primaryImageIndex];
-                } else {
-                    $guiding->thumbnail_path = $orderedGallery[0];
-                }
-
-                $guiding->gallery_images = json_encode($orderedGallery);
-            }
-        }
+        $pathsToDelete = $this->processGuidingImages($guiding, $request);
 
         // Step 2: Boat and fishing info
         $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -1620,6 +1565,140 @@ class GuidingsController extends Controller
             }
         }
         // If not provided, keep existing values (don't overwrite)
+
+        return $pathsToDelete;
+    }
+
+    /**
+     * Build gallery state from the request. Queues removed images for deferred deletion.
+     *
+     * @return array<int, string>
+     */
+    private function processGuidingImages(Guiding $guiding, StoreNewGuidingRequest $request): array
+    {
+        $pathsToDelete = [];
+        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
+        $imageListNormalized = array_values(array_filter(array_map(
+            fn ($path) => $this->normalizeGuidingImagePath($path),
+            (array) $imageListRaw
+        )));
+
+        if ($this->shouldSkipGuidingImageProcessing($guiding, $request, $imageListNormalized)) {
+            return $pathsToDelete;
+        }
+
+        $galeryImages = [];
+        $processedFilenames = [];
+        $imageListLookup = array_flip($imageListNormalized);
+
+        if ($request->input('is_update') == '1') {
+            $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
+
+            foreach ($existingImages as $existingImage) {
+                $normalizedExisting = $this->normalizeGuidingImagePath($existingImage);
+
+                if (!$normalizedExisting) {
+                    continue;
+                }
+
+                if (isset($imageListLookup[$normalizedExisting])) {
+                    $galeryImages[$normalizedExisting] = ltrim((string) $existingImage, '/');
+                    $processedFilenames[] = basename($normalizedExisting);
+                } else {
+                    $pathsToDelete[] = $existingImage;
+                }
+            }
+        }
+
+        if ($request->has('title_image')) {
+            $uploadSlug = $guiding->slug ?: slugify(
+                ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+            );
+            $imageCount = count($galeryImages);
+            $keptBasenames = array_flip(array_map('basename', array_values($galeryImages)));
+            $maxNewUploads = $request->input('is_update') == '1'
+                ? max(0, count($imageListNormalized) - $imageCount)
+                : count($imageListNormalized);
+            $newUploadCount = 0;
+
+            foreach ($request->file('title_image') as $index => $image) {
+                $originalFilename = $image->getClientOriginalName();
+
+                if (isset($keptBasenames[$originalFilename]) || in_array($originalFilename, $processedFilenames, true)) {
+                    continue;
+                }
+
+                if ($request->input('is_update') == '1' && $newUploadCount >= $maxNewUploads) {
+                    continue;
+                }
+
+                $uploadIndex = $imageCount + $newUploadCount;
+                $newUploadCount++;
+                $webpPath = media_upload(
+                    $image,
+                    'guidings-images',
+                    $uploadSlug . '-' . $uploadIndex . '-' . time(),
+                    75,
+                    $guiding->id
+                );
+                $webpPath = ltrim($webpPath, '/');
+                $normalizedNew = $this->normalizeGuidingImagePath($webpPath);
+
+                if ($normalizedNew) {
+                    $galeryImages[$normalizedNew] = $webpPath;
+                    $processedFilenames[] = $originalFilename;
+                }
+            }
+        }
+
+        if (empty($galeryImages) && !empty($imageListNormalized)) {
+            foreach ($imageListNormalized as $normalizedPath) {
+                if (str_starts_with($normalizedPath, 'guidings-images/')) {
+                    $galeryImages[$normalizedPath] = $normalizedPath;
+                }
+            }
+        }
+
+        if (!empty($galeryImages)) {
+            $orderedGallery = [];
+
+            if (!empty($imageListNormalized)) {
+                foreach ($imageListNormalized as $normalizedPath) {
+                    if (isset($galeryImages[$normalizedPath])) {
+                        $orderedGallery[] = $galeryImages[$normalizedPath];
+                        unset($galeryImages[$normalizedPath]);
+                    }
+                }
+            }
+
+            if (!empty($galeryImages)) {
+                $orderedGallery = array_merge($orderedGallery, array_values($galeryImages));
+            }
+
+            $seenGalleryPaths = [];
+            $orderedGallery = array_values(array_filter($orderedGallery, function ($path) use (&$seenGalleryPaths) {
+                $normalized = $this->normalizeGuidingImagePath($path);
+                if (!$normalized || isset($seenGalleryPaths[$normalized])) {
+                    return false;
+                }
+                $seenGalleryPaths[$normalized] = true;
+
+                return true;
+            }));
+
+            if (!empty($orderedGallery)) {
+                $primaryImageIndex = (int) $request->input('primaryImage', 0);
+                if (isset($orderedGallery[$primaryImageIndex])) {
+                    $guiding->thumbnail_path = $orderedGallery[$primaryImageIndex];
+                } else {
+                    $guiding->thumbnail_path = $orderedGallery[0];
+                }
+
+                $guiding->gallery_images = json_encode($orderedGallery);
+            }
+        }
+
+        return $pathsToDelete;
     }
 
     private function saveDescriptions( $request)
@@ -2032,64 +2111,16 @@ class GuidingsController extends Controller
     public function saveDraftSync(StoreNewGuidingRequest $request)
     {
         try {
-            DB::beginTransaction();
-
-            // Handle file uploads first
-            $processedData = $this->processFileUploads($request);
-
-            $isUpdate = $request->input('is_update') == '1';
-            $originalStatus = null;
-
-            // Try to find an existing draft for this user and (optionally) title/location
-            if ($isUpdate && $request->input('guiding_id')) {
-                $guiding = Guiding::findOrFail($request->input('guiding_id'));
-                $originalStatus = $guiding->status;
-            } else {
-                $guiding = Guiding::where('user_id', auth()->id())
-                    ->where('status', 2)
-                    ->where('title', $request->input('title'))
-                    ->where('city', $request->input('city'))
-                    ->where('country', $request->input('country'))
-                    ->where('region', $request->input('region'))
-                    ->first();
-
-                if (!$guiding) {
-                    $guiding = new Guiding(['user_id' => auth()->id()]);
-                }
-            }
-
-            // Use the legacy method for consistency
-            $this->fillGuidingFromRequest($guiding, $request, true);
-
-            // Slug generation (always for new, or if title/location changed)
-            if (!$isUpdate) {
-                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
-            }
-
-            $guiding->is_newguiding = 1;
-            
-            // Smart status management for drafts
-            if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
-                // Preserve original status if it was published (1) or disabled (0)
-                $guiding->status = $originalStatus;
-            } else {
-                // Set to draft for new guidings or guidings that were already drafts
-                $guiding->status = 2;
-            }
-
-            // Fill the guiding with form data (this was missing!)
-            $this->fillGuidingFromRequest($guiding, $request, true);
-
-            $guiding->save();
-            DB::commit();
+            $result = $this->persistGuidingDraft($request);
 
             return response()->json([
                 'success' => true,
-                'guiding_id' => $guiding->id,
-                'message' => 'Draft saved successfully.'
+                'guiding_id' => $result['guiding_id'],
+                'gallery_images' => $result['gallery_images'],
+                'thumbnail_path' => $result['thumbnail_path'] ?? '',
+                'message' => 'Draft saved successfully.',
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::error('Error in saveDraftSync: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
