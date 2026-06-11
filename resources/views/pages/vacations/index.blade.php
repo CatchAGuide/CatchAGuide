@@ -11,7 +11,7 @@
     <meta name="description" content="{{$row_data->sub_title ?? $row_data->introduction}}">
     
     @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
-        <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
+        <meta property="og:image" content="{{ media_url($row_data->thumbnail_path) }}"/>
     @endif
 @endsection
 
@@ -369,7 +369,7 @@
                         @php
                             $gallery_images = get_galleries_image_link($vacation, 0);
                             $gallery_images_full = array_map(function($img) {
-                                return asset($img);
+                                return media_url($img);
                             }, $gallery_images);
                             $gallery_count = count($gallery_images);
                             $target_fish_raw = $vacation->target_fish ?? [];
@@ -429,7 +429,7 @@
                                         @endif
                                         @if($gallery_count > 0)
                                             <img
-                                                src="{{ asset($gallery_images[0]) }}"
+                                                src="{{ $gallery_images[0] }}"
                                                 alt="{{ translate($vacation->title) }}"
                                                 data-vacation-gallery-image
                                                 data-vacation-open-modal

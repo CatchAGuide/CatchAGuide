@@ -921,6 +921,23 @@
 <script>
     // Use centralized GoogleMapsManager
     const MapsManager = window.GoogleMapsManager;
+    const listingMediaCdnBase = @json(rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/'));
+    const listingMediaEnvPrefix = @json(app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix());
+    const listingMediaPlaceholder = @json(media_url(null));
+
+    function resolveListingMediaUrl(path) {
+        if (!path) {
+            return listingMediaPlaceholder;
+        }
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        const normalized = String(path).replace(/^\/+/, '');
+        return listingMediaCdnBase
+            ? `${listingMediaCdnBase}/${listingMediaEnvPrefix}/${normalized}`
+            : `/${normalized}`;
+    }
+
     let map; // Make map variable accessible in wider scope
     let markerCluster; // Make markerCluster accessible in wider scope
     let isDuplicateCoordinate;
@@ -1072,9 +1089,9 @@
 
                 markers.push(marker);
 
-                const thumbnailPath = guiding.thumbnail_path ? 
-                    `{{ asset('') }}${guiding.thumbnail_path}` :
-                    '{{ asset('images/placeholder_guide.jpg') }}';
+                const thumbnailPath = guiding.thumbnail_path
+                    ? resolveListingMediaUrl(guiding.thumbnail_path)
+                    : @json(media_url(null));
 
                 const infowindow = new google.maps.InfoWindow({
                     content: `

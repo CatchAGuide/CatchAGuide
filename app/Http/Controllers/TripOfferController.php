@@ -211,11 +211,7 @@ class TripOfferController extends Controller
             return null;
         }
 
-        if (str_starts_with($path, 'http') || str_starts_with($path, '/')) {
-            return $path;
-        }
-
-        return '/' . ltrim($path, '/');
+        return media_url($path);
     }
 
     private function buildPresentationData(array $tripView, array $gallery): array

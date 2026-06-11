@@ -17,14 +17,8 @@ class CampOfferController extends Controller
         if (empty($path)) {
             return null;
         }
-        
-        // If path already starts with http or /, return as is
-        if (str_starts_with($path, 'http') || str_starts_with($path, '/')) {
-            return $path;
-        }
-        
-        // Prepend / to make it a public URL
-        return '/' . $path;
+
+        return media_url($path);
     }
     
     /**

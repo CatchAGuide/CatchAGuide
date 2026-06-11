@@ -10,7 +10,7 @@
                 <div class="row">
                     <div class="col-md-12 text-center">
                         <img class=""
-                             src="{{asset('images/' . $guiding->thumbnail_path)}}"
+                             src="{{ media_url($guiding->thumbnail_path) }}"
                              alt="" style="width: 100%; height: 500px; object-fit: cover;">
 
                     </div>

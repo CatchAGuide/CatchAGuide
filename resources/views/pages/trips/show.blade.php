@@ -534,7 +534,7 @@
                                             <div class="trip-offer-page__guide-left">
                                                 <div class="trip-offer-page__guide-row">
                                                     @if(!empty($prov['photo']))
-                                                        <img src="{{ asset($prov['photo']) }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img">
+                                                        <img src="{{ media_url($prov['photo'] ?? null) }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img">
                                                     @else
                                                         <div class="trip-offer-page__guide-avatar-initials">
                                                             {{ strtoupper(mb_substr(($prov['name'] ?? '?'), 0, 2)) }}

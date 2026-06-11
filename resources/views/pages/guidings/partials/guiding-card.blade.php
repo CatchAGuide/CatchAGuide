@@ -38,7 +38,7 @@
                             @foreach($galleryImages as $index => $gallery_image_link)
                                 <div class="carousel-item @if($index == 0) active @endif">
                                     <img class="d-block"
-                                         src="{{ (strpos($gallery_image_link, 'http') === 0) ? $gallery_image_link : asset($gallery_image_link) }}"
+                                         src="{{ (strpos($gallery_image_link, 'http') === 0) ? $gallery_image_link : media_url($gallery_image_link) }}"
                                          alt="{{ $guiding->title }}"
                                          loading="lazy"
                                          width="800"

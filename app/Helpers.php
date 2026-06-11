@@ -115,12 +115,11 @@ if (! function_exists('get_link')) {
 if (! function_exists('get_featured_image_link')) {
     function get_featured_image_link($model)
     {
-        // Use cached file check for data integrity
-        if($model->thumbnail_path && file_exists_cached($model->thumbnail_path)){
-            return asset($model->thumbnail_path);
+        if ($model->thumbnail_path && media_path_usable($model->thumbnail_path)) {
+            return media_url($model->thumbnail_path);
         }
-        
-        return asset('images/placeholder_guide.jpg');
+
+        return media_url(null);
     }
 }
 
@@ -130,13 +129,10 @@ if (! function_exists('get_galleries_image_link')) {
         $links = [];
         $uniqueUrls = []; // Track unique URLs to prevent duplicates
 
-        // Add thumbnail if it exists (with cached file check)
-        if($model->thumbnail_path){
-            if(file_exists_cached($model->thumbnail_path)){
-                $thumbnailUrl = asset($model->thumbnail_path);
-                $links[] = $thumbnailUrl;
-                $uniqueUrls[] = $thumbnailUrl;
-            }
+        if ($model->thumbnail_path && media_path_usable($model->thumbnail_path)) {
+            $thumbnailUrl = media_url($model->thumbnail_path);
+            $links[] = $thumbnailUrl;
+            $uniqueUrls[] = $thumbnailUrl;
         }
 
         // Get gallery images based on type
@@ -158,13 +154,11 @@ if (! function_exists('get_galleries_image_link')) {
             }
         }
 
-        // Add gallery images, avoiding duplicates (with cached file checks)
-        if(is_array($galleries) && count($galleries)){
-            foreach($galleries as $url){
-                if(!empty($url) && file_exists_cached($url)){
-                    $galleryUrl = asset($url);
-                    // Only add if not already in the links array
-                    if(!in_array($galleryUrl, $uniqueUrls)){
+        if (is_array($galleries) && count($galleries)) {
+            foreach ($galleries as $url) {
+                if (! empty($url) && media_path_usable($url)) {
+                    $galleryUrl = media_url($url);
+                    if (! in_array($galleryUrl, $uniqueUrls, true)) {
                         $links[] = $galleryUrl;
                         $uniqueUrls[] = $galleryUrl;
                     }
@@ -172,9 +166,8 @@ if (! function_exists('get_galleries_image_link')) {
             }
         }
 
-        // Fallback to placeholder if no images
-        if(count($links) == 0){
-            $links[] = asset('images/placeholder_guide.jpg');
+        if (count($links) === 0) {
+            $links[] = media_url(null);
         }
 
         return $links;
@@ -184,6 +177,10 @@ if (! function_exists('get_galleries_image_link')) {
 if (! function_exists('file_exists_cached')) {
     function file_exists_cached($path)
     {
+        if (function_exists('media_path_usable') && media_path_usable($path)) {
+            return true;
+        }
+
         // Skip file checks in staging/production for performance, but keep in development
         if (app()->environment(['staging', 'production'])) {
             // In production, assume files exist (faster) but cache negative results

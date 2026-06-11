@@ -10,7 +10,7 @@
     <meta property="og:description" content="{{$row_data->language->introduction ?? ""}}" />
     
     @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
-        <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
+        <meta property="og:image" content="{{ media_url($row_data->thumbnail_path) }}"/>
     @endif
 @endsection
 
