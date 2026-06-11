@@ -903,6 +903,8 @@ class GuidingsController extends Controller
                 'message' => $message,
                 'saved_as_draft_due_to_pending' => $savedAsDraftDueToPending,
                 'redirect_url' => $redirectUrl,
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1393,6 +1395,8 @@ class GuidingsController extends Controller
             }
         }
 
+        $basenameToPath = [];
+
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
             $directory = media_listing_directory('guiding', $guiding->id > 0 ? (int) $guiding->id : null);
@@ -1412,6 +1416,7 @@ class GuidingsController extends Controller
 
                 if ($normalizedNew) {
                     $galeryImages[$normalizedNew] = $webpPath;
+                    $basenameToPath[$image->getClientOriginalName()] = $webpPath;
                     $processedUploadKeys[] = $uploadKey;
                 }
             }
@@ -1431,6 +1436,12 @@ class GuidingsController extends Controller
                     if (isset($galeryImages[$normalizedPath])) {
                         $orderedGallery[] = $galeryImages[$normalizedPath];
                         unset($galeryImages[$normalizedPath]);
+                    } elseif (isset($basenameToPath[$normalizedPath])) {
+                        $orderedGallery[] = $basenameToPath[$normalizedPath];
+                        $uploadedNormalized = $normalizePath($basenameToPath[$normalizedPath]);
+                        if ($uploadedNormalized) {
+                            unset($galeryImages[$uploadedNormalized]);
+                        }
                     }
                 }
             }
@@ -2097,7 +2108,9 @@ class GuidingsController extends Controller
             return response()->json([
                 'success' => true,
                 'guiding_id' => $guiding->id,
-                'message' => 'Draft saved successfully.'
+                'message' => 'Draft saved successfully.',
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

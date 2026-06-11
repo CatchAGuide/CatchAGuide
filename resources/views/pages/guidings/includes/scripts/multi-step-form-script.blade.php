@@ -39,6 +39,21 @@
         });
         return croppedImages.length;
     }
+
+    function applyGallerySaveResponse(data) {
+        if (!data || !window.imageManagerLoaded) {
+            return;
+        }
+        if (!Array.isArray(data.gallery_images) || data.gallery_images.length === 0) {
+            return;
+        }
+        if (typeof imageManagerLoaded.setGallerySnapshot === 'function') {
+            imageManagerLoaded.setGallerySnapshot(data.gallery_images, data.thumbnail_path || '');
+        }
+        if (typeof imageManagerLoaded.markAllImagesAsPersisted === 'function') {
+            imageManagerLoaded.markAllImagesAsPersisted();
+        }
+    }
     function isAdminEdit() {
         const el = document.getElementById('is_admin_guiding_form');
         const isUpdateEl = document.getElementById('is_update');
@@ -455,9 +470,7 @@
                 $('#is_update').val(1);
             }
 
-            if (uploadedCount > 0 && window.imageManagerLoaded && typeof imageManagerLoaded.markAllImagesAsPersisted === 'function') {
-                imageManagerLoaded.markAllImagesAsPersisted();
-            }
+            applyGallerySaveResponse(data);
 
             if (shouldRedirect) {
                 // Redirect to my guidings page
@@ -1437,6 +1450,7 @@
                         return response.json();
                     })
                     .then(data => {
+                        applyGallerySaveResponse(data);
                         if (data.success && data.redirect_url) {
                             if (data.message) {
                                 try {
@@ -2223,9 +2237,7 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
-                if (uploadedCount > 0 && typeof imageManagerLoaded.markAllImagesAsPersisted === 'function') {
-                    imageManagerLoaded.markAllImagesAsPersisted();
-                }
+                applyGallerySaveResponse(data);
                 resolve(data);
             })
             .catch(error => {
