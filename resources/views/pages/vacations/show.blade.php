@@ -8,7 +8,7 @@
     <meta property="og:title" content="{{$translatedVacation->title ?? $vacation->title}}" />
     <meta property="og:description" content="{{$translatedVacation->description ?? ""}}" />
     
-    @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
+    @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && media_path_usable($vacation->gallery[0]))
         <meta property="og:image" content="{{asset($vacation->gallery[0])}}"/>
     @endif
 @endsection
@@ -337,7 +337,7 @@
     <!-- Image Gallery -->
     <div class="guidings-gallery row mx-0 mb-3">
         <div class="left-image">
-            @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
+            @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && media_path_usable($vacation->gallery[0]))
                 <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($vacation->gallery[0])}}" class="img-fluid" alt="Main Image">
             @else
                 <div class="text-center p-4">
@@ -357,7 +357,7 @@
                 // Filter and validate gallery images
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
-                        if (file_exists(public_path($image)) 
+                        if (media_path_usable($image)) 
                             && $image !== $thumbnailPath) {
                             $finalImages[] = asset($image);
                             $overallImages[] = asset($image);
@@ -372,7 +372,7 @@
                 }
 
                 // If less than 4 images and thumbnail exists, pad with thumbnail
-                if (count($finalImages) < 4 && file_exists(public_path($thumbnailPath))) {
+                if (count($finalImages) < 4 && media_path_usable($thumbnailPath)) {
                     while (count($finalImages) < 4) {
                         $finalImages[] = asset($thumbnailPath);
                     }
@@ -409,7 +409,7 @@
                 // Filter gallery images that exist
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
-                        if (file_exists(public_path($image))) {
+                        if (media_path_usable($image)) {
                             $overallImages[] = asset($image);
                             if ($image !== $thumbnailPath) {
                                 $finalImages[] = asset($image);

@@ -173,6 +173,30 @@ if (!function_exists('media_exists')) {
     }
 }
 
+if (!function_exists('media_path_usable')) {
+    /**
+     * Whether a stored media path can be displayed (local public file or managed object-storage path).
+     */
+    function media_path_usable(?string $path): bool
+    {
+        if ($path === null || trim($path) === '') {
+            return false;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return true;
+        }
+
+        $normalized = app(MediaPathResolver::class)->normalizePath($path);
+
+        if (app(ManagedMediaPathMatcher::class)->matches($normalized)) {
+            return true;
+        }
+
+        return file_exists(public_path($normalized));
+    }
+}
+
 if (!function_exists('media_listing_directory')) {
     /**
      * Resolve upload directory for a listing: {folder}/{id} or {folder}/temp.

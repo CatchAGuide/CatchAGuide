@@ -6,7 +6,7 @@
 @section('share_tags')
     <meta property="og:title" content="{{$guiding->title}}" />
     <meta property="og:description" content="{{$guiding->desc_course_of_action ?? ""}}" />
-    @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
+    @if(media_path_usable($guiding->thumbnail_path))
         <meta property="og:image" content="{{asset($guiding->thumbnail_path)}}"/>
     @endif
 @endsection
@@ -863,7 +863,7 @@
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
-                @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
+                @if(media_path_usable($guiding->thumbnail_path))
                     <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
                 @else
                     <div class="text-center p-4">
@@ -881,14 +881,14 @@
                     $hiddenCount = 0;
 
                     // Check if thumbnail exists
-                    if (file_exists(public_path($thumbnailPath))) {
+                    if (media_path_usable($thumbnailPath)) {
                         $overallImages[] = asset($thumbnailPath);
                     }
 
                     // Filter and validate gallery images
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            if (file_exists(public_path($image)) 
+                            if (media_path_usable($image)
                                 && $image !== $thumbnailPath) {
                                 $finalImages[] = asset($image);
                                 $overallImages[] = asset($image);
@@ -903,7 +903,7 @@
                     }
 
                     // If less than 4 images and thumbnail exists, pad with thumbnail
-                    if (count($finalImages) < 4 && file_exists(public_path($thumbnailPath))) {
+                    if (count($finalImages) < 4 && media_path_usable($thumbnailPath)) {
                         while (count($finalImages) < 4) {
                             $finalImages[] = asset($thumbnailPath);
                         }
@@ -938,13 +938,13 @@
                     $overallImages = [];
                     
                     // Validate thumbnail exists
-                    if (file_exists(public_path($thumbnailPath))) {
+                    if (media_path_usable($thumbnailPath)) {
                         $overallImages[] = asset($thumbnailPath);
                     }
                     // Filter gallery images that exist
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            if (file_exists(public_path($image))
+                            if (media_path_usable($image)
                                 && $image !== $thumbnailPath) {
                                 $finalImages[] = asset($image);
                                 $overallImages[] = asset($image);
@@ -956,7 +956,7 @@
 
                     if (empty($finalImages)) {
                         // No valid gallery images, use thumbnail if it exists
-                        if (file_exists(public_path($thumbnailPath))) {
+                        if (media_path_usable($thumbnailPath)) {
                             $finalImages = array_fill(0, 2, asset($thumbnailPath));
                         }
                     } elseif (count($finalImages) > 3) {
@@ -968,7 +968,7 @@
                             $finalImages = $finalImages;
                             
                             // Pad with thumbnail if it exists
-                            if (file_exists(public_path($thumbnailPath))) {
+                            if (media_path_usable($thumbnailPath)) {
                                 while (count($finalImages) < 2) {
                                     $finalImages[] = asset($thumbnailPath);
                                 }

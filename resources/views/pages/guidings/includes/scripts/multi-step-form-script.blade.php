@@ -8,6 +8,8 @@
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
 <script>
+    window.mediaCdnBase = @json(rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/'));
+    window.mediaEnvPrefix = @json(app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix());
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
     window.totalSteps = window.totalSteps || 7;
@@ -138,7 +140,7 @@
     }
     
     function initializeImageManager() {
-        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', '#cropped_image');
+        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
         
         if (document.getElementById('is_update').value === '1') {
             const existingImagesInput = document.getElementById('existing_images');
@@ -1311,6 +1313,10 @@
             if (!imageManagerLoaded) {
                 console.error('ImageManager not initialized');
                 return;
+            }
+
+            if (typeof imageManagerLoaded.syncImageListFromDom === 'function') {
+                imageManagerLoaded.syncImageListFromDom();
             }
 
             const croppedImages = imageManagerLoaded.getCroppedImages();

@@ -10,7 +10,7 @@
     <meta property="og:description" content="{{$row_data->introduction ?? ""}}" />
     <meta name="description" content="{{$row_data->sub_title ?? $row_data->introduction}}">
     
-    @if(isset($row_data->thumbnail_path) && file_exists(public_path(str_replace(asset(''), '', asset($row_data->thumbnail_path)))))
+    @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
         <meta property="og:image" content="{{asset($row_data->thumbnail_path)}}"/>
     @endif
 @endsection

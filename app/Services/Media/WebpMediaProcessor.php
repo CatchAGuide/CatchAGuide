@@ -43,9 +43,13 @@ class WebpMediaProcessor implements MediaProcessorInterface
             $storage->delete($relativePath);
         }
 
-        $storage->write($relativePath, $encoded, [
+        $stored = $storage->write($relativePath, $encoded, [
             'visibility' => config('media_storage.object_visibility', 'public'),
         ]);
+
+        if (! $stored) {
+            throw new \RuntimeException("Failed to upload image to storage at [{$relativePath}]");
+        }
 
         return $relativePath;
     }
