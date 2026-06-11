@@ -7,9 +7,13 @@
 <script src="https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 
+@php
+    $mediaCdnBase = rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/');
+    $mediaEnvPrefix = app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix();
+@endphp
 <script>
-    window.mediaCdnBase = @json(rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/'));
-    window.mediaEnvPrefix = @json(app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix());
+    window.mediaCdnBase = @json($mediaCdnBase);
+    window.mediaEnvPrefix = @json($mediaEnvPrefix);
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
     window.totalSteps = window.totalSteps || 7;

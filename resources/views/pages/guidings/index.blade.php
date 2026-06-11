@@ -918,12 +918,17 @@
     });
 </script>
 
+@php
+    $listingMediaCdnBase = rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/');
+    $listingMediaEnvPrefix = app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix();
+    $listingMediaPlaceholder = media_url(null);
+@endphp
 <script>
     // Use centralized GoogleMapsManager
     const MapsManager = window.GoogleMapsManager;
-    const listingMediaCdnBase = @json(rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/'));
-    const listingMediaEnvPrefix = @json(app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix());
-    const listingMediaPlaceholder = @json(media_url(null));
+    const listingMediaCdnBase = @json($listingMediaCdnBase);
+    const listingMediaEnvPrefix = @json($listingMediaEnvPrefix);
+    const listingMediaPlaceholder = @json($listingMediaPlaceholder);
 
     function resolveListingMediaUrl(path) {
         if (!path) {
@@ -1091,7 +1096,7 @@
 
                 const thumbnailPath = guiding.thumbnail_path
                     ? resolveListingMediaUrl(guiding.thumbnail_path)
-                    : @json(media_url(null));
+                    : listingMediaPlaceholder;
 
                 const infowindow = new google.maps.InfoWindow({
                     content: `
