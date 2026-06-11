@@ -22,6 +22,7 @@
     $waterNames     = collect($guidingWaters)->pluck('name')->toArray();
     $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
     $totalImages    = count($galleryImages);
+    $lowestPrice    = number_format($guiding->getLowestPrice(), 0, ',', '.');
 @endphp
 <div class="row m-0 mb-3 guiding-list-item {{ $collapseShowMore ? ($loop->index < 2 ? 'show' : '') : 'show' }}">
     <div class="col-md-12">
@@ -176,7 +177,7 @@
                             @endif
                         </div>
                         <div class="guiding-item-price">
-                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{$guiding->getLowestPrice()}}€ p.P.</span></h5>
+                            <h5 class="mr-1 fw-bold text-end"><span class="p-1">@lang('message.from') {{ $lowestPrice }}€ p.P.</span></h5>
                             <div class="d-none d-flex flex-column mt-4">
                             </div>
                         </div>
@@ -187,7 +188,7 @@
                 <div class="gc-mob-footer d-flex d-md-none">
                     <div class="gc-mob-price">
                         <span class="gc-mob-price-from">@lang('message.from')</span>
-                        <span class="gc-mob-price-amount">€{{ $guiding->getLowestPrice() }} p.P.</span>
+                        <span class="gc-mob-price-amount">€{{ $lowestPrice }} p.P.</span>
                     </div>
                     <div class="gc-mob-cta">
                         <a href="{{ $showUrl }}"
