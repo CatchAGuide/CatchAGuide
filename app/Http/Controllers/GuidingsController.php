@@ -990,21 +990,22 @@ class GuidingsController extends Controller
             $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
             $guidingId = (int) $request->input('guiding_id', 0);
             $directory = media_listing_directory('guiding', $guidingId > 0 ? $guidingId : null);
-            
+            $processedUploadKeys = [];
+
             foreach($request->file('title_image') as $index => $image) {
                 $originalFilename = $image->getClientOriginalName();
-                
-                // Check if this image was already processed (existing image)
-                if (in_array($originalFilename, $processedFilenames)) {
+                $uploadKey = $originalFilename . '|' . $image->getSize();
+
+                if (in_array($uploadKey, $processedUploadKeys, true)) {
                     continue;
                 }
-                
+
                 // Check if this image is in the image_list (new image that should be kept)
                 if (in_array($originalFilename, $imageList) || in_array('/' . $originalFilename, $imageList)) {
                     $index = $index + $imageCount;
                     $webp_path = media_upload($image, $directory, $tempSlug. "-". $index . "-" . time());
                     $galeryImages[] = $webp_path;
-                    $processedFilenames[] = $originalFilename; // Track as processed
+                    $processedUploadKeys[] = $uploadKey;
                 }
             }
         }
@@ -1395,11 +1396,12 @@ class GuidingsController extends Controller
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
             $directory = media_listing_directory('guiding', $guiding->id > 0 ? (int) $guiding->id : null);
+            $processedUploadKeys = [];
 
             foreach ($request->file('title_image') as $index => $image) {
-                $originalFilename = $image->getClientOriginalName();
+                $uploadKey = $image->getClientOriginalName() . '|' . $image->getSize();
 
-                if (in_array($originalFilename, $processedFilenames, true)) {
+                if (in_array($uploadKey, $processedUploadKeys, true)) {
                     continue;
                 }
 
@@ -1410,7 +1412,7 @@ class GuidingsController extends Controller
 
                 if ($normalizedNew) {
                     $galeryImages[$normalizedNew] = $webpPath;
-                    $processedFilenames[] = $originalFilename;
+                    $processedUploadKeys[] = $uploadKey;
                 }
             }
         }

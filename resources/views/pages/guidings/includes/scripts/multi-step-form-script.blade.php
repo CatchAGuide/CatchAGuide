@@ -22,8 +22,23 @@
     window.region = window.region || null;
     window.country = window.country || null;
     window.postal_code = window.postal_code || null;
-    // Track if we've already uploaded images as part of a draft save
-    window.hasUploadedImagesInDraft = window.hasUploadedImagesInDraft || false;
+    function getUnsavedCroppedImages() {
+        if (!window.imageManagerLoaded || typeof imageManagerLoaded.getCroppedImages !== 'function') {
+            return [];
+        }
+        return imageManagerLoaded.getCroppedImages(true);
+    }
+
+    function appendCroppedImagesToFormData(formData) {
+        const croppedImages = getUnsavedCroppedImages();
+        formData.delete('title_image[]');
+        croppedImages.forEach((imgObj, idx) => {
+            const blob = dataURLtoBlob(imgObj.dataUrl);
+            const filename = imgObj.filename || `cropped_${idx}.png`;
+            formData.append('title_image[]', blob, filename);
+        });
+        return croppedImages.length;
+    }
     function isAdminEdit() {
         const el = document.getElementById('is_admin_guiding_form');
         const isUpdateEl = document.getElementById('is_update');
@@ -415,21 +430,11 @@
             if (guidingId) formData.set('guiding_id', guidingId);
             if (isUpdate) formData.set('is_update', isUpdate);
 
-            // Append cropped images as files if available
-            if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
-                const croppedImages = imageManagerLoaded.getCroppedImages();
-                if (croppedImages.length > 0) {
-                    // Remove any existing title_image[] from FormData
-                    formData.delete('title_image[]');
-                    croppedImages.forEach((imgObj, idx) => {
-                        // Convert dataURL to Blob
-                        const blob = dataURLtoBlob(imgObj.dataUrl);
-                        // Use the original filename if available, otherwise fallback
-                        const filename = imgObj.filename || `cropped_${idx}.png`;
-                        formData.append('title_image[]', blob, filename);
-                    });
-                }
+            if (window.imageManagerLoaded && typeof imageManagerLoaded.syncImageListFromDom === 'function') {
+                imageManagerLoaded.syncImageListFromDom();
             }
+
+            const uploadedCount = appendCroppedImagesToFormData(formData);
 
             const response = await fetch(window.saveDraftUrl, {
                 method: 'POST',
@@ -448,8 +453,10 @@
             if (data.guiding_id) {
                 $('#guiding_id').val(data.guiding_id);
                 $('#is_update').val(1);
-                // Mark that we have already sent images at least once for this draft
-                window.hasUploadedImagesInDraft = true;
+            }
+
+            if (uploadedCount > 0 && window.imageManagerLoaded && typeof imageManagerLoaded.markAllImagesAsPersisted === 'function') {
+                imageManagerLoaded.markAllImagesAsPersisted();
             }
 
             if (shouldRedirect) {
@@ -1323,7 +1330,7 @@
                 imageManagerLoaded.syncImageListFromDom();
             }
 
-            const croppedImages = imageManagerLoaded.getCroppedImages();
+            const croppedImages = imageManagerLoaded.getCroppedImages(true);
             formData.delete('title_image[]');
 
             // Compression options
@@ -2093,22 +2100,7 @@
             }, 100);
         });
         
-        const imageUploadInput = document.getElementById('title_image');
-        if (imageUploadInput) {
-            imageUploadInput.addEventListener('change', function(event) {
-                if (imageManagerLoaded) {
-                    try {
-                        imageManagerLoaded.handleFileSelect(event.target.files);
-                    } catch (error) {
-                        console.error('Error in handleFileSelect:', error);
-                    }
-                } else {
-                    console.error('ImageManager not initialized');
-                }
-            });
-        } else {
-            console.error('File input element not found');
-        }
+        // File input change is handled by ImageManager.initEventListeners()
 
         // Add click handlers for step buttons
         document.querySelectorAll('.step-button').forEach(button => {
@@ -2164,63 +2156,34 @@
         form.addEventListener('submit', handleSubmit);
     }
 
-    // Add these variables at the top of your script
-    // Use var instead of let so duplicate script inclusions don't throw
-    var saveStepProgressTimeout = null;
-    var saveStepProgressLock = false;
+    // Serialize step saves so rapid navigation cannot drop uploads.
+    var saveStepProgressQueue = Promise.resolve();
 
     function saveStepProgress(stepNumber) {
-        // Return a Promise to allow waiting for completion
-        return new Promise((resolve, reject) => {
-            // Prevent duplicate calls within 2 seconds
-            if (saveStepProgressLock) {
-                resolve(); // Resolve immediately for duplicate calls
-                return;
-            }
-            saveStepProgressLock = true;
-
-            // Release the lock after 2 seconds
-            clearTimeout(saveStepProgressTimeout);
-            saveStepProgressTimeout = setTimeout(() => {
-                saveStepProgressLock = false;
-            }, 1500);
-
+        saveStepProgressQueue = saveStepProgressQueue.then(() => new Promise((resolve, reject) => {
             const form = document.getElementById('newGuidingForm');
             const formData = new FormData(form);
 
             formData.append('current_step', stepNumber);
             formData.append('is_draft', 1);
 
-            // Always append these if present
             const guidingId = $('#guiding_id').val();
             const isUpdate = $('#is_update').val();
             if (guidingId) formData.append('guiding_id', guidingId);
             if (isUpdate) formData.append('is_update', isUpdate);
 
-            // Only include image binaries on the very first step-1 draft save.
-            // This avoids repeatedly sending large image payloads on every step change.
-            const shouldIncludeImages = stepNumber === 1 && !window.hasUploadedImagesInDraft;
-
-            if (!shouldIncludeImages) {
-                // Ensure we don't send original large files when not needed
-                formData.delete('title_image[]');
-            } else if (window.imageManagerLoaded && typeof imageManagerLoaded.getCroppedImages === 'function') {
-                const croppedImages = imageManagerLoaded.getCroppedImages();
-                if (croppedImages.length > 0) {
-                    // Replace any original title_image[] with compressed, cropped versions
-                    formData.delete('title_image[]');
-                    croppedImages.forEach((imgObj, idx) => {
-                        const blob = dataURLtoBlob(imgObj.dataUrl);
-                        const filename = imgObj.filename || `cropped_${idx}.png`;
-                        formData.append('title_image[]', blob, filename);
-                    });
-                    // After one successful step save with images, mark as uploaded
-                    window.hasUploadedImagesInDraft = true;
-                }
+            if (typeof imageManagerLoaded.syncImageListFromDom === 'function') {
+                imageManagerLoaded.syncImageListFromDom();
             }
 
-            // Use synchronous saving for step progression to avoid status timing issues.
-            // Accept: application/json so Laravel returns JSON validation errors (422) instead of HTML.
+            // Only upload images that have not been persisted yet.
+            let uploadedCount = 0;
+            if (stepNumber === 1) {
+                uploadedCount = appendCroppedImagesToFormData(formData);
+            } else {
+                formData.delete('title_image[]');
+            }
+
             fetch(window.saveDraftSyncUrl, {
                 method: 'POST',
                 body: formData,
@@ -2260,13 +2223,18 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
+                if (uploadedCount > 0 && typeof imageManagerLoaded.markAllImagesAsPersisted === 'function') {
+                    imageManagerLoaded.markAllImagesAsPersisted();
+                }
                 resolve(data);
             })
             .catch(error => {
                 console.error('Failed to save draft:', error);
                 reject(error);
             });
-        });
+        }));
+
+        return saveStepProgressQueue;
     }
 
     // Helper function to convert data URL to Blob
