@@ -162,6 +162,8 @@ class MediaStorageServiceProvider extends ServiceProvider
 
                 $app->make(ManagedMediaPathMatcher::class),
 
+                $app->make(MediaEnvironmentResolver::class),
+
             );
 
         });
