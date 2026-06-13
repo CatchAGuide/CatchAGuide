@@ -446,7 +446,7 @@
                                     </div>
                                 </div>
                                 <div class="vacation-list-card__body">
-                                    <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__link" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">
+                                    <a href="{{ route('vacations.camps.show', [$vacation->slug]) }}" class="vacation-list-card__link" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">
                                         <h3 class="vacation-list-card__title">{{ \Str::limit(translate($vacation->title), 65) }}</h3>
                                         <p class="vacation-list-card__location"><i class="fas fa-map-marker-alt me-2"></i>{{ $vacation->location }}</p>
 
@@ -575,15 +575,15 @@
                                                 @lang('vacations.verified_operator')
                                             </span>
                                         </div>
-                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now') &rarr;</a>
+                                        <a href="{{ route('vacations.camps.show', [$vacation->slug]) }}" class="vacation-list-card__btn-book" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.book_now') &rarr;</a>
                                         {{-- View Details link - desktop only --}}
-                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-details d-none d-md-inline-flex" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.view_details') &rarr;</a>
+                                        <a href="{{ route('vacations.camps.show', [$vacation->slug]) }}" class="vacation-list-card__btn-details d-none d-md-inline-flex" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();">@lang('vacations.view_details') &rarr;</a>
                                         {{-- Mobile-only info button --}}
-                                        <a href="{{ route('vacations.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info d-md-none" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
+                                        <a href="{{ route('vacations.camps.show', [$vacation->slug]) }}" class="vacation-list-card__btn-info d-md-none" onclick="event.preventDefault(); document.getElementById('store-destination-{{ $vacation->id }}').submit();" aria-label="@lang('vacations.details')"><i class="fas fa-info"></i></a>
                                         {{-- No booking fees - desktop only --}}
                                         <div class="vacation-list-card__no-fees d-none d-md-block">@lang('vacations.no_booking_fees')</div>
                                     </div>
-                                    <form id="store-destination-{{ $vacation->id }}" action="{{ route('vacations.show', [$vacation->slug]) }}" method="GET" style="display: none;">
+                                    <form id="store-destination-{{ $vacation->id }}" action="{{ route('vacations.camps.show', [$vacation->slug]) }}" method="GET" style="display: none;">
                                         @php session(['vacation_destination_id' => $row_data->id]); @endphp
                                     </form>
                                 </div>

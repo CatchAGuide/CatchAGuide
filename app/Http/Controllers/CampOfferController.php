@@ -328,6 +328,7 @@ class CampOfferController extends Controller
         return [
             'id' => $camp->id,
             'title' => $camp->title,
+            'slug' => $camp->slug,
             'city' => $camp->city,
             'region' => $camp->region,
             'country' => $camp->country,

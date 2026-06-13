@@ -3,8 +3,16 @@
 @include('layouts.modal.guideApplicationModal')
 @php
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
-    $hideHeaderSubtitle = $isDestinationOrCategoryPage || request()->is('vacations*');
-    $currentVacationCountry = $currentVacationCountry ?? null;
+    $hideHeaderSubtitle = $isDestinationOrCategoryPage
+        || (request()->is('vacations*') && ! request()->routeIs('vacations.index'));
+    $currentVacationCountry = $currentVacationCountry ?? request()->route('country');
+    $vacationCountryOptions = ($isVacation ?? false)
+        ? \App\Models\Destination::query()
+            ->where('type', 'vacations')
+            ->where('language', app()->getLocale())
+            ->orderBy('name')
+            ->get(['slug', 'name'])
+        : collect();
 @endphp
 <nav class="navbar-custom short-header long-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
     <div class="container">
@@ -139,18 +147,15 @@
             <!-- Mobile full search form (other routes) -->
             @if ($isVacation)
             <div id="filterContainer" class="col-12 d-md-none pb-3">
-                @php
-                    $countries = \App\Models\Destination::where('type', 'vacations')->where('language',app()->getLocale())->pluck('name');
-                @endphp
-                <form id="global-search1" action="{{ route('vacations.category', ['country' => 'all']) }}" method="get">
+                <form id="global-search1" action="{{ route('vacations.index') }}" method="get">
                     <div class="vacation-mobile-select-wrap">
                         <i class="fa fa-map-marker-alt vacation-mobile-select-icon"></i>
                         <select class="vacation-mobile-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                            <option value="">{{translate('Select Country')}}</option>
-                            @foreach($countries as $country)
-                                <option value="{{ $country }}"
-                                    {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                    {{ translate($country) }}
+                            <option value="">{{ translate('Select Country') }}</option>
+                            @foreach($vacationCountryOptions as $country)
+                                <option value="{{ $country->slug }}"
+                                    {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
+                                    {{ translate($country->name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -228,17 +233,18 @@
     @if(request()->segment(1) != 'guidings')
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
+            <form id="global-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                    <option value="">{{translate('Select Country')}}</option>
-                                    @foreach($countries as $country)
-                                        <option value="{{ $country }}" {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                            {{ translate($country) }}
+                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search')">
+                                    <option value="">{{ translate('Select Country') }}</option>
+                                    @foreach($vacationCountryOptions as $country)
+                                        <option value="{{ $country->slug }}"
+                                            {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
+                                            {{ translate($country->name) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1047,18 +1053,18 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{ $isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
+                <form id="mobile-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
                     @if ($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
                             <div class="position-relative">
                                 <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <select class="form-select ps-5" name="country" onchange="updateFormAction(this, 'mobile-search')">
-                                    <option value="">{{translate('Select Country')}}</option>
-                                    @foreach($countries as $country)
-                                        <option value="{{ $country }}" 
-                                            {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                            {{ $country }}
+                                    <option value="">{{ translate('Select Country') }}</option>
+                                    @foreach($vacationCountryOptions as $country)
+                                        <option value="{{ $country->slug }}"
+                                            {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
+                                            {{ translate($country->name) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1251,16 +1257,14 @@ input[type=number] {
 <script>
 function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
-    const selectedCountry = selectElement.value;
-    
-    // Use the selected country for the form action if one is selected
+    const selectedCountry = selectElement.value.trim().toLowerCase();
+
     if (selectedCountry) {
-        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
+        form.action = "{{ url('/vacations') }}/" + encodeURIComponent(selectedCountry);
     } else {
         form.action = "{{ route('vacations.index') }}";
     }
-    
-    // Submit the form immediately after changing the action
+
     form.submit();
 }
 

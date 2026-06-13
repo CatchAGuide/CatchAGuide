@@ -133,7 +133,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('trips.show', $trip->slug) }}"
+                                                <a href="{{ route('vacations.trips.show', $trip->slug) }}"
                                                    class="btn btn-sm btn-info"
                                                    title="View product page"
                                                    target="_blank" rel="noopener">

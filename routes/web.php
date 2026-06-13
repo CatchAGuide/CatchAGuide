@@ -50,6 +50,11 @@ use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\LanguageController;
 use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
+use App\Http\Controllers\Vacation\VacationHubController;
+use App\Http\Controllers\Vacation\VacationCountryController;
+use App\Http\Controllers\Vacation\VacationCampIndexController;
+use App\Http\Controllers\Vacation\VacationTripIndexController;
+use App\Http\Controllers\Vacation\VacationInterestController;
 use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\TripOfferController;
 use App\Http\Controllers\TripsCatalogController;
@@ -283,16 +288,24 @@ Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
 
-Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
+Route::get('vacations', [VacationHubController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
+Route::get('vacations/trips', [VacationTripIndexController::class, 'index'])->name('vacations.trips.index')->middleware('ddos:search');
+Route::get('vacations/camps', [VacationCampIndexController::class, 'index'])->name('vacations.camps.index')->middleware('ddos:search');
+Route::get('vacations/trips/{slug}', [TripOfferController::class, 'show'])->name('vacations.trips.show')->middleware('ddos:search');
+Route::get('vacations/camps/{slug}', [CampOfferController::class, 'show'])->name('vacations.camps.show')->middleware('ddos:search');
+Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
+    ->name('vacations.country')
+    ->where('country', '^(?!trips$|camps$)[a-z0-9\-]+$')
+    ->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
-Route::get('vacations/{slug}', [CampOfferController::class, 'show'])->name('vacations.show');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')
     ->middleware('web');
+Route::post('/vacation-interest', [VacationInterestController::class, 'store'])->name('vacations.interest.store');
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
-// NOTE: /trips is a real public directory (used for trip images). Use a non-conflicting prefix for the public catalog.
+// Legacy URLs — VacationRedirectMiddleware 301s to canonical routes above
 Route::get('trips-destinations', [TripsCatalogController::class, 'index'])->name('trips.index')->middleware('ddos:search');
 Route::get('trips-destinations/c/{location}', [TripsCatalogController::class, 'category'])->name('trips.category')->middleware('ddos:search');
 Route::get('trips/{slug}', [TripOfferController::class, 'show'])

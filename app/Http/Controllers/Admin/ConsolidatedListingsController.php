@@ -514,7 +514,7 @@ class ConsolidatedListingsController extends Controller
                 'created_at' => optional($t->created_at)->format('Y-m-d H:i:s'),
                 'created_at_ts' => optional($t->created_at)->timestamp ?? 0,
                 'admin_edit_url' => route('admin.trips.edit', $t->id),
-                'public_url' => $t->slug ? route('trips.show', $t->slug) : null,
+                'public_url' => $t->slug ? route('vacations.trips.show', $t->slug) : null,
             ];
         })->values();
     }
