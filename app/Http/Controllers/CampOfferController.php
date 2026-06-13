@@ -128,6 +128,7 @@ class CampOfferController extends Controller
             'facilities',
             'specialOffers'
         ])->where('slug', $slug)
+        ->where('status', 'active')
         ->firstOrFail();
         
         // Map camp data to view format

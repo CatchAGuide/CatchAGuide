@@ -6,8 +6,6 @@ use App\Domain\Vacation\Pillar;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\ViewModels\PillarSectionViewModel;
 use App\Domain\Vacation\ViewModels\VacationCountryViewModel;
-use App\Models\Camp;
-use App\Models\Trip;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
@@ -87,9 +85,7 @@ class VacationCountryPageService
         $markers = [];
 
         if ($filter->showsTrips() && $filter->pillar !== 'camps') {
-            foreach (Trip::query()
-                ->where('status', 'active')
-                ->where('country', $countrySlug)
+            foreach ($this->trips->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->get(['title', 'slug', 'latitude', 'longitude']) as $trip) {
@@ -104,9 +100,7 @@ class VacationCountryPageService
         }
 
         if ($filter->showsCamps() && $filter->pillar !== 'trips') {
-            foreach (Camp::query()
-                ->where('status', 'active')
-                ->where('country', $countrySlug)
+            foreach ($this->camps->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->get(['title', 'slug', 'latitude', 'longitude']) as $camp) {

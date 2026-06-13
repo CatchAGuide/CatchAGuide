@@ -752,6 +752,58 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         border-radius: 8px;
         border-color: $vac-border;
     }
+
+    &__mobile-bar {
+        display: flex;
+        gap: .5rem;
+        margin-bottom: 1rem;
+    }
+
+    &__mobile-btn {
+        flex: 1 1 0;
+        font-size: .85rem;
+        font-weight: 600;
+    }
+
+    &__map-btn {
+        white-space: nowrap;
+    }
+}
+
+.vacation-filters-offcanvas {
+    max-height: 85vh;
+
+    &__form {
+        padding-bottom: .5rem;
+    }
+}
+
+.vacation-country-map-modal {
+    max-width: 96%;
+    width: 96%;
+
+    .modal-content {
+        height: min(90vh, 720px);
+    }
+
+    &__canvas {
+        flex: 1 1 auto;
+        min-height: 420px;
+        padding: 0 !important;
+    }
+}
+
+.vacation-country-map-popup {
+    &__title {
+        display: block;
+        font-weight: 700;
+        color: $vac-ink;
+        text-decoration: none;
+
+        &:hover {
+            color: $vac-brand;
+        }
+    }
 }
 
 // —— Country page hero ——
@@ -929,6 +981,16 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     display: flex;
     flex-direction: column;
     gap: 1.15rem;
+}
+
+.vacation-country__section-empty {
+    margin: 0;
+    padding: 1rem 1.15rem;
+    border-radius: $vac-radius;
+    background: $vac-surface;
+    border: 1px dashed $vac-border;
+    color: $vac-muted;
+    font-size: .95rem;
 }
 
 // —— Empty state ——

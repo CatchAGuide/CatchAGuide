@@ -91,16 +91,16 @@
 
 
     <x-vacation.filters
-
         :filter="$vm->filter"
-
         :trips-total="$vm->tripsTotal"
-
         :camps-total="$vm->campsTotal"
-
         :species-options="$vm->speciesOptions"
-
+        :show-map-button="count($vm->mapMarkers) > 0"
     />
+
+    @if(count($vm->mapMarkers) > 0)
+        @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])
+    @endif
 
 
 
@@ -116,7 +116,7 @@
 
 
 
-    @if($vm->tripsSection->visible && $vm->tripsTotal > 0)
+    @if($vm->tripsSection->visible)
 
         <section class="vacation-country__section vacation-country__section--trip">
 
@@ -126,17 +126,29 @@
 
             </h2>
 
-            <div class="vacation-country__list">
+            @if($vm->tripsTotal > 0)
 
-                @foreach($tripRows as $card)
+                <div class="vacation-country__list">
 
-                    <x-vacation.trip-list-row :card="$card" />
+                    @foreach($tripRows as $card)
 
-                @endforeach
+                        <x-vacation.trip-list-row :card="$card" />
 
-            </div>
+                    @endforeach
 
-            <div class="mt-3">{{ $vm->trips->links('vendor.pagination.default') }}</div>
+                </div>
+
+                <div class="mt-3">{{ $vm->trips->links('vendor.pagination.default') }}</div>
+
+            @else
+
+                <p class="vacation-country__section-empty">
+
+                    {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
+
+                </p>
+
+            @endif
 
         </section>
 
@@ -144,7 +156,7 @@
 
 
 
-    @if($vm->campsSection->visible && $vm->campsTotal > 0)
+    @if($vm->campsSection->visible)
 
         <section class="vacation-country__section vacation-country__section--camp">
 
@@ -154,17 +166,29 @@
 
             </h2>
 
-            <div class="vacation-country__list">
+            @if($vm->campsTotal > 0)
 
-                @foreach($campRows as $card)
+                <div class="vacation-country__list">
 
-                    <x-vacation.camp-list-row :card="$card" />
+                    @foreach($campRows as $card)
 
-                @endforeach
+                        <x-vacation.camp-list-row :card="$card" />
 
-            </div>
+                    @endforeach
 
-            <div class="mt-3">{{ $vm->camps->links('vendor.pagination.default') }}</div>
+                </div>
+
+                <div class="mt-3">{{ $vm->camps->links('vendor.pagination.default') }}</div>
+
+            @else
+
+                <p class="vacation-country__section-empty">
+
+                    {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
+
+                </p>
+
+            @endif
 
         </section>
 
@@ -225,4 +249,80 @@
 </div>
 
 @endsection
+
+@if(count($vm->mapMarkers) > 0)
+@section('js_after')
+<script>
+(function () {
+    const MapsManager = window.GoogleMapsManager;
+    if (!MapsManager) {
+        return;
+    }
+
+    const markersData = @json($vm->mapMarkers);
+    let map;
+    let mapInitialized = false;
+    const markers = [];
+    const infowindows = [];
+
+    async function initVacationCountryMap() {
+        if (mapInitialized || !markersData.length) {
+            if (map) {
+                MapsManager.resizeMap(map);
+            }
+            return;
+        }
+
+        const defaultCenter = { lat: markersData[0].lat, lng: markersData[0].lng };
+        map = await MapsManager.initMap('vacationCountryMap', {
+            zoom: 6,
+            center: defaultCenter,
+            mapId: @json(config('services.google_maps.map_id', 'DEMO_MAP_ID')),
+            mapTypeControl: false,
+            streetViewControl: false,
+        });
+
+        const bounds = new google.maps.LatLngBounds();
+
+        for (const item of markersData) {
+            const position = { lat: item.lat, lng: item.lng };
+            bounds.extend(position);
+
+            const marker = await MapsManager.createMarker({ map, position });
+            markers.push(marker);
+
+            const infowindow = new google.maps.InfoWindow({
+                content: `
+                    <div class="vacation-country-map-popup">
+                        <a href="${item.url}" class="vacation-country-map-popup__title">${item.title}</a>
+                    </div>
+                `,
+            });
+            infowindows.push(infowindow);
+
+            marker.addListener('gmp-click', () => {
+                infowindows.forEach((window) => window.close());
+                infowindow.open(map, marker);
+            });
+        }
+
+        if (markersData.length === 1) {
+            map.setCenter(bounds.getCenter());
+            map.setZoom(10);
+        } else {
+            map.fitBounds(bounds);
+        }
+
+        if (markers.length > 1) {
+            MapsManager.createMarkerClusterer({ markers, map });
+        }
+
+        mapInitialized = true;
+    }
+
+    MapsManager.initMapOnModalShow('vacationCountryMapModal', initVacationCountryMap);
+})();
+</script>
+@endsection
+@endif
 
