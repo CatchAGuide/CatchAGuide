@@ -23,15 +23,24 @@
     window.country = window.country || null;
     window.postal_code = window.postal_code || null;
     function getUnsavedCroppedImages() {
-        if (!window.imageManagerLoaded || typeof imageManagerLoaded.getCroppedImages !== 'function') {
+        if (!window.imageManagerLoaded || typeof window.imageManagerLoaded.getCroppedImages !== 'function') {
             return [];
         }
-        return imageManagerLoaded.getCroppedImages(true);
+        return window.imageManagerLoaded.getCroppedImages(true);
+    }
+
+    function clearTitleImagesFromFormData(formData) {
+        if (!formData || typeof formData.delete !== 'function') {
+            return;
+        }
+        while (formData.has('title_image[]')) {
+            formData.delete('title_image[]');
+        }
     }
 
     function appendCroppedImagesToFormData(formData) {
         const croppedImages = getUnsavedCroppedImages();
-        formData.delete('title_image[]');
+        clearTitleImagesFromFormData(formData);
         croppedImages.forEach((imgObj, idx) => {
             const blob = dataURLtoBlob(imgObj.dataUrl);
             const filename = imgObj.filename || `cropped_${idx}.png`;
@@ -174,14 +183,17 @@
     }
     
     function initializeImageManager() {
-        imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+        window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
+            storagePrefix: 'guidings-images',
+        });
+        imageManagerLoaded = window.imageManagerLoaded;
         
         if (document.getElementById('is_update').value === '1') {
             const existingImagesInput = document.getElementById('existing_images');
             const thumbnailPath = document.getElementById('thumbnail_path').value;
             
             if (existingImagesInput && existingImagesInput.value) {
-                imageManagerLoaded.loadExistingImages(existingImagesInput.value, thumbnailPath);
+                window.imageManagerLoaded.loadExistingImages(existingImagesInput.value, thumbnailPath);
             }
         }
 
@@ -1334,17 +1346,25 @@
 
 
         try {
-            if (!imageManagerLoaded) {
+            if (!window.imageManagerLoaded) {
                 console.error('ImageManager not initialized');
+                hideLoadingScreen();
                 return;
             }
 
-            if (typeof imageManagerLoaded.syncImageListFromDom === 'function') {
-                imageManagerLoaded.syncImageListFromDom();
+            if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                window.imageManagerLoaded.syncImageListFromDom();
             }
 
-            const croppedImages = imageManagerLoaded.getCroppedImages(true);
-            formData.delete('title_image[]');
+            const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
+            if (typeof window.imageManagerLoaded.hasUnsavedImages === 'function'
+                && window.imageManagerLoaded.hasUnsavedImages()
+                && croppedImages.length === 0) {
+                hideLoadingScreen();
+                alert('Could not prepare your new images for upload. Please remove and re-add them, then try again.');
+                return;
+            }
+            clearTitleImagesFromFormData(formData);
 
             // Compression options
             const maxWidth = 1024; // Maximum width or height of the image
@@ -2195,7 +2215,7 @@
             if (stepNumber === 1) {
                 uploadedCount = appendCroppedImagesToFormData(formData);
             } else {
-                formData.delete('title_image[]');
+                clearTitleImagesFromFormData(formData);
             }
 
             fetch(window.saveDraftSyncUrl, {

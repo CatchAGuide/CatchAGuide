@@ -886,6 +886,15 @@ class GuidingsController extends Controller
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after guiding save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
+
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
             if ($savedAsDraftDueToPending) {
                 $redirectUrl = route('profile.myguidings', ['notice' => 'pending_publish']);
@@ -986,7 +995,7 @@ class GuidingsController extends Controller
             }
         }
 
-        // Process new file uploads
+        // Process new file uploads (frontend only sends new/unsaved images on edit)
         if ($request->has('title_image')) {
             $imageCount = count($galeryImages);
             $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
@@ -1002,13 +1011,10 @@ class GuidingsController extends Controller
                     continue;
                 }
 
-                // Check if this image is in the image_list (new image that should be kept)
-                if (in_array($originalFilename, $imageList) || in_array('/' . $originalFilename, $imageList)) {
-                    $index = $index + $imageCount;
-                    $webp_path = media_upload($image, $directory, $tempSlug. "-". $index . "-" . time());
-                    $galeryImages[] = $webp_path;
-                    $processedUploadKeys[] = $uploadKey;
-                }
+                $index = $index + $imageCount;
+                $webp_path = media_upload($image, $directory, $tempSlug. "-". $index . "-" . time());
+                $galeryImages[] = $webp_path;
+                $processedUploadKeys[] = $uploadKey;
             }
         }
 
@@ -1442,6 +1448,15 @@ class GuidingsController extends Controller
                         if ($uploadedNormalized) {
                             unset($galeryImages[$uploadedNormalized]);
                         }
+                    } else {
+                        $uploadBasename = basename($normalizedPath);
+                        if (isset($basenameToPath[$uploadBasename])) {
+                            $orderedGallery[] = $basenameToPath[$uploadBasename];
+                            $uploadedNormalized = $normalizePath($basenameToPath[$uploadBasename]);
+                            if ($uploadedNormalized) {
+                                unset($galeryImages[$uploadedNormalized]);
+                            }
+                        }
                     }
                 }
             }
@@ -1623,14 +1638,6 @@ class GuidingsController extends Controller
                 $selectedMonths = $allMonths;
                 $guiding->months = json_encode($selectedMonths);
             }
-
-            // Generate complete calendar schedule
-            CalendarScheduleService::generateCompleteSchedule(
-                $guiding,
-                $selectedMonths,
-                $request->input('weekdays', []),
-                $request->input('is_update') == '1' // shouldCleanup
-            );
         }
 
         // Only update weekday availability if it's provided in the current request
@@ -2105,6 +2112,15 @@ class GuidingsController extends Controller
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after draft save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'guiding_id' => $guiding->id,
@@ -2123,6 +2139,49 @@ class GuidingsController extends Controller
         }
     }
 
+
+    /**
+     * Rebuild calendar schedules after the guiding row is committed.
+     * Skipped on intermediate draft step saves to avoid heavy concurrent writes.
+     */
+    private function syncGuidingCalendarSchedule(Guiding $guiding, StoreNewGuidingRequest $request): void
+    {
+        if (!$request->has('seasonal_trip')) {
+            return;
+        }
+
+        $isDraft = $request->input('is_draft', 0) == 1;
+        $currentStep = (int) $request->input('current_step', 0);
+        if ($isDraft && $currentStep > 0 && $currentStep < 7) {
+            return;
+        }
+
+        $allMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+        if ($request->input('seasonal_trip') === 'season_monthly') {
+            $selectedMonths = $request->input('months', []);
+        } else {
+            $selectedMonths = $allMonths;
+        }
+
+        if (empty($selectedMonths)) {
+            $selectedMonths = json_decode($guiding->months ?? '[]', true) ?? $allMonths;
+        }
+
+        $weekdays = $request->input('weekdays', []);
+        if ($request->input('weekday_availability') === 'all_week') {
+            $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        } elseif (empty($weekdays)) {
+            $weekdays = json_decode($guiding->weekdays ?? '[]', true) ?? [];
+        }
+
+        CalendarScheduleService::generateCompleteSchedule(
+            $guiding,
+            $selectedMonths,
+            $weekdays,
+            $request->input('is_update') == '1'
+        );
+    }
 
     private function relocateGuidingMediaFromTemp(Guiding $guiding): void
     {
