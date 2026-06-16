@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Services\Media\MediaEnvironmentResolver;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\UnableToCheckFileExistence;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -13,7 +14,7 @@ class SyncMediaDirectoriesCommand extends Command
 {
     protected $signature = 'media:sync-directories
                             {sources?* : Local folder paths (relative to --base or absolute). Omit when using --from-listing-media}
-                            {--from-listing-media : Sync all listing folders marked migrate in config/media_storage.php}
+                            {--from-listing-media : Sync all folders marked migrate in config/media_storage.php}
                             {--prefix= : Bucket folder prefix (production|staging). Default: APP_ENV prefix}
                             {--base= : Local root to resolve relative sources (default: public/)}
                             {--map=* : Remap local folder to bucket path, e.g. guidings-images:guidings-images}
@@ -55,6 +56,7 @@ class SyncMediaDirectoriesCommand extends Command
         $skipped = 0;
         $missing = 0;
         $failed = 0;
+        $existenceCheckWarnings = 0;
 
         foreach ($mappings as $localDir => $bucketFolder) {
             if (! is_dir($localDir)) {
@@ -83,7 +85,7 @@ class SyncMediaDirectoriesCommand extends Command
                 $relativePath = ltrim(str_replace('\\', '/', substr($absolutePath, strlen($localDir))), '/');
                 $objectKey = $bucketPrefix . '/' . trim($bucketFolder, '/') . '/' . $relativePath;
 
-                if ($skipExisting && $disk->exists($objectKey)) {
+                if ($skipExisting && $this->objectExists($disk, $objectKey, $existenceCheckWarnings)) {
                     $skipped++;
                     $bar->advance();
                     continue;
@@ -96,18 +98,8 @@ class SyncMediaDirectoriesCommand extends Command
                 }
 
                 try {
-                    $stream = fopen($absolutePath, 'rb');
-                    if ($stream === false) {
-                        $failed++;
-                        $bar->advance();
-                        continue;
-                    }
-
-                    $disk->put($objectKey, $stream, ['visibility' => $visibility]);
-                    if (is_resource($stream)) {
-                        fclose($stream);
-                    }
-                    $disk->setVisibility($objectKey, $visibility);
+                    $this->putObject($disk, $objectKey, $absolutePath, $visibility);
+                    $this->setObjectVisibility($disk, $objectKey, $visibility);
                     $uploaded++;
                 } catch (\Throwable $e) {
                     $failed++;
@@ -132,6 +124,10 @@ class SyncMediaDirectoriesCommand extends Command
             $dryRun ? ' (dry run)' : ''
         ));
 
+        if ($existenceCheckWarnings > 0) {
+            $this->warn("Existence checks failed {$existenceCheckWarnings} time(s) (network/DNS). Those files were uploaded instead of skipped.");
+        }
+
         if (! $dryRun && $uploaded > 0) {
             $this->line('Run media:make-objects-public --prefix=' . $bucketPrefix . ' if any files need public ACL.');
         }
@@ -148,14 +144,16 @@ class SyncMediaDirectoriesCommand extends Command
         $mappings = [];
 
         if ($this->option('from-listing-media')) {
-            foreach (config('media_storage.sitewide_folders.listing_media', []) as $folder => $meta) {
-                if (! ($meta['migrate'] ?? false)) {
-                    continue;
-                }
+            foreach (config('media_storage.sitewide_folders', []) as $group) {
+                foreach ($group as $folder => $meta) {
+                    if (! ($meta['migrate'] ?? false)) {
+                        continue;
+                    }
 
-                $localName = (string) $folder;
-                $bucketFolder = $explicitMaps[$localName] ?? $localName;
-                $mappings[$this->resolveLocalPath($basePath, $localName)] = $bucketFolder;
+                    $localName = (string) $folder;
+                    $bucketFolder = $explicitMaps[$localName] ?? $localName;
+                    $mappings[$this->resolveLocalPath($basePath, $localName)] = $bucketFolder;
+                }
             }
         }
 
@@ -230,5 +228,80 @@ class SyncMediaDirectoriesCommand extends Command
         sort($files);
 
         return $files;
+    }
+
+    private function objectExists($disk, string $objectKey, int &$existenceCheckWarnings): bool
+    {
+        try {
+            return $this->retryStorageCall(fn () => $disk->exists($objectKey));
+        } catch (UnableToCheckFileExistence|\Throwable $e) {
+            $existenceCheckWarnings++;
+
+            if ($existenceCheckWarnings <= 3) {
+                $this->newLine();
+                $this->warn("  Could not check if object exists (will upload): {$objectKey} — {$e->getMessage()}");
+            }
+
+            return false;
+        }
+    }
+
+    private function putObject($disk, string $objectKey, string $absolutePath, string $visibility): void
+    {
+        $this->retryStorageCall(function () use ($disk, $objectKey, $absolutePath, $visibility) {
+            $stream = fopen($absolutePath, 'rb');
+
+            if ($stream === false) {
+                throw new \RuntimeException("Unable to open local file: {$absolutePath}");
+            }
+
+            try {
+                $disk->put($objectKey, $stream, ['visibility' => $visibility]);
+            } finally {
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }
+        });
+    }
+
+    private function setObjectVisibility($disk, string $objectKey, string $visibility): void
+    {
+        $this->retryStorageCall(fn () => $disk->setVisibility($objectKey, $visibility));
+    }
+
+    private function retryStorageCall(callable $callback, int $attempts = 3): mixed
+    {
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+            try {
+                return $callback();
+            } catch (\Throwable $e) {
+                $lastException = $e;
+
+                if ($attempt === $attempts || ! $this->isRetryableStorageError($e)) {
+                    throw $e;
+                }
+
+                usleep(250_000 * $attempt);
+            }
+        }
+
+        throw $lastException;
+    }
+
+    private function isRetryableStorageError(\Throwable $e): bool
+    {
+        $message = strtolower($e->getMessage());
+
+        return str_contains($message, 'could not resolve host')
+            || str_contains($message, 'connection timed out')
+            || str_contains($message, 'connection reset')
+            || str_contains($message, 'ssl')
+            || str_contains($message, 'temporarily unavailable')
+            || str_contains($message, '503')
+            || str_contains($message, '502')
+            || str_contains($message, '504');
     }
 }

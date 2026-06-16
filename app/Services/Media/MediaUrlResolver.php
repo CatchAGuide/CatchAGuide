@@ -12,6 +12,7 @@ class MediaUrlResolver
         private readonly MediaPathResolver $pathResolver,
         private readonly ManagedMediaPathMatcher $pathMatcher,
         private readonly MediaEnvironmentResolver $environmentResolver,
+        private readonly MediaWriteStorageResolver $writeStorageResolver,
     ) {}
 
     public function resolve(?string $path, ?string $placeholder = 'images/placeholder_guide.jpg'): string
@@ -25,6 +26,10 @@ class MediaUrlResolver
         }
 
         $normalized = $this->pathResolver->normalizePath($path);
+
+        if (! $this->writeStorageResolver->usesObjectStorage()) {
+            return $this->resolveLocalUrl($normalized, $placeholder);
+        }
 
         if ($this->shouldUseObjectStorageUrl($normalized)) {
             $publicUrl = $this->objectStoragePublicUrl($normalized);
@@ -72,16 +77,32 @@ class MediaUrlResolver
 
     private function shouldUseObjectStorageUrl(string $normalized): bool
     {
+        if (! $this->writeStorageResolver->usesObjectStorage()) {
+            return false;
+        }
+
         if (! $this->pathMatcher->matches($normalized)) {
             return false;
         }
 
-        if ($this->cdnBaseUrl() !== '') {
-            return true;
+        return $this->cdnBaseUrl() !== '';
+    }
+
+    private function resolveLocalUrl(string $normalized, ?string $placeholder): string
+    {
+        if ($this->pathMatcher->matches($normalized)) {
+            if ($this->urlSkipsExistsCheck() || $this->pathResolver->existsLocally($normalized)) {
+                return $this->toAbsoluteUrl($this->localStorage->url($normalized));
+            }
+
+            return $this->staticAsset($placeholder ?? 'images/placeholder_guide.jpg');
         }
 
-        return (string) config('media_storage.disk', 'do_spaces')
-            !== (string) config('media_storage.local_disk', 'public');
+        if ($this->localStorage->exists($normalized)) {
+            return $this->toAbsoluteUrl($this->localStorage->url($normalized));
+        }
+
+        return $this->staticAsset($normalized);
     }
 
     /**
@@ -118,11 +139,19 @@ class MediaUrlResolver
             return null;
         }
 
+        if (! $this->writeStorageResolver->usesObjectStorage()) {
+            return $this->toAbsoluteUrl($this->localStorage->url($normalized));
+        }
+
         return $this->objectStoragePublicUrl($normalized);
     }
 
     private function cdnBaseUrl(): string
     {
+        if (! $this->writeStorageResolver->usesObjectStorage()) {
+            return '';
+        }
+
         $disk = (string) config('media_storage.disk', 'do_spaces');
 
         return rtrim((string) config("filesystems.disks.{$disk}.url", ''), '/');

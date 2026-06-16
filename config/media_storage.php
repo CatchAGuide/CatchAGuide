@@ -177,9 +177,15 @@ return [
         ],
 
         'profiles' => [
-            'images' => ['migrate' => false],
+            'images' => [
+                'migrate' => true,
+                'notes' => 'General site images under public/images',
+            ],
+            'uploads' => [
+                'migrate' => true,
+                'notes' => 'User uploads under public/uploads (includes profile_images)',
+            ],
             'uploads/profile_images' => ['migrate' => false],
-            'uploads' => ['migrate' => false],
         ],
 
         'local_only' => [
