@@ -41,9 +41,25 @@ class CustomersController extends Controller
 
     public function update(UpdateCustomerRequest $request, User $customer)
     {
-        $informationData = collect($request->input('information', []))
-            ->only((new UserInformation())->getFillable())
+        $userFields = [
+            'firstname',
+            'lastname',
+            'email',
+            'language',
+            'banktransferdetails',
+            'paypaldetails',
+        ];
+
+        $userData = collect($userFields)
+            ->filter(fn (string $field) => $request->has($field))
+            ->mapWithKeys(fn (string $field) => [$field => $request->input($field)])
             ->all();
+
+        foreach (['bar_allowed', 'banktransfer_allowed', 'paypal_allowed'] as $checkbox) {
+            if ($request->has($checkbox)) {
+                $userData[$checkbox] = $request->boolean($checkbox);
+            }
+        }
 
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
@@ -63,26 +79,32 @@ class CustomersController extends Controller
             $customer->profil_image = $imageName;
         }
 
-        $customer->fill([
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
-            'email' => $request->email,
-            'language' => $request->language,
-            'banktransferdetails' => $request->banktransferdetails,
-            'paypaldetails' => $request->paypaldetails,
-            'bar_allowed' => $request->boolean('bar_allowed'),
-            'banktransfer_allowed' => $request->boolean('banktransfer_allowed'),
-            'paypal_allowed' => $request->boolean('paypal_allowed'),
-        ]);
-        $customer->tax_id = $request->input('tax_id');
-        $customer->save();
+        if ($userData !== []) {
+            $customer->fill($userData);
+        }
 
-        if (!$customer->information) {
-            $userInfo = UserInformation::create($informationData);
-            $customer->user_information_id = $userInfo->id;
+        if ($request->has('tax_id')) {
+            $customer->tax_id = $request->input('tax_id');
+        }
+
+        if ($customer->isDirty()) {
             $customer->save();
-        } else {
-            $customer->information->update($informationData);
+        }
+
+        if ($request->has('information') && is_array($request->input('information'))) {
+            $informationData = collect($request->input('information'))
+                ->only((new UserInformation())->getFillable())
+                ->all();
+
+            if ($informationData !== []) {
+                if (!$customer->information) {
+                    $userInfo = UserInformation::create($informationData);
+                    $customer->user_information_id = $userInfo->id;
+                    $customer->save();
+                } else {
+                    $customer->information->update($informationData);
+                }
+            }
         }
 
         return redirect()->route('admin.customers.index')->with('success', 'Kunde wurde erfolgreich aktualisiert');
