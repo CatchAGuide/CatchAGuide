@@ -39,8 +39,6 @@ class GuideVerificationSubmitRequest extends FormRequest
         if ($isCompany) {
             $rules['information.company_name'] = 'required|string|max:255';
             $rules['information.legal_form'] = 'required|string|max:100';
-            $rules['information.founded_year'] = 'required|integer|min:1800|max:' . date('Y');
-            $rules['information.contact_position'] = 'required|string|max:255';
         } else {
             $rules['information.birthday'] = 'nullable|date|before_or_equal:today';
         }

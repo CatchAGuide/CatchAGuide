@@ -86,11 +86,21 @@ class MediaPathResolver
             return true;
         }
 
+        if (! $this->usesObjectStorage()) {
+            return false;
+        }
+
         if ($this->urlSkipsExistsCheck()) {
             return app(ManagedMediaPathMatcher::class)->matches($this->normalizePath($path));
         }
 
         return $this->existsOnObjectStorage($path);
+    }
+
+    private function usesObjectStorage(): bool
+    {
+        return (string) config('media_storage.disk', 'do_spaces')
+            !== (string) config('media_storage.local_disk', 'public');
     }
 
     private function rememberExists(string $disk, string $normalized, callable $callback): bool

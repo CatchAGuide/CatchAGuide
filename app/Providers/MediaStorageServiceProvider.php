@@ -164,6 +164,8 @@ class MediaStorageServiceProvider extends ServiceProvider
 
                 $app->make(MediaEnvironmentResolver::class),
 
+                $app->make(MediaWriteStorageResolver::class),
+
             );
 
         });

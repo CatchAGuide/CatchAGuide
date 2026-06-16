@@ -919,15 +919,23 @@
 </script>
 
 @php
-    $listingMediaCdnBase = rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/');
-    $listingMediaEnvPrefix = app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix();
+    $listingMediaUsesObjectStorage = app(\App\Services\Media\MediaWriteStorageResolver::class)->usesObjectStorage();
+    $listingMediaCdnBase = $listingMediaUsesObjectStorage
+        ? rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/')
+        : '';
+    $listingMediaEnvPrefix = $listingMediaUsesObjectStorage
+        ? app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix()
+        : '';
+    $listingMediaLocalBase = rtrim(url('/'), '/');
     $listingMediaPlaceholder = media_url(null);
 @endphp
 <script>
     // Use centralized GoogleMapsManager
     const MapsManager = window.GoogleMapsManager;
+    const listingMediaUsesObjectStorage = @json($listingMediaUsesObjectStorage);
     const listingMediaCdnBase = @json($listingMediaCdnBase);
     const listingMediaEnvPrefix = @json($listingMediaEnvPrefix);
+    const listingMediaLocalBase = @json($listingMediaLocalBase);
     const listingMediaPlaceholder = @json($listingMediaPlaceholder);
 
     function resolveListingMediaUrl(path) {
@@ -938,6 +946,9 @@
             return path;
         }
         const normalized = String(path).replace(/^\/+/, '');
+        if (!listingMediaUsesObjectStorage) {
+            return `${listingMediaLocalBase}/${normalized}`;
+        }
         return listingMediaCdnBase
             ? `${listingMediaCdnBase}/${listingMediaEnvPrefix}/${normalized}`
             : `/${normalized}`;

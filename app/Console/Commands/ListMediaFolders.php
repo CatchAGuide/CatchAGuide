@@ -13,26 +13,38 @@ class ListMediaFolders extends Command
 
     public function handle(MediaEnvironmentResolver $environmentResolver): int
     {
-        $this->info('Current bucket prefix: ' . $environmentResolver->bucketPrefix());
+        $prefix = $environmentResolver->bucketPrefix();
+        $localBase = rtrim(public_path(), '/\\');
+
+        $this->info('Current bucket prefix: ' . $prefix);
+        $this->info('Local base: ' . $localBase);
         $this->newLine();
 
         $rows = [];
 
         foreach (config('media_storage.sitewide_folders', []) as $group => $folders) {
             foreach ($folders as $folder => $meta) {
+                $migrate = (bool) ($meta['migrate'] ?? false);
                 $rows[] = [
                     $group,
                     $folder,
-                    ($meta['migrate'] ?? false) ? 'yes' : 'no',
+                    $migrate ? 'yes' : 'no',
+                    $migrate ? "{$localBase}/{$folder}" : '—',
+                    $migrate ? "{$prefix}/{$folder}/" : '—',
                     $meta['listing'] ?? ($meta['notes'] ?? ''),
                 ];
             }
         }
 
         $this->table(
-            ['Group', 'Folder', 'Object storage', 'Listing / notes'],
+            ['Group', 'Folder', 'Sync', 'Local path', 'Bucket path', 'Listing / notes'],
             $rows
         );
+
+        $synced = array_filter($rows, fn (array $row) => $row[2] === 'yes');
+        $this->newLine();
+        $this->info(count($synced) . ' folder(s) will sync with: php artisan media:sync-directories --from-listing-media');
+        $this->line('Override bucket prefix: --prefix=production (default follows APP_ENV: ' . app()->environment() . ')');
 
         return self::SUCCESS;
     }
