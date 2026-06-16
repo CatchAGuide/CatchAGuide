@@ -10,33 +10,38 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'firstname' => ['required', 'string'],
-            'lastname' => ['required', 'string'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->route('customer'))],
-            'language' => ['required', 'string'],
-            'tax_id' => ['nullable', 'string'],
-            'profile_image' => ['nullable', 'image', 'max:2048'],
-            'information.birthday' => ['nullable', 'date'],
-            'information.address' => ['required', 'string'],
-            'information.address_number' => ['required', 'string'],
-            'information.postal' => ['required', 'string'],
-            'information.city' => ['required', 'string'],
-            'information.phone' => ['required', 'string'],
-            'information.languages' => ['nullable', 'string'],
-            'information.about_me' => ['nullable', 'string'],
-            'information.favorite_fish' => ['nullable', 'string'],
-            'information.fishing_start_year' => ['nullable', 'string'],
-            'banktransferdetails' => ['nullable', 'string'],
-            'paypaldetails' => ['nullable', 'string'],
-            'bar_allowed' => ['nullable', 'boolean'],
-            'banktransfer_allowed' => ['nullable', 'boolean'],
-            'paypal_allowed' => ['nullable', 'boolean'],
+            'firstname' => ['sometimes', 'required', 'string'],
+            'lastname' => ['sometimes', 'required', 'string'],
+            'email' => ['sometimes', 'required', 'email', Rule::unique('users', 'email')->ignore($this->route('customer'))],
+            'language' => ['sometimes', 'required', 'string'],
+            'tax_id' => ['sometimes', 'nullable', 'string'],
+            'profile_image' => ['sometimes', 'nullable', 'image', 'max:2048'],
+            'information' => ['sometimes', 'array'],
+            'information.birthday' => ['sometimes', 'nullable', 'date'],
+            'information.address' => ['sometimes', 'required', 'string'],
+            'information.address_number' => ['sometimes', 'required', 'string'],
+            'information.postal' => ['sometimes', 'required', 'string'],
+            'information.city' => ['sometimes', 'required', 'string'],
+            'information.phone' => ['sometimes', 'required', 'string'],
+            'information.languages' => ['sometimes', 'nullable', 'string'],
+            'information.about_me' => ['sometimes', 'nullable', 'string'],
+            'information.favorite_fish' => ['sometimes', 'nullable', 'string'],
+            'information.fishing_start_year' => ['sometimes', 'nullable', 'string'],
+            'banktransferdetails' => ['sometimes', 'nullable', 'string'],
+            'paypaldetails' => ['sometimes', 'nullable', 'string'],
+            'bar_allowed' => ['sometimes', 'boolean'],
+            'banktransfer_allowed' => ['sometimes', 'boolean'],
+            'paypal_allowed' => ['sometimes', 'boolean'],
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $information = $this->input('information', []);
+        if (!$this->has('information') || !is_array($this->input('information'))) {
+            return;
+        }
+
+        $information = $this->input('information');
 
         if (array_key_exists('birthday', $information) && $information['birthday'] === '') {
             $information['birthday'] = null;
@@ -49,12 +54,7 @@ class UpdateCustomerRequest extends FormRequest
             unset($information['fishing_experience']);
         }
 
-        $this->merge([
-            'information' => $information,
-            'bar_allowed' => $this->has('bar_allowed'),
-            'banktransfer_allowed' => $this->has('banktransfer_allowed'),
-            'paypal_allowed' => $this->has('paypal_allowed'),
-        ]);
+        $this->merge(['information' => $information]);
     }
 
     public function authorize(): bool
