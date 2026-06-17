@@ -974,6 +974,15 @@ class GuidingsController extends Controller
                 ]);
             }
 
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after guiding save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
+
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
             if ($savedAsDraftDueToPending) {
                 $redirectUrl = route('profile.myguidings', ['notice' => 'pending_publish']);
