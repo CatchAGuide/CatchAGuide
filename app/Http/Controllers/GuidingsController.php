@@ -954,7 +954,14 @@ class GuidingsController extends Controller
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
-            $this->deleteGuidingImagePaths($pathsToDelete);
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after guiding save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
 
             try {
                 $this->syncGuidingCalendarSchedule($guiding, $request);
@@ -1405,7 +1412,130 @@ class GuidingsController extends Controller
         $guiding->city = $request->input('city', '');
         $guiding->region = $request->input('region', '');
 
-        $pathsToDelete = $this->processGuidingImages($guiding, $request);
+        // Step 1: Images
+        $galeryImages = [];
+        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
+        $processedFilenames = []; // Track processed filenames to prevent duplicates
+
+        $normalizePath = function ($path) {
+            if (is_array($path)) {
+                $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
+            }
+
+            if (!is_string($path)) {
+                return null;
+            }
+
+            $parsedPath = parse_url($path, PHP_URL_PATH);
+            if ($parsedPath) {
+                $path = $parsedPath;
+            }
+
+            return ltrim($path, '/');
+        };
+
+        $imageListNormalized = array_values(array_filter(array_map($normalizePath, (array) $imageListRaw)));
+        $imageListLookup = array_flip($imageListNormalized);
+
+        if ($request->input('is_update') == '1') {
+            $existingImagesJson = $request->input('existing_images');
+            $existingImages = json_decode($existingImagesJson, true) ?? [];
+
+            foreach ($existingImages as $existingImage) {
+                $normalizedExisting = $normalizePath($existingImage);
+
+                if (!$normalizedExisting) {
+                    continue;
+                }
+
+                if (isset($imageListLookup[$normalizedExisting])) {
+                    $galeryImages[$normalizedExisting] = $normalizedExisting === $existingImage
+                        ? $existingImage
+                        : ltrim($existingImage, '/');
+                    $processedFilenames[] = basename($normalizedExisting);
+                } else {
+                    media_delete($existingImage);
+                }
+            }
+        }
+
+        $basenameToPath = [];
+
+        if ($request->has('title_image')) {
+            $imageCount = count($galeryImages);
+            $directory = media_listing_directory('guiding', $guiding->id > 0 ? (int) $guiding->id : null);
+            $processedUploadKeys = [];
+
+            foreach ($request->file('title_image') as $index => $image) {
+                $uploadKey = $image->getClientOriginalName() . '|' . $image->getSize();
+
+                if (in_array($uploadKey, $processedUploadKeys, true)) {
+                    continue;
+                }
+
+                $index = $index + $imageCount;
+                $webpPath = media_upload($image, $directory, $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
+                $webpPath = ltrim($webpPath, '/');
+                $normalizedNew = $normalizePath($webpPath);
+
+                if ($normalizedNew) {
+                    $galeryImages[$normalizedNew] = $webpPath;
+                    $basenameToPath[$image->getClientOriginalName()] = $webpPath;
+                    $processedUploadKeys[] = $uploadKey;
+                }
+            }
+        }
+
+        if (empty($galeryImages) && !empty($imageListNormalized)) {
+            foreach ($imageListNormalized as $normalizedPath) {
+                $galeryImages[$normalizedPath] = $normalizedPath;
+            }
+        }
+
+        if (!empty($galeryImages)) {
+            $orderedGallery = [];
+
+            if (!empty($imageListNormalized)) {
+                foreach ($imageListNormalized as $normalizedPath) {
+                    if (isset($galeryImages[$normalizedPath])) {
+                        $orderedGallery[] = $galeryImages[$normalizedPath];
+                        unset($galeryImages[$normalizedPath]);
+                    } elseif (isset($basenameToPath[$normalizedPath])) {
+                        $orderedGallery[] = $basenameToPath[$normalizedPath];
+                        $uploadedNormalized = $normalizePath($basenameToPath[$normalizedPath]);
+                        if ($uploadedNormalized) {
+                            unset($galeryImages[$uploadedNormalized]);
+                        }
+                    } else {
+                        $uploadBasename = basename($normalizedPath);
+                        if (isset($basenameToPath[$uploadBasename])) {
+                            $orderedGallery[] = $basenameToPath[$uploadBasename];
+                            $uploadedNormalized = $normalizePath($basenameToPath[$uploadBasename]);
+                            if ($uploadedNormalized) {
+                                unset($galeryImages[$uploadedNormalized]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($galeryImages)) {
+                $orderedGallery = array_merge($orderedGallery, array_values($galeryImages));
+            }
+
+            $orderedGallery = array_values(array_filter($orderedGallery));
+
+            if (!empty($orderedGallery)) {
+                $primaryImageIndex = (int) $request->input('primaryImage', 0);
+                if (isset($orderedGallery[$primaryImageIndex])) {
+                    $guiding->thumbnail_path = $orderedGallery[$primaryImageIndex];
+                } else {
+                    $guiding->thumbnail_path = $orderedGallery[0];
+                }
+
+                $guiding->gallery_images = json_encode($orderedGallery);
+            }
+        }
 
         // Step 2: Boat and fishing info
         $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;

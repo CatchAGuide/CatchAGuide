@@ -2176,7 +2176,7 @@
             }, 100);
         });
         
-        // File input change is handled inside ImageManager.initEventListeners() — do not attach a second listener here.
+        // File input change is handled by ImageManager.initEventListeners()
 
         // Add click handlers for step buttons
         document.querySelectorAll('.step-button').forEach(button => {
