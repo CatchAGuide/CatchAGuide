@@ -33,6 +33,7 @@ return [
     */
 
     'listing_folders' => [
+        // 'guiding' => 'assets/images/guidings',
         'guiding' => 'guidings',
         'vacation' => 'vacations',
         'accommodation' => 'accommodations',
@@ -84,7 +85,7 @@ return [
     */
 
     'legacy_listing_folders' => [
-        'guiding' => ['guidings-images'],
+        'guiding' => ['guidings-images', 'guidings'],
         'vacation' => ['vacations-images'],
         'camp' => ['camps-images'],
         'rental_boat' => ['rental-boats-images'],
@@ -105,6 +106,7 @@ return [
         'special-offers' => 'special_offer',
         'trips' => 'trip',
         'guidings-images' => 'guiding',
+        'assets/images/guidings' => 'guiding',
         'vacations-images' => 'vacation',
         'camps-images' => 'camp',
         'rental-boats-images' => 'rental_boat',
@@ -117,7 +119,7 @@ return [
             'guidings' => [
                 'listing' => 'guiding',
                 'migrate' => true,
-                'notes' => 'guidings/{id}/filename.webp',
+                'notes' => 'Transitional guidings/{id}/ paths (prefer assets/images/guidings/{id}/)',
             ],
             'vacations' => [
                 'listing' => 'vacation',
@@ -146,7 +148,12 @@ return [
             'guidings-images' => [
                 'listing' => 'guiding',
                 'migrate' => true,
-                'notes' => 'Legacy flat paths',
+                'notes' => 'Legacy flat guidings-images/* paths',
+            ],
+            'assets/images/guidings' => [
+                'listing' => 'guiding',
+                'migrate' => true,
+                'notes' => 'assets/images/guidings/{id}/filename.webp',
             ],
             'vacations-images' => [
                 'listing' => 'vacation',
@@ -167,9 +174,18 @@ return [
         ],
 
         'blog' => [
-            'blog' => ['migrate' => false],
-            'newblog' => ['migrate' => false],
-            'blog/contents' => ['migrate' => false],
+            'blog' => [
+                'migrate' => true,
+                'notes' => 'Blog images (includes blog/contents, blog/city, etc.)',
+            ],
+            'newblog' => [
+                'migrate' => true,
+                'notes' => 'Guide blog (newblog) post images',
+            ],
+            'blog/contents' => [
+                'migrate' => false,
+                'notes' => 'Covered by parent blog/ sync',
+            ],
         ],
 
         'category_seo' => [
