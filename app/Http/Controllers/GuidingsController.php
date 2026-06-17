@@ -1092,6 +1092,67 @@ class GuidingsController extends Controller
     }
 
     /**
+     * Persist a guiding draft synchronously with safe deferred image deletion.
+     *
+     * @return array{guiding_id: int, gallery_images: array, thumbnail_path: string|null}
+     */
+    private function persistGuidingDraft(StoreNewGuidingRequest $request): array
+    {
+        DB::beginTransaction();
+
+        try {
+            $isUpdate = $request->input('is_update') == '1';
+            $originalStatus = null;
+
+            if ($isUpdate && $request->input('guiding_id')) {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+                $originalStatus = $guiding->status;
+            } else {
+                $guiding = Guiding::where('user_id', auth()->id())
+                    ->where('status', 2)
+                    ->where('title', $request->input('title'))
+                    ->where('city', $request->input('city'))
+                    ->where('country', $request->input('country'))
+                    ->where('region', $request->input('region'))
+                    ->first();
+
+                if (!$guiding) {
+                    $guiding = new Guiding(['user_id' => auth()->id()]);
+                }
+            }
+
+            if (!$isUpdate) {
+                $guiding->slug = slugify(
+                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+                );
+            }
+
+            $this->fillGuidingFromRequest($guiding, $request, true);
+
+            $guiding->is_newguiding = 1;
+
+            if ($isUpdate && ((int) $originalStatus === 1 || (int) $originalStatus === 0)) {
+                $guiding->status = $originalStatus;
+            } else {
+                $guiding->status = 2;
+            }
+
+            $guiding->save();
+            $this->relocateGuidingMediaFromTemp($guiding);
+            DB::commit();
+
+            return [
+                'guiding_id' => $guiding->id,
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
      * Prepare data for the job from request
      */
     private function prepareGuidingDataForJob(StoreNewGuidingRequest $request, array $processedData): array
