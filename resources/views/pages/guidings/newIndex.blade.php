@@ -6,8 +6,8 @@
 @section('share_tags')
     <meta property="og:title" content="{{$guiding->title}}" />
     <meta property="og:description" content="{{$guiding->desc_course_of_action ?? ""}}" />
-    @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
-        <meta property="og:image" content="{{asset($guiding->thumbnail_path)}}"/>
+    @if(media_path_usable($guiding->thumbnail_path))
+        <meta property="og:image" content="{{ media_url($guiding->thumbnail_path) }}"/>
     @endif
 @endsection
 
@@ -19,7 +19,7 @@
             'name' => $guiding->title,
             'description' => $guiding->desc_tour_unique ?? $guiding->desc_course_of_action ?? $guiding->description,
             'url' => url()->current(),
-            'image' => $guiding->thumbnail_path ? asset($guiding->thumbnail_path) : null,
+            'image' => $guiding->thumbnail_path ? media_url($guiding->thumbnail_path) : null,
             'touristType' => 'Fishing trip',
             'areaServed' => array_filter([
                 $guiding->city,
@@ -863,8 +863,8 @@
         <!-- Image Gallery -->
         <div class="guidings-gallery row mx-0 mb-3">
             <div class="left-image">
-                @if(file_exists(public_path(str_replace(asset(''), '', asset($guiding->thumbnail_path)))))
-                    <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($guiding->thumbnail_path)}}" class="img-fluid" alt="Main Image">
+                @if(media_path_usable($guiding->thumbnail_path))
+                    <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{ media_url($guiding->thumbnail_path) }}" class="img-fluid" alt="Main Image">
                 @else
                     <div class="text-center p-4">
                         <p>@lang('guidings.No_image_found')</p>
@@ -881,17 +881,17 @@
                     $hiddenCount = 0;
 
                     // Check if thumbnail exists
-                    if (file_exists(public_path($thumbnailPath))) {
-                        $overallImages[] = asset($thumbnailPath);
+                    if (media_path_usable($thumbnailPath)) {
+                        $overallImages[] = media_url($thumbnailPath);
                     }
 
                     // Filter and validate gallery images
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            if (file_exists(public_path($image)) 
+                            if (media_path_usable($image)
                                 && $image !== $thumbnailPath) {
-                                $finalImages[] = asset($image);
-                                $overallImages[] = asset($image);
+                                $finalImages[] = media_url($image);
+                                $overallImages[] = media_url($image);
                             }
                         }
                     }
@@ -903,9 +903,9 @@
                     }
 
                     // If less than 4 images and thumbnail exists, pad with thumbnail
-                    if (count($finalImages) < 4 && file_exists(public_path($thumbnailPath))) {
+                    if (count($finalImages) < 4 && media_path_usable($thumbnailPath)) {
                         while (count($finalImages) < 4) {
-                            $finalImages[] = asset($thumbnailPath);
+                            $finalImages[] = media_url($thumbnailPath);
                         }
                     }
                     
@@ -938,16 +938,16 @@
                     $overallImages = [];
                     
                     // Validate thumbnail exists
-                    if (file_exists(public_path($thumbnailPath))) {
-                        $overallImages[] = asset($thumbnailPath);
+                    if (media_path_usable($thumbnailPath)) {
+                        $overallImages[] = media_url($thumbnailPath);
                     }
                     // Filter gallery images that exist
                     if ($galleryImages) {
                         foreach ($galleryImages as $image) {
-                            if (file_exists(public_path($image))
+                            if (media_path_usable($image)
                                 && $image !== $thumbnailPath) {
-                                $finalImages[] = asset($image);
-                                $overallImages[] = asset($image);
+                                $finalImages[] = media_url($image);
+                                $overallImages[] = media_url($image);
                             }
                         }
                     }
@@ -956,8 +956,8 @@
 
                     if (empty($finalImages)) {
                         // No valid gallery images, use thumbnail if it exists
-                        if (file_exists(public_path($thumbnailPath))) {
-                            $finalImages = array_fill(0, 2, asset($thumbnailPath));
+                        if (media_path_usable($thumbnailPath)) {
+                            $finalImages = array_fill(0, 2, media_url($thumbnailPath));
                         }
                     } elseif (count($finalImages) > 3) {
                         // More than 3 valid gallery images
@@ -968,9 +968,9 @@
                             $finalImages = $finalImages;
                             
                             // Pad with thumbnail if it exists
-                            if (file_exists(public_path($thumbnailPath))) {
+                            if (media_path_usable($thumbnailPath)) {
                                 while (count($finalImages) < 2) {
-                                    $finalImages[] = asset($thumbnailPath);
+                                    $finalImages[] = media_url($thumbnailPath);
                                 }
                             } 
                         } else {
@@ -1955,7 +1955,7 @@
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($other_guidings as $other_guiding)
                         @php
-                            $tile_img = $other_guiding->thumbnail_path ? asset($other_guiding->thumbnail_path) : null;
+                            $tile_img = $other_guiding->thumbnail_path ? media_url($other_guiding->thumbnail_path) : null;
                             if (!$tile_img && count(get_galleries_image_link($other_guiding)) > 0) {
                                 $tile_img = get_galleries_image_link($other_guiding)[0];
                             }

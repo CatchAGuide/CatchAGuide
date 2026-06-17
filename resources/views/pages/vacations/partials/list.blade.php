@@ -8,7 +8,7 @@
 						@if(count(get_galleries_image_link($vacation, 1)))
 							@foreach(get_galleries_image_link($vacation, 1) as $index => $gallery_image_link)
 								<div class="carousel-item @if($index == 0) active @endif">
-									<img  class="carousel-image" src="{{asset($gallery_image_link)}}">
+									<img  class="carousel-image" src="{{ $gallery_image_link }}">
 								</div>
 							@endforeach
 						@endif

@@ -1268,7 +1268,7 @@
                         <div class="card">
                             <div class="row g-0">
                                 <div class="col-5">
-                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
+                                    <img class="img-fluid rounded-start img-top" src="{{media_url($category->thumbnail_path)}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
                                 </div>
                                 <div class="col-7">
                                     <div class="card-body py-2 px-3 d-flex align-items-center h-100">
@@ -1294,7 +1294,7 @@
                     <div class="my-1 col-md-4">
                         <a href="{{ route('category.types', ['type' => 'methods', 'slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                <img class="card-img-left example-card-img-responsive img-top" src="{{media_url($category->thumbnail_path)}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
                                 <h5 class="card-title">{{$category->source->name}}</h5>
                                 
@@ -1410,7 +1410,7 @@
                         <div class="card">
                             <div class="row g-0">
                                 <div class="col-5">
-                                    <img class="img-fluid rounded-start img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
+                                    <img class="img-fluid rounded-start img-top" src="{{media_url($category->thumbnail_path)}}" style="height:100px; object-fit:cover;" alt="{{$category->source->name}}">
                                 </div>
                                 <div class="col-7">
                                     <div class="card-body py-2 px-3 d-flex align-items-center h-100">
@@ -1436,7 +1436,7 @@
                     <div class="my-1 col-md-4">
                         <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
-                                <img class="card-img-left example-card-img-responsive img-top" src="{{asset($category->thumbnail_path ?? 'images/placeholder_guide.jpg')}}" style="width:150px;height:100px"/>
+                                <img class="card-img-left example-card-img-responsive img-top" src="{{media_url($category->thumbnail_path)}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
                                 <h5 class="card-title">{{$category->source->name}}</h5>
                                 

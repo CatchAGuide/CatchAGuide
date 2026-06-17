@@ -16,6 +16,7 @@ use App\Models\RentalBoat;
 use App\Models\SpecialOffer;
 use App\Models\Thread;
 use App\Models\Vacation;
+use App\Services\Media\MediaPathResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -99,17 +100,18 @@ class ImageCleanupService
     ];
 
     /** Directories we consider for orphan file scan. Subdirs included. */
-    protected static array $knownImageDirectories = [
-        'vacations-images',
-        'guidings-images',
-        'accommodations',
-        'camps',
-        'rental-boats',
-        'special-offers',
-        'blog',
-        'newblog',
-        'category',
-    ];
+    protected function knownImageDirectories(): array
+    {
+        $directories = [];
+
+        foreach (config('media_storage.sitewide_folders', []) as $group) {
+            foreach (array_keys($group) as $folder) {
+                $directories[] = $folder;
+            }
+        }
+
+        return array_values(array_unique($directories));
+    }
 
     public function normalizePath(string $path): string
     {
@@ -138,11 +140,19 @@ class ImageCleanupService
             return false;
         }
 
-        if (Storage::disk('public')->exists($n)) {
-            return true;
+        try {
+            $pathResolver = app(MediaPathResolver::class);
+
+            return $pathResolver->exists($path);
+        } catch (\Throwable) {
+            if (Storage::disk('public')->exists($n)) {
+                return true;
+            }
+
+            $pub = public_path($n);
+
+            return is_file($pub) && file_exists($pub);
         }
-        $pub = public_path($n);
-        return is_file($pub) && file_exists($pub);
     }
 
     /**
@@ -493,7 +503,7 @@ class ImageCleanupService
         $storageRoot = Storage::disk('public')->path('');
         $publicRoot = public_path('');
 
-        foreach (self::$knownImageDirectories as $dir) {
+        foreach ($this->knownImageDirectories() as $dir) {
             $this->scanDirectoryForOrphans($dir, $storageRoot, $referencedSet, $orphans);
             $this->scanDirectoryForOrphans($dir, $publicRoot, $referencedSet, $orphans);
         }

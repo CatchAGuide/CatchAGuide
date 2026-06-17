@@ -6,6 +6,7 @@ use App\Models\CalendarSchedule;
 use App\Models\BlockedEvent;
 use App\Models\Guiding;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 
 class CalendarScheduleService
 {
@@ -173,15 +174,48 @@ class CalendarScheduleService
         bool $shouldCleanup = true,
         int $monthsAhead = 24
     ): void {
-        if ($shouldCleanup) {
-            self::cleanupOldSchedules($guiding);
+        self::retryOnDeadlock(function () use ($guiding, $availableMonths, $availableWeekdays, $shouldCleanup, $monthsAhead) {
+            if ($shouldCleanup) {
+                self::cleanupOldSchedules($guiding);
+            }
+
+            self::generateCalendarSchedulesForGuiding($guiding, $availableMonths, $availableWeekdays, $monthsAhead);
+            self::createBlockedEventsForUnavailableMonths($guiding, $availableMonths);
+        });
+    }
+
+    /**
+     * Retry calendar writes when concurrent guiding saves deadlock on calendar_schedule.
+     */
+    private static function retryOnDeadlock(callable $callback, int $maxAttempts = 3): void
+    {
+        $attempt = 0;
+
+        while (true) {
+            try {
+                $callback();
+                return;
+            } catch (QueryException $e) {
+                $attempt++;
+
+                if ($attempt >= $maxAttempts || ! self::isDeadlockException($e)) {
+                    throw $e;
+                }
+
+                usleep(random_int(50_000, 200_000) * $attempt);
+            }
+        }
+    }
+
+    private static function isDeadlockException(QueryException $e): bool
+    {
+        $previous = $e->getPrevious();
+
+        if ($previous !== null && (int) $previous->getCode() === 1213) {
+            return true;
         }
 
-        // Generate comprehensive calendar schedules
-        self::generateCalendarSchedulesForGuiding($guiding, $availableMonths, $availableWeekdays, $monthsAhead);
-        
-        // Also maintain the existing BlockedEvent creation for backward compatibility
-        self::createBlockedEventsForUnavailableMonths($guiding, $availableMonths);
+        return str_contains($e->getMessage(), 'Deadlock found');
     }
 
     /**

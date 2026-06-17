@@ -8,8 +8,8 @@
     <meta property="og:title" content="{{$translatedVacation->title ?? $vacation->title}}" />
     <meta property="og:description" content="{{$translatedVacation->description ?? ""}}" />
     
-    @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
-        <meta property="og:image" content="{{asset($vacation->gallery[0])}}"/>
+    @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && media_path_usable($vacation->gallery[0]))
+        <meta property="og:image" content="{{media_url($vacation->gallery[0])}}"/>
     @endif
 @endsection
 
@@ -17,7 +17,7 @@
     @php
         $mainImage = null;
         if (isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0])) {
-            $mainImage = asset($vacation->gallery[0]);
+            $mainImage = media_url($vacation->gallery[0]);
         }
 
         $jsonLd = [
@@ -337,8 +337,8 @@
     <!-- Image Gallery -->
     <div class="guidings-gallery row mx-0 mb-3">
         <div class="left-image">
-            @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && file_exists(public_path(str_replace(asset(''), '', asset($vacation->gallery[0])))))
-                <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{asset($vacation->gallery[0])}}" class="img-fluid" alt="Main Image">
+            @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && media_path_usable($vacation->gallery[0]))
+                <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{media_url($vacation->gallery[0])}}" class="img-fluid" alt="Main Image">
             @else
                 <div class="text-center p-4">
                     <p>No image found</p>
@@ -357,10 +357,10 @@
                 // Filter and validate gallery images
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
-                        if (file_exists(public_path($image)) 
+                        if (media_path_usable($image)) 
                             && $image !== $thumbnailPath) {
-                            $finalImages[] = asset($image);
-                            $overallImages[] = asset($image);
+                            $finalImages[] = media_url($image);
+                            $overallImages[] = media_url($image);
                         }
                     }
                 }
@@ -372,9 +372,9 @@
                 }
 
                 // If less than 4 images and thumbnail exists, pad with thumbnail
-                if (count($finalImages) < 4 && file_exists(public_path($thumbnailPath))) {
+                if (count($finalImages) < 4 && media_path_usable($thumbnailPath)) {
                     while (count($finalImages) < 4) {
-                        $finalImages[] = asset($thumbnailPath);
+                        $finalImages[] = media_url($thumbnailPath);
                     }
                 }
                 
@@ -409,10 +409,10 @@
                 // Filter gallery images that exist
                 if ($galleryImages) {
                     foreach ($galleryImages as $image) {
-                        if (file_exists(public_path($image))) {
-                            $overallImages[] = asset($image);
+                        if (media_path_usable($image)) {
+                            $overallImages[] = media_url($image);
                             if ($image !== $thumbnailPath) {
-                                $finalImages[] = asset($image);
+                                $finalImages[] = media_url($image);
                             }   
                         }
                     }
@@ -1058,7 +1058,7 @@
                             <a class="popular-tours__img" href="{{ route('guidings.show',[$same_country->id,$same_country->slug]) }}" title="{{ translate('Guide aufmachen') }}">
                                 <div class="popular-tours__img__wrapper">
                                     @if($same_country->gallery)
-                                        <img src="{{ asset($same_country->gallery[0]) }}" alt="{{ $same_country->title }}"/>
+                                        <img src="{{ media_url($same_country->gallery[0]) }}" alt="{{ $same_country->title }}"/>
                                     @endif
                                 </div>
                             </a>

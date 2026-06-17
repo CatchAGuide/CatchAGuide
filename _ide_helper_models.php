@@ -1194,37 +1194,9 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property int $id
- * @property string $label
- * @property string|null $description
- * @property string $command
- * @property bool $is_enabled
- * @property string $frequency
- * @property string|null $schedule_time
- * @property int|null $day_of_week
- * @property string|null $cron_expression
- * @property bool $without_overlapping
- * @property bool $run_in_background
- * @property string|null $append_output_to
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereAppendOutputTo($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCommand($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCronExpression($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereDayOfWeek($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereFrequency($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereIsEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereLabel($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereRunInBackground($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereScheduleTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereWithoutOverlapping($value)
  */
 	class CustomScheduledTask extends \Eloquent {}
 }
@@ -1645,16 +1617,8 @@ namespace App\Models{
  * @property string $invoice_status
  * @property \Illuminate\Support\Carbon|null $invoice_sent_at
  * @property string|null $invoice_number
- * @property numeric|null $gross_amount
- * @property numeric|null $commission_amount
- * @property numeric|null $tax_amount
- * @property string $currency
  * @property string $paid_status
  * @property \Illuminate\Support\Carbon|null $paid_at
- * @property \Illuminate\Support\Carbon|null $invoice_due_at
- * @property int $reminder_step
- * @property \Illuminate\Support\Carbon|null $last_reminder_sent_at
- * @property \Illuminate\Support\Carbon|null $next_reminder_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $billable
@@ -1665,21 +1629,13 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereBillableId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereBillableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCommissionAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCurrency($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereGrossAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceDueAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceSentAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereLastReminderSentAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereNextReminderAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem wherePaidAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem wherePaidStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereReminderStep($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereTaxAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereUpdatedAt($value)
  */
 	class FinanceItem extends \Eloquent {}
@@ -1687,27 +1643,11 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property int $id
- * @property int $finance_item_id
- * @property string $event_type
- * @property array<array-key, mixed>|null $payload
- * @property string|null $actor_type
- * @property int|null $actor_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $actor
- * @property-read \App\Models\FinanceItem $financeItem
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $actor
+ * @property-read \App\Models\FinanceItem|null $financeItem
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereActorId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereActorType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereEventType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereFinanceItemId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent wherePayload($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereUpdatedAt($value)
  */
 	class FinanceItemEvent extends \Eloquent {}
 }
@@ -1800,6 +1740,27 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property-read \App\Models\User|null $reviewer
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest query()
+ */
+	class GuideRequest extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog query()
+ */
+	class GuideStatusLog extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
  * @property int $id
  * @property string|null $language
  * @property string $title
@@ -1844,7 +1805,6 @@ namespace App\Models{
  * @property string $location
  * @property string|null $city
  * @property string|null $country
- * @property string|null $country_iso
  * @property string|null $region
  * @property string|null $type
  * @property int|null $recommended_for_anfaenger
@@ -1967,6 +1927,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding filterByRequestValue($requestValue)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding publiclyVisible()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding radius($latitude, $longitude, $radius)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereAdditionalInfo($value)
@@ -1979,7 +1940,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCatering($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCountry($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCountryIso($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCourseOfAction($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereDescCourseOfAction($value)
@@ -2987,27 +2947,9 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property int $id
- * @property string $key
- * @property bool $is_enabled
- * @property string|null $frequency
- * @property string|null $schedule_time
- * @property int|null $day_of_week
- * @property string|null $cron_expression
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereCronExpression($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereDayOfWeek($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereFrequency($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereIsEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereKey($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereScheduleTime($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereUpdatedAt($value)
  */
 	class ScheduledTaskSetting extends \Eloquent {}
 }
@@ -3371,11 +3313,6 @@ namespace App\Models{
  * @property float $paid_balance
  * @property int $is_active
  * @property int|null $is_guide
- * @property string|null $role
- * @property string|null $guide_status
- * @property string|null $guide_type
- * @property string|null $guide_submitted_at
- * @property string|null $guide_verified_at
  * @property string|null $profil_image
  * @property int $user_information_id
  * @property string|null $remember_token
@@ -3411,6 +3348,10 @@ namespace App\Models{
  * @property-read string $full_name
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Rating> $given_ratings
  * @property-read int|null $given_ratings_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GuideRequest> $guideRequests
+ * @property-read int|null $guide_requests_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\GuideStatusLog> $guideStatusLogs
+ * @property-read int|null $guide_status_logs_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Guiding> $guidings
  * @property-read int|null $guidings_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ICalFeed> $icalFeeds
@@ -3439,10 +3380,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereFirstname($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideSubmittedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsActive($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsGuide($value)
@@ -3467,7 +3404,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePmType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfilImage($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRole($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereStripeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTaxId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTrialEndsAt($value)

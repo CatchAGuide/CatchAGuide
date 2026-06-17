@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Media\ListingMediaRelocator;
 
 class GuidingsController extends Controller
 {
@@ -124,7 +125,10 @@ class GuidingsController extends Controller
      * - Manual disable/enable toggles between 0 and 1
      */
 
-    public function __construct(GuidingTranslationService $guidingTranslationService)
+    public function __construct(
+        GuidingTranslationService $guidingTranslationService,
+        private ListingMediaRelocator $mediaRelocator,
+    )
     {
         $this->initializeOptimizationServices();
         $this->guidingTranslationService = $guidingTranslationService;
@@ -285,7 +289,7 @@ class GuidingsController extends Controller
             $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
             $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
 
-            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+            $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap, withGallery: false);
             $this->preComputeGuidingData($guidings->items(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
 
             // Apply stored translations for the current locale so listing titles use manual translations
@@ -527,7 +531,7 @@ class GuidingsController extends Controller
                 $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
                 $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
 
-                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
+                $this->preComputeGuidingData($allGuidings, $targetsMap, $methodsMap, $watersMap, $inclussionsMap, withGallery: false);
                 $this->preComputeGuidingData($guidings->getCollection(), $targetsMap, $methodsMap, $watersMap, $inclussionsMap);
 
                 // Apply stored translations for the current locale so listing titles use manual translations
@@ -947,9 +951,17 @@ class GuidingsController extends Controller
             }
 
             $guiding->save();
+            $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
-            $this->deleteGuidingImagePaths($pathsToDelete);
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after guiding save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
 
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
             if ($savedAsDraftDueToPending) {
@@ -968,6 +980,8 @@ class GuidingsController extends Controller
                 'message' => $message,
                 'saved_as_draft_due_to_pending' => $savedAsDraftDueToPending,
                 'redirect_url' => $redirectUrl,
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1029,10 +1043,26 @@ class GuidingsController extends Controller
                 }
             }
 
-            if (!$isUpdate) {
-                $guiding->slug = slugify(
-                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
-                );
+        // Process new file uploads (frontend only sends new/unsaved images on edit)
+        if ($request->has('title_image')) {
+            $imageCount = count($galeryImages);
+            $tempSlug = slugify(($request->input('title') ?? 'temp') . "-in-" . ($request->input('location') ?? 'location'));
+            $guidingId = (int) $request->input('guiding_id', 0);
+            $directory = media_listing_directory('guiding', $guidingId > 0 ? $guidingId : null);
+            $processedUploadKeys = [];
+
+            foreach($request->file('title_image') as $index => $image) {
+                $originalFilename = $image->getClientOriginalName();
+                $uploadKey = $originalFilename . '|' . $image->getSize();
+
+                if (in_array($uploadKey, $processedUploadKeys, true)) {
+                    continue;
+                }
+
+                $index = $index + $imageCount;
+                $webp_path = media_upload($image, $directory, $tempSlug. "-". $index . "-" . time());
+                $galeryImages[] = $webp_path;
+                $processedUploadKeys[] = $uploadKey;
             }
 
             $pathsToDelete = $this->fillGuidingFromRequest($guiding, $request, true);
@@ -1287,32 +1317,35 @@ class GuidingsController extends Controller
     /**
      * Pre-compute expensive view data to avoid N+1 queries and repeated function calls
      */
-    private function preComputeGuidingData($guidings, $targetsMap = null, $methodsMap = null, $watersMap = null, $inclussionsMap = null)
+    private function preComputeGuidingData($guidings, $targetsMap = null, $methodsMap = null, $watersMap = null, $inclussionsMap = null, bool $withGallery = true)
     {
         if (empty($guidings)) {
             return;
         }
         foreach ($guidings as $guiding) {
-            $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
-            $optimizedImages = [];
-            
-            if (!empty($guiding->thumbnail_path)) {
-                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
-            }
-            
-            foreach ($galleryImages as $imagePath) {
-                if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
-                    continue;
+            if ($withGallery) {
+                $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
+                $optimizedImages = [];
+
+                if (!empty($guiding->thumbnail_path)) {
+                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
                 }
-                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
+
+                foreach ($galleryImages as $imagePath) {
+                    if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
+                        continue;
+                    }
+                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
+                }
+                $guiding->cached_gallery_images = $optimizedImages;
             }
-            $guiding->cached_gallery_images = $optimizedImages;
+
             $guiding->cached_target_fish_names = $guiding->getTargetFishNames($targetsMap);
             $guiding->cached_inclusion_names = $guiding->getInclusionNames($inclussionsMap);
             $guiding->cached_review_count = $guiding->user->reviews->count();
             $guiding->cached_average_rating = $guiding->user->average_rating();
-            $guiding->cached_boat_type_name = $guiding->is_boat ? 
-                ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) : 
+            $guiding->cached_boat_type_name = $guiding->is_boat ?
+                ($guiding->boatType && $guiding->boatType->name !== null ? $guiding->boatType->name : __('guidings.boat')) :
                 __('guidings.shore');
         }
     }
@@ -1383,7 +1416,130 @@ class GuidingsController extends Controller
         $guiding->city = $request->input('city', '');
         $guiding->region = $request->input('region', '');
 
-        $pathsToDelete = $this->processGuidingImages($guiding, $request);
+        // Step 1: Images
+        $galeryImages = [];
+        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
+        $processedFilenames = []; // Track processed filenames to prevent duplicates
+
+        $normalizePath = function ($path) {
+            if (is_array($path)) {
+                $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
+            }
+
+            if (!is_string($path)) {
+                return null;
+            }
+
+            $parsedPath = parse_url($path, PHP_URL_PATH);
+            if ($parsedPath) {
+                $path = $parsedPath;
+            }
+
+            return ltrim($path, '/');
+        };
+
+        $imageListNormalized = array_values(array_filter(array_map($normalizePath, (array) $imageListRaw)));
+        $imageListLookup = array_flip($imageListNormalized);
+
+        if ($request->input('is_update') == '1') {
+            $existingImagesJson = $request->input('existing_images');
+            $existingImages = json_decode($existingImagesJson, true) ?? [];
+
+            foreach ($existingImages as $existingImage) {
+                $normalizedExisting = $normalizePath($existingImage);
+
+                if (!$normalizedExisting) {
+                    continue;
+                }
+
+                if (isset($imageListLookup[$normalizedExisting])) {
+                    $galeryImages[$normalizedExisting] = $normalizedExisting === $existingImage
+                        ? $existingImage
+                        : ltrim($existingImage, '/');
+                    $processedFilenames[] = basename($normalizedExisting);
+                } else {
+                    media_delete($existingImage);
+                }
+            }
+        }
+
+        $basenameToPath = [];
+
+        if ($request->has('title_image')) {
+            $imageCount = count($galeryImages);
+            $directory = media_listing_directory('guiding', $guiding->id > 0 ? (int) $guiding->id : null);
+            $processedUploadKeys = [];
+
+            foreach ($request->file('title_image') as $index => $image) {
+                $uploadKey = $image->getClientOriginalName() . '|' . $image->getSize();
+
+                if (in_array($uploadKey, $processedUploadKeys, true)) {
+                    continue;
+                }
+
+                $index = $index + $imageCount;
+                $webpPath = media_upload($image, $directory, $guiding->slug . "-" . $index . "-" . time(), 75, $guiding->id);
+                $webpPath = ltrim($webpPath, '/');
+                $normalizedNew = $normalizePath($webpPath);
+
+                if ($normalizedNew) {
+                    $galeryImages[$normalizedNew] = $webpPath;
+                    $basenameToPath[$image->getClientOriginalName()] = $webpPath;
+                    $processedUploadKeys[] = $uploadKey;
+                }
+            }
+        }
+
+        if (empty($galeryImages) && !empty($imageListNormalized)) {
+            foreach ($imageListNormalized as $normalizedPath) {
+                $galeryImages[$normalizedPath] = $normalizedPath;
+            }
+        }
+
+        if (!empty($galeryImages)) {
+            $orderedGallery = [];
+
+            if (!empty($imageListNormalized)) {
+                foreach ($imageListNormalized as $normalizedPath) {
+                    if (isset($galeryImages[$normalizedPath])) {
+                        $orderedGallery[] = $galeryImages[$normalizedPath];
+                        unset($galeryImages[$normalizedPath]);
+                    } elseif (isset($basenameToPath[$normalizedPath])) {
+                        $orderedGallery[] = $basenameToPath[$normalizedPath];
+                        $uploadedNormalized = $normalizePath($basenameToPath[$normalizedPath]);
+                        if ($uploadedNormalized) {
+                            unset($galeryImages[$uploadedNormalized]);
+                        }
+                    } else {
+                        $uploadBasename = basename($normalizedPath);
+                        if (isset($basenameToPath[$uploadBasename])) {
+                            $orderedGallery[] = $basenameToPath[$uploadBasename];
+                            $uploadedNormalized = $normalizePath($basenameToPath[$uploadBasename]);
+                            if ($uploadedNormalized) {
+                                unset($galeryImages[$uploadedNormalized]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($galeryImages)) {
+                $orderedGallery = array_merge($orderedGallery, array_values($galeryImages));
+            }
+
+            $orderedGallery = array_values(array_filter($orderedGallery));
+
+            if (!empty($orderedGallery)) {
+                $primaryImageIndex = (int) $request->input('primaryImage', 0);
+                if (isset($orderedGallery[$primaryImageIndex])) {
+                    $guiding->thumbnail_path = $orderedGallery[$primaryImageIndex];
+                } else {
+                    $guiding->thumbnail_path = $orderedGallery[0];
+                }
+
+                $guiding->gallery_images = json_encode($orderedGallery);
+            }
+        }
 
         // Step 2: Boat and fishing info
         $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;
@@ -1544,14 +1700,6 @@ class GuidingsController extends Controller
                 $selectedMonths = $allMonths;
                 $guiding->months = json_encode($selectedMonths);
             }
-
-            // Generate complete calendar schedule
-            CalendarScheduleService::generateCompleteSchedule(
-                $guiding,
-                $selectedMonths,
-                $request->input('weekdays', []),
-                $request->input('is_update') == '1' // shouldCleanup
-            );
         }
 
         // Only update weekday availability if it's provided in the current request
@@ -2111,14 +2259,70 @@ class GuidingsController extends Controller
     public function saveDraftSync(StoreNewGuidingRequest $request)
     {
         try {
-            $result = $this->persistGuidingDraft($request);
+            DB::beginTransaction();
+
+            // Handle file uploads first
+            $processedData = $this->processFileUploads($request);
+
+            $isUpdate = $request->input('is_update') == '1';
+            $originalStatus = null;
+
+            // Try to find an existing draft for this user and (optionally) title/location
+            if ($isUpdate && $request->input('guiding_id')) {
+                $guiding = Guiding::findOrFail($request->input('guiding_id'));
+                $originalStatus = $guiding->status;
+            } else {
+                $guiding = Guiding::where('user_id', auth()->id())
+                    ->where('status', 2)
+                    ->where('title', $request->input('title'))
+                    ->where('city', $request->input('city'))
+                    ->where('country', $request->input('country'))
+                    ->where('region', $request->input('region'))
+                    ->first();
+
+                if (!$guiding) {
+                    $guiding = new Guiding(['user_id' => auth()->id()]);
+                }
+            }
+
+            // Use the legacy method for consistency
+            $this->fillGuidingFromRequest($guiding, $request, true);
+
+            // Slug generation (always for new, or if title/location changed)
+            if (!$isUpdate) {
+                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
+            }
+
+            $guiding->is_newguiding = 1;
+            
+            // Smart status management for drafts
+            if ($isUpdate && ((int)$originalStatus === 1 || (int)$originalStatus === 0)) {
+                // Preserve original status if it was published (1) or disabled (0)
+                $guiding->status = $originalStatus;
+            } else {
+                // Set to draft for new guidings or guidings that were already drafts
+                $guiding->status = 2;
+            }
+
+            $guiding->save();
+            $this->relocateGuidingMediaFromTemp($guiding);
+            DB::commit();
+
+            try {
+                $this->syncGuidingCalendarSchedule($guiding, $request);
+            } catch (\Exception $calendarException) {
+                Log::warning('Calendar schedule sync failed after draft save', [
+                    'guiding_id' => $guiding->id,
+                    'error' => $calendarException->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'guiding_id' => $result['guiding_id'],
-                'gallery_images' => $result['gallery_images'],
-                'thumbnail_path' => $result['thumbnail_path'] ?? '',
+                'guiding_id' => $guiding->id,
                 'message' => 'Draft saved successfully.',
+                'gallery_images' => json_decode($guiding->gallery_images ?? '[]', true) ?? [],
+                'thumbnail_path' => $guiding->thumbnail_path,
             ]);
         } catch (\Exception $e) {
             Log::error('Error in saveDraftSync: ' . $e->getMessage());
@@ -2128,6 +2332,75 @@ class GuidingsController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    /**
+     * Rebuild calendar schedules after the guiding row is committed.
+     * Skipped on intermediate draft step saves to avoid heavy concurrent writes.
+     */
+    private function syncGuidingCalendarSchedule(Guiding $guiding, StoreNewGuidingRequest $request): void
+    {
+        if (!$request->has('seasonal_trip')) {
+            return;
+        }
+
+        $isDraft = $request->input('is_draft', 0) == 1;
+        $currentStep = (int) $request->input('current_step', 0);
+        if ($isDraft && $currentStep > 0 && $currentStep < 7) {
+            return;
+        }
+
+        $allMonths = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+        if ($request->input('seasonal_trip') === 'season_monthly') {
+            $selectedMonths = $request->input('months', []);
+        } else {
+            $selectedMonths = $allMonths;
+        }
+
+        if (empty($selectedMonths)) {
+            $selectedMonths = json_decode($guiding->months ?? '[]', true) ?? $allMonths;
+        }
+
+        $weekdays = $request->input('weekdays', []);
+        if ($request->input('weekday_availability') === 'all_week') {
+            $weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        } elseif (empty($weekdays)) {
+            $weekdays = json_decode($guiding->weekdays ?? '[]', true) ?? [];
+        }
+
+        CalendarScheduleService::generateCompleteSchedule(
+            $guiding,
+            $selectedMonths,
+            $weekdays,
+            $request->input('is_update') == '1'
+        );
+    }
+
+    private function relocateGuidingMediaFromTemp(Guiding $guiding): void
+    {
+        if ($guiding->id <= 0) {
+            return;
+        }
+
+        $gallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        if (empty($gallery) && empty($guiding->thumbnail_path)) {
+            return;
+        }
+
+        $relocated = $this->mediaRelocator->promoteForListing(
+            'guiding',
+            (int) $guiding->id,
+            [
+                'gallery_images' => $gallery,
+                'thumbnail_path' => $guiding->thumbnail_path,
+            ]
+        );
+
+        $guiding->gallery_images = json_encode($relocated['gallery_images']);
+        $guiding->thumbnail_path = $relocated['thumbnail_path'] ?: $guiding->thumbnail_path;
+        $guiding->saveQuietly();
     }
 
 

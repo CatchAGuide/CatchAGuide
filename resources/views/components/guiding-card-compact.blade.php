@@ -22,9 +22,8 @@
                 $firstImage = $guiding->featured_image;
             }
             
-            // Ensure the image path is properly formatted
-            if ($firstImage && !str_starts_with($firstImage, 'http') && !str_starts_with($firstImage, '/')) {
-                $firstImage = asset($firstImage);
+            if ($firstImage && ! str_starts_with($firstImage, 'http')) {
+                $firstImage = media_url(ltrim($firstImage, '/'));
             }
         @endphp
         

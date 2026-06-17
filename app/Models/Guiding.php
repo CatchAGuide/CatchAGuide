@@ -480,21 +480,30 @@ class Guiding extends Model
         return $this->hasOne(GuidingBoatType::class,'id','boat_type');
     }
 
-    public function getLowestPrice()
+    public function getLowestPrice(): int
     {
-        $prices = decode_if_json($this->prices, true);
-        if (!$prices) {
-            return 0;
+        if ($this->price_type === 'per_person') {
+            $prices = decode_if_json($this->prices, true);
+            if (! is_array($prices) || empty($prices)) {
+                return 0;
+            }
+
+            $perPersonPrices = collect($prices)
+                ->filter(fn ($price) => is_array($price) && isset($price['amount']) && (float) $price['amount'] > 0)
+                ->map(function ($price) {
+                    $personCount = max(1, (int) ($price['person'] ?? 1));
+
+                    return (int) round((float) $price['amount'] / $personCount);
+                })
+                ->filter(fn ($price) => $price > 0)
+                ->all();
+
+            return ! empty($perPersonPrices) ? (int) min($perPersonPrices) : 0;
         }
-  
-        $singlePrice = collect($prices)->where('person', 1)->first();
-        $singlePrice = $singlePrice ? $singlePrice['amount'] : PHP_FLOAT_MAX;
-        
-        $minPrice = min(array_map(function($price) {
-            return $price['person'] > 1 ? round($price['amount'] / $price['person']) : $price['amount'];
-        }, $prices));
-        
-        return round(min($singlePrice ?? PHP_FLOAT_MAX, $minPrice ?? PHP_FLOAT_MAX));
+
+        $maxGuests = max(1, (int) $this->max_guests);
+
+        return (int) round((float) $this->price / $maxGuests);
     }
 
     public function getBlockedEvents(?int $excludeCalendarScheduleId = null)

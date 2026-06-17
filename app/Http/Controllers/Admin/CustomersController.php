@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateCustomerRequest;
 use App\Models\User;
+use App\Models\UserInformation;
 use Illuminate\Http\Request;
 
 class CustomersController extends Controller
@@ -33,7 +34,6 @@ class CustomersController extends Controller
 
     public function edit(User $customer)
     {
-        // dd($customer);
         return view('admin.pages.customers.edit', [
             'customer' => $customer
         ]);
@@ -41,59 +41,71 @@ class CustomersController extends Controller
 
     public function update(UpdateCustomerRequest $request, User $customer)
     {
-        $data = $request->all();
-        // Handle information data separately
-        $informationData = $request->input('information') ?? [];
-        unset($data['information']);
-        
-        // Handle profile image upload
+        $userFields = [
+            'firstname',
+            'lastname',
+            'email',
+            'language',
+            'banktransferdetails',
+            'paypaldetails',
+        ];
+
+        $userData = collect($userFields)
+            ->filter(fn (string $field) => $request->has($field))
+            ->mapWithKeys(fn (string $field) => [$field => $request->input($field)])
+            ->all();
+
+        foreach (['bar_allowed', 'banktransfer_allowed', 'paypal_allowed'] as $checkbox) {
+            if ($request->has($checkbox)) {
+                $userData[$checkbox] = $request->boolean($checkbox);
+            }
+        }
+
         if ($request->hasFile('profile_image')) {
             $image = $request->file('profile_image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
-            
-            // Create directory if it doesn't exist
+
             $uploadPath = public_path('uploads/profile_images');
             if (!file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
-            
+
             $image->move($uploadPath, $imageName);
-            
-            // If there's an existing image, delete it
+
             if ($customer->profil_image && file_exists(public_path('uploads/profile_images/' . $customer->profil_image))) {
                 unlink(public_path('uploads/profile_images/' . $customer->profil_image));
             }
-            
-            $data['profil_image'] = $imageName;
+
+            $customer->profil_image = $imageName;
         }
-        
-        // Update user data
-        $customer->update($data);
-        
-        // Create or update user information
-        if (!$customer->information) {
-            $userInfo = new \App\Models\UserInformation($informationData);
-            $userInfo->save();
-            $customer->user_information_id = $userInfo->id;
+
+        if ($userData !== []) {
+            $customer->fill($userData);
+        }
+
+        if ($request->has('tax_id')) {
+            $customer->tax_id = $request->input('tax_id');
+        }
+
+        if ($customer->isDirty()) {
             $customer->save();
-        } else {
-            $customer->information->update($informationData);
         }
-        
-        // Update payment methods if provided
-        if (isset($data['bar_allowed'])) {
-            $customer->bar_allowed = $data['bar_allowed'] ? 1 : 0;
+
+        if ($request->has('information') && is_array($request->input('information'))) {
+            $informationData = collect($request->input('information'))
+                ->only((new UserInformation())->getFillable())
+                ->all();
+
+            if ($informationData !== []) {
+                if (!$customer->information) {
+                    $userInfo = UserInformation::create($informationData);
+                    $customer->user_information_id = $userInfo->id;
+                    $customer->save();
+                } else {
+                    $customer->information->update($informationData);
+                }
+            }
         }
-        
-        if (isset($data['banktransfer_allowed'])) {
-            $customer->banktransfer_allowed = $data['banktransfer_allowed'] ? 1 : 0;
-        }
-        
-        if (isset($data['paypal_allowed'])) {
-            $customer->paypal_allowed = $data['paypal_allowed'] ? 1 : 0;
-        }
-        
-        $customer->save();
 
         return redirect()->route('admin.customers.index')->with('success', 'Kunde wurde erfolgreich aktualisiert');
     }

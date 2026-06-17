@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RentalBoatRequest;
 use App\Models\RentalBoat;
 use App\Services\RentalBoat\RentalBoatDataProcessor;
-use App\Services\RentalBoat\RentalBoatImageProcessor;
 use App\Services\RentalBoat\RentalBoatSeoService;
 use App\Services\RentalBoat\RentalBoatCacheService;
+use App\Services\Media\ListingGalleryImageProcessor;
+use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,8 @@ class RentalBoatsController extends Controller
 {
     public function __construct(
         private RentalBoatDataProcessor $dataProcessor,
-        private RentalBoatImageProcessor $imageProcessor,
+        private ListingGalleryImageProcessor $galleryProcessor,
+        private ListingMediaRelocator $mediaRelocator,
         private RentalBoatSeoService $seoService,
         private RentalBoatCacheService $cacheService
     ) {}
@@ -74,7 +76,7 @@ class RentalBoatsController extends Controller
 
             
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $rentalBoatData['slug'], null);
+            $imageData = $this->galleryProcessor->process($request, 'rental_boat', $rentalBoatData['slug'], null);
             
             if ($imageData) {
                 $rentalBoatData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -86,7 +88,7 @@ class RentalBoatsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData && $rentalBoat->id) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($rentalBoat->id, $rentalBoat->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('rental_boat', $rentalBoat->id, $imageData);
                 $rentalBoat->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
@@ -191,7 +193,7 @@ class RentalBoatsController extends Controller
 
             
             // Process images
-            $imageData = $this->imageProcessor->processImageUploads($request, $rentalBoat->slug, $rentalBoat->id);
+            $imageData = $this->galleryProcessor->process($request, 'rental_boat', $rentalBoat->slug, $rentalBoat->id);
             
             if ($imageData) {
                 $rentalBoatData['thumbnail_path'] = $imageData['thumbnail_path'];
@@ -203,7 +205,7 @@ class RentalBoatsController extends Controller
 
             // Move images from temp directory to final directory if they were created
             if ($imageData) {
-                $updatedImageData = $this->imageProcessor->moveImagesToFinalDirectory($rentalBoat->id, $rentalBoat->slug, $imageData);
+                $updatedImageData = $this->mediaRelocator->promoteForListing('rental_boat', $rentalBoat->id, $imageData);
                 $rentalBoat->update([
                     'gallery_images' => $updatedImageData['gallery_images'],
                     'thumbnail_path' => $updatedImageData['thumbnail_path']

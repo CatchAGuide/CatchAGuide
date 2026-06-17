@@ -46,7 +46,7 @@ class GuideThread extends Component
 
     public function mount()
     {
-        $this->imageOptimizationService = new ImageOptimizationService();
+        $this->imageOptimizationService = app(ImageOptimizationService::class);
         
         // Initialize filters from the $filt property if provided
         if ($this->filt) {

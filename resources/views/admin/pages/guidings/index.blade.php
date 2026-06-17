@@ -330,12 +330,12 @@
                                         })($galleryRaw);
 
                                         $allImages = [];
-                                        if ($thumbPath && file_exists(public_path($thumbPath))) {
+                                        if ($thumbPath && media_path_usable($thumbPath)) {
                                             $allImages[] = asset($thumbPath);
                                         }
                                         if (!empty($galleryArray) && is_array($galleryArray)) {
                                             foreach ($galleryArray as $img) {
-                                                if (!empty($img) && $img !== $thumbPath && file_exists(public_path($img))) {
+                                                if (!empty($img) && $img !== $thumbPath && media_path_usable($img)) {
                                                     $allImages[] = asset($img);
                                                 }
                                             }

@@ -1,5 +1,12 @@
 <?php
 
+use App\Contracts\Media\MediaProcessorInterface;
+use App\Services\Media\ListingMediaPathBuilder;
+use App\Services\Media\ListingMediaStorageRegistry;
+use App\Services\Media\ManagedMediaPathMatcher;
+use App\Services\Media\MediaPathResolver;
+use App\Services\Media\MediaUrlResolver;
+use App\Services\Media\MediaWriteStorageResolver;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
@@ -75,87 +82,160 @@ if (!function_exists('getLocalizedValue')) {
 if (!function_exists('media_upload')) {
     function media_upload($file, $directory = 'uploads', $filename = null, $quality = 75, $id = null)
     {
-        if (filter_var($file, FILTER_VALIDATE_URL)) {
-            
-            $image = Image::make($file);
-            if (!$filename) {
-                $filename = basename(parse_url($file, PHP_URL_PATH));
-            }
+        $registry = app(ListingMediaStorageRegistry::class);
+        $listingStorage = $registry->forDirectory($directory);
 
-        } elseif ($file instanceof \Illuminate\Http\UploadedFile) {
-
-            $thumbnail_path = $file->store('public/' . $directory);
-            $imagePath = Storage::disk()->path($thumbnail_path);
-            $image = Image::make($imagePath);
-            if (!$filename) {
-                $filename = $file->getClientOriginalName();
-            }
-
-        } else {
-            throw new \InvalidArgumentException('Invalid input: must be a URL or an uploaded file');
-        }
-        
-        // Check file size and resize if needed
-        $fileSize = strlen($image->encode('webp', $quality)->encoded);
-        if ($fileSize > 2048 * 1024) { // If larger than 2048KB
-            $width = $image->width();
-            $height = $image->height();
-            
-            // Calculate new dimensions while maintaining aspect ratio
-            $ratio = sqrt(2048 * 1024 / $fileSize);
-            $newWidth = round($width * $ratio);
-            $newHeight = round($height * $ratio);
-            
-            $image->resize($newWidth, $newHeight);
+        if ($listingStorage !== null) {
+            return $listingStorage->upload($file, $filename, $quality, $id, $directory);
         }
 
-        // Hash the filename
-        $hashedName = md5(pathinfo($filename, PATHINFO_FILENAME) . time());
-        $webpImageName = $hashedName . ($id ? '_' . $id : '') . '.webp';
-        $webpImage = $image->encode('webp', $quality);
-        
-        $webp_path = $directory . '/' . $webpImageName;
+        $processor = app(MediaProcessorInterface::class);
+        $writeStorage = app(MediaWriteStorageResolver::class);
 
-        // Ensure the directory exists in both storage and public
-        Storage::disk('public')->makeDirectory($directory);
-        if (!file_exists(public_path($directory))) {
-            mkdir(public_path($directory), 0755, true);
-        }
+        $path = $processor->process($file, $directory, $filename, $quality, $id, $writeStorage->forUploads());
+        app(MediaPathResolver::class)->forgetExistsCache($path);
 
-        // Check if file exists and delete it
-        if (Storage::disk('public')->exists($webp_path)) {
-            Storage::disk('public')->delete($webp_path);
-        }
-        if (file_exists(public_path($webp_path))) {
-            unlink(public_path($webp_path));
-        }
-
-        // Save new file
-        Storage::disk('public')->put($webp_path, $webpImage->encoded);
-        $webpImage->save(public_path($webp_path));
-        
-        return $webp_path;
+        return $path;
     }
 }
 
 if (!function_exists('media_delete')) {
     function media_delete($path)
     {
-        // Remove any double slashes
-        $path = str_replace('//', '/', $path);
-        
-        // Delete from storage
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
+        $path = str_replace('//', '/', (string) $path);
+
+        $registry = app(ListingMediaStorageRegistry::class);
+        $directory = explode('/', ltrim($path, '/'), 2)[0] ?? '';
+        $listingStorage = $registry->forDirectory($directory);
+
+        if ($listingStorage !== null) {
+            $deleted = $listingStorage->delete($path);
+        } else {
+            $localStorage = app('media.local_storage');
+            $deleted = $localStorage->delete($path);
         }
-        
-        // Delete from public path
-        $publicPath = public_path($path);
-        if (file_exists($publicPath)) {
-            unlink($publicPath);
+
+        app(MediaPathResolver::class)->forgetExistsCache($path);
+
+        return $deleted;
+    }
+}
+
+if (!function_exists('media_move')) {
+    /**
+     * Move a media file between paths (works on local disk and DigitalOcean Spaces).
+     */
+    function media_move(string $fromPath, string $toPath): string
+    {
+        $pathResolver = app(MediaPathResolver::class);
+        $writeStorageResolver = app(MediaWriteStorageResolver::class);
+
+        $from = $pathResolver->normalizePath($fromPath);
+        $to = $pathResolver->normalizePath($toPath);
+
+        if ($from === $to) {
+            return $toPath;
         }
-        
-        return true;
+
+        $contents = $pathResolver->read($from);
+        if ($contents === '') {
+            return $fromPath;
+        }
+
+        $writeStorage = $writeStorageResolver->forUploads();
+        $writeStorage->write($to, $contents, [
+            'visibility' => config('media_storage.object_visibility', 'public'),
+        ]);
+        media_delete($from);
+
+        $pathResolver->forgetExistsCache($fromPath);
+        $pathResolver->forgetExistsCache($toPath);
+
+        return $to;
+    }
+}
+
+if (!function_exists('media_url')) {
+    function media_url(?string $path, ?string $placeholder = 'images/placeholder_guide.jpg'): string
+    {
+        return app(MediaUrlResolver::class)->resolve($path, $placeholder);
+    }
+}
+
+if (!function_exists('media_exists')) {
+    function media_exists(?string $path): bool
+    {
+        if ($path === null || $path === '') {
+            return false;
+        }
+
+        return app(MediaPathResolver::class)->exists($path);
+    }
+}
+
+if (!function_exists('media_path_usable')) {
+    /**
+     * Whether a stored media path can be displayed (local public file or managed object-storage path).
+     */
+    function media_path_usable(?string $path): bool
+    {
+        if ($path === null || trim($path) === '') {
+            return false;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return true;
+        }
+
+        $normalized = app(MediaPathResolver::class)->normalizePath($path);
+
+        if (app(ManagedMediaPathMatcher::class)->matches($normalized)) {
+            return true;
+        }
+
+        return file_exists(public_path($normalized));
+    }
+}
+
+if (!function_exists('media_listing_directory')) {
+    /**
+     * Resolve upload directory for a listing: {folder}/{id} or {folder}/temp.
+     */
+    function media_listing_directory(string $listingKey, ?int $entityId = null): string
+    {
+        return app(ListingMediaPathBuilder::class)->entityDirectory($listingKey, $entityId);
+    }
+}
+
+/**
+ * Override Laravel's asset() so managed media paths resolve directly to the DO CDN
+ * (no remote exists check when MEDIA_URL_SKIP_EXISTS=true). Static assets unchanged.
+ *
+ * Defined here (composer autoload) so it takes precedence over the framework helper.
+ */
+if (! function_exists('asset')) {
+    function asset($path, $secure = null)
+    {
+        if (! is_string($path) || $path === '') {
+            return app('url')->asset($path, $secure);
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        try {
+            if (app()->bound(ManagedMediaPathMatcher::class)) {
+                $matcher = app(ManagedMediaPathMatcher::class);
+                if ($matcher->matches($path)) {
+                    return media_url($path);
+                }
+            }
+        } catch (\Throwable) {
+            // Application not fully booted; fall through to default asset URL.
+        }
+
+        return app('url')->asset($path, $secure);
     }
 }
 

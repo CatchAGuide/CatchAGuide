@@ -97,13 +97,13 @@
                                     <div class="form-group col-md-4">
                                         <label for="address">Straße<span style="color: #e8604c">*</span></label>
                                         <input type="text" class="form-control" id="address" placeholder="Straße" required
-                                               name="information[address]" value="{{$customer->information->address ?? ''}}">
+                                               name="information[address]" value="{{$customer->information?->address ?? ''}}">
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label for="address_number">Nr.<span style="color: #e8604c">*</span></label>
                                         <input type="text" class="form-control" id="address_number" placeholder="Nr."
                                                name="information[address_number]"
-                                               value="{{$customer->information->address_number ?? ''}}" required>
+                                               value="{{$customer->information?->address_number ?? ''}}" required>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="email">Email<span style="color: #e8604c">*</span></label>
@@ -116,17 +116,17 @@
                                     <div class="form-group col-md-4">
                                         <label for="postal">PLZ<span style="color: #e8604c">*</span></label>
                                         <input type="text" class="form-control" id="postal" name="information[postal]" placeholder="PLZ"
-                                               value="{{$customer->information->postal ?? ''}}" required>
+                                               value="{{$customer->information?->postal ?? ''}}" required>
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="city">Stadt<span style="color: #e8604c">*</span></label>
                                         <input type="text" class="form-control" id="city" name="information[city]" placeholder="Stadt"
-                                               value="{{$customer->information->city ?? ''}}" required>
+                                               value="{{$customer->information?->city ?? ''}}" required>
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="phone">Telefonnummer<span style="color: #e8604c">*</span></label>
                                         <input type="text" class="form-control" id="phone" name="information[phone]" placeholder="Telefonnummer"
-                                               value="{{$customer->information->phone ?? ''}}" required>
+                                               value="{{$customer->information?->phone ?? ''}}" required>
                                     </div>
                                 </div>
                                 
@@ -152,7 +152,7 @@
                                     <div class="form-group col-md-12">
                                         <label for="languages">Sprachen</label>
                                         <input type="text" class="form-control" id="languages" name="information[languages]" 
-                                               placeholder="z.B. Deutsch, Englisch" value="{{$customer->information->languages ?? ''}}">
+                                               placeholder="z.B. Deutsch, Englisch" value="{{$customer->information?->languages ?? ''}}">
                                     </div>
                                 </div>
                                 
@@ -160,7 +160,7 @@
                                     <div class="form-group col-md-12">
                                         <label for="about_me">Über mich</label>
                                         <textarea class="form-control" id="about_me" name="information[about_me]" rows="4" 
-                                                  placeholder="Bitte schildere hier in einigen Sätzen, wer du bist, etwas zu deinem anglerischen Hintergrund, deine Lieblings-methoden, was für ein Typ du bist, etc.">{{$customer->information->about_me ?? ''}}</textarea>
+                                                  placeholder="Bitte schildere hier in einigen Sätzen, wer du bist, etwas zu deinem anglerischen Hintergrund, deine Lieblings-methoden, was für ein Typ du bist, etc.">{{$customer->information?->about_me ?? ''}}</textarea>
                                     </div>
                                 </div>
                                 
@@ -169,15 +169,15 @@
                                     <div class="form-group col-md-12">
                                         <label for="favorite_fish">Lieblingsfisch</label>
                                         <input type="text" class="form-control" id="favorite_fish" name="information[favorite_fish]" 
-                                               placeholder="z.B. Barsch, Meerforelle, Zander und vieles mehr!" value="{{$customer->information->favorite_fish ?? ''}}">
+                                               placeholder="z.B. Barsch, Meerforelle, Zander und vieles mehr!" value="{{$customer->information?->favorite_fish ?? ''}}">
                                     </div>
                                 </div>
                                 
                                 <div class="row">
                                     <div class="form-group col-md-12">
                                         <label for="fishing_experience">Anglererfahrung</label>
-                                        <input type="text" class="form-control" id="fishing_experience" name="information[fishing_experience]" 
-                                               placeholder="Bitte gib das Jahr an seit dem Du angelst (z.B. 2004)" value="{{$customer->information->fishing_experience ?? ''}}">
+                                        <input type="text" class="form-control" id="fishing_experience" name="information[fishing_start_year]" 
+                                               placeholder="Bitte gib das Jahr an seit dem Du angelst (z.B. 2004)" value="{{$customer->information?->fishing_start_year ?? ''}}">
                                     </div>
                                 </div>
                                 

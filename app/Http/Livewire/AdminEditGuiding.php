@@ -20,6 +20,7 @@ use App\Models\Levels;
 use App\Models\FishingType;
 use App\Models\FishingFrom;
 use App\Models\EquipmentStatus;
+use App\Services\Media\ListingImageUploadService;
 
 
 use Livewire\WithFileUploads;
@@ -661,10 +662,7 @@ class AdminEditGuiding extends Component
         if(count($this->imagesToDelete)){
 
             foreach($this->imagesToDelete as $index => $deleteImage){
-                $imagepath = 'assets/guides/'.$deleteImage;
-                    if (file_exists($imagepath)) {
-                        unlink($imagepath);
-                    }
+                app(ListingImageUploadService::class)->deleteGuiding($deleteImage);
             }
 
             foreach($this->userPhotos as $usp){
@@ -731,24 +729,10 @@ class AdminEditGuiding extends Component
     }
 
     public function ImageUpload($photo){
+        $guidingId = $this->guiding->exists ? (int) $this->guiding->id : null;
+        $filename = time() . '_' . \Illuminate\Support\Str::random(10);
 
-        $directory = public_path('assets/guides');
-                
-        // Ensure the directory exists
-        if (!file_exists($directory)) {
-            mkdir($directory, 0755, true); // Recursive directory creation
-        }
-
-        // Generate a unique filename for each photo
-        $imageName = time() . '_' . Str::random(10) . '.' . $photo->getClientOriginalExtension();
-
-        // Resize and save the image using Intervention Image
-        $image = Image::make($photo->getRealPath())->orientate()->resize(800, 600);
-        $image->save(public_path('assets/guides/' . $imageName));
-
-        // Add the filename to the $galleries array
-        $galleries = $imageName;
-
-        return $galleries;
+        return app(ListingImageUploadService::class)
+            ->uploadForListing('guiding', $photo, $guidingId, $filename);
     }
 }

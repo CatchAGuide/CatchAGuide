@@ -918,9 +918,42 @@
     });
 </script>
 
+@php
+    $listingMediaUsesObjectStorage = app(\App\Services\Media\MediaWriteStorageResolver::class)->usesObjectStorage();
+    $listingMediaCdnBase = $listingMediaUsesObjectStorage
+        ? rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/')
+        : '';
+    $listingMediaEnvPrefix = $listingMediaUsesObjectStorage
+        ? app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix()
+        : '';
+    $listingMediaLocalBase = rtrim(url('/'), '/');
+    $listingMediaPlaceholder = media_url(null);
+@endphp
 <script>
     // Use centralized GoogleMapsManager
     const MapsManager = window.GoogleMapsManager;
+    const listingMediaUsesObjectStorage = @json($listingMediaUsesObjectStorage);
+    const listingMediaCdnBase = @json($listingMediaCdnBase);
+    const listingMediaEnvPrefix = @json($listingMediaEnvPrefix);
+    const listingMediaLocalBase = @json($listingMediaLocalBase);
+    const listingMediaPlaceholder = @json($listingMediaPlaceholder);
+
+    function resolveListingMediaUrl(path) {
+        if (!path) {
+            return listingMediaPlaceholder;
+        }
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        const normalized = String(path).replace(/^\/+/, '');
+        if (!listingMediaUsesObjectStorage) {
+            return `${listingMediaLocalBase}/${normalized}`;
+        }
+        return listingMediaCdnBase
+            ? `${listingMediaCdnBase}/${listingMediaEnvPrefix}/${normalized}`
+            : `/${normalized}`;
+    }
+
     let map; // Make map variable accessible in wider scope
     let markerCluster; // Make markerCluster accessible in wider scope
     let isDuplicateCoordinate;
@@ -1072,9 +1105,9 @@
 
                 markers.push(marker);
 
-                const thumbnailPath = guiding.thumbnail_path ? 
-                    `{{ asset('') }}${guiding.thumbnail_path}` :
-                    '{{ asset('images/placeholder_guide.jpg') }}';
+                const thumbnailPath = guiding.thumbnail_path
+                    ? resolveListingMediaUrl(guiding.thumbnail_path)
+                    : listingMediaPlaceholder;
 
                 const infowindow = new google.maps.InfoWindow({
                     content: `

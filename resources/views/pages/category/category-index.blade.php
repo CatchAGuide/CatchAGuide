@@ -340,7 +340,7 @@
                                 <div class="trending-card">
                                     <a href="{{ route('category.targets', ['type' => $type, 'slug' => $targets->slug]) }}"> 
                                         <div class="trending-card-wrapper">
-                                            <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{asset($targets->thumbnail_path ?? 'images/placeholder_guide.jpg')}}">
+                                            <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{ media_url($targets->thumbnail_path) }}">
 
                                             <div class="trending-card-wrapper-content">
                                                 <div class="overlay-wrapper"></div>

@@ -97,7 +97,7 @@
                         <div class="trending-card">
                             <a href="{{ route('trips.category', ['location' => $loc->slug]) }}">
                                 <div class="trending-card-wrapper">
-                                    <img alt="{{ translate($loc->name) }}" class="trending-card-background" src="{{ asset($loc->thumbnail_path ?? 'images/placeholder_guide.jpg') }}">
+                                    <img alt="{{ translate($loc->name) }}" class="trending-card-background" src="{{ media_url($loc->thumbnail_path) }}">
 
                                     <div class="trending-card-wrapper-content">
                                         <div class="overlay-wrapper"></div>
