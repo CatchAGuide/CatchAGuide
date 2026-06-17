@@ -965,17 +965,6 @@ class GuidingsController extends Controller
                 ]);
             }
 
-            try {
-                $this->syncGuidingCalendarSchedule($guiding, $request);
-            } catch (\Exception $calendarException) {
-                Log::warning('Calendar schedule sync failed after guiding save', [
-                    'guiding_id' => $guiding->id,
-                    'error' => $calendarException->getMessage(),
-                ]);
-            }
-
-            $this->deleteGuidingImagePaths($pathsToDelete);
-
             $redirectUrl = $request->input('target_redirect') ?? route('profile.myguidings');
             if ($savedAsDraftDueToPending) {
                 $redirectUrl = route('profile.myguidings', ['notice' => 'pending_publish']);
@@ -1415,6 +1404,7 @@ class GuidingsController extends Controller
         $guiding->region = $request->input('region', '');
 
         // Step 1: Images
+        $pathsToDelete = [];
         $galeryImages = [];
         $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
         $processedFilenames = []; // Track processed filenames to prevent duplicates
@@ -1456,7 +1446,7 @@ class GuidingsController extends Controller
                         : ltrim($existingImage, '/');
                     $processedFilenames[] = basename($normalizedExisting);
                 } else {
-                    media_delete($existingImage);
+                    $pathsToDelete[] = $existingImage;
                 }
             }
         }
