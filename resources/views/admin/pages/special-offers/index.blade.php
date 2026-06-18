@@ -72,7 +72,7 @@
                                         <td>{{ $specialOffer->id }}</td>
                                         <td>
                                             @if($specialOffer->thumbnail_path)
-                                                <img src="{{ asset('storage/' . $specialOffer->thumbnail_path) }}" 
+                                                <img src="{{ asset($specialOffer->thumbnail_path) }}" 
                                                      alt="{{ $specialOffer->title }}" 
                                                      class="img-thumbnail" 
                                                      style="width: 50px; height: 50px; object-fit: cover;">

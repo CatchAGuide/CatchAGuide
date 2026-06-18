@@ -3,6 +3,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
+@include('components.image-manager-media-config')
 
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
@@ -35,7 +36,9 @@
     function initializeRentalBoatForm() {
         // Initialize image manager using the same pattern as guidings
         if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
-            window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+            window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
+                storagePrefix: 'rental-boats-images',
+            });
             
             if (document.getElementById('is_update').value === '1') {
                 const existingImagesInput = document.getElementById('existing_images');

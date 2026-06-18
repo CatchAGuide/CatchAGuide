@@ -64,7 +64,7 @@
                                         <td>
                                             <div class="accommodation-title">
                                                 @if($accommodation->thumbnail_path)
-                                                    <img src="{{ Storage::url($accommodation->thumbnail_path) }}" 
+                                                    <img src="{{ asset($accommodation->thumbnail_path) }}" 
                                                          alt="Thumbnail" class="accommodation-thumbnail">
                                                 @endif
                                                 <strong>{{ $accommodation->title }}</strong>

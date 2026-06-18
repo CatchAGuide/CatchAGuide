@@ -511,7 +511,7 @@
                     </div>
                     @if(!empty($formData['provider_photo']))
                         <div class="mt-2">
-                            <img src="{{ asset('storage/' . $formData['provider_photo']) }}"
+                            <img src="{{ asset($formData['provider_photo']) }}"
                                  alt="Provider"
                                  class="img-thumbnail"
                                  style="width:80px;height:80px;object-fit:cover;">

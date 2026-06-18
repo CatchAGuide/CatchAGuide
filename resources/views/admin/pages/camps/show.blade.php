@@ -152,7 +152,7 @@
                                 <div class="row">
                                     @foreach($camp->gallery_images as $index => $image)
                                         <div class="col-6 mb-3">
-                                            <img src="{{ asset('storage/' . $image) }}" 
+                                            <img src="{{ asset($image) }}" 
                                                  alt="Camp Image {{ $index + 1 }}" 
                                                  class="img-thumbnail w-100" 
                                                  style="height: 100px; object-fit: cover;">

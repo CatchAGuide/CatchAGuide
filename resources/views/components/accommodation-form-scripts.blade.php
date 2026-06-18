@@ -14,6 +14,7 @@
     </script>
     @php $imageManagerLoaded = true; @endphp
 @endif
+@include('components.image-manager-media-config')
 
 <script>
     window.imageManagerLoaded = window.imageManagerLoaded || null;
@@ -53,7 +54,9 @@
         function initializeImageManager() {
         if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
                 try {
-            window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+            window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
+                storagePrefix: 'accommodations',
+            });
                 } catch (e) {
                     console.error('Error creating ImageManager:', e);
                     window.imageManagerLoaded = null;
