@@ -290,7 +290,7 @@
                                 <div class="row">
                                     @foreach($trip->gallery_images as $index => $image)
                                         <div class="col-6 mb-3">
-                                            <img src="{{ asset('storage/' . $image) }}"
+                                            <img src="{{ asset($image) }}"
                                                  alt="Trip Image {{ $index + 1 }}"
                                                  class="img-thumbnail w-100"
                                                  style="height: 100px; object-fit: cover;">
@@ -310,7 +310,7 @@
                         <div class="card-body">
                             @if($trip->provider_photo)
                                 <div class="mb-3 text-center">
-                                    <img src="{{ asset('storage/' . $trip->provider_photo) }}"
+                                    <img src="{{ asset($trip->provider_photo) }}"
                                          alt="Provider"
                                          class="img-thumbnail"
                                          style="width: 120px; height: 120px; object-fit: cover;">

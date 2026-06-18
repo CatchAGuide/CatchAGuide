@@ -124,7 +124,7 @@
                                 <div class="row">
                                     @foreach($specialOffer->gallery_images as $index => $image)
                                         <div class="col-6 mb-3">
-                                            <img src="{{ asset('storage/' . $image) }}" 
+                                            <img src="{{ asset($image) }}" 
                                                  alt="Special Offer Image {{ $index + 1 }}" 
                                                  class="img-thumbnail w-100" 
                                                  style="height: 100px; object-fit: cover;">

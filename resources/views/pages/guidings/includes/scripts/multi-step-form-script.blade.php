@@ -6,22 +6,9 @@
 {{-- HEIC/HEIF to JPEG converter for broader mobile support --}}
 <script src="https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
+@include('components.image-manager-media-config')
 
-@php
-    $mediaUsesObjectStorage = app(\App\Services\Media\MediaWriteStorageResolver::class)->usesObjectStorage();
-    $mediaCdnBase = $mediaUsesObjectStorage
-        ? rtrim((string) config('filesystems.disks.' . config('media_storage.disk', 'do_spaces') . '.url', ''), '/')
-        : '';
-    $mediaEnvPrefix = $mediaUsesObjectStorage
-        ? app(\App\Services\Media\MediaEnvironmentResolver::class)->bucketPrefix()
-        : '';
-    $mediaLocalBase = rtrim(url('/'), '/');
-@endphp
 <script>
-    window.mediaUsesObjectStorage = @json($mediaUsesObjectStorage);
-    window.mediaCdnBase = @json($mediaCdnBase);
-    window.mediaEnvPrefix = @json($mediaEnvPrefix);
-    window.mediaLocalBase = @json($mediaLocalBase);
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
     window.totalSteps = window.totalSteps || 7;
