@@ -425,7 +425,7 @@
                             <div class="card-body">
                                 @if($accommodation->thumbnail_path)
                                     <div class="thumbnail-preview mb-3">
-                                        <img src="{{ Storage::url($accommodation->thumbnail_path) }}" 
+                                        <img src="{{ asset($accommodation->thumbnail_path) }}" 
                                              alt="Thumbnail" class="img-fluid rounded">
                                     </div>
                                 @endif
@@ -435,7 +435,7 @@
                                         <h5>Gallery Images</h5>
                                         <div class="gallery-grid">
                                             @foreach($accommodation->gallery_images as $image)
-                                                <img src="{{ Storage::url($image) }}" 
+                                                <img src="{{ asset($image) }}" 
                                                      alt="Gallery image" class="img-fluid rounded">
                                             @endforeach
                                         </div>

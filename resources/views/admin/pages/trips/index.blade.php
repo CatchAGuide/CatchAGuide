@@ -84,7 +84,7 @@
                                         <td>{{ $trip->id }}</td>
                                         <td>
                                             @if($trip->thumbnail_path)
-                                                <img src="{{ asset('storage/' . $trip->thumbnail_path) }}"
+                                                <img src="{{ asset($trip->thumbnail_path) }}"
                                                      alt="{{ $trip->title }}"
                                                      class="img-thumbnail"
                                                      style="width: 50px; height: 50px; object-fit: cover;">

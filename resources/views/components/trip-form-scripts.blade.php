@@ -14,6 +14,7 @@
     </script>
     @php $imageManagerLoaded = true; @endphp
 @endif
+@include('components.image-manager-media-config')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
@@ -46,10 +47,14 @@
             if (typeof ImageManager !== 'undefined') {
                 try {
                     if (!window.imageManagerLoaded) {
-                        window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+                        window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
+                            storagePrefix: 'trips-images',
+                        });
                     }
                     if (!window.providerImageManager) {
-                        window.providerImageManager = new ImageManager('#providerPhotoPreviewContainer', '#provider_photo');
+                        window.providerImageManager = new ImageManager('#providerPhotoPreviewContainer', '#provider_photo', {
+                            storagePrefix: 'trips-images',
+                        });
                     }
                 } catch (e) {
                     console.error('Error creating ImageManager instances:', e);

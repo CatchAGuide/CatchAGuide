@@ -72,7 +72,7 @@
                                         <td>{{ $camp->id }}</td>
                                         <td>
                                             @if($camp->thumbnail_path)
-                                                <img src="{{ asset('storage/' . $camp->thumbnail_path) }}" 
+                                                <img src="{{ asset($camp->thumbnail_path) }}" 
                                                      alt="{{ $camp->title }}" 
                                                      class="img-thumbnail" 
                                                      style="width: 50px; height: 50px; object-fit: cover;">

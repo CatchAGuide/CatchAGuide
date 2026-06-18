@@ -14,6 +14,7 @@
     </script>
     @php $imageManagerLoaded = true; @endphp
 @endif
+@include('components.image-manager-media-config')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
@@ -67,7 +68,9 @@
         function initializeImageManager() {
             if (typeof ImageManager !== 'undefined' && !window.imageManagerLoaded) {
                 try {
-                    window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image');
+                    window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
+                        storagePrefix: 'camps-images',
+                    });
                 } catch (e) {
                     console.error('Error creating ImageManager:', e);
                     window.imageManagerLoaded = null;
