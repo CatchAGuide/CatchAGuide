@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Session;
 use Spatie\Geocoder\Geocoder;
 use Illuminate\Support\Facades\Log;
 use App\Traits\GuidingFilterOptimization;
+use App\Services\Location\CountryResolver;
 use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
@@ -140,53 +141,14 @@ class DestinationCountryController extends Controller
         $filteredQuery = clone $baseQuery;
         
         // Filter by current destination context using location data from filters field
-        // The filters field contains the exact location names as stored in guidings table
         $filterData = $this->decodeDestinationFilters($row_data->filters);
-
-        $countryFilterValues = $this->buildDestinationFilterValues(
-            $filterData['country'] ?? null,
-            $country_row->name,
-            $country_row->translations->pluck('title')->all()
+        $this->applyDestinationLocationFilter(
+            $filteredQuery,
+            $filterData,
+            $country_row,
+            $region_row,
+            $city_row
         );
-        $regionFilterValues = $region_row
-            ? $this->buildDestinationFilterValues(
-                $filterData['region'] ?? null,
-                $region_row->name,
-                $region_row->translations->pluck('title')->all()
-            )
-            : [];
-        $cityFilterValues = $city_row
-            ? $this->buildDestinationFilterValues(
-                $filterData['city'] ?? null,
-                $city_row->name,
-                $city_row->translations->pluck('title')->all()
-            )
-            : [];
-        
-        if ($city_row && !empty($cityFilterValues)) {
-            $filteredQuery->whereIn('city', $cityFilterValues);
-
-            if (!empty($countryFilterValues)) {
-                $filteredQuery->whereIn('country', $countryFilterValues);
-            }
-
-            if ($region_row && !empty($regionFilterValues)) {
-                $filteredQuery->whereIn('region', $regionFilterValues);
-            }
-        } elseif ($region_row && !empty($regionFilterValues)) {
-            $filteredQuery->whereIn('region', $regionFilterValues);
-
-            if (!empty($countryFilterValues)) {
-                $filteredQuery->whereIn('country', $countryFilterValues);
-            }
-        } else {
-            if (!empty($countryFilterValues)) {
-                $filteredQuery->whereIn('country', $countryFilterValues);
-            }
-        }
-
-        // dump($filterData);
-        // dd($filteredQuery->get());
 
         // Apply sorting consistent with listings
         $this->applySorting($filteredQuery, $cleanedRequest, $randomSeed);
@@ -391,10 +353,11 @@ class DestinationCountryController extends Controller
         // 5. Get other guidings if needed
         $otherguidings = [];
         if ($this->shouldLoadOtherGuidings($allGuidings)) {
-            if($cleanedRequest->has('placeLat') && $cleanedRequest->has('placeLng') && !empty($cleanedRequest->get('placeLat')) && !empty($cleanedRequest->get('placeLng')) ){
-                $latitude = $cleanedRequest->get('placeLat');
-                $longitude = $cleanedRequest->get('placeLng');
-                $otherguidings = $this->otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings);
+            $nearbyLat = $cleanedRequest->get('placeLat') ?: ($filterData['placeLat'] ?? null);
+            $nearbyLng = $cleanedRequest->get('placeLng') ?: ($filterData['placeLng'] ?? null);
+
+            if (! empty($nearbyLat) && ! empty($nearbyLng)) {
+                $otherguidings = $this->otherGuidingsBasedByLocation($nearbyLat, $nearbyLng, $allGuidings);
             } else {
                 $otherguidings = $this->otherGuidings();
             }
@@ -643,6 +606,211 @@ class DestinationCountryController extends Controller
         return array_values(array_unique(array_filter($values, function ($value) {
             return is_string($value) && $value !== '';
         })));
+    }
+
+    /**
+     * Match guidings to a destination page using configured city/region hierarchy.
+     */
+    private function applyDestinationLocationFilter(
+        $filteredQuery,
+        array $filterData,
+        Country $country_row,
+        ?Region $region_row,
+        ?City $city_row
+    ): void {
+        $resolver = app(CountryResolver::class);
+
+        $countryFilterValues = $this->expandCountryFilterValues(
+            $this->buildDestinationFilterValues(
+                $filterData['country'] ?? null,
+                $country_row->name
+            ),
+            $resolver,
+            $filterData['country_short'] ?? $country_row->countrycode ?? null
+        );
+
+        if ($city_row) {
+            $cityFilterValues = $this->expandCityFilterValues(
+                $this->buildDestinationFilterValues(
+                    $filterData['city'] ?? null,
+                    $city_row->name
+                )
+            );
+
+            $this->applyCityFilterConstraint($filteredQuery, $cityFilterValues);
+            $this->applyCountryFilterConstraint($filteredQuery, $countryFilterValues, $resolver, $country_row, $filterData);
+
+            return;
+        }
+
+        if ($region_row) {
+            $cityFilterValues = $this->collectCityFilterValuesForRegion($region_row);
+
+            if ($cityFilterValues !== []) {
+                $this->applyCityFilterConstraint($filteredQuery, $cityFilterValues);
+                $this->applyCountryFilterConstraint($filteredQuery, $countryFilterValues, $resolver, $country_row, $filterData);
+
+                return;
+            }
+
+            $regionFilterValues = $this->expandCityFilterValues(
+                $this->buildDestinationFilterValues(
+                    $filterData['region'] ?? null,
+                    $region_row->name
+                )
+            );
+
+            if ($regionFilterValues !== []) {
+                $this->applyRegionFilterConstraint($filteredQuery, $regionFilterValues);
+                $this->applyCountryFilterConstraint($filteredQuery, $countryFilterValues, $resolver, $country_row, $filterData);
+
+                return;
+            }
+        }
+
+        $this->applyCountryFilterConstraint($filteredQuery, $countryFilterValues, $resolver, $country_row, $filterData);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function collectCityFilterValuesForRegion(Region $region_row): array
+    {
+        $values = [];
+
+        foreach (City::where('region_id', $region_row->id)->get() as $city) {
+            $cityFilters = $this->decodeDestinationFilters($city->filters);
+            $values = array_merge(
+                $values,
+                $this->buildDestinationFilterValues($cityFilters['city'] ?? null, $city->name)
+            );
+        }
+
+        return $this->expandCityFilterValues($values);
+    }
+
+    /**
+     * @param  array<int, string>  $values
+     * @return array<int, string>
+     */
+    private function expandCityFilterValues(array $values): array
+    {
+        $expanded = [];
+
+        foreach ($values as $value) {
+            $value = trim($value);
+            if ($value === '') {
+                continue;
+            }
+
+            $expanded[] = $value;
+            $expanded[] = str_replace(' ', '-', $value);
+            $expanded[] = str_replace('-', ' ', $value);
+        }
+
+        return array_values(array_unique(array_filter($expanded, fn ($value) => $value !== '')));
+    }
+
+    /**
+     * @param  array<int, string>  $cityFilterValues
+     */
+    private function applyCityFilterConstraint($query, array $cityFilterValues): void
+    {
+        if ($cityFilterValues === []) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        $query->where(function ($q) use ($cityFilterValues) {
+            $q->whereIn('city', $cityFilterValues);
+
+            foreach ($cityFilterValues as $city) {
+                $q->orWhere('location', 'like', '%'.$city.'%');
+            }
+        });
+    }
+
+    /**
+     * @param  array<int, string>  $regionFilterValues
+     */
+    private function applyRegionFilterConstraint($query, array $regionFilterValues): void
+    {
+        if ($regionFilterValues === []) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        $query->where(function ($q) use ($regionFilterValues) {
+            $q->whereIn('region', $regionFilterValues);
+
+            foreach ($regionFilterValues as $region) {
+                $q->orWhere('location', 'like', '%'.$region.'%');
+            }
+        });
+    }
+
+    /**
+     * @param  array<int, string>  $baseValues
+     * @return array<int, string>
+     */
+    private function expandCountryFilterValues(array $baseValues, CountryResolver $resolver, ?string $countryShort = null): array
+    {
+        $iso = $resolver->resolveIso($countryShort, null);
+
+        foreach ($baseValues as $value) {
+            $iso = $iso ?? $resolver->resolveIso(null, $value);
+        }
+
+        if ($iso) {
+            $baseValues = array_merge($baseValues, $resolver->localizedNames($iso));
+            $english = $resolver->englishName($iso);
+            if ($english) {
+                $baseValues[] = $english;
+            }
+        }
+
+        return array_values(array_unique(array_filter($baseValues, fn ($value) => is_string($value) && $value !== '')));
+    }
+
+    /**
+     * @param  array<int, string>  $countryFilterValues
+     */
+    private function applyCountryFilterConstraint(
+        $query,
+        array $countryFilterValues,
+        CountryResolver $resolver,
+        Country $country_row,
+        array $filterData
+    ): void {
+        if ($countryFilterValues === []) {
+            return;
+        }
+
+        $iso = $resolver->resolveIso(
+            $filterData['country_short'] ?? $country_row->countrycode ?? null,
+            $filterData['country'] ?? $country_row->name
+        );
+
+        if ($iso) {
+            $names = $resolver->localizedNames($iso);
+            $query->where(function ($q) use ($iso, $names) {
+                $q->where('country_iso', $iso);
+
+                if ($names !== []) {
+                    $q->orWhere(function ($legacy) use ($names) {
+                        $legacy->where(function ($missingIso) {
+                            $missingIso->whereNull('country_iso')->orWhere('country_iso', '');
+                        })->whereIn('country', $names);
+                    });
+                }
+            });
+
+            return;
+        }
+
+        $query->whereIn('country', $countryFilterValues);
     }
     
 
