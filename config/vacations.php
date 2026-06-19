@@ -37,6 +37,29 @@ return [
         ],
     ],
 
+    'hub_value_props' => [
+        [
+            'icon' => 'fa-calendar-check',
+            'title_key' => 'vacations.hub_usp_instant_title',
+            'text_key' => 'vacations.hub_usp_instant_text',
+        ],
+        [
+            'icon' => 'fa-suitcase-rolling',
+            'title_key' => 'vacations.hub_usp_trips_title',
+            'text_key' => 'vacations.hub_usp_trips_text',
+        ],
+        [
+            'icon' => 'fa-shield-alt',
+            'title_key' => 'vacations.hub_usp_verified_title',
+            'text_key' => 'vacations.hub_usp_verified_text',
+        ],
+        [
+            'icon' => 'fa-globe-europe',
+            'title_key' => 'vacations.hub_usp_europe_title',
+            'text_key' => 'vacations.hub_usp_europe_text',
+        ],
+    ],
+
     'hub_faq' => [
         ['question_key' => 'vacations.faq_camp_vs_trip_q', 'answer_key' => 'vacations.faq_camp_vs_trip_a'],
         ['question_key' => 'vacations.faq_booking_q', 'answer_key' => 'vacations.faq_booking_a'],

@@ -45,7 +45,7 @@ class CampListingRepository implements ListingRepositoryInterface
     public function paginateForCountry(VacationListingFilter $filter, int $perPage): LengthAwarePaginator
     {
         $query = $this->filterApplicator->applyToCampQuery(
-            $this->baseQuery($filter->country)->with(['rentalBoats', 'facilities', 'guidings', 'accommodations']),
+            $this->baseQuery($filter->country)->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations']),
             $filter
         );
 
@@ -68,7 +68,7 @@ class CampListingRepository implements ListingRepositoryInterface
     public function listForHub(int $limit): Collection
     {
         return $this->baseQuery(null)
-            ->with(['rentalBoats', 'facilities', 'guidings'])
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();

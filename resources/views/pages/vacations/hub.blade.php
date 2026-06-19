@@ -60,19 +60,21 @@
 
     @if($hub->popularListings->isNotEmpty())
 
-        <section class="vacation-hub__rail mb-5" data-analytics-vacation-rail="popular">
+        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-analytics-vacation-rail="popular">
 
-            <x-vacation.section-heading :title="__('vacations.hub_popular_title')" />
-
-            <div class="vacation-hub__card-grid">
+            <x-vacation.card-slider :title="__('vacations.hub_popular_title')" slider-id="popular">
 
                 @foreach($hub->popularListings as $card)
 
-                    <x-vacation.product-card :card="$card" />
+                    <div class="swiper-slide">
+
+                        <x-vacation.product-card :card="$card" variant="compact" />
+
+                    </div>
 
                 @endforeach
 
-            </div>
+            </x-vacation.card-slider>
 
         </section>
 
@@ -80,29 +82,38 @@
 
 
 
+    <x-vacation.hub-bridge
+        :total-camps="$hub->totalCamps"
+        :total-trips="$hub->totalTrips"
+        :country-count="$hub->countryGrid->count()"
+        :inspiration-tiles="$hub->inspirationTiles"
+    />
+
+
+
     @if($hub->showNewTripsRail && $hub->newTrips->isNotEmpty())
 
-        <section class="vacation-hub__rail vacation-hub__rail--trips mb-5" data-analytics-vacation-rail="new-trips">
+        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--trips mb-5" data-analytics-vacation-rail="new-trips">
 
-            <x-vacation.section-heading
-
+            <x-vacation.card-slider
                 :title="__('vacations.hub_new_trips_title')"
-
+                :subtitle="__('vacations.hub_new_trips_subtitle')"
                 :link-url="route('vacations.trips.index')"
-
                 :link-label="__('vacations.view_all_trips')"
-
-            />
-
-            <div class="vacation-hub__card-grid">
+                slider-id="new-trips"
+            >
 
                 @foreach($hub->newTrips as $card)
 
-                    <x-vacation.trip-card :card="$card" />
+                    <div class="swiper-slide">
+
+                        <x-vacation.product-card :card="$card" variant="compact" />
+
+                    </div>
 
                 @endforeach
 
-            </div>
+            </x-vacation.card-slider>
 
         </section>
 
@@ -179,32 +190,6 @@
         </div>
 
     </section>
-
-
-
-    @if($hub->inspirationTiles->isNotEmpty())
-
-        <section class="vacation-hub__inspiration mb-5">
-
-            <x-vacation.section-heading :title="__('vacations.hub_inspiration_title')" />
-
-            <div class="row g-3">
-
-                @foreach($hub->inspirationTiles as $tile)
-
-                    <div class="col-md-4">
-
-                        <a href="{{ $tile['url'] }}" class="vacation-inspiration-chip">{{ $tile['title'] }}</a>
-
-                    </div>
-
-                @endforeach
-
-            </div>
-
-        </section>
-
-    @endif
 
 
 

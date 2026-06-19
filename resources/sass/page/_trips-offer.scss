@@ -38,6 +38,11 @@ $trip-offer-lh-relaxed: 1.7;
     background: $trip-offer-theme-bg;
     font-family: $trip-offer-font-family;
 
+    @media (min-width: 768px) {
+        // Clearance for the floating country search bar below the short header.
+        padding-top: 1.25rem;
+    }
+
     @media (max-width: 991.98px) {
         // Leave room for the mobile sticky request footer.
         padding-bottom: 8rem;
@@ -98,15 +103,17 @@ $trip-offer-lh-relaxed: 1.7;
         width: 100%;
         max-width: 100%;
         margin: 0 auto 1.5rem;
+        overflow: hidden;
+
+        .camp-gallery {
+            margin: 0 auto 1.25rem;
+        }
 
         @media (max-width: 576px) {
             margin: 0 auto 1rem;
-        }
 
-        @media (max-width: 900px) {
-            // `camp-gallery` has its own margin in the vacations styles; remove the extra top spacing on trips mobile.
             .camp-gallery {
-                margin: 0 auto;
+                margin-bottom: 1rem;
             }
         }
     }
