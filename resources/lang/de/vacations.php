@@ -146,6 +146,8 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'pillar_trips_title' => 'Guided Fishing Trips',
     'pillar_trips_desc' => 'All-inclusive-Pakete mit Transport, Verpflegung, Guide und Equipment.',
     'pillar_trips_curated' => 'Kuratierte Pakete',
+    'pillar_camps_tagline' => 'Dein Tempo — pro Nacht buchen.',
+    'pillar_trips_tagline' => 'All-inclusive — pro Person.',
     'pillar_tile_listings' => ':count Angebote',
     'pillar_tile_countries' => ':count Länder',
     'pillar_tile_from' => 'ab :price',

@@ -49,7 +49,6 @@ class VacationHubPageService
             minPrice: $tripMin,
             currency: 'EUR',
             url: route('vacations.trips.index'),
-            descriptor: __('vacations.pillar_trips_curated'),
         );
 
         $newTripsLimit = (int) config('vacations.new_trips_rail_limit', 6);

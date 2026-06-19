@@ -44,20 +44,16 @@
 
 <div class="container vacation-hub" data-analytics-page="vacation-hub">
 
-    <section class="vacation-hub__pillar-tiles row g-3 mb-4" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
+    <section class="vacation-hub__pillar-fork mb-5" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
+        <div class="vacation-hub__pillar-tiles row g-4">
+            <div class="col-md-6">
+                <x-vacation.pillar-tile :tile="$hub->campTile" />
+            </div>
 
-        <div class="col-md-6">
-
-            <x-vacation.pillar-tile :tile="$hub->campTile" />
-
+            <div class="col-md-6">
+                <x-vacation.pillar-tile :tile="$hub->tripTile" />
+            </div>
         </div>
-
-        <div class="col-md-6">
-
-            <x-vacation.pillar-tile :tile="$hub->tripTile" />
-
-        </div>
-
     </section>
 
 

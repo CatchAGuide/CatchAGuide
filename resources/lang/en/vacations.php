@@ -146,6 +146,8 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'pillar_trips_title' => 'Guided Fishing Trips',
     'pillar_trips_desc' => 'All-inclusive packages with transport, meals, guide, and equipment.',
     'pillar_trips_curated' => 'Curated packages',
+    'pillar_camps_tagline' => 'Your pace — book per night.',
+    'pillar_trips_tagline' => 'All-inclusive — per person.',
     'pillar_tile_listings' => ':count listings',
     'pillar_tile_countries' => ':count countries',
     'pillar_tile_from' => 'from :price',
