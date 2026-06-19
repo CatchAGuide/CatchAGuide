@@ -57,7 +57,13 @@ class TripCardPresenter
     public function presentListRow(Trip $trip): array
     {
         $card = $this->present($trip);
+        $included = $this->includedHighlights($trip);
+        $species = collect($trip->getTargetSpeciesNames())->pluck('name')->filter()->values()->all();
         $card['layout'] = 'row';
+        $card['image_badge'] = 'trip';
+        $card['target_fish_tags'] = array_slice($species, 0, 8);
+        $card['facilities_extra'] = max(0, count($trip->included ?? []) - count($included));
+        $card['listing_price_suffix'] = __('vacations.per_person');
 
         return $card;
     }

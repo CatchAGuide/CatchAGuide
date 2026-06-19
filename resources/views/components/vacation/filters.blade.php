@@ -7,6 +7,9 @@
     'showPillarToggles' => true,
     'showMobileToolbar' => true,
     'showMapButton' => false,
+    'mapInSidebar' => false,
+    'variant' => 'default',
+    'showDesktop' => true,
     'action' => null,
 ])
 
@@ -25,7 +28,7 @@
         ->count();
 @endphp
 
-<form method="get" action="{{ $action }}" class="vacation-filters" id="vacation-filters-form">
+<form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
     @foreach($query as $key => $value)
         @if(is_array($value))
             @foreach($value as $v)
@@ -80,10 +83,11 @@
         </div>
     @endif
 
-    <div class="vacation-filters__desktop d-none d-md-block">
-        <div class="row g-3 align-items-end">
+    @if($showDesktop)
+    <div class="vacation-filters__desktop {{ $variant === 'sidebar' ? '' : 'd-none d-md-block' }}">
+        <div class="{{ $variant === 'sidebar' ? 'vacation-filters__sidebar-stack' : 'row g-3 align-items-end' }}">
             @if($countries->isNotEmpty())
-                <div class="col-md-3">
+                <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_country') }}</label>
                     <select name="country" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">{{ __('vacations.all_region') }}</option>
@@ -97,7 +101,7 @@
             @endif
 
             @if($speciesOptions->isNotEmpty())
-                <div class="col-md-3">
+                <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_species') }}</label>
                     <select name="species" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">{{ __('vacations.select') }}</option>
@@ -109,7 +113,7 @@
             @endif
 
             @if(! empty($durationOptions))
-                <div class="col-md-3">
+                <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_duration') }}</label>
                     <select name="duration" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">{{ __('vacations.select') }}</option>
@@ -122,7 +126,7 @@
                 </div>
             @endif
 
-            <div class="col-md-3">
+            <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                 <label class="form-label">{{ __('vacations.filter_sort') }}</label>
                 <select name="sortby" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value="">{{ __('message.newest') }}</option>
@@ -131,7 +135,7 @@
                 </select>
             </div>
 
-            @if($showMapButton)
+            @if($showMapButton && ! $mapInSidebar)
                 <div class="col-md-auto ms-md-auto">
                     <button type="button"
                             class="btn btn-primary btn-sm vacation-filters__map-btn"
@@ -143,6 +147,7 @@
             @endif
         </div>
     </div>
+    @endif
 </form>
 
 @if($showMobileToolbar)

@@ -11,6 +11,7 @@ use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class VacationCountryPageService
 {
@@ -64,6 +65,13 @@ class VacationCountryPageService
             visible: $showCampsSection,
         );
 
+        $listingsTotal = match ($filter->pillar) {
+            'trips' => $tripsTotal,
+            'camps' => $campsTotal,
+            default => $tripsTotal + $campsTotal,
+        };
+        $listings = $this->buildListingsPaginator($filter, $trips, $camps, $perPage);
+
         return new VacationCountryViewModel(
             destination: $destination,
             filter: $filter,
@@ -71,13 +79,98 @@ class VacationCountryPageService
             campsSection: $campsSection,
             trips: $trips,
             camps: $camps,
+            listings: $listings,
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
+            listingsTotal: $listingsTotal,
             faq: $destination->faq,
             fishChart: $destination->fish_chart,
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
             mapMarkers: $this->buildMapMarkers($countrySlug, $filter),
         );
+    }
+
+  /**
+     * @return LengthAwarePaginator<int, array{type: string, model: mixed}>
+     */
+    private function buildListingsPaginator(
+        VacationListingFilter $filter,
+        LengthAwarePaginator $trips,
+        LengthAwarePaginator $camps,
+        int $perPage,
+    ): LengthAwarePaginator {
+        if ($filter->pillar === 'trips') {
+            return $this->wrapPaginatorItems($trips, 'trip');
+        }
+
+        if ($filter->pillar === 'camps') {
+            return $this->wrapPaginatorItems($camps, 'camp');
+        }
+
+        $tripItems = $this->trips->queryForCountry($filter)
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+            ->get()
+            ->map(fn ($trip) => [
+                'type' => 'trip',
+                'model' => $trip,
+                'created_at' => $trip->created_at,
+                'price' => $trip->price_per_person,
+            ]);
+
+        $campItems = $this->camps->queryForCountry($filter)
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+            ->get()
+            ->map(fn ($camp) => [
+                'type' => 'camp',
+                'model' => $camp,
+                'created_at' => $camp->created_at,
+                'price' => $camp->getLowestAccommodationOrOfferPrice(),
+            ]);
+
+        $merged = $this->sortListingItems($tripItems->concat($campItems), $filter);
+
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $total = $merged->count();
+
+        return new LengthAwarePaginator(
+            $merged->slice(($page - 1) * $perPage, $perPage)->values()->all(),
+            $total,
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->except('page')],
+        );
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, array{type: string, model: mixed}>
+     */
+    private function wrapPaginatorItems(LengthAwarePaginator $paginator, string $type): LengthAwarePaginator
+    {
+        $items = collect($paginator->items())->map(fn ($model) => [
+            'type' => $type,
+            'model' => $model,
+        ])->all();
+
+        return new LengthAwarePaginator(
+            $items,
+            $paginator->total(),
+            $paginator->perPage(),
+            $paginator->currentPage(),
+            ['path' => $paginator->path(), 'query' => request()->except('page')],
+        );
+    }
+
+    /**
+     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed}>  $items
+     * @return Collection<int, array{type: string, model: mixed}>
+     */
+    private function sortListingItems(Collection $items, VacationListingFilter $filter): Collection
+    {
+        return match ($filter->sortBy) {
+            'price-asc' => $items->sortBy(fn ($item) => $item['price'] ?? PHP_FLOAT_MAX)->values(),
+            'price-desc' => $items->sortByDesc(fn ($item) => $item['price'] ?? 0)->values(),
+            default => $items->sortByDesc('created_at')->values(),
+        };
     }
 
     private function buildMapMarkers(string $countrySlug, VacationListingFilter $filter): array

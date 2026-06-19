@@ -24,8 +24,11 @@ class VacationCountryController extends Controller
 
         return view('pages.vacations.country', [
             'vm' => $vm,
-            'tripRows' => collect($vm->trips->items())->map(fn ($t) => $this->tripPresenter->presentListRow($t)),
-            'campRows' => collect($vm->camps->items())->map(fn ($c) => $this->campPresenter->presentListRow($c, $vm->destination->id)),
+            'listingRows' => collect($vm->listings->items())->map(function (array $item) use ($vm) {
+                return $item['type'] === 'trip'
+                    ? $this->tripPresenter->presentListRow($item['model'])
+                    : $this->campPresenter->presentListRow($item['model'], $vm->destination->id);
+            }),
         ]);
     }
 }

@@ -16,8 +16,11 @@ final class VacationCountryViewModel
         public readonly PillarSectionViewModel $campsSection,
         public readonly LengthAwarePaginator $trips,
         public readonly LengthAwarePaginator $camps,
+        /** @var LengthAwarePaginator<int, array{type: string, model: mixed}> */
+        public readonly LengthAwarePaginator $listings,
         public readonly int $tripsTotal,
         public readonly int $campsTotal,
+        public readonly int $listingsTotal,
         public readonly Collection $faq,
         public readonly Collection $fishChart,
         public readonly Collection $speciesOptions,

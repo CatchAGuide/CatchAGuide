@@ -49,8 +49,17 @@ class CampCardPresenter
     public function presentListRow(Camp $camp, ?int $destinationId = null): array
     {
         $card = $this->present($camp);
+        $facilities = $this->facilityLabels($camp);
         $card['layout'] = 'row';
         $card['destination_id'] = $destinationId;
+        $card['image_badge'] = $this->imageBadge($camp);
+        $card['target_fish_tags'] = collect($camp->target_fish ?? [])
+            ->map(fn ($fish) => is_array($fish) ? ($fish['name'] ?? '') : (string) $fish)
+            ->filter()
+            ->values()
+            ->all();
+        $card['facilities_extra'] = max(0, $camp->facilities->count() - count($facilities));
+        $card['listing_price_suffix'] = __('vacations.per_day_label');
 
         return $card;
     }
@@ -188,5 +197,18 @@ class CampCardPresenter
         ]);
 
         return implode(' · ', $parts);
+    }
+
+    private function imageBadge(Camp $camp): ?string
+    {
+        if ($camp->guidings->isNotEmpty()) {
+            return 'top';
+        }
+
+        if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
+            return 'limited';
+        }
+
+        return null;
     }
 }

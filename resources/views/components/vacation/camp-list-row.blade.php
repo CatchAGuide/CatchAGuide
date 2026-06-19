@@ -1,3 +1,3 @@
 @props(['card'])
 
-<x-vacation.product-card :card="$card" layout="row" />
+<x-vacation.listing-row :card="$card" />

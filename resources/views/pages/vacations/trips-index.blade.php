@@ -48,22 +48,11 @@
 
 <div class="container vacation-pillar-index vacation-pillar-index--trip" data-analytics-page="vacation-trips-index">
 
-    <div class="vacation-pillar-index__banner vacation-pillar-index__banner--trip">
-        <div class="vacation-pillar-index__banner-icon" aria-hidden="true">
-            <i class="fas fa-suitcase-rolling"></i>
-        </div>
-        <div>
-            <h2 class="vacation-pillar-index__banner-title">{{ __('vacations.pillar_index_trips_title') }}</h2>
-            <p>{{ __('vacations.pillar_trips_desc') }}</p>
-            @if($listings->total() > 0)
-                <p class="vacation-pillar-index__banner-meta">
-                    {{ __('vacations.pillar_index_results', ['count' => $listings->total()]) }}
-                </p>
-            @endif
-        </div>
-    </div>
-
-
+    @if($listings->total() > 0)
+        <p class="vacation-pillar-index__results-meta mb-3">
+            {{ __('vacations.pillar_index_results', ['count' => $listings->total()]) }}
+        </p>
+    @endif
 
     <x-vacation.filters
 
