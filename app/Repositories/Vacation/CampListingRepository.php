@@ -60,6 +60,7 @@ class CampListingRepository implements ListingRepositoryInterface
     public function listNewest(int $limit, ?string $country = null): Collection
     {
         return $this->baseQuery($country)
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();

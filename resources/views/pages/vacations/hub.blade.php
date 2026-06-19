@@ -45,7 +45,7 @@
 <div class="container vacation-hub" data-analytics-page="vacation-hub">
 
     <section class="vacation-hub__pillar-fork mb-5" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
-        <div class="vacation-hub__pillar-tiles row g-4">
+        <div class="vacation-hub__pillar-tiles row g-3 g-md-4">
             <div class="col-md-6">
                 <x-vacation.pillar-tile :tile="$hub->campTile" />
             </div>
@@ -91,6 +91,36 @@
 
 
 
+    @if($hub->showNewCampsRail && $hub->newCamps->isNotEmpty())
+
+        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--camps mb-5" data-analytics-vacation-rail="new-camps">
+
+            <x-vacation.card-slider
+                :title="__('vacations.hub_new_camps_title')"
+                :subtitle="__('vacations.hub_new_camps_subtitle')"
+                :link-url="route('vacations.camps.index')"
+                :link-label="__('vacations.view_all_camps')"
+                slider-id="new-camps"
+            >
+
+                @foreach($hub->newCamps as $card)
+
+                    <div class="swiper-slide">
+
+                        <x-vacation.product-card :card="$card" variant="compact" />
+
+                    </div>
+
+                @endforeach
+
+            </x-vacation.card-slider>
+
+        </section>
+
+    @endif
+
+
+
     @if($hub->showNewTripsRail && $hub->newTrips->isNotEmpty())
 
         <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--trips mb-5" data-analytics-vacation-rail="new-trips">
@@ -121,75 +151,33 @@
 
 
 
-    <section class="vacation-hub__countries mb-5" data-analytics-vacation-rail="country-grid">
+    @if($hub->countryGrid->isNotEmpty())
 
-        <x-vacation.section-heading :title="__('vacations.hub_country_grid_title')" />
+        <section class="vacation-hub__countries mb-5" data-analytics-vacation-rail="country-slider">
 
-        <div class="row g-3">
+            <x-vacation.country-slider
+                :title="__('vacations.hub_country_slider_title')"
+                :subtitle="__('vacations.hub_country_slider_subtitle')"
+                :link-url="route('vacations.camps.index')"
+                :link-label="__('vacations.view_all_countries')"
+                slider-id="countries"
+            >
 
-            @foreach($hub->countryGrid as $row)
+                @foreach($hub->countryGrid as $row)
 
-                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="swiper-slide">
 
-                    <a href="{{ route('vacations.country', $row['slug']) }}" class="vacation-country-tile">
+                        <x-vacation.country-slide :row="$row" />
 
-                        <div class="vacation-country-tile__media">
+                    </div>
 
-                            @if(!empty($row['thumbnail_path']))
+                @endforeach
 
-                                <img src="{{ media_url($row['thumbnail_path']) }}" alt="{{ translate($row['name']) }}">
+            </x-vacation.country-slider>
 
-                            @else
+        </section>
 
-                                <div class="vacation-country-tile__placeholder">
-
-                                    <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
-
-                                </div>
-
-                            @endif
-
-                        </div>
-
-                        <div class="vacation-country-tile__body">
-
-                            <h3 class="vacation-country-tile__title">{{ translate($row['name']) }}</h3>
-
-                            <div class="vacation-country-tile__counts">
-
-                                @if($row['trips'] > 0)
-
-                                    <span class="vacation-country-tile__chip vacation-country-tile__chip--trip">
-
-                                        {{ $row['trips'] }} {{ __('vacations.pillar_index_trips_title') }}
-
-                                    </span>
-
-                                @endif
-
-                                @if($row['camps'] > 0)
-
-                                    <span class="vacation-country-tile__chip vacation-country-tile__chip--camp">
-
-                                        {{ $row['camps'] }} {{ __('vacations.pillar_index_camps_title') }}
-
-                                    </span>
-
-                                @endif
-
-                            </div>
-
-                        </div>
-
-                    </a>
-
-                </div>
-
-            @endforeach
-
-        </div>
-
-    </section>
+    @endif
 
 
 

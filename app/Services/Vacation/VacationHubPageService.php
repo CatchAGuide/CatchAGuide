@@ -55,6 +55,10 @@ class VacationHubPageService
         $newTrips = $this->trips->listNewest($newTripsLimit)
             ->map(fn ($t) => $this->tripPresenter->present($t));
 
+        $newCampsLimit = (int) config('vacations.new_camps_rail_limit', 6);
+        $newCamps = $this->camps->listNewest($newCampsLimit)
+            ->map(fn ($c) => $this->campPresenter->present($c));
+
         $faqItems = collect(config('vacations.hub_faq', []))->map(fn ($item) => [
             'question' => __($item['question_key']),
             'answer' => __($item['answer_key']),
@@ -76,6 +80,8 @@ class VacationHubPageService
             popularListings: $this->popular->mixedForHub(),
             newTrips: $newTrips,
             showNewTripsRail: $totalTrips > 0 && $totalTrips <= (int) config('vacations.new_trips_rail_max_catalog', 30),
+            newCamps: $newCamps,
+            showNewCampsRail: $totalCamps > 0 && $totalCamps <= (int) config('vacations.new_camps_rail_max_catalog', 30),
             countryGrid: $this->destinations->countriesForHubGrid(),
             inspirationTiles: $inspiration,
             faqItems: $faqItems,

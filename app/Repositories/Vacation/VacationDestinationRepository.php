@@ -46,48 +46,93 @@ class VacationDestinationRepository
     }
 
     /**
-     * @return Collection<int, array{destination: Destination, camps: int, trips: int}>
+     * @return Collection<int, array{destination: ?Destination, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}>
      */
     public function countriesForHubGrid(?string $locale = null): Collection
     {
         $locale = $locale ?? app()->getLocale();
 
         $campCounts = DB::table('camps')
-            ->select('country', DB::raw('COUNT(*) as total'))
+            ->select(DB::raw('LOWER(country) as country_slug'), DB::raw('COUNT(*) as total'))
             ->where('status', 'active')
             ->whereNotNull('country')
-            ->groupBy('country')
-            ->pluck('total', 'country');
+            ->where('country', '!=', '')
+            ->groupBy(DB::raw('LOWER(country)'))
+            ->pluck('total', 'country_slug');
 
         $tripCounts = DB::table('trips')
-            ->select('country', DB::raw('COUNT(*) as total'))
+            ->select(DB::raw('LOWER(country) as country_slug'), DB::raw('COUNT(*) as total'))
             ->where('status', 'active')
             ->whereNotNull('country')
-            ->groupBy('country')
-            ->pluck('total', 'country');
+            ->where('country', '!=', '')
+            ->groupBy(DB::raw('LOWER(country)'))
+            ->pluck('total', 'country_slug');
 
         $slugs = $campCounts->keys()->merge($tripCounts->keys())->unique()->values();
 
         $destinations = Destination::query()
-            ->where('type', DestinationCategoryType::VACATIONS)
             ->where('language', $locale)
-            ->whereIn('slug', $slugs)
+            ->whereIn('type', [DestinationCategoryType::VACATIONS, DestinationCategoryType::TRIPS])
             ->get()
-            ->keyBy('slug');
+            ->groupBy(fn (Destination $destination) => strtolower($destination->slug));
 
         return $slugs->map(function (string $slug) use ($destinations, $campCounts, $tripCounts) {
-            $destination = $destinations->get($slug);
+            $destination = $this->resolveHubCountryDestination($destinations, $slug);
+            $thumbnailPath = $destination?->thumbnail_path;
+
+            if (empty($thumbnailPath)) {
+                $thumbnailPath = $this->listingThumbnailForCountry($slug);
+            }
 
             return [
                 'destination' => $destination,
-                'slug' => $slug,
+                'slug' => $destination?->slug ?? $slug,
                 'name' => $destination?->name ?? ucfirst(str_replace('-', ' ', $slug)),
+                'sub_title' => $destination?->sub_title,
                 'camps' => (int) ($campCounts[$slug] ?? 0),
                 'trips' => (int) ($tripCounts[$slug] ?? 0),
-                'thumbnail_path' => $destination?->thumbnail_path,
+                'thumbnail_path' => $thumbnailPath,
                 'countrycode' => $destination?->countrycode,
             ];
         })->sortByDesc(fn ($row) => $row['camps'] + $row['trips'])->values();
+    }
+
+    /**
+     * @param  Collection<string, Collection<int, Destination>>  $destinations
+     */
+    private function resolveHubCountryDestination(Collection $destinations, string $slug): ?Destination
+    {
+        $group = $destinations->get($slug);
+
+        if ($group === null) {
+            return null;
+        }
+
+        return $group->firstWhere('type', DestinationCategoryType::VACATIONS)
+            ?? $group->firstWhere('type', DestinationCategoryType::TRIPS);
+    }
+
+    private function listingThumbnailForCountry(string $slug): ?string
+    {
+        $campThumb = DB::table('camps')
+            ->where('status', 'active')
+            ->whereRaw('LOWER(country) = ?', [$slug])
+            ->whereNotNull('thumbnail_path')
+            ->where('thumbnail_path', '!=', '')
+            ->orderByDesc('id')
+            ->value('thumbnail_path');
+
+        if (! empty($campThumb)) {
+            return $campThumb;
+        }
+
+        return DB::table('trips')
+            ->where('status', 'active')
+            ->whereRaw('LOWER(country) = ?', [$slug])
+            ->whereNotNull('thumbnail_path')
+            ->where('thumbnail_path', '!=', '')
+            ->orderByDesc('id')
+            ->value('thumbnail_path');
     }
 
     public function campRepository(): CampListingRepository

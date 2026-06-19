@@ -3,9 +3,13 @@
 return [
     'new_trips_rail_max_catalog' => 30,
 
+    'new_camps_rail_max_catalog' => 30,
+
     'popular_listing_limit' => 6,
 
     'new_trips_rail_limit' => 6,
+
+    'new_camps_rail_limit' => 6,
 
     'country_page_per_page' => 6,
 

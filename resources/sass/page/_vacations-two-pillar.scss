@@ -15,6 +15,7 @@ $vac-surface: $body-bg;
 $vac-radius: 14px;
 $vac-shadow: 0 4px 24px rgba(49, 48, 65, 0.08);
 $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
+$vac-country-panel: #050b15;
 
 .vacation-hub,
 .vacation-country,
@@ -184,6 +185,14 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         linear-gradient(135deg, rgba($vac-ink, .04) 0%, rgba($vac-brand, .05) 50%, rgba($vac-ink, .03) 100%);
     border: 1px solid rgba($vac-border, .85);
     box-shadow: inset 0 1px 0 rgba(#fff, .65);
+
+    @media (max-width: 575px) {
+        margin-top: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
 }
 
 // —— Pillar fork tiles ——
@@ -610,37 +619,93 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     }
 
     @media (max-width: 575px) {
-        flex-direction: column;
+        border-left-width: 3px;
 
         &__brand {
-            flex: 0 0 auto;
-            min-height: 76px;
+            flex: 0 0 68px;
+            min-height: 0;
+        }
+
+        &__mark {
+            width: 42px;
+            height: 42px;
+            font-size: 1.05rem;
+            animation: none;
         }
 
         &__body {
-            padding: .85rem 1rem .95rem;
+            padding: .7rem 2rem .7rem .75rem;
         }
 
         &__chevron {
-            display: none;
+            display: flex;
+            opacity: .35;
+            right: .5rem;
+            transform: translateY(-50%);
         }
 
+        &__top {
+            flex-wrap: nowrap;
+            gap: .4rem;
+            margin-bottom: .3rem;
+        }
+
+        &__badge {
+            font-size: .56rem;
+            padding: .18rem .45rem;
+        }
+
+        &__stats {
+            width: auto;
+            flex: 1;
+            justify-content: flex-end;
+            gap: .2rem;
+
+            li {
+                font-size: .62rem;
+                padding: .14rem .32rem;
+                gap: .2rem;
+
+                i {
+                    font-size: .56rem;
+                }
+            }
+        }
+
+        &__main {
+            flex-direction: row;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        &__title {
+            font-size: .98rem;
+            margin-bottom: .12rem;
+        }
+
+        &__tagline {
+            font-size: .7rem;
+            line-height: 1.25;
+        }
+
+        &__cta-glow {
+            align-self: center;
+        }
+
+        &__cta {
+            font-size: .64rem;
+            padding: .34rem .62rem;
+        }
+    }
+
+    @media (max-width: 399px) {
         &__top {
             flex-wrap: wrap;
         }
 
         &__stats {
-            width: 100%;
+            flex-basis: 100%;
             justify-content: flex-start;
-        }
-
-        &__main {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        &__cta-glow {
-            align-self: flex-end;
         }
     }
 }
@@ -679,6 +744,10 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         border-left: 4px solid $vac-trip;
     }
 
+    &--camps {
+        border-left: 4px solid $vac-camp;
+    }
+
     &--slider {
         padding-bottom: 1.5rem;
     }
@@ -688,10 +757,10 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 .vacation-hub__interlude {
     position: relative;
     overflow: hidden;
-    border-radius: $vac-radius;
-    border: 1px solid $vac-border;
-    background: linear-gradient(135deg, #fff 0%, rgba($vac-trip, .03) 55%, rgba($vac-camp, .025) 100%);
-    box-shadow: $vac-shadow;
+    border-radius: calc(#{$vac-radius} + 6px);
+    border: 1px solid rgba(#fff, .08);
+    background: $vac-country-panel;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .22);
 
     &::before {
         content: '';
@@ -699,15 +768,15 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, $vac-camp 0%, $vac-camp 48%, $vac-trip 52%, $vac-trip 100%);
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, rgba($vac-brand, .7) 50%, transparent 100%);
     }
 }
 
 .vacation-hub__interlude-inner {
     position: relative;
     z-index: 1;
-    padding: .9rem 1.1rem;
+    padding: clamp(1.1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.6rem);
 }
 
 .vacation-hub__interlude-band {
@@ -715,9 +784,9 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     align-items: center;
     justify-content: space-between;
     gap: 1rem 1.5rem;
-    padding-bottom: .75rem;
-    margin-bottom: .75rem;
-    border-bottom: 1px solid $vac-border;
+    padding-bottom: clamp(.85rem, 2vw, 1.1rem);
+    margin-bottom: clamp(.85rem, 2vw, 1.1rem);
+    border-bottom: 1px solid rgba(#fff, .1);
 }
 
 .vacation-hub__interlude-head {
@@ -726,7 +795,7 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 }
 
 .vacation-hub__interlude-eyebrow {
-    margin: 0 0 .2rem;
+    margin: 0 0 .25rem;
     font-size: .62rem;
     font-weight: 800;
     letter-spacing: .12em;
@@ -735,18 +804,19 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 }
 
 .vacation-hub__interlude-title {
-    margin: 0 0 .2rem;
-    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    margin: 0 0 .25rem;
+    font-size: clamp(1.1rem, 2.2vw, 1.35rem);
     font-weight: 800;
     line-height: 1.2;
-    color: $vac-ink;
+    color: #fff;
 }
 
 .vacation-hub__interlude-lead {
     margin: 0;
-    font-size: .78rem;
-    line-height: 1.4;
-    color: $vac-muted;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.45;
+    color: rgba(#fff, .62);
+    max-width: 36rem;
 }
 
 .vacation-hub__interlude-stats {
@@ -764,23 +834,23 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     gap: .5rem;
     padding: .45rem .65rem;
     border-radius: 999px;
-    background: #fff;
-    border: 1px solid $vac-border;
+    background: rgba(#fff, .06);
+    border: 1px solid rgba(#fff, .14);
     white-space: nowrap;
 
     &--camp .vacation-hub__interlude-stat-icon {
-        background: rgba($vac-camp, .1);
-        color: $vac-camp;
+        background: rgba($vac-camp, .35);
+        color: lighten($vac-camp, 42%);
     }
 
     &--trip .vacation-hub__interlude-stat-icon {
-        background: rgba($vac-trip, .12);
-        color: $vac-trip;
+        background: rgba($vac-trip, .22);
+        color: lighten($vac-trip, 18%);
     }
 
     &--countries .vacation-hub__interlude-stat-icon {
-        background: rgba($vac-brand, .1);
-        color: $vac-brand;
+        background: rgba($vac-brand, .22);
+        color: lighten($vac-brand, 16%);
     }
 }
 
@@ -798,13 +868,13 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 .vacation-hub__interlude-stat-copy {
     font-size: .72rem;
     font-weight: 600;
-    color: $vac-muted;
+    color: rgba(#fff, .68);
     line-height: 1.2;
 
     strong {
         font-size: .95rem;
         font-weight: 800;
-        color: $vac-ink;
+        color: #fff;
         margin-right: .2rem;
         font-variant-numeric: tabular-nums;
     }
@@ -828,10 +898,10 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     display: flex;
     gap: .5rem;
     align-items: flex-start;
-    padding: .5rem .55rem;
-    border-radius: calc(#{$vac-radius} - 4px);
-    background: rgba(#fff, .85);
-    border: 1px solid rgba($vac-border, .85);
+    padding: .55rem .6rem;
+    border-radius: calc(#{$vac-radius} - 2px);
+    background: rgba(#fff, .04);
+    border: 1px solid rgba(#fff, .1);
     min-width: 0;
 }
 
@@ -842,7 +912,7 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba($vac-brand, .1);
+    background: rgba($vac-brand, .18);
     color: $vac-brand;
     flex-shrink: 0;
     font-size: .68rem;
@@ -853,14 +923,14 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     font-size: .7rem;
     font-weight: 800;
     line-height: 1.25;
-    color: $vac-ink;
+    color: #fff;
 }
 
 .vacation-hub__interlude-usp-text {
     margin: 0;
     font-size: .64rem;
     line-height: 1.35;
-    color: $vac-muted;
+    color: rgba(#fff, .58);
 }
 
 .vacation-hub__interlude-inspire {
@@ -871,7 +941,7 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     flex: 0 0 auto;
     max-width: 14rem;
     padding-left: 1rem;
-    border-left: 1px solid $vac-border;
+    border-left: 1px solid rgba(#fff, .1);
 }
 
 .vacation-hub__interlude-inspire-label {
@@ -896,9 +966,9 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     display: block;
     padding: .32rem .6rem;
     border-radius: 999px;
-    border: 1px solid $vac-border;
-    background: #fff;
-    color: $vac-ink;
+    border: 1px solid rgba(#fff, .16);
+    background: rgba(#fff, .06);
+    color: rgba(#fff, .88);
     font-size: .68rem;
     font-weight: 600;
     text-decoration: none;
@@ -906,11 +976,12 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: border-color .2s ease, color .2s ease;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
 
     &:hover {
-        border-color: rgba($vac-brand, .45);
+        border-color: rgba($vac-brand, .5);
         color: $vac-brand;
+        background: rgba($vac-brand, .1);
     }
 }
 
@@ -925,7 +996,8 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         padding-left: 0;
         border-left: 0;
         padding-top: .65rem;
-        border-top: 1px solid $vac-border;
+        margin-top: 0;
+        border-top: 1px solid rgba(#fff, .1);
         align-items: flex-start;
     }
 
@@ -943,7 +1015,11 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 @media (max-width: 991px) {
     .vacation-hub__interlude-band {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: .7rem;
+        padding-bottom: .65rem;
+        margin-bottom: .65rem;
     }
 
     .vacation-hub__interlude-stats {
@@ -958,20 +1034,63 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
 
 @media (max-width: 575px) {
     .vacation-hub__interlude-inner {
-        padding: .8rem .85rem;
+        padding: .9rem .85rem .95rem;
+    }
+
+    .vacation-hub__interlude-band {
+        gap: .55rem;
+        padding-bottom: .55rem;
+        margin-bottom: .55rem;
     }
 
     .vacation-hub__interlude-stats {
-        flex-direction: column;
-        align-items: stretch;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .4rem;
     }
 
     .vacation-hub__interlude-stat {
-        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: .55rem .35rem;
+        white-space: normal;
+        border-radius: calc(#{$vac-radius} - 2px);
+    }
+
+    .vacation-hub__interlude-stat-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+
+    .vacation-hub__interlude-stat-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .12rem;
+        font-size: .58rem;
+        line-height: 1.25;
+
+        strong {
+            display: block;
+            font-size: .95rem;
+            margin: 0;
+        }
     }
 
     .vacation-hub__interlude-usps {
         grid-template-columns: 1fr;
+        gap: .4rem;
+    }
+
+    .vacation-hub__interlude-usp {
+        padding: .6rem .65rem;
+    }
+
+    .vacation-hub__interlude-inspire {
+        padding-top: .55rem;
     }
 }
 
@@ -1592,41 +1711,164 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
     }
 }
 
-// —— Country grid ——
-.vacation-country-tile {
-    display: block;
-    border-radius: $vac-radius;
+// —— Country slider (Explore by Country) ——
+.vacation-hub__countries {
+    .vacation-country-slider {
+        background: $vac-country-panel;
+        border-radius: calc(#{$vac-radius} + 6px);
+        padding: clamp(1.35rem, 3vw, 2rem) clamp(1.1rem, 2.5vw, 1.75rem);
+    }
+}
+
+.vacation-country-slider {
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.35rem;
+    }
+
+    &__intro {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.15;
+        color: #fff;
+    }
+
+    &__subtitle {
+        margin: .4rem 0 0;
+        font-size: .9rem;
+        color: rgba(#fff, .62);
+        line-height: 1.45;
+        max-width: 36rem;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-shrink: 0;
+    }
+
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .88rem;
+        font-weight: 600;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        i {
+            font-size: .72rem;
+            transition: transform .15s ease;
+        }
+
+        &:hover {
+            color: lighten($vac-brand, 8%);
+            text-decoration: none;
+
+            i {
+                transform: translateX(3px);
+            }
+        }
+    }
+
+    &__nav {
+        display: flex;
+        gap: .45rem;
+        flex-shrink: 0;
+    }
+
+    &__btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid rgba(#fff, .22);
+        background: rgba(#fff, .06);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease, transform .15s ease;
+
+        &:hover:not(.swiper-button-disabled) {
+            background: rgba(#fff, .14);
+            border-color: rgba(#fff, .4);
+            transform: translateY(-1px);
+        }
+
+        &.swiper-button-disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        i {
+            font-size: .8rem;
+        }
+    }
+
+    &__swiper {
+        overflow: hidden;
+        margin: 0 -.1rem;
+        padding: .1rem;
+    }
+
+    .swiper-slide {
+        height: auto;
+        display: flex;
+    }
+
+    @media (max-width: 767px) {
+        &__header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__actions {
+            justify-content: space-between;
+        }
+    }
+}
+
+.vacation-country-slide {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 280px;
+    border-radius: calc(#{$vac-radius} + 2px);
     overflow: hidden;
     text-decoration: none;
-    color: inherit;
-    box-shadow: $vac-shadow;
-    border: 1px solid $vac-border;
-    transition: transform .2s ease, box-shadow .2s ease;
-    height: 100%;
+    color: #fff;
+    position: relative;
+    background: #0d1522;
+    transition: transform .22s ease, box-shadow .22s ease;
 
     &:hover {
+        color: #fff;
+        text-decoration: none;
         transform: translateY(-4px);
-        box-shadow: $vac-shadow-hover;
-        color: inherit;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
     }
 
     &__media {
-        position: relative;
-        height: 160px;
-        background: linear-gradient(135deg, $vac-ink, $vac-camp-dark);
+        position: absolute;
+        inset: 0;
 
         img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-        }
-
-        &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, .65) 100%);
         }
     }
 
@@ -1636,43 +1878,44 @@ $vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: rgba(#fff, .5);
-        font-size: 2rem;
+        background: linear-gradient(145deg, #162033, #0a101a);
+        color: rgba(#fff, .35);
+        font-size: 2.25rem;
     }
 
-    &__body {
-        padding: 1rem 1.1rem 1.15rem;
-        background: #fff;
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .08) 0%,
+            rgba(0, 0, 0, .22) 45%,
+            rgba(0, 0, 0, .72) 100%
+        );
+        pointer-events: none;
+    }
+
+    &__copy {
+        position: relative;
+        z-index: 1;
+        margin-top: auto;
+        padding: 1.35rem 1.15rem 1.2rem;
     }
 
     &__title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin: 0 0 .5rem;
-    }
-
-    &__counts {
         margin: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: .4rem;
+        font-size: 1.12rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: #fff;
     }
 
-    &__chip {
-        font-size: .72rem;
-        font-weight: 700;
-        padding: .2rem .55rem;
-        border-radius: 999px;
-
-        &--trip {
-            background: $vac-trip-soft;
-            color: $vac-trip-dark;
-        }
-
-        &--camp {
-            background: $vac-camp-soft;
-            color: $vac-camp-dark;
-        }
+    &__subtitle {
+        margin: .3rem 0 0;
+        font-size: .82rem;
+        font-weight: 500;
+        line-height: 1.35;
+        color: rgba(#fff, .78);
     }
 }
 
