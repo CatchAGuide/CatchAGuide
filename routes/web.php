@@ -52,8 +52,7 @@ use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Vacation\VacationHubController;
 use App\Http\Controllers\Vacation\VacationCountryController;
-use App\Http\Controllers\Vacation\VacationCampIndexController;
-use App\Http\Controllers\Vacation\VacationTripIndexController;
+use App\Http\Controllers\Vacation\VacationPillarController;
 use App\Http\Controllers\Vacation\VacationInterestController;
 use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\TripOfferController;
@@ -289,10 +288,10 @@ Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
 
 Route::get('vacations', [VacationHubController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
-Route::get('vacations/trips', [VacationTripIndexController::class, 'index'])->name('vacations.trips.index')->middleware('ddos:search');
-Route::get('vacations/camps', [VacationCampIndexController::class, 'index'])->name('vacations.camps.index')->middleware('ddos:search');
-Route::get('vacations/trips/{slug}', [TripOfferController::class, 'show'])->name('vacations.trips.show')->middleware('ddos:search');
-Route::get('vacations/camps/{slug}', [CampOfferController::class, 'show'])->name('vacations.camps.show')->middleware('ddos:search');
+Route::get('vacations/trips', [VacationPillarController::class, 'index'])->defaults('pillar', 'trips')->name('vacations.trips.index')->middleware('ddos:search');
+Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defaults('pillar', 'camps')->name('vacations.camps.index')->middleware('ddos:search');
+Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
+Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
 Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
     ->name('vacations.country')
     ->where('country', '^(?!trips$|camps$)[a-z0-9\-]+$')

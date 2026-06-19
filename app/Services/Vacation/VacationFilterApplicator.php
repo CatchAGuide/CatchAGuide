@@ -68,12 +68,12 @@ class VacationFilterApplicator
     {
         $campSpecies = Camp::query()
             ->where('status', 'active')
-            ->when($country, fn ($q) => $q->where('country', $country))
+            ->when($country, fn ($q) => $q->whereRaw('LOWER(country) = ?', [strtolower($country)]))
             ->pluck('target_fish');
 
         $tripSpecies = Trip::query()
             ->where('status', 'active')
-            ->when($country, fn ($q) => $q->where('country', $country))
+            ->when($country, fn ($q) => $q->whereRaw('LOWER(country) = ?', [strtolower($country)]))
             ->pluck('target_species');
 
         $names = collect();

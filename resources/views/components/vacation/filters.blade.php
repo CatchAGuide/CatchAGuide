@@ -11,6 +11,7 @@
     'variant' => 'default',
     'showDesktop' => true,
     'action' => null,
+    'omitPillarFromQuery' => false,
 ])
 
 @php
@@ -24,7 +25,7 @@
     $activePillar = $filter->pillar ?? 'all';
     $durationOptions = config('vacations.duration_filter_options', []);
     $activeFilterCount = collect(['species', 'duration', 'country', 'sortby', 'pillar'])
-        ->filter(fn ($key) => filled(request()->get($key)))
+        ->filter(fn ($key) => $key === 'pillar' && $omitPillarFromQuery ? false : filled(request()->get($key)))
         ->count();
 @endphp
 
@@ -39,7 +40,7 @@
         @endif
     @endforeach
 
-    @if($activePillar !== 'all')
+    @if($activePillar !== 'all' && ! $omitPillarFromQuery)
         <input type="hidden" name="pillar" value="{{ $activePillar }}">
     @endif
 

@@ -228,6 +228,8 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'interest_success' => 'Danke — wir melden uns, sobald neue Angebote live sind.',
     'pillar_index_trips_title' => 'Guided Fishing Trips',
     'pillar_index_camps_title' => 'Anglercamps',
+    'pillar_country_trips_title' => 'Guided Fishing Trips in :country',
+    'pillar_country_camps_title' => 'Anglercamps in :country',
     'view_all_trips' => 'Alle Trips ansehen',
     'view_all_camps' => 'Alle Camps ansehen',
     'view_all_countries' => 'Alle ansehen',

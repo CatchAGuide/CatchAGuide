@@ -19,8 +19,7 @@ class VacationDestinationRepository
     {
         $locale = $locale ?? app()->getLocale();
 
-        return Destination::query()
-            ->with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])
+        return $this->countryDestinationQuery()
             ->whereRaw('LOWER(slug) = ?', [strtolower($slug)])
             ->where('language', $locale)
             ->where('type', DestinationCategoryType::VACATIONS)
@@ -29,20 +28,114 @@ class VacationDestinationRepository
 
     public function mergeCountryContent(string $slug, ?string $locale = null): ?Destination
     {
-        $primary = $this->findCountryForLocale($slug, $locale);
+        $slug = strtolower($slug);
+        $locale = $locale ?? app()->getLocale();
 
+        $primary = $this->findCountryForLocale($slug, $locale);
         if ($primary !== null) {
             return $primary;
         }
 
+        $vacationsFallback = $this->countryDestinationQuery()
+            ->whereRaw('LOWER(slug) = ?', [$slug])
+            ->where('type', DestinationCategoryType::VACATIONS)
+            ->orderByRaw('CASE WHEN language = ? THEN 0 ELSE 1 END', [$locale])
+            ->first();
+
+        if ($vacationsFallback !== null) {
+            return $vacationsFallback;
+        }
+
+        return $this->countryDestinationQuery()
+            ->whereRaw('LOWER(slug) = ?', [$slug])
+            ->where('type', DestinationCategoryType::TRIPS)
+            ->orderByRaw('CASE WHEN language = ? THEN 0 ELSE 1 END', [$locale])
+            ->first();
+    }
+
+    /**
+     * @return array{destination: ?Destination, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}|null
+     */
+    public function hubGridCountry(string $slug, ?string $locale = null): ?array
+    {
+        $slug = strtolower($slug);
+
+        return $this->countriesForHubGrid($locale)
+            ->first(fn (array $row) => strtolower($row['slug']) === $slug);
+    }
+
+    public function isKnownCountrySlug(string $slug, ?string $pillar = null): bool
+    {
+        $slug = strtolower($slug);
+
+        if ($this->mergeCountryContent($slug) !== null) {
+            return true;
+        }
+
+        $row = $this->hubGridCountry($slug);
+        if ($row === null) {
+            return false;
+        }
+
+        if ($pillar === 'trips') {
+            return ($row['trips'] ?? 0) > 0;
+        }
+
+        if ($pillar === 'camps') {
+            return ($row['camps'] ?? 0) > 0;
+        }
+
+        return ($row['trips'] ?? 0) > 0 || ($row['camps'] ?? 0) > 0;
+    }
+
+    /**
+     * @return array{destination: Destination, slug: string}|null
+     */
+    public function resolveCountryPage(string $slug, ?string $pillar = null, ?string $locale = null): ?array
+    {
+        $slug = strtolower($slug);
         $locale = $locale ?? app()->getLocale();
 
+        if ($pillar !== null && ! $this->isKnownCountrySlug($slug, $pillar)) {
+            return null;
+        }
+
+        if ($pillar === null && ! $this->isKnownCountrySlug($slug)) {
+            return null;
+        }
+
+        $destination = $this->mergeCountryContent($slug, $locale);
+        $hubRow = $this->hubGridCountry($slug, $locale);
+
+        if ($destination === null && $hubRow !== null) {
+            $destination = new Destination([
+                'slug' => $hubRow['slug'],
+                'name' => $hubRow['name'],
+                'sub_title' => $hubRow['sub_title'],
+                'thumbnail_path' => $hubRow['thumbnail_path'],
+                'countrycode' => $hubRow['countrycode'],
+                'type' => DestinationCategoryType::VACATIONS,
+                'language' => $locale,
+            ]);
+        }
+
+        if ($destination === null) {
+            return null;
+        }
+
+        return [
+            'destination' => $destination,
+            'slug' => $slug,
+        ];
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<Destination>
+     */
+    private function countryDestinationQuery()
+    {
         return Destination::query()
-            ->with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])
-            ->whereRaw('LOWER(slug) = ?', [strtolower($slug)])
-            ->where('language', $locale)
-            ->where('type', DestinationCategoryType::TRIPS)
-            ->first();
+            ->with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit']);
     }
 
     /**
@@ -71,7 +164,6 @@ class VacationDestinationRepository
         $slugs = $campCounts->keys()->merge($tripCounts->keys())->unique()->values();
 
         $destinations = Destination::query()
-            ->where('language', $locale)
             ->whereIn('type', [DestinationCategoryType::VACATIONS, DestinationCategoryType::TRIPS])
             ->get()
             ->groupBy(fn (Destination $destination) => strtolower($destination->slug));
@@ -108,7 +200,11 @@ class VacationDestinationRepository
             return null;
         }
 
-        return $group->firstWhere('type', DestinationCategoryType::VACATIONS)
+        $locale = app()->getLocale();
+
+        return $group->first(fn (Destination $destination) => $destination->language === $locale && $destination->type === DestinationCategoryType::VACATIONS)
+            ?? $group->first(fn (Destination $destination) => $destination->type === DestinationCategoryType::VACATIONS)
+            ?? $group->first(fn (Destination $destination) => $destination->language === $locale && $destination->type === DestinationCategoryType::TRIPS)
             ?? $group->firstWhere('type', DestinationCategoryType::TRIPS);
     }
 

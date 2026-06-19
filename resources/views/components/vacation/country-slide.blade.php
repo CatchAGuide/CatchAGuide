@@ -1,8 +1,9 @@
-@props(['row'])
+@props(['row', 'href' => null])
 
 @php
     $name = translate($row['name']);
     $subtitle = $row['sub_title'] ?? null;
+    $url = $href ?? route('vacations.country', $row['slug']);
 
     if (empty($subtitle) && (($row['trips'] ?? 0) > 0 || ($row['camps'] ?? 0) > 0)) {
         $subtitle = __('vacations.hub_country_trips_camps', [
@@ -13,7 +14,7 @@
 @endphp
 
 <a
-    href="{{ route('vacations.country', $row['slug']) }}"
+    href="{{ $url }}"
     class="vacation-country-slide"
     data-analytics-vacation-country="{{ $row['slug'] }}"
 >

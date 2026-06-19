@@ -24,10 +24,13 @@ class VacationCountryPageService
 
     public function build(Request $request, string $countrySlug): VacationCountryViewModel
     {
-        $destination = $this->destinations->mergeCountryContent($countrySlug);
-        if ($destination === null) {
+        $resolved = $this->destinations->resolveCountryPage($countrySlug);
+        if ($resolved === null) {
             abort(404);
         }
+
+        $destination = $resolved['destination'];
+        $countrySlug = $resolved['slug'];
 
         $filter = VacationListingFilter::fromRequest($request->all(), $countrySlug);
         $perPage = (int) config('vacations.country_page_per_page', 6);

@@ -3,10 +3,14 @@
 @include('layouts.modal.guideApplicationModal')
 @php
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
+    $vacationPillarCountrySlug = request()->route('slug');
+    $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $showVacationHeaderSubtitle = request()->routeIs('vacations.index')
         || request()->routeIs('vacations.country')
         || request()->routeIs('vacations.camps.index')
-        || request()->routeIs('vacations.trips.index');
+        || request()->routeIs('vacations.trips.index')
+        || (request()->routeIs('vacations.trips.show') && filled($vacationPillarCountrySlug) && $vacationDestinations->isKnownCountrySlug((string) $vacationPillarCountrySlug, 'trips'))
+        || (request()->routeIs('vacations.camps.show') && filled($vacationPillarCountrySlug) && $vacationDestinations->isKnownCountrySlug((string) $vacationPillarCountrySlug, 'camps'));
     $hideHeaderSubtitle = $isDestinationOrCategoryPage
         || (request()->is('vacations*') && ! $showVacationHeaderSubtitle);
     $currentVacationCountry = $currentVacationCountry ?? request()->route('country');

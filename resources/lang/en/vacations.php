@@ -228,6 +228,8 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'interest_success' => 'Thanks — we will notify you when new listings go live.',
     'pillar_index_trips_title' => 'Guided Fishing Trips',
     'pillar_index_camps_title' => 'Angling Camps',
+    'pillar_country_trips_title' => 'Guided Fishing Trips in :country',
+    'pillar_country_camps_title' => 'Angling Camps in :country',
     'view_all_trips' => 'View all trips',
     'view_all_camps' => 'View all camps',
     'view_all_countries' => 'View all',

@@ -73,7 +73,7 @@ class TripListingRepository implements ListingRepositoryInterface
         $query = Trip::query()->where('status', $this->policy->activeStatus());
 
         if ($country !== null && $country !== '') {
-            $query->where('country', $country);
+            $query->whereRaw('LOWER(country) = ?', [strtolower($country)]);
         }
 
         return $query;

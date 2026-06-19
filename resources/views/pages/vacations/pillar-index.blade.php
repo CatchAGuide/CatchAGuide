@@ -1,17 +1,13 @@
 @extends('layouts.app-v2')
 
 @php
-    $destination = $vm->destination;
-    $countryName = translate($destination->name);
     $hasMap = count($vm->mapMarkers) > 0;
-    $countrySubtitle = strip_tags(translate($destination->sub_title ?? ''));
-    $countryIntro = strip_tags(translate($destination->introduction ?? ''));
 @endphp
 
-@section('title', $countryName . ' — ' . __('vacations.hub_breadcrumb'))
-@section('header_title', $countryName)
-@section('header_sub_title', $countrySubtitle)
-@section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
+@section('title', $vm->pageTitle())
+@section('header_title', $vm->pageTitle())
+@section('header_sub_title', $vm->headerSubtitle())
+@section('description', $vm->metaDescription())
 
 @section('content')
 <div class="container">
@@ -23,7 +19,13 @@
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                     <li><a href="{{ route('vacations.index') }}">{{ __('vacations.hub_breadcrumb') }}</a></li>
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li class="active">{{ __('vacations.country_listing_title', ['country' => $countryName]) }}</li>
+                    @if($vm->isCountryPage())
+                        <li><a href="{{ route($vm->pillar->indexRouteName()) }}">{{ __($vm->pillar->indexTitleKey()) }}</a></li>
+                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                        <li class="active">{{ $vm->countryName() }}</li>
+                    @else
+                        <li class="active">{{ __($vm->pillar->indexTitleKey()) }}</li>
+                    @endif
                 </ul>
             </div>
         </div>
@@ -31,21 +33,18 @@
 </div>
 
 <div
-    class="container vacation-country"
+    class="container vacation-pillar-index vacation-pillar-index--{{ $vm->pillar->cssModifier() }}{{ $vm->isCountryPage() ? ' vacation-pillar-country' : '' }}"
     id="vacations-category"
-    data-analytics-page="vacation-country"
-    data-country="{{ $destination->slug }}"
+    data-analytics-page="{{ $vm->pillar->analyticsPage($vm->isCountryPage()) }}"
+    @if($vm->isCountryPage()) data-country="{{ $vm->destination->slug }}" @endif
 >
-    @if(filled($destination->introduction))
-        <div id="page-main-intro" class="mb-3">
-            <div class="page-main-intro-text mb-1">{!! translate(nl2br($destination->introduction)) !!}</div>
-            <p class="see-more text-center">
-                <a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a>
-            </p>
-        </div>
-    @endif
+    @include('pages.vacations.partials.pillar-country-slider', [
+        'countries' => $vm->countries,
+        'pillar' => $vm->pillar->value,
+        'sliderId' => $vm->pillar->sliderId(),
+    ])
 
-    <h2 class="vacation-country__listing-title">{{ __('vacations.country_listing_title', ['country' => $countryName]) }}</h2>
+    <h2 class="vacation-country__listing-title">{{ $vm->pageTitle() }}</h2>
 
     @if($hasMap)
         @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])
@@ -71,116 +70,34 @@
             <div class="vacation-country__sidebar-filters">
                 <x-vacation.filters
                     :filter="$vm->filter"
-                    :trips-total="$vm->tripsTotal"
-                    :camps-total="$vm->campsTotal"
+                    :show-pillar-toggles="false"
                     :species-options="$vm->speciesOptions"
-                    :show-map-button="false"
-                    :show-mobile-toolbar="false"
+                    :countries="$vm->filterCountries()"
+                    :action="$vm->filterAction()"
+                    :omit-pillar-from-query="true"
                     variant="sidebar"
+                    :show-mobile-toolbar="true"
+                    :show-map-button="$hasMap"
                 />
             </div>
         </aside>
 
         <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
-            @if($vm->listingsTotal > 0)
-                @foreach($listingRows as $card)
+            @if($vm->listings->total() > 0)
+                @foreach($vm->cards as $card)
                     <x-vacation.listing-row :card="$card" />
                 @endforeach
 
                 <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
             @else
-                <p class="vacation-country__section-empty">
-                    @if($vm->filter->pillar === 'trips')
-                        {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
-                    @else
-                        {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
-                    @endif
-                </p>
+                <p class="vacation-country__section-empty">{{ $vm->emptyStateMessage() }}</p>
             @endif
         </div>
     </div>
-
-    @if($destination->fish_avail_title && $destination->fish_avail_intro && $vm->fishChart->count() > 0)
-        <section class="vacation-country__seasonality mb-4">
-            <x-vacation.section-heading :title="translate($destination->fish_avail_title)" />
-            <p class="vacation-country__seasonality-intro">{!! translate($destination->fish_avail_intro) !!}</p>
-            @include('pages.vacations.partials.fish-chart', ['fish_chart' => $vm->fishChart])
-        </section>
-    @endif
-
-    @if($destination->content)
-        <section class="vacation-country__seo mb-4 vacation-country__intro">
-            {!! translate($destination->content) !!}
-        </section>
-    @endif
-
-    @if($vm->faq->isNotEmpty())
-        <section class="vacation-country__faq mb-5">
-            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
-            <div class="accordion" id="vacationCountryFaq">
-                @foreach($vm->faq as $index => $item)
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#country-faq-{{ $index }}">
-                                {{ translate($item->question ?? $item['question'] ?? '') }}
-                            </button>
-                        </h3>
-                        <div id="country-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationCountryFaq">
-                            <div class="accordion-body">{!! translate($item->answer ?? $item['answer'] ?? '') !!}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-    @endif
 </div>
 @endsection
 
 @section('js_after')
-<script>
-$(function () {
-    var wordCharCountAllowed = $(window).width() <= 768 ? 300 : 1200;
-    var content = $('#page-main-intro .page-main-intro-text');
-    var seeMoreBtn = $('.see-more');
-    var fullText = content.html();
-    var textLength = content.text().length;
-    var ellipsis = '...';
-    var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a>';
-    var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_less')</a>';
-
-    if (textLength > wordCharCountAllowed) {
-        content.html('<div class="content-wrapper">' + fullText + '</div>');
-        var wrapper = content.find('.content-wrapper');
-
-        wrapper.hide();
-        content.append(
-            '<div class="truncated-content">' +
-                fullText.substring(0, wordCharCountAllowed) +
-                '<span class="more-ellipsis">' + ellipsis + '</span>' +
-            '</div>'
-        );
-
-        seeMoreBtn.show();
-
-        seeMoreBtn.find('a').on('click', function (event) {
-            event.preventDefault();
-
-            if ($(this).hasClass('less')) {
-                $(this).removeClass('less').html(moreText);
-                content.find('.truncated-content').show();
-                wrapper.hide();
-            } else {
-                $(this).addClass('less').html(lessText);
-                content.find('.truncated-content').hide();
-                wrapper.show();
-            }
-        });
-    } else {
-        seeMoreBtn.hide();
-    }
-});
-</script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-vacation-gallery]').forEach(function (gallery) {

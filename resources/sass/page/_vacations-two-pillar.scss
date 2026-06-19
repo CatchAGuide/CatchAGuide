@@ -1712,7 +1712,8 @@ $vac-country-panel: #050b15;
 }
 
 // —— Country slider (Explore by Country) ——
-.vacation-hub__countries {
+.vacation-hub__countries,
+.vacation-pillar-index__countries {
     .vacation-country-slider {
         background: $vac-country-panel;
         border-radius: calc(#{$vac-radius} + 6px);
