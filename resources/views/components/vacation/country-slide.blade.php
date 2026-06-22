@@ -2,15 +2,7 @@
 
 @php
     $name = translate($row['name']);
-    $subtitle = $row['sub_title'] ?? null;
     $url = $href ?? route('vacations.country', $row['slug']);
-
-    if (empty($subtitle) && (($row['trips'] ?? 0) > 0 || ($row['camps'] ?? 0) > 0)) {
-        $subtitle = __('vacations.hub_country_trips_camps', [
-            'trips' => $row['trips'] ?? 0,
-            'camps' => $row['camps'] ?? 0,
-        ]);
-    }
 @endphp
 
 <a
@@ -36,9 +28,5 @@
 
     <div class="vacation-country-slide__copy">
         <h3 class="vacation-country-slide__title">{{ $name }}</h3>
-
-        @if($subtitle)
-            <p class="vacation-country-slide__subtitle">{{ $subtitle }}</p>
-        @endif
     </div>
 </a>

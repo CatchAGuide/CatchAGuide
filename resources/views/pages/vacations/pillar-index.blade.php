@@ -77,7 +77,7 @@
                     :omit-pillar-from-query="true"
                     variant="sidebar"
                     :show-mobile-toolbar="true"
-                    :show-map-button="$hasMap"
+                    :show-map-button="false"
                 />
             </div>
         </aside>
@@ -94,6 +94,26 @@
             @endif
         </div>
     </div>
+
+    @if($vm->faq->isNotEmpty())
+        <section class="vacation-pillar-index__faq mb-5">
+            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
+            <div class="accordion" id="vacationPillarFaq">
+                @foreach($vm->faq as $index => $item)
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pillar-faq-{{ $index }}">
+                                {{ $item->question ?? $item['question'] ?? '' }}
+                            </button>
+                        </h3>
+                        <div id="pillar-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationPillarFaq">
+                            <div class="accordion-body">{!! $item->answer ?? $item['answer'] ?? '' !!}</div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 </div>
 @endsection
 

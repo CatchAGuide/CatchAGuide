@@ -71,5 +71,18 @@ return [
         ['question_key' => 'vacations.faq_countries_q', 'answer_key' => 'vacations.faq_countries_a'],
     ],
 
+    'trips_faq' => [
+        ['question_key' => 'vacations.faq_booking_q', 'answer_key' => 'vacations.faq_booking_a'],
+        ['question_key' => 'vacations.faq_included_q', 'answer_key' => 'vacations.faq_included_a'],
+        ['question_key' => 'vacations.faq_camp_vs_trip_q', 'answer_key' => 'vacations.faq_camp_vs_trip_a'],
+        ['question_key' => 'vacations.faq_countries_q', 'answer_key' => 'vacations.faq_countries_a'],
+    ],
+
+    'camps_faq' => [
+        ['question_key' => 'vacations.faq_camp_vs_trip_q', 'answer_key' => 'vacations.faq_camp_vs_trip_a'],
+        ['question_key' => 'vacations.faq_booking_q', 'answer_key' => 'vacations.faq_booking_a'],
+        ['question_key' => 'vacations.faq_countries_q', 'answer_key' => 'vacations.faq_countries_a'],
+    ],
+
     'trip_legal_seller' => env('VACATION_TRIP_LEGAL_SELLER', ''),
 ];

@@ -2,10 +2,12 @@
 
 namespace App\Services\Vacation;
 
+use App\Domain\Destination\DestinationCategoryType;
 use App\Domain\Vacation\Pillar;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\ViewModels\PillarSectionViewModel;
 use App\Domain\Vacation\ViewModels\VacationCountryViewModel;
+use App\Models\Destination;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
@@ -29,11 +31,38 @@ class VacationCountryPageService
             abort(404);
         }
 
-        $destination = $resolved['destination'];
-        $countrySlug = $resolved['slug'];
+        return $this->buildPage(
+            $request,
+            $resolved['slug'],
+            $resolved['destination'],
+        );
+    }
 
-        $filter = VacationListingFilter::fromRequest($request->all(), $countrySlug);
+    public function buildAllOffers(Request $request): VacationCountryViewModel
+    {
+        $destination = new Destination([
+            'slug' => 'all-offers',
+            'name' => __('vacations.all_offers_title'),
+            'sub_title' => __('vacations.all_offers_subtitle'),
+            'type' => DestinationCategoryType::VACATIONS,
+            'language' => app()->getLocale(),
+        ]);
+        $destination->setRelation('faq', collect());
+        $destination->setRelation('fish_chart', collect());
+
+        return $this->buildPage($request, null, $destination);
+    }
+
+    private function buildPage(Request $request, ?string $countrySlug, Destination $destination): VacationCountryViewModel
+    {
+        $input = $request->all();
+        if ($countrySlug === null) {
+            unset($input['country']);
+        }
+
+        $filter = VacationListingFilter::fromRequest($input, $countrySlug);
         $perPage = (int) config('vacations.country_page_per_page', 6);
+        $countryLabel = translate($destination->name);
 
         $showTripsSection = $filter->pillar !== 'camps';
         $showCampsSection = $filter->pillar !== 'trips';
@@ -56,14 +85,14 @@ class VacationCountryPageService
 
         $tripsSection = new PillarSectionViewModel(
             pillar: Pillar::Trip,
-            countryName: translate($destination->name),
+            countryName: $countryLabel,
             count: $tripsTotal,
             visible: $showTripsSection,
         );
 
         $campsSection = new PillarSectionViewModel(
             pillar: Pillar::Camp,
-            countryName: translate($destination->name),
+            countryName: $countryLabel,
             count: $campsTotal,
             visible: $showCampsSection,
         );
@@ -86,10 +115,10 @@ class VacationCountryPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            faq: $destination->faq,
-            fishChart: $destination->fish_chart,
+            faq: $destination->faq ?? collect(),
+            fishChart: $destination->fish_chart ?? collect(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
-            mapMarkers: $this->buildMapMarkers($countrySlug, $filter),
+            mapMarkers: $this->buildMapMarkers($filter),
         );
     }
 
@@ -111,7 +140,6 @@ class VacationCountryPageService
         }
 
         $tripItems = $this->trips->queryForCountry($filter)
-            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
             ->get()
             ->map(fn ($trip) => [
                 'type' => 'trip',
@@ -176,7 +204,7 @@ class VacationCountryPageService
         };
     }
 
-    private function buildMapMarkers(string $countrySlug, VacationListingFilter $filter): array
+    private function buildMapMarkers(VacationListingFilter $filter): array
     {
         $markers = [];
 

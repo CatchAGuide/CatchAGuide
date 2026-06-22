@@ -19,13 +19,24 @@ final class VacationListingFilter
             $pillar = 'all';
         }
 
+        $resolvedCountry = $country ?? self::nullableString($input['country'] ?? null);
+
         return new self(
             pillar: $pillar,
             species: self::nullableString($input['species'] ?? null),
             duration: self::nullableString($input['duration'] ?? null),
-            country: $country ?? self::nullableString($input['country'] ?? null),
+            country: self::normalizeCountry($resolvedCountry),
             sortBy: self::nullableString($input['sortby'] ?? null),
         );
+    }
+
+    private static function normalizeCountry(?string $country): ?string
+    {
+        if ($country === null || strtolower($country) === 'all-offers') {
+            return null;
+        }
+
+        return $country;
     }
 
     public function showsTrips(): bool

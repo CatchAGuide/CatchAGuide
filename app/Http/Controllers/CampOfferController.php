@@ -118,7 +118,7 @@ class CampOfferController extends Controller
     }
     
 
-    public function show($slug)
+    public function show(Request $request, string $slug)
     {
         // Fetch camp from database with relationships
         $camp = Camp::with([

@@ -44,6 +44,32 @@
 
 <div class="container vacation-hub" data-analytics-page="vacation-hub">
 
+    @if($hub->countryGrid->isNotEmpty())
+
+        <section class="vacation-hub__countries mb-5" data-analytics-vacation-rail="country-slider">
+
+            <x-vacation.country-slider
+                :title="__('vacations.hub_country_slider_title')"
+                :subtitle="__('vacations.hub_country_slider_subtitle')"
+                slider-id="countries"
+            >
+
+                @foreach($hub->countryGrid as $row)
+
+                    <div class="swiper-slide">
+
+                        <x-vacation.country-slide :row="$row" />
+
+                    </div>
+
+                @endforeach
+
+            </x-vacation.country-slider>
+
+        </section>
+
+    @endif
+
     <section class="vacation-hub__pillar-fork mb-5" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
         <div class="vacation-hub__pillar-tiles row g-3 g-md-4">
             <div class="col-md-6">
@@ -144,36 +170,6 @@
                 @endforeach
 
             </x-vacation.card-slider>
-
-        </section>
-
-    @endif
-
-
-
-    @if($hub->countryGrid->isNotEmpty())
-
-        <section class="vacation-hub__countries mb-5" data-analytics-vacation-rail="country-slider">
-
-            <x-vacation.country-slider
-                :title="__('vacations.hub_country_slider_title')"
-                :subtitle="__('vacations.hub_country_slider_subtitle')"
-                :link-url="route('vacations.camps.index')"
-                :link-label="__('vacations.view_all_countries')"
-                slider-id="countries"
-            >
-
-                @foreach($hub->countryGrid as $row)
-
-                    <div class="swiper-slide">
-
-                        <x-vacation.country-slide :row="$row" />
-
-                    </div>
-
-                @endforeach
-
-            </x-vacation.country-slider>
 
         </section>
 

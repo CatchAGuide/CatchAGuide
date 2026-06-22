@@ -7,19 +7,17 @@
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $showVacationHeaderSubtitle = request()->routeIs('vacations.index')
         || request()->routeIs('vacations.country')
+        || request()->routeIs('vacations.all-offers')
         || request()->routeIs('vacations.camps.index')
         || request()->routeIs('vacations.trips.index')
         || (request()->routeIs('vacations.trips.show') && filled($vacationPillarCountrySlug) && $vacationDestinations->isKnownCountrySlug((string) $vacationPillarCountrySlug, 'trips'))
         || (request()->routeIs('vacations.camps.show') && filled($vacationPillarCountrySlug) && $vacationDestinations->isKnownCountrySlug((string) $vacationPillarCountrySlug, 'camps'));
     $hideHeaderSubtitle = $isDestinationOrCategoryPage
         || (request()->is('vacations*') && ! $showVacationHeaderSubtitle);
-    $currentVacationCountry = $currentVacationCountry ?? request()->route('country');
+    $currentVacationCountry = $currentVacationCountry
+        ?? (request()->routeIs('vacations.all-offers') ? 'all-offers' : request()->route('country'));
     $vacationCountryOptions = ($isVacation ?? false)
-        ? \App\Models\Destination::query()
-            ->where('type', 'vacations')
-            ->where('language', app()->getLocale())
-            ->orderBy('name')
-            ->get(['slug', 'name'])
+        ? $vacationDestinations->countriesForSearch()
         : collect();
 @endphp
 <nav class="navbar-custom short-header long-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
@@ -160,6 +158,9 @@
                         <i class="fa fa-map-marker-alt vacation-mobile-select-icon"></i>
                         <select class="vacation-mobile-select" name="country" onchange="updateFormAction(this, 'global-search1')">
                             <option value="">{{ translate('Select Country') }}</option>
+                            <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                {{ __('vacations.all_offers_nav') }}
+                            </option>
                             @foreach($vacationCountryOptions as $country)
                                 <option value="{{ $country->slug }}"
                                     {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
@@ -249,6 +250,9 @@
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search')">
                                     <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                        {{ __('vacations.all_offers_nav') }}
+                                    </option>
                                     @foreach($vacationCountryOptions as $country)
                                         <option value="{{ $country->slug }}"
                                             {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
@@ -1069,6 +1073,9 @@ input[type=number] {
                                 <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <select class="form-select ps-5" name="country" onchange="updateFormAction(this, 'mobile-search')">
                                     <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                        {{ __('vacations.all_offers_nav') }}
+                                    </option>
                                     @foreach($vacationCountryOptions as $country)
                                         <option value="{{ $country->slug }}"
                                             {{ ($currentVacationCountry ?? request()->country) === $country->slug ? 'selected' : '' }}>
@@ -1266,6 +1273,11 @@ input[type=number] {
 function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value.trim().toLowerCase();
+
+    if (selectedCountry === 'all-offers') {
+        window.location.href = "{{ route('vacations.all-offers') }}";
+        return;
+    }
 
     if (selectedCountry) {
         form.action = "{{ url('/vacations') }}/" + encodeURIComponent(selectedCountry);

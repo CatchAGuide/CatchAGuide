@@ -292,9 +292,10 @@ Route::get('vacations/trips', [VacationPillarController::class, 'index'])->defau
 Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defaults('pillar', 'camps')->name('vacations.camps.index')->middleware('ddos:search');
 Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
 Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
+Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');
 Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
     ->name('vacations.country')
-    ->where('country', '^(?!trips$|camps$)[a-z0-9\-]+$')
+    ->where('country', '^(?!trips$|camps$|all-offers$)[a-z0-9\-]+$')
     ->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
@@ -407,6 +408,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('faq')->name('faq.')->group(function () {
             Route::get('/home', [AdminFAQController::class,'home'])->name('home');
             Route::get('/search-request', [AdminFAQController::class,'searchRequest'])->name('searchrequest');
+            Route::get('/vacation-trips', [AdminFAQController::class, 'vacationTrips'])->name('vacation-trips');
+            Route::get('/vacation-camps', [AdminFAQController::class, 'vacationCamps'])->name('vacation-camps');
             Route::get('/create/{page}', [AdminFAQController::class,'create'])->name('create');
             Route::get('/edit/{faq}/{page}', [AdminFAQController::class,'edit'])->name('edit');
             Route::post('/store', [AdminFAQController::class,'store'])->name('store');

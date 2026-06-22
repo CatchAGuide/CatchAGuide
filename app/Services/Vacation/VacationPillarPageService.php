@@ -11,6 +11,7 @@ use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class VacationPillarPageService
 {
@@ -83,7 +84,23 @@ class VacationPillarPageService
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
             destination: $destination,
             mapMarkers: $this->buildMapMarkers($filterAll, $pillar),
+            faq: $this->resolveFaq($pillar),
         );
+    }
+
+    private function resolveFaq(VacationPillar $pillar): Collection
+    {
+        $dbFaqs = get_faqs_by_page($pillar->faqPageKey());
+
+        if ($dbFaqs->isNotEmpty()) {
+            return $dbFaqs;
+        }
+
+        return collect(config('vacations.'.$pillar->faqConfigKey(), config('vacations.hub_faq', [])))
+            ->map(fn (array $item) => (object) [
+                'question' => __($item['question_key']),
+                'answer' => __($item['answer_key']),
+            ]);
     }
 
     /**

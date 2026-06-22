@@ -20,6 +20,7 @@ final class VacationPillarIndexViewModel
         public readonly Collection $speciesOptions,
         public readonly ?Destination $destination = null,
         public readonly array $mapMarkers = [],
+        public readonly Collection $faq,
     ) {}
 
     public function isCountryPage(): bool

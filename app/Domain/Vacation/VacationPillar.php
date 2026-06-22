@@ -99,6 +99,22 @@ enum VacationPillar: string
         return $this->value.'-countries';
     }
 
+    public function faqPageKey(): string
+    {
+        return match ($this) {
+            self::Trips => 'vacation-trips',
+            self::Camps => 'vacation-camps',
+        };
+    }
+
+    public function faqConfigKey(): string
+    {
+        return match ($this) {
+            self::Trips => 'trips_faq',
+            self::Camps => 'camps_faq',
+        };
+    }
+
     public function offerControllerClass(): string
     {
         return match ($this) {

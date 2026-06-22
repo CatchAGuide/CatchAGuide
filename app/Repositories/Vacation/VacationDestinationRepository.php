@@ -139,6 +139,22 @@ class VacationDestinationRepository
     }
 
     /**
+     * Countries for navbar/search dropdowns — same set as the hub grid, sorted A–Z.
+     *
+     * @return Collection<int, object{slug: string, name: string}>
+     */
+    public function countriesForSearch(?string $locale = null): Collection
+    {
+        return $this->countriesForHubGrid($locale)
+            ->map(fn (array $row) => (object) [
+                'slug' => $row['slug'],
+                'name' => $row['name'],
+            ])
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+    }
+
+    /**
      * @return Collection<int, array{destination: ?Destination, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}>
      */
     public function countriesForHubGrid(?string $locale = null): Collection

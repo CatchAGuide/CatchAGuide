@@ -1,14 +1,21 @@
 @extends('layouts.app-v2')
 
 @php
+    $isAllOffers = $isAllOffers ?? false;
     $destination = $vm->destination;
     $countryName = translate($destination->name);
     $hasMap = count($vm->mapMarkers) > 0;
     $countrySubtitle = strip_tags(translate($destination->sub_title ?? ''));
     $countryIntro = strip_tags(translate($destination->introduction ?? ''));
+    $listingTitle = $isAllOffers
+        ? __('vacations.all_offers_listing_title')
+        : __('vacations.country_listing_title', ['country' => $countryName]);
+    $breadcrumbLabel = $isAllOffers
+        ? __('vacations.all_offers_breadcrumb')
+        : __('vacations.country_listing_title', ['country' => $countryName]);
 @endphp
 
-@section('title', $countryName . ' — ' . __('vacations.hub_breadcrumb'))
+@section('title', $listingTitle . ' — ' . __('vacations.hub_breadcrumb'))
 @section('header_title', $countryName)
 @section('header_sub_title', $countrySubtitle)
 @section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
@@ -23,7 +30,7 @@
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                     <li><a href="{{ route('vacations.index') }}">{{ __('vacations.hub_breadcrumb') }}</a></li>
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li class="active">{{ __('vacations.country_listing_title', ['country' => $countryName]) }}</li>
+                    <li class="active">{{ $breadcrumbLabel }}</li>
                 </ul>
             </div>
         </div>
@@ -45,7 +52,7 @@
         </div>
     @endif
 
-    <h2 class="vacation-country__listing-title">{{ __('vacations.country_listing_title', ['country' => $countryName]) }}</h2>
+    <h2 class="vacation-country__listing-title">{{ $listingTitle }}</h2>
 
     @if($hasMap)
         @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])

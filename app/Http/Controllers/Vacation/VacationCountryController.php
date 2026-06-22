@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Services\Vacation\VacationCountryPageService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -22,8 +23,25 @@ class VacationCountryController extends Controller
         $country = strtolower($country);
         $vm = $this->countryPage->build($request, $country);
 
+        return $this->countryView($vm);
+    }
+
+    public function allOffers(Request $request): View|RedirectResponse
+    {
+        if (strtolower((string) $request->query('country', '')) === 'all-offers') {
+            return redirect()->route('vacations.all-offers', $request->except('country'));
+        }
+
+        $vm = $this->countryPage->buildAllOffers($request);
+
+        return $this->countryView($vm, isAllOffers: true);
+    }
+
+    private function countryView($vm, bool $isAllOffers = false): View
+    {
         return view('pages.vacations.country', [
             'vm' => $vm,
+            'isAllOffers' => $isAllOffers,
             'listingRows' => collect($vm->listings->items())->map(function (array $item) use ($vm) {
                 return $item['type'] === 'trip'
                     ? $this->tripPresenter->presentListRow($item['model'])
