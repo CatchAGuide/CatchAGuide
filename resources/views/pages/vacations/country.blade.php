@@ -91,7 +91,11 @@
         <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
             @if($vm->listingsTotal > 0)
                 @foreach($listingRows as $card)
-                    <x-vacation.listing-row :card="$card" />
+                    @if(($card['type'] ?? '') === 'camp')
+                        <x-vacation.camp-list-row :card="$card" />
+                    @else
+                        <x-vacation.trip-list-row :card="$card" />
+                    @endif
                 @endforeach
 
                 <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>

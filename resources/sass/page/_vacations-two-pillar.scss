@@ -854,7 +854,8 @@ $vac-country-panel: #313041;
         height: auto;
         display: flex;
 
-        .vacation-product-card {
+        .vacation-product-card,
+        .vacation-slider-card {
             width: 100%;
             height: 100%;
         }
@@ -1370,6 +1371,989 @@ $vac-country-panel: #313041;
                 flex: 1 1 auto;
                 text-align: center;
             }
+        }
+    }
+}
+
+// —— Slider rail cards (Popular / New trips / New camps) ——
+.vacation-slider-card {
+    border: 1px solid $vac-border;
+    border-radius: $vac-radius;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 14px rgba(49, 48, 65, .07);
+    transition: transform .2s ease, box-shadow .2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $vac-shadow-hover;
+    }
+
+    &--trip {
+        .vacation-slider-card__badge {
+            background: $vac-trip;
+        }
+
+        .vacation-slider-card__cta {
+            background: $vac-trip;
+
+            &:hover {
+                background: $vac-trip-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &--camp {
+        .vacation-slider-card__badge {
+            background: $vac-camp;
+        }
+
+        .vacation-slider-card__cta {
+            background: $vac-camp;
+
+            &:hover {
+                background: $vac-camp-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &__media {
+        position: relative;
+        overflow: hidden;
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+
+        a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .35s ease;
+        }
+    }
+
+    &:hover &__gallery img {
+        transform: scale(1.03);
+    }
+
+    &__gallery-counter {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(#0f172a, .72);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        pointer-events: none;
+        line-height: 1.2;
+    }
+
+    &__badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: .58rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        padding: .28rem .5rem;
+        color: #fff;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+        z-index: 4;
+        pointer-events: none;
+    }
+
+    &__body {
+        padding: .85rem .9rem .9rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: .95rem;
+        font-weight: 700;
+        margin: 0 0 .3rem;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        font-size: .76rem;
+        color: $vac-muted;
+        margin: 0 0 .45rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        min-width: 0;
+
+        span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        i {
+            color: $vac-brand;
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__tags-row {
+        display: flex;
+        align-items: flex-start;
+        gap: .35rem;
+        margin-bottom: .45rem;
+    }
+
+    &__tags-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+        margin-top: .18rem;
+        opacity: .8;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .3rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__tag {
+        font-size: .66rem;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: $vac-ink;
+        border: 1px solid $vac-border;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &--more {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            color: $vac-muted;
+        }
+    }
+
+    &__meta {
+        margin-bottom: .45rem;
+    }
+
+    &__meta-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: .66rem;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        color: $vac-ink;
+        border: 1px solid $vac-border;
+    }
+
+    &__available {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+        margin-bottom: .45rem;
+        font-size: .72rem;
+        line-height: 1.35;
+    }
+
+    &__available-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+    }
+
+    &__available-icon,
+    &__available-item-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+    }
+
+    &__available-label {
+        font-weight: 700;
+        color: $vac-ink;
+        flex-shrink: 0;
+    }
+
+    &__available-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem .45rem;
+    }
+
+    &__available-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        color: $vac-muted;
+        font-weight: 500;
+    }
+
+    &__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: .6rem;
+        padding-top: .65rem;
+        border-top: 1px solid $vac-border;
+    }
+
+    &__price {
+        display: flex;
+        flex-direction: column;
+        gap: .1rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__price-from {
+        font-size: .68rem;
+        font-weight: 500;
+        color: $vac-muted;
+        text-transform: lowercase;
+        line-height: 1;
+    }
+
+    &__price-line {
+        font-size: .88rem;
+        line-height: 1.2;
+        color: $vac-ink;
+
+        strong {
+            font-weight: 800;
+        }
+    }
+
+    &__price-unit {
+        font-weight: 600;
+        color: $vac-ink;
+    }
+
+    &__cta {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: .45rem .75rem;
+        border-radius: 8px;
+        font-size: .72rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #fff;
+        transition: background .15s ease;
+        text-align: center;
+    }
+
+    @media (max-width: 575px) {
+        &__body {
+            padding: .75rem .8rem .8rem;
+        }
+
+        &__footer {
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        &__price {
+            flex: 1 1 100%;
+        }
+
+        &__cta {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+    }
+}
+
+// —— Camp listing row (Anglercamps index) ——
+.vacation-camp-list-card {
+    margin-bottom: 1rem;
+
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid $vac-border;
+        border-radius: $vac-radius;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(49, 48, 65, .05);
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    &__media {
+        flex-shrink: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            width: 40%;
+            max-width: 320px;
+        }
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(#0f172a, .75);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        line-height: 1.2;
+        pointer-events: none;
+    }
+
+    &__favorite {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 4;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(#fff, .92);
+        color: $vac-ink;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, .15);
+        transition: background .15s ease, color .15s ease, transform .15s ease;
+
+        &:hover {
+            background: #fff;
+            color: $vac-brand;
+            transform: scale(1.04);
+        }
+
+        i {
+            font-size: .9rem;
+        }
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        padding: 1rem 1rem 1.05rem;
+
+        @media (min-width: 768px) {
+            padding: 1.1rem 1.25rem 1.15rem;
+        }
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .85rem;
+    }
+
+    &__headline {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        margin: 0 0 .35rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        @media (min-width: 768px) {
+            font-size: 1.2rem;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .8rem;
+        color: $vac-muted;
+
+        i {
+            color: $vac-brand;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+
+        span {
+            min-width: 0;
+        }
+    }
+
+    &__price {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        gap: .1rem;
+    }
+
+    &__price-from,
+    &__price-unit {
+        font-size: .62rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        line-height: 1.1;
+    }
+
+    &__price-amount {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: $vac-ink;
+        line-height: 1.1;
+
+        @media (min-width: 768px) {
+            font-size: 1.45rem;
+        }
+    }
+
+    &__section {
+        margin-bottom: .75rem;
+    }
+
+    &__section-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        margin-bottom: .4rem;
+    }
+
+    &__section-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+        opacity: .75;
+    }
+
+    &__section-label {
+        font-size: .62rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $vac-muted;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+    }
+
+    &__tag {
+        display: inline-flex;
+        align-items: center;
+        padding: .22rem .55rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid $vac-border;
+        font-size: .72rem;
+        font-weight: 600;
+        color: $vac-ink;
+        line-height: 1.2;
+
+        &--more {
+            background: #e2e8f0;
+            color: $vac-muted;
+        }
+    }
+
+    &__amenities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem .55rem;
+        margin-bottom: .4rem;
+    }
+
+    &__amenity {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .74rem;
+        font-weight: 500;
+        color: $vac-muted;
+    }
+
+    &__amenity-icon,
+    &__availability-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+    }
+
+    &__availability {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem .65rem;
+    }
+
+    &__availability-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .74rem;
+        font-weight: 600;
+        color: $vac-ink;
+    }
+
+    &__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        padding-top: .85rem;
+        border-top: 1px solid $vac-border;
+    }
+
+    &__trust {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+        min-width: 0;
+    }
+
+    &__trust-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #16a34a;
+        line-height: 1.2;
+
+        i {
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__cta {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .25rem;
+        padding: .55rem 1rem;
+        border-radius: 8px;
+        background: $vac-trip;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .15s ease;
+
+        &:hover {
+            background: $vac-trip-dark;
+            color: #fff;
+        }
+    }
+
+    @media (max-width: 767px) {
+        &__header {
+            flex-direction: column;
+            gap: .65rem;
+        }
+
+        &__price {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        &__footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__cta {
+            width: 100%;
+        }
+    }
+}
+
+// —— Trip listing row (Guided trips index) ——
+.vacation-trip-list-card {
+    margin-bottom: 1rem;
+
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid $vac-border;
+        border-radius: $vac-radius;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(49, 48, 65, .05);
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    &__media {
+        flex-shrink: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            width: 34%;
+            max-width: 300px;
+        }
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(#0f172a, .75);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        line-height: 1.2;
+        pointer-events: none;
+    }
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        padding: 1rem 1rem 1.05rem;
+
+        @media (min-width: 768px) {
+            padding: 1.1rem 1.25rem;
+            border-right: 1px solid $vac-border;
+        }
+    }
+
+    &__headline {
+        margin-bottom: .65rem;
+    }
+
+    &__title {
+        margin: 0 0 .35rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        @media (min-width: 768px) {
+            font-size: 1.15rem;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .8rem;
+        color: $vac-muted;
+
+        i {
+            color: $vac-brand;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .35rem;
+        margin-bottom: .7rem;
+    }
+
+    &__tag {
+        display: inline-flex;
+        align-items: center;
+        padding: .22rem .55rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid $vac-border;
+        font-size: .72rem;
+        font-weight: 600;
+        color: $vac-ink;
+        line-height: 1.2;
+    }
+
+    &__more-link {
+        font-size: .72rem;
+        font-weight: 700;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+            color: $vac-trip-dark;
+            text-decoration: underline;
+        }
+
+        &--included {
+            display: inline-block;
+            margin-top: .15rem;
+        }
+    }
+
+    &__included {
+        list-style: none;
+        margin: 0 0 .55rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+    }
+
+    &__included-item {
+        display: flex;
+        align-items: flex-start;
+        gap: .45rem;
+        font-size: .78rem;
+        font-weight: 500;
+        color: $vac-ink;
+        line-height: 1.35;
+
+        i {
+            color: #16a34a;
+            font-size: .82rem;
+            margin-top: .1rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__duration {
+        margin-top: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: $vac-ink;
+        padding-top: .5rem;
+
+        i {
+            color: $vac-muted;
+            font-size: .85rem;
+        }
+    }
+
+    &__aside {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .65rem;
+        padding: 1rem;
+
+        @media (min-width: 768px) {
+            width: 190px;
+            flex-shrink: 0;
+            padding: 1.1rem 1.15rem;
+            justify-content: space-between;
+        }
+    }
+
+    &__price {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+    }
+
+    &__price-prefix {
+        font-size: .6rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        line-height: 1.1;
+    }
+
+    &__price-line {
+        font-size: 1.35rem;
+        line-height: 1.1;
+        color: $vac-ink;
+
+        strong {
+            font-weight: 800;
+        }
+    }
+
+    &__price-suffix {
+        font-size: .82rem;
+        font-weight: 600;
+        color: $vac-muted;
+        margin-left: .15rem;
+    }
+
+    &__trust {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+    }
+
+    &__trust-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #16a34a;
+        line-height: 1.2;
+
+        i {
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__cta {
+        margin-top: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: .6rem 1rem;
+        border-radius: 8px;
+        background: $vac-camp;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        transition: background .15s ease;
+
+        &:hover {
+            background: $vac-camp-dark;
+            color: #fff;
+        }
+    }
+
+    @media (max-width: 767px) {
+        &__aside {
+            border-top: 1px solid $vac-border;
+        }
+
+        &__cta {
+            width: 100%;
         }
     }
 }

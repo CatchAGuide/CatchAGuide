@@ -3,6 +3,8 @@
     'alt' => '',
     'galleryId' => '',
     'url' => null,
+    'showNav' => true,
+    'galleryClass' => 'vacation-product-card__gallery',
 ])
 
 @php
@@ -11,7 +13,7 @@
 @endphp
 
 <div
-    class="vacation-product-card__gallery"
+    class="{{ $galleryClass }}"
     data-vacation-card-gallery="{{ $galleryId }}"
     data-gallery-images='@json($galleryImages)'
 >
@@ -35,19 +37,21 @@
         @endif
 
         @if($galleryCount > 1)
-            <button
-                type="button"
-                class="vacation-product-card__gallery-nav vacation-product-card__gallery-nav--prev"
-                data-vacation-card-prev
-                aria-label="{{ __('vacations.gallery_prev') }}"
-            >‹</button>
-            <button
-                type="button"
-                class="vacation-product-card__gallery-nav vacation-product-card__gallery-nav--next"
-                data-vacation-card-next
-                aria-label="{{ __('vacations.gallery_next') }}"
-            >›</button>
-            <div class="vacation-product-card__gallery-counter" data-vacation-card-counter>1/{{ $galleryCount }}</div>
+            @if($showNav)
+                <button
+                    type="button"
+                    class="vacation-product-card__gallery-nav vacation-product-card__gallery-nav--prev"
+                    data-vacation-card-prev
+                    aria-label="{{ __('vacations.gallery_prev') }}"
+                >‹</button>
+                <button
+                    type="button"
+                    class="vacation-product-card__gallery-nav vacation-product-card__gallery-nav--next"
+                    data-vacation-card-next
+                    aria-label="{{ __('vacations.gallery_next') }}"
+                >›</button>
+            @endif
+            <div class="{{ str_contains($galleryClass, 'slider') ? 'vacation-slider-card__gallery-counter' : 'vacation-product-card__gallery-counter' }}" data-vacation-card-counter>1/{{ $galleryCount }}</div>
         @endif
     @else
         <img src="{{ media_url(null) }}" alt="{{ $alt }}" loading="lazy">

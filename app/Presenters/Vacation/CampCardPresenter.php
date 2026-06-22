@@ -15,6 +15,9 @@ class CampCardPresenter
         $price = $camp->getLowestAccommodationOrOfferPrice();
         $addons = $this->addonPills($camp);
         $facilities = $this->facilityLabels($camp);
+        $targetFishAll = $this->targetFishTags($camp);
+        $targetFish = array_slice($targetFishAll, 0, 3);
+        $sliderTags = array_slice($targetFishAll, 0, 2);
 
         return [
             'type' => 'camp',
@@ -28,7 +31,7 @@ class CampCardPresenter
             'badge_class' => 'camp',
             'location' => $camp->location,
             'meta_line' => $this->metaLine($camp, $facilities),
-            'traits' => $this->traits($camp),
+            'traits' => $this->traits($camp, $targetFish),
             'feature_badges' => $this->featureBadges($camp),
             'facilities' => $facilities,
             'addon_pills' => $addons,
@@ -40,6 +43,12 @@ class CampCardPresenter
             'compact_price_label' => $price !== null
                 ? __('vacations.pillar_tile_from', ['price' => '€' . number_format($price, 0)]) . ' / ' . __('vacations.night')
                 : null,
+            'price_amount' => $price !== null ? '€' . number_format($price, 0) : null,
+            'price_unit' => $price !== null ? __('vacations.night') : null,
+            'slider_tags' => $sliderTags,
+            'slider_tags_extra' => max(0, count($targetFishAll) - count($sliderTags)),
+            'slider_availability' => $this->availabilityItems($camp),
+            'slider_cta' => __('vacations.book_now'),
             'cta' => __('vacations.book_now'),
             'cta_class' => 'camp',
             'trust' => $this->trust->resolve($camp),
@@ -53,13 +62,12 @@ class CampCardPresenter
         $card['layout'] = 'row';
         $card['destination_id'] = $destinationId;
         $card['image_badge'] = $this->imageBadge($camp);
-        $card['target_fish_tags'] = collect($camp->target_fish ?? [])
-            ->map(fn ($fish) => is_array($fish) ? ($fish['name'] ?? '') : (string) $fish)
-            ->filter()
-            ->values()
-            ->all();
+        $card['target_fish_tags'] = $this->targetFishTags($camp);
         $card['facilities_extra'] = max(0, $camp->facilities->count() - count($facilities));
-        $card['listing_price_suffix'] = __('vacations.per_day_label');
+        $card['listing_price_suffix'] = __('vacations.per_night_label');
+        $card['listing_availability'] = $this->availabilityItems($camp);
+        $card['listing_facilities'] = $this->facilityItems($camp);
+        $card['target_fish_tags_extra'] = max(0, count($card['target_fish_tags']) - 3);
 
         return $card;
     }
@@ -81,13 +89,67 @@ class CampCardPresenter
     }
 
     /**
+     * @return array<int, array{label: string, icon: string}>
+     */
+    private function availabilityItems(Camp $camp): array
+    {
+        $items = [];
+
+        if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
+            $label = __('vacations.rental_boat');
+            $items[] = [
+                'label' => $label,
+                'icon' => vacation_camp_availability_icon($label),
+            ];
+        }
+
+        if ($camp->guidings->isNotEmpty()) {
+            $label = __('vacations.guiding');
+            $items[] = [
+                'label' => $label,
+                'icon' => vacation_camp_availability_icon($label),
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @return array<int, array{label: string, icon: string}>
+     */
+    private function facilityItems(Camp $camp, int $limit = 3): array
+    {
+        return $camp->facilities->take($limit)->map(function ($facility) {
+            $locale = app()->getLocale();
+
+            if ($locale === 'en' && ! empty($facility->name_en)) {
+                $label = $facility->name_en;
+            } elseif ($locale === 'de' && ! empty($facility->name_de)) {
+                $label = $facility->name_de;
+            } else {
+                $label = $facility->name;
+            }
+
+            $label = trim((string) $label);
+
+            return [
+                'label' => $label,
+                'icon' => vacation_camp_facility_icon($label),
+            ];
+        })->filter(fn (array $item) => $item['label'] !== '')->values()->all();
+    }
+
+    /**
+     * @param  array<int, string>  $targetFish
      * @return array<int, array{label: string, value: string}>
      */
-    private function traits(Camp $camp): array
+    private function traits(Camp $camp, array $targetFish = []): array
     {
         $traits = [];
 
-        $targetFish = $this->targetFishLabels($camp);
+        if (empty($targetFish)) {
+            $targetFish = $this->targetFishLabels($camp);
+        }
         if (! empty($targetFish)) {
             $traits[] = [
                 'label' => __('vacations.target_fish'),
@@ -164,14 +226,24 @@ class CampCardPresenter
     /**
      * @return array<int, string>
      */
+    private function targetFishTags(Camp $camp): array
+    {
+        $raw = $camp->target_fish ?? [];
+
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : array_map('trim', explode(',', $raw));
+        }
+
+        return vacation_fish_tags(is_array($raw) ? $raw : []);
+    }
+
+    /**
+     * @return array<int, string>
+     */
     private function targetFishLabels(Camp $camp): array
     {
-        return collect($camp->target_fish ?? [])
-            ->map(fn ($fish) => is_array($fish) ? ($fish['name'] ?? '') : (string) $fish)
-            ->filter()
-            ->take(3)
-            ->values()
-            ->all();
+        return array_slice($this->targetFishTags($camp), 0, 3);
     }
 
     /**

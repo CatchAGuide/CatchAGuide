@@ -15,9 +15,11 @@ class TripCardPresenter
         $durationPill = $this->durationPill($trip);
         $currency = $trip->currency ?: 'EUR';
         $sym = $currency === 'EUR' ? '€' : $currency . ' ';
-        $species = collect($trip->getTargetSpeciesNames())->pluck('name')->filter()->take(3)->values()->all();
+        $speciesAll = vacation_fish_tags(collect($trip->getTargetSpeciesNames())->pluck('name')->all());
+        $species = array_slice($speciesAll, 0, 3);
         $methods = collect($trip->getFishingMethodNames())->pluck('name')->filter()->take(2)->values()->all();
         $included = $this->includedHighlights($trip);
+        $sliderTags = array_slice($speciesAll, 0, 2);
 
         return [
             'type' => 'trip',
@@ -48,6 +50,14 @@ class TripCardPresenter
                     'price' => $sym . number_format((float) $trip->price_per_person, 0),
                 ]) . ' / ' . __('vacations.person')
                 : null,
+            'price_amount' => $trip->price_per_person
+                ? $sym . number_format((float) $trip->price_per_person, 0)
+                : null,
+            'price_unit' => $trip->price_per_person ? __('vacations.person') : null,
+            'slider_tags' => $sliderTags,
+            'slider_tags_extra' => max(0, count($speciesAll) - count($sliderTags)),
+            'slider_availability' => [],
+            'slider_cta' => __('vacations.inquire_trip'),
             'cta' => __('vacations.request_trip'),
             'cta_class' => 'trip',
             'trust' => $this->trust->resolve($trip),
@@ -57,13 +67,31 @@ class TripCardPresenter
     public function presentListRow(Trip $trip): array
     {
         $card = $this->present($trip);
-        $included = $this->includedHighlights($trip);
-        $species = collect($trip->getTargetSpeciesNames())->pluck('name')->filter()->values()->all();
+        $currency = $trip->currency ?: 'EUR';
+        $sym = match ($currency) {
+            'EUR' => '€',
+            'USD' => '$',
+            default => $currency . ' ',
+        };
+        $species = vacation_fish_tags(collect($trip->getTargetSpeciesNames())->pluck('name')->all());
+        $allIncluded = collect($trip->included ?? [])
+            ->map(fn ($item) => is_array($item) ? ($item['name'] ?? $item['title'] ?? '') : (string) $item)
+            ->filter()
+            ->values()
+            ->all();
+
         $card['layout'] = 'row';
-        $card['image_badge'] = 'trip';
-        $card['target_fish_tags'] = array_slice($species, 0, 8);
-        $card['facilities_extra'] = max(0, count($trip->included ?? []) - count($included));
-        $card['listing_price_suffix'] = __('vacations.per_person');
+        $card['image_badge'] = null;
+        $card['target_fish_tags'] = $species;
+        $card['target_fish_tags_extra'] = max(0, count($species) - 3);
+        $card['listing_included'] = array_slice($allIncluded, 0, 3);
+        $card['listing_included_extra'] = max(0, count($allIncluded) - 3);
+        $card['listing_price_prefix'] = __('vacations.starting_from_label');
+        $card['listing_price_display'] = $trip->price_per_person
+            ? $sym . number_format((float) $trip->price_per_person, 0, ',', '.')
+            : null;
+        $card['listing_price_suffix'] = __('vacations.per_person_short');
+        $card['listing_cta'] = __('vacations.inquire_trip');
 
         return $card;
     }

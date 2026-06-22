@@ -94,7 +94,11 @@
 
                     <div class="swiper-slide">
 
-                        <x-vacation.product-card :card="$card" variant="compact" />
+                        @if(($card['type'] ?? 'trip') === 'camp')
+                            <x-vacation.camp-card :card="$card" variant="slider" />
+                        @else
+                            <x-vacation.trip-card :card="$card" variant="slider" />
+                        @endif
 
                     </div>
 
@@ -133,7 +137,7 @@
 
                     <div class="swiper-slide">
 
-                        <x-vacation.product-card :card="$card" variant="compact" />
+                        <x-vacation.camp-card :card="$card" variant="slider" />
 
                     </div>
 
@@ -163,7 +167,7 @@
 
                     <div class="swiper-slide">
 
-                        <x-vacation.product-card :card="$card" variant="compact" />
+                        <x-vacation.trip-card :card="$card" variant="slider" />
 
                     </div>
 

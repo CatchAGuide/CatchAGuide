@@ -85,7 +85,11 @@
         <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
             @if($vm->listings->total() > 0)
                 @foreach($vm->cards as $card)
-                    <x-vacation.listing-row :card="$card" />
+                    @if($vm->pillar === \App\Domain\Vacation\VacationPillar::Camps)
+                        <x-vacation.camp-list-row :card="$card" />
+                    @else
+                        <x-vacation.trip-list-row :card="$card" />
+                    @endif
                 @endforeach
 
                 <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
