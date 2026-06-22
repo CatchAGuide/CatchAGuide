@@ -56,6 +56,10 @@ $trip-offer-lh-relaxed: 1.7;
         @media (max-width: 576px) {
             padding: 0 .75rem 1.25rem;
         }
+
+        .trip-offer-page__feature-cards {
+            margin-bottom: 0;
+        }
     }
 
     &__hero-heading {
@@ -377,24 +381,40 @@ $trip-offer-lh-relaxed: 1.7;
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
         gap: 2rem;
+        align-items: start;
 
         @media (max-width: 992px) {
             grid-template-columns: minmax(0, 1fr);
+            gap: 1.5rem;
+        }
+    }
+
+    &__sidebar {
+        position: relative;
+        min-width: 0;
+
+        @media (min-width: 992px) {
+            align-self: start;
+            position: sticky;
+            top: 1.25rem;
+        }
+
+        @media (max-width: 991.98px) {
+            // On phones/tablets: map follows main content; booking uses sticky footer.
+            order: 2;
         }
     }
 
     &__main {
         min-width: 0;
+
+        @media (max-width: 991.98px) {
+            order: 1;
+        }
     }
 
-    &__sidebar {
-        position: relative;
-
-        @media (min-width: 992px) {
-            align-self: flex-start;
-            position: sticky;
-            top: 1.25rem; /* Minimal gap when floating; increase if fixed header is taller */
-        }
+    &__about {
+        margin-top: 0;
     }
 
     &__section-title {
@@ -980,12 +1000,14 @@ $trip-offer-lh-relaxed: 1.7;
         }
     }
 
-    // Phone: make availability cards read top-to-bottom.
-    @media (max-width: 576px) {
+    // Phone / narrow: stacked card with price + CTA row (matches production mobile).
+    @media (max-width: 767.98px) {
         &__availability-trip-card {
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
             gap: .75rem;
+            padding: 1rem 1.1rem;
+            background: $trip-offer-theme-surface;
         }
 
         &__availability-trip-left {
@@ -1001,7 +1023,7 @@ $trip-offer-lh-relaxed: 1.7;
         }
 
         &__availability-trip-date-sep {
-            margin-top: 0; // grid aligns center; no manual offset needed
+            margin-top: 0;
         }
 
         &__availability-trip-date {
@@ -1013,41 +1035,48 @@ $trip-offer-lh-relaxed: 1.7;
 
         &__availability-trip-right {
             width: 100%;
+            display: flex;
             flex-direction: row;
-            align-items: flex-end;
+            align-items: center;
             justify-content: space-between;
-            gap: .9rem;
+            gap: .75rem;
             padding-top: .85rem;
+            margin-top: .15rem;
             border-top: 1px solid rgba(15, 23, 42, 0.08);
             padding-left: 0;
             border-left: 0;
+            align-self: auto;
         }
 
         &__availability-trip-price-block {
             align-items: flex-start;
-            width: auto;
             flex: 1 1 auto;
             min-width: 0;
         }
 
         &__availability-trip-price {
             font-size: 1.35rem;
-            width: auto;
             text-align: left;
+            line-height: 1.1;
         }
 
         &__availability-trip-price-label {
-            width: auto;
             text-align: left;
+            white-space: nowrap;
+            letter-spacing: .04em;
+            line-height: 1.2;
         }
 
         &__availability-trip-btn {
             width: auto;
-            min-width: 6.75rem;
+            max-width: 42%;
+            min-width: 5.5rem;
+            margin-top: 0;
             text-align: center;
-            padding: .75rem 1.25rem;
-            border-radius: .7rem;
+            padding: .7rem 1.1rem;
+            border-radius: .65rem;
             flex: 0 0 auto;
+            box-shadow: none;
         }
     }
 
@@ -1288,11 +1317,20 @@ $trip-offer-lh-relaxed: 1.7;
         flex-wrap: wrap;
         align-items: flex-start;
         gap: 1.25rem 2rem;
+
+        @media (max-width: 767.98px) {
+            flex-direction: column;
+            gap: 0;
+        }
     }
 
     &__guide-left {
         flex: 1;
         min-width: 0;
+
+        @media (max-width: 767.98px) {
+            width: 100%;
+        }
     }
 
     &__guide-languages-col {
@@ -1301,6 +1339,14 @@ $trip-offer-lh-relaxed: 1.7;
         display: flex;
         flex-direction: column;
         gap: .35rem;
+
+        @media (max-width: 767.98px) {
+            width: 100%;
+            align-self: stretch;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid $trip-offer-theme-border;
+        }
     }
 
     &__guide-row {
@@ -1344,6 +1390,10 @@ $trip-offer-lh-relaxed: 1.7;
         font-size: $trip-offer-text-sm;
         color: #6b7280;
         line-height: $trip-offer-lh-snug;
+
+        @media (max-width: 767.98px) {
+            max-width: none;
+        }
 
         &--mt {
             margin-top: .5rem;
@@ -1605,6 +1655,10 @@ $trip-offer-lh-relaxed: 1.7;
         grid-template-columns: 1fr 1fr;
         gap: .75rem;
         margin-bottom: 1rem;
+
+        @media (max-width: 576px) {
+            grid-template-columns: 1fr;
+        }
     }
     &__pricing-grid-card {
         background: $trip-offer-theme-surface;
@@ -2048,6 +2102,16 @@ $trip-offer-lh-relaxed: 1.7;
         }
     }
 
+    // Availability row buttons must not inherit full-width booking CTA styles.
+    &__availability-trip-btn#{&}__booking-cta,
+    &__availability-trip-btn {
+        &.trip-offer-page__booking-cta {
+            width: auto;
+            margin-top: 0;
+            box-shadow: none;
+        }
+    }
+
     &__booking-footnote {
         font-size: $trip-offer-text-sm;
         color: #9ca3af;
@@ -2240,6 +2304,10 @@ $trip-offer-lh-relaxed: 1.7;
         overflow: hidden;
         box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
         border: 1px solid $trip-offer-theme-border;
+
+        @media (max-width: 991.98px) {
+            margin-top: 0;
+        }
     }
 
     &__map-label {
@@ -2339,6 +2407,91 @@ $trip-offer-lh-relaxed: 1.7;
         color: #e5e7eb;
         font-size: .8rem;
         font-weight: 600;
+    }
+
+    // Reviews — full-width band below main/sidebar layout
+    &__reviews-band {
+        max-width: $trip-offer-container-max;
+        margin: 0 auto;
+        padding: 1.5rem $trip-offer-gutter-x 0;
+
+        @media (max-width: 576px) {
+            padding: 1.25rem .75rem 0;
+        }
+    }
+
+    &__reviews {
+        margin: 0;
+    }
+
+    &__reviews-card {
+        background: $trip-offer-theme-surface;
+        border-radius: 1rem;
+        padding: 1.5rem 1.75rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        border: 1px solid $trip-offer-theme-border;
+    }
+
+    &__reviews-title {
+        margin-bottom: 1rem;
+        font-size: $trip-offer-text-lg;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
+    }
+
+    &__reviews-trust {
+        display: flex;
+        align-items: center;
+        gap: 1rem 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    &__reviews-trust-score {
+        display: inline-flex;
+        align-items: baseline;
+        gap: .2rem;
+        padding: .7rem 1.1rem;
+        border-radius: .85rem;
+        background: rgba($trip-offer-theme-accent, 0.10);
+        flex-shrink: 0;
+    }
+
+    &__reviews-trust-value {
+        font-size: 1.75rem;
+        font-weight: $trip-offer-weight-extrabold;
+        color: $trip-offer-theme-dark;
+        line-height: 1;
+    }
+
+    &__reviews-trust-outof {
+        font-size: $trip-offer-text-sm;
+        color: $trip-offer-theme-muted;
+        font-weight: $trip-offer-weight-semibold;
+    }
+
+    &__reviews-trust-meta {
+        min-width: 0;
+        flex: 1 1 12rem;
+    }
+
+    &__reviews-trust-name {
+        margin: 0 0 .25rem;
+        font-size: $trip-offer-text-md;
+        font-weight: $trip-offer-weight-bold;
+        color: $trip-offer-theme-dark;
+    }
+
+    &__reviews-trust-label {
+        margin: 0;
+        font-size: $trip-offer-text-sm;
+        color: $trip-offer-theme-muted;
+        line-height: $trip-offer-lh-snug;
+    }
+
+    &__reviews-trust-icon {
+        color: $trip-offer-theme-accent;
+        font-size: .8rem;
+        margin-right: .2rem;
     }
 
     // Contact Modal (Trips) - mobile centering for reCAPTCHA + submit

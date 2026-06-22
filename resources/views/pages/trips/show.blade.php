@@ -73,13 +73,9 @@
                 </div>
                 @endif
             </div>
-        </div>
 
-        {{-- Layout: left = feature cards (part of gallery) + description; right = floating card starting right after image gallery --}}
-        <div class="trip-offer-page__layout">
-            <main class="trip-offer-page__main">
-                {{-- Feature cards: part of "gallery" block, on left; floating card starts beside them on the right --}}
-                <div class="trip-offer-page__feature-cards">
+            {{-- Feature cards: full-width row below gallery; two-column layout starts below --}}
+            <div class="trip-offer-page__feature-cards">
                     @if(!empty($tripView['duration']['days']) || !empty($tripView['duration']['nights']))
                         <div class="trip-offer-page__feature-card">
                             <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
@@ -131,54 +127,12 @@
                             <p class="trip-offer-page__feature-card-value trip-offer-page__feature-card-value--scrollable">{{ implode(', ', $tripView['target_species']) }}</p>
                         </div>
                     @endif
-                </div>
+            </div>
+        </div>
 
-                @if(!empty($includedItems) || !empty($excludedItems))
-                    <section class="trip-offer-page__details-grid" id="details">
-                        <div class="trip-offer-page__included-excluded-card">
-                            <h2 class="trip-offer-page__section-title trip-offer-page__included-title">
-                                {{ __('trips.whats_included_title') }}
-                            </h2>
-
-                            @if(!empty($includedItems))
-                                <div class="trip-offer-page__included-list-wrap">
-                                    <ul class="trip-offer-page__included-list">
-                                        @foreach($includedItems as $item)
-                                            <li class="trip-offer-page__included-item">
-                                                <i class="fas fa-check trip-offer-page__included-icon" aria-hidden="true"></i>
-                                                <span>{{ is_array($item) ? ($item['label'] ?? '') : $item }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-
-                            @if(!empty($includedItems) && !empty($excludedItems))
-                                <hr class="trip-offer-page__included-excluded-divider">
-                            @endif
-
-                            @if(!empty($excludedItems))
-                                <h3 class="trip-offer-page__excluded-title">{{ __('trips.not_included_title') }}</h3>
-                                <div class="trip-offer-page__excluded-list-wrap">
-                                    <ul class="trip-offer-page__excluded-list">
-                                        @foreach($excludedItems as $item)
-                                            <li class="trip-offer-page__excluded-item">
-                                                <i class="fas fa-times trip-offer-page__excluded-icon" aria-hidden="true"></i>
-                                                <span class="trip-offer-page__excluded-item-content">
-                                                    <span class="trip-offer-page__excluded-label">{{ is_array($item) ? ($item['label'] ?? '') : $item }}</span>
-                                                    @if(is_array($item) && !empty($item['subtext']))
-                                                        <span class="trip-offer-page__excluded-subtext">{{ $item['subtext'] }}</span>
-                                                    @endif
-                                                </span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-                        </div>
-                    </section>
-                @endif
-
+        {{-- Layout: main content left; sticky booking card + map right (aligned with About) --}}
+        <div class="trip-offer-page__layout">
+            <main class="trip-offer-page__main">
                 <section class="trip-offer-page__about" id="about">
                     <div class="trip-offer-page__about-card">
                         <h2 class="trip-offer-page__section-title">
@@ -350,8 +304,8 @@
                                                 {{ __('trips.inquire') }}
                                             </a>
                                         @else
-                                            <button type="button" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--primary trip-offer-page__booking-cta" data-reserve-date="{{ $card['departure_date'] ?? '' }}">
-                                                {{ __('vacations.request_trip') }}
+                                            <button type="button" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--primary" data-reserve-date="{{ $card['departure_date'] ?? '' }}">
+                                                {{ __('trips.book') }}
                                             </button>
                                         @endif
                                     </div>
@@ -405,6 +359,52 @@
                                     </li>
                                 @endforeach
                             </ul>
+                        </div>
+                    </section>
+                @endif
+
+                @if(!empty($includedItems) || !empty($excludedItems))
+                    <section class="trip-offer-page__details-grid" id="details">
+                        <div class="trip-offer-page__included-excluded-card">
+                            <h2 class="trip-offer-page__section-title trip-offer-page__included-title">
+                                {{ __('trips.whats_included_title') }}
+                            </h2>
+
+                            @if(!empty($includedItems))
+                                <div class="trip-offer-page__included-list-wrap">
+                                    <ul class="trip-offer-page__included-list">
+                                        @foreach($includedItems as $item)
+                                            <li class="trip-offer-page__included-item">
+                                                <i class="fas fa-check trip-offer-page__included-icon" aria-hidden="true"></i>
+                                                <span>{{ is_array($item) ? ($item['label'] ?? '') : $item }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            @if(!empty($includedItems) && !empty($excludedItems))
+                                <hr class="trip-offer-page__included-excluded-divider">
+                            @endif
+
+                            @if(!empty($excludedItems))
+                                <h3 class="trip-offer-page__excluded-title">{{ __('trips.not_included_title') }}</h3>
+                                <div class="trip-offer-page__excluded-list-wrap">
+                                    <ul class="trip-offer-page__excluded-list">
+                                        @foreach($excludedItems as $item)
+                                            <li class="trip-offer-page__excluded-item">
+                                                <i class="fas fa-times trip-offer-page__excluded-icon" aria-hidden="true"></i>
+                                                <span class="trip-offer-page__excluded-item-content">
+                                                    <span class="trip-offer-page__excluded-label">{{ is_array($item) ? ($item['label'] ?? '') : $item }}</span>
+                                                    @if(is_array($item) && !empty($item['subtext']))
+                                                        <span class="trip-offer-page__excluded-subtext">{{ $item['subtext'] }}</span>
+                                                    @endif
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                         </div>
                     </section>
                 @endif
@@ -681,8 +681,6 @@
                     </section>
                 @endif
 
-                @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
-
             </main>
 
             <aside class="trip-offer-page__sidebar">
@@ -773,6 +771,8 @@
                 @endif
             </aside>
         </div>
+
+        @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
 
         <!-- Mobile Sticky Request Card (replaces the floating booking card) -->
         <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('vacations.request_trip') }}">
