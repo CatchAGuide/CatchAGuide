@@ -136,6 +136,8 @@
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.faq.home') }}" class="slide-item {{ request()->routeIs('admin.faq.home') ? 'active' : '' }}">Home</a></li>
                         <li><a href="{{ route('admin.faq.searchrequest') }}" class="slide-item {{ request()->routeIs('admin.faq.searchrequest') ? 'active' : '' }}">Search request</a></li>
+                        <li><a href="{{ route('admin.faq.vacation-trips') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-trips') ? 'active' : '' }}">Vacation trips</a></li>
+                        <li><a href="{{ route('admin.faq.vacation-camps') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-camps') ? 'active' : '' }}">Vacation camps</a></li>
                     </ul>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">

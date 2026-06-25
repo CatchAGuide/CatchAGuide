@@ -253,7 +253,11 @@
 
     @include('layouts.partials.newheader', [
         'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($row_data) ? ($row_data->name ?? null) : null,
+        'currentVacationCountry' => isset($row_data)
+            ? ($row_data->slug ?? $row_data->name ?? null)
+            : (request()->routeIs('vacations.all-offers')
+                ? 'all-offers'
+                : (isset($vm) ? ($vm->destination->slug ?? null) : null)),
     ])
 
     @yield('content')

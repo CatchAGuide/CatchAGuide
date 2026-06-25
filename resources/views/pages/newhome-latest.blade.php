@@ -1324,8 +1324,15 @@
                 </div>
             </div>
             <div class="cta-right">
-                <a id="become-guide-homepage" href="{{route('login')}}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
-
+                @if(config('guide_onboarding.new_onboarding_enabled'))
+                    @auth
+                        <a id="become-guide-homepage" href="{{ route('guide.onboarding') }}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
+                    @else
+                        <a id="become-guide-homepage" href="#" class="about-one__btn thm-btn" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">@lang('homepage.guide-button')</a>
+                    @endauth
+                @else
+                    <a id="become-guide-homepage" href="{{ route('login') }}" class="about-one__btn thm-btn">@lang('homepage.guide-button')</a>
+                @endif
             </div>
         </div>
     </div>

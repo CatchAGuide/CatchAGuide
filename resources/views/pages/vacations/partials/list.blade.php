@@ -26,7 +26,7 @@
 				</div>
 			</div>
 			<div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 p-md-3 mt-md-1">
-			<a href="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+			<a href="{{ route('vacations.camps.show', [$vacation->id, $vacation->slug]) }}" 
 			   onclick="event.preventDefault(); 
 						document.getElementById('store-destination-{{ $vacation->id }}').submit();">
 				<div class="guidings-item">
@@ -74,7 +74,7 @@
 				</div>
 			</a>
 			<form id="store-destination-{{ $vacation->id }}" 
-				  action="{{ route('vacations.show', [$vacation->id, $vacation->slug]) }}" 
+				  action="{{ route('vacations.camps.show', [$vacation->id, $vacation->slug]) }}" 
 				  method="GET" style="display: none;">
 				@php
 					session(['vacation_destination_id' => $row_data->id]);

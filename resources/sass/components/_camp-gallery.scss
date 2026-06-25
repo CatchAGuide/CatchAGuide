@@ -1,0 +1,359 @@
+// Shared camp / trip offer gallery grid + lightbox modal
+.camp-gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 12px;
+    margin: 24px auto;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0;
+    }
+
+    &:not(:has(.camp-gallery__thumb)) {
+        @media (min-width: 901px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &__main {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #e2e8f0;
+        min-height: 180px;
+        box-shadow: 0 20px 40px -30px rgba(17, 24, 39, .3);
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 24px 48px -32px rgba(17, 24, 39, .4);
+        }
+
+        @media (min-width: 768px) {
+            min-height: 240px;
+        }
+
+        @media (max-width: 900px) {
+            margin-bottom: 0;
+            min-height: 250px;
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    // Single-image galleries (common on trip pages): constrain height
+    &:not(:has(.camp-gallery__thumb)) &__main {
+        aspect-ratio: 16 / 10;
+        max-height: 420px;
+
+        @media (max-width: 900px) {
+            max-height: 320px;
+        }
+
+        img {
+            position: absolute;
+            inset: 0;
+        }
+    }
+
+    &__right {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        &:empty {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            display: none;
+        }
+
+        .camp-gallery__thumb {
+            flex: 1;
+            min-height: 125px;
+        }
+    }
+
+    &__thumb {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #e2e8f0;
+        min-height: 100px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -8px rgba(17, 24, 39, .25);
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &__more {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 24, 39, .70);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s ease;
+
+        &:hover {
+            background: rgba(17, 24, 39, .80);
+        }
+    }
+
+    &__bottom {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+
+        &:empty {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        @media (max-width: 600px) {
+            display: none;
+        }
+    }
+
+    &__mobile-carousel {
+        display: none;
+        margin-top: 16px;
+
+        @media (min-width: 901px) {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            display: block;
+        }
+
+        &-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(17, 24, 39, 0.3) transparent;
+            padding-bottom: 8px;
+
+            &::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background-color: rgba(17, 24, 39, 0.3);
+                border-radius: 2px;
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(17, 24, 39, 0.5);
+            }
+        }
+
+        &-item {
+            flex: 0 0 auto;
+            width: 200px;
+            min-width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            scroll-snap-align: start;
+            box-shadow: 0 4px 12px -6px rgba(17, 24, 39, .25);
+
+            &:active {
+                transform: scale(0.98);
+            }
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+        }
+    }
+}
+
+.gallery-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    align-items: center;
+    justify-content: center;
+    animation: campGalleryFadeIn 0.2s ease;
+
+    &__content {
+        position: relative;
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        max-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: campGalleryZoomIn 0.2s ease;
+
+        img {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+    }
+
+    &__close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        font-size: 40px;
+        font-weight: 300;
+        color: #fff;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+        z-index: 10000;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    &__prev,
+    &__next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 30px;
+        font-weight: bold;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        padding: 16px 20px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+    }
+
+    &__prev {
+        left: 20px;
+    }
+
+    &__next {
+        right: 20px;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 8px 16px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 768px) {
+        &__prev,
+        &__next {
+            font-size: 24px;
+            padding: 12px 16px;
+        }
+
+        &__prev {
+            left: 10px;
+        }
+
+        &__next {
+            right: 10px;
+        }
+
+        &__close {
+            top: 10px;
+            right: 10px;
+            font-size: 32px;
+        }
+
+        &__counter {
+            bottom: 20px;
+        }
+    }
+}
+
+@keyframes campGalleryFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes campGalleryZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

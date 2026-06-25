@@ -295,20 +295,18 @@ class GenerateSitemap extends Command
 
     protected function generateVacationSitemap($url, $lang)
     {
-        $url .= '/vacations';
-        $vacations = Vacation::where('status', 1)
-            ->whereNotNull('slug')
-            ->where('slug', '!=', '')
-            ->get();
+        app()->setLocale($lang);
+        $contributor = app(\App\Services\Vacation\VacationSitemapContributor::class);
+        $entries = $contributor->entries($url);
+
         $xml = $this->generateSitemapHeader();
-        foreach ($vacations as $vacation) {
-            $sUrl = $url . '/' . $vacation->slug;
-            $xml .= $this->generateUrlEntry($sUrl, 'monthly', 0.7);
+        foreach ($entries as $entry) {
+            $xml .= $this->generateUrlEntry($entry['loc'], $entry['changefreq'], $entry['priority']);
         }
         $xml .= '</urlset>' . "\n";
         $filePath = '/sitemap_vacations_' . $lang . '.xml';
         \Storage::disk('sitemaps')->put($filePath, $xml);
-        $this->info("✓ Generated vacation rentals sitemap for {$lang} with " . count($vacations) . " entries");
+        $this->info("✓ Generated vacation sitemap for {$lang} with " . count($entries) . " entries");
         return $filePath;
     }
 

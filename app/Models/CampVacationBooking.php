@@ -91,8 +91,8 @@ class CampVacationBooking extends Model
         }
 
         return match (strtolower($this->source_type)) {
-            self::SOURCE_CAMP => $model->slug ? route('vacations.show', $model->slug) : null,
-            self::SOURCE_VACATION => $model->slug ? route('vacations.show', $model->slug) : null,
+            self::SOURCE_CAMP => $model->slug ? route('vacations.camps.show', $model->slug) : null,
+            self::SOURCE_VACATION => $model->slug ? route('vacations.camps.show', $model->slug) : null,
             default => null,
         };
     }

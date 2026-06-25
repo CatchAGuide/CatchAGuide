@@ -48,7 +48,7 @@
                                                     <tr>
                                                         <td style="vertical-align: top;">
                                                             <h2 style="margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: 0.2px; line-height: 1.3;">
-                                                                <a href="{{ route('vacations.show', $offer['camp']->slug) }}" target="_blank" style="color: #ffffff; text-decoration: none;">{{ $offer['camp']->title }}</a>
+                                                                <a href="{{ route('vacations.camps.show', $offer['camp']->slug) }}" target="_blank" style="color: #ffffff; text-decoration: none;">{{ $offer['camp']->title }}</a>
                                                             </h2>
                                                             @if(!empty($offer['camp_location']))
                                                             <p style="margin: 0; font-size: 11px; color: #cbd5e1; line-height: 1.35;">
@@ -94,7 +94,7 @@
                                                             @foreach($offer['accommodation_items'] as $item)
                                                             @php
                                                                 $acc = $item['model'] ?? null;
-                                                                $campUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.show', $offer['camp']->slug) : route('welcome');
+                                                                $campUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.camps.show', $offer['camp']->slug) : route('welcome');
                                                                 $accThumb = !empty($acc->thumbnail_path) ? (strpos($acc->thumbnail_path, 'http') === 0 ? $acc->thumbnail_path : asset(ltrim($acc->thumbnail_path, '/'))) : null;
                                                             @endphp
                                                             <div style="position: relative; margin-bottom: 6px;">
@@ -182,7 +182,7 @@
                                                         <td style="padding: 0 0 8px;">
                                                             @foreach($offer['accommodations'] as $acc)
                                                             @php
-                                                                $campUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.show', $offer['camp']->slug) : route('welcome');
+                                                                $campUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.camps.show', $offer['camp']->slug) : route('welcome');
                                                                 $accThumb = !empty($acc->thumbnail_path) ? (strpos($acc->thumbnail_path, 'http') === 0 ? $acc->thumbnail_path : asset(ltrim($acc->thumbnail_path, '/'))) : null;
                                                             @endphp
                                                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px;">
@@ -221,7 +221,7 @@
                                                             @foreach($offer['boat_items'] as $item)
                                                             @php
                                                                 $boat = $item['model'] ?? null;
-                                                                $boatCampUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.show', $offer['camp']->slug) : route('welcome');
+                                                                $boatCampUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.camps.show', $offer['camp']->slug) : route('welcome');
                                                                 $boatSpecs = $boat ? (is_array($boat->boat_information) ? $boat->boat_information : []) : [];
                                                                 $boatInclusives = $boat ? (is_array($boat->inclusions) ? $boat->inclusions : []) : [];
                                                                 $boatThumb = $boat && !empty($boat->thumbnail_path) ? (strpos($boat->thumbnail_path, 'http') === 0 ? $boat->thumbnail_path : asset(ltrim($boat->thumbnail_path, '/'))) : null;
@@ -293,7 +293,7 @@
                                                         <td style="padding: 0 0 8px;">
                                                             @foreach($offer['boats'] as $boat)
                                                             @php
-                                                                $boatCampUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.show', $offer['camp']->slug) : route('welcome');
+                                                                $boatCampUrl = (!empty($offer['camp']) && !empty($offer['camp']->slug)) ? route('vacations.camps.show', $offer['camp']->slug) : route('welcome');
                                                                 $boatSpecs = is_array($boat->boat_information ?? null) ? $boat->boat_information : [];
                                                                 $boatInclusives = is_array($boat->inclusions ?? null) ? $boat->inclusions : [];
                                                                 $boatThumb = !empty($boat->thumbnail_path) ? (strpos($boat->thumbnail_path, 'http') === 0 ? $boat->thumbnail_path : asset(ltrim($boat->thumbnail_path, '/'))) : null;
