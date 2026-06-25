@@ -115,10 +115,6 @@
                     <i class="fas fa-check-circle" aria-hidden="true"></i>
                     {{ __('vacations.verified_short') }}
                 </span>
-                <span class="vacation-trip-list-card__trust-item">
-                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
-                    {{ __('vacations.cancel_free') }}
-                </span>
             </div>
 
             <a href="{{ $card['url'] }}" class="vacation-trip-list-card__cta">

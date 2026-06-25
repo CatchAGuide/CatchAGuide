@@ -126,7 +126,6 @@
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_new_camps_title')"
-                :subtitle="__('vacations.hub_new_camps_subtitle')"
                 :link-url="route('vacations.camps.index')"
                 :link-label="__('vacations.view_all_camps')"
                 slider-id="new-camps"
@@ -156,7 +155,6 @@
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_new_trips_title')"
-                :subtitle="__('vacations.hub_new_trips_subtitle')"
                 :link-url="route('vacations.trips.index')"
                 :link-label="__('vacations.view_all_trips')"
                 slider-id="new-trips"

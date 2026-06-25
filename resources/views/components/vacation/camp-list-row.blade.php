@@ -157,10 +157,6 @@
                         <i class="fas fa-shield-alt" aria-hidden="true"></i>
                         {{ __('vacations.verified_host') }}
                     </span>
-                    <span class="vacation-camp-list-card__trust-item">
-                        <i class="fas fa-calendar-check" aria-hidden="true"></i>
-                        {{ __('vacations.free_cancellation') }}
-                    </span>
                 </div>
 
                 <a href="{{ $card['url'] }}" class="vacation-camp-list-card__cta">

@@ -568,10 +568,6 @@
                                         <div class="vacation-list-card__trust d-none d-md-flex">
                                             <span class="vacation-list-card__trust-item">
                                                 <i class="fas fa-check-circle" aria-hidden="true"></i>
-                                                @lang('vacations.free_cancellation')
-                                            </span>
-                                            <span class="vacation-list-card__trust-item">
-                                                <i class="fas fa-check-circle" aria-hidden="true"></i>
                                                 @lang('vacations.verified_operator')
                                             </span>
                                         </div>
