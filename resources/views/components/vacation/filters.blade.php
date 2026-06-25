@@ -34,6 +34,7 @@
 
         return $action.'?'.http_build_query(array_merge($query, ['pillar' => $pillar]));
     };
+    $showPillarFilters = $showPillarToggles && ($tripsTotal ?? 0) > 0 && ($campsTotal ?? 0) > 0;
 @endphp
 
 <form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
@@ -51,7 +52,7 @@
         <input type="hidden" name="pillar" value="{{ $activePillar }}">
     @endif
 
-    @if($showPillarToggles && $tripsTotal !== null && $campsTotal !== null)
+    @if($showPillarFilters)
         <div class="vacation-filters__pillar-group" role="group" data-analytics-vacation-pillar-filter>
             <a href="{{ $pillarUrl('all') }}"
                class="vacation-filters__pillar-btn vacation-filters__pillar-btn--all {{ $activePillar === 'all' ? 'is-active' : '' }}">
@@ -162,7 +163,7 @@
                     @endif
                 @endforeach
 
-                @if($showPillarToggles && $tripsTotal !== null && $campsTotal !== null)
+                @if($showPillarFilters)
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_show_all') }}</label>
                         @if(is_array($pillarLinks))
