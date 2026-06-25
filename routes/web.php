@@ -135,9 +135,9 @@ Route::get('/all-countries',function(){
 Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
 
 
-Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->name('profile.newguiding.store');
-Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->name('profile.newguiding.save-draft');
-Route::post('/newguiding/save-draft-sync', [GuidingsController::class, 'saveDraftSync'])->name('profile.newguiding.save-draft-sync');
+Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('profile.newguiding.store');
+Route::post('/newguiding/save-draft', [GuidingsController::class, 'saveDraft'])->middleware('auth:web,employees')->name('profile.newguiding.save-draft');
+Route::post('/newguiding/save-draft-sync', [GuidingsController::class, 'saveDraftSync'])->middleware('auth:web,employees')->name('profile.newguiding.save-draft-sync');
 
 Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(function () {
     Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
@@ -280,7 +280,7 @@ Route::middleware('auth:web')->group(function () {
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('ddos:search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
-Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->name('guidings.store');
+Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('guidings.store');
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
 
 Route::get('vacations', [VacationsController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
