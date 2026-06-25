@@ -79,6 +79,24 @@ class GuidingsController extends Controller
         return $a === $b;
     }
 
+    private function resolveGuidingOwnerUserId(StoreNewGuidingRequest $request): ?int
+    {
+        if ($request->filled('user_id')) {
+            return (int) $request->input('user_id');
+        }
+
+        return auth()->id();
+    }
+
+    private function canActorPublishGuidings(StoreNewGuidingRequest $request): bool
+    {
+        if (str_contains($request->input('target_redirect', ''), 'admin') || auth('employees')->check()) {
+            return true;
+        }
+
+        return (bool) auth()->user()?->canPublishGuidings();
+    }
+
     /**
      * Skip image processing when no new uploads and the client image_list matches the stored gallery.
      */
@@ -884,7 +902,7 @@ class GuidingsController extends Controller
             $isUpdate = $request->input('is_update', 0) == 1;
             $guiding = $isUpdate
                 ? Guiding::findOrFail($request->input('guiding_id'))
-                : new Guiding(['user_id' => auth()->id()]);
+                : new Guiding(['user_id' => $this->resolveGuidingOwnerUserId($request)]);
 
             // Store original status for updates
             $originalStatus = $isUpdate ? $guiding->status : null;
@@ -938,7 +956,7 @@ class GuidingsController extends Controller
                 } else {
                     $guiding->status = 2; // New guiding or was already draft
                 }
-            } elseif (! auth()->user()->canPublishGuidings()) {
+            } elseif (! $this->canActorPublishGuidings($request)) {
                 // Pending/rejected guides: save the tour but keep it unpublished (draft)
                 if ($isUpdate && in_array((int) $originalStatus, [0, 1], true)) {
                     $guiding->status = $originalStatus;
@@ -1046,11 +1064,13 @@ class GuidingsController extends Controller
             $isUpdate = $request->input('is_update') == '1';
             $originalStatus = null;
 
+            $ownerUserId = $this->resolveGuidingOwnerUserId($request);
+
             if ($isUpdate && $request->input('guiding_id')) {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
                 $originalStatus = $guiding->status;
             } else {
-                $guiding = Guiding::where('user_id', auth()->id())
+                $guiding = Guiding::where('user_id', $ownerUserId)
                     ->where('status', 2)
                     ->where('title', $request->input('title'))
                     ->where('city', $request->input('city'))
@@ -1059,7 +1079,7 @@ class GuidingsController extends Controller
                     ->first();
 
                 if (!$guiding) {
-                    $guiding = new Guiding(['user_id' => auth()->id()]);
+                    $guiding = new Guiding(['user_id' => $ownerUserId]);
                 }
             }
 
