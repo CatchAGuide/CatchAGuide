@@ -16,6 +16,108 @@ if (!function_exists('two')) {
     }
 }
 
+if (!function_exists('vacation_fish_tags')) {
+    /**
+     * @param  array<int, mixed>  $tags
+     * @return array<int, string>
+     */
+    function vacation_fish_tags(array $tags): array
+    {
+        return collect($tags)
+            ->flatMap(function ($tag) {
+                if (is_array($tag)) {
+                    $value = trim((string) ($tag['name'] ?? $tag['value'] ?? ''));
+
+                    return $value !== '' ? [$value] : [];
+                }
+
+                $value = trim((string) $tag);
+                if ($value === '') {
+                    return [];
+                }
+
+                if (str_contains($value, ',')) {
+                    return array_values(array_filter(array_map('trim', explode(',', $value))));
+                }
+
+                return [$value];
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+}
+
+if (!function_exists('vacation_camp_facility_icon')) {
+    function vacation_camp_facility_icon(string $label): string
+    {
+        $key = strtolower($label);
+
+        return match (true) {
+            str_contains($key, 'park') => 'assets/images/icons/pa.png',
+            str_contains($key, 'boat ramp')
+                || str_contains($key, 'rampe')
+                || str_contains($key, 'steg')
+                || str_contains($key, 'jetty')
+                || str_contains($key, 'mooring')
+                || str_contains($key, 'anleg') => 'assets/images/icons/sea.png',
+            str_contains($key, 'pool')
+                || str_contains($key, 'whirlpool')
+                || str_contains($key, 'schwimm') => 'assets/images/icons/water-waves.png',
+            str_contains($key, 'fish') => 'assets/images/icons/fish.png',
+            str_contains($key, 'barbecue')
+                || str_contains($key, 'grill') => 'assets/images/icons/check.png',
+            str_contains($key, 'charg') => 'assets/images/icons/check.png',
+            str_contains($key, 'reception')
+                || str_contains($key, 'rezeption') => 'assets/images/icons/information.png',
+            default => 'assets/images/icons/check.png',
+        };
+    }
+}
+
+if (!function_exists('vacation_camp_availability_icon')) {
+    function vacation_camp_availability_icon(string $label): string
+    {
+        $key = strtolower($label);
+
+        return match (true) {
+            str_contains($key, 'boat') || str_contains($key, 'boot') => 'assets/images/icons/sea.png',
+            str_contains($key, 'guid') => 'assets/images/icons/fishing-man.png',
+            default => 'assets/images/icons/check.png',
+        };
+    }
+}
+
+if (!function_exists('vacation_availability_item')) {
+    /**
+     * @return array{label: string, available: bool, icon: ?string}
+     */
+    function vacation_availability_item(mixed $item): array
+    {
+        if (is_array($item)) {
+            $label = trim((string) ($item['label'] ?? ''));
+            $available = array_key_exists('available', $item)
+                ? (bool) $item['available']
+                : true;
+
+            return [
+                'label' => $label,
+                'available' => $available,
+                'icon' => $available ? 'assets/images/icons/check.png' : null,
+            ];
+        }
+
+        $label = trim((string) $item);
+
+        return [
+            'label' => $label,
+            'available' => true,
+            'icon' => 'assets/images/icons/check.png',
+        ];
+    }
+}
+
 if (!function_exists('twoString')) {
     function twoString($number) {
         return number_format($number, 2, '.');

@@ -7,8 +7,14 @@
 @section('title', $tripView['title'] ?? __('trips.page_title_fallback'))
 @section('description', \Illuminate\Support\Str::limit(strip_tags($tripView['description']['full'] ?? ''), 155))
 
+@section('share_tags')
+    @if(!empty($canonicalUrl))
+        <link rel="canonical" href="{{ $canonicalUrl }}">
+    @endif
+@endsection
+
 @section('content')
-    <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}">
+    <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-analytics-page="trip-offer">
         {{-- Full-width top: heading, gallery (same width as before), feature cards. Floating card starts after this. --}}
         <div class="trip-offer-page__top">
             <div class="trip-offer-page__hero-heading">
@@ -67,13 +73,9 @@
                 </div>
                 @endif
             </div>
-        </div>
 
-        {{-- Layout: left = feature cards (part of gallery) + description; right = floating card starting right after image gallery --}}
-        <div class="trip-offer-page__layout">
-            <main class="trip-offer-page__main">
-                {{-- Feature cards: part of "gallery" block, on left; floating card starts beside them on the right --}}
-                <div class="trip-offer-page__feature-cards">
+            {{-- Feature cards: full-width row below gallery; two-column layout starts below --}}
+            <div class="trip-offer-page__feature-cards">
                     @if(!empty($tripView['duration']['days']) || !empty($tripView['duration']['nights']))
                         <div class="trip-offer-page__feature-card">
                             <span class="trip-offer-page__feature-card-icon" aria-hidden="true">
@@ -125,8 +127,12 @@
                             <p class="trip-offer-page__feature-card-value trip-offer-page__feature-card-value--scrollable">{{ implode(', ', $tripView['target_species']) }}</p>
                         </div>
                     @endif
-                </div>
+            </div>
+        </div>
 
+        {{-- Layout: main content left; sticky booking card + map right (aligned with About) --}}
+        <div class="trip-offer-page__layout">
+            <main class="trip-offer-page__main">
                 <section class="trip-offer-page__about" id="about">
                     <div class="trip-offer-page__about-card">
                         <h2 class="trip-offer-page__section-title">
@@ -747,8 +753,8 @@
                             </select>
                         </div>
 
-                        <button type="button" class="trip-offer-page__booking-cta">
-                            {{ __('trips.request_now') }}
+                        <button type="button" class="trip-offer-page__booking-cta" data-analytics-trip-inquiry>
+                            {{ __('vacations.request_trip') }}
                         </button>
 
                         <p class="trip-offer-page__booking-footnote">
@@ -766,8 +772,10 @@
             </aside>
         </div>
 
+        @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
+
         <!-- Mobile Sticky Request Card (replaces the floating booking card) -->
-        <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('trips.book_now') }}">
+        <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('vacations.request_trip') }}">
             <div class="trip-offer-page__mobile-sticky-inner">
                 <div class="trip-offer-page__mobile-sticky-simple">
                     <div class="trip-offer-page__mobile-sticky-simple-left">
@@ -785,8 +793,8 @@
                         </div>
                     </div>
 
-                    <button type="button" class="trip-offer-page__mobile-sticky-simple-cta trip-offer-page__booking-cta">
-                        <span class="trip-offer-page__mobile-sticky-simple-cta-text">{{ __('trips.book_now') }}</span>
+                    <button type="button" class="trip-offer-page__mobile-sticky-simple-cta trip-offer-page__booking-cta" data-analytics-trip-inquiry>
+                        <span class="trip-offer-page__mobile-sticky-simple-cta-text">{{ __('vacations.request_trip') }}</span>
                         <span class="trip-offer-page__mobile-sticky-simple-cta-arrow" aria-hidden="true">→</span>
                     </button>
                 </div>
@@ -892,6 +900,33 @@
 
                                 <div class="form-group mb-3">
                                     <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ __('vacations.inquiry_date_flexible') }}</label>
+                                        <select name="date_flexible" class="form-select">
+                                            <option value="">{{ __('vacations.select') }}</option>
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ __('vacations.inquiry_room_config') }}</label>
+                                        <input type="text" name="room_configuration" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ __('vacations.inquiry_dietary') }}</label>
+                                        <input type="text" name="dietary_requirements" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ __('vacations.inquiry_experience') }}</label>
+                                        <input type="text" name="experience_level" class="form-control">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">{{ __('vacations.inquiry_addons') }}</label>
+                                        <input type="text" name="addons" class="form-control">
+                                    </div>
                                 </div>
 
                                 <div class="trip-contact-submit-row">

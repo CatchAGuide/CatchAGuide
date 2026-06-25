@@ -1,0 +1,3279 @@
+// Two-pillar vacations — hub, country, cards, filters
+// Theme-aligned: trips = brand orange, camps = brand charcoal (#313041)
+
+$vac-trip: $primary-color;
+$vac-trip-dark: #c94a32;
+$vac-trip-soft: $card;
+$vac-camp: #313041;
+$vac-camp-dark: #252238;
+$vac-camp-soft: rgba(#313041, 0.06);
+$vac-brand: $primary-color;
+$vac-ink: #313041;
+$vac-muted: #666;
+$vac-border: #e5e7eb;
+$vac-surface: $body-bg;
+$vac-radius: 14px;
+
+// Floating pillar label on card images (Angelcamp / Angelreise)
+.vacation-pillar-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .28rem .5rem;
+    color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+    z-index: 4;
+    pointer-events: none;
+    line-height: 1.2;
+
+    &--trip {
+        background: $vac-trip;
+    }
+
+    &--camp {
+        background: $vac-camp;
+    }
+}
+$vac-shadow: 0 4px 24px rgba(49, 48, 65, 0.08);
+$vac-shadow-hover: 0 12px 40px rgba(49, 48, 65, 0.12);
+$vac-country-panel: #313041;
+
+.vacation-hub,
+.vacation-country,
+.vacation-pillar-index {
+    color: $vac-ink;
+    padding-bottom: 3rem;
+}
+
+// —— Section heading component ——
+.vacation-section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: .75rem 1rem;
+    margin-bottom: 1.25rem;
+
+    &__eyebrow {
+        display: block;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: $vac-brand;
+        margin-bottom: .35rem;
+    }
+
+    &__title {
+        font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+        color: $vac-ink;
+    }
+
+    &__subtitle {
+        margin: .35rem 0 0;
+        font-size: .95rem;
+        color: $vac-muted;
+        max-width: 42rem;
+    }
+
+    &__link {
+        font-size: .875rem;
+        font-weight: 600;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+            color: darken($primary-color, 8%);
+            text-decoration: underline;
+        }
+    }
+}
+
+// —— Hub hero ——
+.vacation-hub__hero-panel {
+    background: $vac-ink;
+    border-radius: $vac-radius;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    margin-bottom: 2rem;
+    color: #fff;
+
+    .vacation-hub__hero-eyebrow {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: rgba(#fff, .75);
+        margin-bottom: .5rem;
+    }
+
+    .vacation-hub__hero-title {
+        font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+        font-weight: 800;
+        margin: 0 0 .75rem;
+        max-width: 28rem;
+        color: #fff;
+    }
+
+    .vacation-hub__hero-lead {
+        margin: 0 0 1.25rem;
+        color: rgba(#fff, .85);
+        max-width: 36rem;
+        font-size: 1.05rem;
+        line-height: 1.55;
+    }
+
+    .vacation-hub__hero-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .75rem;
+    }
+
+    .vacation-hub__hero-stat {
+        background: rgba(#fff, .1);
+        border: 1px solid rgba(#fff, .15);
+        border-radius: 999px;
+        padding: .4rem .95rem;
+        font-size: .8rem;
+        font-weight: 600;
+        backdrop-filter: blur(6px);
+
+        strong {
+            color: #fff;
+            font-size: .95rem;
+            margin-right: .25rem;
+        }
+    }
+
+    .vacation-hub__hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .65rem;
+        margin-top: .25rem;
+    }
+
+    .vacation-hub__hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .55rem 1.1rem;
+        border-radius: 999px;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid rgba(#fff, .25);
+        transition: transform .15s ease, background .15s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        &--camp {
+            background: rgba(#fff, .12);
+            color: #fff;
+            border-color: rgba(#fff, .35);
+
+            &:hover {
+                background: rgba(#fff, .2);
+                color: #fff;
+            }
+        }
+
+        &--trip {
+            background: $primary-color;
+            color: #fff;
+            border-color: $primary-color;
+
+            &:hover {
+                background: $vac-trip-dark;
+                border-color: $vac-trip-dark;
+                color: #fff;
+            }
+        }
+    }
+}
+
+// —— Hub pillar fork section ——
+.vacation-hub__pillar-fork {
+    margin-top: .25rem;
+
+    @media (max-width: 575px) {
+        margin-top: 0;
+    }
+}
+
+// —— Pillar fork tiles ——
+.vacation-pillar-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: clamp(240px, 32vw, 280px);
+    padding: clamp(1.35rem, 3vw, 1.75rem);
+    border-radius: $vac-radius;
+    text-decoration: none;
+    color: #fff;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .22s ease, box-shadow .22s ease;
+
+    &:hover,
+    &:focus-visible {
+        transform: translateY(-4px);
+        color: #fff;
+        outline: none;
+
+        .vacation-pillar-tile__cta i {
+            transform: translateX(3px);
+        }
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 3px rgba(#fff, .45);
+    }
+
+    &--camp {
+        background: linear-gradient(155deg, lighten($vac-camp, 4%) 0%, $vac-camp 42%, $vac-camp-dark 100%);
+        box-shadow: 0 10px 36px rgba($vac-camp, .28);
+
+        &:hover,
+        &:focus-visible {
+            box-shadow: 0 16px 44px rgba($vac-camp, .36);
+        }
+
+        .vacation-pillar-tile__decor {
+            background: radial-gradient(circle at center, rgba(#fff, .08) 0%, transparent 68%);
+        }
+
+        .vacation-pillar-tile__badge {
+            background: rgba(#fff, .12);
+            color: rgba(#fff, .92);
+        }
+
+        .vacation-pillar-tile__desc {
+            color: rgba(#fff, .72);
+        }
+
+        .vacation-pillar-tile__stats {
+            color: rgba(#fff, .58);
+        }
+    }
+
+    &--trip {
+        background: linear-gradient(155deg, lighten($vac-trip, 6%) 0%, $vac-trip 45%, $vac-trip-dark 100%);
+        box-shadow: 0 10px 36px rgba($vac-trip, .32);
+
+        &:hover,
+        &:focus-visible {
+            box-shadow: 0 16px 44px rgba($vac-trip, .4);
+        }
+
+        .vacation-pillar-tile__decor {
+            background: radial-gradient(circle at center, rgba(#fff, .16) 0%, transparent 68%);
+        }
+
+        .vacation-pillar-tile__badge {
+            background: rgba(#000, .14);
+            color: #fff;
+        }
+
+        .vacation-pillar-tile__desc {
+            color: rgba(#fff, .9);
+        }
+
+        .vacation-pillar-tile__stats {
+            color: rgba(#fff, .78);
+        }
+    }
+
+    &__decor {
+        position: absolute;
+        top: -3.5rem;
+        right: -3.5rem;
+        width: clamp(9rem, 22vw, 11.5rem);
+        height: clamp(9rem, 22vw, 11.5rem);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    &__icon {
+        position: relative;
+        z-index: 1;
+        width: 2rem;
+        height: 2rem;
+        margin-bottom: .85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        color: #fff;
+        opacity: .95;
+    }
+
+    &__title {
+        position: relative;
+        z-index: 1;
+        font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+        font-weight: 800;
+        margin: 0 0 .55rem;
+        line-height: 1.15;
+        letter-spacing: -.01em;
+        color: #fff;
+    }
+
+    &__desc {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        font-size: clamp(.82rem, 1.6vw, .9rem);
+        line-height: 1.45;
+        font-weight: 500;
+        max-width: 34ch;
+    }
+
+    &__badges {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: .45rem;
+        margin-bottom: auto;
+        padding-bottom: 1.25rem;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .32rem .72rem;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+
+    &__footer {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        margin-top: auto;
+        padding-top: .25rem;
+    }
+
+    &__stats {
+        font-size: .78rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    &__cta {
+        flex-shrink: 0;
+        font-size: .82rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        color: #fff;
+        white-space: nowrap;
+
+        i {
+            font-size: .72rem;
+            transition: transform .18s ease;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover,
+        &:focus-visible {
+            transform: translateY(-2px);
+        }
+    }
+
+    @media (max-width: 575px) {
+        min-height: 0;
+        padding: 1.2rem;
+
+        &__desc {
+            max-width: none;
+        }
+
+        &__footer {
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+    }
+}
+
+
+.vacation-hub__card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.35rem;
+}
+
+.vacation-hub__rail {
+    margin-bottom: 2.5rem;
+    padding: 1.25rem;
+    border-radius: $vac-radius;
+    background: $vac-surface;
+    border: 1px solid $vac-border;
+
+    &--trips {
+        border-left: 4px solid $vac-trip;
+    }
+
+    &--camps {
+        border-left: 4px solid $vac-camp;
+    }
+
+    &--slider {
+        padding-bottom: 1.5rem;
+    }
+}
+
+// —— Hub interlude (between Popular and New Trips) ——
+.vacation-hub__interlude {
+    position: relative;
+    overflow: hidden;
+    border-radius: calc(#{$vac-radius} + 6px);
+    border: 1px solid rgba(#fff, .08);
+    background: $vac-country-panel;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .22);
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, rgba($vac-brand, .7) 50%, transparent 100%);
+    }
+}
+
+.vacation-hub__interlude-inner {
+    position: relative;
+    z-index: 1;
+    padding: clamp(1.1rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.6rem);
+}
+
+.vacation-hub__interlude-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding-bottom: clamp(.85rem, 2vw, 1.1rem);
+    margin-bottom: clamp(.85rem, 2vw, 1.1rem);
+    border-bottom: 1px solid rgba(#fff, .1);
+}
+
+.vacation-hub__interlude-head {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.vacation-hub__interlude-eyebrow {
+    margin: 0 0 .25rem;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: $vac-brand;
+}
+
+.vacation-hub__interlude-title {
+    margin: 0 0 .25rem;
+    font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.vacation-hub__interlude-lead {
+    margin: 0;
+    font-size: clamp(.78rem, 1.6vw, .88rem);
+    line-height: 1.45;
+    color: rgba(#fff, .62);
+    max-width: 36rem;
+}
+
+.vacation-hub__interlude-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: .45rem;
+    flex: 0 1 auto;
+}
+
+.vacation-hub__interlude-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .45rem .65rem;
+    border-radius: 999px;
+    background: rgba(#fff, .06);
+    border: 1px solid rgba(#fff, .14);
+    white-space: nowrap;
+
+    &--camp .vacation-hub__interlude-stat-icon {
+        background: rgba($vac-camp, .35);
+        color: lighten($vac-camp, 42%);
+    }
+
+    &--trip .vacation-hub__interlude-stat-icon {
+        background: rgba($vac-trip, .22);
+        color: lighten($vac-trip, 18%);
+    }
+
+    &--countries .vacation-hub__interlude-stat-icon {
+        background: rgba($vac-brand, .22);
+        color: lighten($vac-brand, 16%);
+    }
+}
+
+.vacation-hub__interlude-stat-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .72rem;
+    flex-shrink: 0;
+}
+
+.vacation-hub__interlude-stat-copy {
+    font-size: .72rem;
+    font-weight: 600;
+    color: rgba(#fff, .68);
+    line-height: 1.2;
+
+    strong {
+        font-size: .95rem;
+        font-weight: 800;
+        color: #fff;
+        margin-right: .2rem;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.vacation-hub__interlude-usps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .5rem;
+    width: 100%;
+}
+
+.vacation-hub__interlude-usp {
+    display: flex;
+    gap: .5rem;
+    align-items: flex-start;
+    padding: .55rem .6rem;
+    border-radius: calc(#{$vac-radius} - 2px);
+    background: rgba(#fff, .04);
+    border: 1px solid rgba(#fff, .1);
+    min-width: 0;
+}
+
+.vacation-hub__interlude-usp-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($vac-brand, .18);
+    color: $vac-brand;
+    flex-shrink: 0;
+    font-size: .68rem;
+}
+
+.vacation-hub__interlude-usp-title {
+    margin: 0 0 .1rem;
+    font-size: .7rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #fff;
+}
+
+.vacation-hub__interlude-usp-text {
+    margin: 0;
+    font-size: .64rem;
+    line-height: 1.35;
+    color: rgba(#fff, .58);
+}
+
+@media (max-width: 991px) {
+    .vacation-hub__interlude-band {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: .7rem;
+        padding-bottom: .65rem;
+        margin-bottom: .65rem;
+    }
+
+    .vacation-hub__interlude-stats {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .vacation-hub__interlude-usps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .vacation-hub__interlude-inner {
+        padding: .9rem .85rem .95rem;
+    }
+
+    .vacation-hub__interlude-band {
+        gap: .55rem;
+        padding-bottom: .55rem;
+        margin-bottom: .55rem;
+    }
+
+    .vacation-hub__interlude-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .4rem;
+    }
+
+    .vacation-hub__interlude-stat {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: .55rem .35rem;
+        white-space: normal;
+        border-radius: calc(#{$vac-radius} - 2px);
+    }
+
+    .vacation-hub__interlude-stat-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+
+    .vacation-hub__interlude-stat-copy {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .12rem;
+        font-size: .58rem;
+        line-height: 1.25;
+
+        strong {
+            display: block;
+            font-size: .95rem;
+            margin: 0;
+        }
+    }
+
+    .vacation-hub__interlude-usps {
+        grid-template-columns: 1fr;
+        gap: .4rem;
+    }
+
+    .vacation-hub__interlude-usp {
+        padding: .6rem .65rem;
+    }
+}
+
+// —— Card slider (Popular rail) ——
+.vacation-card-slider {
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.15rem;
+    }
+
+    &__intro {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.2;
+        color: $vac-ink;
+    }
+
+    &__subtitle {
+        margin: .35rem 0 0;
+        font-size: .88rem;
+        color: $vac-muted;
+        line-height: 1.4;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        flex-shrink: 0;
+    }
+
+    &__link {
+        font-size: .82rem;
+        font-weight: 600;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+            color: darken($primary-color, 8%);
+            text-decoration: underline;
+        }
+    }
+
+    &__nav {
+        display: flex;
+        gap: .45rem;
+        flex-shrink: 0;
+    }
+
+    &__btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid $vac-border;
+        background: #fff;
+        color: $vac-ink;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+        box-shadow: 0 2px 8px rgba(49, 48, 65, .08);
+
+        &:hover:not(.swiper-button-disabled) {
+            background: $vac-ink;
+            border-color: $vac-ink;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        &.swiper-button-disabled {
+            opacity: .35;
+            cursor: default;
+        }
+
+        i {
+            font-size: .8rem;
+        }
+    }
+
+    &__swiper {
+        overflow: hidden;
+        margin: 0 -.15rem;
+        padding: .15rem;
+    }
+
+    .swiper-slide {
+        height: auto;
+        display: flex;
+
+        .vacation-product-card,
+        .vacation-slider-card {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    @media (max-width: 767px) {
+        &__header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__actions {
+            justify-content: space-between;
+        }
+    }
+}
+
+// —— Product cards ——
+.vacation-product-card {
+    border: 1px solid $vac-border;
+    border-radius: $vac-radius;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: $vac-shadow;
+    transition: transform .2s ease, box-shadow .2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: $vac-shadow-hover;
+    }
+
+    &--row {
+        flex-direction: row;
+
+        @media (max-width: 767px) {
+            flex-direction: column;
+        }
+    }
+
+    &--trip {
+        .vacation-pillar-badge--trip {
+            background: $vac-trip;
+        }
+
+        .vacation-product-card__cta {
+            background: $vac-trip;
+
+            &:hover {
+                background: $vac-trip-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &--camp {
+        .vacation-pillar-badge--camp {
+            background: $vac-camp;
+        }
+
+        .vacation-product-card__cta {
+            background: $vac-camp;
+
+            &:hover {
+                background: $vac-camp-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &__media {
+        position: relative;
+        overflow: hidden;
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        height: 210px;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    &__gallery-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    &__gallery img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .35s ease;
+    }
+
+    &:hover &__gallery img {
+        transform: scale(1.03);
+    }
+
+    &__gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(#fff, .92);
+        border: 1px solid rgba(15, 23, 42, .12);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 300;
+        line-height: 1;
+        color: #1e293b;
+        cursor: pointer;
+        transition: background .2s ease, box-shadow .2s ease;
+        box-shadow: 0 6px 14px -8px rgba(15, 23, 42, .4);
+        z-index: 3;
+        padding: 0;
+
+        &:hover {
+            background: #fff;
+            box-shadow: 0 10px 18px -12px rgba(15, 23, 42, .45);
+        }
+
+        &--prev {
+            left: 8px;
+        }
+
+        &--next {
+            right: 8px;
+        }
+    }
+
+    &__gallery-counter {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(#fff, .9);
+        border-radius: 12px;
+        padding: 3px 7px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #64748b;
+        box-shadow: 0 1px 3px rgba(#000, .1);
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    &--row &__media {
+        flex: 0 0 min(320px, 42%);
+        max-width: 320px;
+    }
+
+    &--row &__gallery {
+        height: 100%;
+        min-height: 200px;
+    }
+
+    &__body {
+        padding: 1.15rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: 1.08rem;
+        font-weight: 700;
+        margin: 0 0 .4rem;
+        line-height: 1.3;
+
+        a {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        font-size: .85rem;
+        color: $vac-muted;
+        margin-bottom: .35rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+
+        span {
+            min-width: 0;
+        }
+
+        i {
+            color: $vac-brand;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__meta {
+        font-size: .82rem;
+        color: $vac-muted;
+        margin-bottom: .5rem;
+        line-height: 1.45;
+    }
+
+    &__features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        margin: 0 0 .45rem;
+    }
+
+    &__feature {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        color: $vac-ink;
+        border: 1px solid $vac-border;
+
+        i {
+            font-size: .68rem;
+            color: $vac-brand;
+        }
+    }
+
+    &__traits {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 .5rem;
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+    }
+
+    &__trait {
+        font-size: .78rem;
+        line-height: 1.35;
+        color: $vac-muted;
+        display: flex;
+        gap: .25rem;
+        align-items: flex-start;
+    }
+
+    &__trait-label {
+        font-weight: 700;
+        color: $vac-ink;
+        flex-shrink: 0;
+        font-size: .7rem;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
+
+    &__trait-value {
+        min-width: 0;
+    }
+
+    &__included {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .3rem .45rem;
+        margin: 0 0 .5rem;
+        font-size: .76rem;
+    }
+
+    &__included-label {
+        font-weight: 700;
+        color: $vac-ink;
+        font-size: .7rem;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
+
+    &__included-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        color: $vac-muted;
+
+        i {
+            color: #16a34a;
+            font-size: .65rem;
+        }
+    }
+
+    &__pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem;
+        margin: .25rem 0 .5rem;
+    }
+
+    &__pill {
+        font-size: .72rem;
+        font-weight: 600;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: $vac-ink;
+
+        &--duration {
+            background: $vac-trip-soft;
+            color: $vac-trip-dark;
+        }
+
+        &--addon {
+            background: $vac-camp-soft;
+            color: $vac-camp-dark;
+        }
+    }
+
+    &__trust {
+        font-size: .78rem;
+        color: $vac-muted;
+        margin: .25rem 0;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+
+        i {
+            color: $primary-color;
+        }
+    }
+
+    &__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        padding-top: 1rem;
+        border-top: 1px solid $vac-border;
+    }
+
+    &__price {
+        margin: 0;
+        font-weight: 800;
+        font-size: .95rem;
+        color: $vac-ink;
+    }
+
+    &__cta {
+        white-space: nowrap;
+        padding: .5rem 1rem;
+        border-radius: 8px;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #fff;
+        transition: background .15s ease;
+    }
+
+    &--compact {
+        box-shadow: 0 2px 14px rgba(49, 48, 65, .07);
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+
+        .vacation-product-card__gallery {
+            height: 148px;
+        }
+
+        .vacation-product-card__gallery-nav {
+            width: 26px;
+            height: 26px;
+            font-size: 14px;
+        }
+
+        .vacation-pillar-badge {
+            top: 8px;
+            right: 8px;
+            padding: .2rem .45rem;
+            font-size: .56rem;
+        }
+
+        .vacation-product-card__body {
+            padding: .7rem .8rem .75rem;
+        }
+
+        .vacation-product-card__title {
+            font-size: .92rem;
+            margin-bottom: .25rem;
+            line-height: 1.25;
+
+            a {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+        }
+
+        .vacation-product-card__location {
+            font-size: .75rem;
+            margin-bottom: .4rem;
+
+            span {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        .vacation-product-card__chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3rem;
+            margin-bottom: .4rem;
+            min-height: 0;
+        }
+
+        .vacation-product-card__chip {
+            font-size: .66rem;
+            font-weight: 600;
+            line-height: 1.2;
+            padding: .18rem .45rem;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: $vac-ink;
+            border: 1px solid $vac-border;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .vacation-product-card__trust--compact {
+            font-size: .72rem;
+            margin: 0 0 .35rem;
+            font-weight: 600;
+
+            span {
+                color: $vac-muted;
+                font-weight: 500;
+            }
+        }
+
+        .vacation-product-card__footer {
+            padding-top: .55rem;
+            margin-top: auto;
+            gap: .45rem;
+            border-top: 1px solid rgba($vac-border, .8);
+        }
+
+        .vacation-product-card__price {
+            font-size: .78rem;
+            line-height: 1.2;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .vacation-product-card__cta {
+            padding: .38rem .65rem;
+            font-size: .72rem;
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 575px) {
+            .vacation-product-card__gallery {
+                height: 132px;
+            }
+
+            .vacation-product-card__body {
+                padding: .65rem .7rem .7rem;
+            }
+
+            .vacation-product-card__footer {
+                flex-wrap: wrap;
+            }
+
+            .vacation-product-card__price {
+                flex: 1 1 100%;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .vacation-product-card__cta {
+                flex: 1 1 auto;
+                text-align: center;
+            }
+        }
+    }
+}
+
+// —— Slider rail cards (Popular / New trips / New camps) ——
+.vacation-slider-card {
+    border: 1px solid $vac-border;
+    border-radius: $vac-radius;
+    overflow: hidden;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 14px rgba(49, 48, 65, .07);
+    transition: transform .2s ease, box-shadow .2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $vac-shadow-hover;
+    }
+
+    &--trip {
+        .vacation-pillar-badge--trip {
+            background: $vac-trip;
+        }
+
+        .vacation-slider-card__cta {
+            background: $vac-trip;
+
+            &:hover {
+                background: $vac-trip-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &--camp {
+        .vacation-pillar-badge--camp {
+            background: $vac-camp;
+        }
+
+        .vacation-slider-card__cta {
+            background: $vac-camp;
+
+            &:hover {
+                background: $vac-camp-dark;
+                color: #fff;
+            }
+        }
+    }
+
+    &__media {
+        position: relative;
+        overflow: hidden;
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+
+        a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .35s ease;
+        }
+    }
+
+    &:hover &__gallery img {
+        transform: scale(1.03);
+    }
+
+    &__gallery-counter {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(#0f172a, .72);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        pointer-events: none;
+        line-height: 1.2;
+    }
+
+    &__body {
+        padding: .85rem .9rem .9rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: .95rem;
+        font-weight: 700;
+        margin: 0 0 .3rem;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        font-size: .76rem;
+        color: $vac-muted;
+        margin: 0 0 .45rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        min-width: 0;
+
+        span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        i {
+            color: $vac-brand;
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__tags-row {
+        display: flex;
+        align-items: flex-start;
+        gap: .35rem;
+        margin-bottom: .45rem;
+    }
+
+    &__tags-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+        margin-top: .18rem;
+        opacity: .8;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .3rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__tag {
+        font-size: .66rem;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: $vac-ink;
+        border: 1px solid $vac-border;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &--more {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+            color: $vac-muted;
+        }
+    }
+
+    &__meta {
+        margin-bottom: .45rem;
+    }
+
+    &__meta-pill {
+        display: inline-flex;
+        align-items: center;
+        font-size: .66rem;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: .2rem .5rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        color: $vac-ink;
+        border: 1px solid $vac-border;
+    }
+
+    &__available {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+        margin-bottom: .45rem;
+        font-size: .72rem;
+        line-height: 1.35;
+    }
+
+    &__available-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+    }
+
+    &__available-icon,
+    &__available-item-icon {
+        flex-shrink: 0;
+        display: block;
+        width: 14px;
+        font-size: .72rem;
+        line-height: 1;
+        text-align: center;
+    }
+
+    &__available-label {
+        font-weight: 700;
+        color: $vac-ink;
+        flex-shrink: 0;
+    }
+
+    &__available-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem .45rem;
+    }
+
+    &__available-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        color: $vac-muted;
+        font-weight: 500;
+    }
+
+    &__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: .6rem;
+        padding-top: .65rem;
+        border-top: 1px solid $vac-border;
+    }
+
+    &__price {
+        display: flex;
+        flex-direction: column;
+        gap: .1rem;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__price-from {
+        font-size: .68rem;
+        font-weight: 500;
+        color: $vac-muted;
+        text-transform: lowercase;
+        line-height: 1;
+    }
+
+    &__price-line {
+        font-size: .88rem;
+        line-height: 1.2;
+        color: $vac-ink;
+
+        strong {
+            font-weight: 800;
+        }
+    }
+
+    &__price-unit {
+        font-weight: 600;
+        color: $vac-ink;
+    }
+
+    &__cta {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: .45rem .75rem;
+        border-radius: 8px;
+        font-size: .72rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #fff;
+        transition: background .15s ease;
+        text-align: center;
+    }
+
+    @media (max-width: 575px) {
+        &__body {
+            padding: .75rem .8rem .8rem;
+        }
+
+        &__footer {
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        &__price {
+            flex: 1 1 100%;
+        }
+
+        &__cta {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+    }
+}
+
+// —— Camp listing row (Anglercamps index) ——
+.vacation-camp-list-card {
+    margin-bottom: 1rem;
+
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid $vac-border;
+        border-radius: $vac-radius;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(49, 48, 65, .05);
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    &__media {
+        flex-shrink: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            width: 40%;
+            max-width: 320px;
+        }
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(#0f172a, .75);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        line-height: 1.2;
+        pointer-events: none;
+    }
+
+    &__favorite {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 4;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(#fff, .92);
+        color: $vac-ink;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, .15);
+        transition: background .15s ease, color .15s ease, transform .15s ease;
+
+        &:hover {
+            background: #fff;
+            color: $vac-brand;
+            transform: scale(1.04);
+        }
+
+        i {
+            font-size: .9rem;
+        }
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        padding: 1rem 1rem 1.05rem;
+
+        @media (min-width: 768px) {
+            padding: 1.1rem 1.25rem 1.15rem;
+        }
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .85rem;
+    }
+
+    &__headline {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        margin: 0 0 .35rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        @media (min-width: 768px) {
+            font-size: 1.2rem;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .8rem;
+        color: $vac-muted;
+
+        i {
+            color: $vac-brand;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+
+        span {
+            min-width: 0;
+        }
+    }
+
+    &__price {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        gap: .1rem;
+    }
+
+    &__price-from,
+    &__price-unit {
+        font-size: .62rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        line-height: 1.1;
+    }
+
+    &__price-amount {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: $vac-ink;
+        line-height: 1.1;
+
+        @media (min-width: 768px) {
+            font-size: 1.45rem;
+        }
+    }
+
+    &__section {
+        margin-bottom: .75rem;
+    }
+
+    &__section-heading {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        flex-shrink: 0;
+    }
+
+    &__section-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+        opacity: .75;
+    }
+
+    &__section-label {
+        font-size: .62rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        white-space: nowrap;
+    }
+
+    &__tags-row {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        min-width: 0;
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: .35rem;
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    &__tag {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .22rem .55rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid $vac-border;
+        font-size: .72rem;
+        font-weight: 600;
+        color: $vac-ink;
+        line-height: 1.2;
+        flex-shrink: 0;
+        white-space: nowrap;
+
+        &--more {
+            background: #e2e8f0;
+            color: $vac-muted;
+        }
+
+        &--amenity {
+            color: $vac-ink;
+        }
+    }
+
+    &__tag-icon {
+        flex-shrink: 0;
+        object-fit: contain;
+        display: block;
+        opacity: .8;
+    }
+
+    &__amenities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+    }
+    &__availability-icon {
+        flex-shrink: 0;
+        display: block;
+        width: 16px;
+        font-size: .78rem;
+        line-height: 1;
+        text-align: center;
+    }
+
+    &__availability {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .35rem .65rem;
+    }
+
+    &__availability-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .74rem;
+        font-weight: 600;
+        color: $vac-ink;
+
+        &--unavailable {
+            font-weight: 500;
+        }
+    }
+
+    &__footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        padding-top: .85rem;
+        border-top: 1px solid $vac-border;
+    }
+
+    &__trust {
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+        min-width: 0;
+    }
+
+    &__trust-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #16a34a;
+        line-height: 1.2;
+
+        i {
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__cta {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .25rem;
+        padding: .55rem 1rem;
+        border-radius: 8px;
+        background: $vac-trip;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .15s ease;
+
+        &:hover {
+            background: $vac-trip-dark;
+            color: #fff;
+        }
+    }
+
+    @media (max-width: 767px) {
+        &__header {
+            flex-direction: column;
+            gap: .65rem;
+        }
+
+        &__price {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        &__footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__cta {
+            width: 100%;
+        }
+    }
+}
+
+// —— Trip listing row (Guided trips index) ——
+.vacation-trip-list-card {
+    margin-bottom: 1rem;
+
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid $vac-border;
+        border-radius: $vac-radius;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(49, 48, 65, .05);
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    &__media {
+        flex-shrink: 0;
+        width: 100%;
+
+        @media (min-width: 768px) {
+            width: 34%;
+            max-width: 300px;
+        }
+    }
+
+    &__gallery {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        background: #f1f5f9;
+    }
+
+    &__img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+    &__counter {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(#0f172a, .75);
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        z-index: 3;
+        line-height: 1.2;
+        pointer-events: none;
+    }
+
+    &__main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        padding: 1rem 1rem 1.05rem;
+
+        @media (min-width: 768px) {
+            padding: 1.1rem 1.25rem;
+            border-right: 1px solid $vac-border;
+        }
+    }
+
+    &__headline {
+        margin-bottom: .65rem;
+    }
+
+    &__title {
+        margin: 0 0 .35rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: $vac-ink;
+
+        @media (min-width: 768px) {
+            font-size: 1.15rem;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            &:hover {
+                color: $vac-brand;
+            }
+        }
+    }
+
+    &__location {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .8rem;
+        color: $vac-muted;
+
+        i {
+            color: $vac-brand;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__tags {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .35rem;
+        margin-bottom: .7rem;
+        max-height: calc((.72rem * 1.2 + .44rem) * 2 + .35rem);
+        overflow: hidden;
+    }
+
+    &__tag {
+        display: inline-flex;
+        align-items: center;
+        padding: .22rem .55rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid $vac-border;
+        font-size: .72rem;
+        font-weight: 600;
+        color: $vac-ink;
+        line-height: 1.2;
+    }
+
+    &__more-link {
+        font-size: .72rem;
+        font-weight: 700;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+            color: $vac-trip-dark;
+            text-decoration: underline;
+        }
+    }
+
+    &__included {
+        list-style: none;
+        margin: 0 0 .55rem;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: .35rem;
+    }
+
+    &__included-item {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        font-size: .78rem;
+        font-weight: 500;
+        color: $vac-ink;
+        line-height: 1.35;
+        min-width: 0;
+
+        i {
+            color: #16a34a;
+            font-size: .82rem;
+            flex-shrink: 0;
+        }
+
+        span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__duration {
+        margin-top: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: $vac-ink;
+        padding-top: .5rem;
+
+        i {
+            color: $vac-muted;
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__duration-label {
+        font-weight: 700;
+        color: $vac-muted;
+        text-transform: capitalize;
+    }
+
+    &__aside {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .65rem;
+        padding: 1rem;
+
+        @media (min-width: 768px) {
+            width: 190px;
+            flex-shrink: 0;
+            padding: 1.1rem 1.15rem;
+            justify-content: space-between;
+        }
+    }
+
+    &__price {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+    }
+
+    &__price-prefix {
+        font-size: .6rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        line-height: 1.1;
+    }
+
+    &__price-line {
+        font-size: 1.35rem;
+        line-height: 1.1;
+        color: $vac-ink;
+
+        strong {
+            font-weight: 800;
+        }
+    }
+
+    &__price-suffix {
+        font-size: .82rem;
+        font-weight: 600;
+        color: $vac-muted;
+        margin-left: .15rem;
+    }
+
+    &__trust {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+    }
+
+    &__trust-item {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .64rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #16a34a;
+        line-height: 1.2;
+
+        i {
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__cta {
+        margin-top: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: .6rem 1rem;
+        border-radius: 8px;
+        background: $vac-camp;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        transition: background .15s ease;
+
+        &:hover {
+            background: $vac-camp-dark;
+            color: #fff;
+        }
+    }
+
+    @media (max-width: 767px) {
+        &__aside {
+            border-top: 1px solid $vac-border;
+        }
+
+        &__cta {
+            width: 100%;
+        }
+    }
+}
+
+// —— Country slider (Explore by Country) ——
+.vacation-hub__countries,
+.vacation-pillar-index__countries {
+    .vacation-country-slider {
+        background: $vac-country-panel;
+        border-radius: calc(#{$vac-radius} + 6px);
+        padding: clamp(1.35rem, 3vw, 2rem) clamp(1.1rem, 2.5vw, 1.75rem);
+    }
+}
+
+.vacation-country-slider {
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.35rem;
+    }
+
+    &__intro {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.15;
+        color: #fff;
+    }
+
+    &__subtitle {
+        margin: .4rem 0 0;
+        font-size: .9rem;
+        color: rgba(#fff, .62);
+        line-height: 1.45;
+        max-width: 36rem;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-shrink: 0;
+    }
+
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .88rem;
+        font-weight: 600;
+        color: $vac-brand;
+        text-decoration: none;
+        white-space: nowrap;
+
+        i {
+            font-size: .72rem;
+            transition: transform .15s ease;
+        }
+
+        &:hover {
+            color: lighten($vac-brand, 8%);
+            text-decoration: none;
+
+            i {
+                transform: translateX(3px);
+            }
+        }
+    }
+
+    &__nav {
+        display: flex;
+        gap: .45rem;
+        flex-shrink: 0;
+    }
+
+    &__btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 1px solid rgba(#fff, .22);
+        background: rgba(#fff, .06);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s ease, border-color .15s ease, transform .15s ease;
+
+        &:hover:not(.swiper-button-disabled) {
+            background: rgba(#fff, .14);
+            border-color: rgba(#fff, .4);
+            transform: translateY(-1px);
+        }
+
+        &.swiper-button-disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        i {
+            font-size: .8rem;
+        }
+    }
+
+    &__swiper {
+        overflow: hidden;
+        margin: 0 -.1rem;
+        padding: .1rem;
+    }
+
+    .swiper-slide {
+        height: auto;
+        display: flex;
+    }
+
+    @media (max-width: 767px) {
+        &__header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__actions {
+            justify-content: space-between;
+        }
+    }
+}
+
+.vacation-country-slide {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 280px;
+    border-radius: calc(#{$vac-radius} + 2px);
+    overflow: hidden;
+    text-decoration: none;
+    color: #fff;
+    position: relative;
+    background: #0d1522;
+    transition: transform .22s ease, box-shadow .22s ease;
+
+    &:hover {
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, .35);
+    }
+
+    &__media {
+        position: absolute;
+        inset: 0;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &__placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #162033, #0a101a);
+        color: rgba(#fff, .35);
+        font-size: 2.25rem;
+    }
+
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, .08) 0%,
+            rgba(0, 0, 0, .22) 45%,
+            rgba(0, 0, 0, .72) 100%
+        );
+        pointer-events: none;
+    }
+
+    &__copy {
+        position: relative;
+        z-index: 1;
+        margin-top: auto;
+        padding: 1.35rem 1.15rem 1.2rem;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 1.12rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+    }
+
+    &__flag {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 3px;
+        object-fit: cover;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+    }
+
+    &__subtitle {
+        margin: .3rem 0 0;
+        font-size: .82rem;
+        font-weight: 500;
+        line-height: 1.35;
+        color: rgba(#fff, .78);
+    }
+}
+
+// —— Filters ——
+.vacation-filters {
+    background: #fff;
+    border: 1px solid $vac-border;
+    border-radius: $vac-radius;
+    padding: 1rem 1.15rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .04);
+
+    &__pillar-group {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: .35rem;
+        padding: .35rem;
+        background: $vac-surface;
+        border-radius: 999px;
+        border: 1px solid $vac-border;
+        margin-bottom: 1rem !important;
+
+        &--mobile {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            border-radius: 12px;
+            padding: .3rem;
+
+            .vacation-filters__pillar-btn {
+                text-align: center;
+                width: 100%;
+            }
+        }
+    }
+
+    &__pillar-btn {
+        display: inline-block;
+        padding: .45rem 1rem;
+        border-radius: 999px;
+        font-size: .82rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: $vac-muted;
+        border: 1px solid transparent;
+        transition: all .15s ease;
+
+        &:hover {
+            color: $vac-ink;
+            background: #fff;
+        }
+
+        &.is-active {
+            background: #fff;
+            color: $vac-ink;
+            border-color: $vac-border;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+        }
+
+        &--trips.is-active {
+            background: $vac-trip;
+            border-color: $vac-trip;
+            color: #fff;
+        }
+
+        &--camps.is-active {
+            background: $vac-camp;
+            border-color: $vac-camp;
+            color: #fff;
+        }
+
+        &--all.is-active {
+            background: $vac-ink;
+            border-color: $vac-ink;
+            color: #fff;
+        }
+    }
+
+    .form-label {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: $vac-muted;
+    }
+
+    .form-select {
+        border-radius: 8px;
+        border-color: $vac-border;
+    }
+
+    &__mobile-bar {
+        display: flex;
+        gap: .5rem;
+        margin-bottom: 1rem;
+    }
+
+    &__mobile-btn {
+        flex: 1 1 0;
+        font-size: .85rem;
+        font-weight: 600;
+    }
+
+    &__map-btn {
+        white-space: nowrap;
+    }
+
+    &--sidebar {
+        margin-bottom: 0;
+        padding: .85rem .9rem;
+        box-shadow: none;
+
+        .vacation-filters__pillar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: .85rem !important;
+            padding: .3rem;
+        }
+
+        .vacation-filters__pillar-btn {
+            text-align: center;
+            width: 100%;
+        }
+
+        .vacation-filters__sidebar-stack {
+            display: flex;
+            flex-direction: column;
+            gap: .65rem;
+        }
+
+        .vacation-filters__field {
+            width: 100%;
+        }
+
+        .form-select {
+            width: 100%;
+        }
+    }
+
+    &--mobile {
+        margin-bottom: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        background: transparent;
+
+        .vacation-filters__pillar-group {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: .7rem !important;
+            padding: .28rem;
+            gap: .3rem;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .vacation-filters__pillar-btn {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            font-size: .76rem;
+            padding: .42rem .8rem;
+        }
+
+        .vacation-filters__mobile-bar {
+            margin-bottom: 0;
+            gap: .55rem;
+        }
+
+        .vacation-filters__mobile-btn {
+            min-height: 42px;
+            border-radius: 10px;
+            font-size: .82rem;
+            font-weight: 600;
+
+            &.btn-outline-secondary {
+                border-color: #d4d5d6;
+                color: #313041;
+                background: #fff;
+            }
+
+            &.btn-primary {
+                background: #313041;
+                border-color: #313041;
+            }
+        }
+    }
+}
+
+.vacation-filters-offcanvas {
+    max-height: 85vh;
+
+    &__form {
+        padding-bottom: .5rem;
+    }
+}
+
+.vacation-country-map-modal {
+    max-width: 96%;
+    width: 96%;
+
+    .modal-content {
+        height: min(90vh, 720px);
+    }
+
+    &__canvas {
+        flex: 1 1 auto;
+        min-height: 420px;
+        padding: 0 !important;
+    }
+}
+
+.vacation-country-map-popup {
+    &__title {
+        display: block;
+        font-weight: 700;
+        color: $vac-ink;
+        text-decoration: none;
+
+        &:hover {
+            color: $vac-brand;
+        }
+    }
+}
+
+.vacation-country__sidebar-filters {
+    .vacation-filters--sidebar {
+        border-radius: $vac-radius;
+    }
+}
+
+.vacation-country__mobile-toolbar {
+    .vacation-filters--mobile {
+        .vacation-filters__mobile-bar {
+            margin-bottom: 0;
+        }
+    }
+
+    @media (max-width: 991px) {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: #fff;
+        padding: .65rem 0 .75rem;
+        margin-bottom: .85rem !important;
+        border-bottom: 1px solid $vac-border;
+    }
+}
+
+.vacation-country__listing-title {
+    font-size: clamp(1.15rem, 2.4vw, 1.35rem);
+    font-weight: 800;
+    margin: 0 0 1rem;
+    color: $vac-ink;
+
+    @media (max-width: 767px) {
+        font-size: 1.1rem;
+        margin-bottom: .85rem;
+    }
+}
+
+.vacation-country #page-main-intro {
+    @media (max-width: 767px) {
+        padding: .9rem 1rem;
+        font-size: .9rem;
+        line-height: 1.5;
+    }
+
+    .read-more-btn {
+        background-color: $vac-brand !important;
+        color: #fff !important;
+        border: 2px solid $vac-brand !important;
+    }
+}
+
+// —— Country page hero ——
+
+.vacation-country__layout {
+    align-items: flex-start;
+}
+
+.vacation-country__sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.vacation-country__map-card {
+    border: 1px solid $vac-border;
+    border-radius: $vac-radius;
+    overflow: hidden;
+}
+
+.vacation-country__map-placeholder {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background-image: url('/assets/images/map-bg.png');
+    background-size: cover;
+    background-position: center;
+
+    .show-more-maps {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        margin: 0;
+        background-color: var(--thm-black) !important;
+        color: #fff !important;
+        border: 2px solid var(--thm-black) !important;
+        white-space: nowrap;
+    }
+}
+
+.vacation-country__sidebar-stats {
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+}
+
+.vacation-country__sidebar-stat {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .55rem .8rem;
+    border-radius: 10px;
+    font-size: .8rem;
+    font-weight: 600;
+    border: 1px solid $vac-border;
+    background: #fff;
+
+    strong {
+        font-size: .95rem;
+    }
+
+    &--trip {
+        background: $vac-trip-soft;
+        color: $vac-trip-dark;
+        border-color: rgba($vac-trip, .18);
+    }
+
+    &--camp {
+        background: $vac-camp-soft;
+        color: $vac-camp-dark;
+        border-color: rgba($vac-camp, .14);
+    }
+}
+
+.vacation-country__listings {
+    padding-left: 15px;
+
+    @media (max-width: 991px) {
+        padding-left: 0;
+        margin-top: 0;
+    }
+}
+
+.vacation-country__section {
+    margin-bottom: 1.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+
+    &--trip,
+    &--camp {
+        border-top: 0;
+    }
+}
+
+.vacation-country__section-label {
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    margin: 0 0 .85rem;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid $vac-border;
+
+    &--trip {
+        color: $vac-trip-dark;
+    }
+
+    &--camp {
+        color: $vac-camp-dark;
+    }
+}
+
+// —— Country page hero (legacy panel) ——
+.vacation-country__hero {
+    display: grid;
+    grid-template-columns: minmax(0, 280px) 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: $vac-radius;
+    border: 1px solid $vac-border;
+    background: $vac-surface;
+    box-shadow: $vac-shadow;
+
+    @media (max-width: 767px) {
+        grid-template-columns: 1fr;
+    }
+
+    &-media {
+        border-radius: calc($vac-radius - 4px);
+        overflow: hidden;
+        aspect-ratio: 4 / 3;
+        box-shadow: 0 8px 24px rgba($vac-ink, .12);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &-eyebrow {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: $vac-brand;
+        margin: 0 0 .5rem;
+    }
+
+    &-lead {
+        margin: 0 0 1rem;
+        color: $vac-muted;
+        font-size: .98rem;
+        line-height: 1.55;
+        max-width: 40rem;
+    }
+
+    &-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .55rem;
+    }
+
+    &-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .75rem;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 600;
+
+        strong {
+            font-size: .9rem;
+        }
+
+        &--trip {
+            background: $vac-trip-soft;
+            color: $vac-trip-dark;
+        }
+
+        &--camp {
+            background: $vac-camp-soft;
+            color: $vac-camp-dark;
+        }
+    }
+}
+
+.vacation-country__seasonality {
+    padding: 1.25rem;
+    border-radius: $vac-radius;
+    border: 1px solid $vac-border;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .04);
+}
+
+.vacation-country__seasonality-intro {
+    color: $vac-muted;
+    margin-bottom: 1rem;
+    line-height: 1.55;
+}
+
+.vacation-fish-chart {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid $vac-border;
+
+    &__table {
+        margin-bottom: 0;
+        font-size: .82rem;
+
+        thead th {
+            background: $vac-surface;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: $vac-muted;
+            border-color: $vac-border;
+            vertical-align: middle;
+        }
+
+        tbody td:first-child {
+            font-weight: 600;
+            color: $vac-ink;
+        }
+
+        td {
+            border-color: $vac-border;
+        }
+    }
+}
+
+// —— Country page sections ——
+.vacation-country__intro {
+    background: $vac-surface;
+    border-radius: $vac-radius;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid $vac-border;
+    font-size: .95rem;
+    line-height: 1.6;
+    color: $vac-ink;
+}
+
+.vacation-country__section {
+    margin-bottom: 2rem;
+    padding: 1.25rem;
+    border-radius: $vac-radius;
+    border: 1px solid $vac-border;
+    background: #fff;
+
+    &--trip {
+        border-top: 4px solid $vac-trip;
+    }
+
+    &--camp {
+        border-top: 4px solid $vac-camp;
+    }
+}
+
+.vacation-country__section-header {
+    font-size: .82rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 0 0 .85rem;
+    margin: 0 0 1rem;
+    border-bottom: 1px solid $vac-border;
+    line-height: 1.4;
+
+    &--trip {
+        color: $vac-trip-dark;
+    }
+
+    &--camp {
+        color: $vac-camp-dark;
+    }
+}
+
+.vacation-country__list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+}
+
+.vacation-country__section-empty {
+    margin: 0;
+    padding: 1rem 1.15rem;
+    border-radius: $vac-radius;
+    background: $vac-surface;
+    border: 1px dashed $vac-border;
+    color: $vac-muted;
+    font-size: .95rem;
+}
+
+// —— Empty state ——
+.vacation-pillar-empty {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-radius: $vac-radius;
+    background: $vac-surface;
+    border: 2px dashed $vac-border;
+
+    &[data-pillar="trip"] {
+        border-color: rgba($vac-trip, .35);
+        background: $vac-trip-soft;
+    }
+
+    &[data-pillar="camp"] {
+        border-color: rgba($vac-camp, .35);
+        background: $vac-camp-soft;
+    }
+
+    &__icon {
+        font-size: 1.75rem;
+        margin-bottom: .75rem;
+        opacity: .85;
+    }
+
+    &__body {
+        margin: 0 0 1rem;
+        font-size: .95rem;
+        color: $vac-ink;
+        max-width: 28rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    &__success {
+        color: $vac-camp-dark;
+        font-weight: 600;
+    }
+
+    &__fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        justify-content: center;
+        max-width: 420px;
+        margin: 0 auto;
+
+        .form-control {
+            flex: 1;
+            min-width: 200px;
+            border-radius: 8px;
+        }
+
+        .btn-orange {
+            border-radius: 8px;
+            font-weight: 700;
+        }
+    }
+}
+
+// —— Inspiration chips ——
+.vacation-inspiration-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: .75rem 1rem;
+    border-radius: $vac-radius;
+    border: 1px solid $vac-border;
+    background: #fff;
+    font-weight: 600;
+    font-size: .9rem;
+    color: $vac-ink;
+    text-decoration: none;
+    transition: all .15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+
+    &:hover {
+        border-color: $vac-brand;
+        color: $vac-brand;
+        transform: translateY(-2px);
+        box-shadow: $vac-shadow;
+    }
+}
+
+// —— FAQ ——
+.vacation-hub__faq,
+.vacation-country__faq,
+.vacation-pillar-index__faq {
+    .accordion-item {
+        border: 1px solid $vac-border;
+        border-radius: 10px !important;
+        margin-bottom: .5rem;
+        overflow: hidden;
+    }
+
+    .accordion-button {
+        font-weight: 600;
+        font-size: .95rem;
+
+        &:not(.collapsed) {
+            background: $vac-surface;
+            color: $vac-ink;
+        }
+    }
+}
+
+// —— Pillar index chrome ——
+.vacation-pillar-index__results-meta {
+    margin: 0;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: $vac-muted;
+}
+
+.vacation-pillar-index__banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: $vac-radius;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    color: #fff;
+    box-shadow: $vac-shadow;
+
+    &--trip {
+        background: $primary-color;
+    }
+
+    &--camp {
+        background: $vac-ink;
+    }
+
+    &-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(#fff, .15);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    &-title {
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin: 0 0 .35rem;
+        color: #fff;
+    }
+
+    p {
+        margin: 0;
+        opacity: .9;
+        font-size: .95rem;
+    }
+
+    &-meta {
+        margin-top: .65rem !important;
+        font-size: .78rem !important;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        opacity: .85 !important;
+    }
+}

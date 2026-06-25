@@ -206,6 +206,11 @@
     }
     
     function initializeImageManager() {
+        if (window.imageManagerInitialized) {
+            return;
+        }
+        window.imageManagerInitialized = true;
+
         window.imageManagerLoaded = new ImageManager('#croppedImagesContainer', '#title_image', {
             storagePrefix: 'guidings-images',
         });
@@ -505,6 +510,7 @@
                 $('#is_update').val(1);
             }
 
+            syncGalleryFromDraftResponse(data);
             applyGallerySaveResponse(data);
 
             if (shouldRedirect) {
@@ -2280,6 +2286,7 @@
                     $('#guiding_id').val(data.guiding_id);
                     $('#is_update').val(1);
                 }
+                syncGalleryFromDraftResponse(data);
                 applyGallerySaveResponse(data);
                 resolve(data);
             })

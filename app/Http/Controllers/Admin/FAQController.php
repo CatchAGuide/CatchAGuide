@@ -29,6 +29,26 @@ class FAQController extends Controller
         ]);
     }
 
+    public function vacationTrips()
+    {
+        $frequentlyAskedQuestions = Faq::where('page', '=', 'vacation-trips')->get();
+
+        return view('admin.pages.faq.index', [
+            'frequentlyAskedQuestions' => $frequentlyAskedQuestions,
+            'page' => 'vacation-trips',
+        ]);
+    }
+
+    public function vacationCamps()
+    {
+        $frequentlyAskedQuestions = Faq::where('page', '=', 'vacation-camps')->get();
+
+        return view('admin.pages.faq.index', [
+            'frequentlyAskedQuestions' => $frequentlyAskedQuestions,
+            'page' => 'vacation-camps',
+        ]);
+    }
+
     // public function index()
     // {
     //     return view('admin.pages.faq.index', [
@@ -54,8 +74,14 @@ class FAQController extends Controller
         if($data['page'] == 'search-request'){
             return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
-   
-  
+
+        if ($data['page'] === 'vacation-trips') {
+            return redirect()->route('admin.faq.vacation-trips')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
+        }
+
+        if ($data['page'] === 'vacation-camps') {
+            return redirect()->route('admin.faq.vacation-camps')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
+        }
     }
 
     public function show(Faq $faq)
@@ -84,6 +110,14 @@ class FAQController extends Controller
 
         if($data['page'] == 'search-request'){
             return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich editiert!');
+        }
+
+        if ($data['page'] === 'vacation-trips') {
+            return redirect()->route('admin.faq.vacation-trips')->with('success', 'Das FAQ wurde erfolgreich editiert!');
+        }
+
+        if ($data['page'] === 'vacation-camps') {
+            return redirect()->route('admin.faq.vacation-camps')->with('success', 'Das FAQ wurde erfolgreich editiert!');
         }
     }
 

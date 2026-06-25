@@ -11,7 +11,7 @@ use App\Mail\CustomerContactMail;
 use App\Models\ContactSubmission;
 use App\Models\CampVacationBooking;
 use App\Models\TripBooking;
-use App\Mail\CustomerNewsletterMail;
+use App\Presenters\Vacation\TripInquiryPayloadFormatter;
 
 class ZoisController extends Controller
 {
@@ -37,6 +37,12 @@ class ZoisController extends Controller
         
         // Add source information to the description if available (emails)
         $description = $request->description;
+        if (strtolower((string) $sourceType) === TripBooking::SOURCE_TRIP) {
+            $description = app(TripInquiryPayloadFormatter::class)->format(
+                $request->only(['date_flexible', 'room_configuration', 'dietary_requirements', 'experience_level', 'addons']),
+                (string) $request->description
+            );
+        }
         if ($sourceType && $sourceId) {
             $sourceInfo = "\n\nThis contact was submitted from: {$sourceType} ID: {$sourceId}";
             $description .= $sourceInfo;
@@ -53,7 +59,7 @@ class ZoisController extends Controller
                 'email' => $request->email,
                 'phone_country_code' => $request->countryCode,
                 'phone' => $request->phone,
-                'message' => $request->description,
+                'message' => $description,
                 'status' => CampVacationBooking::STATUS_OPEN,
             ]);
         } elseif (strtolower((string) $sourceType) === TripBooking::SOURCE_TRIP && $sourceId && $hasBookingDetails) {
@@ -66,7 +72,7 @@ class ZoisController extends Controller
                 'email' => $request->email,
                 'phone_country_code' => $request->countryCode,
                 'phone' => $request->phone,
-                'message' => $request->description,
+                'message' => $description,
                 'status' => TripBooking::STATUS_OPEN,
             ]);
         } else {
@@ -83,7 +89,7 @@ class ZoisController extends Controller
         $sourceTypeLower = strtolower((string) $sourceType);
         $sourceTitle = ContactSubmission::resolveSourceTitle($sourceType, $sourceId);
         $contactMailExtra = array_filter([
-            'contact_message' => $request->description,
+            'contact_message' => $description,
             'preferred_date' => $request->filled('preferred_date') ? $request->input('preferred_date') : null,
             'number_of_persons' => $request->filled('number_of_persons') ? (int) $request->input('number_of_persons') : null,
             'source_type' => $sourceType,
@@ -95,7 +101,7 @@ class ZoisController extends Controller
         Mail::send(new ContactMail(
             $request->name,
             $request->email,
-            $request->description,
+            $description,
             $request->phone,
             $request->countryCode,
             $contactMailExtra
@@ -103,7 +109,7 @@ class ZoisController extends Controller
         Mail::send(new CustomerContactMail(
             $request->name,
             $request->email,
-            $request->description,
+            $description,
             $request->phone,
             $request->countryCode,
             $contactMailExtra

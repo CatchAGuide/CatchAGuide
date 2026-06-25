@@ -161,7 +161,7 @@ class TripCatalogService
     protected function buildVacationUrl(Vacation $vacation): string
     {
         try {
-            return route('vacations.show', ['slug' => $vacation->slug]);
+            return route('vacations.camps.show', ['slug' => $vacation->slug]);
         } catch (\Throwable $e) {
             return url('/vacations/' . $vacation->slug);
         }

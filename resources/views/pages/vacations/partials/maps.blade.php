@@ -42,7 +42,7 @@
                     <img src="{{$gallery[0]}}" alt="{{translate($vacation->title)}}" style="width: 100%; height: 150px; object-fit: cover;">
                 </div>
                 <div class="p-2">
-                    <a class="text-decoration-none" href="{{route('vacations.show',[$vacation->id,$vacation->slug])}}">
+                    <a class="text-decoration-none" href="{{route('vacations.camps.show',[$vacation->id,$vacation->slug])}}">
                         <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">{{translate($vacation->title)}}</h5>
                     </a>
                     <div class="text-muted small">{{$vacation->location}}</div>
