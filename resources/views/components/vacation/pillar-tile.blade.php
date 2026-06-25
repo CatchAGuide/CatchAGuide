@@ -12,9 +12,7 @@
         $priceBadge = __($priceKey, ['price' => $sym]);
     }
 
-    $featureBadge = $modifier === 'trip'
-        ? __('vacations.pillar_badge_all_inclusive')
-        : __('vacations.pillar_badge_instant_booking');
+    $marketingKeywords = __($tile->pillar->marketingKeywordsKey());
 
     $statsKey = $modifier === 'trip' ? 'vacations.pillar_tile_stats_trips' : 'vacations.pillar_tile_stats_camps';
     $statsLabel = __($statsKey, [
@@ -41,7 +39,9 @@
     <p class="vacation-pillar-tile__desc">{{ $tile->description }}</p>
 
     <div class="vacation-pillar-tile__badges">
-        <span class="vacation-pillar-tile__badge">{{ $featureBadge }}</span>
+        @foreach($marketingKeywords as $keyword)
+            <span class="vacation-pillar-tile__badge">{{ $keyword }}</span>
+        @endforeach
         @if($priceBadge)
             <span class="vacation-pillar-tile__badge">{{ $priceBadge }}</span>
         @endif

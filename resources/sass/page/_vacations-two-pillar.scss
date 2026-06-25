@@ -14,7 +14,7 @@ $vac-border: #e5e7eb;
 $vac-surface: $body-bg;
 $vac-radius: 14px;
 
-// Floating pillar label on card images (Camps / All-Inclusive)
+// Floating pillar label on card images (Angelcamp / Angelreise)
 .vacation-pillar-badge {
     position: absolute;
     top: 10px;
@@ -2504,6 +2504,18 @@ $vac-country-panel: #313041;
         font-weight: 800;
         line-height: 1.2;
         color: #fff;
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+    }
+
+    &__flag {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 3px;
+        object-fit: cover;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
     }
 
     &__subtitle {

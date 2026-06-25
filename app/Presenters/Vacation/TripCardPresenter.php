@@ -29,7 +29,7 @@ class TripCardPresenter
             'url' => route('vacations.trips.show', $trip->slug),
             'image' => media_url($trip->thumbnail_path),
             'gallery_images' => get_galleries_image_link($trip, 0),
-            'badge' => __('vacations.badge_all_inclusive'),
+            'badge' => __('vacations.badge_trip'),
             'badge_class' => 'trip',
             'location' => $trip->location,
             'meta_line' => $this->metaLine($trip),

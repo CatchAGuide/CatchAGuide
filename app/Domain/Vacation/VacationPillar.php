@@ -62,6 +62,14 @@ enum VacationPillar: string
         };
     }
 
+    public function marketingKeywordsKey(): string
+    {
+        return match ($this) {
+            self::Trips => 'vacations.pillar_trips_keywords',
+            self::Camps => 'vacations.pillar_camps_keywords',
+        };
+    }
+
     public function countryTitleKey(): string
     {
         return match ($this) {

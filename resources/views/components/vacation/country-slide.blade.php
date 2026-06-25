@@ -3,6 +3,7 @@
 @php
     $name = translate($row['name']);
     $url = $href ?? route('vacations.country', $row['slug']);
+    $flagCode = ! empty($row['countrycode']) ? strtolower($row['countrycode']) : null;
 @endphp
 
 <a
@@ -27,6 +28,18 @@
     </div>
 
     <div class="vacation-country-slide__copy">
-        <h3 class="vacation-country-slide__title">{{ $name }}</h3>
+        <h3 class="vacation-country-slide__title">
+            @if($flagCode)
+                <img
+                    class="vacation-country-slide__flag"
+                    src="{{ asset('flags/' . $flagCode . '.svg') }}"
+                    alt=""
+                    width="22"
+                    height="22"
+                    loading="lazy"
+                >
+            @endif
+            <span>{{ $name }}</span>
+        </h3>
     </div>
 </a>

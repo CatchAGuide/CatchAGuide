@@ -2,7 +2,7 @@
 
 @php
     $label = $badge ?? ($pillar === 'trip'
-        ? __('vacations.badge_all_inclusive')
+        ? __('vacations.badge_trip')
         : __('vacations.badge_camp'));
 @endphp
 
