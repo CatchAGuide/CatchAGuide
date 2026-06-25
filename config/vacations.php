@@ -15,12 +15,6 @@ return [
 
     'pillar_index_per_page' => 9,
 
-    'duration_filter_options' => [
-        ['value' => '3+', 'label_key' => 'vacations.duration_filter_min_3'],
-        ['value' => '7+', 'label_key' => 'vacations.duration_filter_min_7'],
-        ['value' => '14+', 'label_key' => 'vacations.duration_filter_min_14'],
-    ],
-
     'reserved_country_segments' => ['trips', 'camps'],
 
     'inspiration_tiles' => [

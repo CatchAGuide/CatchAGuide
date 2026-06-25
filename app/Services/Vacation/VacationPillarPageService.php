@@ -65,7 +65,6 @@ class VacationPillarPageService
         $filterAll = new VacationListingFilter(
             pillar: $pillar->value,
             species: $filter->species,
-            duration: $filter->duration,
             country: $countrySlug,
             sortBy: $filter->sortBy,
         );
@@ -75,6 +74,9 @@ class VacationPillarPageService
             VacationPillar::Camps => $this->campListings($filterAll, $perPage, $destination?->id),
         };
 
+        $tripsTotal = $this->trips->queryForCountry($filterAll)->count();
+        $campsTotal = $this->camps->queryForCountry($filterAll)->count();
+
         return new VacationPillarIndexViewModel(
             pillar: $pillar,
             filter: $filterAll,
@@ -82,9 +84,11 @@ class VacationPillarPageService
             cards: $cards,
             countries: $this->destinations->countriesForHubGrid(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
+            tripsTotal: $tripsTotal,
+            campsTotal: $campsTotal,
+            faq: $this->resolveFaq($pillar),
             destination: $destination,
             mapMarkers: $this->buildMapMarkers($filterAll, $pillar),
-            faq: $this->resolveFaq($pillar),
         );
     }
 

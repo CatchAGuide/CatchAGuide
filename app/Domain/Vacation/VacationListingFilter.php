@@ -7,7 +7,6 @@ final class VacationListingFilter
     public function __construct(
         public readonly string $pillar = 'all',
         public readonly ?string $species = null,
-        public readonly ?string $duration = null,
         public readonly ?string $country = null,
         public readonly ?string $sortBy = null,
     ) {}
@@ -24,7 +23,6 @@ final class VacationListingFilter
         return new self(
             pillar: $pillar,
             species: self::nullableString($input['species'] ?? null),
-            duration: self::nullableString($input['duration'] ?? null),
             country: self::normalizeCountry($resolvedCountry),
             sortBy: self::nullableString($input['sortby'] ?? null),
         );

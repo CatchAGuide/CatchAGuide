@@ -67,13 +67,8 @@ class VacationCountryPageService
         $showTripsSection = $filter->pillar !== 'camps';
         $showCampsSection = $filter->pillar !== 'trips';
 
-        $tripsTotal = $showTripsSection
-            ? $this->trips->queryForCountry($filter)->count()
-            : 0;
-
-        $campsTotal = $showCampsSection
-            ? $this->camps->queryForCountry($filter)->count()
-            : 0;
+        $tripsTotal = $this->trips->queryForCountry($filter)->count();
+        $campsTotal = $this->camps->queryForCountry($filter)->count();
 
         $trips = $showTripsSection
             ? $this->trips->paginateForCountry($filter, $perPage)

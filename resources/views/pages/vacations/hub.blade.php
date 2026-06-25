@@ -116,7 +116,6 @@
         :total-camps="$hub->totalCamps"
         :total-trips="$hub->totalTrips"
         :country-count="$hub->countryGrid->count()"
-        :inspiration-tiles="$hub->inspirationTiles"
     />
 
 

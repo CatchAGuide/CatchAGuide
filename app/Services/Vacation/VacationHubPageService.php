@@ -64,16 +64,6 @@ class VacationHubPageService
             'answer' => __($item['answer_key']),
         ])->all();
 
-        $inspiration = collect(config('vacations.inspiration_tiles', []))->map(function ($tile) {
-            $query = http_build_query($tile['query'] ?? []);
-            $url = url($tile['url'] . ($query ? '?' . $query : ''));
-
-            return [
-                'title' => __($tile['title_key']),
-                'url' => $url,
-            ];
-        });
-
         return new VacationHubViewModel(
             campTile: $campTile,
             tripTile: $tripTile,
@@ -83,7 +73,6 @@ class VacationHubPageService
             newCamps: $newCamps,
             showNewCampsRail: $totalCamps > 0 && $totalCamps <= (int) config('vacations.new_camps_rail_max_catalog', 30),
             countryGrid: $this->destinations->countriesForHubGrid(),
-            inspirationTiles: $inspiration,
             faqItems: $faqItems,
             totalTrips: $totalTrips,
             totalCamps: $totalCamps,

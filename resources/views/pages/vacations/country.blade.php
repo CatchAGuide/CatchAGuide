@@ -60,8 +60,20 @@
 
     <div class="row vacation-country__layout mb-5">
         <aside class="col-12 col-lg-3 vacation-country__sidebar">
+            <div class="vacation-country__sidebar-filters">
+                <x-vacation.filters
+                    :filter="$vm->filter"
+                    :trips-total="$vm->tripsTotal"
+                    :camps-total="$vm->campsTotal"
+                    :species-options="$vm->speciesOptions"
+                    :show-map-button="false"
+                    :show-mobile-toolbar="false"
+                    variant="sidebar"
+                />
+            </div>
+
             @if($hasMap)
-                <div class="card vacation-country__map-card mb-3">
+                <div class="card vacation-country__map-card mt-3">
                     <div id="map-placeholder" class="vacation-country__map-placeholder">
                         <button
                             type="button"
@@ -74,18 +86,6 @@
                     </div>
                 </div>
             @endif
-
-            <div class="vacation-country__sidebar-filters">
-                <x-vacation.filters
-                    :filter="$vm->filter"
-                    :trips-total="$vm->tripsTotal"
-                    :camps-total="$vm->campsTotal"
-                    :species-options="$vm->speciesOptions"
-                    :show-map-button="false"
-                    :show-mobile-toolbar="false"
-                    variant="sidebar"
-                />
-            </div>
         </aside>
 
         <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">

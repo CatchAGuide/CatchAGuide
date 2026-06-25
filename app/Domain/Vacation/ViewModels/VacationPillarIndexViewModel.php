@@ -18,9 +18,11 @@ final class VacationPillarIndexViewModel
         public readonly Collection $cards,
         public readonly Collection $countries,
         public readonly Collection $speciesOptions,
+        public readonly int $tripsTotal,
+        public readonly int $campsTotal,
+        public readonly Collection $faq,
         public readonly ?Destination $destination = null,
         public readonly array $mapMarkers = [],
-        public readonly Collection $faq,
     ) {}
 
     public function isCountryPage(): bool
@@ -78,5 +80,36 @@ final class VacationPillarIndexViewModel
     public function filterCountries(): Collection
     {
         return $this->isCountryPage() ? collect() : $this->countries;
+    }
+
+    /**
+     * @return array{all: string, trips: string, camps: string}
+     */
+    public function pillarToggleUrls(): array
+    {
+        $query = array_filter([
+            'species' => $this->filter->species,
+            'sortby' => $this->filter->sortBy,
+        ]);
+
+        $withQuery = fn (string $url) => $query === []
+            ? $url
+            : $url.'?'.http_build_query($query);
+
+        if ($this->isCountryPage()) {
+            $countrySlug = $this->destination->slug;
+
+            return [
+                'all' => $withQuery(route('vacations.country', $countrySlug)),
+                'trips' => $withQuery(route('vacations.trips.show', $countrySlug)),
+                'camps' => $withQuery(route('vacations.camps.show', $countrySlug)),
+            ];
+        }
+
+        return [
+            'all' => $withQuery(route('vacations.all-offers')),
+            'trips' => $withQuery(route('vacations.trips.index')),
+            'camps' => $withQuery(route('vacations.camps.index')),
+        ];
     }
 }

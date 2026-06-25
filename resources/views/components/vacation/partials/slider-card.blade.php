@@ -24,9 +24,10 @@
             :show-nav="false"
             gallery-class="vacation-slider-card__gallery"
         />
-        @if(!empty($card['badge']))
-            <span class="vacation-slider-card__badge">{{ $card['badge'] }}</span>
-        @endif
+        <x-vacation.partials.image-pillar-badge
+            :pillar="$pillar"
+            :badge="$card['badge'] ?? null"
+        />
     </div>
 
     <div class="vacation-slider-card__body">
@@ -69,28 +70,20 @@
             </div>
         @endif
 
-        @if($pillar === 'camp' && !empty($availability))
+        @if($pillar === 'camp')
             <div class="vacation-slider-card__available">
-                <div class="vacation-slider-card__available-heading">
-                    <img
-                        src="{{ asset('assets/images/icons/check.png') }}"
-                        width="14"
-                        height="14"
-                        alt=""
-                        class="vacation-slider-card__available-icon"
-                    />
-                    <span class="vacation-slider-card__available-label">{{ __('vacations.availability_label') }}:</span>
-                </div>
                 <div class="vacation-slider-card__available-items">
                     @foreach($availability as $item)
-                        <span class="vacation-slider-card__available-item">
-                            <img
-                                src="{{ asset($item['icon']) }}"
-                                width="14"
-                                height="14"
-                                alt=""
-                                class="vacation-slider-card__available-item-icon"
-                            />
+                        <span @class([
+                            'vacation-slider-card__available-item',
+                            'vacation-slider-card__available-item--unavailable' => ! ($item['available'] ?? false),
+                        ])>
+                            <i @class([
+                                'vacation-slider-card__available-item-icon',
+                                'fas',
+                                'fa-check text-success' => $item['available'] ?? false,
+                                'fa-times text-danger' => ! ($item['available'] ?? false),
+                            ]) aria-hidden="true"></i>
                             <span>{{ $item['label'] }}</span>
                         </span>
                     @endforeach

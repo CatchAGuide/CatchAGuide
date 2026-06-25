@@ -18,10 +18,6 @@ class VacationFilterApplicator
             });
         }
 
-        if ($filter->duration !== null) {
-            $this->applyCampDuration($query, $filter->duration);
-        }
-
         return $query;
     }
 
@@ -32,10 +28,6 @@ class VacationFilterApplicator
             $query->where(function (Builder $q) use ($needle) {
                 $q->whereRaw('LOWER(CAST(target_species AS CHAR)) LIKE ?', ['%' . $needle . '%']);
             });
-        }
-
-        if ($filter->duration !== null) {
-            $this->applyTripDuration($query, $filter->duration);
         }
 
         return $query;
@@ -92,32 +84,5 @@ class VacationFilterApplicator
         }
 
         return $names->unique()->sort()->values()->all();
-    }
-
-    private function applyCampDuration(Builder $query, string $duration): void
-    {
-        if (str_contains($duration, '+')) {
-            $minNights = (int) filter_var($duration, FILTER_SANITIZE_NUMBER_INT);
-            if ($minNights > 0) {
-                $query->whereHas('accommodations', function (Builder $q) use ($minNights) {
-                    $q->where('minimum_stay_nights', '>=', $minNights);
-                });
-            }
-        }
-    }
-
-    private function applyTripDuration(Builder $query, string $duration): void
-    {
-        if (str_contains($duration, '+')) {
-            $minDays = (int) filter_var($duration, FILTER_SANITIZE_NUMBER_INT);
-            if ($minDays > 0) {
-                $query->where('duration_days', '>=', $minDays);
-            }
-            return;
-        }
-
-        if (preg_match('/^(\d+)$/', $duration, $m)) {
-            $query->where('duration_days', (int) $m[1]);
-        }
     }
 }

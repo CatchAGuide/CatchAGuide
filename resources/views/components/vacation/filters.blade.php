@@ -12,6 +12,7 @@
     'showDesktop' => true,
     'action' => null,
     'omitPillarFromQuery' => false,
+    'pillarLinks' => null,
 ])
 
 @php
@@ -23,10 +24,16 @@
     $speciesOptions = $speciesOptions instanceof Collection ? $speciesOptions : collect($speciesOptions ?? []);
     $countries = $countries instanceof Collection ? $countries : collect($countries ?? []);
     $activePillar = $filter->pillar ?? 'all';
-    $durationOptions = config('vacations.duration_filter_options', []);
-    $activeFilterCount = collect(['species', 'duration', 'country', 'sortby', 'pillar'])
+    $activeFilterCount = collect(['species', 'country', 'sortby', 'pillar'])
         ->filter(fn ($key) => $key === 'pillar' && $omitPillarFromQuery ? false : filled(request()->get($key)))
         ->count();
+    $pillarUrl = function (string $pillar) use ($action, $query, $pillarLinks) {
+        if (is_array($pillarLinks) && isset($pillarLinks[$pillar])) {
+            return $pillarLinks[$pillar];
+        }
+
+        return $action.'?'.http_build_query(array_merge($query, ['pillar' => $pillar]));
+    };
 @endphp
 
 <form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
@@ -35,7 +42,7 @@
             @foreach($value as $v)
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
             @endforeach
-        @elseif($key !== 'species' && $key !== 'duration' && $key !== 'country' && $key !== 'sortby')
+        @elseif($key !== 'species' && $key !== 'country' && $key !== 'sortby')
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
     @endforeach
@@ -46,15 +53,15 @@
 
     @if($showPillarToggles && $tripsTotal !== null && $campsTotal !== null)
         <div class="vacation-filters__pillar-group" role="group" data-analytics-vacation-pillar-filter>
-            <a href="{{ $action }}?{{ http_build_query(array_merge($query, ['pillar' => 'all'])) }}"
+            <a href="{{ $pillarUrl('all') }}"
                class="vacation-filters__pillar-btn vacation-filters__pillar-btn--all {{ $activePillar === 'all' ? 'is-active' : '' }}">
                 {{ __('vacations.filter_show_all') }} ({{ $total }})
             </a>
-            <a href="{{ $action }}?{{ http_build_query(array_merge($query, ['pillar' => 'trips'])) }}"
+            <a href="{{ $pillarUrl('trips') }}"
                class="vacation-filters__pillar-btn vacation-filters__pillar-btn--trips {{ $activePillar === 'trips' ? 'is-active' : '' }}">
                 {{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})
             </a>
-            <a href="{{ $action }}?{{ http_build_query(array_merge($query, ['pillar' => 'camps'])) }}"
+            <a href="{{ $pillarUrl('camps') }}"
                class="vacation-filters__pillar-btn vacation-filters__pillar-btn--camps {{ $activePillar === 'camps' ? 'is-active' : '' }}">
                 {{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})
             </a>
@@ -113,20 +120,6 @@
                 </div>
             @endif
 
-            @if(! empty($durationOptions))
-                <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
-                    <label class="form-label">{{ __('vacations.filter_duration') }}</label>
-                    <select name="duration" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">{{ __('vacations.select') }}</option>
-                        @foreach($durationOptions as $option)
-                            <option value="{{ $option['value'] }}" @selected(($filter->duration ?? '') === $option['value'])>
-                                {{ __($option['label_key']) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
-
             <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                 <label class="form-label">{{ __('vacations.filter_sort') }}</label>
                 <select name="sortby" class="form-select form-select-sm" onchange="this.form.submit()">
@@ -164,7 +157,7 @@
                         @foreach($value as $v)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
                         @endforeach
-                    @elseif(! in_array($key, ['species', 'duration', 'country', 'sortby', 'pillar'], true))
+                    @elseif(! in_array($key, ['species', 'country', 'sortby', 'pillar'], true))
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                 @endforeach
@@ -172,11 +165,28 @@
                 @if($showPillarToggles && $tripsTotal !== null && $campsTotal !== null)
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_show_all') }}</label>
-                        <select name="pillar" class="form-select">
-                            <option value="all" @selected($activePillar === 'all')>{{ __('vacations.filter_show_all') }} ({{ $total }})</option>
-                            <option value="trips" @selected($activePillar === 'trips')>{{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})</option>
-                            <option value="camps" @selected($activePillar === 'camps')>{{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})</option>
-                        </select>
+                        @if(is_array($pillarLinks))
+                            <div class="vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
+                                <a href="{{ $pillarUrl('all') }}"
+                                   class="vacation-filters__pillar-btn vacation-filters__pillar-btn--all {{ $activePillar === 'all' ? 'is-active' : '' }}">
+                                    {{ __('vacations.filter_show_all') }} ({{ $total }})
+                                </a>
+                                <a href="{{ $pillarUrl('trips') }}"
+                                   class="vacation-filters__pillar-btn vacation-filters__pillar-btn--trips {{ $activePillar === 'trips' ? 'is-active' : '' }}">
+                                    {{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})
+                                </a>
+                                <a href="{{ $pillarUrl('camps') }}"
+                                   class="vacation-filters__pillar-btn vacation-filters__pillar-btn--camps {{ $activePillar === 'camps' ? 'is-active' : '' }}">
+                                    {{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})
+                                </a>
+                            </div>
+                        @else
+                            <select name="pillar" class="form-select">
+                                <option value="all" @selected($activePillar === 'all')>{{ __('vacations.filter_show_all') }} ({{ $total }})</option>
+                                <option value="trips" @selected($activePillar === 'trips')>{{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})</option>
+                                <option value="camps" @selected($activePillar === 'camps')>{{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})</option>
+                            </select>
+                        @endif
                     </div>
                 @endif
 
@@ -201,20 +211,6 @@
                             <option value="">{{ __('vacations.select') }}</option>
                             @foreach($speciesOptions as $species)
                                 <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
-
-                @if(! empty($durationOptions))
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('vacations.filter_duration') }}</label>
-                        <select name="duration" class="form-select">
-                            <option value="">{{ __('vacations.select') }}</option>
-                            @foreach($durationOptions as $option)
-                                <option value="{{ $option['value'] }}" @selected(($filter->duration ?? '') === $option['value'])>
-                                    {{ __($option['label_key']) }}
-                                </option>
                             @endforeach
                         </select>
                     </div>

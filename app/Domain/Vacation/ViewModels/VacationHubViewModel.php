@@ -15,7 +15,6 @@ final class VacationHubViewModel
         public readonly Collection $newCamps,
         public readonly bool $showNewCampsRail,
         public readonly Collection $countryGrid,
-        public readonly Collection $inspirationTiles,
         public readonly array $faqItems,
         public readonly int $totalTrips,
         public readonly int $totalCamps,

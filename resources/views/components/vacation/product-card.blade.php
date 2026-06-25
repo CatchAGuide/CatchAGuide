@@ -39,7 +39,10 @@
             :gallery-id="($card['type'] ?? 'listing') . '-' . ($card['id'] ?? uniqid())"
             :url="$card['url']"
         />
-        <span class="vacation-product-card__badge">{{ $card['badge'] }}</span>
+        <x-vacation.partials.image-pillar-badge
+            :pillar="$pillar"
+            :badge="$card['badge'] ?? null"
+        />
     </div>
 
     <div class="vacation-product-card__body">

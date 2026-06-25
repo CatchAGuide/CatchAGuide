@@ -9,8 +9,6 @@
     $galleryId = 'camp-' . ($card['id'] ?? uniqid());
 
     $targetFishTags = vacation_fish_tags($card['target_fish_tags'] ?? []);
-    $visibleFishTags = array_slice($targetFishTags, 0, 3);
-    $targetFishExtra = max(0, count($targetFishTags) - count($visibleFishTags));
 
     $facilities = $card['listing_facilities'] ?? array_map(
         fn (string $label) => ['label' => $label, 'icon' => vacation_camp_facility_icon($label)],
@@ -52,6 +50,8 @@
                     />
                 @endif
 
+                <x-vacation.partials.image-pillar-badge pillar="camp" :badge="$card['badge'] ?? null" />
+
                 <button
                     type="button"
                     class="vacation-camp-list-card__favorite"
@@ -86,77 +86,70 @@
                 @endif
             </div>
 
-            @if(!empty($visibleFishTags))
-                <div class="vacation-camp-list-card__section">
-                    <div class="vacation-camp-list-card__section-heading">
-                        <img
-                            src="{{ asset('assets/images/icons/fish.png') }}"
-                            width="16"
-                            height="16"
-                            alt=""
-                            class="vacation-camp-list-card__section-icon"
-                        />
-                        <span class="vacation-camp-list-card__section-label">{{ __('vacations.target_fish') }}</span>
+            @if(!empty($targetFishTags))
+                <div class="vacation-camp-list-card__section vacation-camp-list-card__section--fish">
+                    <div class="vacation-camp-list-card__tags-row">
+                        <div class="vacation-camp-list-card__section-heading">
+                            <img
+                                src="{{ asset('assets/images/icons/fish.png') }}"
+                                width="16"
+                                height="16"
+                                alt=""
+                                class="vacation-camp-list-card__section-icon"
+                            />
+                            <span class="vacation-camp-list-card__section-label">{{ __('vacations.target_fish') }}</span>
+                        </div>
+                        <div class="vacation-camp-list-card__tags" data-vacation-fish-tags>
+                            @foreach($targetFishTags as $tag)
+                                <span class="vacation-camp-list-card__tag" data-vacation-fish-tag>{{ $tag }}</span>
+                            @endforeach
+                            <span
+                                class="vacation-camp-list-card__tag vacation-camp-list-card__tag--more"
+                                data-vacation-fish-tag-more
+                                hidden
+                            >+0</span>
+                        </div>
                     </div>
-                    <div class="vacation-camp-list-card__tags">
-                        @foreach($visibleFishTags as $tag)
-                            <span class="vacation-camp-list-card__tag">{{ $tag }}</span>
+                </div>
+            @endif
+
+            @if(!empty($facilities))
+                <div class="vacation-camp-list-card__section">
+                    <div class="vacation-camp-list-card__amenities">
+                        @foreach($facilities as $facility)
+                            <span class="vacation-camp-list-card__tag vacation-camp-list-card__tag--amenity">
+                                <img
+                                    src="{{ asset($facility['icon']) }}"
+                                    width="14"
+                                    height="14"
+                                    alt=""
+                                    class="vacation-camp-list-card__tag-icon"
+                                />
+                                <span>{{ $facility['label'] }}</span>
+                            </span>
                         @endforeach
-                        @if($targetFishExtra > 0)
-                            <span class="vacation-camp-list-card__tag vacation-camp-list-card__tag--more">+{{ $targetFishExtra }}</span>
-                        @endif
                     </div>
                 </div>
             @endif
 
-            @if(!empty($facilities) || !empty($availability))
-                <div class="vacation-camp-list-card__section">
-                    <div class="vacation-camp-list-card__section-heading">
-                        <img
-                            src="{{ asset('assets/images/icons/check.png') }}"
-                            width="16"
-                            height="16"
-                            alt=""
-                            class="vacation-camp-list-card__section-icon"
-                        />
-                        <span class="vacation-camp-list-card__section-label">{{ __('vacations.availability_label') }}</span>
-                    </div>
-
-                    @if(!empty($facilities))
-                        <div class="vacation-camp-list-card__amenities">
-                            @foreach($facilities as $facility)
-                                <span class="vacation-camp-list-card__amenity">
-                                    <img
-                                        src="{{ asset($facility['icon']) }}"
-                                        width="16"
-                                        height="16"
-                                        alt=""
-                                        class="vacation-camp-list-card__amenity-icon"
-                                    />
-                                    <span>{{ $facility['label'] }}</span>
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    @if(!empty($availability))
-                        <div class="vacation-camp-list-card__availability">
-                            @foreach($availability as $item)
-                                <span class="vacation-camp-list-card__availability-item">
-                                    <img
-                                        src="{{ asset($item['icon']) }}"
-                                        width="16"
-                                        height="16"
-                                        alt=""
-                                        class="vacation-camp-list-card__availability-icon"
-                                    />
-                                    <span>{{ $item['label'] }}</span>
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
+            <div class="vacation-camp-list-card__section">
+                <div class="vacation-camp-list-card__availability">
+                    @foreach($availability as $item)
+                        <span @class([
+                            'vacation-camp-list-card__availability-item',
+                            'vacation-camp-list-card__availability-item--unavailable' => ! ($item['available'] ?? false),
+                        ])>
+                            <i @class([
+                                'vacation-camp-list-card__availability-icon',
+                                'fas',
+                                'fa-check text-success' => $item['available'] ?? false,
+                                'fa-times text-danger' => ! ($item['available'] ?? false),
+                            ]) aria-hidden="true"></i>
+                            <span>{{ $item['label'] }}</span>
+                        </span>
+                    @endforeach
                 </div>
-            @endif
+            </div>
 
             <div class="vacation-camp-list-card__footer">
                 <div class="vacation-camp-list-card__trust">
@@ -171,7 +164,7 @@
                 </div>
 
                 <a href="{{ $card['url'] }}" class="vacation-camp-list-card__cta">
-                    {{ $card['cta'] }} <span aria-hidden="true">&rarr;</span>
+                    {{ __('vacations.see_more') }}
                 </a>
             </div>
         </div>

@@ -2,7 +2,6 @@
     'totalCamps' => 0,
     'totalTrips' => 0,
     'countryCount' => 0,
-    'inspirationTiles' => collect(),
 ])
 
 <section class="vacation-hub__interlude mb-5" data-analytics-vacation-rail="hub-bridge">
@@ -47,31 +46,18 @@
             </div>
         </div>
 
-        <div class="vacation-hub__interlude-details">
-            <div class="vacation-hub__interlude-usps">
-                @foreach(config('vacations.hub_value_props', []) as $prop)
-                    <article class="vacation-hub__interlude-usp">
-                        <span class="vacation-hub__interlude-usp-icon" aria-hidden="true">
-                            <i class="fas {{ $prop['icon'] }}"></i>
-                        </span>
-                        <div>
-                            <h3 class="vacation-hub__interlude-usp-title">{{ __($prop['title_key']) }}</h3>
-                            <p class="vacation-hub__interlude-usp-text">{{ __($prop['text_key']) }}</p>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-
-            @if($inspirationTiles->isNotEmpty())
-                <div class="vacation-hub__interlude-inspire">
-                    <p class="vacation-hub__interlude-inspire-label">{{ __('vacations.hub_inspiration_title') }}</p>
-                    <div class="vacation-hub__interlude-chips">
-                        @foreach($inspirationTiles as $tile)
-                            <a href="{{ $tile['url'] }}" class="vacation-hub__interlude-chip">{{ $tile['title'] }}</a>
-                        @endforeach
+        <div class="vacation-hub__interlude-usps">
+            @foreach(config('vacations.hub_value_props', []) as $prop)
+                <article class="vacation-hub__interlude-usp">
+                    <span class="vacation-hub__interlude-usp-icon" aria-hidden="true">
+                        <i class="fas {{ $prop['icon'] }}"></i>
+                    </span>
+                    <div>
+                        <h3 class="vacation-hub__interlude-usp-title">{{ __($prop['title_key']) }}</h3>
+                        <p class="vacation-hub__interlude-usp-text">{{ __($prop['text_key']) }}</p>
                     </div>
-                </div>
-            @endif
+                </article>
+            @endforeach
         </div>
     </div>
 </section>

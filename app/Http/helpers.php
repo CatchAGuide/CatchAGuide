@@ -91,16 +91,20 @@ if (!function_exists('vacation_camp_availability_icon')) {
 
 if (!function_exists('vacation_availability_item')) {
     /**
-     * @return array{label: string, icon: string}
+     * @return array{label: string, available: bool, icon: ?string}
      */
     function vacation_availability_item(mixed $item): array
     {
         if (is_array($item)) {
             $label = trim((string) ($item['label'] ?? ''));
+            $available = array_key_exists('available', $item)
+                ? (bool) $item['available']
+                : true;
 
             return [
                 'label' => $label,
-                'icon' => $item['icon'] ?? vacation_camp_availability_icon($label),
+                'available' => $available,
+                'icon' => $available ? 'assets/images/icons/check.png' : null,
             ];
         }
 
@@ -108,7 +112,8 @@ if (!function_exists('vacation_availability_item')) {
 
         return [
             'label' => $label,
-            'icon' => vacation_camp_availability_icon($label),
+            'available' => true,
+            'icon' => 'assets/images/icons/check.png',
         ];
     }
 }

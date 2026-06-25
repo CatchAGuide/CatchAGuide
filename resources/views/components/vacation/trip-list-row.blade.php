@@ -1,6 +1,8 @@
 @props(['card'])
 
 @php
+    use Illuminate\Support\Str;
+
     $galleryImages = array_values(array_filter($card['gallery_images'] ?? [$card['image'] ?? '']));
     $galleryFull = array_map(function ($img) {
         return str_starts_with((string) $img, 'http') ? $img : media_url($img);
@@ -13,7 +15,6 @@
     $targetFishExtra = (int) ($card['target_fish_tags_extra'] ?? max(0, count($targetFishTags) - count($visibleFishTags)));
 
     $included = $card['listing_included'] ?? ($card['facilities'] ?? []);
-    $includedExtra = (int) ($card['listing_included_extra'] ?? 0);
 @endphp
 
 <article class="vacation-trip-list-card guiding-list-item" data-analytics-vacation-card data-pillar="trip">
@@ -44,6 +45,8 @@
                         loading="lazy"
                     />
                 @endif
+
+                <x-vacation.partials.image-pillar-badge pillar="trip" :badge="$card['badge'] ?? null" />
             </div>
         </div>
 
@@ -77,23 +80,21 @@
             @if(!empty($included))
                 <ul class="vacation-trip-list-card__included">
                     @foreach($included as $item)
-                        <li class="vacation-trip-list-card__included-item">
+                        <li class="vacation-trip-list-card__included-item" title="{{ $item }}">
                             <i class="fas fa-check-circle" aria-hidden="true"></i>
-                            <span>{{ $item }}</span>
+                            <span>{{ Str::limit($item, 72) }}</span>
                         </li>
                     @endforeach
                 </ul>
-                @if($includedExtra > 0)
-                    <a href="{{ $card['url'] }}" class="vacation-trip-list-card__more-link vacation-trip-list-card__more-link--included">
-                        + @lang('vacations.more')
-                    </a>
-                @endif
             @endif
 
             @if(!empty($card['duration_pill']))
                 <div class="vacation-trip-list-card__duration">
                     <i class="far fa-clock" aria-hidden="true"></i>
-                    <span>{{ $card['duration_pill'] }}</span>
+                    <span>
+                        <span class="vacation-trip-list-card__duration-label">{{ __('vacations.duration_label') }}:</span>
+                        {{ $card['duration_pill'] }}
+                    </span>
                 </div>
             @endif
         </div>
@@ -121,7 +122,7 @@
             </div>
 
             <a href="{{ $card['url'] }}" class="vacation-trip-list-card__cta">
-                {{ $card['listing_cta'] ?? $card['slider_cta'] ?? $card['cta'] }}
+                {{ __('vacations.see_more') }}
             </a>
         </div>
     </div>

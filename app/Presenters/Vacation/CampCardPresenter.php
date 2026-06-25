@@ -89,29 +89,20 @@ class CampCardPresenter
     }
 
     /**
-     * @return array<int, array{label: string, icon: string}>
+     * @return array<int, array{label: string, available: bool}>
      */
     private function availabilityItems(Camp $camp): array
     {
-        $items = [];
-
-        if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
-            $label = __('vacations.rental_boat');
-            $items[] = [
-                'label' => $label,
-                'icon' => vacation_camp_availability_icon($label),
-            ];
-        }
-
-        if ($camp->guidings->isNotEmpty()) {
-            $label = __('vacations.guiding');
-            $items[] = [
-                'label' => $label,
-                'icon' => vacation_camp_availability_icon($label),
-            ];
-        }
-
-        return $items;
+        return [
+            [
+                'label' => __('vacations.guiding'),
+                'available' => $camp->guidings->isNotEmpty(),
+            ],
+            [
+                'label' => __('vacations.rental_boat'),
+                'available' => $camp->rentalBoats->where('status', 'active')->isNotEmpty(),
+            ],
+        ];
     }
 
     /**
