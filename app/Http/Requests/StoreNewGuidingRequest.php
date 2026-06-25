@@ -105,7 +105,7 @@ class StoreNewGuidingRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return auth()->check() || auth('employees')->check();
     }
 
     protected function prepareForValidation()
