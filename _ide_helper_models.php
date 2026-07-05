@@ -3803,6 +3803,29 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property string $email
+ * @property string $country
+ * @property string $pillar
+ * @property string $locale
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup wherePillar($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereUpdatedAt($value)
+ */
+	class VacationInterestSignup extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property int $vacation_id
  * @property string|null $title
  * @property string $description
