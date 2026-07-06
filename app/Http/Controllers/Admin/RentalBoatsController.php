@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RentalBoatRequest;
 use App\Models\RentalBoat;
+use App\Support\AdminListingStats;
 use App\Services\RentalBoat\RentalBoatDataProcessor;
 use App\Services\RentalBoat\RentalBoatSeoService;
 use App\Services\RentalBoat\RentalBoatCacheService;
@@ -29,8 +30,10 @@ class RentalBoatsController extends Controller
      */
     public function index()
     {
-        $rentalBoats = $this->cacheService->getRentalBoatsList();
-        return view('admin.pages.rental-boats.index', compact('rentalBoats'));
+        $rentalBoats = RentalBoat::with('user')->orderByDesc('id')->get();
+        $listingStats = AdminListingStats::cardsForRentalBoats($rentalBoats);
+
+        return view('admin.pages.rental-boats.index', compact('rentalBoats', 'listingStats'));
     }
 
     /**

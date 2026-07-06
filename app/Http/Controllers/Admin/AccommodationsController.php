@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccommodationRequest;
 use App\Models\Accommodation;
+use App\Support\AdminListingStats;
 use App\Services\Accommodation\AccommodationDataProcessor;
 use App\Services\Accommodation\AccommodationSeoService;
 use App\Services\Accommodation\AccommodationCacheService;
@@ -28,8 +29,12 @@ class AccommodationsController extends Controller
      */
     public function index()
     {
-        $accommodations = $this->cacheService->getAccommodationsList(15);
-        return view('admin.pages.accommodations.index', compact('accommodations'));
+        $accommodations = Accommodation::with(['user', 'accommodationType'])
+            ->orderByDesc('id')
+            ->get();
+        $listingStats = AdminListingStats::cardsForStatusListings($accommodations, 'Total accommodations');
+
+        return view('admin.pages.accommodations.index', compact('accommodations', 'listingStats'));
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SpecialOfferRequest;
 use App\Models\SpecialOffer;
+use App\Support\AdminListingStats;
 use App\Services\SpecialOffer\SpecialOfferDataProcessor;
 use App\Services\SpecialOffer\SpecialOfferSeoService;
 use App\Services\SpecialOffer\SpecialOfferCacheService;
@@ -29,8 +30,12 @@ class SpecialOffersController extends Controller
      */
     public function index()
     {
-        $specialOffers = $this->cacheService->getSpecialOffersList();
-        return view('admin.pages.special-offers.index', compact('specialOffers'));
+        $specialOffers = SpecialOffer::with('user')
+            ->orderByDesc('id')
+            ->get();
+        $listingStats = AdminListingStats::cardsForStatusListings($specialOffers, 'Total offers');
+
+        return view('admin.pages.special-offers.index', compact('specialOffers', 'listingStats'));
     }
 
     /**

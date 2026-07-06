@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CampRequest;
 use App\Models\Camp;
+use App\Support\AdminListingStats;
 use App\Models\CampFacility;
 use App\Services\Camp\CampDataProcessor;
 use App\Services\Camp\CampSeoService;
@@ -29,8 +30,12 @@ class CampsController extends Controller
      */
     public function index()
     {
-        $camps = $this->cacheService->getCampsList();
-        return view('admin.pages.camps.index', compact('camps'));
+        $camps = Camp::with('user')
+            ->orderByDesc('id')
+            ->get();
+        $listingStats = AdminListingStats::cardsForStatusListings($camps, 'Total camps');
+
+        return view('admin.pages.camps.index', compact('camps', 'listingStats'));
     }
 
     /**
