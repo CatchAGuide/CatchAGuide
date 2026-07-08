@@ -25,12 +25,18 @@ class ListingGalleryImageProcessor
     ): ?array {
         $options = $this->options($listingKey);
         $galleryImages = [];
-        $imageList = json_decode($request->input('image_list', '[]'), true) ?? [];
+        $imageListRaw = $request->input('image_list');
+        // Empty/missing means ImageManager never synced the hidden field.
+        // A synced empty gallery is the JSON string "[]".
+        $imageListSynced = is_string($imageListRaw) && trim($imageListRaw) !== '';
+        $imageList = $imageListSynced
+            ? (json_decode($imageListRaw, true) ?? [])
+            : [];
         $processedFilenames = [];
         $directory = $this->paths->entityDirectory($listingKey, $entityId);
 
         if ($request->input('is_update') == '1' && $entityId) {
-            $galleryImages = $this->retainExistingImages($request, $imageList);
+            $galleryImages = $this->retainExistingImages($request, $imageList, $imageListSynced);
         }
 
         if ($request->hasFile($fileField)) {
@@ -45,7 +51,11 @@ class ListingGalleryImageProcessor
                         continue;
                     }
 
-                    if (! $this->shouldKeepUpload($originalFilename, $imageList, $listingKey)) {
+                    if (! $this->shouldKeepUpload($originalFilename, $imageList, $listingKey, $imageListSynced)) {
+                        Log::warning("ListingGalleryImageProcessor [{$listingKey}] skipped upload not present in image_list", [
+                            'filename' => $originalFilename,
+                            'image_list' => $imageList,
+                        ]);
                         continue;
                     }
 
@@ -127,17 +137,30 @@ class ListingGalleryImageProcessor
      * @param  array<int, mixed>  $imageList
      * @return array<int, string>
      */
-    private function retainExistingImages(Request $request, array $imageList): array
+    private function retainExistingImages(Request $request, array $imageList, bool $imageListSynced): array
     {
         $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
-        $keepImages = array_filter($imageList);
+        $existingImages = array_values(array_filter($existingImages, static fn ($path) => is_string($path) && $path !== ''));
+
+        // Client never synced image_list: keep existing images instead of wiping the gallery.
+        if (! $imageListSynced) {
+            return $existingImages;
+        }
+
+        $keepImages = array_values(array_filter(array_map(
+            static fn ($path) => is_string($path) ? ltrim($path, '/') : null,
+            $imageList
+        )));
+        $keepBasenames = array_flip(array_map('basename', $keepImages));
         $galleryImages = [];
 
         foreach ($existingImages as $existingImage) {
-            $imagePath = $existingImage;
-            $imagePathWithSlash = '/' . $existingImage;
+            $normalizedExisting = ltrim($existingImage, '/');
 
-            if (in_array($imagePath, $keepImages, true) || in_array($imagePathWithSlash, $keepImages, true)) {
+            if (
+                in_array($normalizedExisting, $keepImages, true)
+                || isset($keepBasenames[basename($normalizedExisting)])
+            ) {
                 $galleryImages[] = $existingImage;
             } else {
                 media_delete($existingImage);
@@ -148,19 +171,40 @@ class ListingGalleryImageProcessor
     }
 
     /**
+     * Match uploaded filenames against ImageManager's image_list entries.
+     *
+     * image_list may contain bare filenames, legacy prefixes (e.g. rental-boats-images/),
+     * current listing folders (e.g. accommodations/), or full entity paths
+     * (e.g. accommodations/81/photo.jpg). Compare by exact path and by basename so
+     * storagePrefix / entity-folder paths do not silently drop uploads.
+     *
      * @param  array<int, mixed>  $imageList
      */
-    private function shouldKeepUpload(string $originalFilename, array $imageList, string $listingKey): bool
-    {
-        if (in_array($originalFilename, $imageList, true) || in_array('/' . $originalFilename, $imageList, true)) {
+    private function shouldKeepUpload(
+        string $originalFilename,
+        array $imageList,
+        string $listingKey,
+        bool $imageListSynced = true,
+    ): bool {
+        // Client never synced image_list: accept uploads rather than silently discarding them.
+        if (! $imageListSynced) {
             return true;
         }
 
-        foreach ($this->legacyImageListPrefixes($listingKey) as $prefix) {
-            if (
-                in_array($prefix . $originalFilename, $imageList, true)
-                || in_array('/' . $prefix . $originalFilename, $imageList, true)
-            ) {
+        $candidates = $this->imageListUploadCandidates($originalFilename, $listingKey);
+
+        foreach ($imageList as $entry) {
+            if (! is_string($entry) || $entry === '') {
+                continue;
+            }
+
+            $normalized = ltrim($entry, '/');
+
+            if (in_array($normalized, $candidates, true) || in_array($entry, $candidates, true)) {
+                return true;
+            }
+
+            if (basename($normalized) === $originalFilename) {
                 return true;
             }
         }
@@ -171,14 +215,46 @@ class ListingGalleryImageProcessor
     /**
      * @return array<int, string>
      */
-    private function legacyImageListPrefixes(string $listingKey): array
+    private function imageListUploadCandidates(string $originalFilename, string $listingKey): array
     {
-        $legacy = config("media_storage.legacy_listing_folders.{$listingKey}", []);
+        $candidates = [
+            $originalFilename,
+            '/' . $originalFilename,
+        ];
 
-        return array_map(
+        foreach ($this->imageListPrefixes($listingKey) as $prefix) {
+            $candidates[] = $prefix . $originalFilename;
+            $candidates[] = '/' . $prefix . $originalFilename;
+        }
+
+        return array_values(array_unique($candidates));
+    }
+
+    /**
+     * Current + legacy folder prefixes used by ImageManager storagePrefix / path sync.
+     *
+     * @return array<int, string>
+     */
+    private function imageListPrefixes(string $listingKey): array
+    {
+        $folders = [];
+
+        $current = config("media_storage.listing_folders.{$listingKey}");
+        if (is_string($current) && $current !== '') {
+            $folders[] = $current;
+        }
+
+        $legacy = config("media_storage.legacy_listing_folders.{$listingKey}", []);
+        foreach ((array) $legacy as $folder) {
+            if (is_string($folder) && $folder !== '') {
+                $folders[] = $folder;
+            }
+        }
+
+        return array_values(array_unique(array_map(
             static fn (string $folder) => rtrim($folder, '/') . '/',
-            array_filter((array) $legacy, 'is_string')
-        );
+            $folders
+        )));
     }
 
     /**

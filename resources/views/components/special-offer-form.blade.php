@@ -50,6 +50,12 @@
             <input type="hidden" id="image_list" name="image_list">
             <input type="hidden" name="pricing" id="pricing_input" value="{{ isset($formData['pricing']) ? json_encode($formData['pricing']) : '' }}">
 
+            @include('components.listing-draft-status-banner', [
+                'formData' => $formData ?? [],
+                'formId' => 'specialOfferForm',
+                'activateSubmitButtonId' => 'submitBtn3',
+            ])
+
             <!-- Step 1: Gallery, Location and Title -->
             <div class="step active" id="step1">
                 <h5>Gallery, Location & Title</h5>
@@ -275,7 +281,7 @@
                             </button>
                             <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn3" onclick="document.getElementById('is_draft').value = '0';">
+                        <button type="submit" class="btn btn-primary" id="submitBtn3" onclick="document.getElementById('is_draft').value = '0'; document.getElementById('status').value = 'active';">
                             Submit & Publish
                         </button>
                     </div>

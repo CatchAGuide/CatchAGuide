@@ -133,6 +133,19 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
+                                                @if($trip->status === 'active')
+                                                    <a href="{{ route('admin.trips.change-status', $trip->id) }}"
+                                                       class="btn btn-sm btn-secondary"
+                                                       title="Set to Draft">
+                                                        <i class="fas fa-file-alt"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('admin.trips.change-status', $trip->id) }}"
+                                                       class="btn btn-sm btn-success"
+                                                       title="Activate">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                @endif
                                                 <a href="{{ route('trips.show', $trip->slug) }}"
                                                    class="btn btn-sm btn-info"
                                                    title="View product page"
