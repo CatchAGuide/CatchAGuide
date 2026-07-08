@@ -862,6 +862,10 @@
     function submitForm(form) {
         const formData = new FormData(form);
         
+        // Publishing always clears draft and forces active status
+        formData.set('is_draft', '0');
+        formData.set('status', 'active');
+        
         // Process images before submission
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
             if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {

@@ -55,6 +55,11 @@
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
 
+            @include('components.listing-draft-status-banner', [
+                'formData' => $formData ?? [],
+                'formId' => 'accommodationForm',
+                'activateSubmitButtonId' => 'submitBtn6',
+            ])
 
             <!-- Step 1: Gallery, Location and Title -->
             <div class="step active" id="step1">
@@ -479,7 +484,7 @@
                             </button>
                             <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn6" onclick="document.getElementById('is_draft').value = '0';">
+                        <button type="submit" class="btn btn-primary" id="submitBtn6" onclick="document.getElementById('is_draft').value = '0'; document.getElementById('status').value = 'active';">
                             {{ __('accommodations.submit_publish') }}
                         </button>
                     </div>

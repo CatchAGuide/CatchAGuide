@@ -61,7 +61,7 @@ class AccommodationsController extends Controller
         try {
             // Process form data using service
             $accommodationData = $this->dataProcessor->processRequestData($request);
-            $accommodationData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
+            $accommodationData['status'] = $isDraft ? 'draft' : 'active';
             $accommodationData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
@@ -156,7 +156,7 @@ class AccommodationsController extends Controller
         try {
             // Process form data using service
             $accommodationData = $this->dataProcessor->processRequestData($request, $accommodation);
-            $accommodationData['status'] = $isDraft ? 'draft' : ($request->status ?? $accommodation->status);
+            $accommodationData['status'] = $isDraft ? 'draft' : 'active';
             
             // Generate slug from title if title changed
             if ($accommodation->title !== $request->title && $request->title) {
@@ -229,5 +229,35 @@ class AccommodationsController extends Controller
 
         return redirect()->route('admin.accommodations.index')
             ->with('success', 'Accommodation deleted successfully.');
+    }
+
+    /**
+     * Activate or deactivate an accommodation (draft <-> active).
+     */
+    public function changeStatus(Request $request, $id)
+    {
+        $accommodation = Accommodation::findOrFail($id);
+        $requested = $request->input('status');
+        $accommodation->status = in_array($requested, ['active', 'draft'], true)
+            ? $requested
+            : ($accommodation->status === 'active' ? 'draft' : 'active');
+        $accommodation->save();
+
+        $this->cacheService->clearAccommodationCache($accommodation->id);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status' => $accommodation->status,
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            $accommodation->status === 'active'
+                ? 'Accommodation activated successfully.'
+                : 'Accommodation set to draft successfully.'
+        );
     }
 }

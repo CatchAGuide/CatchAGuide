@@ -53,6 +53,12 @@
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
 
+            @include('components.listing-draft-status-banner', [
+                'formData' => $formData ?? [],
+                'formId' => 'tripForm',
+                'activateSubmitButtonId' => 'submitBtn8',
+            ])
+
             {{-- STEP 1 — IMAGES & BASICS --}}
             <div class="step active" id="step1">
                 <h5>{{ __('trips.upload_images_title') }}</h5>
@@ -866,7 +872,7 @@
                             </button>
                             <div></div>
                         </div>
-                        <button type="submit" class="btn btn-primary" id="submitBtn8" onclick="document.getElementById('is_draft').value = '0';">
+                        <button type="submit" class="btn btn-primary" id="submitBtn8" onclick="document.getElementById('is_draft').value = '0'; document.getElementById('status').value = 'active';">
                             {{ __('trips.submit_publish') }}
                         </button>
                     </div>

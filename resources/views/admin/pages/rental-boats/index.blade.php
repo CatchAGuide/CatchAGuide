@@ -72,8 +72,10 @@
                                         <td>
                                             @if($rentalBoat->status === 'active')
                                                 <span class="badge bg-success">Active</span>
+                                            @elseif($rentalBoat->status === 'draft')
+                                                <span class="badge bg-warning text-dark">Draft</span>
                                             @else
-                                                <span class="badge bg-danger">Inactive</span>
+                                                <span class="badge bg-secondary">{{ ucfirst($rentalBoat->status) }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -88,9 +90,9 @@
                                             <div class="btn-group">
                                                 @if($rentalBoat->status === 'active')
                                                     <a href="{{ route('admin.rental-boats.change-status', $rentalBoat->id) }}" 
-                                                       title="Deactivate Rental Boat" 
-                                                       class="btn btn-sm btn-danger">
-                                                        <i class="fa fa-times"></i>
+                                                       title="Set to Draft" 
+                                                       class="btn btn-sm btn-secondary">
+                                                        <i class="fa fa-file-alt"></i>
                                                     </a>
                                                 @else
                                                     <a href="{{ route('admin.rental-boats.change-status', $rentalBoat->id) }}" 

@@ -485,7 +485,7 @@
         
         // Ensure status is set to 'active' for final submission (not draft)
         const isDraft = formData.get('is_draft') === '1';
-        if (!isDraft && !formData.get('status')) {
+        if (!isDraft) {
             formData.set('status', 'active');
         }
         
