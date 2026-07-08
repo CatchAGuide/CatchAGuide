@@ -414,6 +414,10 @@
 
             // Append cropped images as files if available
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+                if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                    window.imageManagerLoaded.syncImageListFromDom();
+                    formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+                }
                 const croppedImages = window.imageManagerLoaded.getCroppedImages();
                 if (croppedImages.length > 0) {
                     // Remove any existing title_image[] from FormData
@@ -487,6 +491,10 @@
         
         // Process images before submission
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+            if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                window.imageManagerLoaded.syncImageListFromDom();
+                formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+            }
             const croppedImages = window.imageManagerLoaded.getCroppedImages();
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData

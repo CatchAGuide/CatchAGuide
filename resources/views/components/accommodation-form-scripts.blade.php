@@ -71,20 +71,23 @@
         initializeImageManager();
         
         // Load existing images if editing using ImageManager
-            if (document.getElementById('is_update').value === '1') {
+        // Delay so async ImageManager.js finish loading (same pattern as camp form)
+        if (document.getElementById('is_update').value === '1') {
+            setTimeout(() => {
                 const existingImagesInput = document.getElementById('existing_images');
-                const thumbnailPath = document.getElementById('thumbnail_path').value;
-                
-            if (existingImagesInput && existingImagesInput.value && window.imageManagerLoaded) {
-                try {
-                    const existingImages = JSON.parse(existingImagesInput.value);
-                    if (Array.isArray(existingImages) && existingImages.length > 0) {
-                        window.imageManagerLoaded.loadExistingImages(existingImages, thumbnailPath);
+                const thumbnailPath = document.getElementById('thumbnail_path')?.value || '';
+
+                if (existingImagesInput && existingImagesInput.value && window.imageManagerLoaded) {
+                    try {
+                        const existingImages = JSON.parse(existingImagesInput.value);
+                        if (Array.isArray(existingImages) && existingImages.length > 0) {
+                            window.imageManagerLoaded.loadExistingImages(existingImages, thumbnailPath);
+                        }
+                    } catch (e) {
+                        console.error('Error loading existing images:', e);
                     }
-                } catch (e) {
-                    console.error('Error loading existing images:', e);
                 }
-            }
+            }, 500);
         }
 
     function loadExistingFormData() {
@@ -805,6 +808,10 @@
 
             // Append cropped images as files if available
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+                if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                    window.imageManagerLoaded.syncImageListFromDom();
+                    formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+                }
                 const croppedImages = window.imageManagerLoaded.getCroppedImages();
                 if (croppedImages.length > 0) {
                     // Remove any existing title_image[] from FormData
@@ -857,6 +864,10 @@
         
         // Process images before submission
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+            if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                window.imageManagerLoaded.syncImageListFromDom();
+                formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+            }
             const croppedImages = window.imageManagerLoaded.getCroppedImages();
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData
