@@ -335,11 +335,13 @@ function setupStepNavigation() {
     
     function saveDraft() {
         $('#is_draft').val('1');
+        $('#status').val('draft');
         $('#campForm').submit();
     }
     
     function submitForm() {
         $('#is_draft').val('0');
+        $('#status').val('active');
         $('#campForm').submit();
     }
 }
@@ -350,6 +352,14 @@ function setupFormSubmission() {
         
         const formData = new FormData(this);
         const submitUrl = $(this).attr('action');
+
+        // Keep status in sync with draft vs publish
+        if (formData.get('is_draft') === '1') {
+            formData.set('status', 'draft');
+        } else {
+            formData.set('is_draft', '0');
+            formData.set('status', 'active');
+        }
         
         // Collect tagify data properly
         collectTagifyData(formData);

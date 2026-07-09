@@ -62,7 +62,7 @@ class TripsController extends Controller
 
         try {
             $tripData = $this->dataProcessor->processRequestData($request);
-            $tripData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
+            $tripData['status'] = $isDraft ? 'draft' : 'active';
             $tripData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             $imageData = $this->galleryProcessor->process($request, 'trip', $tripData['slug'], null);
@@ -147,7 +147,7 @@ class TripsController extends Controller
 
         try {
             $tripData = $this->dataProcessor->processRequestData($request, $trip);
-            $tripData['status'] = $isDraft ? 'draft' : ($request->status ?? $trip->status);
+            $tripData['status'] = $isDraft ? 'draft' : 'active';
 
             if ($trip->title !== $request->title && $request->title) {
                 $tripData['slug'] = $this->seoService->generateSlug($request->title, $trip->id);
@@ -250,16 +250,29 @@ class TripsController extends Controller
     public function changeStatus(Request $request, $id)
     {
         $trip = Trip::findOrFail($id);
-        $trip->status = $request->status;
+        $requested = $request->input('status');
+        $trip->status = in_array($requested, ['active', 'draft'], true)
+            ? $requested
+            : ($trip->status === 'active' ? 'draft' : 'active');
         $trip->save();
 
         $this->cacheService->clearTripCache($trip->id);
         $this->cacheService->clearTripsListCache();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully.',
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status' => $trip->status,
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            $trip->status === 'active'
+                ? 'Trip activated successfully.'
+                : 'Trip set to draft successfully.'
+        );
     }
 }
 

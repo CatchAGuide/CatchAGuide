@@ -74,7 +74,7 @@ class RentalBoatsController extends Controller
 
             // Process form data using service
             $rentalBoatData = $this->dataProcessor->processRequestData($request);
-            $rentalBoatData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
+            $rentalBoatData['status'] = $isDraft ? 'draft' : 'active';
             $rentalBoatData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             
@@ -187,7 +187,7 @@ class RentalBoatsController extends Controller
 
             // Process form data using service
             $rentalBoatData = $this->dataProcessor->processRequestData($request, $rentalBoat);
-            $rentalBoatData['status'] = $isDraft ? 'draft' : ($request->status ?? $rentalBoat->status);
+            $rentalBoatData['status'] = $isDraft ? 'draft' : 'active';
             
             // Generate slug from title if title changed
             if ($rentalBoat->title !== $request->title && $request->title) {
@@ -269,16 +269,29 @@ class RentalBoatsController extends Controller
     public function changeStatus(Request $request, $id)
     {
         $rentalBoat = RentalBoat::findOrFail($id);
-        $rentalBoat->status = $request->status;
+        $requested = $request->input('status');
+        $rentalBoat->status = in_array($requested, ['active', 'draft'], true)
+            ? $requested
+            : ($rentalBoat->status === 'active' ? 'draft' : 'active');
         $rentalBoat->save();
 
         // Clear caches
         $this->cacheService->clearRentalBoatCache($rentalBoat->id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully.'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status' => $rentalBoat->status,
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            $rentalBoat->status === 'active'
+                ? 'Rental boat activated successfully.'
+                : 'Rental boat set to draft successfully.'
+        );
     }
 
     /**

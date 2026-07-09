@@ -414,6 +414,10 @@
 
             // Append cropped images as files if available
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+                if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                    window.imageManagerLoaded.syncImageListFromDom();
+                    formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+                }
                 const croppedImages = window.imageManagerLoaded.getCroppedImages();
                 if (croppedImages.length > 0) {
                     // Remove any existing title_image[] from FormData
@@ -481,12 +485,16 @@
         
         // Ensure status is set to 'active' for final submission (not draft)
         const isDraft = formData.get('is_draft') === '1';
-        if (!isDraft && !formData.get('status')) {
+        if (!isDraft) {
             formData.set('status', 'active');
         }
         
         // Process images before submission
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
+            if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+                window.imageManagerLoaded.syncImageListFromDom();
+                formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+            }
             const croppedImages = window.imageManagerLoaded.getCroppedImages();
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData

@@ -68,7 +68,7 @@ class SpecialOffersController extends Controller
 
             // Process form data using service
             $specialOfferData = $this->dataProcessor->processRequestData($request);
-            $specialOfferData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
+            $specialOfferData['status'] = $isDraft ? 'draft' : 'active';
             $specialOfferData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
@@ -169,7 +169,7 @@ class SpecialOffersController extends Controller
 
             // Process form data using service
             $specialOfferData = $this->dataProcessor->processRequestData($request, $specialOffer);
-            $specialOfferData['status'] = $isDraft ? 'draft' : ($request->status ?? $specialOffer->status);
+            $specialOfferData['status'] = $isDraft ? 'draft' : 'active';
             
             // Generate slug from title if title changed
             if ($specialOffer->title !== $request->title && $request->title) {
@@ -291,17 +291,30 @@ class SpecialOffersController extends Controller
     public function changeStatus(Request $request, $id)
     {
         $specialOffer = SpecialOffer::findOrFail($id);
-        $specialOffer->status = $request->status;
+        $requested = $request->input('status');
+        $specialOffer->status = in_array($requested, ['active', 'draft'], true)
+            ? $requested
+            : ($specialOffer->status === 'active' ? 'draft' : 'active');
         $specialOffer->save();
 
         // Clear caches - clear both the specific special offer and the list
         $this->cacheService->clearSpecialOfferCache($specialOffer->id);
         $this->cacheService->clearSpecialOffersListCache();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully.'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status' => $specialOffer->status,
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            $specialOffer->status === 'active'
+                ? 'Special offer activated successfully.'
+                : 'Special offer set to draft successfully.'
+        );
     }
 
     /**

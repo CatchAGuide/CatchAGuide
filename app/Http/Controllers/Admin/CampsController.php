@@ -70,7 +70,7 @@ class CampsController extends Controller
 
             // Process form data using service
             $campData = $this->dataProcessor->processRequestData($request);
-            $campData['status'] = $isDraft ? 'draft' : ($request->status ?? 'active');
+            $campData['status'] = $isDraft ? 'draft' : 'active';
             $campData['slug'] = $this->seoService->generateSlug($request->title ?? 'Untitled');
 
             // Process images
@@ -182,7 +182,7 @@ class CampsController extends Controller
 
             // Process form data using service
             $campData = $this->dataProcessor->processRequestData($request, $camp);
-            $campData['status'] = $isDraft ? 'draft' : ($request->status ?? $camp->status);
+            $campData['status'] = $isDraft ? 'draft' : 'active';
             
             // Generate slug from title if title changed
             if ($camp->title !== $request->title && $request->title) {
@@ -304,18 +304,31 @@ class CampsController extends Controller
      */
     public function changeStatus(Request $request, $id)
     {
-            $camp = Camp::findOrFail($id);
-        $camp->status = $request->status;
+        $camp = Camp::findOrFail($id);
+        $requested = $request->input('status');
+        $camp->status = in_array($requested, ['active', 'draft'], true)
+            ? $requested
+            : ($camp->status === 'active' ? 'draft' : 'active');
         $camp->save();
 
         // Clear caches - clear both the specific camp and the list
         $this->cacheService->clearCampCache($camp->id);
         $this->cacheService->clearCampsListCache();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated successfully.'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status' => $camp->status,
+            ]);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            $camp->status === 'active'
+                ? 'Camp activated successfully.'
+                : 'Camp set to draft successfully.'
+        );
     }
 
     /**
