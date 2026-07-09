@@ -32,6 +32,21 @@ $trip-offer-lh-snug: 1.45;
 $trip-offer-lh-normal: 1.6;
 $trip-offer-lh-relaxed: 1.7;
 
+@mixin trip-field-label {
+    font-size: $trip-offer-text-sm;
+    font-weight: $trip-offer-weight-extrabold;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: $trip-offer-theme-dark;
+}
+
+@mixin trip-field-value {
+    font-size: $trip-offer-text-sm;
+    font-weight: $trip-offer-weight-regular;
+    color: #6b7280;
+    line-height: $trip-offer-lh-snug;
+}
+
 .trip-offer-page {
     padding-top: 0.8rem;
     padding-bottom: 4rem;
@@ -307,18 +322,32 @@ $trip-offer-lh-relaxed: 1.7;
         margin-bottom: 0.25rem;
         color: $trip-offer-theme-accent;
 
-        svg {
+        svg,
+        i {
             width: 28px;
             height: 28px;
             flex-shrink: 0;
         }
 
+        i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            line-height: 1;
+        }
+
         @media (max-width: 576px) {
             margin-bottom: 0;
 
-            svg {
+            svg,
+            i {
                 width: 22px;
                 height: 22px;
+            }
+
+            i {
+                font-size: 1.1rem;
             }
         }
     }
@@ -432,20 +461,10 @@ $trip-offer-lh-relaxed: 1.7;
         border: 1px solid $trip-offer-theme-border;
     }
 
-    &__about-intro,
-    &__about-rest {
+    &__about-description {
         font-size: $trip-offer-text-md;
         line-height: $trip-offer-lh-relaxed;
         color: #4b5563;
-    }
-
-    &__about-rest {
-        margin-top: .75rem;
-
-        &--collapsed {
-            max-height: 5.5rem;
-            overflow: hidden;
-        }
     }
 
     &__see-more {
@@ -469,11 +488,7 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__about-block-label {
-        font-size: $trip-offer-text-xs;
-        font-weight: $trip-offer-weight-bold;
-        text-transform: uppercase;
-        letter-spacing: .1em;
-        color: $trip-offer-theme-dark;
+        @include trip-field-label;
         margin: 0 0 .5rem 0;
     }
 
@@ -490,28 +505,28 @@ $trip-offer-lh-relaxed: 1.7;
 
     &__tags--methods .trip-offer-page__tag--secondary {
         background: rgba(232, 91, 64, 0.12);
-        color: $trip-offer-theme-dark;
+        color: #6b7280;
     }
 
     &__tag {
         padding: .35rem .9rem;
         border-radius: 999px;
         background: #eef0f4;
-        color: $trip-offer-theme-dark;
-        font-size: $trip-offer-text-sm;
-        font-weight: $trip-offer-weight-semibold;
+        color: #6b7280;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-medium;
         display: inline-flex;
         align-items: center;
         gap: .35rem;
 
         &--secondary {
             background: rgba(232, 91, 64, 0.10);
-            color: $trip-offer-theme-dark;
+            color: #6b7280;
         }
 
         &--muted {
             background: #e5e7eb;
-            color: #374151;
+            color: #6b7280;
         }
     }
 
@@ -542,17 +557,12 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__about-spec-label {
-        font-size: $trip-offer-text-xs;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #9ca3af;
-        margin: 0 0 .2rem 0;
+        @include trip-field-label;
+        margin: 0 0 .25rem 0;
     }
 
     &__about-spec-value {
-        font-size: $trip-offer-text-base;
-        font-weight: $trip-offer-weight-semibold;
-        color: $trip-offer-theme-dark;
+        @include trip-field-value;
         margin: 0;
     }
 
@@ -580,17 +590,12 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__tech-label {
-        font-size: .65rem;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #9ca3af;
+        @include trip-field-label;
         margin-bottom: .25rem;
     }
 
     &__tech-value {
-        font-size: .9rem;
-        font-weight: 600;
-        color: #111827;
+        @include trip-field-value;
     }
 
     &__highlights {
@@ -1412,22 +1417,22 @@ $trip-offer-lh-relaxed: 1.7;
         border-radius: 6px;
         background: $trip-offer-theme-dark;
         color: #fff;
-        font-size: $trip-offer-text-sm;
-        font-weight: $trip-offer-weight-semibold;
+        font-size: $trip-offer-text-xs;
+        font-weight: $trip-offer-weight-medium;
 
         &--light {
             background: #eef0f4;
-            color: $trip-offer-theme-dark;
+            color: #6b7280;
         }
 
         &--meal {
             background: rgba(232, 91, 64, 0.10);
-            color: $trip-offer-theme-dark;
+            color: #6b7280;
         }
 
         &--lang {
             background: #eef0f4;
-            color: $trip-offer-theme-dark;
+            color: #6b7280;
         }
     }
 
@@ -1512,19 +1517,13 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__info-card-label {
-        margin: 0 0 .15rem 0;
-        font-size: $trip-offer-text-xs;
-        font-weight: $trip-offer-weight-bold;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: #9ca3af;
+        @include trip-field-label;
+        margin: 0 0 .25rem 0;
     }
 
     &__info-card-value {
+        @include trip-field-value;
         margin: 0;
-        font-size: $trip-offer-text-sm;
-        font-weight: $trip-offer-weight-semibold;
-        color: #111827;
     }
 
     &__info-card-callout {
@@ -1749,25 +1748,19 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__additional-info-label {
-        margin: 0 0 .25rem 0;
-        font-size: $trip-offer-text-xs;
-        font-weight: $trip-offer-weight-bold;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #9ca3af;
+        @include trip-field-label;
+        margin: 0 0 .35rem 0;
     }
 
     &__additional-info-value {
+        @include trip-field-value;
         margin: 0;
-        font-size: $trip-offer-text-base;
-        font-weight: $trip-offer-weight-semibold;
-        color: $trip-offer-theme-dark;
 
         &--long {
             font-weight: $trip-offer-weight-regular;
-            font-size: $trip-offer-text-base;
+            font-size: $trip-offer-text-sm;
             line-height: $trip-offer-lh-normal;
-            color: #4b5563;
+            color: #6b7280;
         }
     }
 

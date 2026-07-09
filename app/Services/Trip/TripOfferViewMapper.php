@@ -28,7 +28,6 @@ class TripOfferViewMapper
         $cateringList = $this->extractTagifyNames($trip->catering ?? []);
         $guideLanguagesList = $this->extractTagifyNames($trip->guide_languages ?? []);
 
-        [$descriptionShort, $descriptionRest] = $this->splitDescription((string) ($trip->description ?? ''));
         $highlightItems = $this->extractHighlightItems($trip->trip_highlights ?? []);
 
         $additionalInfo = $trip->additional_info ?? [];
@@ -181,15 +180,13 @@ class TripOfferViewMapper
             'non_fishing_activities_list' => $nonFishingActivitiesList,
             'catch_and_release_value'    => $catchAndReleaseValue ? (string) $catchAndReleaseValue : null,
             'catch_success_value'        => $catchSuccessValue ? (string) $catchSuccessValue : null,
-            'cancellation_policy'        => $trip->cancellation_policy,
-            'downpayment_policy'         => $trip->downpayment_policy ? (string) $trip->downpayment_policy : null,
+            'cancellation_policy'        => $this->normalizePolicyText($trip->cancellation_policy),
+            'downpayment_policy'         => $this->normalizePolicyText($trip->downpayment_policy),
             'provider'                   => $provider,
             'accommodation'              => $acc,
             'boat'                       => $boat,
             'description'                => [
-                'full'  => (string) ($trip->description ?? ''),
-                'intro'  => $descriptionShort,
-                'rest'   => $descriptionRest,
+                'full' => $this->formatDescriptionForDisplay((string) ($trip->description ?? '')),
             ],
             'trip_highlights'            => $highlightItems,
         ];
@@ -292,18 +289,58 @@ class TripOfferViewMapper
         return array_values(array_filter(array_map('trim', explode(',', (string) $value))));
     }
 
-    private function splitDescription(string $description): array
+    private function formatDescriptionForDisplay(string $description): string
     {
-        if (mb_strlen($description) <= 600) {
-            return [$description, ''];
+        $description = trim($description);
+        if ($description === '') {
+            return '';
         }
-        $intro = mb_substr($description, 0, 600);
-        $lastDot = mb_strrpos($intro, '.');
-        if ($lastDot !== false && $lastDot > 200) {
-            $intro = mb_substr($intro, 0, $lastDot + 1);
+
+        if (preg_match('/<[^>]+>/', $description)) {
+            return $description;
         }
-        $rest = trim(mb_substr($description, mb_strlen($intro)));
-        return [$intro, $rest];
+
+        return nl2br(e($description));
+    }
+
+    private function normalizePolicyText(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $text = trim(strip_tags((string) $value));
+        if ($text === '' || in_array($text, ['—', '-', '–'], true)) {
+            return null;
+        }
+
+        if ($this->isPolicyPlaceholder($text)) {
+            return null;
+        }
+
+        return $text;
+    }
+
+    private function isPolicyPlaceholder(string $text): bool
+    {
+        $normalized = mb_strtolower(preg_replace('/\s+/u', ' ', trim($text)));
+
+        $exactMatches = [
+            'bitte beim anbieter erfragen',
+            'bitte beim anbieter nachfragen',
+            'please ask the provider',
+            'please ask provider',
+            'ask the provider',
+        ];
+
+        if (in_array($normalized, $exactMatches, true)) {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '/^(bitte\s+)?(beim\s+)?anbieter\s+(er)?fragen\.?$|^please\s+ask\s+(the\s+)?provider\.?$/iu',
+            $text
+        );
     }
 
     private function extractHighlightItems($raw): array

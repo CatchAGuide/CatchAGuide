@@ -19,6 +19,10 @@ class TripXlsxImporter
 
     private const PLACEHOLDER_PATTERNS = [
         '/^bitte beim anbieter erfragen$/iu',
+        '/^bitte beim anbieter nachfragen$/iu',
+        '/^please ask the provider$/iu',
+        '/^please ask provider$/iu',
+        '/^ask the provider$/iu',
         '/^kein fixer termin/i',
     ];
 
@@ -189,8 +193,8 @@ class TripXlsxImporter
             'price_per_person'           => $this->toDecimal($this->rawValue($fields, 'Gesamtpreis standard pro Person')),
             'price_single_room_addition' => $this->toDecimal($this->rawValue($fields, 'Gesamtpreis bei Einzelzimmer')),
             'currency'                   => strtoupper(substr($this->textValue($fields, 'Währung') ?: 'EUR', 0, 3)),
-            'downpayment_policy'         => $this->nullableText($this->textValue($fields, 'Anzahlungsrichtlinie')),
-            'cancellation_policy'        => $this->nullableText($this->textValue($fields, 'Stornierungsbedingungen')),
+            'downpayment_policy'         => $this->nullablePolicyText($this->textValue($fields, 'Anzahlungsrichtlinie')),
+            'cancellation_policy'        => $this->nullablePolicyText($this->textValue($fields, 'Stornierungsbedingungen')),
         ];
     }
 
@@ -294,6 +298,13 @@ class TripXlsxImporter
     private function nullableText(string $value): ?string
     {
         return $value !== '' ? $value : null;
+    }
+
+    private function nullablePolicyText(string $value): ?string
+    {
+        $value = trim($value);
+
+        return ($value !== '' && ! $this->isPlaceholder($value)) ? $value : null;
     }
 
     private function nullableVarchar(string $value): ?string

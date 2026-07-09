@@ -182,8 +182,8 @@ return [
     'inquire'                      => 'Anfragen',
 
     'return_date_label'            => 'Rückreise:',
-    'outbound_label'               => 'Hinflug',
-    'return_label'                 => 'Rückflug',
+    'outbound_label'               => 'Ankunft',
+    'return_label'                 => 'Abreise',
 
     // Public offer page (meta & UI)
     'page_title_fallback' => 'Reise',
