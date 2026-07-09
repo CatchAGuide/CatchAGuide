@@ -5,7 +5,7 @@
                 <button type="button" class="btn-close" style="padding-right: 40px; padding-bottom: 20px"
                         data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <a href="{{ route('vacations.show', [$vacation->id,$vacation->slug]) }}" >
+            <a href="{{ route('vacations.camps.show', [$vacation->id,$vacation->slug]) }}" >
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12 text-center">

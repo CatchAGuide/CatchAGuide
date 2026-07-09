@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
+use App\Presenters\Vacation\TripTrustSignalResolver;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripOfferViewMapper;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ class TripOfferController extends Controller
 
     public function __construct(
         private TripOfferViewMapper $mapper,
-        private TripCacheService $cache
+        private TripCacheService $cache,
+        private TripTrustSignalResolver $tripTrust,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -57,6 +59,8 @@ class TripOfferController extends Controller
             'tripOfferData' => $tripOfferData,
             'selectedDate' => $selectedDate,
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
+            'reviewTrust' => $this->tripTrust->resolve($trip),
+            'canonicalUrl' => route('vacations.trips.show', $slug),
         ]);
     }
 
@@ -148,6 +152,14 @@ class TripOfferController extends Controller
 
     private function buildAvailabilityCards(Trip $trip): array
     {
+        if ($trip->year_round_availability) {
+            return [[
+                'year_round'          => true,
+                'availability_status' => 'available',
+                'spots_available'     => null,
+            ]];
+        }
+
         $durationDays = $trip->duration_days ?? null;
 
         $dates = $trip->availabilityDates()

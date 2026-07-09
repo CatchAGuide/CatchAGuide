@@ -61,6 +61,7 @@ class TripDataProcessor
             'price_single_room_addition'  => $request->input('price_single_room_addition') ?: null,
             'downpayment_policy'          => $request->input('downpayment_policy') ?: null,
             'currency'                    => $request->input('currency') ?: 'EUR',
+            'year_round_availability'     => $request->boolean('year_round_availability'),
         ];
     }
 
@@ -124,6 +125,7 @@ class TripDataProcessor
             'price_single_room_addition'   => $trip->price_single_room_addition,
             'downpayment_policy'           => $trip->downpayment_policy,
             'currency'                     => $trip->currency ?? 'EUR',
+            'year_round_availability'      => (bool) $trip->year_round_availability,
             'availability_dates'           => $trip->availabilityDates()
                                                         ->orderBy('departure_date')
                                                         ->get()
@@ -139,6 +141,12 @@ class TripDataProcessor
 
     public function processAvailabilityDates(Request $request, Trip $trip): void
     {
+        if ($request->boolean('year_round_availability')) {
+            $trip->availabilityDates()->delete();
+
+            return;
+        }
+
         $dates = $request->input('availability_dates', []);
 
         // Support JSON-encoded payload from JS (string) as well as array input

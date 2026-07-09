@@ -3,313 +3,150 @@
 @section('title', __('accommodations.title'))
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
+    <div class="side-app">
+        <div class="main-container container-fluid">
             <div class="page-header">
-                <div class="page-title">
-                    <h1>{{ __('accommodations.title') }}</h1>
-                    <p class="text-muted">Manage your accommodations</p>
-                </div>
-                <div class="page-actions">
-                    <a href="{{ route('admin.accommodations.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> {{ __('accommodations.create') }}
-                    </a>
+                <h1 class="page-title">@yield('title')</h1>
+                <div>
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Administration</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@yield('title')</li>
+                    </ol>
                 </div>
             </div>
 
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">All Accommodations</h3>
-                    <div class="card-tools">
-                        <div class="input-group input-group-sm" style="width: 150px;">
-                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-default">
-                                    <i class="fas fa-search"></i>
-                                </button>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center w-100 flex-wrap gap-2">
+                                <a href="{{ route('admin.accommodations.create') }}" class="btn btn-primary">
+                                    <i class="fa fa-plus"></i> {{ __('accommodations.create') }}
+                                </a>
+                                @isset($listingStats)
+                                    @include('admin.partials.listing-stats-cards', ['stats' => $listingStats])
+                                @endisset
                             </div>
+                        </div>
+                        <div class="card-body table-responsive">
+                            @if($accommodations->count() > 0)
+                                <table id="accommodations-datatable" class="table align-middle mb-0 admin-listing-datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="wd-8p border-bottom-0">ID</th>
+                                            <th class="wd-20p border-bottom-0">Accommodation</th>
+                                            <th class="wd-12p border-bottom-0">Type</th>
+                                            <th class="wd-15p border-bottom-0">Details</th>
+                                            <th class="wd-8p border-bottom-0 text-center">Images</th>
+                                            <th class="wd-10p border-bottom-0">Status</th>
+                                            <th class="wd-12p border-bottom-0">Created</th>
+                                            <th class="wd-18p border-bottom-0">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($accommodations as $accommodation)
+                                            @php
+                                                $amenitiesCount = is_array($accommodation->amenities) ? count($accommodation->amenities) : 0;
+                                                $detailsCount = is_array($accommodation->accommodation_details) ? count($accommodation->accommodation_details) : 0;
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $accommodation->id }}</td>
+                                                <td>
+                                                    <div class="d-flex flex-column">
+                                                        <div class="fw-bold">{{ $accommodation->title }}</div>
+                                                        @if($accommodation->location)
+                                                            <div class="text-info">{{ $accommodation->location }}</div>
+                                                        @endif
+                                                        @if($accommodation->city && $accommodation->country)
+                                                            <small class="text-muted">{{ $accommodation->city }}, {{ $accommodation->country }}</small>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if($accommodation->accommodationType)
+                                                        <span class="badge bg-info admin-listing-status-badge">{{ $accommodation->accommodationType->name }}</span>
+                                                    @else
+                                                        <span class="text-muted">Not set</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="admin-listing-meta">
+                                                        @if($detailsCount > 0)
+                                                            <small><i class="fa fa-info-circle"></i> {{ $detailsCount }} detail(s)</small>
+                                                        @endif
+                                                        @if($amenitiesCount > 0)
+                                                            <small><i class="fa fa-check-circle"></i> {{ $amenitiesCount }} amenity/ies</small>
+                                                        @endif
+                                                        @if($detailsCount === 0 && $amenitiesCount === 0)
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <x-admin.listing-image-count
+                                                        :thumbnail-path="$accommodation->thumbnail_path"
+                                                        :gallery="$accommodation->gallery_images"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <span class="badge admin-listing-status-badge bg-{{ $accommodation->status === 'active' ? 'success' : ($accommodation->status === 'draft' ? 'warning' : 'secondary') }}">
+                                                        {{ ucfirst($accommodation->status) }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $accommodation->created_at->format('M d, Y') }}</td>
+                                                <td class="text-center">
+                                                    <div class="btn-group">
+                                                        <a href="{{ route('admin.accommodations.show', $accommodation) }}"
+                                                           class="btn btn-sm btn-primary"
+                                                           title="View">
+                                                            <i class="fa fa-search"></i>
+                                                        </a>
+                                                        <a href="{{ route('admin.accommodations.edit', $accommodation) }}"
+                                                           class="btn btn-sm btn-secondary"
+                                                           title="Edit">
+                                                            <i class="fa fa-pen"></i>
+                                                        </a>
+                                                        <form action="{{ route('admin.accommodations.destroy', $accommodation) }}"
+                                                              method="POST"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('{{ __('accommodations.confirm_delete') }}')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @else
+                                <div class="admin-listing-empty-state">
+                                    <i class="fa fa-home d-block"></i>
+                                    <h5 class="text-muted">No Accommodations Found</h5>
+                                    <p class="mb-3">Get started by creating your first accommodation.</p>
+                                    <a href="{{ route('admin.accommodations.create') }}" class="btn btn-primary">
+                                        <i class="fa fa-plus"></i> Create Accommodation
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-
-                <div class="card-body table-responsive p-0">
-                    @if($accommodations->count() > 0)
-                        <table class="table table-hover text-nowrap">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Location</th>
-                                    <th>Type</th>
-                                    <th>Details</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($accommodations as $accommodation)
-                                    <tr>
-                                        <td>{{ $accommodation->id }}</td>
-                                        <td>
-                                            <div class="accommodation-title">
-                                                @if($accommodation->thumbnail_path)
-                                                    <img src="{{ asset($accommodation->thumbnail_path) }}" 
-                                                         alt="Thumbnail" class="accommodation-thumbnail">
-                                                @endif
-                                                <strong>{{ $accommodation->title }}</strong>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="location-info">
-                                                @if($accommodation->city && $accommodation->country)
-                                                    <div>{{ $accommodation->city }}, {{ $accommodation->country }}</div>
-                                                @endif
-                                                @if($accommodation->location)
-                                                    <small class="text-muted">{{ $accommodation->location }}</small>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if($accommodation->accommodationType)
-                                                <span class="badge badge-info">
-                                                    {{ $accommodation->accommodationType->name }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">Not set</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="accommodation-details-summary">
-                                                @php
-                                                    $amenitiesCount = is_array($accommodation->amenities) ? count($accommodation->amenities) : 0;
-                                                    $detailsCount = is_array($accommodation->accommodation_details) ? count($accommodation->accommodation_details) : 0;
-                                                    $hasImages = is_array($accommodation->gallery_images) && count($accommodation->gallery_images) > 0;
-                                                @endphp
-                                                @if($detailsCount > 0)
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-info-circle"></i> {{ $detailsCount }} detail(s)
-                                                    </small>
-                                                @endif
-                                                @if($amenitiesCount > 0)
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-check-circle"></i> {{ $amenitiesCount }} amenity/ies
-                                                    </small>
-                                                @endif
-                                                @if($hasImages)
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-images"></i> {{ count($accommodation->gallery_images) }} image(s)
-                                                    </small>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-{{ $accommodation->status === 'active' ? 'success' : ($accommodation->status === 'draft' ? 'warning' : 'secondary') }}">
-                                                {{ ucfirst($accommodation->status) }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $accommodation->created_at->format('M d, Y') }}</td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                @if($accommodation->status === 'active')
-                                                    <a href="{{ route('admin.accommodations.change-status', $accommodation->id) }}"
-                                                       class="btn btn-sm btn-secondary"
-                                                       title="Set to Draft">
-                                                        <i class="fas fa-file-alt"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('admin.accommodations.change-status', $accommodation->id) }}"
-                                                       class="btn btn-sm btn-success"
-                                                       title="Activate">
-                                                        <i class="fas fa-check"></i>
-                                                    </a>
-                                                @endif
-                                                <a href="{{ route('admin.accommodations.show', $accommodation) }}" 
-                                                   class="btn btn-sm btn-info" title="View">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('admin.accommodations.edit', $accommodation) }}" 
-                                                   class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('admin.accommodations.destroy', $accommodation) }}" 
-                                                      method="POST" class="d-inline" 
-                                                      onsubmit="return confirm('{{ __('accommodations.confirm_delete') }}')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    @else
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <i class="fas fa-home"></i>
-                            </div>
-                            <h3>No Accommodations Found</h3>
-                            <p>Get started by creating your first accommodation.</p>
-                            <a href="{{ route('admin.accommodations.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Create Accommodation
-                            </a>
-                        </div>
-                    @endif
-                </div>
-
-                @if($accommodations->hasPages())
-                    <div class="card-footer">
-                        {{ $accommodations->links() }}
-                    </div>
-                @endif
             </div>
         </div>
     </div>
-</div>
 @endsection
 
-@push('styles')
-<style>
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.page-title h1 {
-    margin: 0;
-    color: #2c3e50;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.page-title .text-muted {
-    margin: 5px 0 0 0;
-    font-size: 1rem;
-}
-
-.page-actions .btn {
-    padding: 10px 20px;
-    font-weight: 600;
-}
-
-.accommodation-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.accommodation-thumbnail {
-    width: 40px;
-    height: 30px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.location-info {
-    line-height: 1.4;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #6c757d;
-}
-
-.empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    color: #dee2e6;
-}
-
-.empty-state h3 {
-    margin-bottom: 10px;
-    color: #495057;
-}
-
-.empty-state p {
-    margin-bottom: 30px;
-    font-size: 1.1rem;
-}
-
-.btn-group .btn {
-    margin-right: 2px;
-}
-
-.btn-group .btn:last-child {
-    margin-right: 0;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #495057;
-    border-top: none;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-.badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-}
-
-.accommodation-details-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.accommodation-details-summary small {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-}
-
-.accommodation-details-summary i {
-    font-size: 0.85rem;
-}
-
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-    
-    .btn-group {
-        flex-direction: column;
-        gap: 2px;
-    }
-    
-    .btn-group .btn {
-        margin-right: 0;
-        margin-bottom: 2px;
-    }
-}
-</style>
-@endpush
+@section('js_after')
+    @include('admin.partials.listing-datatable-script', ['tableId' => 'accommodations-datatable', 'actionsColumn' => 7])
+@endsection

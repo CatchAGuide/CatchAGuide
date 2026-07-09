@@ -598,9 +598,18 @@
     function initializeAvailabilityTable() {
         const tbody = $('#availabilityTable tbody');
         const existing = @json($formData['availability_dates'] ?? []);
+        const yearRoundToggle = $('#year_round_availability');
+        const manualInputs = $('#availabilityManualInputs');
+        const addBtn = $('#addAvailabilityRowBtn');
 
         const today = new Date();
         const todayStr = today.toISOString().substring(0, 10);
+
+        function setManualAvailabilityEnabled(enabled) {
+            manualInputs.toggleClass('opacity-50 pe-none', !enabled);
+            addBtn.prop('disabled', !enabled);
+            tbody.find('input, button').prop('disabled', !enabled);
+        }
 
         function addRow(date = '', spots = '') {
             const row = $(`
@@ -656,9 +665,20 @@
         tbody.on('click', '.remove-availability-row', function () {
             $(this).closest('tr').remove();
         });
+
+        yearRoundToggle.on('change', function () {
+            setManualAvailabilityEnabled(!this.checked);
+        });
+
+        setManualAvailabilityEnabled(!yearRoundToggle.is(':checked'));
     }
 
     function collectAvailabilityData(formData) {
+        if ($('#year_round_availability').is(':checked')) {
+            formData.set('availability_dates', JSON.stringify([]));
+            return;
+        }
+
         const rows = [];
         $('#availabilityTable tbody tr').each(function () {
             const date = $(this).find('input[name="availability_dates[][departure_date]"]').val();
