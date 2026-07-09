@@ -1,0 +1,152 @@
+// Admin catalog listing tables (guidings-style rows: rental boats, accommodations, etc.)
+
+.admin-shell {
+  .admin-listing-datatable,
+  table.dataTable.admin-listing-datatable {
+    border-collapse: separate !important;
+    border-spacing: 0 6px !important;
+  }
+
+  .admin-listing-datatable thead th,
+  table.dataTable.admin-listing-datatable thead th {
+    border-bottom-width: 1px !important;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    background-color: #f9fafb;
+    white-space: nowrap;
+  }
+
+  .admin-listing-datatable tbody tr,
+  table.dataTable.admin-listing-datatable > tbody > tr {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .admin-listing-datatable tbody tr:hover,
+  table.dataTable.admin-listing-datatable > tbody > tr:hover {
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  }
+
+  table.dataTable.admin-listing-datatable > tbody > tr > td {
+    border-top: none;
+    vertical-align: middle;
+    background-color: transparent !important;
+  }
+
+  table.dataTable.admin-listing-datatable.stripe > tbody > tr.odd,
+  table.dataTable.admin-listing-datatable.stripe > tbody > tr.even,
+  table.dataTable.admin-listing-datatable.display > tbody > tr.odd > .sorting_1,
+  table.dataTable.admin-listing-datatable.display > tbody > tr.even > .sorting_1 {
+    background-color: #ffffff !important;
+  }
+
+  .admin-listing-datatable_wrapper .dataTables_length,
+  .admin-listing-datatable_wrapper .dataTables_filter {
+    margin-bottom: 0.75rem;
+  }
+
+  // Override generic admin table zebra/hover inside listing grids
+  .admin-listing-datatable tbody tr:nth-child(even),
+  table.dataTable.admin-listing-datatable > tbody > tr.odd,
+  table.dataTable.admin-listing-datatable > tbody > tr.even {
+    background-color: #ffffff !important;
+  }
+
+  .admin-listing-datatable tbody tr:hover,
+  table.dataTable.admin-listing-datatable > tbody > tr:hover {
+    background-color: #ffffff !important;
+  }
+
+  .admin-listing-owner-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    white-space: nowrap;
+  }
+
+  .admin-listing-owner-avatar,
+  .admin-listing-owner-avatar-placeholder {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .admin-listing-owner-avatar {
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+    background-color: #f3f4f6;
+  }
+
+  .admin-listing-owner-avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #ffffff;
+    background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb);
+    border: 2px solid #e5e7eb;
+    text-transform: uppercase;
+  }
+
+  .admin-listing-owner-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #111827;
+
+    small {
+      display: block;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  }
+
+  .admin-listing-image-count {
+    min-width: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .admin-listing-image-empty {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    white-space: nowrap;
+  }
+
+  .admin-listing-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    small {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+  }
+
+  .admin-listing-status-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+  }
+
+  .admin-listing-empty-state {
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+    color: #6b7280;
+
+    i {
+      font-size: 2.5rem;
+      color: #d1d5db;
+      margin-bottom: 1rem;
+    }
+  }
+}

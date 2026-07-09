@@ -90,7 +90,7 @@ class TripBooking extends Model
         }
 
         return match (strtolower($this->source_type)) {
-            self::SOURCE_TRIP => $model->slug ? route('trips.show', $model->slug) : null,
+            self::SOURCE_TRIP => $model->slug ? route('vacations.trips.show', $model->slug) : null,
             default => null,
         };
     }

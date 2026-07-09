@@ -110,7 +110,7 @@
                 @foreach($countries as $country)
                     <div class="col-md-4 my-1">
                         <div class="trending-card">
-                            <a href="{{ route('vacations.category', ['country' => $country->slug]) }}"> 
+                            <a href="{{ route('vacations.country', ['country' => $country->slug]) }}"> 
                                 <div class="trending-card-wrapper">
                                     <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 

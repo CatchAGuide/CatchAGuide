@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
+@section('share_tags')
+    @if(!empty($camp['slug']))
+        <link rel="canonical" href="{{ route('vacations.camps.show', $camp['slug']) }}">
+    @endif
+@endsection
+
 @section('content')
 <div 
     x-data="campConfigurator({

@@ -575,6 +575,9 @@ $admin-shell-gradient-strong: #4f46e5;
 // Consolidated listings page (admin)
 @import "./consolidated-listings";
 
+// Catalog listing tables (rental boats, accommodations, camps, etc.)
+@import "./listing-table";
+
 @keyframes admin-shell-pulse {
   0% {
     transform: scale(0.9);
