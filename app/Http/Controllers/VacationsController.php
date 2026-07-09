@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Vacation;
 use App\Models\Camp;
 use App\Models\Destination;
+use App\Services\Location\ListingCountryFilter;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -188,8 +189,13 @@ class VacationsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        // $query = Vacation::where('status', 1)->where('country', $country);
-        $query = Camp::with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])->where('status', 'active')->where('country', $country);
+        $filterData = json_decode($row_data->filters, true) ?? [];
+        $countryFilter = app(ListingCountryFilter::class);
+        $countryFilterValues = $countryFilter->valuesForVacationDestination($row_data, $country, $filterData);
+
+        $query = Camp::with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+            ->where('status', 'active');
+        $countryFilter->applyToQuery($query, $countryFilterValues);
 
         // Build title based on filters
         if($request->has('page')){
@@ -231,8 +237,6 @@ class VacationsController extends Controller
             // Default ordering by ID to ensure consistent pagination
             $query->orderBy('id', 'asc');
         }
-
-        $filterData = json_decode($row_data->filters, true);
 
         $searchMessage = '';
         $placeLat = $filterData['placeLat'] ?? null;
