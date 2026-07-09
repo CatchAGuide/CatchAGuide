@@ -22,7 +22,7 @@ class CreateLocationBoundariesTable extends Migration
         });
 
         // Add geometry column using raw SQL for better MySQL spatial support
-        DB::statement('ALTER TABLE location_boundaries ADD geometry GEOMETRY NOT NULL SRID 4326');
+        DB::statement('ALTER TABLE location_boundaries ADD geometry GEOMETRY NOT NULL');
         DB::statement('CREATE SPATIAL INDEX location_boundaries_geometry_index ON location_boundaries(geometry)');
     }
 
