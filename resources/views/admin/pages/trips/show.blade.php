@@ -353,7 +353,11 @@
                             <h3 class="card-title">Availability</h3>
                         </div>
                         <div class="card-body">
-                            @if($trip->availabilityDates && $trip->availabilityDates->count() > 0)
+                            @if($trip->year_round_availability)
+                                <p class="mb-0">
+                                    <span class="badge bg-success">{{ __('trips.year_round_availability_label') }}</span>
+                                </p>
+                            @elseif($trip->availabilityDates && $trip->availabilityDates->count() > 0)
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>

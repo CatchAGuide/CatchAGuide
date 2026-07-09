@@ -1978,6 +1978,30 @@ $trip-offer-lh-relaxed: 1.7;
         }
     }
 
+    &__booking-date-input {
+        width: 100%;
+        padding: .65rem .9rem;
+        border-radius: .9rem;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        font-size: $trip-offer-text-base;
+        color: $trip-offer-theme-dark;
+        cursor: pointer;
+        appearance: auto;
+        font-family: inherit;
+
+        &::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: rgba(49, 48, 65, 0.35);
+            box-shadow: 0 0 0 3px rgba(49, 48, 65, 0.08);
+        }
+    }
+
     @media (max-width: 1200px) {
         &__booking-header-grid {
             grid-template-columns: minmax(0, 1fr);

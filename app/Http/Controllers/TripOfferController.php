@@ -152,6 +152,14 @@ class TripOfferController extends Controller
 
     private function buildAvailabilityCards(Trip $trip): array
     {
+        if ($trip->year_round_availability) {
+            return [[
+                'year_round'          => true,
+                'availability_status' => 'available',
+                'spots_available'     => null,
+            ]];
+        }
+
         $durationDays = $trip->duration_days ?? null;
 
         $dates = $trip->availabilityDates()

@@ -80,6 +80,7 @@ class Trip extends Model
         'price_single_room_addition',
         'downpayment_policy',
         'currency',
+        'year_round_availability',
         'status',
         'user_id',
     ];
@@ -103,6 +104,7 @@ class Trip extends Model
         'additional_info'            => 'array',
         'price_per_person'           => 'decimal:2',
         'price_single_room_addition' => 'decimal:2',
+        'year_round_availability'    => 'boolean',
     ];
 
     protected $attributes = [
