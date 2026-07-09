@@ -153,7 +153,7 @@ return [
     'price_single_room_addition'   => 'Single Room Addition Price',
     'downpayment_policy'           => 'Downpayment Policy',
     'pricing_details_title'       => 'Pricing Details',
-    'single_supplement'            => 'Single Supplement',
+    'single_supplement'            => 'Single Occupancy Surcharge',
     'group_discount'               => 'Group Discount (4+ Anglers)',
     'early_bird'                   => 'Early Bird (60+ Days)',
     'deposit_at_booking'           => 'Deposit at Booking',
@@ -173,6 +173,10 @@ return [
     'availability_status_fully_booked' => 'Fully Booked',
     'availability_status_limited'  => 'Limited',
     'availability_status_sold_out' => 'Sold Out',
+    'year_round_availability'    => 'Available year round',
+    'year_round_availability_hint' => 'When enabled, specific departure dates are not required — the trip is shown as available throughout the year.',
+    'add_availability_date'        => 'Add Date',
+    'year_round_availability_label' => 'Year round',
     'spots_available_count'        => ':count spots available',
     'only_x_spot'                  => 'Only :count spot available',
     'only_x_spot_plural'           => 'Only :count spots available',
@@ -182,8 +186,8 @@ return [
     'inquire'                      => 'Inquire',
 
     'return_date_label'            => 'Return:',
-    'outbound_label'               => 'Outbound',
-    'return_label'                 => 'Return',
+    'outbound_label'               => 'Arrival',
+    'return_label'                 => 'Departure',
 
     // Public offer page (meta & UI)
     'page_title_fallback' => 'Trip',

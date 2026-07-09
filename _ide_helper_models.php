@@ -3313,6 +3313,10 @@ namespace App\Models{
  * @property float $paid_balance
  * @property int $is_active
  * @property int|null $is_guide
+ * @property string|null $guide_status
+ * @property string|null $guide_type
+ * @property \Illuminate\Support\Carbon|null $guide_submitted_at
+ * @property \Illuminate\Support\Carbon|null $guide_verified_at
  * @property string|null $profil_image
  * @property int $user_information_id
  * @property string|null $remember_token
@@ -3798,6 +3802,15 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationGuiding whereVacationId($value)
  */
 	class VacationGuiding extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup query()
+ */
+	class VacationInterestSignup extends \Eloquent {}
 }
 
 namespace App\Models{

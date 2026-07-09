@@ -118,7 +118,7 @@ class CampOfferController extends Controller
     }
     
 
-    public function show($slug)
+    public function show(Request $request, string $slug)
     {
         // Fetch camp from database with relationships
         $camp = Camp::with([
@@ -128,6 +128,7 @@ class CampOfferController extends Controller
             'facilities',
             'specialOffers'
         ])->where('slug', $slug)
+        ->where('status', 'active')
         ->firstOrFail();
         
         // Map camp data to view format
@@ -328,6 +329,7 @@ class CampOfferController extends Controller
         return [
             'id' => $camp->id,
             'title' => $camp->title,
+            'slug' => $camp->slug,
             'city' => $camp->city,
             'region' => $camp->region,
             'country' => $camp->country,

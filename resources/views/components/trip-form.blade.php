@@ -841,22 +841,45 @@
             <div class="step" id="step8">
                 <h5>{{ __('trips.availability_title') }}</h5>
 
-                <div class="table-responsive">
-                    <table class="table table-sm" id="availabilityTable">
-                        <thead>
-                            <tr>
-                                <th>{{ __('trips.availability_departure_date') }}</th>
-                                <th>{{ __('trips.availability_spots') }}</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{-- rows managed dynamically in JS from availability data --}}
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="addAvailabilityRowBtn">
-                        <i class="fas fa-plus"></i> Add Date
-                    </button>
+                @php
+                    $yearRoundActive = !empty($formData['year_round_availability']);
+                @endphp
+                <div class="mb-3">
+                    <div class="btn-checkbox-container">
+                        <input
+                            type="checkbox"
+                            class="form-check-input d-none"
+                            id="year_round_availability"
+                            name="year_round_availability"
+                            value="1"
+                            {{ $yearRoundActive ? 'checked' : '' }}>
+                        <label class="btn btn-outline-primary btn-checkbox text-start px-3 py-2" for="year_round_availability">
+                            <i class="fas fa-infinity me-1"></i> {{ __('trips.year_round_availability') }}
+                        </label>
+                    </div>
+                    <p class="text-muted small mb-0" id="yearRoundAvailabilityHint">
+                        {{ __('trips.year_round_availability_hint') }}
+                    </p>
+                </div>
+
+                <div id="availabilityManualInputs" @if($yearRoundActive) class="opacity-50 pe-none" @endif>
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="availabilityTable">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('trips.availability_departure_date') }}</th>
+                                    <th>{{ __('trips.availability_spots') }}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- rows managed dynamically in JS from availability data --}}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="addAvailabilityRowBtn" @if($yearRoundActive) disabled @endif>
+                            <i class="fas fa-plus"></i> {{ __('trips.add_availability_date') }}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="button-group mt-4">

@@ -9,6 +9,7 @@ use App\Models\GuidingBoatType;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Trip;
+use App\Support\AdminListingStats;
 use App\Models\Water;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripDataProcessor;
@@ -33,9 +34,12 @@ class TripsController extends Controller
 
     public function index()
     {
-        $trips = $this->cacheService->getTripsList(15);
+        $trips = Trip::with('user')
+            ->orderByDesc('id')
+            ->get();
+        $listingStats = AdminListingStats::cardsForTrips($trips);
 
-        return view('admin.pages.trips.index', compact('trips'));
+        return view('admin.pages.trips.index', compact('trips', 'listingStats'));
     }
 
     public function create()

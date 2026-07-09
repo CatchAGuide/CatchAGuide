@@ -43,7 +43,7 @@
                 <ul class="thm-breadcrumb list-unstyled">
                     <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li><a href="{{ route('trips.index') }}">{{ __('trips.catalog_breadcrumb') }}</a></li>
+                    <li><a href="{{ route('vacations.trips.index') }}">{{ __('trips.catalog_breadcrumb') }}</a></li>
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                     <li class="active">{{ translate($row_data->name) }}</li>
                 </ul>
@@ -75,7 +75,7 @@
                 @forelse($trips as $trip)
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card trip-cat-card h-100 border shadow-sm">
-                            <a href="{{ route('trips.show', $trip->slug) }}" class="text-decoration-none text-dark">
+                            <a href="{{ route('vacations.trips.show', $trip->slug) }}" class="text-decoration-none text-dark">
                                 @php
                                     $img = media_url($trip->thumbnail_path);
                                 @endphp
@@ -83,7 +83,7 @@
                             </a>
                             <div class="card-body d-flex flex-column">
                                 <h3 class="h5 card-title">
-                                    <a href="{{ route('trips.show', $trip->slug) }}" class="stretched-link text-decoration-none text-dark">{{ \Illuminate\Support\Str::limit($trip->title, 70) }}</a>
+                                    <a href="{{ route('vacations.trips.show', $trip->slug) }}" class="stretched-link text-decoration-none text-dark">{{ \Illuminate\Support\Str::limit($trip->title, 70) }}</a>
                                 </h3>
                                 @if($trip->location)
                                 <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1"></i>{{ $trip->location }}</p>

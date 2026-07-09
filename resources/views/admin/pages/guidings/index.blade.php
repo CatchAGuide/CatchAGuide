@@ -81,45 +81,10 @@
         color: #6b7280;
     }
 
-    /* Tour images thumbnail column */
-    .guiding-images-scroll {
-        max-width: 220px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .guiding-images-row {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding-bottom: 0.15rem;
-    }
-
-    .guiding-thumb-img {
-        width: 46px;
-        height: 46px;
-        border-radius: 0.55rem;
-        object-fit: cover;
-        border: 1px solid rgba(148, 163, 184, 0.5);
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
-        background-color: #f3f4f6;
-        flex-shrink: 0;
-    }
-
-    .guiding-thumb-img-more {
-        position: relative;
-    }
-
-    .guiding-thumb-img-more-badge {
-        position: absolute;
-        right: 4px;
-        bottom: 4px;
-        padding: 0 6px;
-        border-radius: 999px;
-        background-color: rgba(15, 23, 42, 0.8);
-        color: #f9fafb;
-        font-size: 0.7rem;
-        font-weight: 500;
+    .guiding-image-count {
+        min-width: 2rem;
+        font-size: 0.8rem;
+        font-weight: 600;
     }
 
     .guiding-images-empty {
@@ -318,7 +283,6 @@
                                         sort($availableLangs);
                                         $missingLangs = $translationService->getMissingLanguages($guiding, $translationTargetLangs);
 
-                                        // Build small gallery for admin list
                                         $thumbPath = $guiding->thumbnail_path ?? null;
                                         $galleryRaw = $guiding->gallery_images ?? '[]';
                                         $galleryArray = is_array($galleryRaw) ? $galleryRaw : (function ($value) {
@@ -329,20 +293,20 @@
                                             }
                                         })($galleryRaw);
 
-                                        $allImages = [];
-                                        if ($thumbPath && media_path_usable($thumbPath)) {
-                                            $allImages[] = asset($thumbPath);
+                                        $imageCount = 0;
+                                        $countedPaths = [];
+                                        if (!empty(trim((string) $thumbPath))) {
+                                            $imageCount++;
+                                            $countedPaths[$thumbPath] = true;
                                         }
                                         if (!empty($galleryArray) && is_array($galleryArray)) {
                                             foreach ($galleryArray as $img) {
-                                                if (!empty($img) && $img !== $thumbPath && media_path_usable($img)) {
-                                                    $allImages[] = asset($img);
+                                                if (!empty($img) && empty($countedPaths[$img])) {
+                                                    $imageCount++;
+                                                    $countedPaths[$img] = true;
                                                 }
                                             }
                                         }
-                                        $allImages = array_values(array_unique($allImages));
-                                        $displayImages = array_slice($allImages, 0, 3);
-                                        $extraCount = max(count($allImages) - count($displayImages), 0);
 
                                         $fullName = $guiding->user->full_name ?? '';
                                         $nameParts = preg_split('/\s+/', trim($fullName));
@@ -371,6 +335,8 @@
                                                             src="{{ asset('uploads/profile_images/' . $guiding->user->profil_image) }}"
                                                             alt="{{ $guiding->user->full_name }}"
                                                             class="guiding-guide-avatar"
+                                                            loading="lazy"
+                                                            decoding="async"
                                                         >
                                                     @else
                                                         <span class="guiding-guide-avatar-placeholder">
@@ -386,31 +352,11 @@
                                                 </div>
                                             </a>
                                         </td>
-                                        <td>
-                                            @if(!empty($displayImages))
-                                                <div
-                                                    class="guiding-images-scroll guiding-images-trigger"
-                                                    data-guiding-id="{{ $guiding->id }}"
-                                                    data-guiding-title="{{ e($guiding->title) }}"
-                                                    data-guiding-location="{{ e($guiding->location ?? '') }}"
-                                                    data-images='@json($allImages)'
-                                                >
-                                                    <div class="guiding-images-row">
-                                                        @foreach($displayImages as $idx => $img)
-                                                            @php
-                                                                $isLast = $idx === count($displayImages) - 1;
-                                                            @endphp
-                                                            <div class="{{ $isLast && $extraCount > 0 ? 'guiding-thumb-img-more' : '' }}">
-                                                                <img src="{{ $img }}" alt="Guiding image {{ $idx + 1 }}" class="guiding-thumb-img">
-                                                                @if($isLast && $extraCount > 0)
-                                                                    <span class="guiding-thumb-img-more-badge">+{{ $extraCount }}</span>
-                                                                @endif
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
+                                        <td class="text-center">
+                                            @if($imageCount > 0)
+                                                <span class="badge bg-secondary guiding-image-count">{{ $imageCount }}</span>
                                             @else
-                                                <span class="guiding-images-empty">{{ __('admin.guidings.no_images') ?? 'No images' }}</span>
+                                                <span class="guiding-images-empty">0</span>
                                             @endif
                                         </td>
                                         <td>
@@ -548,29 +494,6 @@
         </div>
         <!-- CONTAINER CLOSED -->
 
-    </div>
-
-    <!-- Guiding images modal -->
-    <div class="modal fade" id="guidingImagesModal" tabindex="-1" aria-labelledby="guidingImagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="guidingImagesModalLabel">
-                        <i class="fa fa-images me-2"></i> {{ __('admin.guidings.images_modal_title') ?? 'Guiding images' }}
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.guidings.modal_close') }}"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="guidingImagesMain" class="text-center mb-3">
-                        <img id="guidingImagesMainImg" src="" alt="" class="img-fluid rounded shadow-sm d-none">
-                        <div id="guidingImagesEmpty" class="text-muted py-4">
-                            {{ __('admin.guidings.no_images') ?? 'No images available for this guiding.' }}
-                        </div>
-                    </div>
-                    <div id="guidingImagesThumbs" class="d-flex flex-wrap gap-2 justify-content-center"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Guiding text details modal -->
@@ -758,73 +681,6 @@
                         alert(msg);
                     })
                     .always(function() { $btn.prop('disabled', false); });
-            });
-        }
-
-        // Images modal
-        var guidingImagesModalEl = document.getElementById('guidingImagesModal');
-        if (guidingImagesModalEl) {
-            var guidingImagesModal = new bootstrap.Modal(guidingImagesModalEl);
-
-            $(document).on('click', '.guiding-images-trigger', function() {
-                var $el = $(this);
-                var raw = $el.attr('data-images') || '[]';
-                var images = [];
-                try {
-                    images = JSON.parse(raw);
-                } catch (e) {
-                    images = [];
-                }
-                if (!Array.isArray(images)) {
-                    images = [];
-                }
-
-                var title = $el.data('guiding-title') || '';
-                var location = $el.data('guiding-location') || '';
-                var id = $el.data('guiding-id') || '';
-                var headerTitle = title || ('Guiding #' + id);
-                if (location) {
-                    headerTitle += ' – ' + location;
-                }
-                $('#guidingImagesModalLabel').text(headerTitle);
-
-                var $mainImg = $('#guidingImagesMainImg');
-                var $empty = $('#guidingImagesEmpty');
-                var $thumbs = $('#guidingImagesThumbs').empty();
-
-                if (!images.length) {
-                    $mainImg.addClass('d-none').attr('src', '');
-                    $empty.removeClass('d-none');
-                } else {
-                    $empty.addClass('d-none');
-                    $mainImg.removeClass('d-none').attr('src', images[0]);
-
-                    images.forEach(function(src, idx) {
-                        if (!src) return;
-                        var thumb = $('<img>', {
-                            src: src,
-                            alt: 'Image ' + (idx + 1),
-                            class: 'img-thumbnail guiding-images-thumb',
-                            css: {
-                                width: '72px',
-                                height: '72px',
-                                objectFit: 'cover',
-                                cursor: 'pointer'
-                            },
-                            'data-src': src
-                        });
-                        $thumbs.append(thumb);
-                    });
-                }
-
-                guidingImagesModal.show();
-            });
-
-            $(document).on('click', '.guiding-images-thumb', function() {
-                var src = $(this).attr('data-src');
-                if (src) {
-                    $('#guidingImagesMainImg').attr('src', src);
-                }
             });
         }
 

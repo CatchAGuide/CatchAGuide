@@ -102,9 +102,9 @@ class ContactSubmission extends Model
 
         return match (strtolower($this->source_type)) {
             self::SOURCE_GUIDING => $model->slug ? route('guidings.show', ['id' => $model->id, 'slug' => $model->slug]) : null,
-            self::SOURCE_CAMP => $model->slug ? route('vacations.show', $model->slug) : null,
-            self::SOURCE_VACATION => $model->slug ? route('vacations.show', $model->slug) : null,
-            self::SOURCE_TRIP => $model->slug ? route('trips.show', $model->slug) : null,
+            self::SOURCE_CAMP => $model->slug ? route('vacations.camps.show', $model->slug) : null,
+            self::SOURCE_VACATION => $model->slug ? route('vacations.camps.show', $model->slug) : null,
+            self::SOURCE_TRIP => $model->slug ? route('vacations.trips.show', $model->slug) : null,
             default => null,
         };
     }
