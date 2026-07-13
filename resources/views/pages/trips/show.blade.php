@@ -779,34 +779,7 @@
                                     <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
                                 </div>
 
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">{{ __('vacations.inquiry_date_flexible') }}</label>
-                                        <select name="date_flexible" class="form-select">
-                                            <option value="">{{ __('vacations.select') }}</option>
-                                            <option value="yes">Yes</option>
-                                            <option value="no">No</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">{{ __('vacations.inquiry_room_config') }}</label>
-                                        <input type="text" name="room_configuration" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">{{ __('vacations.inquiry_dietary') }}</label>
-                                        <input type="text" name="dietary_requirements" class="form-control">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">{{ __('vacations.inquiry_experience') }}</label>
-                                        <input type="text" name="experience_level" class="form-control">
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">{{ __('vacations.inquiry_addons') }}</label>
-                                        <input type="text" name="addons" class="form-control">
-                                    </div>
-                                </div>
-
-                                <div class="trip-contact-submit-row">
+                                <div class="trip-contact-submit-row d-flex justify-content-between align-items-center flex-wrap gap-3">
                                     <div class="trip-contact-captcha-wrap">
                                         <x-recaptcha />
                                     </div>

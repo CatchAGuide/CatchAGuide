@@ -22,7 +22,7 @@
                     @if($vm->isCountryPage())
                         <li><a href="{{ route($vm->pillar->indexRouteName()) }}">{{ __($vm->pillar->indexTitleKey()) }}</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">{{ $vm->countryName() }}</li>
+                        <li class="active">{{ $vm->pageTitle() }}</li>
                     @else
                         <li class="active">{{ __($vm->pillar->indexTitleKey()) }}</li>
                     @endif
@@ -38,11 +38,13 @@
     data-analytics-page="{{ $vm->pillar->analyticsPage($vm->isCountryPage()) }}"
     @if($vm->isCountryPage()) data-country="{{ $vm->destination->slug }}" @endif
 >
-    @include('pages.vacations.partials.pillar-country-slider', [
-        'countries' => $vm->countries,
-        'pillar' => $vm->pillar->value,
-        'sliderId' => $vm->pillar->sliderId(),
-    ])
+    @unless($vm->isCountryPage())
+        @include('pages.vacations.partials.pillar-country-slider', [
+            'countries' => $vm->countries,
+            'pillar' => $vm->pillar->value,
+            'sliderId' => $vm->pillar->sliderId(),
+        ])
+    @endunless
 
     <h2 class="vacation-country__listing-title">{{ $vm->pageTitle() }}</h2>
 
@@ -51,9 +53,25 @@
     @endif
 
     <div class="row vacation-country__layout mb-5">
-        <aside class="col-12 col-lg-3 vacation-country__sidebar">
+        <div class="col-12 d-block d-sm-none mobile-selection-sfm mb-3 vacation-country__mobile-toolbar">
+            <x-vacation.filters
+                render-section="mobile"
+                :filter="$vm->filter"
+                :trips-total="$vm->tripsTotal"
+                :camps-total="$vm->campsTotal"
+                :species-options="$vm->speciesOptions"
+                :countries="$vm->filterCountries()"
+                :action="$vm->filterAction()"
+                :pillar-links="$vm->pillarToggleUrls()"
+                :omit-pillar-from-query="true"
+                :show-map-button="$hasMap"
+            />
+        </div>
+
+        <aside class="col-12 col-lg-3 vacation-country__sidebar d-none d-sm-block">
             <div class="vacation-country__sidebar-filters">
                 <x-vacation.filters
+                    render-section="sidebar"
                     :filter="$vm->filter"
                     :trips-total="$vm->tripsTotal"
                     :camps-total="$vm->campsTotal"
@@ -63,7 +81,7 @@
                     :pillar-links="$vm->pillarToggleUrls()"
                     :omit-pillar-from-query="true"
                     variant="sidebar"
-                    :show-mobile-toolbar="true"
+                    :show-mobile-toolbar="false"
                     :show-map-button="false"
                 />
             </div>
@@ -121,6 +139,18 @@
         </section>
     @endif
 </div>
+
+<x-vacation.filters
+    render-section="offcanvas"
+    :filter="$vm->filter"
+    :trips-total="$vm->tripsTotal"
+    :camps-total="$vm->campsTotal"
+    :species-options="$vm->speciesOptions"
+    :countries="$vm->filterCountries()"
+    :action="$vm->filterAction()"
+    :pillar-links="$vm->pillarToggleUrls()"
+    :omit-pillar-from-query="true"
+/>
 @endsection
 
 @section('js_after')

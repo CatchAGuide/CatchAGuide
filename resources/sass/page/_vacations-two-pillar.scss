@@ -1620,7 +1620,7 @@ $vac-country-panel: #313041;
     }
 }
 
-// —— Camp listing row (Anglercamps index) ——
+// —— Camp listing row (Fishing camps index) ——
 .vacation-camp-list-card {
     margin-bottom: 1rem;
 
@@ -1644,8 +1644,8 @@ $vac-country-panel: #313041;
         width: 100%;
 
         @media (min-width: 768px) {
-            width: 40%;
-            max-width: 320px;
+            width: 34%;
+            max-width: 300px;
         }
     }
 
@@ -1709,7 +1709,7 @@ $vac-country-panel: #313041;
         }
     }
 
-    &__content {
+    &__main {
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -1717,21 +1717,13 @@ $vac-country-panel: #313041;
         padding: 1rem 1rem 1.05rem;
 
         @media (min-width: 768px) {
-            padding: 1.1rem 1.25rem 1.15rem;
+            padding: 1.1rem 1.25rem;
+            border-right: 1px solid $vac-border;
         }
     }
 
-    &__header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: .85rem;
-    }
-
     &__headline {
-        min-width: 0;
-        flex: 1;
+        margin-bottom: .65rem;
     }
 
     &__title {
@@ -1742,7 +1734,7 @@ $vac-country-panel: #313041;
         color: $vac-ink;
 
         @media (min-width: 768px) {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
         }
 
         a {
@@ -1772,90 +1764,21 @@ $vac-country-panel: #313041;
             font-size: .75rem;
             flex-shrink: 0;
         }
-
-        span {
-            min-width: 0;
-        }
-    }
-
-    &__price {
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        text-align: right;
-        gap: .1rem;
-    }
-
-    &__price-from,
-    &__price-unit {
-        font-size: .62rem;
-        font-weight: 600;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-        color: $vac-muted;
-        line-height: 1.1;
-    }
-
-    &__price-amount {
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: $vac-ink;
-        line-height: 1.1;
-
-        @media (min-width: 768px) {
-            font-size: 1.45rem;
-        }
-    }
-
-    &__section {
-        margin-bottom: .75rem;
-    }
-
-    &__section-heading {
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        flex-shrink: 0;
-    }
-
-    &__section-icon {
-        flex-shrink: 0;
-        object-fit: contain;
-        display: block;
-        opacity: .75;
-    }
-
-    &__section-label {
-        font-size: .62rem;
-        font-weight: 700;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: $vac-muted;
-        white-space: nowrap;
-    }
-
-    &__tags-row {
-        display: flex;
-        align-items: center;
-        gap: .45rem;
-        min-width: 0;
     }
 
     &__tags {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         align-items: center;
         gap: .35rem;
-        min-width: 0;
-        flex: 1;
+        margin-bottom: .7rem;
+        max-height: calc((.72rem * 1.2 + .44rem) * 2 + .35rem);
         overflow: hidden;
     }
 
     &__tag {
         display: inline-flex;
         align-items: center;
-        gap: .3rem;
         padding: .22rem .55rem;
         border-radius: 999px;
         background: #f1f5f9;
@@ -1864,74 +1787,140 @@ $vac-country-panel: #313041;
         font-weight: 600;
         color: $vac-ink;
         line-height: 1.2;
-        flex-shrink: 0;
+    }
+
+    &__more-link {
+        font-size: .72rem;
+        font-weight: 700;
+        color: $vac-brand;
+        text-decoration: none;
         white-space: nowrap;
 
-        &--more {
-            background: #e2e8f0;
-            color: $vac-muted;
-        }
-
-        &--amenity {
-            color: $vac-ink;
+        &:hover {
+            color: $vac-trip-dark;
+            text-decoration: underline;
         }
     }
 
-    &__tag-icon {
-        flex-shrink: 0;
-        object-fit: contain;
-        display: block;
-        opacity: .8;
-    }
-
-    &__amenities {
+    &__included {
+        list-style: none;
+        margin: 0 0 .55rem;
+        padding: 0;
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: .35rem;
-    }
-    &__availability-icon {
-        flex-shrink: 0;
-        display: block;
-        width: 16px;
-        font-size: .78rem;
-        line-height: 1;
-        text-align: center;
+
+        &--availability {
+            margin-bottom: .45rem;
+        }
     }
 
-    &__availability {
+    &__included-item {
         display: flex;
-        flex-wrap: wrap;
-        gap: .35rem .65rem;
-    }
-
-    &__availability-item {
-        display: inline-flex;
         align-items: center;
-        gap: .35rem;
-        font-size: .74rem;
-        font-weight: 600;
+        gap: .45rem;
+        font-size: .78rem;
+        font-weight: 500;
         color: $vac-ink;
+        line-height: 1.35;
+        min-width: 0;
+
+        i {
+            color: #16a34a;
+            font-size: .82rem;
+            flex-shrink: 0;
+        }
+
+        span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
         &--unavailable {
-            font-weight: 500;
+            color: $vac-muted;
+
+            i {
+                color: #dc2626;
+            }
         }
     }
 
-    &__footer {
+    &__duration {
         margin-top: auto;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: space-between;
-        gap: .75rem;
-        padding-top: .85rem;
-        border-top: 1px solid $vac-border;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: $vac-ink;
+        padding-top: .5rem;
+
+        i {
+            color: $vac-muted;
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+    }
+
+    &__duration-label {
+        font-weight: 700;
+        color: $vac-muted;
+        text-transform: capitalize;
+    }
+
+    &__aside {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: .65rem;
+        padding: 1rem;
+
+        @media (min-width: 768px) {
+            width: 190px;
+            flex-shrink: 0;
+            padding: 1.1rem 1.15rem;
+            justify-content: space-between;
+        }
+    }
+
+    &__price {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+    }
+
+    &__price-prefix {
+        font-size: .6rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: $vac-muted;
+        line-height: 1.1;
+    }
+
+    &__price-line {
+        font-size: 1.35rem;
+        line-height: 1.1;
+        color: $vac-ink;
+
+        strong {
+            font-weight: 800;
+        }
+    }
+
+    &__price-suffix {
+        font-size: .82rem;
+        font-weight: 600;
+        color: $vac-muted;
+        margin-left: .15rem;
     }
 
     &__trust {
         display: flex;
         flex-direction: column;
-        gap: .25rem;
-        min-width: 0;
+        gap: .3rem;
     }
 
     &__trust-item {
@@ -1952,41 +1941,29 @@ $vac-country-panel: #313041;
     }
 
     &__cta {
-        flex-shrink: 0;
+        margin-top: auto;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: .25rem;
-        padding: .55rem 1rem;
+        padding: .6rem 1rem;
         border-radius: 8px;
-        background: $vac-trip;
+        background: $vac-camp;
         color: #fff;
         font-size: .82rem;
         font-weight: 700;
         text-decoration: none;
-        white-space: nowrap;
+        text-align: center;
         transition: background .15s ease;
 
         &:hover {
-            background: $vac-trip-dark;
+            background: $vac-camp-dark;
             color: #fff;
         }
     }
 
     @media (max-width: 767px) {
-        &__header {
-            flex-direction: column;
-            gap: .65rem;
-        }
-
-        &__price {
-            align-items: flex-start;
-            text-align: left;
-        }
-
-        &__footer {
-            flex-direction: column;
-            align-items: stretch;
+        &__aside {
+            border-top: 1px solid $vac-border;
         }
 
         &__cta {
@@ -2617,15 +2594,7 @@ $vac-country-panel: #313041;
     }
 
     &__mobile-bar {
-        display: flex;
-        gap: .5rem;
-        margin-bottom: 1rem;
-    }
-
-    &__mobile-btn {
-        flex: 1 1 0;
-        font-size: .85rem;
-        font-weight: 600;
+        display: none;
     }
 
     &__map-btn {
@@ -2697,37 +2666,47 @@ $vac-country-panel: #313041;
             font-size: .76rem;
             padding: .42rem .8rem;
         }
-
-        .vacation-filters__mobile-bar {
-            margin-bottom: 0;
-            gap: .55rem;
-        }
-
-        .vacation-filters__mobile-btn {
-            min-height: 42px;
-            border-radius: 10px;
-            font-size: .82rem;
-            font-weight: 600;
-
-            &.btn-outline-secondary {
-                border-color: #d4d5d6;
-                color: #313041;
-                background: #fff;
-            }
-
-            &.btn-primary {
-                background: #313041;
-                border-color: #313041;
-            }
-        }
     }
 }
 
 .vacation-filters-offcanvas {
-    max-height: 85vh;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1045;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 90vh;
+    height: auto;
+    margin: 0;
+    background: #fff;
+
+    &.show {
+        transform: none !important;
+    }
+
+    .offcanvas-header {
+        flex-shrink: 0;
+        border-bottom: 1px solid $vac-border;
+    }
+
+    .offcanvas-body {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem;
+        min-height: 0;
+    }
 
     &__form {
         padding-bottom: .5rem;
+    }
+
+    &__submit {
+        position: sticky;
+        bottom: 0;
+        margin-top: .5rem;
     }
 }
 
@@ -2766,20 +2745,15 @@ $vac-country-panel: #313041;
 }
 
 .vacation-country__mobile-toolbar {
-    .vacation-filters--mobile {
-        .vacation-filters__mobile-bar {
-            margin-bottom: 0;
-        }
-    }
-
-    @media (max-width: 991px) {
+    @media (max-width: 575px) {
         position: sticky;
         top: 0;
-        z-index: 30;
+        z-index: 20;
+        padding-top: 6px;
+        padding-bottom: 2px;
         background: #fff;
-        padding: .65rem 0 .75rem;
         margin-bottom: .85rem !important;
-        border-bottom: 1px solid $vac-border;
+        border-bottom: 0;
     }
 }
 

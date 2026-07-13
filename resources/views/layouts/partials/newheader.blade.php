@@ -156,7 +156,7 @@
                 <form id="global-search1" action="{{ route('vacations.index') }}" method="get">
                     <div class="vacation-mobile-select-wrap">
                         <i class="fa fa-map-marker-alt vacation-mobile-select-icon"></i>
-                        <select class="vacation-mobile-select" name="country" onchange="updateFormAction(this, 'global-search1')">
+                        <select class="vacation-mobile-select" name="country">
                             <option value="">{{ translate('Select Country') }}</option>
                             <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                 {{ __('vacations.all_offers_nav') }}
@@ -248,7 +248,7 @@
                         @if ($isVacation)
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search')">
+                                <select class="form-select" name="country">
                                     <option value="">{{ translate('Select Country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
@@ -303,7 +303,44 @@
     @endif
 </nav>
 
+@if ($isVacation)
+<div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
+    <div class="vacation-page-loading-overlay__panel" role="status">
+        <div class="spinner-border text-danger" aria-hidden="true"></div>
+        <span>{{ translate('Loading...') }}</span>
+    </div>
+</div>
+@endif
+
 <style>
+    @if ($isVacation)
+    .vacation-page-loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.82);
+    }
+
+    .vacation-page-loading-overlay[hidden] {
+        display: none !important;
+    }
+
+    .vacation-page-loading-overlay__panel {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.5rem;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        font-weight: 500;
+        color: #313041;
+    }
+    @endif
+
     /* Vacation mobile country select – inline within dark header */
     #filterContainer {
         height: {{ $isVacation ? 'auto' : '200px' }};
@@ -1071,7 +1108,7 @@ input[type=number] {
                             <label class="form-label">{{translate('Country')}}</label>
                             <div class="position-relative">
                                 <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
-                                <select class="form-select ps-5" name="country" onchange="updateFormAction(this, 'mobile-search')">
+                                <select class="form-select ps-5" name="country">
                                     <option value="">{{ translate('Select Country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
@@ -1270,7 +1307,97 @@ input[type=number] {
 </div>
 
 <script>
+function showVacationPageLoader() {
+    const overlay = document.getElementById('vacation-page-loading-overlay');
+    if (!overlay) {
+        return;
+    }
+
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+}
+
+function bindVacationCountrySelect(select, formId) {
+    if (!select || select.dataset.vacationLoaderBound) {
+        return;
+    }
+
+    select.dataset.vacationLoaderBound = '1';
+
+    select.addEventListener('mousedown', function(e) {
+        if (e.target.tagName !== 'OPTION') {
+            return;
+        }
+
+        this._vacationClickedOption = e.target.value;
+        this._vacationValueBeforeClick = this.value;
+    });
+
+    select.addEventListener('change', function() {
+        this._vacationClickedOption = null;
+        updateFormAction(this, formId);
+    });
+
+    select.addEventListener('mouseup', function() {
+        if (this._vacationClickedOption === undefined || this._vacationClickedOption === null) {
+            return;
+        }
+
+        const clicked = this._vacationClickedOption;
+        this._vacationClickedOption = null;
+
+        if (clicked === this.value && clicked === this._vacationValueBeforeClick) {
+            updateFormAction(this, formId);
+        }
+    });
+}
+
+function bindVacationFilterSelect(select) {
+    if (!select || select.dataset.vacationLoaderBound) {
+        return;
+    }
+
+    select.dataset.vacationLoaderBound = '1';
+
+    const submitFilterForm = function() {
+        showVacationPageLoader();
+
+        if (select.form) {
+            select.form.submit();
+        }
+    };
+
+    select.addEventListener('mousedown', function(e) {
+        if (e.target.tagName !== 'OPTION') {
+            return;
+        }
+
+        this._vacationClickedOption = e.target.value;
+        this._vacationValueBeforeClick = this.value;
+    });
+
+    select.addEventListener('change', function() {
+        this._vacationClickedOption = null;
+        submitFilterForm();
+    });
+
+    select.addEventListener('mouseup', function() {
+        if (this._vacationClickedOption === undefined || this._vacationClickedOption === null) {
+            return;
+        }
+
+        const clicked = this._vacationClickedOption;
+        this._vacationClickedOption = null;
+
+        if (clicked === this.value && clicked === this._vacationValueBeforeClick) {
+            submitFilterForm();
+        }
+    });
+}
+
 function updateFormAction(selectElement, formId) {
+    showVacationPageLoader();
+
     const form = document.getElementById(formId);
     const selectedCountry = selectElement.value.trim().toLowerCase();
 
@@ -1287,6 +1414,16 @@ function updateFormAction(selectElement, formId) {
 
     form.submit();
 }
+
+window.addEventListener('pageshow', function() {
+    const overlay = document.getElementById('vacation-page-loading-overlay');
+    if (!overlay) {
+        return;
+    }
+
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+});
 
 function closeMobileMenu() {
     // Close the mobile menu modal before opening login modal
@@ -1322,12 +1459,18 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     for (const [formId, select] of Object.entries(countrySelects)) {
-        if (select) {
-            select.addEventListener('change', function() {
-                updateFormAction(this, formId);
-            });
-        }
+        bindVacationCountrySelect(select, formId);
     }
+
+    document.querySelectorAll('.vacation-filters select, .vacation-filters-offcanvas__form select').forEach(function(select) {
+        bindVacationFilterSelect(select);
+    });
+
+    document.querySelectorAll('.vacation-filters form, .vacation-filters-offcanvas__form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            showVacationPageLoader();
+        });
+    });
 
     // Update logout form handling: stay on current page, clear session, then refresh in place
     document.querySelectorAll('.logout-form').forEach(form => {
