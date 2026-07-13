@@ -2514,7 +2514,12 @@ $trip-offer-lh-relaxed: 1.7;
     // Contact Modal (Trips) - mobile centering for reCAPTCHA + submit
     #tripContactModal {
         .trip-contact-submit-row {
-            // Desktop is controlled by normal layout; only override on phones.
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+
             @media (max-width: 576px) {
                 display: flex;
                 flex-direction: column;

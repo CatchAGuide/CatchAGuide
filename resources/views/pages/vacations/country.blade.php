@@ -16,7 +16,7 @@
 @endphp
 
 @section('title', $listingTitle . ' — ' . __('vacations.hub_breadcrumb'))
-@section('header_title', $countryName)
+@section('header_title', $listingTitle)
 @section('header_sub_title', $countrySubtitle)
 @section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
 
@@ -59,9 +59,21 @@
     @endif
 
     <div class="row vacation-country__layout mb-5">
-        <aside class="col-12 col-lg-3 vacation-country__sidebar">
+        <div class="col-12 d-block d-sm-none mobile-selection-sfm mb-3 vacation-country__mobile-toolbar">
+            <x-vacation.filters
+                render-section="mobile"
+                :filter="$vm->filter"
+                :trips-total="$vm->tripsTotal"
+                :camps-total="$vm->campsTotal"
+                :species-options="$vm->speciesOptions"
+                :show-map-button="$hasMap"
+            />
+        </div>
+
+        <aside class="col-12 col-lg-3 vacation-country__sidebar d-none d-sm-block">
             <div class="vacation-country__sidebar-filters">
                 <x-vacation.filters
+                    render-section="sidebar"
                     :filter="$vm->filter"
                     :trips-total="$vm->tripsTotal"
                     :camps-total="$vm->campsTotal"
@@ -145,6 +157,14 @@
         </section>
     @endif
 </div>
+
+<x-vacation.filters
+    render-section="offcanvas"
+    :filter="$vm->filter"
+    :trips-total="$vm->tripsTotal"
+    :camps-total="$vm->campsTotal"
+    :species-options="$vm->speciesOptions"
+/>
 @endsection
 
 @section('js_after')

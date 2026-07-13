@@ -59,7 +59,7 @@ class CustomerContactMail extends Mailable
     {
         return $this->view('mails.customercontactmail')
             ->to($this->email)
-            ->cc(env('TO_CEO'))
+            ->cc(config('mail.admin_email'))
             ->subject(__('emails.contact_customer.subject'));
     }
 }

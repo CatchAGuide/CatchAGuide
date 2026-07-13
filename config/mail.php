@@ -106,7 +106,9 @@ return [
     |
     */
 
-    'admin_email' => env('TO_CEO', env('TO_CEO')),
+    'admin_email' => env('TO_CEO', 'info@catchaguide.com'),
+
+    'cc_email' => env('CC_MAIL', env('TO_MAIL', 'info@catchaguide.com')),
 
     /*
     |--------------------------------------------------------------------------
