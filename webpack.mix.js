@@ -24,3 +24,5 @@ mix.sass("resources/sass/admin/layout.scss", "public/css/admin-layout.css");
 // creates 'dist/app.css'
 
 mix.js("resources/js/app.js", "public/js/app.js");
+
+mix.version();
