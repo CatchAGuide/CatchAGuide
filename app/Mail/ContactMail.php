@@ -58,7 +58,7 @@ class ContactMail extends Mailable
     public function build()
     {
         return $this->view('mails.contactmail')
-            ->to(env('TO_CEO'))
+            ->to(config('mail.admin_email'))
             ->subject(__('emails.contact_admin.subject'));
     }
 }

@@ -59,15 +59,21 @@ class CampCardPresenter
     {
         $card = $this->present($camp);
         $facilities = $this->facilityLabels($camp);
+        $price = $camp->getLowestAccommodationOrOfferPrice();
         $card['layout'] = 'row';
         $card['destination_id'] = $destinationId;
         $card['image_badge'] = $this->imageBadge($camp);
         $card['target_fish_tags'] = $this->targetFishTags($camp);
         $card['facilities_extra'] = max(0, $camp->facilities->count() - count($facilities));
-        $card['listing_price_suffix'] = __('vacations.per_night_label');
+        $card['listing_price_prefix'] = __('vacations.starting_from_label');
+        $card['listing_price_display'] = $price !== null
+            ? '€' . number_format($price, 0, ',', '.')
+            : null;
+        $card['listing_price_suffix'] = __('vacations.per_night');
         $card['listing_availability'] = $this->availabilityItems($camp);
-        $card['listing_facilities'] = $this->facilityItems($camp);
+        $card['listing_included'] = $facilities;
         $card['target_fish_tags_extra'] = max(0, count($card['target_fish_tags']) - 3);
+        $card['duration_pill'] = $this->minimumStayPill($camp);
 
         return $card;
     }
@@ -273,5 +279,17 @@ class CampCardPresenter
         }
 
         return null;
+    }
+
+    private function minimumStayPill(Camp $camp): ?string
+    {
+        $accommodation = $camp->accommodations->first();
+        if (! $accommodation?->minimum_stay_nights) {
+            return null;
+        }
+
+        $nights = (int) $accommodation->minimum_stay_nights;
+
+        return $nights . ' ' . ($nights === 1 ? __('vacations.night') : __('vacations.nights'));
     }
 }
