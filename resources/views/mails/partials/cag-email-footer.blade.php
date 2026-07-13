@@ -5,14 +5,14 @@
             <tr>
                 <td style="padding: 10px; text-align: left; width: 50%; vertical-align: top;">
                     <img src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100" alt="Catch A Guide">
-                    @if(env('CONTACT_NUM'))
+                    @if(config('cag.contact_num'))
                     <p style="margin: 8px 0 0;">
-                        <a href="tel:+49{{ preg_replace('/\D/', '', env('CONTACT_NUM')) }}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{ env('CONTACT_NUM') }}</a>
+                        <a href="tel:+49{{ preg_replace('/\D/', '', config('cag.contact_num')) }}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{ config('cag.contact_num') }}</a>
                     </p>
                     @endif
-                    @if(env('TO_CEO'))
+                    @if(config('mail.admin_email'))
                     <p style="margin: 4px 0 0;">
-                        <a href="mailto:{{ env('TO_CEO') }}" style="color: #fff; font-size: 14px; text-decoration: none;">{{ env('TO_CEO') }}</a>
+                        <a href="mailto:{{ config('mail.admin_email') }}" style="color: #fff; font-size: 14px; text-decoration: none;">{{ config('mail.admin_email') }}</a>
                     </p>
                     @endif
                 </td>

@@ -47,7 +47,7 @@ class MailToCEO extends Mailable
             'user' => $this->user,
             'guide' => $this->guide
         ])
-            ->to(env('TO_CEO','info@catchaguide.com'))
+            ->to(config('mail.admin_email'))
             ->subject("Eine neue Buchung!");
     }
 }

@@ -108,6 +108,8 @@ return [
 
     'admin_email' => env('TO_CEO', 'info@catchaguide.com'),
 
+    'to_email' => env('TO_MAIL', 'info@catchaguide.com'),
+
     'cc_email' => env('CC_MAIL', env('TO_MAIL', 'info@catchaguide.com')),
 
     /*

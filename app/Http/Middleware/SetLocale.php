@@ -13,7 +13,7 @@ class SetLocale
     public function handle($request, Closure $next)
     {
 
-      if (env('APP_ENV') == 'production') {
+      if (app()->environment('production')) {
         $domain = $request->getHost();
         // Normalize so both www.catchaguide.de and catchaguide.de get correct locale
         $normalizedDomain = str_replace('www.', '', $domain);

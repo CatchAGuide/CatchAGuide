@@ -46,4 +46,8 @@ return [
         'driver' => env('TRANSLATION_SERVICE', 'gemini'), // Options: 'gemini' or 'google'
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY', ''),
+    ],
+
 ];

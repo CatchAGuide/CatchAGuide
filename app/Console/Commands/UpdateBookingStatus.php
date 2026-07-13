@@ -67,8 +67,8 @@ class UpdateBookingStatus extends Command
                 Mail::to($guide->email)->locale($guide->language ?? app()->getLocale())->send(new GuideBookingExpiredMail($booking,$user,$guiding,$guide));
             }
 
-            if (!CheckEmailLog('booking_expire_to_ceo', 'booking_' . $booking->id, env('TO_CEO','info@catchaguide.com'))) {
-                Mail::to(env('TO_CEO','info@catchaguide.com'))->locale('de')->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
+            if (!CheckEmailLog('booking_expire_to_ceo', 'booking_' . $booking->id, config('mail.admin_email'))) {
+                Mail::to(config('mail.admin_email'))->locale('de')->send(new BookingExpireMailToCEO($booking,$user,$guiding,$guide));
             }
         }
     }

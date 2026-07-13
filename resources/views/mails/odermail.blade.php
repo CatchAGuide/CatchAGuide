@@ -87,7 +87,7 @@
                                     <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;">Wenn Du Fragen hast, antworte einfach auf diese Mail.</p>
 
                                     <p style="color:#4a5566;margin-top:20px;margin-bottom:20px;margin-right:0;margin-left:0;font-size:16px;line-height:28px;">Liebe Grüße,
-                                        <br>Das Team von {{ env('app.name') }}</p>
+                                        <br>Das Team von {{ config('app.name') }}</p>
 
                                     <table width="100%" style="border-collapse:collapse;">
                                         <tr>

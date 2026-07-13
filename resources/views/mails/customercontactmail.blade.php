@@ -146,8 +146,8 @@
                                     @if(config('mail.from.address'))
                                     <p style="margin: 0 0 4px;"><a href="mailto:{{ config('mail.from.address') }}" style="color: #ffffff; text-decoration: none;">{{ config('mail.from.address') }}</a></p>
                                     @endif
-                                    @if(env('CONTACT_NUM'))
-                                    <p style="margin: 0;"><a href="tel:{{ env('CONTACT_NUM') }}" style="color: #ffffff; text-decoration: none;">{{ env('CONTACT_NUM') }}</a></p>
+                                    @if(config('cag.contact_num'))
+                                    <p style="margin: 0;"><a href="tel:{{ config('cag.contact_num') }}" style="color: #ffffff; text-decoration: none;">{{ config('cag.contact_num') }}</a></p>
                                     @endif
                                 </td>
                             </tr>

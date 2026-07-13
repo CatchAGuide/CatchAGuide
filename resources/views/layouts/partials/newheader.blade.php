@@ -1235,7 +1235,7 @@ input[type=number] {
                     
                     <div class="social-icons">
                         <a href="https://www.facebook.com/CatchAGuide" class="fab fa-facebook-square"></a>
-                        <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" class="fab fa-whatsapp"></a>
+                        <a href="https://wa.me/+49{{config('cag.contact_num')}}" class="fab fa-whatsapp"></a>
                         <a href="https://www.instagram.com/catchaguide_official/" class="fab fa-instagram"></a>
                     </div>
                     

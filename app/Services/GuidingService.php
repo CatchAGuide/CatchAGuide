@@ -14,12 +14,12 @@ class GuidingService
                 $images[$key] = $imgUrl;
                 
                 if (app()->getLocale() == 'en') {
-                    $url = str_replace('https://catchaguide.com//', env('EN_APP_URL'), $imgUrl);
+                    $url = str_replace('https://catchaguide.com//', config('cag.en_app_url'), $imgUrl);
                     $images[$key] = $url;
                 }
 
                 if (app()->getLocale() == 'de') {
-                    $url = str_replace('https://catchaguide.com//', env('DE_APP_URL'), $imgUrl);
+                    $url = str_replace('https://catchaguide.com//', config('cag.de_app_url'), $imgUrl);
                     $images[$key] = $url;
                 }
             }

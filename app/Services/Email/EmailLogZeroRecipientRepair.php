@@ -43,7 +43,7 @@ class EmailLogZeroRecipientRepair
 
     private function ceoEmail(): string
     {
-        $addr = env('TO_CEO', 'info@catchaguide.com');
+        $addr = config('mail.admin_email');
 
         return is_string($addr) && $addr !== '' ? $addr : 'info@catchaguide.com';
     }

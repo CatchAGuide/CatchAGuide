@@ -55,8 +55,8 @@ class GenerateSitemap extends Command
         
         // Get URLs from environment
         $this->urls = [
-            'en' => env('EN_APP_URL'),
-            'de' => env('DE_APP_URL')
+            'en' => config('cag.en_app_url'),
+            'de' => config('cag.de_app_url')
         ];
 
         foreach ($languages as $lang) {

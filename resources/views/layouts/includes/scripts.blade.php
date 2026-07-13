@@ -35,7 +35,7 @@
 <script src="{{ asset('assets/vendors/masonry/masonry.pkgd.min.js') }}" async></script>
 <script src="/js/app.js"></script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker&loading=async"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places,geocoding,marker&loading=async"></script>
 @include('layouts.includes.maps-utils')
 @stack('js_push')
 

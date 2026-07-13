@@ -5,7 +5,7 @@
         <div>
             <div class="contact-info">
                 <i class="fas fa-phone-alt me-2"></i>
-                <a href="tel:+49{{ env('CONTACT_NUM') }}" class="text-decoration-none">+49 (0) {{ env('CONTACT_NUM') }}</a>
+                <a href="tel:+49{{ config('cag.contact_num') }}" class="text-decoration-none">+49 (0) {{ config('cag.contact_num') }}</a>
             </div>
             <a
                 href="#"

@@ -64,7 +64,7 @@ class GuideEmail extends Mailable
     public function build()
     {
         return $this->view('mails.guidemail', ['taxId' => $this->taxId])
-            ->to(env('TO_MAIL','info@catchaguide.com'))
+            ->to(config('mail.to_email'))
             ->subject("Anmeldung als Guide");
     }
 }

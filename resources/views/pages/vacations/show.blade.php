@@ -821,7 +821,7 @@
                         <div class="">
                             <div class="contact-info">
                                 <i class="fas fa-phone-alt me-2"></i>
-                                <a href="tel:+49{{env('CONTACT_NUM')}}" class="text-decoration-none">+49 (0) {{env('CONTACT_NUM')}}</a>
+                                <a href="tel:+49{{config('cag.contact_num')}}" class="text-decoration-none">+49 (0) {{config('cag.contact_num')}}</a>
                             </div>
                             <a id="contact-footer" href="{{ route('additional.contact') }}" class="btn btn-outline-orange">
                             >@lang('vacations.contact_us_button')

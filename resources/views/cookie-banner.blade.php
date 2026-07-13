@@ -38,7 +38,7 @@
     }
 
     function loadGuidingsGoogleMapsScript() {
-        loadGoogleMapsScript('https://maps.googleapis.com/maps/api/js?key='.env('GOOGLE_MAPS_API_KEY').'&libraries=places,geocoding&callback=initMap&v=weekly', null);
+        loadGoogleMapsScript('https://maps.googleapis.com/maps/api/js?key='.config('services.google_maps.api_key').'&libraries=places,geocoding&callback=initMap&v=weekly', null);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
