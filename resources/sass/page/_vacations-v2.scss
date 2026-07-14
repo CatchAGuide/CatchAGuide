@@ -63,6 +63,19 @@
     }
 }
 
+.vacation-offer-breadcrumb {
+    .breadcrumb-container {
+        padding-top: 12px;
+        margin-bottom: 0;
+        border-bottom-color: rgba(15, 23, 42, .08);
+    }
+
+    .thm-breadcrumb {
+        margin-bottom: 0;
+        font-size: 0.875rem;
+    }
+}
+
 // Camp Topbar
 .camp-topbar {
     padding: 15px 0 0;
@@ -502,27 +515,17 @@
             }
         }
 
-        // Mobile only: truncate description to 5 lines with visible See more/See less
-        @media (max-width: 767.98px) {
-            .camp-desc-mobile-wrap.collapsed .description-text-wrapper {
-                display: -webkit-box;
-                -webkit-line-clamp: 5;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
-            .camp-desc-see-more.camp-desc-visible {
-                display: inline-block !important;
-            }
+        // Truncate long Camp / Area / Fishing copy on all viewports
+        .camp-desc-wrap.collapsed .description-text-wrapper {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
-        @media (min-width: 768px) {
-            .camp-desc-mobile-wrap.collapsed .description-text-wrapper {
-                display: block;
-                -webkit-line-clamp: unset;
-                overflow: visible;
-            }
-            .camp-desc-see-more {
-                display: none !important;
-            }
+
+        .camp-desc-see-more.camp-desc-visible {
+            display: inline-block !important;
+            font-weight: 600;
         }
     }
 

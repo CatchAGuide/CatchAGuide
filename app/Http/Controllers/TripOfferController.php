@@ -45,6 +45,7 @@ class TripOfferController extends Controller
         );
         $availabilityCards = $this->buildAvailabilityCards($trip);
         $selectedDate = $this->resolveSelectedDate($request, $availabilityCards);
+        $isYearRoundTrip = (bool) $trip->year_round_availability;
 
         $tripOfferData = [
             'gallery' => $gallery['all'] ?? [],
@@ -58,6 +59,9 @@ class TripOfferController extends Controller
             'availabilityCards' => $availabilityCards,
             'tripOfferData' => $tripOfferData,
             'selectedDate' => $selectedDate,
+            'isYearRoundTrip' => $isYearRoundTrip,
+            'minBookingDate' => now()->toDateString(),
+            'initialBookingDate' => $selectedDate ?? '',
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
             'reviewTrust' => $this->tripTrust->resolve($trip),
             'canonicalUrl' => route('vacations.trips.show', $slug),

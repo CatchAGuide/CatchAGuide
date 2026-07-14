@@ -5,6 +5,10 @@
 @php
     $isCheckout = (request()->is('checkout') || request()->is('checkout/thank-you/*')) ? 1 : 0;
     $currentVacationCountry = $currentVacationCountry ?? null;
+    $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
+    $vacationCountryOptions = ($isVacation ?? false)
+        ? $vacationDestinations->countriesForSearch()
+        : collect();
 @endphp
 
 <nav class="navbar-custom short-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isCheckout ? 'checkout-minimal' : '' }} {{ ($isCheckout) ? 'no-searchbar' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
@@ -132,10 +136,6 @@
             @endif
 
             @php
-                $countries = \App\Models\Destination::where('type', 'vacations')->where('language',app()->getLocale())->pluck('name');
-            @endphp
-
-            @php
                 // Collect all non-empty request filters (excluding internal/mobile helper param)
                 $activeFilters = collect(request()->except(['ismobile']))
                     ->filter(function ($value) {
@@ -202,15 +202,18 @@
                 </div>
             @elseif(!($isCheckout))
                 <div id="filterContainer" class="col-12 d-md-none pb-3">
-                    <form id="global-search1" action="{{ route('vacations.category', ['country' => 'all']) }}" method="get">
+                    <form id="global-search1" action="{{ route('vacations.index') }}" method="get">
                         <div class="vacation-mobile-select-wrap">
                             <i class="fas fa-map-marker-alt vacation-mobile-select-icon"></i>
-                            <select class="vacation-mobile-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                <option value="">{{translate('Select Country')}}</option>
-                                @foreach($countries as $country)
-                                    <option value="{{ $country }}"
-                                        {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                        {{ $country }}
+                            <select class="vacation-mobile-select" name="country">
+                                <option value="">{{ translate('Select Country') }}</option>
+                                <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                    {{ __('vacations.all_offers_nav') }}
+                                </option>
+                                @foreach($vacationCountryOptions as $country)
+                                    <option value="{{ $country->slug }}"
+                                        {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
+                                        {{ translate($country->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -247,17 +250,21 @@
     @if(!($isCheckout))
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">
+            <form id="global-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceShortDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if($isVacation)
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                    <option value="">{{translate('Select Country')}}</option>
-                                    @foreach($countries as $country)
-                                        <option value="{{ $country }}" {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                            {{ $country }}
+                                <select class="form-select" name="country">
+                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                        {{ __('vacations.all_offers_nav') }}
+                                    </option>
+                                    @foreach($vacationCountryOptions as $country)
+                                        <option value="{{ $country->slug }}"
+                                            {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
+                                            {{ translate($country->name) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1006,17 +1013,21 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{$isVacation ? route('vacations.category', ['country' => 'all']) : route('guidings.index')}}" method="get" onsubmit="return validateSearch(event, 'searchPlace')">
+                <form id="mobile-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlace')">
                     @if($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{ translate('Country') }}</label>
                             <div class="position-relative">
-                                <i class="fa fa-globe position-absolute top-50 translate-middle-y"></i>
-                                <select class="form-select" name="country" onchange="updateFormAction(this, 'global-search1')">
-                                    <option value="">{{translate('Select Country')}}</option>
-                                    @foreach($countries as $country)
-                                        <option value="{{ $country }}" {{ ($currentVacationCountry ?? request()->country) == $country ? 'selected' : '' }}>
-                                            {{ $country }}
+                                <i class="fa fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
+                                <select class="form-select ps-5" name="country">
+                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
+                                        {{ __('vacations.all_offers_nav') }}
+                                    </option>
+                                    @foreach($vacationCountryOptions as $country)
+                                        <option value="{{ $country->slug }}"
+                                            {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
+                                            {{ translate($country->name) }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1212,16 +1223,56 @@ input[type=number] {
 
 <script>
     
+function bindVacationCountrySelect(select, formId) {
+    if (!select || select.dataset.vacationLoaderBound) {
+        return;
+    }
+
+    select.dataset.vacationLoaderBound = '1';
+
+    select.addEventListener('mousedown', function(e) {
+        if (e.target.tagName !== 'OPTION') {
+            return;
+        }
+
+        this._vacationClickedOption = e.target.value;
+        this._vacationValueBeforeClick = this.value;
+    });
+
+    select.addEventListener('change', function() {
+        this._vacationClickedOption = null;
+        updateFormAction(this, formId);
+    });
+
+    select.addEventListener('mouseup', function() {
+        if (this._vacationClickedOption === undefined || this._vacationClickedOption === null) {
+            return;
+        }
+
+        const clicked = this._vacationClickedOption;
+        this._vacationClickedOption = null;
+
+        if (clicked === this.value && clicked === this._vacationValueBeforeClick) {
+            updateFormAction(this, formId);
+        }
+    });
+}
+
 function updateFormAction(selectElement, formId) {
     const form = document.getElementById(formId);
-    const selectedCountry = selectElement.value;
+    const selectedCountry = selectElement.value.trim().toLowerCase();
 
-    if(selectedCountry){
-        form.action = "{{ route('vacations.category', ['country' => 'all']) }}".replace('all', selectedCountry);
-    }else{
-        form.action = "{{ route('guidings.index') }}";
+    if (selectedCountry === 'all-offers') {
+        window.location.href = "{{ route('vacations.all-offers') }}";
+        return;
     }
-    
+
+    if (selectedCountry) {
+        form.action = "{{ url('/vacations') }}/" + encodeURIComponent(selectedCountry);
+    } else {
+        form.action = "{{ route('vacations.index') }}";
+    }
+
     form.submit();
 }
 
@@ -1251,11 +1302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     for (const [formId, select] of Object.entries(countrySelects)) {
-        if (select) {
-            select.addEventListener('change', function() {
-                updateFormAction(this, formId);
-            });
-        }
+        bindVacationCountrySelect(select, formId);
     }
     
     document.querySelectorAll('.logout-form').forEach(form => {

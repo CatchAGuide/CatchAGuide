@@ -19,7 +19,13 @@
     x-init="init()"
     class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
 >
-    
+    <div class="camp-container">
+        @include('pages.vacations.partials.offer-breadcrumb', [
+            'pillar' => 'camps',
+            'productTitle' => translate($camp['title'] ?? ''),
+        ])
+    </div>
+
     <!-- Camp Header -->
     <header class="camp-topbar">
         <div class="camp-container camp-topbar__inner">
@@ -172,7 +178,7 @@
                                 </div>
                             </div>
                             @if(!empty($camp['description']['camp_description']))
-                            <div class="description-item-toggle camp-desc-mobile-wrap">
+                            <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_description">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -187,7 +193,7 @@
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area']))
-                            <div class="description-item-toggle camp-desc-mobile-wrap">
+                            <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_area">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.area') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -202,7 +208,7 @@
                             </div>
                             @endif
                             @if(!empty($camp['description']['camp_area_fishing']))
-                            <div class="description-item-toggle camp-desc-mobile-wrap">
+                            <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_area_fishing">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.fishing') }}</h3>
                                 <p class="description-text description-text-wrapper">
                                     <span class="description-loading">
@@ -773,9 +779,13 @@
                         <div class="form-group mb-3">
                             <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <x-recaptcha />
-                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
+                        <div class="contact-modal-submit-row d-flex flex-column flex-sm-row flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="contact-modal-captcha-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-start">
+                                <x-recaptcha />
+                            </div>
+                            <div class="contact-modal-submit-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-end">
+                                <button type="button" id="contactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -926,26 +936,24 @@ document.addEventListener('DOMContentLoaded', function () {
     initDescriptionToggles();
 });
 
-// Description expand/collapse functionality (mobile only: 5 lines + visible See more/See less)
+// Description expand/collapse (all viewports: ~5 lines + See more / See less)
 function initDescriptionToggles() {
-    const descriptionItems = document.querySelectorAll('.description-item-toggle.camp-desc-mobile-wrap');
+    const descriptionItems = document.querySelectorAll('.description-item-toggle.camp-desc-wrap');
     const originalTexts = {
         'camp_description': @json(translate($camp['description']['camp_description'] ?? '')),
         'camp_area': @json(translate($camp['description']['camp_area'] ?? '')),
         'camp_area_fishing': @json(translate($camp['description']['camp_area_fishing'] ?? ''))
     };
 
-    descriptionItems.forEach((item, index) => {
+    descriptionItems.forEach((item) => {
         const textElement = item.querySelector('.description-text-wrapper');
         const seeMoreBtn = item.querySelector('.camp-desc-see-more');
         const moreLabel = seeMoreBtn ? seeMoreBtn.querySelector('.camp-desc-more-label') : null;
         const lessLabel = seeMoreBtn ? seeMoreBtn.querySelector('.camp-desc-less-label') : null;
         if (!textElement) return;
 
-        let originalText = '';
-        if (index === 0 && originalTexts.camp_description) originalText = originalTexts.camp_description;
-        else if (index === 1 && originalTexts.camp_area) originalText = originalTexts.camp_area;
-        else if (index === 2 && originalTexts.camp_area_fishing) originalText = originalTexts.camp_area_fishing;
+        const descKey = item.getAttribute('data-desc-key');
+        const originalText = (descKey && originalTexts[descKey]) ? originalTexts[descKey] : '';
 
         const loadingElement = textElement.querySelector('.description-loading');
         if (loadingElement) loadingElement.remove();
@@ -953,50 +961,57 @@ function initDescriptionToggles() {
 
         textElement.innerHTML = originalText;
 
-        function applyMobileTruncation() {
-            const isMobile = window.innerWidth < 768;
-            if (!isMobile) {
+        function applyTruncation() {
+            const wasExpanded = seeMoreBtn && seeMoreBtn.getAttribute('aria-expanded') === 'true';
+
+            // Measure full height without clamp
+            item.classList.remove('collapsed');
+            if (seeMoreBtn) {
+                seeMoreBtn.classList.add('d-none');
+                seeMoreBtn.classList.remove('camp-desc-visible');
+            }
+
+            const lineHeight = parseFloat(window.getComputedStyle(textElement).lineHeight) || 24;
+            const maxLines = 5;
+            const maxHeight = lineHeight * maxLines;
+            const needsTruncation = textElement.scrollHeight > maxHeight + 2;
+
+            if (needsTruncation && seeMoreBtn) {
+                if (!wasExpanded) {
+                    item.classList.add('collapsed');
+                    seeMoreBtn.setAttribute('aria-expanded', 'false');
+                    if (moreLabel) moreLabel.classList.remove('d-none');
+                    if (lessLabel) lessLabel.classList.add('d-none');
+                } else {
+                    seeMoreBtn.setAttribute('aria-expanded', 'true');
+                    if (moreLabel) moreLabel.classList.add('d-none');
+                    if (lessLabel) lessLabel.classList.remove('d-none');
+                }
+                seeMoreBtn.classList.add('camp-desc-visible');
+                seeMoreBtn.classList.remove('d-none');
+            } else {
                 item.classList.remove('collapsed');
                 if (seeMoreBtn) {
                     seeMoreBtn.classList.remove('camp-desc-visible');
                     seeMoreBtn.classList.add('d-none');
+                    seeMoreBtn.setAttribute('aria-expanded', 'false');
                     if (moreLabel) moreLabel.classList.remove('d-none');
                     if (lessLabel) lessLabel.classList.add('d-none');
                 }
-                return;
-            }
-            const lineHeight = parseFloat(window.getComputedStyle(textElement).lineHeight) || 24;
-            const maxLines = 5;
-            const maxHeight = lineHeight * maxLines;
-            const fullHeight = textElement.scrollHeight;
-            const needsTruncation = fullHeight > maxHeight;
-
-            if (needsTruncation && seeMoreBtn) {
-                item.classList.add('collapsed');
-                seeMoreBtn.classList.add('camp-desc-visible');
-                seeMoreBtn.classList.remove('d-none');
-                moreLabel.classList.remove('d-none');
-                lessLabel.classList.add('d-none');
-                seeMoreBtn.setAttribute('aria-expanded', 'false');
-            } else {
-                item.classList.remove('collapsed');
-                if (seeMoreBtn) seeMoreBtn.classList.remove('camp-desc-visible');
             }
         }
 
         if (seeMoreBtn) {
             seeMoreBtn.addEventListener('click', function() {
-                if (window.innerWidth >= 768) return;
-                const expanded = item.classList.toggle('collapsed');
-                const isExpanded = !item.classList.contains('collapsed');
-                seeMoreBtn.setAttribute('aria-expanded', isExpanded);
+                const isExpanded = item.classList.toggle('collapsed') === false;
+                seeMoreBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
                 if (moreLabel) moreLabel.classList.toggle('d-none', isExpanded);
                 if (lessLabel) lessLabel.classList.toggle('d-none', !isExpanded);
             });
         }
 
-        setTimeout(applyMobileTruncation, 50);
-        window.addEventListener('resize', applyMobileTruncation);
+        setTimeout(applyTruncation, 50);
+        window.addEventListener('resize', applyTruncation);
     });
 }
 

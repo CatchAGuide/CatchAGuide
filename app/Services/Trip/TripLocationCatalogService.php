@@ -3,6 +3,7 @@
 namespace App\Services\Trip;
 
 use App\Domain\Destination\DestinationCategoryType;
+use App\Domain\Vacation\CountrySlug;
 use App\Models\Destination;
 use App\Models\Trip;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -54,7 +55,11 @@ class TripLocationCatalogService
 
         $base = Trip::query()
             ->where('status', 'active')
-            ->where('country', $locationSlug);
+            ->where(function (Builder $q) use ($locationSlug) {
+                foreach (CountrySlug::storageVariants($locationSlug) as $variant) {
+                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
+                }
+            });
 
         $trips_total = (clone $base)->count();
 

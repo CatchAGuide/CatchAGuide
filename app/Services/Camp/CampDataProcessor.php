@@ -2,6 +2,7 @@
 
 namespace App\Services\Camp;
 
+use App\Domain\Vacation\CountrySlug;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,7 +26,7 @@ class CampDataProcessor
             'description_fishing' => $request->description_fishing ?? '',
             'latitude' => $request->latitude ?? null,
             'longitude' => $request->longitude ?? null,
-            'country' => $request->country ?? '',
+            'country' => $this->normalizeCountrySlug($request->country ?? ''),
             'city' => $request->city ?? '',
             'region' => $request->region ?? '',
             'distance_to_store' => $request->distance_to_store ?? '',
@@ -166,5 +167,14 @@ class CampDataProcessor
             // For other paths, return as is
             return $path;
         }, $imagePaths);
+    }
+
+    private function normalizeCountrySlug(mixed $country): string
+    {
+        if (! is_string($country) || trim($country) === '') {
+            return '';
+        }
+
+        return CountrySlug::canonicalize($country) ?? '';
     }
 }

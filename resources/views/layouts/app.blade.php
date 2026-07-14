@@ -171,7 +171,11 @@
   
     @include('layouts.partials.newheader-short', [
         'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($campData) && is_array($campData) ? ($campData['country'] ?? null) : null,
+        'currentVacationCountry' => isset($campData) && is_array($campData) && filled($campData['country'] ?? null)
+            ? strtolower((string) $campData['country'])
+            : (isset($tripView) && is_array($tripView) && filled($tripView['country'] ?? null)
+                ? strtolower((string) $tripView['country'])
+                : null),
     ])
 
     @yield('content')
