@@ -3,3 +3,42 @@
     text-align: left;
   }
 }
+
+/* Contact modal: keep reCAPTCHA + send button on-screen on mobile */
+#contactModal {
+  .modal-content,
+  .modal-body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .contact-modal-submit-row {
+    width: 100%;
+  }
+
+  .contact-modal-captcha-wrap,
+  .contact-modal-submit-wrap {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  @media (max-width: 575.98px) {
+    .contact-modal-submit-row {
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: .9rem !important;
+    }
+
+    .contact-modal-captcha-wrap,
+    .contact-modal-submit-wrap {
+      width: 100% !important;
+      display: flex !important;
+      justify-content: center !important;
+    }
+
+    .contact-modal-submit-wrap .btn {
+      width: auto;
+    }
+  }
+}

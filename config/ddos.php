@@ -217,6 +217,7 @@ return [
         'threat_score_threshold' => 70,  // Lower threshold for better detection
         'high_threat_threshold' => 85,   // Lower threshold for high threat detection
         'bot_detection' => true,         // Enable bot detection
+        'retention_days' => 7,           // Auto-purge rows older than this via threat-intelligence:cleanup
         'suspicious_patterns' => [
             'rapid_requests' => true,    // Detect rapid request patterns
             'missing_headers' => true,   // Detect missing common headers
@@ -224,6 +225,7 @@ return [
             'geolocation_anomalies' => true,  // Detect unusual geographic patterns
         ],
     ],
+
 
     /*
     |--------------------------------------------------------------------------

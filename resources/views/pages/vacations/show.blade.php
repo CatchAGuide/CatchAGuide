@@ -1141,9 +1141,13 @@
                         <div class="form-group mb-3">
                             <textarea name="description" class="form-control" rows="4" placeholder="@lang('contact.feedback')" required></textarea>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <x-recaptcha />
-                            <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                        <div class="contact-modal-submit-row d-flex flex-column flex-sm-row flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="contact-modal-captcha-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-start">
+                                <x-recaptcha />
+                            </div>
+                            <div class="contact-modal-submit-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-end">
+                                <button type="button" id="contactSubmitBtn" class="btn btn-orange">@lang('contact.btnSend')</button>
+                            </div>
                         </div>
                     </form>
                 </div>

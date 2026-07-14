@@ -159,6 +159,23 @@ return [
             'run_in_background' => true,
         ],
 
+        'threat_intelligence_cleanup' => [
+            'label' => 'Threat intelligence cleanup',
+            'description' => 'Deletes threat_intelligence rows older than retention (threat-intelligence:cleanup).',
+            'command' => 'threat-intelligence:cleanup',
+            'default' => [
+                'enabled' => true,
+                'frequency' => 'daily_at',
+                'schedule_time' => '03:30',
+                'day_of_week' => null,
+                'cron_expression' => null,
+            ],
+            'without_overlapping' => true,
+            'run_in_background' => true,
+            'append_output_to' => 'logs/threat-intelligence-cleanup.log',
+        ],
+
+
         'vacation_translate_admin_changes' => [
             'label' => 'Vacation translations (admin changes)',
             'description' => 'Translates vacation content after admin edits (vacation:translate --admin-changes --relations).',
