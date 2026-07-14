@@ -349,7 +349,7 @@ if (!function_exists('getCoordinatesFromLocation')) {
             $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
                 'query' => [
                     'address' => $location,
-                    'key' => env('GOOGLE_MAPS_API_KEY')
+                    'key' => config('services.google_maps.api_key')
                 ]
             ]);
 
@@ -384,7 +384,7 @@ if (!function_exists('getCoordinatesFromLocation')) {
                             $capitalResponse = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
                                 'query' => [
                                     'query' => "{$component['long_name']} capital city",
-                                    'key' => env('GOOGLE_MAPS_API_KEY')
+                                    'key' => config('services.google_maps.api_key')
                                 ]
                             ]);
                             $capitalData = json_decode($capitalResponse->getBody(), true);
@@ -568,7 +568,7 @@ if (!function_exists('getLocationDetails')) {
                         'types' => '(regions)',  // This includes countries and administrative areas
                         'language' => 'en',
                         'region' => 'us',  // Force English results by using US region
-                        'key' => env('GOOGLE_MAPS_API_KEY')
+                        'key' => config('services.google_maps.api_key')
                     ]
                 ]);
                 
@@ -585,7 +585,7 @@ if (!function_exists('getLocationDetails')) {
                             'types' => '(cities)',
                             'language' => 'en',
                             'region' => 'us',  // Force English results by using US region
-                            'key' => env('GOOGLE_MAPS_API_KEY')
+                            'key' => config('services.google_maps.api_key')
                         ]
                     ]);
                     $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
@@ -602,7 +602,7 @@ if (!function_exists('getLocationDetails')) {
                         'type' => 'administrative_area_level_1',
                         'language' => 'en',
                         'region' => 'us',  // Force English results by using US region
-                        'key' => env('GOOGLE_MAPS_API_KEY')
+                        'key' => config('services.google_maps.api_key')
                     ]
                 ]);
                 
@@ -618,7 +618,7 @@ if (!function_exists('getLocationDetails')) {
                             'type' => 'locality',  // Focus on localities/cities
                             'language' => 'en',
                             'region' => 'us',  // Force English results by using US region
-                            'key' => env('GOOGLE_MAPS_API_KEY')
+                            'key' => config('services.google_maps.api_key')
                         ]
                     ]);
                     
@@ -634,7 +634,7 @@ if (!function_exists('getLocationDetails')) {
                                 'types' => '(cities)',
                                 'language' => 'en',
                                 'region' => 'us',  // Force English results by using US region
-                                'key' => env('GOOGLE_MAPS_API_KEY')
+                                'key' => config('services.google_maps.api_key')
                             ]
                         ]);
                         $autocompleteResult = json_decode($autocompleteResponse->getBody(), true);
@@ -653,7 +653,7 @@ if (!function_exists('getLocationDetails')) {
                         'fields' => 'address_component',  // Removed invalid field
                         'language' => 'en',
                         'region' => 'us',  // Force English results by using US region
-                        'key' => env('GOOGLE_MAPS_API_KEY')
+                        'key' => config('services.google_maps.api_key')
                     ]
                 ]);
                 

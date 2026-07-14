@@ -51,14 +51,14 @@ class GenerateImages extends Command
                 $i = 0;     
                 foreach($guiding->galleries as $index => $photo){
                          
-                        $url = env('APP_URL').'/images/'.$photo->image_name;
+                        $url = config('app.url').'/images/'.$photo->image_name;
                         app('asset')->uploadImageFromUrl($guiding,'image_'.$i,$url);
                         $i++;
                 };
             }else{
                 $path = $guiding->thumbnail_path;
 
-                $url = env('APP_URL').'/images/'.$path;
+                $url = config('app.url').'/images/'.$path;
                 echo($url);
                 app('asset')->uploadImageFromUrl($guiding,'image_0',$url);
             }

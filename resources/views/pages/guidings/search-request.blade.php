@@ -289,7 +289,7 @@
                     </div>
                     <div class="information__text">
                         <h4>
-                            <a href="tel:+49{{env('CONTACT_NUM')}}" class="information__number-1">+49 (0) {{env('CONTACT_NUM')}}</a>
+                            <a href="tel:+49{{config('cag.contact_num')}}" class="information__number-1">+49 (0) {{config('cag.contact_num')}}</a>
 
                         </h4>
                     </div>

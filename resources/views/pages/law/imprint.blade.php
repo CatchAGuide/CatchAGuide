@@ -45,7 +45,7 @@
                     <br>
                 </p>
                 <h5>Kontakt</h4>
-                <p>Tel: +49{{env('CONTACT_NUM')}}<br>
+                <p>Tel: +49{{config('cag.contact_num')}}<br>
 
                     Mail: info.catchaguide@gmail.com</p> <br>
                 <h5>Streitschlichtung</h5>
@@ -110,7 +110,7 @@
                 </p>
                 <h5>Contact</h5>
                 <p>
-                    Tel: +49{{env('CONTACT_NUM')}} <br>
+                    Tel: +49{{config('cag.contact_num')}} <br>
                     Email: info.catchaguide@gmail.com
                 </p>
                 <br>

@@ -2267,7 +2267,7 @@ class GuidingsController extends Controller
         }else{
             \App::setLocale('de');
         }
-        $email = env('TO_CEO','info@catchaguide.com');
+        $email = config('mail.admin_email');
         if (!CheckEmailLog('guiding_request_mail', 'guiding_request_mail', $email)) {
             Mail::to($email)->queue(new GuidingRequestMail($guideRequest));
         }

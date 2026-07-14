@@ -3,10 +3,9 @@
 
 <head>
     <meta charset="UTF-8"/>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
+    <!-- Favicon (same paths as below; root /favicon.png is not deployed) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/favicon.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -44,7 +43,7 @@
                     '@type' => 'ContactPoint',
                     'contactType' => 'customer support',
                     'email' => 'info.catchaguide@gmail.com',
-                    'telephone' => '+49 ' . env('CONTACT_NUM'),
+                    'telephone' => '+49 ' . config('cag.contact_num'),
                     'availableLanguage' => ['en', 'de'],
                 ],
             ],
@@ -280,13 +279,13 @@
             </li>
             <li>
                 <i class="fa fa-phone-alt"></i>
-                <a href="tel:+49{{env('CONTACT_NUM')}}">+49 (0) {{env('CONTACT_NUM')}}</a>
+                <a href="tel:+49{{config('cag.contact_num')}}">+49 (0) {{config('cag.contact_num')}}</a>
             </li>
         </ul><!-- /.mobile-nav__contact -->
         <div class="mobile-nav__top">
             <div class="mobile-nav__social">
                 <a href="https://www.facebook.com/CatchAGuide" class="fab fa-facebook-square"></a>
-                <a href="https://wa.me/+49{{env('CONTACT_NUM')}}" class="fab fa-whatsapp"></a>
+                <a href="https://wa.me/+49{{config('cag.contact_num')}}" class="fab fa-whatsapp"></a>
                 <a href="https://www.instagram.com/catchaguide_official/" class="fab fa-instagram"></a>
                 <div class="language-wrapper">
                     <form action="{{ route('language.switch') }}" method="POST">

@@ -24,7 +24,7 @@ class Asset{
     protected $rootDir;
 
     public function  __construct(){
-        $this->diskStorage = env('SITE_STORAGE');
+        $this->diskStorage = config('cag.site_storage');
     }
 
 
@@ -477,7 +477,7 @@ class Asset{
     }
 
     public function getConfig($key){
-        $keyWithSite = env('SITE_KEY').'_'.$key;
+        $keyWithSite = config('cag.site_key').'_'.$key;
         if(config()->has($keyWithSite)){
             return config($keyWithSite);
         }else{

@@ -38,6 +38,6 @@ class BookingCancelMailToCEO extends Mailable
             'user' => $this->user,
             'guiding' => $this->guiding,
             'guide' => $this->guide,
-        ])->to(env('TO_CEO','info@catchaguide.com'))->subject(__('profile.gc-cancelled')." – Catch A Guide");
+        ])->to(config('mail.admin_email'))->subject(__('profile.gc-cancelled')." – Catch A Guide");
     }
 }

@@ -57,6 +57,7 @@ deploy_staging:
         - ls
         - echo "deploy neueseite staging"
         - rsync -a -e ssh ./ $STAGING_USER@$STAGING_HOST:$STAGING_DIR
+        - ssh $STAGING_USER@$STAGING_HOST "cd $STAGING_DIR && php artisan livewire:publish --assets --force && php artisan config:clear && php artisan view:clear && php artisan cache:clear"
 
 deploy_prod:
     stage: deploy
@@ -72,4 +73,4 @@ deploy_prod:
         - ls
         - echo "deploy prod"
         - rsync -a -e ssh ./ $PROD_USER@$PROD_HOST:$PROD_DIR
-        - ssh $PROD_USER@$PROD_HOST "cd $PROD_DIR && php artisan migrate"
+        - ssh $PROD_USER@$PROD_HOST "cd $PROD_DIR && php artisan migrate && php artisan view:clear && php artisan config:clear"

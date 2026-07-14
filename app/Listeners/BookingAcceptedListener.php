@@ -34,7 +34,7 @@ class BookingAcceptedListener  implements ShouldQueue
                 Mail::to($event->booking->guiding->user->email)->locale($event->booking->guiding->user->language ?? app()->getLocale())->send(new GuideBookingAcceptedMail($event->booking));
             }
 
-            $email = env('TO_CEO','info@catchaguide.com');
+            $email = config('mail.admin_email');
             if (!CheckEmailLog('booking_accept', 'booking_' . $event->booking->id, $email)) {
                 Mail::to($email)->locale('de')->send(new BookingAcceptMailToCEO($event->booking));
             }
@@ -45,7 +45,7 @@ class BookingAcceptedListener  implements ShouldQueue
                 Mail::to($bookingUserEmail)->locale($event->booking->language ?? app()->getLocale())->send(new BookingRejectMail($event->booking));
             }
 
-            $email = env('TO_CEO','info@catchaguide.com');
+            $email = config('mail.admin_email');
             if (!CheckEmailLog('booking_reject_mail_to_ceo', 'admin_booking_' . $event->booking->id, $email)) {
                 Mail::to($email)->locale('de')->send(new BookingRejectMailToCEO($event->booking));
             }

@@ -63,7 +63,7 @@ class SendCheckoutEmail implements ShouldQueue
         }
 
         // CEO notification (default to DE)
-        $email = env('TO_CEO', 'info@catchaguide.com');
+        $email = config('mail.admin_email');
         if (!CheckEmailLog('ceo_booking_notification', 'admin_booking_' . $this->booking->id, $email)) {
             Log::info('Sending CEO booking notification email to ' . $email . ' with locale ' . $ceoLocale . '*****************************************************************************************');
             Mail::to($email)

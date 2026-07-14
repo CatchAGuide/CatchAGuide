@@ -443,14 +443,14 @@
 @endsection
 
 @section('js_after')
-    @if($intent && env('STRIPE_KEY'))
+    @if($intent && config('services.stripe.key'))
         <script src="https://js.stripe.com/v3/"></script>
     @endif
 
     <script>
         // Stripe functionality (only if available)
-        @if($intent && env('STRIPE_KEY'))
-            const stripe = Stripe('{{ env('STRIPE_KEY') }}');
+        @if($intent && config('services.stripe.key'))
+            const stripe = Stripe('{{ config('services.stripe.key') }}');
             const elements = stripe.elements();
             const cardElement = elements.create('card');
             cardElement.mount('#card-element');

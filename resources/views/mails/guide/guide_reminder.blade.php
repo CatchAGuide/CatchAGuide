@@ -114,10 +114,10 @@
                 <td style="padding: 10px; text-align: left; width: 50%; vertical-align: top;">
                     <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo" style="display: block;">
                     <p style="margin-top: 10px; margin-bottom: 5px;">
-                        <a href="tel:+49 (0) {{env('CONTACT_NUM')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{env('CONTACT_NUM')}}</a>
+                        <a href="tel:+49 (0) {{config('cag.contact_num')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{config('cag.contact_num')}}</a>
                     </p>
                     <p style="margin-top: 5px; margin-bottom: 5px;">
-                        <a href="mailto:{{env('TO_CEO')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{env('TO_CEO')}}</a>
+                        <a href="mailto:{{config('mail.admin_email')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{config('mail.admin_email')}}</a>
                     </p>
                 </td>
                 <td style="padding: 10px; vertical-align: top;">

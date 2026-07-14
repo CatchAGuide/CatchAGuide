@@ -57,6 +57,12 @@
  * GoogleMapsManager - Centralized OOP-style Google Maps utility
  * Provides reusable methods for map initialization, marker clustering, and Places autocomplete
  */
+@if(empty(config('services.google_maps.api_key')))
+console.error('GOOGLE_MAPS_API_KEY is not set — maps and geocoding will not work. Add it to the server .env and run php artisan config:clear.');
+@endif
+@if(empty(config('services.google_maps.map_id')) || config('services.google_maps.map_id') === 'DEMO_MAP_ID')
+console.warn('GOOGLE_MAPS_MAP_ID is not set — using raster map + legacy markers. Set GOOGLE_MAPS_MAP_ID in .env for vector maps and AdvancedMarkerElement.');
+@endif
 window.GoogleMapsManager = (function() {
     'use strict';
 
@@ -203,13 +209,38 @@ window.GoogleMapsManager = (function() {
         },
 
         /**
-         * Create an Advanced Marker
+         * Whether the configured map ID supports vector maps / AdvancedMarkerElement.
+         */
+        hasValidMapId: function(mapId) {
+            const id = mapId || this.config.mapId;
+            return !!(id && id !== 'DEMO_MAP_ID');
+        },
+
+        /**
+         * Create a map marker (AdvancedMarkerElement when a real map ID is set, else legacy Marker).
          * @param {Object} options - Marker options (position, map, etc.)
          * @returns {Promise<Object>} Promise that resolves with marker instance
          */
         createMarker: async function(options) {
-            const { AdvancedMarkerElement } = await this.loadLibrary('marker');
-            return new AdvancedMarkerElement(options);
+            const mapId = options.mapId
+                || (options.map && typeof options.map.getMapId === 'function' ? options.map.getMapId() : null)
+                || this.config.mapId;
+
+            if (this.hasValidMapId(mapId)) {
+                try {
+                    const { AdvancedMarkerElement } = await this.loadLibrary('marker');
+                    return new AdvancedMarkerElement(options);
+                } catch (error) {
+                    console.warn('AdvancedMarkerElement unavailable, falling back to Marker', error);
+                }
+            }
+
+            await this.loadLibrary('maps');
+            return new google.maps.Marker({
+                map: options.map,
+                position: options.position,
+                title: options.title || undefined,
+            });
         },
 
         /**

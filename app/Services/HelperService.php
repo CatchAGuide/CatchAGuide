@@ -9,14 +9,14 @@ class HelperService {
 
     public function calculateRates($price)
     {
-        if($price <= env('PRICE_CAT_0')) {
-            $fee = $price * env('PRICE_CAT_0_FEE');
-        } elseif($price > env('PRICE_CAT_0') && $price <= env('PRICE_CAT_1')) {
-            $fee = $price * env('PRICE_CAT_0_FEE');
-        } elseif ($price > env('PRICE_CAT_1') && $price <= env('PRICE_CAT_2')) {
-            $fee = $price * env('PRICE_CAT_1_FEE');
-        } elseif($price > env('PRICE_CAT_2')) {
-            $fee = $price * env('PRICE_CAT_2_FEE');
+        if($price <= config('cag.pricing.cat_0')) {
+            $fee = $price * config('cag.pricing.cat_0_fee');
+        } elseif($price > config('cag.pricing.cat_0') && $price <= config('cag.pricing.cat_1')) {
+            $fee = $price * config('cag.pricing.cat_0_fee');
+        } elseif ($price > config('cag.pricing.cat_1') && $price <= config('cag.pricing.cat_2')) {
+            $fee = $price * config('cag.pricing.cat_1_fee');
+        } elseif($price > config('cag.pricing.cat_2')) {
+            $fee = $price * config('cag.pricing.cat_2_fee');
         } else {
             $fee = 0; // Fallback
         }

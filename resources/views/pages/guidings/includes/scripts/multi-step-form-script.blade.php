@@ -175,7 +175,7 @@
         if (window.__guidingMapsScriptLoading) return;
         window.__guidingMapsScriptLoading = true;
         var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key={{ env("GOOGLE_MAPS_API_KEY") }}&libraries=places&callback=initAutocomplete';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&callback=initAutocomplete';
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);

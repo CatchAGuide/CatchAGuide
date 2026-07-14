@@ -35,7 +35,7 @@
 <link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/admin/colors/color1.css') }}" />
 
 <!-- webschuppen styles -->
-<link rel="stylesheet" href="{{ asset('css/app.css') }}" />
+<link rel="stylesheet" href="{{ mix('css/app.css') }}" />
 
 <!-- Custom admin layout theme -->
 <link rel="stylesheet" href="{{ asset('css/admin-layout.css') }}" />

@@ -44,7 +44,7 @@ class BookingConfirmationMailGuest extends Mailable
     public function build()
     {
         return $this->view('mails.bookingconfirmationmailguest', ['phoneFromUser' => $this->phoneFromUser])
-            ->to($this->user->email)->cc(env('CC_MAIL','info@catchaguide.com'))
+            ->to($this->user->email)->cc(config('mail.cc_email'))
             ->subject("Buchungsbestätigung – Catch A Guide");
     }
 }

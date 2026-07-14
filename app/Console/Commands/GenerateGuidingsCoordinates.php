@@ -112,7 +112,7 @@ class GenerateGuidingsCoordinates extends Command
      */
     private function checkApiKey()
     {
-        $apiKey = env('GOOGLE_MAPS_API_KEY');
+        $apiKey = config('services.google_maps.api_key');
         
         if (empty($apiKey)) {
             $this->warn("Google Maps API key is not configured.");
@@ -287,7 +287,7 @@ class GenerateGuidingsCoordinates extends Command
     private function getCoordinatesFromGoogle($guiding, $searchString)
     {
         // Check if Google Maps API key is configured
-        if (empty(env('GOOGLE_MAPS_API_KEY'))) {
+        if (empty(config('services.google_maps.api_key'))) {
             return false;
         }
 
@@ -391,7 +391,7 @@ class GenerateGuidingsCoordinates extends Command
             $response = $client->get('https://maps.googleapis.com/maps/api/geocode/json', [
                 'query' => [
                     'address' => $searchString,
-                    'key' => env('GOOGLE_MAPS_API_KEY')
+                    'key' => config('services.google_maps.api_key')
                 ]
             ]);
             

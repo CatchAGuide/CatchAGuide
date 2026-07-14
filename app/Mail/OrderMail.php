@@ -34,7 +34,7 @@ class OrderMail extends Mailable
     {
 
         return $this->view('mails.ordermail')
-            ->to($this->order->user->email)->cc(env('CC_MAIL','info@catchaguide.com'))
+            ->to($this->order->user->email)->cc(config('mail.cc_email'))
             ->subject("Bestellbestätigung");
     }
 }

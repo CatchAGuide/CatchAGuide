@@ -548,7 +548,7 @@ class DestinationCountryController extends Controller
         $client = new \GuzzleHttp\Client();
         $geocoder = new Geocoder($client);
 
-        $geocoder->setApiKey(env('GOOGLE_MAPS_API_KEY'));
+        $geocoder->setApiKey(config('services.google_maps.api_key'));
 
         $geocoder->setCountry($country);
 

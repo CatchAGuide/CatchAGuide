@@ -13,7 +13,7 @@ class LanguageController extends Controller
             'redirect_url' => 'nullable|string'
         ]);
 
-        if (env('APP_ENV') == 'production') {
+        if (app()->environment('production')) {
         
             $english = ENV('EN_APP_URL', 'https://catchaguide.com');
             $german = ENV('DE_APP_URL', 'https://catchaguide.de');

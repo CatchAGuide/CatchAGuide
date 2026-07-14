@@ -193,7 +193,7 @@
             })
         });
     </script>
-        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&loading=async&libraries=places,geocoding"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&loading=async&libraries=places,geocoding"></script>
         <script>
             function initialize() {
                 var input = document.getElementById('searchPlace');

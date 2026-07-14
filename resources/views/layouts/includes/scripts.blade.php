@@ -33,11 +33,13 @@
 <script src="{{ asset('assets/vendors/tagify/tagify.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/cropperjs/cropper.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/masonry/masonry.pkgd.min.js') }}" async></script>
-<script src="/js/app.js"></script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places,geocoding,marker&loading=async"></script>
+@if(!empty(config('services.google_maps.api_key')))
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places,geocoding,marker&loading=async"></script>
+@else
+<script>console.error('GOOGLE_MAPS_API_KEY is not set — Google Maps script was not loaded.');</script>
+@endif
 @include('layouts.includes.maps-utils')
-@stack('js_push')
 
 <script>
     @if(Session::has('message'))
@@ -80,7 +82,7 @@
 
 <!-- template js -->
 <script src="{{ asset('assets/js/tevily.js') }}"></script>
-<script type="module" src="{{ asset('js/app.js') }}"></script>
+<script type="module" src="{{ mix('js/app.js') }}"></script>
 <script>
     function changeGuestCount(type, value) {
         var input = document.getElementById(type);

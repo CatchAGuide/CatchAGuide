@@ -5,8 +5,8 @@
     $path = $path === '/' ? '' : $path;
     $path = ltrim($path, '/');
 
-    $enBase = rtrim(env('EN_APP_URL', 'https://www.catchaguide.com'), '/');
-    $deBase = rtrim(env('DE_APP_URL', 'https://www.catchaguide.de'), '/');
+    $enBase = rtrim(config('cag.en_app_url'), '/');
+    $deBase = rtrim(config('cag.de_app_url'), '/');
 
     $enUrl = $enBase . ($path !== '' ? '/' . $path : '/');
     $deUrl = $deBase . ($path !== '' ? '/' . $path : '/');

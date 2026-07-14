@@ -27,7 +27,7 @@
 
 
 <!-- webschuppen styles -->
-<link rel="stylesheet" href="{{ asset('css/app.css') }}" />
+<link rel="stylesheet" href="{{ mix('css/app.css') }}" />
 
 <link rel="stylesheet" href="{{ asset('assets/vendors/toastr/toastr.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/litepicker/css/litepicker.css') }}">

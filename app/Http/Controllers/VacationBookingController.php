@@ -81,7 +81,7 @@ class VacationBookingController extends Controller
 
         // Send email notification
         try {
-            $email = env('TO_CEO','info@catchaguide.com');
+            $email = config('mail.admin_email');
             if (!CheckEmailLog('vacation_booking_notification', 'booking_' . $booking->id, $email)) {
                 Mail::to($email)->send(new VacationBookingNotification($booking));
             }
