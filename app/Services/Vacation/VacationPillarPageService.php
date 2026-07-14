@@ -2,6 +2,7 @@
 
 namespace App\Services\Vacation;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
 use App\Domain\Vacation\ViewModels\VacationPillarIndexViewModel;
@@ -38,7 +39,7 @@ class VacationPillarPageService
 
     public function buildCountry(Request $request, VacationPillar $pillar, string $countrySlug): VacationPillarIndexViewModel
     {
-        $countrySlug = strtolower($countrySlug);
+        $countrySlug = CountrySlug::canonicalize($countrySlug) ?? strtolower($countrySlug);
         $resolved = $this->destinations->resolveCountryPage($countrySlug, $pillar->value);
 
         if ($resolved === null) {

@@ -75,6 +75,20 @@ $trip-offer-lh-relaxed: 1.7;
         .trip-offer-page__feature-cards {
             margin-bottom: 0;
         }
+
+        .vacation-offer-breadcrumb {
+            margin-bottom: 0.75rem;
+
+            .breadcrumb-container {
+                padding-top: 0;
+                padding-bottom: 0.75rem;
+            }
+
+            .thm-breadcrumb {
+                margin-bottom: 0;
+                font-size: 0.875rem;
+            }
+        }
     }
 
     &__hero-heading {
@@ -2513,6 +2527,87 @@ $trip-offer-lh-relaxed: 1.7;
 
     // Contact Modal (Trips) - mobile centering for reCAPTCHA + submit
     #tripContactModal {
+        .modal-dialog {
+            @media (max-width: 576px) {
+                margin: .5rem;
+                max-width: calc(100% - 1rem);
+            }
+        }
+
+        .modal-content,
+        .modal-body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        .row > [class*="col-"],
+        .form-group,
+        .trip-contact-date-field {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #trip_preferred_date.form-control,
+        .trip-contact-date-select {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .trip-contact-date-options {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .trip-contact-date-option {
+            display: flex;
+            align-items: flex-start;
+            gap: .65rem;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: .7rem .8rem;
+            border: 1px solid #e5e7eb;
+            border-radius: .75rem;
+            background: #f9fafb;
+            cursor: pointer;
+            font-weight: normal;
+            color: $trip-offer-theme-dark;
+            transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+
+            &:has(.trip-contact-date-option__input:checked) {
+                border-color: rgba($trip-offer-theme-accent, 0.55);
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba($trip-offer-theme-accent, 0.12);
+            }
+
+            &:has(.trip-contact-date-option__input:focus-visible) {
+                outline: 2px solid rgba($trip-offer-theme-accent, 0.45);
+                outline-offset: 1px;
+            }
+        }
+
+        .trip-contact-date-option__input {
+            flex: 0 0 auto;
+            margin-top: .2rem;
+            accent-color: $trip-offer-theme-accent;
+        }
+
+        .trip-contact-date-option__label {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: $trip-offer-text-sm;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
         .trip-contact-submit-row {
             display: flex;
             justify-content: space-between;

@@ -3,6 +3,7 @@
 namespace App\Repositories\Vacation;
 
 use App\Domain\Destination\DestinationCategoryType;
+use App\Domain\Vacation\CountrySlug;
 use App\Models\Destination;
 use App\Repositories\Vacation\Contracts\ListingRepositoryInterface;
 use Illuminate\Support\Collection;
@@ -18,9 +19,10 @@ class VacationDestinationRepository
     public function findCountryForLocale(string $slug, ?string $locale = null): ?Destination
     {
         $locale = $locale ?? app()->getLocale();
+        $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
 
         return $this->countryDestinationQuery()
-            ->whereRaw('LOWER(slug) = ?', [strtolower($slug)])
+            ->whereRaw('LOWER(slug) = ?', [$slug])
             ->where('language', $locale)
             ->where('type', DestinationCategoryType::VACATIONS)
             ->first();
@@ -28,7 +30,7 @@ class VacationDestinationRepository
 
     public function mergeCountryContent(string $slug, ?string $locale = null): ?Destination
     {
-        $slug = strtolower($slug);
+        $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
         $locale = $locale ?? app()->getLocale();
 
         $primary = $this->findCountryForLocale($slug, $locale);
@@ -58,15 +60,15 @@ class VacationDestinationRepository
      */
     public function hubGridCountry(string $slug, ?string $locale = null): ?array
     {
-        $slug = strtolower($slug);
+        $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
 
         return $this->countriesForHubGrid($locale)
-            ->first(fn (array $row) => strtolower($row['slug']) === $slug);
+            ->first(fn (array $row) => CountrySlug::canonicalize($row['slug']) === $slug);
     }
 
     public function isKnownCountrySlug(string $slug, ?string $pillar = null): bool
     {
-        $slug = strtolower($slug);
+        $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
 
         if ($this->mergeCountryContent($slug) !== null) {
             return true;
@@ -93,7 +95,7 @@ class VacationDestinationRepository
      */
     public function resolveCountryPage(string $slug, ?string $pillar = null, ?string $locale = null): ?array
     {
-        $slug = strtolower($slug);
+        $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
         $locale = $locale ?? app()->getLocale();
 
         if ($pillar !== null && ! $this->isKnownCountrySlug($slug, $pillar)) {
@@ -125,7 +127,7 @@ class VacationDestinationRepository
 
         return [
             'destination' => $destination,
-            'slug' => $slug,
+            'slug' => CountrySlug::canonicalize($destination->slug) ?? $slug,
         ];
     }
 
@@ -161,28 +163,15 @@ class VacationDestinationRepository
     {
         $locale = $locale ?? app()->getLocale();
 
-        $campCounts = DB::table('camps')
-            ->select(DB::raw('LOWER(country) as country_slug'), DB::raw('COUNT(*) as total'))
-            ->where('status', 'active')
-            ->whereNotNull('country')
-            ->where('country', '!=', '')
-            ->groupBy(DB::raw('LOWER(country)'))
-            ->pluck('total', 'country_slug');
-
-        $tripCounts = DB::table('trips')
-            ->select(DB::raw('LOWER(country) as country_slug'), DB::raw('COUNT(*) as total'))
-            ->where('status', 'active')
-            ->whereNotNull('country')
-            ->where('country', '!=', '')
-            ->groupBy(DB::raw('LOWER(country)'))
-            ->pluck('total', 'country_slug');
+        $campCounts = $this->canonicalCountryCounts('camps');
+        $tripCounts = $this->canonicalCountryCounts('trips');
 
         $slugs = $campCounts->keys()->merge($tripCounts->keys())->unique()->values();
 
         $destinations = Destination::query()
             ->whereIn('type', [DestinationCategoryType::VACATIONS, DestinationCategoryType::TRIPS])
             ->get()
-            ->groupBy(fn (Destination $destination) => strtolower($destination->slug));
+            ->groupBy(fn (Destination $destination) => CountrySlug::canonicalize($destination->slug) ?? strtolower($destination->slug));
 
         return $slugs->map(function (string $slug) use ($destinations, $campCounts, $tripCounts) {
             $destination = $this->resolveHubCountryDestination($destinations, $slug);
@@ -192,9 +181,11 @@ class VacationDestinationRepository
                 $thumbnailPath = $this->listingThumbnailForCountry($slug);
             }
 
+            $canonicalSlug = CountrySlug::canonicalize($destination?->slug) ?? $slug;
+
             return [
                 'destination' => $destination,
-                'slug' => $destination?->slug ?? $slug,
+                'slug' => $canonicalSlug,
                 'name' => $destination?->name ?? ucfirst(str_replace('-', ' ', $slug)),
                 'sub_title' => $destination?->sub_title,
                 'camps' => (int) ($campCounts[$slug] ?? 0),
@@ -206,11 +197,37 @@ class VacationDestinationRepository
     }
 
     /**
+     * Aggregate active listing counts keyed by canonical country slug.
+     *
+     * @return Collection<string, int>
+     */
+    private function canonicalCountryCounts(string $table): Collection
+    {
+        return DB::table($table)
+            ->select('country', DB::raw('COUNT(*) as total'))
+            ->where('status', 'active')
+            ->whereNotNull('country')
+            ->where('country', '!=', '')
+            ->groupBy('country')
+            ->get()
+            ->reduce(function (Collection $counts, object $row) {
+                $slug = CountrySlug::canonicalize($row->country);
+                if ($slug === null) {
+                    return $counts;
+                }
+
+                $counts[$slug] = (int) ($counts[$slug] ?? 0) + (int) $row->total;
+
+                return $counts;
+            }, collect());
+    }
+
+    /**
      * @param  Collection<string, Collection<int, Destination>>  $destinations
      */
     private function resolveHubCountryDestination(Collection $destinations, string $slug): ?Destination
     {
-        $group = $destinations->get($slug);
+        $group = $destinations->get(CountrySlug::canonicalize($slug) ?? strtolower($slug));
 
         if ($group === null) {
             return null;
@@ -226,9 +243,15 @@ class VacationDestinationRepository
 
     private function listingThumbnailForCountry(string $slug): ?string
     {
+        $variants = CountrySlug::storageVariants($slug);
+
         $campThumb = DB::table('camps')
             ->where('status', 'active')
-            ->whereRaw('LOWER(country) = ?', [$slug])
+            ->where(function ($q) use ($variants) {
+                foreach ($variants as $variant) {
+                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
+                }
+            })
             ->whereNotNull('thumbnail_path')
             ->where('thumbnail_path', '!=', '')
             ->orderByDesc('id')
@@ -240,7 +263,11 @@ class VacationDestinationRepository
 
         return DB::table('trips')
             ->where('status', 'active')
-            ->whereRaw('LOWER(country) = ?', [$slug])
+            ->where(function ($q) use ($variants) {
+                foreach ($variants as $variant) {
+                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
+                }
+            })
             ->whereNotNull('thumbnail_path')
             ->where('thumbnail_path', '!=', '')
             ->orderByDesc('id')

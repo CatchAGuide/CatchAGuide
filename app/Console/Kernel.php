@@ -45,6 +45,13 @@ class Kernel extends ConsoleKernel
         // To also fix DB: add --fix-db --no-dry-run. To delete orphans: --delete-orphans --backup --no-dry-run
                 
         $schedule->command('generate:sitemap')->daily()->runInBackground();
+
+        // Purge threat_intelligence rows older than retention window (default 7 days)
+        $schedule->command('threat-intelligence:cleanup')
+                ->dailyAt('03:30')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/threat-intelligence-cleanup.log'));
         
         // Process vacation translations for admin changes daily (defaults to EN and DE languages)
         // $schedule->command('vacation:translate --admin-changes --relations')

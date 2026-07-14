@@ -66,6 +66,8 @@
                 :trips-total="$vm->tripsTotal"
                 :camps-total="$vm->campsTotal"
                 :species-options="$vm->speciesOptions"
+                :pillar-links="$vm->pillarToggleUrls()"
+                :omit-pillar-from-query="true"
                 :show-map-button="$hasMap"
             />
         </div>
@@ -78,6 +80,8 @@
                     :trips-total="$vm->tripsTotal"
                     :camps-total="$vm->campsTotal"
                     :species-options="$vm->speciesOptions"
+                    :pillar-links="$vm->pillarToggleUrls()"
+                    :omit-pillar-from-query="true"
                     :show-map-button="false"
                     :show-mobile-toolbar="false"
                     variant="sidebar"
@@ -164,6 +168,8 @@
     :trips-total="$vm->tripsTotal"
     :camps-total="$vm->campsTotal"
     :species-options="$vm->speciesOptions"
+    :pillar-links="$vm->pillarToggleUrls()"
+    :omit-pillar-from-query="true"
 />
 @endsection
 

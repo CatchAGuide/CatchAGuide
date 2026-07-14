@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Vacation;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationPillar;
 use App\Http\Controllers\Controller;
 use App\Repositories\Vacation\VacationDestinationRepository;
@@ -26,7 +27,7 @@ class VacationPillarController extends Controller
     public function slug(Request $request, string $slug)
     {
         $pillar = VacationPillar::fromRequest($request);
-        $country = strtolower($slug);
+        $country = CountrySlug::canonicalize($slug) ?? strtolower($slug);
 
         if ($this->destinations->isKnownCountrySlug($country, $pillar->value)) {
             $vm = $this->pages->buildCountry($request, $pillar, $country);

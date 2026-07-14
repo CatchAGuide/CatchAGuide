@@ -2,6 +2,7 @@
 
 namespace App\Services\Vacation;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Models\Camp;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Http\Request;
@@ -23,7 +24,9 @@ class VacationRedirectResolver
         }
 
         if (preg_match('#^trips-destinations/c/([^/]+)$#', $path, $m)) {
-            return '/vacations/' . $m[1] . $suffix;
+            $country = CountrySlug::canonicalize($m[1]) ?? strtolower($m[1]);
+
+            return '/vacations/' . $country . $suffix;
         }
 
         if (preg_match('#^trips/([^/]+)$#', $path, $m) && $m[1] !== '') {
@@ -31,12 +34,14 @@ class VacationRedirectResolver
         }
 
         if (preg_match('#^vacations/c/([^/]+)$#', $path, $m)) {
-            return '/vacations/' . $m[1] . $suffix;
+            $country = CountrySlug::canonicalize($m[1]) ?? strtolower($m[1]);
+
+            return '/vacations/' . $country . $suffix;
         }
 
         if ($path === 'vacations/trips' && $request->filled('country')) {
-            $country = strtolower((string) $request->get('country'));
-            if ($this->isCountrySlug($country)) {
+            $country = CountrySlug::canonicalize((string) $request->get('country'));
+            if ($country !== null && $this->isCountrySlug($country)) {
                 $query = http_build_query($request->except(['country', 'pillar']));
 
                 return '/vacations/trips/' . $country . ($query ? '?' . $query : '');
@@ -44,8 +49,8 @@ class VacationRedirectResolver
         }
 
         if ($path === 'vacations/camps' && $request->filled('country')) {
-            $country = strtolower((string) $request->get('country'));
-            if ($this->isCountrySlug($country)) {
+            $country = CountrySlug::canonicalize((string) $request->get('country'));
+            if ($country !== null && $this->isCountrySlug($country)) {
                 $query = http_build_query($request->except(['country', 'pillar']));
 
                 return '/vacations/camps/' . $country . ($query ? '?' . $query : '');
@@ -75,12 +80,12 @@ class VacationRedirectResolver
         if (preg_match('#^vacations/([^/]+)$#', $path, $m)) {
             $segment = $m[1];
             $reserved = config('vacations.reserved_country_segments', ['trips', 'camps']);
-            if (in_array(strtolower($segment), $reserved, true)) {
+            if (in_array(mb_strtolower($segment, 'UTF-8'), $reserved, true)) {
                 return null;
             }
 
-            $canonical = strtolower($segment);
-            if ($canonical !== $segment && ! in_array($canonical, $reserved, true)) {
+            $canonical = CountrySlug::canonicalize($segment) ?? mb_strtolower(CountrySlug::decode($segment), 'UTF-8');
+            if (CountrySlug::needsCanonicalRedirect($segment) && ! in_array($canonical, $reserved, true)) {
                 return '/vacations/' . $canonical . $suffix;
             }
 
@@ -99,13 +104,13 @@ class VacationRedirectResolver
         if (preg_match('#^vacations/(trips|camps)/([^/]+)$#', $path, $m)) {
             $pillar = $m[1];
             $segment = $m[2];
-            $canonical = strtolower($segment);
+            $canonical = CountrySlug::canonicalize($segment) ?? mb_strtolower(CountrySlug::decode($segment), 'UTF-8');
 
             if (! app(VacationDestinationRepository::class)->isKnownCountrySlug($canonical, $pillar)) {
                 return null;
             }
 
-            if ($canonical !== $segment || $request->has('pillar')) {
+            if (CountrySlug::needsCanonicalRedirect($segment) || $request->has('pillar')) {
                 $query = http_build_query($request->except('pillar'));
 
                 return '/vacations/' . $pillar . '/' . $canonical . ($query ? '?' . $query : '');

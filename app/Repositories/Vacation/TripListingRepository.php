@@ -3,6 +3,7 @@
 namespace App\Repositories\Vacation;
 
 use App\Domain\Vacation\BookableListingPolicy;
+use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\Trip;
 use App\Repositories\Vacation\Contracts\ListingRepositoryInterface;
@@ -73,7 +74,12 @@ class TripListingRepository implements ListingRepositoryInterface
         $query = Trip::query()->where('status', $this->policy->activeStatus());
 
         if ($country !== null && $country !== '') {
-            $query->whereRaw('LOWER(country) = ?', [strtolower($country)]);
+            $variants = CountrySlug::storageVariants($country);
+            $query->where(function (Builder $q) use ($variants) {
+                foreach ($variants as $variant) {
+                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
+                }
+            });
         }
 
         return $query;
