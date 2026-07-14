@@ -295,7 +295,7 @@ Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])-
 Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');
 Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
     ->name('vacations.country')
-    ->where('country', '^(?!trips$|camps$|all-offers$)[a-z0-9\-]+$')
+    ->where('country', '^(?!trips$|camps$|all-offers$)[\p{L}0-9\-]+$')
     ->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])

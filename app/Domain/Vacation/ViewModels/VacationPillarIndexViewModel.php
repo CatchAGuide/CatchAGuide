@@ -2,6 +2,7 @@
 
 namespace App\Domain\Vacation\ViewModels;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
 use App\Models\Destination;
@@ -97,7 +98,8 @@ final class VacationPillarIndexViewModel
             : $url.'?'.http_build_query($query);
 
         if ($this->isCountryPage()) {
-            $countrySlug = $this->destination->slug;
+            $countrySlug = CountrySlug::canonicalize($this->destination->slug)
+                ?? strtolower((string) $this->destination->slug);
 
             return [
                 'all' => $withQuery(route('vacations.country', $countrySlug)),

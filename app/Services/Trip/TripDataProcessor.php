@@ -2,6 +2,7 @@
 
 namespace App\Services\Trip;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Models\Trip;
 use App\Models\TripAvailabilityDate;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class TripDataProcessor
             'location'                    => $request->location ?? '',
             'latitude'                    => $request->latitude ?? null,
             'longitude'                   => $request->longitude ?? null,
-            'country'                     => $request->country ?? '',
+            'country'                     => $this->normalizeCountrySlug($request->country ?? ''),
             'city'                        => $request->city ?? '',
             'region'                      => $request->region ?? '',
             'target_species'              => $this->processTagifyField($request->input('target_species')),
@@ -329,6 +330,15 @@ class TripDataProcessor
         }
 
         return $result;
+    }
+
+    private function normalizeCountrySlug(mixed $country): string
+    {
+        if (! is_string($country) || trim($country) === '') {
+            return '';
+        }
+
+        return CountrySlug::canonicalize($country) ?? '';
     }
 }
 

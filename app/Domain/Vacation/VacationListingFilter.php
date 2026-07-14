@@ -34,7 +34,7 @@ final class VacationListingFilter
             return null;
         }
 
-        return $country;
+        return CountrySlug::canonicalize($country);
     }
 
     public function showsTrips(): bool

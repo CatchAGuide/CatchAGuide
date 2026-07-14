@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Vacation;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\Controller;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
@@ -20,7 +21,7 @@ class VacationCountryController extends Controller
 
     public function show(Request $request, string $country): View|RedirectResponse
     {
-        $country = strtolower($country);
+        $country = CountrySlug::canonicalize($country) ?? strtolower($country);
 
         if ($redirect = $this->redirectPillarToLanding($request, $country)) {
             return $redirect;

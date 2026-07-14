@@ -2,6 +2,7 @@
 
 namespace App\Domain\Vacation\ViewModels;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\Destination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -56,7 +57,8 @@ final class VacationCountryViewModel
             ];
         }
 
-        $countrySlug = $this->destination->slug;
+        $countrySlug = CountrySlug::canonicalize($this->destination->slug)
+            ?? strtolower((string) $this->destination->slug);
 
         return [
             'all' => $withQuery(route('vacations.country', $countrySlug)),
