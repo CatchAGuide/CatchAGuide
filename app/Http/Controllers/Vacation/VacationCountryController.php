@@ -18,9 +18,14 @@ class VacationCountryController extends Controller
         private CampCardPresenter $campPresenter,
     ) {}
 
-    public function show(Request $request, string $country): View
+    public function show(Request $request, string $country): View|RedirectResponse
     {
         $country = strtolower($country);
+
+        if ($redirect = $this->redirectPillarToLanding($request, $country)) {
+            return $redirect;
+        }
+
         $vm = $this->countryPage->build($request, $country);
 
         return $this->countryView($vm);
@@ -32,9 +37,39 @@ class VacationCountryController extends Controller
             return redirect()->route('vacations.all-offers', $request->except('country'));
         }
 
+        if ($redirect = $this->redirectPillarToLanding($request)) {
+            return $redirect;
+        }
+
         $vm = $this->countryPage->buildAllOffers($request);
 
         return $this->countryView($vm, isAllOffers: true);
+    }
+
+    /**
+     * Send trips/camps pillar filters to their dedicated landing pages
+     * so page title and subtitle update correctly.
+     */
+    private function redirectPillarToLanding(Request $request, ?string $countrySlug = null): ?RedirectResponse
+    {
+        $pillar = strtolower((string) $request->query('pillar', ''));
+        if (! in_array($pillar, ['trips', 'camps'], true)) {
+            return null;
+        }
+
+        $query = $request->except('pillar', 'country');
+
+        if ($countrySlug === null) {
+            return redirect()->route(
+                $pillar === 'trips' ? 'vacations.trips.index' : 'vacations.camps.index',
+                $query,
+            );
+        }
+
+        return redirect()->route(
+            $pillar === 'trips' ? 'vacations.trips.show' : 'vacations.camps.show',
+            array_merge(['slug' => $countrySlug], $query),
+        );
     }
 
     private function countryView($vm, bool $isAllOffers = false): View
