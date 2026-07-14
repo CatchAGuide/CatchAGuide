@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-    <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-analytics-page="trip-offer">
+    <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
         {{-- Full-width top: heading, gallery (same width as before), feature cards. Floating card starts after this. --}}
         <div class="trip-offer-page__top">
             <div class="trip-offer-page__hero-heading">
@@ -598,10 +598,6 @@
             </main>
 
             <aside class="trip-offer-page__sidebar">
-                @php
-                    $minBookingDate = now()->toDateString();
-                    $initialBookingDate = !empty($selectedDate) ? $selectedDate : '';
-                @endphp
                 <div class="trip-offer-page__booking-card">
                     <div class="trip-offer-page__booking-header">
                         <div class="trip-offer-page__booking-header-grid">
@@ -641,6 +637,8 @@
                     </div>
 
                     <div class="trip-offer-page__booking-body">
+                        {{-- Year-round trips collect preferred date only in the request modal --}}
+                        @unless($isYearRoundTrip)
                         <div class="trip-offer-page__booking-field-group">
                             <p class="trip-offer-page__booking-field-label">
                                 {{ __('trips.select_date') }}
@@ -655,6 +653,7 @@
                                 aria-label="{{ __('trips.select_date') }}"
                                 required>
                         </div>
+                        @endunless
 
                         <button type="button" class="trip-offer-page__booking-cta" data-analytics-trip-inquiry>
                             {{ __('vacations.request_trip') }}
@@ -1141,13 +1140,29 @@
                     if (preferredDateInput && selectedDate) preferredDateInput.value = selectedDate;
                 }
 
+                const isYearRound = page.dataset.yearRound === '1';
+
+                function isVisible(el) {
+                    if (!el) return false;
+                    const style = window.getComputedStyle(el);
+                    if (style.display === 'none' || style.visibility === 'hidden') return false;
+                    return el.getClientRects().length > 0;
+                }
+
                 ctas.forEach((cta) => {
                     cta.addEventListener('click', function () {
-                        const bookingDateInput = page.querySelector('.trip-offer-page__booking-date-input[data-trip-selected-date]');
-                        if (bookingDateInput && !bookingDateInput.value) {
-                            bookingDateInput.reportValidity();
-                            bookingDateInput.focus();
-                            return;
+                        // Dated trips (desktop only): require booking-card date first.
+                        // Year-round / no schedules / mobile sticky: open modal immediately —
+                        // preferred date is collected in the request modal.
+                        // (Mobile hides the booking card, so validating it silently blocked the CTA.)
+                        const fromMobileSticky = !!cta.closest('.trip-offer-page__mobile-sticky-footer');
+                        if (!isYearRound && !fromMobileSticky) {
+                            const bookingDateInput = page.querySelector('.trip-offer-page__booking-date-input[data-trip-selected-date]');
+                            if (bookingDateInput && isVisible(bookingDateInput) && !bookingDateInput.value) {
+                                bookingDateInput.reportValidity();
+                                bookingDateInput.focus();
+                                return;
+                            }
                         }
 
                         prefillContactForm();
