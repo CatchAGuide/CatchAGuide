@@ -8,10 +8,16 @@ use App\Models\Accommodation;
 use App\Models\Guiding;
 use App\Models\Camp;
 use App\Models\SpecialOffer;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Support\Str;
 
 class CampOfferController extends Controller
 {
+    public function __construct(
+        private ListingViewTranslationService $viewTranslation,
+    ) {}
+
     private function getImageUrl($path)
     {
         if (empty($path)) {
@@ -130,6 +136,14 @@ class CampOfferController extends Controller
         ])->where('slug', $slug)
         ->where('status', 'active')
         ->firstOrFail();
+
+        $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
+        $this->viewTranslation->applyToCollection($camp->accommodations, ListingTranslationService::TYPE_ACCOMMODATION);
+        $this->viewTranslation->applyToCollection($camp->rentalBoats, ListingTranslationService::TYPE_RENTAL_BOAT);
+        $this->viewTranslation->applyToGuidings($camp->guidings);
+
+        $activeSpecialOffers = $camp->specialOffers()->where('status', 'active')->get();
+        $this->viewTranslation->applyToCollection($activeSpecialOffers, ListingTranslationService::TYPE_SPECIAL_OFFER);
         
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
@@ -193,9 +207,7 @@ class CampOfferController extends Controller
         })->toArray();
         
         // Map all special offers with full data for display
-        $specialOffers = $camp->specialOffers()
-            ->where('status', 'active')
-            ->get()
+        $specialOffers = $activeSpecialOffers
             ->map(function($specialOffer) {
                 return $this->mapSpecialOfferData($specialOffer);
             })->toArray();
@@ -355,7 +367,7 @@ class CampOfferController extends Controller
             'best_travel_times' => $bestTravelTimes,
             'best_travel_times_parsed' => $bestTravelTimesParsed,
             'travel_info' => $camp->travel_information ? array_filter(array_map('trim', explode("\n", $camp->travel_information))) : [],
-            'extras' => $camp->extras ? array_filter(array_map('trim', explode(',', $camp->extras))) : [],
+            'extras' => $this->normalizeListField($camp->extras),
             'target_fish' => $targetFish,
             'conditions' => [
                 'minimum_stay_nights' => $camp->minimum_stay_nights ?? null,
@@ -366,6 +378,44 @@ class CampOfferController extends Controller
         ];
     }
     
+    /**
+     * Normalize a DB field that may be a comma-separated string or an array.
+     *
+     * @return array<int, string>
+     */
+    private function normalizeListField(mixed $value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return array_values(array_filter(array_map(function ($item) {
+                if (is_string($item)) {
+                    return trim($item);
+                }
+
+                if (is_array($item)) {
+                    return trim((string) ($item['name'] ?? $item['value'] ?? ''));
+                }
+
+                return '';
+            }, $value)));
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $this->normalizeListField($decoded);
+            }
+
+            return array_values(array_filter(array_map('trim', explode(',', $value))));
+        }
+
+        return [];
+    }
+
     /**
      * Extract numeric distance value from string like "Fayón – 4 km"
      */

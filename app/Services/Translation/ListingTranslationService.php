@@ -193,24 +193,66 @@ class ListingTranslationService
 
   public function getTranslatedListing(Model $listing, string $listingType, string $targetLanguage): ?array
   {
+    $batch = $this->getTranslatedListingsBatch(
+      [(int) $listing->getKey()],
+      $listingType,
+      $targetLanguage
+    );
+
+    return $batch[(int) $listing->getKey()] ?? null;
+  }
+
+  /**
+   * @param  array<int, int>  $listingIds
+   * @return array<int, array<string, mixed>>
+   */
+  public function getTranslatedListingsBatch(array $listingIds, string $listingType, string $targetLanguage): array
+  {
+    $listingIds = array_values(array_unique(array_filter(array_map('intval', $listingIds))));
+
+    if ($listingIds === []) {
+      return [];
+    }
+
     $config = $this->configFor($listingType);
-    $cacheKey = $this->cacheKey($listingType, (int) $listing->getKey(), $targetLanguage);
+    $results = [];
 
-    return Cache::remember($cacheKey, 3600, function () use ($listing, $config, $targetLanguage) {
-      $translation = Language::where([
-        'source_id' => $listing->getKey(),
-        'type' => $config['language_type'],
-        'language' => $targetLanguage,
-      ])->first();
+    foreach ($listingIds as $listingId) {
+      $cacheKey = $this->cacheKey($listingType, $listingId, $targetLanguage);
+      $cached = Cache::get($cacheKey);
 
-      if (! $translation || ! $translation->json_data) {
-        return null;
+      if (is_array($cached)) {
+        $results[$listingId] = $cached;
+      }
+    }
+
+    $missingIds = array_values(array_diff($listingIds, array_keys($results)));
+
+    if ($missingIds === []) {
+      return $results;
+    }
+
+    $translations = Language::where('type', $config['language_type'])
+      ->where('language', $targetLanguage)
+      ->whereIn('source_id', $missingIds)
+      ->get();
+
+    foreach ($translations as $translation) {
+      $listingId = (int) $translation->source_id;
+
+      if (! $translation->json_data) {
+        continue;
       }
 
-      return is_array($translation->json_data)
+      $data = is_array($translation->json_data)
         ? $translation->json_data
         : (array) json_decode($translation->json_data, true);
-    });
+
+      $results[$listingId] = $data;
+      Cache::put($this->cacheKey($listingType, $listingId, $targetLanguage), $data, 3600);
+    }
+
+    return $results;
   }
 
   public function clearTranslationCache(Model $listing, string $listingType): void

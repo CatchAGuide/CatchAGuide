@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
+use App\Http\Controllers\Admin\AdminTermsSectionController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
@@ -341,7 +343,7 @@ Route::name('ratings.')->prefix('ratings')->group(function () {
 Route::name('law.')->group(function() {
     Route::view('/imprint', 'pages.law.imprint')->name('imprint');
     Route::view('/data-protection', 'pages.law.data-protection')->name('data-protection');
-    Route::view('/agb', 'pages.law.agb')->name('agb');
+    Route::get('/agb', [TermsController::class, 'show'])->name('agb');
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
 });
 
@@ -415,6 +417,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/store', [AdminFAQController::class,'store'])->name('store');
             Route::post('/update/{faq}', [AdminFAQController::class,'update'])->name('update');
             Route::get('/destroy/{faq}', [AdminFAQController::class,'destroy'])->name('destroy');
+        });
+
+        Route::prefix('terms')->name('terms.')->group(function () {
+            Route::get('/', [AdminTermsSectionController::class, 'index'])->name('index');
+            Route::get('/create', [AdminTermsSectionController::class, 'create'])->name('create');
+            Route::post('/', [AdminTermsSectionController::class, 'store'])->name('store');
+            Route::post('/reorder', [AdminTermsSectionController::class, 'reorder'])->name('reorder');
+            Route::get('/{termsSection}/edit', [AdminTermsSectionController::class, 'edit'])->name('edit');
+            Route::put('/{termsSection}', [AdminTermsSectionController::class, 'update'])->name('update');
+            Route::delete('/{termsSection}', [AdminTermsSectionController::class, 'destroy'])->name('destroy');
+            Route::get('/{termsSection}/translation', [AdminTermsSectionController::class, 'getTranslation'])->name('translation');
         });
 
         Route::get('guidings/search', [AdminGuidingsController::class, 'searchForSelect'])->name('guidings.search');
