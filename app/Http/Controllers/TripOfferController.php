@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Trip;
 use App\Presenters\Vacation\TripTrustSignalResolver;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripOfferViewMapper;
 use Illuminate\Http\Request;
@@ -22,6 +24,7 @@ class TripOfferController extends Controller
         private TripOfferViewMapper $mapper,
         private TripCacheService $cache,
         private TripTrustSignalResolver $tripTrust,
+        private ListingViewTranslationService $viewTranslation,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -34,7 +37,12 @@ class TripOfferController extends Controller
         $tripView = $this->cache->rememberTripOfferViewModel(
             $slug,
             app()->getLocale(),
-            fn () => $this->mapper->map($trip)
+            function () use ($trip) {
+                $tripForView = clone $trip;
+                $this->viewTranslation->applyToModel($tripForView, ListingTranslationService::TYPE_TRIP);
+
+                return $this->mapper->map($tripForView);
+            }
         );
 
         $gallery = $this->buildGallery($trip);

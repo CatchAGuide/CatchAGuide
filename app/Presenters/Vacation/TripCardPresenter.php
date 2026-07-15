@@ -3,15 +3,20 @@
 namespace App\Presenters\Vacation;
 
 use App\Models\Trip;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 
 class TripCardPresenter
 {
     public function __construct(
         private TripTrustSignalResolver $trust,
+        private ListingViewTranslationService $viewTranslation,
     ) {}
 
     public function present(Trip $trip): array
     {
+        $this->viewTranslation->applyToModel($trip, ListingTranslationService::TYPE_TRIP);
+
         $durationPill = $this->durationPill($trip);
         $currency = $trip->currency ?: 'EUR';
         $sym = $currency === 'EUR' ? '€' : $currency . ' ';
