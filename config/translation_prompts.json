@@ -89,5 +89,16 @@
             "instructions": "Maintain detailed descriptions while being engaging",
             "prompt": "Translate this vacation component description. Maintain detail while being engaging for tourists."
         }
+    },
+    "terms": {
+        "instructions": "Legal terms and conditions. Preserve legal meaning, numbering, and HTML structure.",
+        "title": {
+            "instructions": "Keep titles legally precise",
+            "prompt": "Translate this T&C section title. Keep legal precision."
+        },
+        "content": {
+            "instructions": "Preserve HTML tags, lists, and legal terminology",
+            "prompt": "Translate this T&C section body. Preserve HTML tags, lists, and legal terminology."
+        }
     }
 } 
