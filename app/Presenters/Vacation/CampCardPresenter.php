@@ -3,15 +3,20 @@
 namespace App\Presenters\Vacation;
 
 use App\Models\Camp;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 
 class CampCardPresenter
 {
     public function __construct(
         private CampTrustSignalResolver $trust,
+        private ListingViewTranslationService $viewTranslation,
     ) {}
 
     public function present(Camp $camp): array
     {
+        $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
+
         $price = $camp->getLowestAccommodationOrOfferPrice();
         $addons = $this->addonPills($camp);
         $facilities = $this->facilityLabels($camp);
@@ -22,7 +27,7 @@ class CampCardPresenter
         return [
             'type' => 'camp',
             'id' => $camp->id,
-            'title' => translate($camp->title),
+            'title' => $camp->title,
             'slug' => $camp->slug,
             'url' => route('vacations.camps.show', $camp->slug),
             'image' => media_url($camp->thumbnail_path),

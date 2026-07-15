@@ -11,6 +11,8 @@ use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -23,6 +25,7 @@ class VacationPillarPageService
         private TripCardPresenter $tripPresenter,
         private CampCardPresenter $campPresenter,
         private VacationFilterApplicator $filterApplicator,
+        private ListingViewTranslationService $viewTranslation,
     ) {}
 
     public function buildIndex(Request $request, VacationPillar $pillar): VacationPillarIndexViewModel
@@ -116,10 +119,14 @@ class VacationPillarPageService
         $markers = [];
 
         if ($pillar === VacationPillar::Trips) {
-            foreach ($this->trips->queryForCountry($filter)
+            $trips = $this->trips->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['title', 'slug', 'latitude', 'longitude']) as $trip) {
+                ->get(['id', 'title', 'slug', 'latitude', 'longitude']);
+
+            $this->viewTranslation->applyToCollection($trips, ListingTranslationService::TYPE_TRIP);
+
+            foreach ($trips as $trip) {
                 $markers[] = [
                     'lat' => (float) $trip->latitude,
                     'lng' => (float) $trip->longitude,
@@ -131,14 +138,18 @@ class VacationPillarPageService
         }
 
         if ($pillar === VacationPillar::Camps) {
-            foreach ($this->camps->queryForCountry($filter)
+            $camps = $this->camps->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['title', 'slug', 'latitude', 'longitude']) as $camp) {
+                ->get(['id', 'title', 'slug', 'latitude', 'longitude']);
+
+            $this->viewTranslation->applyToCollection($camps, ListingTranslationService::TYPE_CAMP);
+
+            foreach ($camps as $camp) {
                 $markers[] = [
                     'lat' => (float) $camp->latitude,
                     'lng' => (float) $camp->longitude,
-                    'title' => translate($camp->title),
+                    'title' => $camp->title,
                     'url' => route('vacations.camps.show', $camp->slug),
                     'pillar' => 'camp',
                 ];

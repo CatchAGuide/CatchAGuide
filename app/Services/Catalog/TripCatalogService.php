@@ -5,10 +5,16 @@ namespace App\Services\Catalog;
 use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Vacation;
+use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Support\Facades\Cache;
 
 class TripCatalogService
 {
+    public function __construct(
+        private ListingViewTranslationService $viewTranslation,
+    ) {}
+
     /**
      * Build a unified list of trips (guidings + vacations) for AI/agent consumption.
      *
@@ -596,6 +602,8 @@ class TripCatalogService
                 ->where('slug', '!=', '')
                 ->limit(500)
                 ->get();
+
+            $this->viewTranslation->applyToCollection($camps, ListingTranslationService::TYPE_CAMP);
 
             return $camps->map(function (Camp $camp): array {
                 $minPrice = null;

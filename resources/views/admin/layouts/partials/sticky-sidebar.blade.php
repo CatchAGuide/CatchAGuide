@@ -140,6 +140,13 @@
                         <li><a href="{{ route('admin.faq.vacation-camps') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-camps') ? 'active' : '' }}">Vacation camps</a></li>
                     </ul>
                 </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.terms.*') ? 'active' : '' }}"
+                       href="{{ route('admin.terms.index') }}">
+                        <i class="side-menu__icon fe fe-file-text"></i>
+                        <span class="side-menu__label">Terms & Conditions</span>
+                    </a>
+                </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-book-open"></i>
