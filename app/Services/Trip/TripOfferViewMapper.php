@@ -41,6 +41,10 @@ class TripOfferViewMapper
                 if (! is_array($config)) {
                     continue;
                 }
+                // Skip corrupted numeric keys from older translations that used array_values().
+                if (is_int($key) || (is_string($key) && ctype_digit($key))) {
+                    continue;
+                }
                 $enabled = (bool) ($config['enabled'] ?? false);
                 $details = $config['details'] ?? null;
                 if (! $enabled && ($details === null || $details === '')) {

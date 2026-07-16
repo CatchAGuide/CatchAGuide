@@ -135,7 +135,96 @@ class ListingTranslationService
 
     $currentHash = md5(serialize($this->getTranslatableFields($listing, $listingType)));
 
-    return $translation->content !== $currentHash;
+    if ($translation->content !== $currentHash) {
+      return true;
+    }
+
+    return $this->hasStructurallyInvalidTranslation($listing, $listingType, $translation);
+  }
+
+  /**
+   * Whether this listing needs translation work for a target language (missing, outdated, or structurally broken).
+   */
+  public function needsTranslationUpdate(
+    Model $listing,
+    string $listingType,
+    string $targetLanguage,
+    string $fromLanguage = 'de'
+  ): bool {
+    if ($fromLanguage === $targetLanguage) {
+      return false;
+    }
+
+    return $this->hasSignificantChanges($listing, $listingType, $targetLanguage);
+  }
+
+  /**
+   * Human-readable reasons why a listing needs translation (empty = up to date).
+   *
+   * @return array<int, string>
+   */
+  public function getTranslationUpdateReasons(
+    Model $listing,
+    string $listingType,
+    string $targetLanguage,
+    string $fromLanguage = 'de'
+  ): array {
+    if ($fromLanguage === $targetLanguage) {
+      return [];
+    }
+
+    $config = $this->configFor($listingType);
+
+    $translation = Language::where([
+      'source_id' => $listing->getKey(),
+      'type' => $config['language_type'],
+      'language' => $targetLanguage,
+    ])->first();
+
+    if (! $translation) {
+      return ['missing'];
+    }
+
+    $reasons = [];
+    $currentHash = md5(serialize($this->getTranslatableFields($listing, $listingType)));
+
+    if ($translation->content !== $currentHash) {
+      $reasons[] = 'outdated';
+    }
+
+    if ($this->hasStructurallyInvalidTranslation($listing, $listingType, $translation)) {
+      $reasons[] = 'incomplete';
+    }
+
+    return $reasons;
+  }
+
+  /**
+   * Active listings that are missing, outdated, or have broken stored translations for any target language.
+   *
+   * @param  array<int, string>  $targetLanguages
+   * @return Collection<int, Model>
+   */
+  public function getListingsNeedingTranslationUpdate(
+    string $listingType,
+    array $targetLanguages,
+    string $fromLanguage = 'de'
+  ): Collection {
+    $config = $this->configFor($listingType);
+
+    return $config['model']::query()
+      ->where('status', $config['status'])
+      ->get()
+      ->filter(function (Model $listing) use ($listingType, $targetLanguages, $fromLanguage) {
+        foreach ($targetLanguages as $language) {
+          if ($this->needsTranslationUpdate($listing, $listingType, $language, $fromLanguage)) {
+            return true;
+          }
+        }
+
+        return false;
+      })
+      ->values();
   }
 
   /**
@@ -290,13 +379,29 @@ class ListingTranslationService
   }
 
   /**
-   * @param  array<string, string>  $originalFields
    * @param  array<string, string>  $translatedFields
    * @return array<string, mixed>
    */
   private function reconstructFields(Model $listing, string $listingType, array $translatedFields): array
   {
     $reconstructed = [];
+
+    if ($listingType === self::TYPE_TRIP) {
+      $highlights = $this->decodeValue($listing->trip_highlights ?? null);
+      if (is_array($highlights)) {
+        $reconstructed['trip_highlights'] = $this->reconstructTripHighlights($highlights, $translatedFields);
+      }
+
+      $schedule = $this->decodeValue($listing->trip_schedule ?? null);
+      if (is_array($schedule)) {
+        $reconstructed['trip_schedule'] = $this->reconstructTripSchedule($schedule, $translatedFields);
+      }
+
+      $additionalInfo = $this->decodeValue($listing->additional_info ?? null);
+      if (is_array($additionalInfo)) {
+        $reconstructed['additional_info'] = $this->reconstructAdditionalInfo($additionalInfo, $translatedFields);
+      }
+    }
 
     foreach ($this->jsonFieldNames($listingType) as $jsonField) {
       $value = $listing->{$jsonField} ?? null;
@@ -310,6 +415,11 @@ class ListingTranslationService
     }
 
     foreach ($translatedFields as $key => $value) {
+      // Skip flattened JSON keys that should already have been consumed above.
+      if (preg_match('/^(trip_highlights_items|trip_schedule|additional_info)_/', $key)) {
+        continue;
+      }
+
       if (! preg_match('/_\d+(_name|_value)?$/', $key)) {
         $reconstructed[$key] = $value;
       }
@@ -344,6 +454,10 @@ class ListingTranslationService
     );
 
     $this->clearTranslationCache($listing, $listingType);
+
+    if ($listing instanceof Trip && ! empty($listing->slug)) {
+      app(\App\Services\Trip\TripCacheService::class)->clearTripOfferCacheBySlug((string) $listing->slug);
+    }
   }
 
   /**
@@ -385,6 +499,9 @@ class ListingTranslationService
       'title',
       'description',
       'location',
+      'city',
+      'region',
+      'country',
       'meeting_point',
       'accommodation_description',
       'boat_information',
@@ -393,6 +510,7 @@ class ListingTranslationService
       'provider_certifications',
       'boat_staff',
       'cancellation_policy',
+      'downpayment_policy',
       'fishing_style',
       'best_arrival_options',
       'arrival_day',
@@ -402,11 +520,16 @@ class ListingTranslationService
       'distance_to_water',
     ]);
 
-    foreach (['trip_highlights', 'included', 'excluded', 'additional_info', 'catering', 'room_types'] as $jsonField) {
+    foreach (['included', 'excluded', 'catering', 'room_types'] as $jsonField) {
       $fields = array_merge($fields, $this->collectListField($listing, $jsonField));
     }
 
-    return $fields;
+    return array_merge(
+      $fields,
+      $this->collectTripHighlights($listing),
+      $this->collectTripSchedule($listing),
+      $this->collectAdditionalInfo($listing)
+    );
   }
 
   /**
@@ -536,13 +659,185 @@ class ListingTranslationService
   }
 
   /**
+   * @return array<string, string>
+   */
+  private function collectTripHighlights(Model $listing): array
+  {
+    $fields = [];
+    $decoded = $this->decodeValue($listing->trip_highlights ?? null);
+
+    if (! is_array($decoded)) {
+      return $fields;
+    }
+
+    $items = isset($decoded['items']) && is_array($decoded['items'])
+      ? $decoded['items']
+      : (array_is_list($decoded) ? $decoded : []);
+
+    foreach ($items as $index => $item) {
+      $text = is_array($item) ? ($item['text'] ?? '') : (string) $item;
+      $text = trim($text);
+
+      if ($text !== '' && ! is_numeric($text)) {
+        $fields["trip_highlights_items_{$index}"] = $text;
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  private function collectTripSchedule(Model $listing): array
+  {
+    $fields = [];
+    $decoded = $this->decodeValue($listing->trip_schedule ?? null);
+
+    if (! is_array($decoded)) {
+      return $fields;
+    }
+
+    foreach ($decoded as $index => $item) {
+      if (! is_array($item)) {
+        continue;
+      }
+
+      foreach (['day_label', 'description'] as $subKey) {
+        $value = $item[$subKey] ?? null;
+        if (is_string($value) && trim($value) !== '' && ! is_numeric($value)) {
+          $fields["trip_schedule_{$index}_{$subKey}"] = trim($value);
+        }
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  private function collectAdditionalInfo(Model $listing): array
+  {
+    $fields = [];
+    $decoded = $this->decodeValue($listing->additional_info ?? null);
+
+    if (! is_array($decoded)) {
+      return $fields;
+    }
+
+    foreach ($decoded as $key => $config) {
+      if (! is_array($config)) {
+        continue;
+      }
+
+      $details = $config['details'] ?? null;
+      if (is_string($details) && trim($details) !== '' && ! is_numeric($details)) {
+        $fields["additional_info_{$key}_details"] = trim($details);
+      }
+    }
+
+    return $fields;
+  }
+
+  /**
+   * @param  array<string, mixed>  $original
+   * @param  array<string, string>  $translatedFields
+   * @return array<string, mixed>
+   */
+  private function reconstructTripHighlights(array $original, array &$translatedFields): array
+  {
+    $reconstructed = $original;
+    $items = isset($original['items']) && is_array($original['items'])
+      ? $original['items']
+      : (array_is_list($original) ? $original : []);
+
+    foreach ($items as $index => $item) {
+      $key = "trip_highlights_items_{$index}";
+      if (! isset($translatedFields[$key])) {
+        continue;
+      }
+
+      if (is_array($item)) {
+        $items[$index]['text'] = $translatedFields[$key];
+      } else {
+        $items[$index] = $translatedFields[$key];
+      }
+
+      unset($translatedFields[$key]);
+    }
+
+    if (isset($original['items']) && is_array($original['items'])) {
+      $reconstructed['items'] = array_values($items);
+    } else {
+      $reconstructed = array_values($items);
+    }
+
+    return $reconstructed;
+  }
+
+  /**
+   * @param  array<int, mixed>  $original
+   * @param  array<string, string>  $translatedFields
+   * @return array<int, mixed>
+   */
+  private function reconstructTripSchedule(array $original, array &$translatedFields): array
+  {
+    $reconstructed = $original;
+
+    foreach ($original as $index => $item) {
+      if (! is_array($item)) {
+        continue;
+      }
+
+      foreach (['day_label', 'description'] as $subKey) {
+        $key = "trip_schedule_{$index}_{$subKey}";
+        if (isset($translatedFields[$key])) {
+          $reconstructed[$index][$subKey] = $translatedFields[$key];
+          unset($translatedFields[$key]);
+        }
+      }
+    }
+
+    return array_values($reconstructed);
+  }
+
+  /**
+   * Preserve associative keys (license_required, etc.) — never array_values().
+   *
+   * @param  array<string, mixed>  $original
+   * @param  array<string, string>  $translatedFields
+   * @return array<string, mixed>
+   */
+  private function reconstructAdditionalInfo(array $original, array &$translatedFields): array
+  {
+    $reconstructed = $original;
+
+    foreach ($original as $infoKey => $config) {
+      if (! is_array($config)) {
+        continue;
+      }
+
+      $key = "additional_info_{$infoKey}_details";
+      if (isset($translatedFields[$key])) {
+        $reconstructed[$infoKey]['details'] = $translatedFields[$key];
+        unset($translatedFields[$key]);
+      }
+    }
+
+    return $reconstructed;
+  }
+
+  /**
+   * Generic JSON list fields only. Trip highlights/schedule/additional_info are handled separately.
+   *
    * @return array<int, string>
    */
   private function jsonFieldNames(string $listingType): array
   {
     return match ($listingType) {
       self::TYPE_CAMP => ['target_fish', 'extras'],
-      self::TYPE_TRIP => ['trip_highlights', 'included', 'excluded', 'additional_info', 'catering', 'room_types'],
+      self::TYPE_TRIP => ['included', 'excluded', 'catering', 'room_types'],
       self::TYPE_RENTAL_BOAT => ['requirements', 'inclusions', 'boat_extras', 'pricing_extra', 'boat_information'],
       self::TYPE_SPECIAL_OFFER => ['whats_included'],
       self::TYPE_ACCOMMODATION => ['extras', 'inclusives', 'amenities', 'kitchen_equipment', 'bathroom_amenities'],
@@ -599,7 +894,8 @@ class ListingTranslationService
       }
     }
 
-    return array_values($reconstructed);
+    // Keep associative keys intact (e.g. keyed maps). Only re-index true lists.
+    return array_is_list($reconstructed) ? array_values($reconstructed) : $reconstructed;
   }
 
   private function decodeValue(mixed $value): mixed
@@ -658,5 +954,85 @@ class ListingTranslationService
   private function cacheKey(string $listingType, int $listingId, string $targetLanguage): string
   {
     return "listing_translation_{$listingType}_{$listingId}_{$targetLanguage}";
+  }
+
+  /**
+   * Detect stored translations that are present but unusable (e.g. corrupted additional_info keys).
+   */
+  private function hasStructurallyInvalidTranslation(Model $listing, string $listingType, Language $translation): bool
+  {
+    if ($listingType !== self::TYPE_TRIP) {
+      return false;
+    }
+
+    $data = $translation->json_data;
+    if (! is_array($data)) {
+      return true;
+    }
+
+    if (isset($data['additional_info']) && is_array($data['additional_info'])) {
+      foreach (array_keys($data['additional_info']) as $key) {
+        if (is_int($key) || (is_string($key) && ctype_digit($key))) {
+          return true;
+        }
+      }
+    }
+
+    $sourceSchedule = $this->decodeValue($listing->trip_schedule ?? null);
+    if (is_array($sourceSchedule) && $this->tripScheduleHasContent($sourceSchedule)) {
+      $translatedSchedule = $data['trip_schedule'] ?? null;
+      if (! is_array($translatedSchedule) || ! $this->tripScheduleHasContent($translatedSchedule)) {
+        return true;
+      }
+    }
+
+    $sourceAdditional = $this->decodeValue($listing->additional_info ?? null);
+    if (! is_array($sourceAdditional)) {
+      return false;
+    }
+
+    foreach ($sourceAdditional as $key => $config) {
+      if (! is_string($key) || ctype_digit($key) || ! is_array($config)) {
+        continue;
+      }
+
+      $details = $config['details'] ?? null;
+      if (! is_string($details) || trim($details) === '') {
+        continue;
+      }
+
+      $translatedConfig = $data['additional_info'][$key] ?? null;
+      if (! is_array($translatedConfig)) {
+        return true;
+      }
+
+      $translatedDetails = $translatedConfig['details'] ?? null;
+      if (! is_string($translatedDetails) || trim($translatedDetails) === '') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @param  array<int, mixed>  $schedule
+   */
+  private function tripScheduleHasContent(array $schedule): bool
+  {
+    foreach ($schedule as $item) {
+      if (! is_array($item)) {
+        continue;
+      }
+
+      foreach (['day_label', 'description'] as $field) {
+        $value = $item[$field] ?? null;
+        if (is_string($value) && trim($value) !== '') {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }
