@@ -22,10 +22,11 @@ class ListingTranslationCommand extends Command
                             {--force : Force retranslation even if translations exist}
                             {--recent-only : Only process listings updated in the last 7 days}
                             {--missing-only : Only process listings missing at least one target translation}
-                            {--report-missing : List listings missing translations without translating}
+                            {--needs-update : Only process listings missing, outdated, or structurally incomplete translations (recommended)}
+                            {--report-missing : List listings needing translation work without translating}
                             {--dry-run : Show what would be translated without writing}';
 
-  protected $description = 'Translate camps, trips, rental boats, special offers, and accommodations into the languages table (defaults: EN and DE).';
+  protected $description = 'Translate camps, trips, rental boats, special offers, and accommodations into the languages table (defaults: EN and DE). Use --needs-update to only translate missing/outdated/incomplete rows without --force.';
 
   public function __construct(private ListingTranslationService $translationService)
   {
@@ -93,13 +94,20 @@ class ListingTranslationCommand extends Command
           continue;
         }
 
-        if (! $force && ! $this->translationService->hasSignificantChanges($listing, $listingType, $targetLanguage)) {
+        if (! $force && ! $this->translationService->needsTranslationUpdate($listing, $listingType, $targetLanguage, $fromLanguage)) {
           $results['skipped']++;
           continue;
         }
 
         if ($dryRun) {
-          $this->line("\nWould translate [{$listingType}] {$listing->title} (ID: {$listing->id}) → {$targetLanguage}");
+          $reasons = implode(', ', $this->translationService->getTranslationUpdateReasons(
+            $listing,
+            $listingType,
+            $targetLanguage,
+            $fromLanguage
+          ));
+          $reasonLabel = $reasons !== '' ? " [{$reasons}]" : '';
+          $this->line("\nWould translate [{$listingType}] {$listing->title} (ID: {$listing->id}) → {$targetLanguage}{$reasonLabel}");
           $results['translated']++;
           continue;
         }
@@ -221,6 +229,12 @@ class ListingTranslationCommand extends Command
       $query->whereIn('id', $recentIds);
     } elseif ($this->option('missing-only')) {
       return $this->translationService->getListingsMissingTranslations($type, $targetLanguages);
+    } elseif ($this->option('needs-update')) {
+      return $this->translationService->getListingsNeedingTranslationUpdate(
+        $type,
+        $targetLanguages,
+        $this->option('from') ?: ListingTranslationService::defaultSourceLanguage()
+      );
     }
 
     return $query->get();
@@ -268,31 +282,49 @@ class ListingTranslationCommand extends Command
    */
   private function reportMissingTranslations(array $types, array $targetLanguages): void
   {
+    $fromLanguage = $this->option('from') ?: ListingTranslationService::defaultSourceLanguage();
     $rows = [];
 
     foreach ($types as $type) {
-      $missing = $this->translationService->getListingsMissingTranslations($type, $targetLanguages);
+      $listings = $this->translationService->getListingsNeedingTranslationUpdate($type, $targetLanguages, $fromLanguage);
 
-      foreach ($missing as $listing) {
+      foreach ($listings as $listing) {
+        $reasonsByLanguage = [];
+        foreach ($targetLanguages as $language) {
+          if ($fromLanguage === $language) {
+            continue;
+          }
+
+          $reasons = $this->translationService->getTranslationUpdateReasons($listing, $type, $language, $fromLanguage);
+          if ($reasons !== []) {
+            $reasonsByLanguage[] = $language.':'.implode('+', $reasons);
+          }
+        }
+
+        if ($reasonsByLanguage === []) {
+          continue;
+        }
+
         $rows[] = [
           $type,
           $listing->id,
           Str::limit($listing->title ?? '-', 50),
-          implode(', ', $this->translationService->getMissingLanguages($listing, $type, $targetLanguages)),
+          implode('; ', $reasonsByLanguage),
         ];
       }
     }
 
     if ($rows === []) {
-      $this->info('All active listings have translations for: '.implode(', ', $targetLanguages));
+      $this->info('All active listings are up to date for: '.implode(', ', $targetLanguages));
 
       return;
     }
 
-    $this->table(['Type', 'ID', 'Title', 'Missing languages'], $rows);
+    $this->table(['Type', 'ID', 'Title', 'Needs update (lang:reason)'], $rows);
     $this->newLine();
-    $this->info('Total: '.count($rows).' listing(s) with missing translations.');
-    $this->info('Run: php artisan listing:translate --missing-only [--language=en,de] to translate them.');
+    $this->info('Total: '.count($rows).' listing(s) needing translation work.');
+    $this->info('Reasons: missing = no row; outdated = source changed; incomplete = broken/partial stored translation.');
+    $this->info('Run: php artisan listing:translate --needs-update --type=trip --language=en to translate only these.');
   }
 
   private function displayResults(array $results, bool $dryRun): void
