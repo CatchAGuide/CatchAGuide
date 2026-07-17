@@ -342,8 +342,8 @@ Route::name('ratings.')->prefix('ratings')->group(function () {
 
 Route::name('law.')->group(function() {
     Route::view('/imprint', 'pages.law.imprint')->name('imprint');
-    Route::view('/data-protection', 'pages.law.data-protection')->name('data-protection');
-    Route::get('/agb', [TermsController::class, 'show'])->name('agb');
+    Route::get('/data-protection', [TermsController::class, 'dataProtection'])->name('data-protection');
+    Route::get('/agb/{section?}', [TermsController::class, 'show'])->whereNumber('section')->name('agb');
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
 });
 

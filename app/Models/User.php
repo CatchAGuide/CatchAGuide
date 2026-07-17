@@ -110,7 +110,10 @@ class User extends Authenticatable
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class);
+        // bookings.user_id holds a user_guests.id when is_guest = 1, so the
+        // guard prevents matching guest bookings whose guest id collides
+        // with this user's id.
+        return $this->hasMany(Booking::class)->where('is_guest', false);
     }
 
     /**
@@ -142,7 +145,7 @@ class User extends Authenticatable
     public function average_rating()
     {
         // Use already eager-loaded reviews if available
-        $reviews = $this->relationLoaded('reviews') ? $this->reviews : Review::where('guide_id', $this->id)->with('booking', 'booking.user')->get();
+        $reviews = $this->relationLoaded('reviews') ? $this->reviews : Review::where('guide_id', $this->id)->with('booking', 'booking.registeredUser', 'booking.guestUser')->get();
         $reviews_count = $reviews->count();
 
         // Calculate average scores

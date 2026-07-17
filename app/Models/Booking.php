@@ -53,11 +53,55 @@ class Booking extends Model
         'is_reviewed',
     ];
     
+    /**
+     * bookings.user_id points to users.id when is_guest = 0 and to
+     * user_guests.id when is_guest = 1. This conditional relation is only
+     * safe for lazy access on a hydrated model. NEVER eager load it with
+     * with('user') / load('user'): Eloquent resolves the relation on an
+     * empty prototype model (is_guest = null), so every booking - guest
+     * ones included - would be matched against the users table and guest
+     * bookings would show a completely unrelated user whose users.id
+     * happens to equal the user_guests.id. Eager load registeredUser and
+     * guestUser instead; $booking->user will pick the right one.
+     */
     public function user()
     {
         return $this->is_guest
-            ? $this->belongsTo(UserGuest::class)
-            : $this->belongsTo(User::class);
+            ? $this->guestUser()
+            : $this->registeredUser();
+    }
+
+    /**
+     * Registered customer (users table). Only meaningful when is_guest = 0.
+     */
+    public function registeredUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Guest customer (user_guests table). Only meaningful when is_guest = 1.
+     */
+    public function guestUser(): BelongsTo
+    {
+        return $this->belongsTo(UserGuest::class, 'user_id');
+    }
+
+    /**
+     * Make $booking->user reuse an eager-loaded registeredUser/guestUser
+     * relation instead of running one query per booking.
+     */
+    public function getRelationValue($key)
+    {
+        if ($key === 'user' && ! $this->relationLoaded('user')) {
+            $target = $this->is_guest ? 'guestUser' : 'registeredUser';
+
+            if ($this->relationLoaded($target)) {
+                return $this->getRelation($target);
+            }
+        }
+
+        return parent::getRelationValue($key);
     }
 
     /**

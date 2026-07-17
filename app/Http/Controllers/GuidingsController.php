@@ -816,7 +816,7 @@ class GuidingsController extends Controller
         // Get reviews instead of ratings
         // $reviews = $guiding->reviews;
         $reviews = Review::where('guide_id', $guiding->user_id)
-            ->with('booking', 'booking.user', 'booking.calendar_schedule', 'booking.blocked_event')
+            ->with('booking', 'booking.registeredUser', 'booking.guestUser', 'booking.calendar_schedule', 'booking.blocked_event')
             ->get();
         $reviews_count = $reviews->count();
 

@@ -6,27 +6,58 @@
     <meta name="robots" content="noindex, nofollow">
 @endsection
 
+@include('pages.law.partials.terms-page-assets')
+
 @section('content')
+<div id="termsProgress" class="terms-progress"></div>
+
 <div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">@lang('message.data-protection')</li>
-                    </ul>
-                </div>
+    <section class="page-header">
+        <div class="page-header__bottom breadcrumb-container guiding">
+            <div class="page-header__bottom-inner">
+                <ul class="thm-breadcrumb list-unstyled">
+                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                    <li class="active">@lang('message.data-protection')</li>
+                </ul>
             </div>
-        </section>
-    </div>
-    <!--About Page Start-->
-    <main class="main" style="word-wrap: break-word;">
-        <div class="page-content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h1 class="text-center mb-4">@lang('data-protection.dataProt')</h1>
+        </div>
+    </section>
+</div>
+
+<section class="terms-page">
+    <div class="container">
+
+        <div class="terms-hero">
+            <span class="terms-hero__eyebrow"><i class="fas fa-balance-scale"></i> @lang('terms.eyebrow')</span>
+            <h1>@lang('data-protection.dataProt')</h1>
+            <p class="terms-hero__subtitle">@lang('data-protection.generalInformationMsg')</p>
+            <div class="terms-hero__meta">
+                <span class="terms-hero__badge"><i class="fas fa-clock"></i> <span id="termsReadTime"></span></span>
+                <button type="button" class="terms-print-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> @lang('terms.print')
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            @if(!empty($navItems))
+                @include('pages.law.partials.terms-sidebar')
+            @endif
+
+            <div class="{{ !empty($navItems) ? 'col-lg-8 col-xl-9' : 'col-12' }}" style="word-wrap: break-word;">
+                <div id="termsContent">
+                    <article class="terms-section">
+                        <div class="terms-section__header">
+                            <span class="terms-section__icon"><i class="fas fa-lock"></i></span>
+                            <div class="terms-section__heading">
+                                <h2 class="terms-section__title">@lang('data-protection.dataProt')</h2>
+                            </div>
+                            <button type="button" class="terms-copy-link" aria-label="@lang('terms.copy_link')" title="@lang('terms.copy_link')">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                        <div class="terms-section__body">
                         <h2>1. @lang('data-protection.privacyatglance')</h2>
                         <h3>@lang('data-protection.generalInformation')</h3> 
                         <p>@lang('data-protection.generalInformationMsg')</p>
@@ -258,13 +289,21 @@
                         <h4>Abschluss eines Vertrags &uuml;ber Auftragsverarbeitung</h4> 
                         <p>Wir haben einen Vertrag &uuml;ber Auftragsverarbeitung mit OneDrive geschlossen. Hierbei handelt es sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der gew&auml;hrleistet, dass OneDrive die personenbezogenen Daten unserer Websitebesucher nur nach unseren Weisungen und unter Einhaltung der DSGVO verarbeitet.</p>
                         <p>Quelle: <a href="https://www.e-recht24.de">e-recht24.de</a></p>
+                        </div>
+                    </article>
+
+                    <div class="terms-no-results" id="termsNoResults">
+                        <i class="fas fa-search"></i>
+                        <h5>@lang('terms.no_results_title')</h5>
+                        <p class="mb-0">@lang('terms.no_results_text')</p>
                     </div>
                 </div>
-
             </div>
-
-            <!-- End About Section-->
         </div>
-    </main>
-    <!--About Page End-->
+    </div>
+</section>
+
+<button type="button" class="terms-back-top" id="termsBackTop" aria-label="@lang('terms.back_to_top')">
+    <i class="fas fa-arrow-up"></i>
+</button>
 @endsection

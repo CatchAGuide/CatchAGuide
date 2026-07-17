@@ -14,7 +14,7 @@ class EventsController extends Controller
     public function index(Request $request)
     {
         $query = CalendarSchedule::where('user_id', auth()->id())
-            ->with(['booking.user', 'guiding', 'vacation']);
+            ->with(['booking.registeredUser', 'booking.guestUser', 'guiding', 'vacation']);
         
         // Filter by guiding if provided
         if ($request->has('guiding_id') && $request->guiding_id) {

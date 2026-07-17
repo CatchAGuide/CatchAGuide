@@ -267,13 +267,14 @@ class ProfileController extends Controller
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
             ->orderBy('created_at','desc')
             ->where('user_id',auth()->user()->id)
+            ->where('is_guest', false)
             ->paginate(5, ['*'], 'my_bookings');
         
         // Get guide bookings if user is a guide with pagination (5 items per page) - pending first
         $guideBookings = null;
         if (auth()->user()->canAccessGuideDashboard()) {
             try {
-                $guideBookings = Booking::with(['guiding', 'user', 'blocked_event', 'calendar_schedule'])
+                $guideBookings = Booking::with(['guiding', 'registeredUser', 'guestUser', 'blocked_event', 'calendar_schedule'])
                     ->whereHas('guiding', function($query) {
                         $query->where('user_id', auth()->user()->id);
                     })
@@ -309,6 +310,7 @@ class ProfileController extends Controller
                 ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
                 ->orderBy('created_at','desc')
                 ->where('user_id', auth()->user()->id)
+                ->where('is_guest', false)
                 ->paginate(5, ['*'], 'my_bookings', $page);
             
             return view('pages.profile.partials.booking-cards', [
@@ -321,7 +323,7 @@ class ProfileController extends Controller
                 return response()->json(['error' => 'Not authorized'], 403);
             }
             
-            $guideBookings = Booking::with(['guiding', 'user', 'blocked_event', 'calendar_schedule'])
+            $guideBookings = Booking::with(['guiding', 'registeredUser', 'guestUser', 'blocked_event', 'calendar_schedule'])
                 ->whereHas('guiding', function($query) {
                     $query->where('user_id', auth()->user()->id);
                 })
@@ -467,7 +469,9 @@ class ProfileController extends Controller
         if(!$booking){
             abort(404);
         }
-        if($booking->user_id == auth()->user()->id || $booking->guiding->user_id == auth()->user()->id ){
+        $isCustomer = !$booking->is_guest && $booking->user_id == auth()->user()->id;
+        $isGuide = $booking->guiding && $booking->guiding->user_id == auth()->user()->id;
+        if($isCustomer || $isGuide){
             $guiding = Guiding::where('id',$booking->guiding_id)->first();
             if(!$guiding){
                 abort(404);
@@ -483,7 +487,7 @@ class ProfileController extends Controller
     public function stornobooking($bookingid)
     {
         $booking = Booking::find($bookingid);
-        if($booking->user_id != auth()->user()->id) {
+        if(!$booking || $booking->is_guest || $booking->user_id != auth()->user()->id) {
             return back()->with('error', 'Du hast nicht die Berechtigung die Buchung zu stornieren. Bitte wende Dich an Catchaguide für mehr Informationen.');
         }
         $guiding = Guiding::find($booking->guiding_id);

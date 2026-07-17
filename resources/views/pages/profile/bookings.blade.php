@@ -937,7 +937,7 @@
                             </button>
 
                             @if($booking->status == 'accepted')
-                                @if($booking->isBookingOver() && !auth()->user()->hasratet($booking->user_id) && !$booking->is_reviewed)
+                                @if($booking->isBookingOver() && !auth()->user()->hasratet($booking->guiding?->user_id) && !$booking->is_reviewed)
                                     <a href="{{ route('ratings.show', ['token' => $booking->token]) }}" class="btn-action btn-warning" target="_blank">
                                         <i class="fas fa-star"></i> Rate Guide
                                     </a>
