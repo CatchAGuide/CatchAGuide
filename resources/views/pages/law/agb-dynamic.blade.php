@@ -1,11 +1,23 @@
 @extends('layouts.app-v2-1')
 
-@section('title', ucwords(translate('Allgemeine Geschäftsbedingungen')))
+@section('title', $translation->title . ' - ' . ucwords(translate('Allgemeine Geschäftsbedingungen')))
 @section('meta_robots')
     <meta name="robots" content="noindex, nofollow">
 @endsection
 
+@include('pages.law.partials.terms-page-assets')
+
+@php
+    $sectionIcons = [
+        'fa-building', 'fa-handshake', 'fa-file-signature', 'fa-user-check', 'fa-euro-sign',
+        'fa-gavel', 'fa-calendar-check', 'fa-shield-alt', 'fa-lock', 'fa-balance-scale',
+    ];
+    $icon = $sectionIcons[($sectionNumber - 1) % count($sectionIcons)];
+@endphp
+
 @section('content')
+<div id="termsProgress" class="terms-progress"></div>
+
 <div class="container">
     <section class="page-header">
         <div class="page-header__bottom breadcrumb-container guiding">
@@ -13,97 +25,82 @@
                 <ul class="thm-breadcrumb list-unstyled">
                     <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                     <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li class="active">@lang('message.term-conditions')</li>
+                    <li><a href="{{ route('law.agb') }}">@lang('message.term-conditions')</a></li>
+                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                    <li class="active">{{ $translation->title }}</li>
                 </ul>
             </div>
         </div>
     </section>
 </div>
 
-<section class="about-pages terms-dynamic py-4">
+<section class="terms-page">
     <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1 class="h2">@lang('message.term-conditions')</h1>
-                <h3>ALLGEMEINE GESCHÄFTS- UND NUTZUNGSBEDINGUNGEN</h3>
-                <p>für die Nutzung sowie den Bezug oder Absatz von Waren oder Dienstleistungen auf der „Catch A Guide“-Plattform</p>
+
+        <div class="terms-hero">
+            <span class="terms-hero__eyebrow"><i class="fas fa-balance-scale"></i> @lang('terms.eyebrow')</span>
+            <h1>@lang('message.term-conditions')</h1>
+            <p class="terms-hero__subtitle">@lang('terms.subtitle')</p>
+            <div class="terms-hero__meta">
+                <span class="terms-hero__badge"><i class="fas fa-list-ol"></i> {{ count($navItems) }} @lang('terms.sections')</span>
+                <span class="terms-hero__badge"><i class="fas fa-clock"></i> <span id="termsReadTime"></span></span>
+                <button type="button" class="terms-print-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> @lang('terms.print')
+                </button>
             </div>
         </div>
 
         <div class="row">
-            <aside class="col-lg-3 mb-4 mb-lg-0">
-                <nav class="terms-sidebar list-group sticky-top" style="top: 100px;" id="termsSidebar">
-                    @foreach($sections as $index => $section)
-                        @php $translation = $section->translations->first(); @endphp
-                        <a href="#section-{{ $section->id }}"
-                           class="list-group-item list-group-item-action terms-nav-link {{ $loop->first ? 'active' : '' }}"
-                           data-section-id="section-{{ $section->id }}">
-                            {{ ($index + 1) }}) {{ $translation->title }}
-                        </a>
-                    @endforeach
-                </nav>
-            </aside>
+            @include('pages.law.partials.terms-sidebar')
 
-            <div class="col-lg-9">
-                @foreach($sections as $index => $section)
-                    @php $translation = $section->translations->first(); @endphp
-                    <article id="section-{{ $section->id }}" class="terms-section mb-5" data-section-id="section-{{ $section->id }}">
-                        <h4 class="pt-2">{{ ($index + 1) }}) {{ $translation->title }}</h4>
-                        <div class="terms-section-content">
+            <div class="col-lg-8 col-xl-9">
+                <div id="termsContent">
+                    <article class="terms-section">
+                        <div class="terms-section__header">
+                            <span class="terms-section__icon"><i class="fas {{ $icon }}"></i></span>
+                            <div class="terms-section__heading">
+                                <span class="terms-section__kicker">&sect; {{ $sectionNumber }}</span>
+                                <h2 class="terms-section__title">{{ $translation->title }}</h2>
+                            </div>
+                            <button type="button" class="terms-copy-link" aria-label="@lang('terms.copy_link')" title="@lang('terms.copy_link')">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                        <div class="terms-section__body">
                             {!! $translation->content !!}
                         </div>
                     </article>
-                @endforeach
+
+                    <div class="terms-no-results" id="termsNoResults">
+                        <i class="fas fa-search"></i>
+                        <h5>@lang('terms.no_results_title')</h5>
+                        <p class="mb-0">@lang('terms.no_results_text')</p>
+                    </div>
+
+                    <nav class="terms-pager">
+                        @if($prevItem)
+                            <a href="{{ $prevItem['url'] }}" class="terms-pager__link terms-pager__link--prev">
+                                <span class="terms-pager__label"><i class="fas fa-arrow-left"></i> @lang('terms.prev')</span>
+                                <span class="terms-pager__title">{{ $prevItem['title'] }}</span>
+                            </a>
+                        @else
+                            <span></span>
+                        @endif
+
+                        @if($nextItem)
+                            <a href="{{ $nextItem['url'] }}" class="terms-pager__link terms-pager__link--next">
+                                <span class="terms-pager__label">@lang('terms.next') <i class="fas fa-arrow-right"></i></span>
+                                <span class="terms-pager__title">{{ $nextItem['title'] }}</span>
+                            </a>
+                        @endif
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<button type="button" class="terms-back-top" id="termsBackTop" aria-label="@lang('terms.back_to_top')">
+    <i class="fas fa-arrow-up"></i>
+</button>
 @endsection
-
-@push('js_push')
-<script>
-(function () {
-    var links = document.querySelectorAll('.terms-nav-link');
-    var sections = document.querySelectorAll('.terms-section');
-    if (!links.length || !sections.length) {
-        return;
-    }
-
-    function setActive(id) {
-        links.forEach(function (link) {
-            link.classList.toggle('active', link.getAttribute('data-section-id') === id);
-        });
-    }
-
-    links.forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-            var targetId = link.getAttribute('data-section-id');
-            var target = document.getElementById(targetId);
-            if (target) {
-                var offset = 120;
-                var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-                setActive(targetId);
-            }
-        });
-    });
-
-    function onScroll() {
-        var current = sections[0].getAttribute('data-section-id');
-        var scrollPos = window.pageYOffset + 140;
-
-        sections.forEach(function (section) {
-            if (section.offsetTop <= scrollPos) {
-                current = section.getAttribute('data-section-id');
-            }
-        });
-
-        setActive(current);
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-})();
-</script>
-@endpush
