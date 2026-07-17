@@ -33,7 +33,6 @@ class AutomaticReviewService
      */
     private static function commentForBooking(Booking $booking): string
     {
-        $booking->loadMissing('user');
         $name = trim((string) optional($booking->user)->firstname);
         if ($name === '') {
             return 'Successfully completed fishing tour';

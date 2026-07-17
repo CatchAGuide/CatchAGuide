@@ -84,7 +84,7 @@ class ICalGeneratorService
         
         // Get bookings as guide
         $guideBookings = Booking::whereIn('guiding_id', $guidingIds)
-            ->with(['user', 'guiding', 'calendar_schedule'])
+            ->with(['registeredUser', 'guestUser', 'guiding', 'calendar_schedule'])
             ->get();
         
         foreach ($guideBookings as $booking) {
@@ -112,6 +112,7 @@ class ICalGeneratorService
         
         // Get bookings as client
         $clientBookings = Booking::where('user_id', $user->id)
+            ->where('is_guest', false)
             ->with(['guiding', 'guiding.user', 'calendar_schedule'])
             ->get();
             

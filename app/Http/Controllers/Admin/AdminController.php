@@ -116,7 +116,7 @@ class AdminController extends Controller
 
         // Completed + approved bookings (accepted and tour date already passed)
         $completedApprovedBookings = $filterTestBookings(
-                Booking::with(['user', 'guiding', 'blocked_event', 'calendar_schedule'])
+                Booking::with(['registeredUser', 'guestUser', 'guiding', 'blocked_event', 'calendar_schedule'])
                     ->where('status', 'accepted')
                     ->orderBy('id', 'desc')
             )
@@ -385,6 +385,7 @@ class AdminController extends Controller
                 $query->selectRaw('1')
                       ->from('bookings')
                       ->whereColumn('users.id', 'bookings.user_id')
+                      ->where('bookings.is_guest', false)
                       ->whereNotIn('bookings.user_id', $testUserIds)
                       ->when(!empty($testUserEmails), function ($q) use ($testUserEmails) {
                           $q->whereNotIn('bookings.email', $testUserEmails);

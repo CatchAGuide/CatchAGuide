@@ -185,7 +185,7 @@ class BookingsController extends Controller
 
     public function rescheduleData(Booking $booking)
     {
-        $booking->loadMissing(['guiding.user', 'user']);
+        $booking->loadMissing(['guiding.user']);
 
         if (!in_array($booking->status, BookingService::adminReschedulableStatuses(), true)) {
             return response()->json([
@@ -252,7 +252,7 @@ class BookingsController extends Controller
         Booking $booking,
         BookingService $bookingService
     ) {
-        $booking->loadMissing(['guiding.user', 'user']);
+        $booking->loadMissing(['guiding.user']);
 
         try {
             $sendEmails = $request->boolean('send_emails', true);

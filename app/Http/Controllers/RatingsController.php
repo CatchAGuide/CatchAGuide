@@ -14,7 +14,7 @@ class RatingsController extends Controller
     public function show($token)
     {
         $booking = Booking::where('token', $token)->where('status', 'accepted')->firstOrFail();
-        $user = User::find($booking->user_id);
+        $user = $booking->user;
 
         if($booking->is_reviewed){
             return redirect()->route('ratings.notified')->with('title', 'Thank you for your rating!');
@@ -28,7 +28,7 @@ class RatingsController extends Controller
 
     public function store(StoreRatingRequest $request, $token)
     {
-        $booking = Booking::where('token', $token)->with('guiding', 'guiding.user', 'user')->firstOrFail();
+        $booking = Booking::where('token', $token)->with('guiding', 'guiding.user')->firstOrFail();
         $data = $request->validated();
         
         $dataSave = [

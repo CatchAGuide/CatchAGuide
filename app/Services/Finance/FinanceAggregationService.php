@@ -104,7 +104,7 @@ class FinanceAggregationService
     private function getGuidingBookingRows(?Carbon $from, ?Carbon $to, string $dateFilter): array
     {
         $bookingsQuery = Booking::query()
-            ->with(['guiding.user', 'user', 'financeItem', 'calendar_schedule', 'blocked_event'])
+            ->with(['guiding.user', 'registeredUser', 'guestUser', 'financeItem', 'calendar_schedule', 'blocked_event'])
             ->where('status', 'accepted')
             ->latest();
 

@@ -210,7 +210,7 @@ class EmailLogZeroRecipientRepair
         if ($bookingId === null) {
             return null;
         }
-        $booking = Booking::query()->with('user')->find($bookingId);
+        $booking = Booking::query()->find($bookingId);
         if (! $booking) {
             return null;
         }
@@ -227,7 +227,7 @@ class EmailLogZeroRecipientRepair
         if ($bookingId === null) {
             return null;
         }
-        $booking = Booking::query()->with('user')->find($bookingId);
+        $booking = Booking::query()->find($bookingId);
 
         return $booking?->user?->email;
     }
