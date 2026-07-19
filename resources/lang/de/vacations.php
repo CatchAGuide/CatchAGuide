@@ -59,6 +59,9 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'contact_us' => 'Unverbindliche Buchungsanfrage',
     'contact_us_message' => 'Stell eine kurze Anfrage zu deinem gewünschten Zeitraum. Wir bestätigen dir in Kürze, ob der Angelurlaub verfügbar ist.',
     'contact_us_button' => 'Jetzt anfragen',
+    'general_contact_title' => 'Kontakt aufnehmen',
+    'general_contact_message' => 'Hast du Fragen zu diesem Camp? Unser Team hilft dir gerne weiter!',
+    'general_contact_form' => 'Kontaktformular',
     'book_vacations' => 'Urlaub buchen',
     'facilities' => 'Ausstattung',
 

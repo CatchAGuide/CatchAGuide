@@ -411,7 +411,7 @@ class TripXlsxImporter
         return match ($normalized) {
             'active', 'aktiv'   => 'active',
             'passive', 'passiv' => 'passive',
-            'both', 'beides'    => 'both',
+            'both', 'beides', 'aktiv & passiv', 'active & passive', 'aktiv / passiv', 'active / passive' => 'both',
             default             => $normalized,
         };
     }

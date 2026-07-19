@@ -6,7 +6,6 @@ return [
     'contents' => 'Inhalt',
     'search_placeholder' => 'Suchen...',
     'clear' => 'Leeren',
-    'print' => 'Drucken / PDF',
     'sections' => 'Abschnitte',
     'no_results_title' => 'Keine Treffer',
     'no_results_text' => 'Versuchen Sie einen anderen Suchbegriff.',

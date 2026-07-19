@@ -10,7 +10,9 @@ class UpdateFaqRequest extends FormRequest
     {
         return [
             'question' => ['required', 'string'],
-            'answer' => ['required', 'string']
+            'answer' => ['required', 'string'],
+            'page' => ['required', 'string'],
+            'language' => ['required', 'string'],
         ];
     }
 

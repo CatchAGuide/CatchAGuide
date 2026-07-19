@@ -440,9 +440,9 @@ class TripOfferViewMapper
         $normalized = strtolower(str_replace([' ', '-'], '_', trim($value)));
 
         return match ($normalized) {
-            'active' => __('trips.fishing_style_active'),
-            'passive' => __('trips.fishing_style_passive'),
-            'both' => __('trips.fishing_style_both'),
+            'active', 'aktiv' => __('trips.fishing_style_active'),
+            'passive', 'passiv' => __('trips.fishing_style_passive'),
+            'both', 'beides', 'aktiv_&_passiv', 'active_&_passive', 'aktiv_/_passiv', 'active_/_passive' => __('trips.fishing_style_both'),
             default => $this->titleCase($value),
         };
     }

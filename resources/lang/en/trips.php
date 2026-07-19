@@ -22,7 +22,7 @@ return [
     'fishing_style'         => 'Fishing Style',
     'fishing_style_active'  => 'Active',
     'fishing_style_passive' => 'Passive',
-    'fishing_style_both'    => 'Both',
+    'fishing_style_both'    => 'Active & Passive',
     'water_types'           => 'Water Types',
     'skill_level'           => 'Skill Level',
     'skill_level_beginner'      => 'Beginner',

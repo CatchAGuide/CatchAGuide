@@ -163,9 +163,6 @@ HTML,
             <div class="terms-hero__meta">
                 <span class="terms-hero__badge"><i class="fas fa-list-ol"></i> {{ count($sections) }} @lang('terms.sections')</span>
                 <span class="terms-hero__badge"><i class="fas fa-clock"></i> <span id="termsReadTime"></span></span>
-                <button type="button" class="terms-print-btn" onclick="window.print()">
-                    <i class="fas fa-print"></i> @lang('terms.print')
-                </button>
             </div>
         </div>
 

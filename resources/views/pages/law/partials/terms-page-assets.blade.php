@@ -85,25 +85,6 @@
         border-radius: 100px;
     }
     .terms-hero__badge i { color: #E8604C; }
-    .terms-print-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-left: auto;
-        background: #E8604C;
-        color: #fff;
-        border: none;
-        font-size: 14px;
-        font-weight: 600;
-        padding: 9px 20px;
-        border-radius: 100px;
-        transition: background .25s ease, transform .25s ease;
-    }
-    .terms-print-btn:hover {
-        background: #d24b37;
-        color: #fff;
-        transform: translateY(-1px);
-    }
 
     /* Sidebar */
     .terms-sidebar-wrap {
@@ -478,13 +459,11 @@
         .terms-toc-toggle i { transition: transform .3s ease; }
         .terms-section { padding: 24px 20px; }
         .terms-section__icon { width: 40px; height: 40px; font-size: 16px; border-radius: 11px; }
-        .terms-print-btn { margin-left: 0; }
     }
 
     @media print {
         .terms-progress,
         .terms-sidebar-wrap,
-        .terms-print-btn,
         .terms-copy-link,
         .terms-pager,
         .terms-back-top,

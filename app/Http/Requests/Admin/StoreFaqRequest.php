@@ -11,8 +11,8 @@ class StoreFaqRequest extends FormRequest
         return [
             'question' => ['required', 'string'],
             'answer' => ['required', 'string'],
-            'page' => ['nullable', 'string'],
-            'language' => ['nullable', 'string']
+            'page' => ['required', 'string'],
+            'language' => ['required', 'string'],
         ];
     }
 

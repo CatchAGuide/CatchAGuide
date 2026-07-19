@@ -6,7 +6,6 @@ return [
     'contents' => 'Contents',
     'search_placeholder' => 'Search...',
     'clear' => 'Clear',
-    'print' => 'Print / PDF',
     'sections' => 'Sections',
     'no_results_title' => 'No matches',
     'no_results_text' => 'Try a different search term.',

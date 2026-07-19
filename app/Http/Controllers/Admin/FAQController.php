@@ -29,6 +29,16 @@ class FAQController extends Controller
         ]);
     }
 
+    public function vacations()
+    {
+        $frequentlyAskedQuestions = Faq::where('page', '=', 'vacations')->get();
+
+        return view('admin.pages.faq.index', [
+            'frequentlyAskedQuestions' => $frequentlyAskedQuestions,
+            'page' => 'vacations',
+        ]);
+    }
+
     public function vacationTrips()
     {
         $frequentlyAskedQuestions = Faq::where('page', '=', 'vacation-trips')->get();
@@ -75,6 +85,10 @@ class FAQController extends Controller
             return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
 
+        if ($data['page'] === 'vacations') {
+            return redirect()->route('admin.faq.vacations')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
+        }
+
         if ($data['page'] === 'vacation-trips') {
             return redirect()->route('admin.faq.vacation-trips')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
@@ -110,6 +124,10 @@ class FAQController extends Controller
 
         if($data['page'] == 'search-request'){
             return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich editiert!');
+        }
+
+        if ($data['page'] === 'vacations') {
+            return redirect()->route('admin.faq.vacations')->with('success', 'Das FAQ wurde erfolgreich editiert!');
         }
 
         if ($data['page'] === 'vacation-trips') {
