@@ -22,7 +22,7 @@ return [
     'fishing_style'         => 'Angelstil',
     'fishing_style_active'  => 'Aktiv',
     'fishing_style_passive' => 'Passiv',
-    'fishing_style_both'    => 'Beides',
+    'fishing_style_both'    => 'Aktiv & Passiv',
     'water_types'           => 'Gewässertypen',
     'skill_level'           => 'Erfahrungslevel',
     'skill_level_beginner'      => 'Anfänger',

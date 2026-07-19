@@ -726,6 +726,168 @@
     }
 }
 
+// CTA stack (booking request + contact us) for Vacations V2
+.camp-cta-stack {
+    // Mobile-only stack - positioned before description section
+    &--mobile-top {
+        display: none;
+        margin-bottom: 1rem;
+
+        @media (max-width: 767px) {
+            display: block;
+        }
+    }
+
+    // Desktop-only stack - floats inside description section for text wrapping
+    &--desktop-float {
+        display: block;
+        float: right;
+        max-width: 320px;
+        width: 100%;
+        margin: 0 0 1rem 1.5rem;
+        clear: right;
+
+        @media (max-width: 767px) {
+            display: none;
+        }
+    }
+
+    .contact-card {
+        margin-left: 0;
+        margin-right: 0;
+        float: none;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+.camp-booking-card {
+    width: 100%;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
+
+    &__header {
+        margin-bottom: 1.25rem;
+    }
+
+    &__title {
+        margin: 0 0 .4rem;
+        color: #313041;
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    &__message {
+        margin: 0;
+        color: #6b7280;
+        font-size: .9rem;
+        line-height: 1.4;
+    }
+
+    &__body,
+    &__field-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__body {
+        gap: 1rem;
+    }
+
+    &__field-group {
+        gap: .35rem;
+    }
+
+    &__field-label {
+        margin: 0;
+        color: #6b7280;
+        font-size: .75rem;
+        font-weight: 600;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    &__date-input {
+        width: 100%;
+        padding: .65rem .9rem;
+        border: 1px solid #e5e7eb;
+        border-radius: .9rem;
+        background: #f9fafb;
+        color: #313041;
+        font: inherit;
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+            border-color: rgba(49, 48, 65, .35);
+            box-shadow: 0 0 0 3px rgba(49, 48, 65, .08);
+        }
+    }
+
+    &__guest-stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+        padding: .35rem .4rem;
+        border: 1px solid #d9dde5;
+        border-radius: .9rem;
+        background: #fff;
+    }
+
+    &__stepper-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0;
+        border: 0;
+        border-radius: .6rem;
+        background: #f1f4f8;
+        color: #4b5563;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            background: #e6ebf2;
+        }
+    }
+
+    &__guest-count {
+        min-width: 1.5rem;
+        color: #313041;
+        font-size: 1.25rem;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    &__cta {
+        width: 100%;
+        margin-top: .5rem;
+        padding: .85rem 1rem;
+        border: 0;
+        border-radius: .9rem;
+        background: #e8604c;
+        box-shadow: 0 6px 18px rgba(232, 96, 76, .28);
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: box-shadow .2s ease;
+
+        &:hover {
+            box-shadow: 0 8px 24px rgba(232, 96, 76, .34);
+        }
+    }
+}
+
 // Contact Card Styles for Vacations V2
 .contact-card {
     padding: 1.25rem 1.5rem;

@@ -139,43 +139,33 @@
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
-                    <!-- Contact Card - Mobile only, positioned before description -->
-                    <div class="contact-card card contact-card--mobile-top">
-                        <div class="contact-card__content">
-                            <div class="contact-card__header">
-                                <h5 class="contact-card__title mb-1">{{ __('vacations.contact_us') }}</h5>
-                                <p class="contact-card__message mb-0 text-muted small">{{ __('vacations.contact_us_message') }}</p>
-                            </div>
-                            <div class="contact-info">
-                                <i class="fas fa-phone-alt me-2"></i>
-                                <a href="tel:+49{{config('cag.contact_num')}}" class="text-decoration-none">+49 (0) {{config('cag.contact_num')}}</a>
-                            </div>
-                            <a href="#" id="contact-product-mobile" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                                {{ __('vacations.contact_us_button') }}
-                                <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                        </div>
+                    <!-- Booking + Contact Us - Mobile only, positioned before description -->
+                    <div class="camp-cta-stack camp-cta-stack--mobile-top">
+                        @include('pages.vacations.partials.camp-booking-card', ['instance' => 'mobile'])
+                        @include('pages.trips.partials.contact-card', [
+                            'wrapperClass' => 'mb-0 mt-3',
+                            'modalTarget' => '#campGeneralContactModal',
+                            'title' => __('vacations.general_contact_title'),
+                            'message' => __('vacations.general_contact_message'),
+                            'buttonLabel' => __('vacations.general_contact_form'),
+                            'showTripAnalytics' => false,
+                        ])
                     </div>
                     
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
-                            <!-- Contact Card - Desktop only, floats inside description -->
-                            <div class="contact-card card contact-card--desktop-float">
-                                <div class="contact-card__content">
-                                    <div class="contact-card__header">
-                                        <h5 class="contact-card__title mb-1">{{ __('vacations.contact_us') }}</h5>
-                                        <p class="contact-card__message mb-0 text-muted small">{{ __('vacations.contact_us_message') }}</p>
-                                    </div>
-                                    <div class="contact-info">
-                                        <i class="fas fa-phone-alt me-2"></i>
-                                        <a href="tel:+49{{config('cag.contact_num')}}" class="text-decoration-none">+49 (0) {{config('cag.contact_num')}}</a>
-                                    </div>
-                                    <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                                        {{ __('vacations.contact_us_button') }}
-                                        <i class="fas fa-arrow-right ms-2"></i>
-                                    </a>
-                                </div>
+                            <!-- Booking + Contact Us - Desktop only, floats inside description -->
+                            <div class="camp-cta-stack camp-cta-stack--desktop-float">
+                                @include('pages.vacations.partials.camp-booking-card', ['instance' => 'desktop'])
+                                @include('pages.trips.partials.contact-card', [
+                                    'wrapperClass' => 'mb-0 mt-3',
+                                    'modalTarget' => '#campGeneralContactModal',
+                                    'title' => __('vacations.general_contact_title'),
+                                    'message' => __('vacations.general_contact_message'),
+                                    'buttonLabel' => __('vacations.general_contact_form'),
+                                    'showTripAnalytics' => false,
+                                ])
                             </div>
                             @if(!empty($camp['description']['camp_description']))
                             <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_description">
@@ -807,17 +797,163 @@
     </div>
 </div>
 
+<!-- General Contact Modal (questions without booking details) -->
+<div class="modal fade" id="campGeneralContactModal" tabindex="-1" aria-labelledby="campGeneralContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="campGeneralContactModalLabel">{{ __('contact.shareYourQuestion') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="campGeneralContactFormContainer">
+                    <form id="campGeneralContactModalForm">
+                        @csrf
+                        <input type="hidden" name="source_type" value="camp">
+                        <input type="hidden" name="source_id" value="{{ $camp['id'] }}">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="{{ __('contact.yourName') }}" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" placeholder="{{ __('contact.email') }}" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            @include('includes.forms.phone-input', [
+                                'placeholder' => 'contact.phone',
+                                'required' => true,
+                                'showLabel' => true,
+                                'labelText' => 'contact.phone',
+                                'id' => 'camp_general_phone',
+                                'countryCodeId' => 'camp_general_countryCode',
+                            ])
+                        </div>
+                        <div class="form-group mb-3">
+                            <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
+                        </div>
+                        <div class="contact-modal-submit-row d-flex flex-column flex-sm-row flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="contact-modal-captcha-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-start">
+                                <x-recaptcha />
+                            </div>
+                            <div class="contact-modal-submit-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-end">
+                                <button type="button" id="campGeneralContactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="campGeneralContactLoadingOverlay" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center flex-column p-4">
+                        <div class="spinner-border text-orange mb-3" role="status">
+                            <span class="visually-hidden">{{ __('vacations.loading') }}</span>
+                        </div>
+                        <p class="text-center">{{ __('contact.submitting') }}...</p>
+                    </div>
+                </div>
+                <div class="alert alert-success mt-3" id="campGeneralContactSuccessMessage" style="display: none;">
+                    {{ __('contact.successMessage') }}
+                </div>
+                <div class="alert alert-danger mt-3" id="campGeneralContactError" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Contact form submission handler
+    const bookingCards = document.querySelectorAll('.camp-booking-card');
+    const bookingDateInputs = document.querySelectorAll('[data-camp-booking-date]');
+    const bookingGuestLabels = document.querySelectorAll('[data-camp-booking-guests-label]');
+    const bookingModal = document.getElementById('contactModal');
+    const modalDateInput = document.getElementById('preferred_date');
+    const modalGuestsInput = document.getElementById('number_of_persons');
+    let bookingGuests = 1;
+
+    function updateBookingGuests(value) {
+        bookingGuests = Math.max(1, Math.min(20, parseInt(value, 10) || 1));
+        bookingGuestLabels.forEach(label => {
+            label.textContent = String(bookingGuests);
+        });
+    }
+
+    function syncBookingDates(value) {
+        bookingDateInputs.forEach(input => {
+            input.value = value;
+        });
+    }
+
+    bookingDateInputs.forEach(input => {
+        input.addEventListener('change', function () {
+            syncBookingDates(input.value);
+        });
+    });
+
+    bookingCards.forEach(card => {
+        const minusButton = card.querySelector('[data-camp-booking-guests-minus]');
+        const plusButton = card.querySelector('[data-camp-booking-guests-plus]');
+        const requestButton = card.querySelector('[data-camp-booking-cta]');
+        const dateInput = card.querySelector('[data-camp-booking-date]');
+
+        minusButton?.addEventListener('click', function () {
+            updateBookingGuests(bookingGuests - 1);
+        });
+
+        plusButton?.addEventListener('click', function () {
+            updateBookingGuests(bookingGuests + 1);
+        });
+
+        requestButton?.addEventListener('click', function () {
+            if (!dateInput?.value) {
+                dateInput?.reportValidity();
+                dateInput?.focus();
+                return;
+            }
+
+            syncBookingDates(dateInput.value);
+            prefillBookingModal();
+
+            if (bookingModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = bootstrap.Modal.getOrCreateInstance
+                    ? bootstrap.Modal.getOrCreateInstance(bookingModal)
+                    : new bootstrap.Modal(bookingModal);
+                modal.show();
+            }
+        });
+    });
+
+    updateBookingGuests(bookingGuests);
+
+    function prefillBookingModal() {
+        const selectedDate = Array.from(bookingDateInputs).map(input => input.value).find(Boolean) || '';
+        if (modalDateInput && selectedDate) modalDateInput.value = selectedDate;
+        if (modalGuestsInput) modalGuestsInput.value = String(bookingGuests);
+    }
+
+    // Booking request form submission handler
     $('#contactSubmitBtn').on('click', function() {
         handleContactFormSubmission();
     });
     
     // Also bind on modal shown event to ensure the button exists
     $('#contactModal').on('shown.bs.modal', function() {
+        prefillBookingModal();
         $('#contactSubmitBtn').off('click').on('click', function() {
             handleContactFormSubmission();
+        });
+    });
+
+    // General contact form submission handler
+    $('#campGeneralContactSubmitBtn').on('click', function() {
+        handleGeneralContactFormSubmission();
+    });
+
+    $('#campGeneralContactModal').on('shown.bs.modal', function() {
+        $('#campGeneralContactSubmitBtn').off('click').on('click', function() {
+            handleGeneralContactFormSubmission();
         });
     });
     
@@ -890,6 +1026,63 @@ document.addEventListener('DOMContentLoaded', function () {
             contactError.innerHTML = error.message || 'An error occurred. Please try again.';
         });
     }
+
+    function handleGeneralContactFormSubmission() {
+        const contactForm = document.getElementById('campGeneralContactModalForm');
+        const contactFormContainer = document.getElementById('campGeneralContactFormContainer');
+        const loadingOverlay = document.getElementById('campGeneralContactLoadingOverlay');
+        const successMessage = document.getElementById('campGeneralContactSuccessMessage');
+        const contactError = document.getElementById('campGeneralContactError');
+
+        contactError.style.display = 'none';
+        successMessage.style.display = 'none';
+
+        if (!contactForm.checkValidity()) {
+            contactForm.reportValidity();
+            return;
+        }
+
+        const formData = new FormData(contactForm);
+        contactFormContainer.style.display = 'none';
+        loadingOverlay.style.display = 'block';
+
+        fetch('{{ route('sendcontactmail') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': contactForm.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingOverlay.style.display = 'none';
+
+            if (data.success) {
+                contactForm.reset();
+                successMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('campGeneralContactModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    successMessage.style.display = 'none';
+                    contactFormContainer.style.display = 'block';
+                }, 2000);
+            } else {
+                contactError.style.display = 'block';
+                contactError.innerHTML = data.message || 'An error occurred. Please try again.';
+                contactFormContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            loadingOverlay.style.display = 'none';
+            contactFormContainer.style.display = 'block';
+            contactError.style.display = 'block';
+            contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+        });
+    }
 });
 </script>
 
@@ -897,14 +1090,129 @@ document.addEventListener('DOMContentLoaded', function () {
 
 @section('css_after')
 <style>
+  /* Booking + Contact Us CTA stack (mirrors trips sidebar pairing) */
+  .camp-cta-stack--mobile-top {
+    display: none;
+    margin-bottom: 1rem;
+  }
+  .camp-cta-stack--desktop-float {
+    display: block;
+    float: right;
+    max-width: 320px;
+    width: 100%;
+    margin: 0 0 1rem 1.5rem;
+    clear: right;
+  }
+  .camp-cta-stack .contact-card {
+    margin-left: 0;
+    margin-right: 0;
+    float: none;
+    max-width: none;
+    width: 100%;
+  }
+  .camp-booking-card {
+    width: 100%;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: 1.5rem;
+    background: #fff;
+    box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
+  }
+  .camp-booking-card__header { margin-bottom: 1.25rem; }
+  .camp-booking-card__title {
+    margin: 0 0 .4rem;
+    color: #313041;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+  .camp-booking-card__message {
+    margin: 0;
+    color: #6b7280;
+    font-size: .9rem;
+    line-height: 1.4;
+  }
+  .camp-booking-card__body,
+  .camp-booking-card__field-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .camp-booking-card__body { gap: 1rem; }
+  .camp-booking-card__field-group { gap: .35rem; }
+  .camp-booking-card__field-label {
+    margin: 0;
+    color: #6b7280;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .camp-booking-card__date-input {
+    width: 100%;
+    padding: .65rem .9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .9rem;
+    background: #f9fafb;
+    color: #313041;
+    font: inherit;
+  }
+  .camp-booking-card__guest-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .35rem .4rem;
+    border: 1px solid #d9dde5;
+    border-radius: .9rem;
+    background: #fff;
+  }
+  .camp-booking-card__stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: .6rem;
+    background: #f1f4f8;
+    color: #4b5563;
+    font-weight: 600;
+  }
+  .camp-booking-card__guest-count {
+    min-width: 1.5rem;
+    color: #313041;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  .camp-booking-card__cta {
+    width: 100%;
+    margin-top: .5rem;
+    padding: .85rem 1rem;
+    border: 0;
+    border-radius: .9rem;
+    background: #e8604c;
+    box-shadow: 0 6px 18px rgba(232, 96, 76, .28);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  @media (max-width: 767px) {
+    .camp-cta-stack--mobile-top { display: block; }
+    .camp-cta-stack--desktop-float { display: none; }
+  }
+
   /* Mobile optimizations for contact modal form */
   @media (max-width: 576px) {
     /* Stack phone country code + number vertically inside modal */
-    #contactModal .phone-input-container .d-flex {
+    #contactModal .phone-input-container .d-flex,
+    #campGeneralContactModal .phone-input-container .d-flex {
       flex-direction: column;
     }
 
-    #contactModal .phone-input-container .d-flex > * {
+    #contactModal .phone-input-container .d-flex > *,
+    #campGeneralContactModal .phone-input-container .d-flex > * {
       width: 100% !important;
       max-width: 100% !important;
       margin-bottom: 0.5rem;
@@ -912,17 +1220,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* Stack ReCaptcha + submit button vertically and make button full width */
-    #contactModal .modal-body .d-flex.justify-content-between {
+    #contactModal .modal-body .d-flex.justify-content-between,
+    #campGeneralContactModal .modal-body .d-flex.justify-content-between {
       flex-direction: column;
       align-items: stretch;
       gap: 1rem;
     }
 
-    #contactModal .modal-body .d-flex.justify-content-between > * {
+    #contactModal .modal-body .d-flex.justify-content-between > *,
+    #campGeneralContactModal .modal-body .d-flex.justify-content-between > * {
       width: 100% !important;
     }
 
-    #contactModal .btn.btn-orange {
+    #contactModal .btn.btn-orange,
+    #campGeneralContactModal .btn.btn-orange {
       width: 100%;
     }
   }

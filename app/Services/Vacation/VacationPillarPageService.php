@@ -90,7 +90,7 @@ class VacationPillarPageService
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
-            faq: $this->resolveFaq($pillar),
+            faq: $destination === null ? $this->resolveFaq($pillar) : collect(),
             destination: $destination,
             mapMarkers: $this->buildMapMarkers($filterAll, $pillar),
         );

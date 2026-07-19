@@ -410,6 +410,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('faq')->name('faq.')->group(function () {
             Route::get('/home', [AdminFAQController::class,'home'])->name('home');
             Route::get('/search-request', [AdminFAQController::class,'searchRequest'])->name('searchrequest');
+            Route::get('/vacations', [AdminFAQController::class, 'vacations'])->name('vacations');
             Route::get('/vacation-trips', [AdminFAQController::class, 'vacationTrips'])->name('vacation-trips');
             Route::get('/vacation-camps', [AdminFAQController::class, 'vacationCamps'])->name('vacation-camps');
             Route::get('/create/{page}', [AdminFAQController::class,'create'])->name('create');

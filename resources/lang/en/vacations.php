@@ -59,6 +59,9 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'contact_us' => 'Non-Binding Booking Request',
     'contact_us_message' => 'Send us a quick request with your preferred dates. We’ll let you know shortly if your fishing holiday is available.',
     'contact_us_button' => 'Request Now',
+    'general_contact_title' => 'Contact us',
+    'general_contact_message' => 'Do you have questions about this camp? Our team is here to help!',
+    'general_contact_form' => 'Contact Form',
     'book_vacations' => 'Book Vacation',
     'facilities' => 'Facilities',
 

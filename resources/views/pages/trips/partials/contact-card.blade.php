@@ -1,7 +1,14 @@
+@php
+    $modalTarget = $modalTarget ?? '#tripGeneralContactModal';
+    $title = $title ?? __('trips.contact_us_title');
+    $message = $message ?? __('trips.contact_us_message');
+    $buttonLabel = $buttonLabel ?? __('trips.contact_form');
+    $showTripAnalytics = $showTripAnalytics ?? true;
+@endphp
 <div class="contact-card mt-4 mb-4 {{ $wrapperClass ?? '' }}">
-    <h5 class="contact-card__title">{{ __('trips.contact_us_title') }}</h5>
+    <h5 class="contact-card__title">{{ $title }}</h5>
     <div class="contact-card__content">
-        <p>{{ __('trips.contact_us_message') }}</p>
+        <p>{{ $message }}</p>
         <div>
             <div class="contact-info">
                 <i class="fas fa-phone-alt me-2"></i>
@@ -11,10 +18,10 @@
                 href="#"
                 class="btn btn-outline-orange"
                 data-bs-toggle="modal"
-                data-bs-target="#tripGeneralContactModal"
-                data-analytics-trip-contact
+                data-bs-target="{{ $modalTarget }}"
+                @if($showTripAnalytics) data-analytics-trip-contact @endif
             >
-                {{ __('trips.contact_form') }}
+                {{ $buttonLabel }}
                 <i class="fas fa-arrow-right ms-2"></i>
             </a>
         </div>
