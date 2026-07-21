@@ -132,7 +132,7 @@
                 <!-- Comment Section -->
                 <div class="review-section">
                     <h4 class="form-label">
-                        {{ __('guidings.rating_comment') }}
+                        {{ __('guidings.rating_comment') }} <span class="text-danger">*</span>
                     </h4>
                     <small class="text-muted">{{ __('guidings.rating_comment_help') }}</small>
                     <textarea 
@@ -140,6 +140,7 @@
                         class="form-control" 
                         rows="4"
                         placeholder="{{ __('guidings.rating_comment_placeholder') }}"
+                        required
                     ></textarea>
                 </div>
 
@@ -578,13 +579,16 @@ $(document).ready(function(){
         const loadingOverlay = document.querySelector('.loading-overlay');
 
         // Validate form data
+        const comment = (formData.get('comment') || '').toString().trim();
         if (!formData.get('rating_overall') || 
             !formData.get('rating_guide') || 
-            !formData.get('rating_region')) {
+            !formData.get('rating_region') ||
+            !comment) {
 
             console.log(formData.get('rating_overall'));
             console.log(formData.get('rating_guide'));
             console.log(formData.get('rating_region'));
+            console.log(comment);
             errorElement.innerHTML = "{{ __('guidings.rating_error') }}";
             errorElement.classList.remove('d-none');
             errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });

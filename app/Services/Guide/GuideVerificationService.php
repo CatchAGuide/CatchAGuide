@@ -87,10 +87,6 @@ class GuideVerificationService
 
     public function approveUserLegacy(User $user, int $reviewerId): User
     {
-        if ($user->isRejectedGuide()) {
-            throw new \RuntimeException('This applicant was rejected. They must submit a new guide application before you can approve them.');
-        }
-
         if ($user->isVerifiedGuide()) {
             throw new \RuntimeException('This user is already a verified guide.');
         }
@@ -105,11 +101,9 @@ class GuideVerificationService
             return $this->approve($pendingRequest, $reviewerId);
         }
 
-        if (! $user->isPendingGuide()) {
-            throw new \RuntimeException('No pending guide application found for this user.');
-        }
-
-        $user = $this->guideStatusService->markVerified($user, $reviewerId, 'Legacy approve action');
+        // Admin customers checkmark / force-approve: allow verifying regular
+        // customers (is_guide + guide_status null) and rejected applicants.
+        $user = $this->guideStatusService->markVerified($user, $reviewerId, 'Admin activated guide status');
 
         if ($user->information) {
             $user->information->update(['request_as_guide' => false]);
@@ -117,7 +111,14 @@ class GuideVerificationService
 
         $this->autoPublishCompleteDrafts($user);
 
-        Mail::send(new GuideApprovedMail($user));
+        try {
+            Mail::send(new GuideApprovedMail($user));
+        } catch (\Throwable $e) {
+            Log::error('Guide approved email failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $user;
     }
