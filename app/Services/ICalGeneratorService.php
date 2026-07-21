@@ -102,8 +102,10 @@ class ICalGeneratorService
                 'uid' => "booking_{$booking->id}@catchaguide.com",
                 'summary' => "Fishing Trip: {$booking->user->firstname} {$booking->user->lastname}",
                 'description' => "Fishing trip with {$booking->count_of_users} person(s)",
-                'start_time' => $bookingDate,
-                'end_time' => $bookingDate->copy()->addHours($booking->guiding->duration ?? 4),
+                'start_time' => $bookingDate->copy()->startOfDay(),
+                // iCal all-day DTEND is exclusive (next day)
+                'end_time' => $bookingDate->copy()->startOfDay()->addDay(),
+                'all_day' => true,
                 'location' => $booking->guiding->location ?? 'TBD',
                 'status' => $booking->status,
                 'type' => 'booking'
@@ -131,8 +133,10 @@ class ICalGeneratorService
                 'uid' => "client_booking_{$booking->id}@catchaguide.com",
                 'summary' => "Fishing Trip with {$booking->guiding->user->firstname} {$booking->guiding->user->lastname}",
                 'description' => "Fishing trip for {$booking->count_of_users} person(s)",
-                'start_time' => $bookingDate,
-                'end_time' => $bookingDate->copy()->addHours($booking->guiding->duration ?? 4),
+                'start_time' => $bookingDate->copy()->startOfDay(),
+                // iCal all-day DTEND is exclusive (next day)
+                'end_time' => $bookingDate->copy()->startOfDay()->addDay(),
+                'all_day' => true,
                 'location' => $booking->guiding->location ?? 'TBD',
                 'status' => $booking->status,
                 'type' => 'client_booking'
@@ -157,8 +161,9 @@ class ICalGeneratorService
         foreach ($schedules as $schedule) {
             $event = [
                 'uid' => "schedule_{$schedule->id}@catchaguide.com",
-                'start_time' => Carbon::parse($schedule->date),
-                'end_time' => Carbon::parse($schedule->date)->addDay(),
+                'start_time' => Carbon::parse($schedule->date)->startOfDay(),
+                'end_time' => Carbon::parse($schedule->date)->startOfDay()->addDay(),
+                'all_day' => true,
                 'type' => 'schedule'
             ];
             
@@ -216,8 +221,9 @@ class ICalGeneratorService
                 'uid' => "custom_{$schedule->id}@catchaguide.com",
                 'summary' => "Custom Event",
                 'description' => $schedule->note ?: "Custom scheduled event",
-                'start_time' => Carbon::parse($schedule->date),
-                'end_time' => Carbon::parse($schedule->date)->addDay(),
+                'start_time' => Carbon::parse($schedule->date)->startOfDay(),
+                'end_time' => Carbon::parse($schedule->date)->startOfDay()->addDay(),
+                'all_day' => true,
                 'type' => 'custom_schedule'
             ];
         }
@@ -232,8 +238,16 @@ class ICalGeneratorService
     {
         $content = "BEGIN:VEVENT\r\n";
         $content .= "UID:{$event['uid']}\r\n";
-        $content .= "DTSTART:" . $event['start_time']->format('Ymd\THis\Z') . "\r\n";
-        $content .= "DTEND:" . $event['end_time']->format('Ymd\THis\Z') . "\r\n";
+
+        // All-day events use DATE values (no time); DTEND is exclusive per RFC 5545
+        if (!empty($event['all_day'])) {
+            $content .= "DTSTART;VALUE=DATE:" . $event['start_time']->format('Ymd') . "\r\n";
+            $content .= "DTEND;VALUE=DATE:" . $event['end_time']->format('Ymd') . "\r\n";
+        } else {
+            $content .= "DTSTART:" . $event['start_time']->format('Ymd\THis\Z') . "\r\n";
+            $content .= "DTEND:" . $event['end_time']->format('Ymd\THis\Z') . "\r\n";
+        }
+
         $content .= "DTSTAMP:" . now()->format('Ymd\THis\Z') . "\r\n";
         $content .= "SUMMARY:" . $this->escapeICalText($event['summary'] ?? 'Event') . "\r\n";
         
@@ -323,13 +337,15 @@ class ICalGeneratorService
                 ? Carbon::parse($booking->calendar_schedule->date)
                 : Carbon::parse($booking->book_date);
             
-            // Create event data using calendar_schedule information
+            // Create all-day event — tours/offerings have no specific start time yet
             $event = [
                 'uid' => "booking_{$booking->id}@catchaguide.com",
                 'summary' => "Fishing Trip: {$guiding->title}",
                 'description' => "Fishing trip with {$guide->firstname} {$guide->lastname}\\nLocation: {$guiding->location}\\nNumber of guests: {$booking->count_of_users}\\nPrice: " . number_format($booking->price, 2, ',', '.') . " €\\nContact: {$guide->phone} | {$guide->email}",
-                'start_time' => $bookingDate,
-                'end_time' => $bookingDate->copy()->addHours($guiding->duration ?? 4),
+                'start_time' => $bookingDate->copy()->startOfDay(),
+                // iCal all-day DTEND is exclusive (next day)
+                'end_time' => $bookingDate->copy()->startOfDay()->addDay(),
+                'all_day' => true,
                 'location' => $guiding->location ?? 'TBD',
                 'status' => $booking->status,
                 'type' => 'booking'
