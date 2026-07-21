@@ -23,7 +23,7 @@
             <p style="font-size:14px;"> @lang('emails.guest_vacation_booking_notification_text_3')</p>
         </div>
         <div>
-            <p style="font-size:14px;"><strong>{{__('emails.vacation')}}:</strong> <a href="{{route('vacations.show', ['vacation' => $vacation->id])}}" target="__blank">{{$vacation->title}}</a></p>
+            <p style="font-size:14px;"><strong>{{__('emails.vacation')}}:</strong> <a href="{{ \Illuminate\Support\Facades\Route::has('vacations.show') ? route('vacations.show', ['id' => $vacation->id, 'slug' => $vacation->slug ?? 'preview']) : url('/vacations') }}" target="__blank">{{$vacation->title}}</a></p>
             <p style="font-size:14px;"><strong>{{__('emails.location')}}:</strong> {{$vacation->location}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->number_of_persons}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->start_date))}} - {{date('d F Y', strtotime($booking->end_date))}}</p>
