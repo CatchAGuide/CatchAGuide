@@ -689,10 +689,42 @@ HTML;
             case 'guide_application_received':
                 return ['user' => $mockGuide];
 
+            case 'guide_admin_new_request':
+                $mockGuide->guide_type = 'private';
+                $mockGuide->information = (object) [
+                    'phone' => '+49 987 654 3210',
+                    'address' => 'Seestrasse',
+                    'address_number' => '12',
+                    'postal' => '78462',
+                    'city' => 'Konstanz',
+                ];
+
+                return ['user' => $mockGuide];
+
             case 'guide_application_rejected':
                 return [
                     'user' => $mockGuide,
                     'rejectionReason' => 'Incomplete profile information. Please add a valid fishing license and more tour photos.',
+                ];
+
+            case 'registration_verification':
+                return ['user' => $mockUser];
+
+            case 'automatic_registration_mail':
+                return [
+                    'user' => $mockUser,
+                    'tempPassword' => 'TempPass123!',
+                ];
+
+            case 'customer_newsletter_mail':
+            case 'newsletter':
+                return [
+                    'email' => $mockUser->email,
+                    'language' => 'en',
+                    'copyNamespace' => $template === 'newsletter'
+                        ? 'emails.newsletter_admin'
+                        : 'emails.newsletter_customer',
+                    'viewSubscribersUrl' => route('admin.newsletter-subscribers.index'),
                 ];
 
             case 'guide_invoice':
@@ -705,38 +737,55 @@ HTML;
                     'email' => $mockUser->email,
                     'phone' => $mockUser->phone,
                     'phone_country_code' => $mockUser->phone_country_code,
-                    'contact_message' => 'We are interested in a guided fishing trip for 4 people in late August.',
+                    'contact_message' => 'Hi — I have a question about guided fishing in Bavaria. Could you help?',
+                    'source_title' => 'Bavarian Alpine Trout',
+                    'source_type' => 'guiding',
+                    'copyNamespace' => $template === 'contact_mail'
+                        ? 'emails.contact_admin'
+                        : 'emails.contact_customer',
+                    'viewRequestsUrl' => route('admin.contact-requests.index'),
+                ];
+
+            case 'vacation_booking_customer_mail':
+            case 'vacation_booking_admin_mail':
+                return [
+                    'name' => $mockUser->firstname . ' ' . $mockUser->lastname,
+                    'email' => $mockUser->email,
+                    'phone' => $mockUser->phone,
+                    'phone_country_code' => $mockUser->phone_country_code,
+                    'contact_message' => 'Looking forward to this trip — please confirm availability for our group.',
                     'source_title' => 'Lake Constance Pike Fishing',
                     'source_type' => 'trip',
                     'preferred_date' => '2024-08-25',
                     'number_of_persons' => 4,
+                    'source_id' => 42,
+                    'copyNamespace' => $template === 'vacation_booking_admin_mail'
+                        ? 'emails.vacation_booking_admin'
+                        : 'emails.vacation_booking_customer',
+                    'viewRequestsUrl' => route('admin.trip-bookings.index'),
                 ];
 
-            case 'guest_vacation_booking_notification':
-                $mockVacation = (object) [
-                    'id' => 1,
-                    'title' => 'Norway Salmon Fishing Adventure',
-                    'location' => 'Lofoten, Norway',
-                    'slug' => 'norway-salmon-fishing-adventure',
-                ];
-                $mockVacationBooking = (object) [
-                    'name' => $mockUser->firstname . ' ' . $mockUser->lastname,
-                    'number_of_persons' => 2,
-                    'start_date' => '2024-09-01',
-                    'end_date' => '2024-09-07',
-                    'total_price' => 1899.00,
-                ];
-
-                return [
-                    'booking' => $mockVacationBooking,
-                    'vacation' => $mockVacation,
-                ];
-
+            case 'ceo_booking_notification':
+            case 'booking_reject_mail_to_ceo':
+            case 'booking_cancel':
             case 'ceo_reject_mail':
             case 'ceo_accept_mail':
             case 'ceo_request_mail':
             case 'ceo_expire_mail':
                 return $baseData;
+
+            case 'ddos_alert':
+                return [
+                    'alertType' => 'Rate limit exceeded',
+                    'details' => [
+                        'ip' => '203.0.113.42',
+                        'user_agent' => 'Mozilla/5.0 (compatible; Bot/1.0)',
+                        'context' => 'search',
+                        'violations' => 25,
+                        'url' => 'https://catchaguide.com/guidings',
+                    ],
+                    'timestamp' => now(),
+                ];
 
             default:
                 return $baseData;

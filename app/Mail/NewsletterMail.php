@@ -12,31 +12,25 @@ class NewsletterMail extends Mailable
 
     public $email;
     public $locale;
-    public $target;
     public $language;
+    public $target;
+    public $copyNamespace = 'emails.newsletter_admin';
+    public $viewSubscribersUrl;
     public $type = 'newsletter';
 
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct($email, $locale)
+    public function __construct($email, $locale, ?string $viewSubscribersUrl = null)
     {
         $this->email = $email;
         $this->locale = $locale;
-        $this->target = 'newsletter';
         $this->language = $locale;
+        $this->target = 'newsletter';
+        $this->viewSubscribersUrl = $viewSubscribersUrl;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
-        return $this->view('mails.newsletter')->to('info@catchaguide.com')
-            ->subject("Neuer Newsletterabonnent");
+        return $this->view('mails.newsletter')
+            ->to(config('mail.admin_email'))
+            ->subject(__($this->copyNamespace . '.subject'));
     }
 }

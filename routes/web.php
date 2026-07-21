@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
+use App\Http\Controllers\Admin\NewsletterSubscribersController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\AdminTermsSectionController;
 use App\Http\Controllers\TermsController;
@@ -642,6 +643,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');
         Route::post('contact-requests/reply', [ContactRequestsController::class, 'sendReply'])->name('contact-requests.reply');
         Route::patch('contact-requests/{contactSubmission}/status', [ContactRequestsController::class, 'updateStatus'])->name('contact-requests.update-status');
+
+        Route::get('newsletter-subscribers', [NewsletterSubscribersController::class, 'index'])->name('newsletter-subscribers.index');
+        Route::delete('newsletter-subscribers/{newsletter}', [NewsletterSubscribersController::class, 'destroy'])->name('newsletter-subscribers.destroy');
 
         Route::prefix('offer-sendout')->name('offer-sendout.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\OfferSendoutController::class, 'customCampOffers'])->name('index');

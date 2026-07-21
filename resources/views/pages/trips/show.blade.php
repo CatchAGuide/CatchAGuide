@@ -1030,7 +1030,7 @@
                         </div>
 
                         <div class="alert alert-success mt-3" id="tripContactSuccessMessage" style="display: none;">
-                            {{ __('contact.successMessage') }}
+                            {{ __('contact.bookingSuccessMessage') }}
                         </div>
                         <div class="alert alert-danger mt-3" id="tripContactError" style="display: none;"></div>
                     </div>
