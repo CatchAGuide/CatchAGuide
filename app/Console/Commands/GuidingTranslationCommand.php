@@ -126,7 +126,8 @@ class GuidingTranslationCommand extends Command
                     }
 
                     if ($dryRun) {
-                        $this->line("\nWould translate: {$guiding->title} (ID: {$guiding->id}) to {$targetLanguage}");
+                        $statusLabel = ((int) $guiding->status === 1) ? 'active' : 'inactive';
+                        $this->line("\nWould translate: {$guiding->title} (ID: {$guiding->id}, {$statusLabel}) to {$targetLanguage}");
                         $results['translated']++;
                         continue;
                     }
@@ -262,6 +263,7 @@ class GuidingTranslationCommand extends Command
 
             $rows[] = [
                 $guiding->id,
+                ((int) $guiding->status === 1) ? 'active' : 'inactive',
                 $current,
                 $detected ?? '?',
                 $result['confidence'],
@@ -277,7 +279,7 @@ class GuidingTranslationCommand extends Command
             $this->info($mismatchesOnly ? 'No source-language mismatches found.' : 'Nothing to show.');
         } else {
             $this->table(
-                ['ID', 'Current', 'Detected', 'Conf.', 'EN row', 'DE row', 'Action', 'Title', 'Why'],
+                ['ID', 'Status', 'Current', 'Detected', 'Conf.', 'EN row', 'DE row', 'Action', 'Title', 'Why'],
                 $rows
             );
         }
@@ -389,15 +391,19 @@ class GuidingTranslationCommand extends Command
 
     /**
      * Output a report of guidings missing translations for the given target languages.
+     * Includes active and inactive tours so status is visible.
      */
     private function reportMissingTranslations(array $targetLanguages): void
     {
-        $guidings = $this->translationService->getGuidingsMissingTranslations($targetLanguages);
+        $guidings = $this->translationService->getGuidingsMissingTranslations($targetLanguages, null);
 
         if ($guidings->isEmpty()) {
-            $this->info('All active guidings have translations for: ' . implode(', ', $targetLanguages));
+            $this->info('All guidings have translations for: ' . implode(', ', $targetLanguages));
             return;
         }
+
+        $activeCount = $guidings->where('status', 1)->count();
+        $inactiveCount = $guidings->count() - $activeCount;
 
         $this->info('Guidings missing at least one translation for [' . implode(', ', $targetLanguages) . ']:');
         $this->newLine();
@@ -411,16 +417,22 @@ class GuidingTranslationCommand extends Command
             }
             return [
                 $guiding->id,
+                ((int) $guiding->status === 1) ? 'active' : 'inactive',
                 Str::limit($guiding->title ?? '-', 50),
                 $guiding->language ?? '-',
                 implode(', ', $missing),
             ];
         })->toArray();
 
-        $this->table(['ID', 'Title', 'Source lang', 'Missing languages'], $rows);
+        $this->table(['ID', 'Status', 'Title', 'Source lang', 'Missing languages'], $rows);
         $this->newLine();
-        $this->info("Total: {$guidings->count()} guiding(s) with missing translations.");
-        $this->info('Run: php artisan guiding:translate --missing-only [--language=en,de] to translate them.');
+        $this->table(['Metric', 'Count'], [
+            ['Total missing at least one lang', $guidings->count()],
+            ['Active (status=1)', $activeCount],
+            ['Inactive (status≠1)', $inactiveCount],
+        ]);
+        $this->newLine();
+        $this->info('Translate active only: php artisan guiding:translate --missing-only [--language=en,de]');
     }
 
     /**

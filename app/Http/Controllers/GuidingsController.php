@@ -808,6 +808,9 @@ class GuidingsController extends Controller
         if (is_null($guiding)) {
             abort(404);
         }
+
+        $guiding->healThumbnailPath();
+
         // $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
         $targetFish = json_decode($guiding->target_fish, true);
         $fishingFrom = $guiding->fishing_from_id;
@@ -937,6 +940,7 @@ class GuidingsController extends Controller
             }
 
             $isAdminSubmit = str_contains($request->input('target_redirect', ''), 'admin');
+            $isAdminActor = $isAdminSubmit || auth('employees')->check();
 
             // Require 5 images only for non-draft, non-admin submissions (profile create/update)
             if (!$isDraft && !$isAdminSubmit && $totalImageCount < 5) {
@@ -967,6 +971,11 @@ class GuidingsController extends Controller
             } else {
                 $guiding->status = 1;
             }
+
+            // Never imprint domain/locale onto guidings.language from create/edit POSTs
+            // (admin and profile share this endpoint). Source language is only changed via
+            // AdminGuidingsController::updateLanguage or artisan guiding:translate --detect-language.
+            $this->rejectDomainDerivedSourceLanguage($guiding, $isUpdate, $isAdminActor);
 
             $guiding->save();
             $this->relocateGuidingMediaFromTemp($guiding);
@@ -1099,6 +1108,10 @@ class GuidingsController extends Controller
                 $guiding->status = 2;
             }
 
+            $isAdminSubmit = str_contains($request->input('target_redirect', ''), 'admin')
+                || auth('employees')->check();
+            $this->rejectDomainDerivedSourceLanguage($guiding, $isUpdate, $isAdminSubmit);
+
             $guiding->save();
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
@@ -1113,6 +1126,28 @@ class GuidingsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
+        }
+    }
+
+    /**
+     * Block guidings.language from being set/changed based on the current website domain/locale.
+     * Admin edit/create and profile save posts must not overwrite source language.
+     */
+    private function rejectDomainDerivedSourceLanguage(Guiding $guiding, bool $isUpdate, bool $isAdminSubmit): void
+    {
+        $locale = strtolower((string) (app()->getLocale() ?: config('app.locale') ?: ''));
+
+        if ($isUpdate && $guiding->exists) {
+            if ($guiding->isDirty('language')) {
+                $guiding->language = $guiding->getOriginal('language');
+            }
+
+            return;
+        }
+
+        // New records from Admin: never stamp source language from the request domain/locale.
+        if ($isAdminSubmit && $guiding->isDirty('language') && strtolower((string) $guiding->language) === $locale) {
+            $guiding->language = null;
         }
     }
 
@@ -1351,13 +1386,14 @@ class GuidingsController extends Controller
             if ($withGallery) {
                 $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
                 $optimizedImages = [];
+                $thumbnailPath = align_listing_thumbnail_path($guiding->thumbnail_path, $galleryImages);
 
-                if (!empty($guiding->thumbnail_path)) {
-                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
+                if (! empty($thumbnailPath)) {
+                    $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($thumbnailPath);
                 }
 
                 foreach ($galleryImages as $imagePath) {
-                    if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
+                    if ($thumbnailPath && $imagePath === $thumbnailPath) {
                         continue;
                     }
                     $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);
@@ -1987,6 +2023,8 @@ class GuidingsController extends Controller
         if(!$guiding){
             abort(404);
         }
+
+        $guiding->healThumbnailPath();
         
         $targetId = $guiding->guidingTargets->pluck('id')->toArray();
         $fishingfrom = $guiding->fishingFrom->id;

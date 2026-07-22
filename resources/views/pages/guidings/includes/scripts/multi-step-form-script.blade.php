@@ -769,13 +769,45 @@
                 const durationRadio = document.querySelector(`input[name="duration"][value="${durationType}"]`);
                 if (durationRadio) {
                     durationRadio.checked = true;
-                    durationRadio.dispatchEvent(new Event('change')); // Trigger change event
-                    
-                    document.getElementById('duration_details').style.display = 'block';
-                    if (durationType === 'multi_day') {
-                        document.getElementById('duration_days').value = durationCount;
+                    // Prefer jQuery trigger so the duration change handler runs reliably
+                    if (window.jQuery) {
+                        $(durationRadio).trigger('change');
                     } else {
-                        document.getElementById('duration_hours').value = durationCount;
+                        durationRadio.dispatchEvent(new Event('change'));
+                    }
+
+                    const durationDetails = document.getElementById('duration_details');
+                    const hoursInput = document.getElementById('hours_input');
+                    const daysInput = document.getElementById('days_input');
+
+                    if (durationDetails) {
+                        durationDetails.style.display = 'block';
+                    }
+
+                    // Explicitly toggle hours/days inputs on initial edit load
+                    // (change handlers alone are not always enough when restoring state)
+                    if (durationType === 'multi_day') {
+                        if (daysInput) {
+                            daysInput.style.display = '';
+                        }
+                        if (hoursInput) {
+                            hoursInput.style.display = 'none';
+                        }
+                        const durationDays = document.getElementById('duration_days');
+                        if (durationDays) {
+                            durationDays.value = durationCount;
+                        }
+                    } else {
+                        if (hoursInput) {
+                            hoursInput.style.display = '';
+                        }
+                        if (daysInput) {
+                            daysInput.style.display = 'none';
+                        }
+                        const durationHours = document.getElementById('duration_hours');
+                        if (durationHours) {
+                            durationHours.value = durationCount;
+                        }
                     }
                 }
             }
