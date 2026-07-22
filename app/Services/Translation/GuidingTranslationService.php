@@ -19,55 +19,153 @@ class GuidingTranslationService
         $this->translator = new GeminiTranslationService();
     }
 
+    private const DE_SOURCE_WORDS = [
+        'und', 'oder', 'für', 'mit', 'auf', 'dem', 'der', 'die', 'das', 'den', 'des',
+        'ein', 'eine', 'einer', 'einem', 'einen', 'ist', 'sind', 'wird', 'werden',
+        'angeln', 'angel', 'stunde', 'stunden', 'ganztägig', 'halbtägig', 'tour',
+        'raubfisch', 'raubfische', 'hecht', 'zander', 'barsch', 'wels', 'boot',
+        'gewässer', 'see', 'fluss', 'küste', 'inklusive', 'exklusive', 'personen',
+        'führung', 'führungen', 'angelguide', 'angelguiding', 'vom', 'zum', 'zur',
+        'über', 'nach', 'auch', 'sowie', 'zwischen', 'während', 'bereits',
+    ];
+
+    private const EN_SOURCE_WORDS = [
+        'the', 'and', 'or', 'for', 'with', 'from', 'this', 'that', 'you', 'your',
+        'will', 'are', 'is', 'be', 'on', 'in', 'at', 'to', 'of', 'a', 'an',
+        'fishing', 'trip', 'tour', 'tours', 'hour', 'hours', 'boat', 'guide',
+        'guiding', 'catch', 'target', 'targets', 'include', 'includes', 'experience',
+        'family', 'shared', 'private', 'half', 'full', 'day', 'offshore', 'inshore',
+        'coast', 'lake', 'river', 'sea', 'big', 'game', 'predator', 'bottom',
+    ];
+
     /**
-     * Detect the language of guiding content using Gemini
+     * Detect source language from guiding main content (heuristic EN/DE).
+     * Returns null when uncertain — never forces "de" on failure.
+     *
+     * @return array{language: ?string, confidence: string, reason: string}
+     */
+    public function detectSourceLanguageFromContent(Guiding $guiding): array
+    {
+        $parts = array_filter([
+            $guiding->title,
+            $guiding->description,
+            $guiding->additional_information,
+            $guiding->meeting_point,
+            $guiding->desc_course_of_action,
+            $guiding->desc_meeting_point,
+            $guiding->desc_starting_time,
+            $guiding->desc_tour_unique,
+        ], fn ($v) => is_string($v) && trim($v) !== '');
+
+        if (empty($parts)) {
+            return [
+                'language' => null,
+                'confidence' => 'none',
+                'reason' => 'no text fields',
+            ];
+        }
+
+        $text = mb_strtolower(strip_tags(implode(' ', $parts)));
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+
+        $deScore = 0;
+        $enScore = 0;
+        $reasons = [];
+
+        if (preg_match_all('/[äöüß]/u', $text, $m)) {
+            $umlautHits = count($m[0]);
+            $deScore += $umlautHits * 3;
+            $reasons[] = "umlauts={$umlautHits}";
+        }
+
+        $tokens = preg_split('/[^a-zäöüß]+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $tokenCounts = array_count_values($tokens);
+
+        $deWordHits = 0;
+        foreach (self::DE_SOURCE_WORDS as $word) {
+            if (isset($tokenCounts[$word])) {
+                $deWordHits += $tokenCounts[$word];
+            }
+        }
+        $enWordHits = 0;
+        foreach (self::EN_SOURCE_WORDS as $word) {
+            if (isset($tokenCounts[$word])) {
+                $enWordHits += $tokenCounts[$word];
+            }
+        }
+
+        $deScore += $deWordHits;
+        $enScore += $enWordHits;
+        $reasons[] = "de_words={$deWordHits}";
+        $reasons[] = "en_words={$enWordHits}";
+
+        $title = mb_strtolower((string) $guiding->title);
+        $titleHasUmlaut = (bool) preg_match('/[äöüß]/u', $title);
+        $titleLooksEn = ! $titleHasUmlaut && (bool) preg_match(
+            '/\b(fishing|trip|tour|tours|boat|hour|hours|predator|marlin|tuna|bass)\b/u',
+            $title
+        );
+        $titleLooksDe = $titleHasUmlaut || (bool) preg_match(
+            '/\b(angeln|angel|raubfisch|stunde|stunden|tour|hecht|zander|barsch)\b/u',
+            $title
+        );
+
+        if ($titleLooksEn) {
+            $enScore += 8;
+            $reasons[] = 'title~en';
+        }
+        if ($titleLooksDe) {
+            $deScore += 8;
+            $reasons[] = 'title~de';
+        }
+
+        if ($deScore === 0 && $enScore === 0) {
+            return [
+                'language' => null,
+                'confidence' => 'none',
+                'reason' => 'no language signals',
+            ];
+        }
+
+        $diff = abs($enScore - $deScore);
+        $total = max(1, $enScore + $deScore);
+        $margin = $diff / $total;
+
+        if ($diff < 3 || $margin < 0.15) {
+            return [
+                'language' => null,
+                'confidence' => 'low',
+                'reason' => 'tied '.$enScore.':'.$deScore.' ('.implode(', ', $reasons).')',
+            ];
+        }
+
+        $language = $enScore > $deScore ? 'en' : 'de';
+        $confidence = $margin >= 0.4 || $diff >= 10 ? 'high' : 'medium';
+
+        return [
+            'language' => $language,
+            'confidence' => $confidence,
+            'reason' => "{$enScore}:{$deScore} (".implode(', ', $reasons).')',
+        ];
+    }
+
+    /**
+     * Detect the source language of guiding content (EN/DE heuristic).
+     * Falls back to current language, then "de", only when heuristic is uncertain.
      */
     public function detectGuidingLanguage(Guiding $guiding): string
     {
-        try {
-            // Get sample text from guiding for language detection
-            $sampleTexts = array_filter([
-                $guiding->title,
-                $guiding->description,
-                $guiding->additional_information,
-                $guiding->meeting_point,
-                $guiding->desc_course_of_action,
-                $guiding->desc_meeting_point,
-                $guiding->desc_starting_time,
-                $guiding->desc_tour_unique,
-                $guiding->inclusions,
-                $guiding->requirements,
-                $guiding->recommendations,
-                $guiding->other_information,
-            ]);
-
-            if (empty($sampleTexts)) {
-                return 'de'; // Default fallback
-            }
-
-            $combinedText = implode('. ', array_slice($sampleTexts, 0, 3));
-            
-            $prompt = "Analyze the following text and determine what language it is written in. 
-                       Respond with only the 2-letter ISO language code (e.g., 'de' for German, 'en' for English, 'es' for Spanish, etc.).
-                       
-                       Text: {$combinedText}";
-
-            $detectedLanguage = $this->translator->translate($prompt);
-            $detectedLanguage = strtolower(trim($detectedLanguage));
-
-            // Validate the detected language is a 2-letter code
-            if (preg_match('/^[a-z]{2}$/', $detectedLanguage)) {
-                return $detectedLanguage;
-            }
-
-            return 'de'; // Default fallback
-        } catch (\Exception $e) {
-            Log::error('Language detection failed for guiding', [
-                'guiding_id' => $guiding->id,
-                'error' => $e->getMessage()
-            ]);
-            return 'de'; // Default fallback
+        $result = $this->detectSourceLanguageFromContent($guiding);
+        if ($result['language']) {
+            return $result['language'];
         }
+
+        $current = strtolower((string) ($guiding->language ?? ''));
+        if (in_array($current, ['en', 'de'], true)) {
+            return $current;
+        }
+
+        return 'de';
     }
 
     /**

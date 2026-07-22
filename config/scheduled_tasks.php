@@ -192,9 +192,9 @@ return [
         ],
 
         'guiding_translate_detect_language' => [
-            'label' => 'Guiding translation (detect language)',
-            'description' => 'Guiding translation job (guiding:translate --detect-language).',
-            'command' => 'guiding:translate --detect-language',
+            'label' => 'Guiding source language fix',
+            'description' => 'Audit/fix guidings.language from content (guiding:translate --detect-language --mismatches-only). Does not translate.',
+            'command' => 'guiding:translate --detect-language --mismatches-only',
             'default' => [
                 'enabled' => false,
                 'frequency' => 'daily',
