@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Guiding;
+use App\Models\Language;
 use App\Services\Translation\GuidingTranslationService;
 use Illuminate\Support\Str;
 
@@ -17,19 +18,20 @@ class GuidingTranslationCommand extends Command
     protected $signature = 'guiding:translate 
                             {--guiding=* : Specific guiding IDs to translate}
                             {--language=* : Target languages to translate to (e.g., en,es,fr)}
-                            {--detect-language : Detect and update source language for all guidings}
+                            {--detect-language : Audit/fix guidings.language from main content (EN/DE heuristic); alone = language only, no translate}
+                            {--mismatches-only : With --detect-language, only show/update rows where detected differs from current}
                             {--force : Force retranslation even if translations exist}
                             {--admin-changes : Only process guidings with admin changes}
                             {--missing-only : Only process guidings that have no translation for at least one target language}
                             {--report-missing : List guidings missing translations (no translation performed)}
-                            {--dry-run : Show what would be translated without actually doing it}';
+                            {--dry-run : Show what would change without writing (applies to detect-language and translate)}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Translate guiding content using Gemini AI. Defaults to EN and DE languages. Use --admin-changes to only process guidings with admin changes, --missing-only for guidings without translations, --report-missing to list them, or --guiding=1,2,3 for specific IDs.';
+    protected $description = 'Translate guiding content (defaults EN/DE). Use --detect-language to audit/fix source language only; add --missing-only/--admin-changes/--force to translate after detection. Use --dry-run to preview.';
 
     private GuidingTranslationService $translationService;
 
@@ -57,6 +59,15 @@ class GuidingTranslationCommand extends Command
         // Handle language detection first if requested
         if ($this->option('detect-language')) {
             $this->handleLanguageDetection();
+
+            // Language-only mode: do not continue into translation unless explicitly asked
+            if ($this->isDetectLanguageOnly()) {
+                return 0;
+            }
+
+            $this->newLine();
+            $this->info('Continuing with translation after source-language check...');
+            $this->newLine();
         }
 
         // Get target languages (defaults to EN and DE if not specified)
@@ -91,6 +102,9 @@ class GuidingTranslationCommand extends Command
         ];
 
         foreach ($guidings as $guiding) {
+            // Reload language in case --detect-language just updated it
+            $guiding->refresh();
+
             foreach ($targetLanguages as $targetLanguage) {
                 $progressBar->advance();
 
@@ -146,38 +160,167 @@ class GuidingTranslationCommand extends Command
     }
 
     /**
-     * Handle language detection for all guidings
+     * True when --detect-language should run alone (no translation step).
+     */
+    private function isDetectLanguageOnly(): bool
+    {
+        return ! $this->option('missing-only')
+            && ! $this->option('admin-changes')
+            && ! $this->option('force')
+            && ! $this->option('report-missing');
+    }
+
+    /**
+     * Audit/fix guidings.language from main content (EN/DE heuristic).
+     * Respects --dry-run, --mismatches-only, and --guiding.
      */
     private function handleLanguageDetection(): void
     {
-        $this->info('Detecting languages for all guidings...');
-        
-        $guidings = Guiding::where('status', 1)->get();
+        $dryRun = (bool) $this->option('dry-run');
+        $mismatchesOnly = (bool) $this->option('mismatches-only');
+
+        $query = Guiding::query()->orderBy('id');
+
+        $guidingIds = $this->parseGuidingIds();
+        if (! empty($guidingIds)) {
+            $query->whereIn('id', $guidingIds);
+        } else {
+            $query->where('status', 1);
+        }
+
+        $guidings = $query->get([
+            'id', 'title', 'description', 'additional_information', 'meeting_point',
+            'desc_course_of_action', 'desc_meeting_point', 'desc_starting_time',
+            'desc_tour_unique', 'language', 'status',
+        ]);
 
         if ($guidings->isEmpty()) {
-            $this->info('All guidings already have language detected.');
+            $this->warn('No guidings found for language detection.');
             return;
         }
 
-        $progressBar = $this->output->createProgressBar($guidings->count());
-        $progressBar->start();
+        $this->info(($dryRun ? '[DRY RUN] ' : '[APPLY] ').'Checking source language for '.$guidings->count().' guiding(s)...');
+        $this->comment('Uses content heuristic (EN/DE). Uncertain rows are left unchanged (no forced de fallback).');
+        $this->newLine();
 
-        $detected = 0;
+        $rows = [];
+        $stats = [
+            'checked' => 0,
+            'match' => 0,
+            'mismatch' => 0,
+            'uncertain' => 0,
+            'would_update' => 0,
+            'updated' => 0,
+            'to_en' => 0,
+            'to_de' => 0,
+        ];
+
         foreach ($guidings as $guiding) {
-            try {
-                $detectedLanguage = $this->translationService->detectGuidingLanguage($guiding);
-                $guiding->update(['language' => $detectedLanguage]);
-                $detected++;
-            } catch (\Exception $e) {
-                $this->error("Failed to detect language for guiding {$guiding->id}: {$e->getMessage()}");
+            $stats['checked']++;
+            $result = $this->translationService->detectSourceLanguageFromContent($guiding);
+            $current = strtolower((string) ($guiding->language ?: 'de'));
+            $detected = $result['language'];
+            $isMismatch = $detected !== null && $detected !== $current;
+
+            if ($detected === null) {
+                $stats['uncertain']++;
+            } elseif ($isMismatch) {
+                $stats['mismatch']++;
+            } else {
+                $stats['match']++;
             }
-            $progressBar->advance();
+
+            if ($mismatchesOnly && ! $isMismatch) {
+                continue;
+            }
+
+            $hasDeTranslation = Language::where('source_id', (string) $guiding->id)
+                ->where('type', 'guidings')
+                ->where('language', 'de')
+                ->exists();
+            $hasEnTranslation = Language::where('source_id', (string) $guiding->id)
+                ->where('type', 'guidings')
+                ->where('language', 'en')
+                ->exists();
+
+            $action = 'keep';
+            if ($isMismatch) {
+                $action = $dryRun ? 'would_update' : 'updated';
+                $stats['would_update']++;
+                if ($detected === 'en') {
+                    $stats['to_en']++;
+                } elseif ($detected === 'de') {
+                    $stats['to_de']++;
+                }
+
+                if (! $dryRun) {
+                    $guiding->language = $detected;
+                    $guiding->save();
+                    $stats['updated']++;
+                }
+            }
+
+            $rows[] = [
+                $guiding->id,
+                $current,
+                $detected ?? '?',
+                $result['confidence'],
+                $hasEnTranslation ? 'yes' : 'no',
+                $hasDeTranslation ? 'yes' : 'no',
+                $action,
+                Str::limit((string) $guiding->title, 45),
+                $result['reason'],
+            ];
         }
 
-        $progressBar->finish();
+        if (empty($rows)) {
+            $this->info($mismatchesOnly ? 'No source-language mismatches found.' : 'Nothing to show.');
+        } else {
+            $this->table(
+                ['ID', 'Current', 'Detected', 'Conf.', 'EN row', 'DE row', 'Action', 'Title', 'Why'],
+                $rows
+            );
+        }
+
         $this->newLine();
-        $this->info("Language detection completed. Detected language for {$detected} guiding(s).");
-        $this->newLine();
+        $this->table(['Metric', 'Count'], [
+            ['Checked', $stats['checked']],
+            ['Already correct', $stats['match']],
+            ['Mismatches', $stats['mismatch']],
+            ['Uncertain (left unchanged)', $stats['uncertain']],
+            ['Would set → EN', $stats['to_en']],
+            ['Would set → DE', $stats['to_de']],
+            [$dryRun ? 'Would update' : 'Updated', $dryRun ? $stats['would_update'] : $stats['updated']],
+        ]);
+
+        if ($dryRun && $stats['would_update'] > 0) {
+            $this->newLine();
+            $this->info('Dry-run only. To write language fixes:');
+            $this->line('  php artisan guiding:translate --detect-language --mismatches-only');
+        }
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function parseGuidingIds(): array
+    {
+        $guidingIds = $this->option('guiding');
+        if (empty($guidingIds)) {
+            return [];
+        }
+
+        $ids = [];
+        foreach ($guidingIds as $raw) {
+            foreach (explode(',', (string) $raw) as $id) {
+                $id = trim($id);
+                if ($id !== '') {
+                    $ids[] = (int) $id;
+                }
+            }
+        }
+
+        return $ids;
     }
 
     /**
@@ -209,7 +352,7 @@ class GuidingTranslationCommand extends Command
      */
     private function getGuidingsToProcess(?array $targetLanguages = null)
     {
-        $guidingIds = $this->option('guiding');
+        $guidingIds = $this->parseGuidingIds();
         
         // If specific guiding IDs are provided, use those
         if (!empty($guidingIds)) {
@@ -306,4 +449,4 @@ class GuidingTranslationCommand extends Command
             $this->warn("WARNING: {$results['failed']} translation(s) failed. Check logs for details.");
         }
     }
-} 
+}
