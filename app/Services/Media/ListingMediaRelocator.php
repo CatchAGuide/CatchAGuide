@@ -6,6 +6,7 @@ class ListingMediaRelocator
 {
     public function __construct(
         private readonly ListingMediaPathBuilder $paths,
+        private readonly ListingGalleryImageProcessor $galleryImageProcessor,
     ) {}
 
     public function promoteForListing(string $listingKey, int $entityId, array $imageData): array
@@ -19,6 +20,16 @@ class ListingMediaRelocator
                 $this->paths->entityDirectory($listingKey, $entityId)
             );
         }
+
+        $gallery = $data['gallery_images'] ?? [];
+        if (! is_array($gallery)) {
+            $gallery = [];
+        }
+
+        $data['thumbnail_path'] = $this->galleryImageProcessor->alignThumbnailWithGallery(
+            isset($data['thumbnail_path']) ? (string) $data['thumbnail_path'] : null,
+            $gallery
+        );
 
         return $data;
     }

@@ -272,6 +272,47 @@ class ListingGalleryImageProcessor
     }
 
     /**
+     * Prefer a gallery path that matches the thumbnail exactly or by basename.
+     * Fixes stale thumbnails left pointing at another listing folder (e.g. guidings/580/… after gallery moved to guidings/595/…).
+     *
+     * @param  array<int, string>  $galleryImages
+     */
+    public function alignThumbnailWithGallery(?string $thumbnailPath, array $galleryImages): string
+    {
+        $galleryImages = array_values(array_filter($galleryImages, static function ($path) {
+            return is_string($path) && $path !== '';
+        }));
+
+        if ($thumbnailPath === null || trim($thumbnailPath) === '') {
+            return $galleryImages[0] ?? '';
+        }
+
+        if (filter_var($thumbnailPath, FILTER_VALIDATE_URL)) {
+            $parsedUrl = parse_url($thumbnailPath);
+            $thumbnailPath = ltrim($parsedUrl['path'] ?? '', '/');
+        }
+
+        $thumbnailPath = ltrim(str_replace('\\', '/', $thumbnailPath), '/');
+
+        if ($galleryImages === []) {
+            return $thumbnailPath;
+        }
+
+        foreach ($galleryImages as $galleryImage) {
+            $normalizedGalleryImage = ltrim(str_replace('\\', '/', $galleryImage), '/');
+
+            if (
+                $normalizedGalleryImage === $thumbnailPath
+                || basename($normalizedGalleryImage) === basename($thumbnailPath)
+            ) {
+                return $galleryImage;
+            }
+        }
+
+        return $galleryImages[0];
+    }
+
+    /**
      * @param  array<int, string>  $galleryImages
      */
     private function resolveRequestedThumbnail(Request $request, array $galleryImages): string
@@ -282,30 +323,7 @@ class ListingGalleryImageProcessor
             return $galleryImages[0] ?? '';
         }
 
-        if (filter_var($requestedThumbnail, FILTER_VALIDATE_URL)) {
-            $parsedUrl = parse_url($requestedThumbnail);
-            $requestedThumbnail = ltrim($parsedUrl['path'] ?? '', '/');
-        }
-
-        $requestedThumbnail = ltrim($requestedThumbnail, '/');
-
-        if (! empty($galleryImages)) {
-            foreach ($galleryImages as $galleryImage) {
-                $normalizedGalleryImage = ltrim($galleryImage, '/');
-                $normalizedRequested = ltrim($requestedThumbnail, '/');
-
-                if (
-                    $normalizedGalleryImage === $normalizedRequested
-                    || basename($normalizedGalleryImage) === basename($normalizedRequested)
-                ) {
-                    return $galleryImage;
-                }
-            }
-
-            return $galleryImages[0];
-        }
-
-        return $requestedThumbnail;
+        return $this->alignThumbnailWithGallery($requestedThumbnail, $galleryImages);
     }
 
     /**

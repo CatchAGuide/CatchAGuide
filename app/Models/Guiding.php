@@ -1193,4 +1193,28 @@ class Guiding extends Model
 
         return true;
     }
+
+    /**
+     * Rematch thumbnail_path to a gallery entry (exact or basename) and persist when stale.
+     */
+    public function healThumbnailPath(): bool
+    {
+        $gallery = $this->gallery_images;
+        if (is_string($gallery)) {
+            $gallery = json_decode($gallery, true) ?? [];
+        }
+        if (! is_array($gallery)) {
+            $gallery = [];
+        }
+
+        $aligned = align_listing_thumbnail_path($this->thumbnail_path, $gallery);
+        if ($aligned === null || $aligned === '' || $aligned === $this->thumbnail_path) {
+            return false;
+        }
+
+        $this->thumbnail_path = $aligned;
+        $this->saveQuietly();
+
+        return true;
+    }
 }
