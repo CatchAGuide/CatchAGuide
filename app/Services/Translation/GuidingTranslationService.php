@@ -528,16 +528,20 @@ class GuidingTranslationService
 
     /**
      * Get guidings that are missing at least one translation for the given target languages.
-     * Only considers active guidings (status = 1).
      *
-     * @param array $targetLanguages e.g. ['en', 'de']
+     * @param  array  $targetLanguages  e.g. ['en', 'de']
+     * @param  int|null  $status  Filter by status (1 = active). Null = all statuses.
      * @return \Illuminate\Support\Collection Guiding models
      */
-    public function getGuidingsMissingTranslations(array $targetLanguages): \Illuminate\Support\Collection
+    public function getGuidingsMissingTranslations(array $targetLanguages, ?int $status = 1): \Illuminate\Support\Collection
     {
-        $guidings = Guiding::where('status', 1)
-            ->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters'])
-            ->get();
+        $query = Guiding::query()->with(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters']);
+
+        if ($status !== null) {
+            $query->where('status', $status);
+        }
+
+        $guidings = $query->orderBy('id')->get();
 
         return $guidings->filter(function (Guiding $guiding) use ($targetLanguages) {
             foreach ($targetLanguages as $lang) {
