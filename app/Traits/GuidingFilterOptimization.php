@@ -260,13 +260,14 @@ trait GuidingFilterOptimization
         foreach ($guidings as $guiding) {
             $galleryImages = json_decode($guiding->gallery_images, true) ?? [];
             $optimizedImages = [];
-            
-            if (!empty($guiding->thumbnail_path)) {
-                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($guiding->thumbnail_path);
+            $thumbnailPath = align_listing_thumbnail_path($guiding->thumbnail_path, $galleryImages);
+
+            if (! empty($thumbnailPath)) {
+                $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($thumbnailPath);
             }
-            
+
             foreach ($galleryImages as $imagePath) {
-                if ($guiding->thumbnail_path && $imagePath === $guiding->thumbnail_path) {
+                if ($thumbnailPath && $imagePath === $thumbnailPath) {
                     continue;
                 }
                 $optimizedImages[] = $this->imageOptimizationService->getOptimizedThumbnail($imagePath);

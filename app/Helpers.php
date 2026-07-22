@@ -112,11 +112,37 @@ if (! function_exists('get_link')) {
     }
 }
 
+if (! function_exists('align_listing_thumbnail_path')) {
+    /**
+     * Rematch thumbnail_path to a gallery entry by exact path or basename.
+     *
+     * @param  array<int, string>|null  $galleryImages
+     */
+    function align_listing_thumbnail_path(?string $thumbnailPath, ?array $galleryImages): ?string
+    {
+        $galleryImages = is_array($galleryImages) ? $galleryImages : [];
+        $aligned = app(\App\Services\Media\ListingGalleryImageProcessor::class)
+            ->alignThumbnailWithGallery($thumbnailPath, $galleryImages);
+
+        return $aligned !== '' ? $aligned : null;
+    }
+}
+
 if (! function_exists('get_featured_image_link')) {
     function get_featured_image_link($model)
     {
-        if ($model->thumbnail_path && media_path_usable($model->thumbnail_path)) {
-            return media_url($model->thumbnail_path);
+        $gallery = $model->gallery_images ?? $model->gallery ?? [];
+        if (is_string($gallery)) {
+            $gallery = json_decode($gallery, true) ?: [];
+        }
+        if (! is_array($gallery)) {
+            $gallery = [];
+        }
+
+        $thumbnailPath = align_listing_thumbnail_path($model->thumbnail_path ?? null, $gallery);
+
+        if ($thumbnailPath && media_path_usable($thumbnailPath)) {
+            return media_url($thumbnailPath);
         }
 
         return media_url(null);
@@ -128,12 +154,6 @@ if (! function_exists('get_galleries_image_link')) {
     {   
         $links = [];
         $uniqueUrls = []; // Track unique URLs to prevent duplicates
-
-        if ($model->thumbnail_path && media_path_usable($model->thumbnail_path)) {
-            $thumbnailUrl = media_url($model->thumbnail_path);
-            $links[] = $thumbnailUrl;
-            $uniqueUrls[] = $thumbnailUrl;
-        }
 
         // Get gallery images based on type
         if($type == 0){
@@ -152,6 +172,14 @@ if (! function_exists('get_galleries_image_link')) {
             if (!is_array($galleries)) {
                 $galleries = [];
             }
+        }
+
+        $thumbnailPath = align_listing_thumbnail_path($model->thumbnail_path ?? null, $galleries);
+
+        if ($thumbnailPath && media_path_usable($thumbnailPath)) {
+            $thumbnailUrl = media_url($thumbnailPath);
+            $links[] = $thumbnailUrl;
+            $uniqueUrls[] = $thumbnailUrl;
         }
 
         if (is_array($galleries) && count($galleries)) {
