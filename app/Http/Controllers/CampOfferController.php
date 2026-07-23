@@ -134,8 +134,10 @@ class CampOfferController extends Controller
             'facilities',
             'specialOffers'
         ])->where('slug', $slug)
-        ->where('status', 'active')
+        ->whereIn('status', ['active', 'draft'])
         ->firstOrFail();
+
+        $isDraft = (string) $camp->status === 'draft';
 
         $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
         $this->viewTranslation->applyToCollection($camp->accommodations, ListingTranslationService::TYPE_ACCOMMODATION);
@@ -230,7 +232,8 @@ class CampOfferController extends Controller
             'bottomStripImages',
             'remainingGalleryCount',
             'galleryImages',
-            'contactModalTitle'
+            'contactModalTitle',
+            'isDraft'
         ))->with('camp', $campData);
     }
     

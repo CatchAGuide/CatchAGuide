@@ -26,30 +26,31 @@
 
             <div style="margin: 20px 0; text-align: center;">
                 @if($booking->alternativeDates)
-                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 15px 0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 15px 0;">
                         @foreach($booking->alternativeDates as $date)
-                        <a href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}" 
-                           style="display: inline-block; 
-                                  background-color: #e8604c; 
-                                  color: #ffffff !important; 
-                                  padding: 8px 16px; 
-                                  text-decoration: none; 
-                                  border-radius: 6px; 
-                                  font-size: 12px; 
-                                  font-family: 'Morrison', sans-serif; 
-                                  font-weight: bold;
-                                  box-shadow: 0 2px 4px rgba(232, 96, 76, 0.3);
-                                  transition: all 0.3s ease;
-                                  border: 2px solid #e8604c;
-                                  min-width: 120px;
-                                  text-align: center;" 
-                           target="_blank"
-                           onmouseover="this.style.backgroundColor='#d54a3a'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(232, 96, 76, 0.4)';"
-                           onmouseout="this.style.backgroundColor='#e8604c'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(232, 96, 76, 0.3)';">
-                            {{ date('F j, Y', strtotime($date)) }}
-                        </a>
+                        <tr>
+                            <td align="center" style="padding: 0 0 10px 0;">
+                                <a href="{{ route('booking.reschedule', ['token' => $booking->token]) }}?date={{ $date }}"
+                                   style="display: block;
+                                          background-color: #e8604c;
+                                          color: #ffffff !important;
+                                          padding: 12px 16px;
+                                          text-decoration: none;
+                                          border-radius: 6px;
+                                          font-size: 14px;
+                                          font-family: 'Morrison', sans-serif;
+                                          font-weight: bold;
+                                          border: 2px solid #e8604c;
+                                          text-align: center;
+                                          max-width: 280px;
+                                          margin: 0 auto;"
+                                   target="_blank">
+                                    {{ date('F j, Y', strtotime($date)) }}
+                                </a>
+                            </td>
+                        </tr>
                         @endforeach
-                    </div>
+                    </table>
                 @else
                     <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_5')</p>
                 @endif

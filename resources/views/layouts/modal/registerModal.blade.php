@@ -298,7 +298,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 // Reset reCAPTCHA if present
-                if (typeof grecaptcha !== 'undefined') {
+                if (typeof RecaptchaWidget !== 'undefined') {
+                    new RecaptchaWidget(registerForm).reset();
+                } else if (typeof grecaptcha !== 'undefined') {
                     grecaptcha.reset();
                 }
             }

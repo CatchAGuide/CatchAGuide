@@ -105,6 +105,7 @@ return [
     'prohibited_if'        => ':attribute ist unzulässig, wenn :other :value ist.',
     'prohibited_unless'    => ':attribute ist unzulässig, wenn :other nicht :values ist.',
     'prohibits'            => ':attribute verbietet die Angabe von :other.',
+    'recaptcha'            => 'Bitte bestätigen Sie, dass Sie kein Roboter sind.',
     'regex'                => ':attribute Format ist ungültig.',
     'required'             => ':attribute muss ausgefüllt werden.',
     'required_array_keys'  => 'The :attribute field must contain entries for: :values.',

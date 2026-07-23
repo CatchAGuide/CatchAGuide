@@ -1,8 +1,18 @@
 @extends('layouts.app')
 @section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
+@php
+    $isDraft = !empty($isDraft);
+@endphp
+
+@section('meta_robots')
+    @if($isDraft)
+        <meta name="robots" content="noindex, nofollow">
+    @endif
+@endsection
+
 @section('share_tags')
-    @if(!empty($camp['slug']))
+    @if(!$isDraft && !empty($camp['slug']))
         <link rel="canonical" href="{{ route('vacations.camps.show', $camp['slug']) }}">
     @endif
 @endsection
@@ -19,6 +29,14 @@
     x-init="init()"
     class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
 >
+    @if($isDraft)
+        <div class="camp-container py-3">
+            <div class="alert alert-warning mb-0" role="status">
+                <strong>{{ __('vacations.draft_review_banner_title') }}</strong>
+                — {{ __('vacations.draft_review_banner_text') }}
+            </div>
+        </div>
+    @endif
     <div class="camp-container">
         @include('pages.vacations.partials.offer-breadcrumb', [
             'pillar' => 'camps',
@@ -140,6 +158,7 @@
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
                     <!-- Booking + Contact Us - Mobile only, positioned before description -->
+                    @unless($isDraft)
                     <div class="camp-cta-stack camp-cta-stack--mobile-top">
                         @include('pages.vacations.partials.camp-booking-card', ['instance' => 'mobile'])
                         @include('pages.trips.partials.contact-card', [
@@ -151,11 +170,13 @@
                             'showTripAnalytics' => false,
                         ])
                     </div>
+                    @endunless
                     
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
                             <!-- Booking + Contact Us - Desktop only, floats inside description -->
+                            @unless($isDraft)
                             <div class="camp-cta-stack camp-cta-stack--desktop-float">
                                 @include('pages.vacations.partials.camp-booking-card', ['instance' => 'desktop'])
                                 @include('pages.trips.partials.contact-card', [
@@ -167,6 +188,7 @@
                                     'showTripAnalytics' => false,
                                 ])
                             </div>
+                            @endunless
                             @if(!empty($camp['description']['camp_description']))
                             <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_description">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
@@ -933,6 +955,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modalGuestsInput) modalGuestsInput.value = String(bookingGuests);
     }
 
+    const recaptchaErrorMessage = @json(__('validation.recaptcha'));
+    const bookingCaptcha = document.getElementById('contactModalForm') && typeof RecaptchaWidget !== 'undefined'
+        ? new RecaptchaWidget(document.getElementById('contactModalForm'))
+        : null;
+    const generalCaptcha = document.getElementById('campGeneralContactModalForm') && typeof RecaptchaWidget !== 'undefined'
+        ? new RecaptchaWidget(document.getElementById('campGeneralContactModalForm'))
+        : null;
+
     // Booking request form submission handler
     $('#contactSubmitBtn').on('click', function() {
         handleContactFormSubmission();
@@ -941,6 +971,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Also bind on modal shown event to ensure the button exists
     $('#contactModal').on('shown.bs.modal', function() {
         prefillBookingModal();
+        bookingCaptcha?.reset();
+        const contactError = document.getElementById('contactError');
+        if (contactError) {
+            contactError.style.display = 'none';
+            contactError.innerHTML = '';
+        }
         $('#contactSubmitBtn').off('click').on('click', function() {
             handleContactFormSubmission();
         });
@@ -952,6 +988,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     $('#campGeneralContactModal').on('shown.bs.modal', function() {
+        generalCaptcha?.reset();
+        const contactError = document.getElementById('campGeneralContactError');
+        if (contactError) {
+            contactError.style.display = 'none';
+            contactError.innerHTML = '';
+        }
         $('#campGeneralContactSubmitBtn').off('click').on('click', function() {
             handleGeneralContactFormSubmission();
         });
@@ -971,6 +1013,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Validate form
         if (!contactForm.checkValidity()) {
             contactForm.reportValidity();
+            return;
+        }
+
+        if (bookingCaptcha && !bookingCaptcha.requireToken(function() {
+            contactError.style.display = 'block';
+            contactError.innerHTML = recaptchaErrorMessage;
+        })) {
             return;
         }
         
@@ -998,6 +1047,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.success) {
                 // Reset form
                 contactForm.reset();
+                bookingCaptcha?.reset();
                 
                 // Show success message
                 successMessage.style.display = 'block';
@@ -1015,6 +1065,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 contactError.style.display = 'block';
                 contactError.innerHTML = data.message || 'An error occurred. Please try again.';
                 contactFormContainer.style.display = 'block';
+                bookingCaptcha?.reset();
             }
         })
         .catch(error => {
@@ -1024,6 +1075,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             contactError.style.display = 'block';
             contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+            bookingCaptcha?.reset();
         });
     }
 
@@ -1039,6 +1091,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!contactForm.checkValidity()) {
             contactForm.reportValidity();
+            return;
+        }
+
+        if (generalCaptcha && !generalCaptcha.requireToken(function() {
+            contactError.style.display = 'block';
+            contactError.innerHTML = recaptchaErrorMessage;
+        })) {
             return;
         }
 
@@ -1060,6 +1119,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.success) {
                 contactForm.reset();
+                generalCaptcha?.reset();
                 successMessage.style.display = 'block';
 
                 setTimeout(() => {
@@ -1074,6 +1134,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 contactError.style.display = 'block';
                 contactError.innerHTML = data.message || 'An error occurred. Please try again.';
                 contactFormContainer.style.display = 'block';
+                generalCaptcha?.reset();
             }
         })
         .catch(error => {
@@ -1081,6 +1142,7 @@ document.addEventListener('DOMContentLoaded', function () {
             contactFormContainer.style.display = 'block';
             contactError.style.display = 'block';
             contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+            generalCaptcha?.reset();
         });
     }
 });

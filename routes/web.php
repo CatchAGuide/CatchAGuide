@@ -331,8 +331,12 @@ Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryControl
 Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
 Route::get('category-page/{type}/{slug}', [CategoryController::class, 'targets'])->name('category.targets');
 
-Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])->name('sendcontactmail');
-Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])->name('sendnewsletter');
+Route::post('sendcontact', [\App\Http\Controllers\ZoisController::class, 'sendcontact'])
+    ->middleware('throttle:10,1')
+    ->name('sendcontactmail');
+Route::post('sendnewsletter', [\App\Http\Controllers\ZoisController::class, 'sendnewsletter'])
+    ->middleware('throttle:5,1')
+    ->name('sendnewsletter');
 
 Route::name('ratings.')->prefix('ratings')->group(function () {
     Route::get('/notified', [RatingsController::class, 'notified'])->name('notified');
