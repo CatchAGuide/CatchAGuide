@@ -8,6 +8,9 @@ use App\Mail\ContactMail;
 use App\Models\Newsletter;
 use App\Mail\NewsletterMail;
 use App\Mail\CustomerContactMail;
+use App\Mail\CustomerNewsletterMail;
+use App\Mail\VacationBookingAdminMail;
+use App\Mail\VacationBookingCustomerMail;
 use App\Models\ContactSubmission;
 use App\Models\CampVacationBooking;
 use App\Models\TripBooking;
@@ -87,6 +90,12 @@ class ZoisController extends Controller
         }
 
         $sourceTypeLower = strtolower((string) $sourceType);
+        $isVacationBooking = $hasBookingDetails && in_array($sourceTypeLower, [
+            TripBooking::SOURCE_TRIP,
+            CampVacationBooking::SOURCE_CAMP,
+            CampVacationBooking::SOURCE_VACATION,
+        ], true) && $sourceId;
+
         $sourceTitle = ContactSubmission::resolveSourceTitle($sourceType, $sourceId);
         $contactMailExtra = array_filter([
             'contact_message' => $description,
@@ -96,34 +105,79 @@ class ZoisController extends Controller
             'source_id' => $sourceId ? (int) $sourceId : null,
             'camp_id' => ($sourceTypeLower === ContactSubmission::SOURCE_CAMP && $sourceId) ? (int) $sourceId : null,
             'source_title' => $sourceTitle,
+            'view_requests_url' => $isVacationBooking
+                ? ($sourceTypeLower === TripBooking::SOURCE_TRIP
+                    ? route('admin.trip-bookings.index')
+                    : route('admin.camp-vacation-bookings.index'))
+                : null,
         ], fn ($value) => $value !== null && $value !== '');
 
-        Mail::send(new ContactMail(
-            $request->name,
-            $request->email,
-            $description,
-            $request->phone,
-            $request->countryCode,
-            $contactMailExtra
-        ));
-        Mail::send(new CustomerContactMail(
-            $request->name,
-            $request->email,
-            $description,
-            $request->phone,
-            $request->countryCode,
-            $contactMailExtra
-        ));
-        
+        if ($isVacationBooking) {
+            $adminEmail = config('mail.admin_email');
+            $guestEmail = $request->email;
+
+            try {
+                Mail::to($guestEmail)->send(new VacationBookingCustomerMail(
+                    $request->name,
+                    $guestEmail,
+                    $description,
+                    $request->phone,
+                    $request->countryCode,
+                    $contactMailExtra
+                ));
+            } catch (\Throwable $e) {
+                \Log::error('Vacation booking customer mail failed', [
+                    'email' => $guestEmail,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            try {
+                Mail::to($adminEmail)->send(new VacationBookingAdminMail(
+                    $request->name,
+                    $guestEmail,
+                    $description,
+                    $request->phone,
+                    $request->countryCode,
+                    $contactMailExtra
+                ));
+            } catch (\Throwable $e) {
+                \Log::error('Vacation booking admin mail failed', [
+                    'email' => $adminEmail,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            $successMessage = __('contact.bookingSuccessMessage');
+        } else {
+            Mail::send(new ContactMail(
+                $request->name,
+                $request->email,
+                $description,
+                $request->phone,
+                $request->countryCode,
+                $contactMailExtra
+            ));
+            Mail::send(new CustomerContactMail(
+                $request->name,
+                $request->email,
+                $description,
+                $request->phone,
+                $request->countryCode,
+                $contactMailExtra
+            ));
+            $successMessage = __('contact.successMessage');
+        }
+
         // If it's an AJAX request or from a modal, return JSON
         if ($request->ajax() || $request->has('source_type')) {
             return response()->json([
                 'success' => true,
-                'message' => 'Deine Kontaktanfrage wurde erfolgreich versand! Wir melden uns schnellstmöglich bei Dir'
+                'message' => $successMessage,
             ]);
         }
-        
-        return back()->with('message', 'Deine Kontaktanfrage wurde erfolgreich versand! Wir melden uns schnellstmöglich bei Dir');
+
+        return back()->with('message', $successMessage);
     }
 
     public function sendnewsletter(Request $request)
@@ -146,8 +200,12 @@ class ZoisController extends Controller
 
         $newsletter->save();
 
-        Mail::send(new NewsletterMail($request->email,$locale));
-        Mail::send(new CustomerNewsletterMail($request->email,$locale));
+        Mail::send(new NewsletterMail(
+            $request->email,
+            $locale,
+            route('admin.newsletter-subscribers.index')
+        ));
+        Mail::send(new CustomerNewsletterMail($request->email, $locale));
         return back()->with('message', 'Vielen Dank wir haben Dich in unseren Newsletterverteiler aufgenommen. Du kannst diesen jederzeit wieder abbestellen!');
     }
 }

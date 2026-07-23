@@ -1,4 +1,5 @@
 @php
+    $copy = $copyNamespace ?? 'emails.contact_customer';
     $hasRequestSection = !empty($source_title)
         || !empty($preferred_date)
         || !empty($number_of_persons)
@@ -21,7 +22,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('emails.contact_customer.title') }}</title>
+    <title>{{ __($copy . '.title') }}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f5; -webkit-font-smoothing: antialiased;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5;">
@@ -34,36 +35,36 @@
                         <a href="{{ route('welcome') }}" target="_blank" style="text-decoration: none; display: inline-block; color: #ffffff;">
                             <img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="{{ config('app.name') }}" style="max-width: 160px; height: auto; display: block; margin: 0 auto 12px;" onerror="this.style.display='none';">
                         </a>
-                        <h1 style="margin: 12px 0 0; color: #e5e7eb; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">{{ __('emails.contact_customer.title') }}</h1>
+                        <h1 style="margin: 12px 0 0; color: #e5e7eb; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">{{ __($copy . '.title') }}</h1>
                     </td>
                 </tr>
                 {{-- Greeting --}}
                 <tr>
                     <td style="padding: 16px 20px 12px;">
-                        <p style="margin: 0 0 4px; font-size: 14px; color: #0f172a; font-weight: 600;">{{ __('emails.contact_customer.greeting', ['name' => $name]) }}</p>
-                        <p style="margin: 0 0 8px; font-size: 12px; color: #475569; line-height: 1.5;">{{ __('emails.contact_customer.intro') }}</p>
-                        <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">{{ __('emails.contact_customer.intro_secondary') }}</p>
+                        <p style="margin: 0 0 4px; font-size: 14px; color: #0f172a; font-weight: 600;">{{ __($copy . '.greeting', ['name' => $name]) }}</p>
+                        <p style="margin: 0 0 8px; font-size: 12px; color: #475569; line-height: 1.5;">{{ __($copy . '.intro') }}</p>
+                        <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">{{ __($copy . '.intro_secondary') }}</p>
                     </td>
                 </tr>
                 {{-- Contact details recap --}}
                 <tr>
                     <td style="padding: 0 20px 12px;">
-                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __('emails.contact_customer.section_contact') }}</p>
+                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __($copy . '.section_contact') }}</p>
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid #e5e7eb; border-radius: 6px; background-color: #fafafa;">
                             <tr>
                                 <td style="padding: 12px 14px;">
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 13px; color: #334155;">
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top; width: 38%;">{{ __('emails.contact_customer.name') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top; width: 38%;">{{ __($copy . '.name') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ $name }}</td>
                                         </tr>
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __('emails.contact_customer.email') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __($copy . '.email') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ $email }}</td>
                                         </tr>
                                         @if($phone)
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __('emails.contact_customer.phone') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __($copy . '.phone') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ trim(($phone_country_code ?? '') . ' ' . $phone) }}</td>
                                         </tr>
                                         @endif
@@ -77,32 +78,32 @@
                 @if($hasRequestSection)
                 <tr>
                     <td style="padding: 0 20px 12px;">
-                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __('emails.contact_customer.section_request') }}</p>
+                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __($copy . '.section_request') }}</p>
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid #e5e7eb; border-radius: 6px; background-color: #f0f9ff;">
                             <tr>
                                 <td style="padding: 12px 14px;">
                                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 13px; color: #334155;">
                                         @if($sourceTypeLabel)
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top; width: 38%;">{{ __('emails.contact_customer.source_type') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top; width: 38%;">{{ __($copy . '.source_type') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ $sourceTypeLabel }}</td>
                                         </tr>
                                         @endif
                                         @if(!empty($source_title))
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __('emails.contact_customer.source_title') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __($copy . '.source_title') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a; font-weight: 600;">{{ $source_title }}</td>
                                         </tr>
                                         @endif
                                         @if($formattedDate)
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __('emails.contact_customer.requested_date') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __($copy . '.requested_date') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ $formattedDate }}</td>
                                         </tr>
                                         @endif
                                         @if(!empty($number_of_persons))
                                         <tr>
-                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __('emails.contact_customer.number_of_persons') }}</td>
+                                            <td style="padding: 5px 12px 5px 0; font-weight: 600; color: #64748b; vertical-align: top;">{{ __($copy . '.number_of_persons') }}</td>
                                             <td style="padding: 5px 0; color: #0f172a;">{{ $number_of_persons }}</td>
                                         </tr>
                                         @endif
@@ -116,7 +117,7 @@
                 {{-- Message --}}
                 <tr>
                     <td style="padding: 0 20px 14px;">
-                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __('emails.contact_customer.section_message') }}</p>
+                        <p style="margin: 0 0 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">{{ __($copy . '.section_message') }}</p>
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid #e5e7eb; border-radius: 6px; background-color: #fff;">
                             <tr>
                                 <td style="padding: 12px 14px;">
@@ -129,8 +130,8 @@
                 {{-- CTA --}}
                 <tr>
                     <td style="padding: 0 20px 18px; text-align: center;">
-                        <a href="{{ route('welcome') }}" target="_blank" style="display: inline-block; background-color: #e8604c; color: #ffffff !important; padding: 10px 24px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px; margin-right: 8px;">{{ __('emails.contact_customer.visit_website') }}</a>
-                        <a href="{{ route('additional.contact') }}" target="_blank" style="display: inline-block; background-color: #1a1a2e; color: #ffffff !important; padding: 10px 24px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px;">{{ __('emails.contact_customer.contact_us') }}</a>
+                        <a href="{{ route('welcome') }}" target="_blank" style="display: inline-block; background-color: #e8604c; color: #ffffff !important; padding: 10px 24px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px; margin-right: 8px;">{{ __($copy . '.visit_website') }}</a>
+                        <a href="{{ route('additional.contact') }}" target="_blank" style="display: inline-block; background-color: #1a1a2e; color: #ffffff !important; padding: 10px 24px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px;">{{ __($copy . '.contact_us') }}</a>
                     </td>
                 </tr>
                 {{-- Footer --}}

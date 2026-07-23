@@ -13,4 +13,5 @@ return [
     'submitting' => 'Wird gesendet...',
     'errorMessage' => 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
     'successMessage' => 'Deine Nachricht wurde erfolgreich gesendet!',
+    'bookingSuccessMessage' => 'Deine Buchungsanfrage wurde gesendet! Wir melden uns in Kürze mit den nächsten Schritten bei Dir.',
 ];

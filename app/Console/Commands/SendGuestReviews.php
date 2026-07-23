@@ -43,10 +43,16 @@ class SendGuestReviews extends Command
         
         $count = 0;
         foreach ($bookings as $booking) {
-            app()->setLocale($booking?->user?->language ?? app()->getLocale());
+            $email = $booking->customerEmail();
+            if (! $email) {
+                $this->warn("Skipping booking #{$booking->id}: no customer email.");
+                continue;
+            }
 
-            if (!CheckEmailLog('guest_review', 'booking_' . $booking->id, $booking->user->email)) {
-                Mail::to($booking->user->email)->send(new GuestReviewMail($booking));
+            app()->setLocale($booking->customerLocale());
+
+            if (! CheckEmailLog('guest_review', 'booking_' . $booking->id, $email)) {
+                Mail::to($email)->send(new GuestReviewMail($booking));
                 $count++;
             }
         }

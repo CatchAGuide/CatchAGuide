@@ -11,15 +11,12 @@ class CustomerNewsletterMail extends Mailable
     use Queueable, SerializesModels;
 
     public $email;
+    public $locale;
     public $language;
     public $target;
+    public $copyNamespace = 'emails.newsletter_customer';
     public $type = 'customer_newsletter_mail';
 
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
     public function __construct($email, $locale)
     {
         $this->email = $email;
@@ -28,14 +25,11 @@ class CustomerNewsletterMail extends Mailable
         $this->target = 'customer_newsletter_mail';
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
-        return $this->view('mails.customernewsletter')->to($this->email)->cc('info@catchaguide.com')
-            ->subject("Danke für Dein Interesse");
+        return $this->view('mails.customernewsletter')
+            ->to($this->email)
+            ->cc(config('mail.admin_email'))
+            ->subject(__($this->copyNamespace . '.subject'));
     }
 }

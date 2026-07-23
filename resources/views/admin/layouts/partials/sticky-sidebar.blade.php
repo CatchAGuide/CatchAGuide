@@ -102,10 +102,16 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
                 </li>
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.newsletter-subscribers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Newsletter subscribers</span></a>
+                </li>
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.offer-sendout.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.offer-sendout.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">Custom camp offers</span></a>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email logs</span></a>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.settings.emailmaintenance') || request()->routeIs('admin.settings.email.preview*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.settings.emailmaintenance') }}"><i class="side-menu__icon fe fe-layout"></i><span class="side-menu__label">Email templates</span></a>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
@@ -210,7 +216,6 @@
                         <li><a href="{{ route('admin.settings.facilities.index') }}" class="slide-item {{ request()->routeIs('admin.settings.facilities.*') ? 'active' : '' }}">Facilities</a></li>
                         <li><a href="{{ route('admin.settings.kitchen-equipment.index') }}" class="slide-item {{ request()->routeIs('admin.settings.kitchen-equipment.*') ? 'active' : '' }}">Kitchen equipment</a></li>
                         <li><a href="{{ route('admin.settings.scheduled-tasks.index') }}" class="slide-item {{ request()->routeIs('admin.settings.scheduled-tasks.*') ? 'active' : '' }}">Scheduled tasks</a></li>
-                        <li><a href="{{ route('admin.settings.emailmaintenance') }}" class="slide-item {{ request()->routeIs('admin.settings.emailmaintenance') ? 'active' : '' }}">Email maintenance</a></li>
                     </ul>
                 </li>
             </ul>
