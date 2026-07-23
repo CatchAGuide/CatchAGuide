@@ -31,8 +31,10 @@ class TripOfferController extends Controller
     {
         $trip = Trip::with(['availabilityDates'])
             ->where('slug', $slug)
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'draft'])
             ->firstOrFail();
+
+        $isDraft = (string) $trip->status === 'draft';
 
         $tripView = $this->cache->rememberTripOfferViewModel(
             $slug,
@@ -68,11 +70,12 @@ class TripOfferController extends Controller
             'tripOfferData' => $tripOfferData,
             'selectedDate' => $selectedDate,
             'isYearRoundTrip' => $isYearRoundTrip,
+            'isDraft' => $isDraft,
             'minBookingDate' => now()->toDateString(),
             'initialBookingDate' => $selectedDate ?? '',
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
             'reviewTrust' => $this->tripTrust->resolve($trip),
-            'canonicalUrl' => route('vacations.trips.show', $slug),
+            'canonicalUrl' => $isDraft ? null : route('vacations.trips.show', $slug),
         ]);
     }
 

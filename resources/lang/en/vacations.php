@@ -286,4 +286,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'reviews_title' => 'Reviews',
     'reviews_empty' => 'No guest reviews yet for this trip.',
     'reviews_guide_fallback' => 'This trip is led by :name (:rating★ from :count guiding reviews).',
+    'draft_review_banner_title' => 'Draft — not published',
+    'draft_review_banner_text' => 'This listing is for review only. It is not visible in search or vacation listings, and bookings are disabled.',
+    'draft_booking_rejected' => 'This listing is not published yet, so booking requests cannot be submitted.',
 ];

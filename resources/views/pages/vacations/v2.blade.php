@@ -1,8 +1,18 @@
 @extends('layouts.app')
 @section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
+@php
+    $isDraft = !empty($isDraft);
+@endphp
+
+@section('meta_robots')
+    @if($isDraft)
+        <meta name="robots" content="noindex, nofollow">
+    @endif
+@endsection
+
 @section('share_tags')
-    @if(!empty($camp['slug']))
+    @if(!$isDraft && !empty($camp['slug']))
         <link rel="canonical" href="{{ route('vacations.camps.show', $camp['slug']) }}">
     @endif
 @endsection
@@ -19,6 +29,14 @@
     x-init="init()"
     class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
 >
+    @if($isDraft)
+        <div class="camp-container py-3">
+            <div class="alert alert-warning mb-0" role="status">
+                <strong>{{ __('vacations.draft_review_banner_title') }}</strong>
+                — {{ __('vacations.draft_review_banner_text') }}
+            </div>
+        </div>
+    @endif
     <div class="camp-container">
         @include('pages.vacations.partials.offer-breadcrumb', [
             'pillar' => 'camps',
@@ -140,6 +158,7 @@
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
                     <!-- Booking + Contact Us - Mobile only, positioned before description -->
+                    @unless($isDraft)
                     <div class="camp-cta-stack camp-cta-stack--mobile-top">
                         @include('pages.vacations.partials.camp-booking-card', ['instance' => 'mobile'])
                         @include('pages.trips.partials.contact-card', [
@@ -151,11 +170,13 @@
                             'showTripAnalytics' => false,
                         ])
                     </div>
+                    @endunless
                     
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
                             <!-- Booking + Contact Us - Desktop only, floats inside description -->
+                            @unless($isDraft)
                             <div class="camp-cta-stack camp-cta-stack--desktop-float">
                                 @include('pages.vacations.partials.camp-booking-card', ['instance' => 'desktop'])
                                 @include('pages.trips.partials.contact-card', [
@@ -167,6 +188,7 @@
                                     'showTripAnalytics' => false,
                                 ])
                             </div>
+                            @endunless
                             @if(!empty($camp['description']['camp_description']))
                             <div class="description-item-toggle camp-desc-wrap" data-desc-key="camp_description">
                                 <h3 class="font-semibold text-gray-700">{{ __('vacations.camp') }}</h3>
