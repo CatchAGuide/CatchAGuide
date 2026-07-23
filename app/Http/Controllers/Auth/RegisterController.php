@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use App\Mail\RegistrationVerification;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Rules\Recaptcha;
 use Crypt;
 use DB;
 use Illuminate\Auth\Events\Registered;
@@ -68,10 +69,7 @@ class RegisterController extends Controller
             'agb' => ['required', 'accepted'],
         ];
 
-        // Only add reCAPTCHA validation in production
-        if (app()->environment('production')) {
-            $rules['g-recaptcha-response'] = 'recaptcha';
-        }
+        $rules['g-recaptcha-response'] = Recaptcha::production();
 
         return Validator::make($data, $rules);
     }

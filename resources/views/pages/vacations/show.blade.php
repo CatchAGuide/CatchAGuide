@@ -1403,22 +1403,50 @@ document.addEventListener("DOMContentLoaded", function() {
             },
         });
     }
-    
+
     const contactForm = document.getElementById('contactModalForm');
     const contactFormContainer = document.getElementById('contactFormContainer');
     const loadingOverlay = document.getElementById('contactLoadingOverlay');
     const successMessage = document.getElementById('contactSuccessMessage');
     const submitButton = document.getElementById('contactSubmitBtn');
     const contactError = document.getElementById('contactError');
-    
+    const contactModalEl = document.getElementById('contactModal');
+    const recaptchaErrorMessage = @json(__('validation.recaptcha'));
+    const contactCaptcha = contactForm && typeof RecaptchaWidget !== 'undefined'
+        ? new RecaptchaWidget(contactForm)
+        : null;
+
+    if (contactCaptcha && contactModalEl) {
+        contactCaptcha.bindModal(contactModalEl, {
+            onShow: function() {
+                if (contactError) {
+                    contactError.style.display = 'none';
+                    contactError.innerHTML = '';
+                }
+            }
+        });
+    }
+
     if (submitButton && contactForm) {
         submitButton.addEventListener('click', function() {
+            if (contactError) {
+                contactError.style.display = 'none';
+                contactError.innerHTML = '';
+            }
+
             // Validate form
             if (!contactForm.checkValidity()) {
                 contactForm.reportValidity();
                 return;
             }
-            
+
+            if (contactCaptcha && !contactCaptcha.requireToken(function() {
+                contactError.style.display = 'block';
+                contactError.innerHTML = recaptchaErrorMessage;
+            })) {
+                return;
+            }
+
             // Get form data
             const formData = new FormData(contactForm);
             
@@ -1446,7 +1474,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     
                     // Reset form
                     contactForm.reset();
-                    
+                    contactCaptcha?.reset();
+
                     // Close modal after 3 seconds
                     setTimeout(() => {
                         const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
@@ -1462,15 +1491,17 @@ document.addEventListener("DOMContentLoaded", function() {
                     contactError.style.display = 'block';
                     contactError.innerHTML = data.message;
                     contactFormContainer.style.display = 'block';
+                    contactCaptcha?.reset();
                 }
             })
             .catch(error => {
                 // Hide loading overlay and show form again on error
                 loadingOverlay.style.display = 'none';
                 contactFormContainer.style.display = 'block';
-                
+
                 contactError.style.display = 'block';
                 contactError.innerHTML = error.message;
+                contactCaptcha?.reset();
             });
         });
     }

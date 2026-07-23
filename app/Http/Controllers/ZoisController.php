@@ -15,6 +15,7 @@ use App\Models\ContactSubmission;
 use App\Models\CampVacationBooking;
 use App\Models\TripBooking;
 use App\Presenters\Vacation\TripInquiryPayloadFormatter;
+use App\Rules\Recaptcha;
 
 class ZoisController extends Controller
 {
@@ -28,7 +29,7 @@ class ZoisController extends Controller
             'phone' => 'required|string|max:20',
             'preferred_date' => ['nullable', 'date'],
             'number_of_persons' => ['nullable', 'integer', 'min:1', 'max:99'],
-            'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
+            'g-recaptcha-response' => Recaptcha::production(),
         ]);
 
         // Get source information if available
@@ -184,7 +185,7 @@ class ZoisController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email',
-            'g-recaptcha-response' => app()->environment('production') ? 'recaptcha' : '',
+            'g-recaptcha-response' => Recaptcha::production(),
         ]);
 
         $locale = app()->getLocale();

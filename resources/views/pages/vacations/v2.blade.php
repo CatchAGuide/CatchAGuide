@@ -933,6 +933,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modalGuestsInput) modalGuestsInput.value = String(bookingGuests);
     }
 
+    const recaptchaErrorMessage = @json(__('validation.recaptcha'));
+    const bookingCaptcha = document.getElementById('contactModalForm') && typeof RecaptchaWidget !== 'undefined'
+        ? new RecaptchaWidget(document.getElementById('contactModalForm'))
+        : null;
+    const generalCaptcha = document.getElementById('campGeneralContactModalForm') && typeof RecaptchaWidget !== 'undefined'
+        ? new RecaptchaWidget(document.getElementById('campGeneralContactModalForm'))
+        : null;
+
     // Booking request form submission handler
     $('#contactSubmitBtn').on('click', function() {
         handleContactFormSubmission();
@@ -941,6 +949,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Also bind on modal shown event to ensure the button exists
     $('#contactModal').on('shown.bs.modal', function() {
         prefillBookingModal();
+        bookingCaptcha?.reset();
+        const contactError = document.getElementById('contactError');
+        if (contactError) {
+            contactError.style.display = 'none';
+            contactError.innerHTML = '';
+        }
         $('#contactSubmitBtn').off('click').on('click', function() {
             handleContactFormSubmission();
         });
@@ -952,6 +966,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     $('#campGeneralContactModal').on('shown.bs.modal', function() {
+        generalCaptcha?.reset();
+        const contactError = document.getElementById('campGeneralContactError');
+        if (contactError) {
+            contactError.style.display = 'none';
+            contactError.innerHTML = '';
+        }
         $('#campGeneralContactSubmitBtn').off('click').on('click', function() {
             handleGeneralContactFormSubmission();
         });
@@ -971,6 +991,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Validate form
         if (!contactForm.checkValidity()) {
             contactForm.reportValidity();
+            return;
+        }
+
+        if (bookingCaptcha && !bookingCaptcha.requireToken(function() {
+            contactError.style.display = 'block';
+            contactError.innerHTML = recaptchaErrorMessage;
+        })) {
             return;
         }
         
@@ -998,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.success) {
                 // Reset form
                 contactForm.reset();
+                bookingCaptcha?.reset();
                 
                 // Show success message
                 successMessage.style.display = 'block';
@@ -1015,6 +1043,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 contactError.style.display = 'block';
                 contactError.innerHTML = data.message || 'An error occurred. Please try again.';
                 contactFormContainer.style.display = 'block';
+                bookingCaptcha?.reset();
             }
         })
         .catch(error => {
@@ -1024,6 +1053,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             contactError.style.display = 'block';
             contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+            bookingCaptcha?.reset();
         });
     }
 
@@ -1039,6 +1069,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!contactForm.checkValidity()) {
             contactForm.reportValidity();
+            return;
+        }
+
+        if (generalCaptcha && !generalCaptcha.requireToken(function() {
+            contactError.style.display = 'block';
+            contactError.innerHTML = recaptchaErrorMessage;
+        })) {
             return;
         }
 
@@ -1060,6 +1097,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.success) {
                 contactForm.reset();
+                generalCaptcha?.reset();
                 successMessage.style.display = 'block';
 
                 setTimeout(() => {
@@ -1074,6 +1112,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 contactError.style.display = 'block';
                 contactError.innerHTML = data.message || 'An error occurred. Please try again.';
                 contactFormContainer.style.display = 'block';
+                generalCaptcha?.reset();
             }
         })
         .catch(error => {
@@ -1081,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', function () {
             contactFormContainer.style.display = 'block';
             contactError.style.display = 'block';
             contactError.innerHTML = error.message || 'An error occurred. Please try again.';
+            generalCaptcha?.reset();
         });
     }
 });

@@ -8,6 +8,7 @@
 
     @if(!empty($siteKey))
         <script src="https://{{ $domain }}/recaptcha/api.js?hl={{ urlencode($lang) }}" async defer></script>
+        <script src="{{ asset('js/recaptcha-widget.js') }}" defer></script>
     @endif
 @endonce
 
@@ -28,4 +29,3 @@
         @if(!empty($attrs['error-callback'])) data-error-callback="{{ $attrs['error-callback'] }}" @endif
     ></div>
 @endif
-

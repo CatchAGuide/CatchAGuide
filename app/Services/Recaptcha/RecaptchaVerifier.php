@@ -24,5 +24,10 @@ class RecaptchaVerifier
 
         return $verifier->verify($token, $ip);
     }
+
+    public function passes(?string $token, ?string $ip = null): bool
+    {
+        return $this->verify($token, $ip)->isSuccess();
+    }
 }
 
