@@ -23,17 +23,25 @@
         'lat' => (float) ($center['lat'] ?? $center['latitude'] ?? config('services.maps.default_center.lat')),
         'lng' => (float) ($center['lng'] ?? $center['longitude'] ?? config('services.maps.default_center.lng')),
     ];
+    // HEX_TAG / HEX_AMP keep popup HTML safe inside <script type="application/json">
+    $markersJson = json_encode(
+        array_values($markers),
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS
+    );
+    $centerJson = json_encode($centerPayload, JSON_UNESCAPED_UNICODE);
 @endphp
 
 <x-maps.assets />
+
+{{-- Markers live in a JSON script (not a data-* attribute) so popup HTML cannot break attribute parsing --}}
+<script type="application/json" data-cag-maps-markers="{{ $mapId }}">{!! $markersJson !!}</script>
+<script type="application/json" data-cag-maps-center="{{ $mapId }}">{!! $centerJson !!}</script>
 
 <div
     id="{{ $mapId }}"
     {{ $attributes->class(['cag-map', 'cag-map--listing', $class]) }}
     style="height: {{ $heightStyle }};"
     data-maps-listing
-    data-markers="{{ e(json_encode(array_values($markers), JSON_UNESCAPED_UNICODE)) }}"
-    data-center="{{ e(json_encode($centerPayload, JSON_UNESCAPED_UNICODE)) }}"
     data-cluster="{{ $cluster ? 'true' : 'false' }}"
     data-fit-primary-bounds="{{ $fitPrimaryBounds ? 'true' : 'false' }}"
     data-show-gray-nearby="{{ $showGrayNearby ? 'true' : 'false' }}"

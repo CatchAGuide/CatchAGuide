@@ -7,8 +7,8 @@ class MarkerFactory {
   createIcon(variant = 'primary') {
     const isGray = variant === 'gray';
     return L.divIcon({
-      className: `cag-map-pin cag-map-pin--${isGray ? 'gray' : 'primary'}`,
-      html: `<div class="cag-map-pin__inner"><span class="cag-map-pin__glyph"></span></div>`,
+      className: `leaflet-div-icon cag-map-pin cag-map-pin--${isGray ? 'gray' : 'primary'}`,
+      html: `<div class="cag-map-pin__inner"><span class="cag-map-pin__glyph" aria-hidden="true"></span></div>`,
       iconSize: isGray ? [32, 44] : [28, 40],
       iconAnchor: isGray ? [16, 40] : [14, 36],
       popupAnchor: [0, -32],

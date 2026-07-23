@@ -18,13 +18,31 @@ class ListingMap {
     this.options = { ...this._parseOptions(el), ...overrideOptions };
   }
 
+  _readJsonScript(el, attr) {
+    const id = el.id;
+    if (!id) {
+      return null;
+    }
+    const safeId =
+      typeof CSS !== 'undefined' && typeof CSS.escape === 'function' ? CSS.escape(id) : id.replace(/"/g, '\\"');
+    const script = document.querySelector(`script[type="application/json"][${attr}="${safeId}"]`);
+    if (!script || !script.textContent) {
+      return null;
+    }
+    return JSON.parse(script.textContent.trim());
+  }
+
   _parseOptions(el) {
     const ds = el.dataset;
     let markers = [];
     let center = null;
 
     try {
-      if (ds.markers) {
+      const fromScript = this._readJsonScript(el, 'data-cag-maps-markers');
+      if (Array.isArray(fromScript)) {
+        markers = fromScript;
+      } else if (ds.markers) {
+        // Legacy fallback (small payloads only)
         markers = JSON.parse(ds.markers);
       }
     } catch (e) {
@@ -32,7 +50,10 @@ class ListingMap {
     }
 
     try {
-      if (ds.center) {
+      const fromScript = this._readJsonScript(el, 'data-cag-maps-center');
+      if (fromScript && typeof fromScript === 'object') {
+        center = fromScript;
+      } else if (ds.center) {
         center = JSON.parse(ds.center);
       }
     } catch (e) {

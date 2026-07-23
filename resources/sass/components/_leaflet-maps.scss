@@ -22,9 +22,12 @@
   }
 }
 
+/* Override Leaflet .leaflet-div-icon defaults so pins are visible */
+.leaflet-div-icon.cag-map-pin,
 .cag-map-pin {
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 
   &__inner {
     width: 28px;
@@ -36,6 +39,7 @@
   }
 
   &__glyph {
+    display: block;
     width: 22px;
     height: 22px;
     border-radius: 50% 50% 50% 0;
