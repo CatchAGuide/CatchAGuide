@@ -13,4 +13,5 @@ return [
     'submitting' => 'Submitting...',
     'errorMessage' => 'An error occurred. Please try again.',
     'successMessage' => 'Your message has been sent successfully!',
+    'bookingSuccessMessage' => 'Your booking request has been sent! We\'ll get back to you shortly with the next steps.',
 ];

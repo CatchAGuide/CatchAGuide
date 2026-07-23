@@ -24,6 +24,7 @@ class CustomerContactMail extends Mailable
     public $source_title;
     public $language;
     public $target;
+    public $copyNamespace = 'emails.contact_customer';
     public $type = 'customer_contact_mail';
 
     /**
@@ -60,6 +61,6 @@ class CustomerContactMail extends Mailable
         return $this->view('mails.customercontactmail')
             ->to($this->email)
             ->cc(config('mail.admin_email'))
-            ->subject(__('emails.contact_customer.subject'));
+            ->subject(__($this->copyNamespace . '.subject'));
     }
 }

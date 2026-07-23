@@ -434,266 +434,373 @@ class GuidingsSettingController extends Controller
         return back()->with('success', 'Die Ausgelegt für wurde erfolgreich gelöscht');
     }
 
-    public function emailmaintenance(){
-        $emailTemplates = [
-            [
-                'name' => 'Guide Booking Request',
-                'description' => 'Email sent to guide when new booking request is received',
-                'template_key' => 'guide_booking_request',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guide Reminder 24hrs',
-                'description' => 'Reminder email sent to guide 24 hours after booking request',
-                'template_key' => 'guide_reminder',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guide Reminder 12hrs', 
-                'description' => 'Reminder email sent to guide 12 hours after booking request',
-                'template_key' => 'guide_reminder_12hrs',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guide Booking Accepted',
-                'description' => 'Email sent to guide when booking is accepted',
-                'template_key' => 'guide_accepted_mail',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guide Booking Expired',
-                'description' => 'Email sent to guide when booking request expires',
-                'template_key' => 'guide_expired_booking',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guide Upcoming Tour',
-                'description' => 'Reminder email sent to guide about upcoming tour',
-                'template_key' => 'guide_upcoming_tour',
-                'category' => 'guide'
-            ],
-            [
-                'name' => 'Guest Booking Request',
-                'description' => 'Email sent to guest when booking request is submitted',
-                'template_key' => 'guest_booking_request',
-                'category' => 'guest'
-            ],
-            [
-                'name' => 'Guest Booking Accepted',
-                'description' => 'Email sent to guest when booking is accepted',
-                'template_key' => 'accepted_mail',
-                'category' => 'guest'
-            ],
-            [
-                'name' => 'Guest Booking Rejected',
-                'description' => 'Email sent to guest when booking is rejected',
-                'template_key' => 'rejected_mail',
-                'category' => 'guest'
-            ],
-            [
-                'name' => 'Guest Tour Reminder',
-                'description' => 'Reminder email sent to guest about upcoming tour',
-                'template_key' => 'guest_tour_reminder',
-                'category' => 'guest'
-            ],
-            [
-                'name' => 'Guest Review Request',
-                'description' => 'Email sent to guest requesting tour review',
-                'template_key' => 'guest_review',
-                'category' => 'guest'
-            ],
-            [
-                'name' => 'Guest Booking Expired',
-                'description' => 'Email sent to guest when booking expires',
-                'template_key' => 'guest_expired_booking',
-                'category' => 'guest'
-            ]
+    public function emailmaintenance()
+    {
+        $emailTemplates = $this->buildEmailTemplateCatalogue();
+        $categories = config('email_templates.categories');
+        $triggerTypes = config('email_templates.trigger_types');
+        $statuses = config('email_templates.statuses');
+
+        $stats = [
+            'total' => count($emailTemplates),
+            'active' => collect($emailTemplates)->where('status', 'active')->count(),
+            'scheduled' => collect($emailTemplates)->where('trigger_type', 'scheduled')->count(),
+            'immediate' => collect($emailTemplates)->where('trigger_type', 'immediate')->count(),
         ];
 
-        return view('admin.pages.setting.emails.maintenance', compact('emailTemplates'));
+        return view('admin.pages.setting.emails.maintenance', compact(
+            'emailTemplates',
+            'categories',
+            'triggerTypes',
+            'statuses',
+            'stats'
+        ));
+    }
+
+    private function buildEmailTemplateCatalogue(): array
+    {
+        $templates = [];
+
+        foreach (config('email_templates.templates', []) as $key => $meta) {
+            $templates[] = array_merge($meta, [
+                'template_key' => $key,
+                'preview_url_en' => route('admin.settings.email.preview', ['template' => $key, 'locale' => 'en']),
+                'preview_url_de' => route('admin.settings.email.preview', ['template' => $key, 'locale' => 'de']),
+            ]);
+        }
+
+        return $templates;
     }
 
     public function emailPreview($template, $locale)
     {
-        // Set the application locale
         app()->setLocale($locale);
-        
-        // Generate mock data based on template type
-        $data = $this->getMockEmailData($template);
-        
-        // Determine the correct view path
-        $viewPath = $this->getEmailViewPath($template);
-        
-        return view($viewPath, $data);
+
+        try {
+            $data = $this->getMockEmailData($template);
+            $viewPath = $this->getEmailViewPath($template);
+
+            return response(view($viewPath, $data)->render());
+        } catch (\Throwable $e) {
+            return response($this->renderPreviewErrorHtml($template, $e), 200);
+        }
     }
 
     public function emailPreviewAjax($template, $locale)
     {
-        // Set the application locale
         app()->setLocale($locale);
-        
-        // Generate mock data based on template type
-        $data = $this->getMockEmailData($template);
-        
-        // Determine the correct view path
-        $viewPath = $this->getEmailViewPath($template);
-        
-        // Return just the HTML content for the modal
-        return response()->json([
-            'html' => view($viewPath, $data)->render(),
-            'template_name' => $this->getTemplateName($template),
-            'locale' => $locale
-        ]);
+
+        try {
+            $data = $this->getMockEmailData($template);
+            $viewPath = $this->getEmailViewPath($template);
+
+            return response()->json([
+                'html' => view($viewPath, $data)->render(),
+                'template_name' => $this->getTemplateName($template),
+                'locale' => $locale,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'html' => $this->renderPreviewErrorHtml($template, $e),
+                'template_name' => $this->getTemplateName($template),
+                'locale' => $locale,
+            ], 200);
+        }
+    }
+
+    private function renderPreviewErrorHtml(string $template, \Throwable $e): string
+    {
+        $name = e($this->getTemplateName($template));
+        $message = e($e->getMessage());
+
+        return <<<HTML
+<!DOCTYPE html>
+<html><body style="font-family: Arial, sans-serif; padding: 24px; background: #f8f9fa; color: #313041;">
+  <div style="max-width: 560px; margin: 0 auto; background: #fff; border: 1px solid #f5c2c7; border-radius: 8px; padding: 20px;">
+    <h3 style="margin-top: 0; color: #842029;">Preview unavailable</h3>
+    <p style="font-size: 14px;"><strong>{$name}</strong> could not be rendered with sample data.</p>
+    <p style="font-size: 12px; color: #6c757d; word-break: break-word;">{$message}</p>
+  </div>
+</body></html>
+HTML;
     }
 
     private function getMockEmailData($template)
     {
-        // Create mock user
         $mockUser = (object) [
             'id' => 1,
             'firstname' => 'John',
             'lastname' => 'Doe',
             'email' => 'john.doe@example.com',
             'phone' => '+49 123 456 7890',
-            'phone_country_code' => '+49'
+            'phone_country_code' => '+49',
+            'language' => 'en',
         ];
-        
-        // Create mock guide
+
         $mockGuide = (object) [
-            'id' => 1,
+            'id' => 2,
             'firstname' => 'Max',
             'lastname' => 'Mustermann',
             'email' => 'max.guide@example.com',
             'phone' => '+49 987 654 3210',
+            'phone_country_code' => '+49',
             'location' => 'Lake Constance, Germany',
-            'user' => $mockUser
+            'language' => 'en',
+            'user' => $mockUser,
         ];
-        
-        // Create mock guiding
+
         $mockGuiding = (object) [
             'id' => 1,
             'title' => 'Professional Pike Fishing Adventure',
             'location' => 'Lake Constance, Germany',
-            'slug' => 'professional-pike-fishing-adventure'
+            'slug' => 'professional-pike-fishing-adventure',
+            'user' => $mockGuide,
         ];
-        
-        // Create mock booking
-        $mockBooking = (object) [
-            'id' => 1,
-            'token' => 'mock-booking-token-123',
-            'book_date' => '2024-02-15',
-            'count_of_users' => 2,
-            'price' => 299.99,
-            'phone' => '+49 123 456 7890',
-            'extras' => serialize([
-                [
-                    'extra_name' => 'Fishing Equipment',
-                    'extra_quantity' => 2,
-                    'extra_total_price' => 50.00,
-                    'price' => 50.00
-                ],
-                [
-                    'extra_name' => 'Lunch Package',
-                    'extra_quantity' => 2,
-                    'extra_total_price' => 30.00,
-                    'price' => 30.00
-                ]
-            ]),
-            'additional_information' => 'Unfortunately, I have to cancel due to weather conditions. However, I can offer you these alternative dates.',
-            'alternativeDates' => ['2024-02-20', '2024-02-22', '2024-02-25', '2024-02-26', '2024-02-28'],
-            'textNote' => 'Thank you for your booking request. We have received it and are processing it.',
-            'alternativeText' => 'Please let us know if any of the alternative dates work for you.',
-            'guideName' => 'Max Mustermann',
-            'user' => $mockUser
+
+        $mockBooking = new class($mockUser, $mockGuiding) {
+            public $id = 1;
+            public $token = 'mock-booking-token-123';
+            public $book_date = '2024-02-15';
+            public $count_of_users = 2;
+            public $price = 299.99;
+            public $cag_percent = 60.00;
+            public $phone = '+49 123 456 7890';
+            public $email = 'john.doe@example.com';
+            public $status = 'pending';
+            public $extras;
+            public $additional_information = 'Unfortunately, I have to cancel due to weather conditions. However, I can offer you these alternative dates.';
+            public $alternativeDates = ['2024-02-20', '2024-02-22', '2024-02-25', '2024-02-26', '2024-02-28'];
+            public $textNote = 'Thank you for your booking request. We have received it and are processing it.';
+            public $alternativeText = 'Please let us know if any of the alternative dates work for you.';
+            public $guideName = 'Max Mustermann';
+            public $user;
+            public $guiding;
+
+            public function __construct($user, $guiding)
+            {
+                $this->user = $user;
+                $this->guiding = $guiding;
+                $this->extras = serialize([
+                    [
+                        'extra_name' => 'Fishing Equipment',
+                        'extra_quantity' => 2,
+                        'extra_total_price' => 50.00,
+                        'price' => 50.00,
+                    ],
+                    [
+                        'extra_name' => 'Lunch Package',
+                        'extra_quantity' => 2,
+                        'extra_total_price' => 30.00,
+                        'price' => 30.00,
+                    ],
+                ]);
+            }
+
+            public function getFormattedBookingDate($format = 'd.m.Y')
+            {
+                return date($format, strtotime($this->book_date));
+            }
+
+            public function getGrossAmount()
+            {
+                return $this->price;
+            }
+
+            public function getGuideShareAmount()
+            {
+                return $this->price - $this->cag_percent;
+            }
+        };
+
+        // Guiding-shaped object used by guide upcoming-tour mail ($guide->user / $guide->location)
+        $mockGuidingAsGuide = (object) [
+            'id' => $mockGuiding->id,
+            'title' => $mockGuiding->title,
+            'location' => $mockGuiding->location,
+            'slug' => $mockGuiding->slug,
+            'user' => $mockGuide,
+            'firstname' => $mockGuide->firstname,
+            'lastname' => $mockGuide->lastname,
+            'email' => $mockGuide->email,
+            'phone' => $mockGuide->phone,
+            'phone_country_code' => $mockGuide->phone_country_code,
         ];
-        
-        // Base data that most templates need
+
         $baseData = [
             'user' => $mockUser,
             'guide' => $mockGuide,
             'guiding' => $mockGuiding,
-            'booking' => $mockBooking
+            'booking' => $mockBooking,
         ];
-        
-        // Add specific data based on template
+
         switch ($template) {
             case 'guest_tour_reminder':
                 return array_merge($baseData, [
                     'guestName' => $mockUser->firstname,
                     'guideName' => $mockGuide->firstname,
                     'location' => $mockGuiding->location,
-                    'date' => date('F j, Y', strtotime($mockBooking->book_date))
+                    'date' => date('F j, Y', strtotime($mockBooking->book_date)),
                 ]);
-                
+
             case 'guest_review':
                 return array_merge($baseData, [
                     'userName' => $mockUser->firstname,
                     'guideName' => $mockGuide->firstname,
                     'location' => $mockGuiding->location,
-                    'reviewUrl' => route('welcome') . '/review/mock-review-token'
+                    'reviewUrl' => url('/review/mock-review-token'),
                 ]);
-                
+
             case 'guest_booking_request':
-                // Generate textNote using translation system
                 $guideName = $mockGuide->firstname;
                 $textNote = __('emails.guest_booking_request_text_1');
                 $textNote = str_replace('[Guide Name]', $guideName, $textNote);
-                
-                $formattedDate = date('F j, Y', strtotime($mockBooking->book_date));
-                $textNote = str_replace('[Date]', $formattedDate, $textNote);
-                
+                $textNote = str_replace('[Date]', date('F j, Y', strtotime($mockBooking->book_date)), $textNote);
                 $textNote = str_replace('[Location]', $mockGuiding->location, $textNote);
-                
+
                 $alternativeText = __('emails.guest_booking_request_text_5');
                 $alternativeText = str_replace('[Guide Name]', $guideName, $alternativeText);
-                
+                $mockBooking->alternativeText = $alternativeText;
+
                 return array_merge($baseData, [
                     'textNote' => $textNote,
-                    'alternativeText' => $alternativeText
+                    'alternativeText' => $alternativeText,
                 ]);
-                
+
+            case 'guide_upcoming_tour':
+                return [
+                    'guide' => $mockGuidingAsGuide,
+                    'booking' => $mockBooking,
+                    'user' => $mockUser,
+                    'guiding' => $mockGuiding,
+                ];
+
+            case 'guide_review_confirmation':
+                return [
+                    'name' => $mockGuide->firstname,
+                    'guiding_name' => $mockGuiding->title,
+                    'score' => 9,
+                    'guide_score' => 9,
+                    'region_water_score' => 8,
+                    'overall_score' => 9,
+                    'comment' => 'Amazing experience! The guide was very knowledgeable and patient.',
+                ];
+
+            case 'guide_application_approved':
+            case 'guide_application_received':
+                return ['user' => $mockGuide];
+
+            case 'guide_admin_new_request':
+                $mockGuide->guide_type = 'private';
+                $mockGuide->information = (object) [
+                    'phone' => '+49 987 654 3210',
+                    'address' => 'Seestrasse',
+                    'address_number' => '12',
+                    'postal' => '78462',
+                    'city' => 'Konstanz',
+                ];
+
+                return ['user' => $mockGuide];
+
+            case 'guide_application_rejected':
+                return [
+                    'user' => $mockGuide,
+                    'rejectionReason' => 'Incomplete profile information. Please add a valid fishing license and more tour photos.',
+                ];
+
+            case 'registration_verification':
+                return ['user' => $mockUser];
+
+            case 'automatic_registration_mail':
+                return [
+                    'user' => $mockUser,
+                    'tempPassword' => 'TempPass123!',
+                ];
+
+            case 'customer_newsletter_mail':
+            case 'newsletter':
+                return [
+                    'email' => $mockUser->email,
+                    'language' => 'en',
+                    'copyNamespace' => $template === 'newsletter'
+                        ? 'emails.newsletter_admin'
+                        : 'emails.newsletter_customer',
+                    'viewSubscribersUrl' => route('admin.newsletter-subscribers.index'),
+                ];
+
+            case 'guide_invoice':
+                return $baseData;
+
+            case 'customer_contact_mail':
+            case 'contact_mail':
+                return [
+                    'name' => $mockUser->firstname . ' ' . $mockUser->lastname,
+                    'email' => $mockUser->email,
+                    'phone' => $mockUser->phone,
+                    'phone_country_code' => $mockUser->phone_country_code,
+                    'contact_message' => 'Hi — I have a question about guided fishing in Bavaria. Could you help?',
+                    'source_title' => 'Bavarian Alpine Trout',
+                    'source_type' => 'guiding',
+                    'copyNamespace' => $template === 'contact_mail'
+                        ? 'emails.contact_admin'
+                        : 'emails.contact_customer',
+                    'viewRequestsUrl' => route('admin.contact-requests.index'),
+                ];
+
+            case 'vacation_booking_customer_mail':
+            case 'vacation_booking_admin_mail':
+                return [
+                    'name' => $mockUser->firstname . ' ' . $mockUser->lastname,
+                    'email' => $mockUser->email,
+                    'phone' => $mockUser->phone,
+                    'phone_country_code' => $mockUser->phone_country_code,
+                    'contact_message' => 'Looking forward to this trip — please confirm availability for our group.',
+                    'source_title' => 'Lake Constance Pike Fishing',
+                    'source_type' => 'trip',
+                    'preferred_date' => '2024-08-25',
+                    'number_of_persons' => 4,
+                    'source_id' => 42,
+                    'copyNamespace' => $template === 'vacation_booking_admin_mail'
+                        ? 'emails.vacation_booking_admin'
+                        : 'emails.vacation_booking_customer',
+                    'viewRequestsUrl' => route('admin.trip-bookings.index'),
+                ];
+
+            case 'ceo_booking_notification':
+            case 'booking_reject_mail_to_ceo':
+            case 'booking_cancel':
+            case 'ceo_reject_mail':
+            case 'ceo_accept_mail':
+            case 'ceo_request_mail':
+            case 'ceo_expire_mail':
+                return $baseData;
+
+            case 'ddos_alert':
+                return [
+                    'alertType' => 'Rate limit exceeded',
+                    'details' => [
+                        'ip' => '203.0.113.42',
+                        'user_agent' => 'Mozilla/5.0 (compatible; Bot/1.0)',
+                        'context' => 'search',
+                        'violations' => 25,
+                        'url' => 'https://catchaguide.com/guidings',
+                    ],
+                    'timestamp' => now(),
+                ];
+
             default:
                 return $baseData;
         }
     }
-    
+
     private function getEmailViewPath($template)
     {
-        $templateMap = [
-            'guide_booking_request' => 'mails.guide.guide_booking_request',
-            'guide_reminder' => 'mails.guide.guide_reminder',
-            'guide_reminder_12hrs' => 'mails.guide.guide_reminder_12hrs',
-            'guide_accepted_mail' => 'mails.guide.guide_accepted_mail',
-            'guide_expired_booking' => 'mails.guide.guide_expired_booking',
-            'guide_upcoming_tour' => 'mails.guide.guide_upcoming_tour',
-            'guest_booking_request' => 'mails.guest.guest_booking_request',
-            'accepted_mail' => 'mails.guest.accepted_mail',
-            'rejected_mail' => 'mails.guest.rejected_mail',
-            'guest_tour_reminder' => 'mails.guest.guest_tour_reminder',
-            'guest_review' => 'mails.guest.guest_review',
-            'guest_expired_booking' => 'mails.guest.guest_expired_booking'
-        ];
-        
-        return $templateMap[$template] ?? 'mails.guest.guest_booking_request';
+        $view = config("email_templates.templates.{$template}.view");
+
+        return $view ?? 'mails.guest.guest_booking_request';
     }
 
     private function getTemplateName($template)
     {
-        $templateNames = [
-            'guide_booking_request' => 'Guide Booking Request',
-            'guide_reminder' => 'Guide Reminder 24hrs',
-            'guide_reminder_12hrs' => 'Guide Reminder 12hrs',
-            'guide_accepted_mail' => 'Guide Booking Accepted',
-            'guide_expired_booking' => 'Guide Booking Expired',
-            'guide_upcoming_tour' => 'Guide Upcoming Tour',
-            'guest_booking_request' => 'Guest Booking Request',
-            'accepted_mail' => 'Guest Booking Accepted',
-            'rejected_mail' => 'Guest Booking Rejected',
-            'guest_tour_reminder' => 'Guest Tour Reminder',
-            'guest_review' => 'Guest Review Request',
-            'guest_expired_booking' => 'Guest Booking Expired'
-        ];
-        
-        return $templateNames[$template] ?? 'Unknown Template';
+        return config("email_templates.templates.{$template}.name", 'Unknown Template');
     }
 }

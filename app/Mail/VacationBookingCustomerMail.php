@@ -6,7 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ContactMail extends Mailable
+class VacationBookingCustomerMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -24,9 +24,8 @@ class ContactMail extends Mailable
     public $source_title;
     public $language;
     public $target;
-    public $copyNamespace = 'emails.contact_admin';
-    public $viewRequestsUrl;
-    public $type = 'contact_mail';
+    public $copyNamespace = 'emails.vacation_booking_customer';
+    public $type = 'vacation_booking_customer_mail';
 
     /**
      * @param  array<string, mixed>|null  $extra
@@ -53,16 +52,13 @@ class ContactMail extends Mailable
         $this->source_id = $extra['source_id'] ?? null;
         $this->camp_id = $extra['camp_id'] ?? null;
         $this->source_title = $extra['source_title'] ?? null;
-        $this->viewRequestsUrl = $extra['view_requests_url'] ?? null;
         $this->language = app()->getLocale();
-        $this->target = 'contact_mail';
+        $this->target = 'vacation_booking_customer_mail';
     }
 
     public function build()
     {
-        return $this->view('mails.contactmail')
-            ->to(config('mail.admin_email'))
+        return $this->view('mails.customercontactmail')
             ->subject(__($this->copyNamespace . '.subject'));
     }
 }
-
