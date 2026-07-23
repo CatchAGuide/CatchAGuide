@@ -810,7 +810,44 @@
                     <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div id="map" class="modal-body"></div>
+                <div class="modal-body p-0" style="height: calc(100% - 56px);">
+                    @php
+                        if ($allGuidings->isEmpty()) {
+                            $mapSource = $otherguidings ?? collect();
+                            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+                        } else {
+                            $mapSource = $allGuidings instanceof \Illuminate\Support\Collection
+                                ? $allGuidings
+                                : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+                            if (isset($otherguidings) && count($otherguidings) > 0) {
+                                $mapSource = $mapSource->concat($otherguidings);
+                            }
+                            $mapGrayIds = isset($otherguidings)
+                                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                                : [];
+                        }
+                        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+                        $mapCenterLat = request()->get('placeLat')
+                            ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
+                        $mapCenterLng = request()->get('placeLng')
+                            ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
+                    @endphp
+                    <x-maps.listing
+                        :markers="$guidingMapMarkers"
+                        layout="modal"
+                        modal-id="mapModal"
+                        map-id="map"
+                        height="100%"
+                        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+                        instance-key="category-country"
+                        :cluster="true"
+                        :show-gray-nearby="true"
+                        :single-zoom="12"
+                        :default-zoom="5"
+                        :lazy-modal="true"
+                        :updatable="true"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -1057,99 +1094,26 @@ $(document).ready(function() {
 
 
 <script>
-    // Use centralized GoogleMapsManager
+    // Use centralized GoogleMapsManager (Places autocomplete shim)
     const MapsManager = window.GoogleMapsManager;
-    let map;
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let isDuplicateCoordinate;
-    let markerCluster;
-    // Bounds for primary markers
-    const redBounds = new google.maps.LatLngBounds();
-    let redMarkerCount = 0;
-    const redCoordinates = new Set();
-
-    // Initialize map
-    MapsManager.waitForGoogleMaps(async function() {
-        @php
-            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-        @endphp
-        const position = { 
-            lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }},
-            lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} 
-        };
-        
-        // Initialize map using centralized manager
-        map = await MapsManager.initMap("map", {
-            zoom: 5,
-            center: position,
-            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
-            mapTypeControl: false,
-            streetViewControl: false
-        });
-
-        // Create placeholder marker
-        await MapsManager.createMarker({
-            map: map,
-            position: position
-        });
-
-    @if($allGuidings->isEmpty())
-        @include('pages.guidings.partials.maps',[
-            'guidings' => $otherguidings,
-            'grayIds' => collect($otherguidings)->pluck('id')->toArray(),
-        ])
-    @else
-        @include('pages.guidings.partials.maps',[
-            'guidings' => $allGuidings,
-            'grayIds' => [],
-        ])
-    @endif
-
-    // Focus map on red markers
-    if (redMarkerCount > 0) {
-        const uniqueCount = redCoordinates.size || redMarkerCount;
-        if (uniqueCount === 1) {
-            map.setCenter(redBounds.getCenter());
-            map.setZoom(12);
-        } else {
-            map.fitBounds(redBounds);
-        }
-    }
-
-        function getRandomOffset() {
-          // Generate a random value between -0.00005 and 0.00005 (adjust the range as needed)
-          return (Math.random() - 0.5) * 0.0080;
-        }
-       
-        // Create marker cluster using centralized manager
-        if (markers.length > 0) {
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-            if (markerCluster) {
-                // Add click event listeners to individual markers inside the cluster
-                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-                    // You can control the zoom level here
-                    // For example, zoom in by 2 levels when clicking on a cluster
-                    map.setZoom(map.getZoom() + 2);
-                    map.setCenter(cluster.getCenter());
-                });
-            }
-        }
-    });
 
     // Initialize Places Autocomplete using centralized manager
     function initialize() {
-        MapsManager.waitForGoogleMaps(function() {
-            MapsManager.initAutocomplete('searchPlace', function(place) {
-                const locationData = MapsManager.extractLocationData(place);
-                const latInput = document.getElementById('placeLat');
-                const lngInput = document.getElementById('placeLng');
-                if (latInput) latInput.value = locationData.lat;
-                if (lngInput) lngInput.value = locationData.lng;
+        const input = document.getElementById('searchPlace');
+        if (!input || !MapsManager) return;
+        const boot = function () {
+            MapsManager.waitForGoogleMaps(function() {
+                MapsManager.initAutocomplete('searchPlace', function(place) {
+                    const locationData = MapsManager.extractLocationData(place);
+                    const latInput = document.getElementById('placeLat');
+                    const lngInput = document.getElementById('placeLng');
+                    if (latInput) latInput.value = locationData.lat;
+                    if (lngInput) lngInput.value = locationData.lng;
+                });
             });
-        });
+        };
+        input.addEventListener('focus', boot, { once: true });
+        input.addEventListener('click', boot, { once: true });
     }
 
     window.addEventListener('load', initialize);

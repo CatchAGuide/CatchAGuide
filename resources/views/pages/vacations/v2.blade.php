@@ -454,9 +454,20 @@
     <!-- Full Width Card Sections -->
     <div class="camp-container">
         <!-- Map Section -->
-        <div id="map" class="mb-5" style="height: 400px;">
-            <!-- Google Map will be rendered here -->
-        </div>
+        @php
+            $campMapLat = $camp['latitude'] ?? $camp['lat'] ?? 41.40338;
+            $campMapLng = $camp['longitude'] ?? $camp['lng'] ?? 2.17403;
+        @endphp
+        <x-maps.product
+            id="map"
+            class="mb-5"
+            :lat="$campMapLat"
+            :lng="$campMapLng"
+            :title="translate($camp['title'] ?? '')"
+            height="400px"
+            :zoom="10"
+            :lazy="true"
+        />
 
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
@@ -1283,7 +1294,6 @@ document.addEventListener('DOMContentLoaded', function () {
 @section('js_after')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    initMap();
     initDescriptionToggles();
 });
 
@@ -1366,33 +1376,6 @@ function initDescriptionToggles() {
     });
 }
 
-// Use centralized GoogleMapsManager
-const MapsManager = window.GoogleMapsManager;
-
-async function initMap() {
-    @php
-        // Try to get coordinates from camp data (support multiple possible field names)
-        $lat = $camp['latitude'] ?? $camp['lat'] ?? 41.40338;
-        $lng = $camp['longitude'] ?? $camp['lng'] ?? 2.17403;
-    @endphp
-    const location = { lat: {{ $lat }}, lng: {{ $lng }} };
-    
-    MapsManager.waitForGoogleMaps(async function() {
-        const map = await MapsManager.initMap('map', {
-            zoom: 10,
-            center: location,
-            mapTypeControl: false,
-            streetViewControl: false,
-            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
-        });
-
-        // Create marker using centralized manager
-        const marker = await MapsManager.createMarker({
-            map: map,
-            position: location
-        });
-    });
-}
 </script>
 @endsection
 

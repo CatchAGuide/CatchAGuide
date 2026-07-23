@@ -732,7 +732,31 @@
                     <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div id="map" class="modal-body"></div>
+                <div class="modal-body p-0" style="height: calc(100% - 56px);">
+                    @php
+                        $grayIds = [];
+                        $vacationMapMarkers = \App\Support\Maps\MapMarkerCollection::fromVacations($vacations, $grayIds);
+                        $mapCenterLat = request()->get('placeLat')
+                            ?: (isset($vacations[0]) ? $vacations[0]->latitude : config('services.maps.default_center.lat'));
+                        $mapCenterLng = request()->get('placeLng')
+                            ?: (isset($vacations[0]) ? $vacations[0]->longitude : config('services.maps.default_center.lng'));
+                    @endphp
+                    <x-maps.listing
+                        :markers="$vacationMapMarkers"
+                        layout="modal"
+                        modal-id="mapModal"
+                        map-id="map"
+                        height="100%"
+                        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+                        instance-key="vacations"
+                        :cluster="true"
+                        :show-gray-nearby="true"
+                        :single-zoom="12"
+                        :default-zoom="5"
+                        :lazy-modal="true"
+                        :updatable="true"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -824,70 +848,25 @@
 @section('js_after')
 
 <script>
-    // Use centralized GoogleMapsManager
+    // Places autocomplete — load Google Places only when the search field is focused
     const MapsManager = window.GoogleMapsManager;
-    let map;
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let isDuplicateCoordinate;
-    let markerCluster;
 
-    // Initialize map
-    MapsManager.waitForGoogleMaps(async function() {
-        @php
-            $lat = isset($vacations[0]) ? $vacations[0]->latitude : 51.165691;
-            $lng = isset($vacations[0]) ? $vacations[0]->longitude : 10.451526;
-        @endphp
-        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }}, lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} };
-        
-        // Initialize map using centralized manager
-        map = await MapsManager.initMap("map", {
-            zoom: 5,
-            center: position,
-            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
-            mapTypeControl: false,
-            streetViewControl: false
-        });
-
-        // Create placeholder marker
-        await MapsManager.createMarker({ map: map });
-        
-        @php
-            $grayIds = collect($vacations->items())->pluck('id')->toArray();
-        @endphp
-        @include('pages.vacations.partials.maps',[
-            'vacations' => $vacations ?? [],
-            'grayIds' => $grayIds ?? [],
-        ])
-    
-        function getRandomOffset() {
-          return (Math.random() - 0.5) * 0.0080;
-        }
-    
-        // Create marker cluster using centralized manager
-        if (markers.length > 0) {
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-            if (markerCluster) {
-                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-                    map.setZoom(map.getZoom() + 2);
-                    map.setCenter(cluster.getCenter());
-                });
-            }
-        }
-    });
-    
-    // Initialize Places Autocomplete using centralized manager
     function initialize() {
-        MapsManager.waitForGoogleMaps(function() {
-            MapsManager.initAutocomplete('searchPlace', function(place) {
-                const locationData = MapsManager.extractLocationData(place);
-                const latInput = document.getElementById('placeLat');
-                const lngInput = document.getElementById('placeLng');
-                if (latInput) latInput.value = locationData.lat;
-                if (lngInput) lngInput.value = locationData.lng;
+        const input = document.getElementById('searchPlace');
+        if (!input || !MapsManager) return;
+        const boot = function () {
+            MapsManager.waitForGoogleMaps(function() {
+                MapsManager.initAutocomplete('searchPlace', function(place) {
+                    const locationData = MapsManager.extractLocationData(place);
+                    const latInput = document.getElementById('placeLat');
+                    const lngInput = document.getElementById('placeLng');
+                    if (latInput) latInput.value = locationData.lat;
+                    if (lngInput) lngInput.value = locationData.lng;
+                });
             });
-        });
+        };
+        input.addEventListener('focus', boot, { once: true });
+        input.addEventListener('click', boot, { once: true });
     }
     
     window.addEventListener('load', initialize);

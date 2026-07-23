@@ -800,7 +800,42 @@
                 </div>
 
                 {{-- Map fills the rest --}}
-                <div id="map" class="map-modal__map"></div>
+                @php
+                    $mapCenterLat = request()->get('placeLat')
+                        ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
+                    $mapCenterLng = request()->get('placeLng')
+                        ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
+
+                    if ($allGuidings->isEmpty()) {
+                        $mapSource = $otherguidings ?? collect();
+                        $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+                    } else {
+                        $mapSource = $allGuidings;
+                        if (isset($otherguidings) && count($otherguidings) > 0) {
+                            $mapSource = $allGuidings->concat($otherguidings);
+                        }
+                        $mapGrayIds = isset($otherguidings)
+                            ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                            : [];
+                    }
+                    $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+                @endphp
+                <x-maps.listing
+                    class="map-modal__map"
+                    :markers="$guidingMapMarkers"
+                    layout="modal"
+                    modal-id="mapModal"
+                    map-id="map"
+                    height="100%"
+                    :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+                    instance-key="guidings"
+                    :cluster="true"
+                    :show-gray-nearby="true"
+                    :single-zoom="12"
+                    :default-zoom="5"
+                    :lazy-modal="true"
+                    :updatable="true"
+                />
 
             </div>
         </div>
@@ -930,8 +965,6 @@
     $listingMediaPlaceholder = media_url(null);
 @endphp
 <script>
-    // Use centralized GoogleMapsManager
-    const MapsManager = window.GoogleMapsManager;
     const listingMediaUsesObjectStorage = @json($listingMediaUsesObjectStorage);
     const listingMediaCdnBase = @json($listingMediaCdnBase);
     const listingMediaEnvPrefix = @json($listingMediaEnvPrefix);
@@ -954,205 +987,19 @@
             : `/${normalized}`;
     }
 
-    let map; // Make map variable accessible in wider scope
-    let markerCluster; // Make markerCluster accessible in wider scope
-    let isDuplicateCoordinate;
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let mapInitialized = false;
-
-    // Initialize map when modal is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        const mapModal = document.getElementById('mapModal');
-        if (mapModal) {
-            mapModal.addEventListener('shown.bs.modal', function () {
-                if (!mapInitialized) {
-                    MapsManager.waitForGoogleMaps(function() {
-                        initializeMap();
-                    });
-                } else if (map) {
-                    // If map already exists, trigger resize to fix dimensions
-                    MapsManager.resizeMap(map);
-                }
-            });
-        }
-    });
-
-    async function initializeMap() {
-        @php
-            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-        @endphp
-        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }}, lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
-        
-        const { InfoWindow } = await MapsManager.loadLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await MapsManager.loadLibrary("marker");
-
-        // Initialize map only if it hasn't been initialized yet
-        if (!map) {
-            map = await MapsManager.initMap("map", {
-                zoom: 5,
-                center: position,
-                mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
-                streetViewControl: false,
-                clickableIcons: false
-            });
-        }
-
-        // Bounds and marker counter for primary (non-gray) markers
-        let redBounds = new google.maps.LatLngBounds();
-        let redMarkerCount = 0;
-        const redCoordinates = new Set();
-
-        @if($allGuidings->isEmpty())
-            @include('pages.guidings.partials.maps',[
-                'guidings' => $otherguidings,
-                'grayIds' => collect($otherguidings)->pluck('id')->toArray(),
-            ])
-        @else
-            @php
-                // Always append otherguidings to the displayed markers
-                $combinedGuidings = $allGuidings;
-                if (isset($otherguidings) && count($otherguidings) > 0) {
-                    $combinedGuidings = $allGuidings->concat($otherguidings);
-                }
-                $grayIds = isset($otherguidings) ? collect($otherguidings)->pluck('id')->toArray() : [];
-            @endphp
-            @include('pages.guidings.partials.maps',[
-                'guidings' => $combinedGuidings,
-                'grayIds' => $grayIds,
-            ])
-        @endif
-
-        // Focus map on red markers (main results)
-        if (redMarkerCount > 0) {
-            const uniqueCount = redCoordinates.size || redMarkerCount;
-            if (uniqueCount === 1) {
-                map.setCenter(redBounds.getCenter());
-                map.setZoom(12);
-            } else {
-                map.fitBounds(redBounds);
-            }
-        }
-
-        function getRandomOffset() {
-            return (Math.random() - 0.5) * 0.0080;
-        }
-
-        // Create marker cluster using centralized manager
-        if (markers.length > 0) {
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-            if (markerCluster) {
-                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-                    map.setZoom(map.getZoom() + 2);
-                    map.setCenter(cluster.getCenter());
-                });
-            }
-        }
-        
-        mapInitialized = true;
-        
-        // Trigger resize after a short delay to ensure modal is fully rendered
-        MapsManager.resizeMap(map);
-    }
-
-    window.updateMapWithGuidings = function(guidings) {
-        // Clear existing markers
-        markers.forEach(marker => marker.setMap(null));
-        
-        // Clear marker cluster
-        if (markerCluster) {
-            try {
-                markerCluster.clearMarkers();
-            } catch (error) {
-                console.warn('Error clearing marker cluster:', error);
-            }
-        }
-
-        // Clear arrays but keep the map instance
-        markers.length = 0;
-        infowindows.forEach(infowindow => infowindow.close());
-        infowindows.length = 0;
-        uniqueCoordinates.length = 0;
-
-        // Add new markers for each guiding
-        guidings.forEach(guiding => {
-            if (guiding.lat && guiding.lng) {
-                const location = { lat: parseFloat(guiding.lat), lng: parseFloat(guiding.lng) };
-
-                const isDuplicateCoordinate = uniqueCoordinates.some(coordinate => {
-                    return coordinate.lat === location.lat && coordinate.lng === location.lng;
-                });
-
-                let marker;
-
-                if (isDuplicateCoordinate) {
-                    marker = new google.maps.marker.AdvancedMarkerElement({
-                        position: {
-                            lat: location.lat + ((Math.random() - 0.5) * 0.0080),
-                            lng: location.lng + ((Math.random() - 0.5) * 0.0080)
-                        },
-                        map: map
-                    });
-                } else {
-                    marker = new google.maps.marker.AdvancedMarkerElement({
-                        position: location,
-                        map: map
-                    });
-                    uniqueCoordinates.push(location);
-                }
-
-                markers.push(marker);
-
-                const thumbnailPath = guiding.thumbnail_path
+    // Leaflet ListingMap registers window.updateMapWithGuidings; enrich AJAX payloads with media URLs
+    window.__cagEnrichGuidingsForMap = function (guidings) {
+        return (guidings || []).map(function (guiding) {
+            return Object.assign({}, guiding, {
+                thumbnail: guiding.thumbnail_path
                     ? resolveListingMediaUrl(guiding.thumbnail_path)
-                    : listingMediaPlaceholder;
-
-                const infowindow = new google.maps.InfoWindow({
-                    content: `
-                        <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
-                            <div class="card-body border-0 p-0">
-                                <div class="d-flex">
-                                     <img src="${thumbnailPath}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
-                                </div>
-                                <div class="p-2">
-                                    <a class="text-decoration-none" href="/guidings/${guiding.id}/${guiding.slug}">
-                                        <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">${guiding.title}</h5>
-                                    </a>
-                                    <div class="text-muted small">${guiding.location}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `
-                });
-
-                infowindows.push(infowindow);
-
-                marker.addListener("gmp-click", () => {
-                    infowindows.forEach((iw) => {
-                        iw.close();
-                    });
-                    infowindow.open(map, marker);
-                });
-            }
+                    : listingMediaPlaceholder,
+                url: guiding.id && guiding.slug
+                    ? `/guidings/${guiding.id}/${guiding.slug}`
+                    : (guiding.url || '#'),
+                lowest_price: guiding.lowest_price != null ? guiding.lowest_price : guiding.price,
+            });
         });
-
-        // Update marker cluster with new markers
-        if (markerCluster) {
-            try {
-                markerCluster.addMarkers(markers);
-            } catch (error) {
-                console.warn('Error adding markers to cluster:', error);
-                // If clustering fails, recreate it
-                if (markers.length > 0 && map) {
-                    markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-                }
-            }
-        } else if (markers.length > 0 && map) {
-            // Create cluster if it doesn't exist
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-        }
     };
 
     function getLocation() {
