@@ -258,7 +258,7 @@ return [
         'subject' => 'Deine Kontaktanfrage',
         'title' => 'Vielen Dank für Deine Nachricht',
         'greeting' => 'Hallo :name,',
-        'intro' => 'Vielen Dank für Deine Anfrage. Wir haben Deine Nachricht erhalten und melden uns schnellstmöglich bei Dir. Wir melden uns in den nächsten 24 Stunden oder so bei Dir.',
+        'intro' => 'Vielen Dank für Deine Anfrage. Wir haben Deine Nachricht erhalten und melden uns in den nächsten 24 Stunden oder so bei Dir.',
         'intro_secondary' => 'Nachfolgend findest Du eine Zusammenfassung Deiner Angaben.',
         'section_contact' => 'Deine Kontaktdaten',
         'section_request' => 'Deine Anfrage',
