@@ -1292,7 +1292,7 @@
             <div class="row">
                 @foreach($CategoryPageMethods as $category)
                     <div class="my-1 col-md-4">
-                        <a href="{{ route('category.types', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                        <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{media_url($category->thumbnail_path)}}" style="width:150px;height:100px"/>
                                 <div class="card-body">

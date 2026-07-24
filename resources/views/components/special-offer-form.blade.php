@@ -82,17 +82,19 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="location" class="form-label fw-bold fs-5">
-                        Location
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="Enter the location of your special offer"></i>
-                    </label>
-                    <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="Enter location">
-                    <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? $formData['lat'] ?? '' }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? $formData['lng'] ?? '' }}">
-                    <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
-                    <input type="hidden" name="city" id="city" value="{{ $formData['city'] ?? '' }}">
-                    <input type="hidden" name="region" id="region" value="{{ $formData['region'] ?? '' }}">
+                    <x-maps.location-input
+                        label="Location"
+                        tooltip="Enter the location of your special offer"
+                        placeholder="Enter location"
+                        :value="$formData['location'] ?? ''"
+                        :lat="$formData['latitude'] ?? $formData['lat'] ?? ''"
+                        :lng="$formData['longitude'] ?? $formData['lng'] ?? ''"
+                        :country="$formData['country'] ?? ''"
+                        :city="$formData['city'] ?? ''"
+                        :region="$formData['region'] ?? ''"
+                        :types="['geocode']"
+                        wrapper-class=""
+                    />
                 </div>
 
                 <hr>

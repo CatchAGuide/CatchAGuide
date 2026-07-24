@@ -364,9 +364,19 @@ transform: translate3d(0,0,0); width: 100%;">
         <div class="row">
             <div class="tour-details-two__location {{$agent->ismobile() ? 'text-center' : ''}}">
                 <h3 class="tour-details-two__title">{{ translate('Karte') }}</h3>
-                <div id="map" style="height: 400px; width: 100%;">
-               
-                </div>
+                @if(!empty($guiding->lat) && !empty($guiding->lng))
+                    <x-maps.product
+                        id="map"
+                        :lat="$guiding->lat"
+                        :lng="$guiding->lng"
+                        :title="translate($guiding->title)"
+                        height="400px"
+                        :zoom="10"
+                        :lazy="true"
+                        on-marker-click="modal"
+                        modal-target="#guidingModal{{ $guiding->id }}"
+                    />
+                @endif
             </div>
 
             <div class="my-5">
@@ -590,46 +600,6 @@ transform: translate3d(0,0,0); width: 100%;">
     </style>
 
     <script>
-        // Use centralized GoogleMapsManager
-        const MapsManager = window.GoogleMapsManager;
-        let map;
-
-        // Wait for Google Maps API and initialize map
-        MapsManager.waitForGoogleMaps(async function() {
-            const position = { lat: {{$guiding->lat}}, lng: {{$guiding->lng}} };
-            
-            // Initialize map using centralized manager (use env mapId if available)
-            map = await MapsManager.initMap("map", {
-                zoom: 10,
-                center: position,
-                mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
-                mapTypeControl: false,
-                streetViewControl: false
-            });
-
-            // Create marker using centralized manager
-            const marker = await MapsManager.createMarker({
-                map: map,
-                position: position
-            });
-            
-            // Add Event on Marker using gmp-click
-            marker.addListener("gmp-click", () => {
-                $('#guidingModal{{$guiding->id}}').modal('show');
-            });
-        });
-
-
-            function toggleHighlight(markerView) {
-                if (markerView.content.classList.contains("highlight")) {
-                    markerView.content.classList.remove("highlight");
-                    markerView.zIndex = null;
-                } else {
-                    markerView.content.classList.add("highlight");
-                    markerView.zIndex = 1;
-                }
-            }
-
         $('#person').on('change',function(){
             $('.price-details').css('display','block');
         })

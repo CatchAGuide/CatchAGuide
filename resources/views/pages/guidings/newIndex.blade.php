@@ -1744,9 +1744,20 @@
     </section>
 
     <!-- Map Section -->
-    <div id="map" class="mb-5" style="height: 400px;">
-        <!-- Google Map will be rendered here -->
-    </div>
+    @if(!empty($guiding->lat) && !empty($guiding->lng))
+        <div class="mb-5">
+            <x-maps.product
+                id="map"
+                :lat="$guiding->lat"
+                :lng="$guiding->lng"
+                :title="translate($guiding->title)"
+                height="400px"
+                :zoom="10"
+                :lazy="true"
+                on-marker-click="popup"
+            />
+        </div>
+    @endif
 
     <div class="mb-5">
         <div class="tour-details-two__about">
@@ -2071,7 +2082,6 @@ let currentCount = 3; // Initial count of displayed items
 const totalItems = {{ $same_guiding->count() }};
 
 $(document).ready(function(){
-    initMap();
     
     // Function to scroll to reviews with highlight effect
     function scrollToReviews() {
@@ -2583,29 +2593,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }, 1500); // Wait a bit longer for calendar to be fully rendered
 });
-
-// Use centralized GoogleMapsManager
-const MapsManager = window.GoogleMapsManager;
-
-async function initMap() {
-    const location = { lat: {{ $guiding->lat }}, lng: {{ $guiding->lng }} };
-    
-    MapsManager.waitForGoogleMaps(async function() {
-        const map = await MapsManager.initMap('map', {
-            zoom: 10,
-            center: location,
-            mapTypeControl: false,
-            streetViewControl: false,
-            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
-        });
-
-        // Create marker using centralized manager
-        const marker = await MapsManager.createMarker({
-            map: map,
-            position: location
-        });
-    });
-}
 
 function initCheckNumberOfColumns() {
     return window.innerWidth < 768 ? 1 : 2;

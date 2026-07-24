@@ -408,10 +408,11 @@ namespace App\Models{
  * @property-read \App\Models\Employee|null $createdBy
  * @property-read \App\Models\Employee|null $employee
  * @property-read \App\Models\FinanceItem|null $financeItem
+ * @property-read \App\Models\UserGuest|null $guestUser
  * @property-read \App\Models\Guiding|null $guiding
  * @property-read \App\Models\Rating|null $rating
+ * @property-read \App\Models\User|null $registeredUser
  * @property-read \App\Models\Review|null $review
- * @property-read \App\Models\User|null $user
  * @method static \Database\Factories\BookingFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Booking newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Booking newQuery()
@@ -1194,9 +1195,37 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property string $label
+ * @property string|null $description
+ * @property string $command
+ * @property bool $is_enabled
+ * @property string $frequency
+ * @property string|null $schedule_time
+ * @property int|null $day_of_week
+ * @property string|null $cron_expression
+ * @property bool $without_overlapping
+ * @property bool $run_in_background
+ * @property string|null $append_output_to
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereAppendOutputTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCommand($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereCronExpression($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereDayOfWeek($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereFrequency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereIsEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereLabel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereRunInBackground($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereScheduleTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|CustomScheduledTask whereWithoutOverlapping($value)
  */
 	class CustomScheduledTask extends \Eloquent {}
 }
@@ -1617,8 +1646,16 @@ namespace App\Models{
  * @property string $invoice_status
  * @property \Illuminate\Support\Carbon|null $invoice_sent_at
  * @property string|null $invoice_number
+ * @property numeric|null $gross_amount
+ * @property numeric|null $commission_amount
+ * @property numeric|null $tax_amount
+ * @property string $currency
  * @property string $paid_status
  * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $invoice_due_at
+ * @property int $reminder_step
+ * @property \Illuminate\Support\Carbon|null $last_reminder_sent_at
+ * @property \Illuminate\Support\Carbon|null $next_reminder_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $billable
@@ -1629,13 +1666,21 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereBillableId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereBillableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCommissionAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereCurrency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereGrossAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceDueAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceSentAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereInvoiceStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereLastReminderSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereNextReminderAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem wherePaidAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem wherePaidStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereReminderStep($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereTaxAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItem whereUpdatedAt($value)
  */
 	class FinanceItem extends \Eloquent {}
@@ -1643,11 +1688,27 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $actor
- * @property-read \App\Models\FinanceItem|null $financeItem
+ * @property int $id
+ * @property int $finance_item_id
+ * @property string $event_type
+ * @property array<array-key, mixed>|null $payload
+ * @property string|null $actor_type
+ * @property int|null $actor_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $actor
+ * @property-read \App\Models\FinanceItem $financeItem
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereActorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereActorType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereEventType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereFinanceItemId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|FinanceItemEvent whereUpdatedAt($value)
  */
 	class FinanceItemEvent extends \Eloquent {}
 }
@@ -1740,21 +1801,57 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon $submitted_at
+ * @property \Illuminate\Support\Carbon|null $reviewed_at
+ * @property int|null $reviewed_by
+ * @property string $decision
+ * @property string|null $internal_notes
+ * @property string|null $rejection_reason
+ * @property int $version
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\User|null $reviewer
- * @property-read \App\Models\User|null $user
+ * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereDecision($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereInternalNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereRejectionReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereReviewedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereReviewedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereUserId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideRequest whereVersion($value)
  */
 	class GuideRequest extends \Eloquent {}
 }
 
 namespace App\Models{
 /**
- * @property-read \App\Models\User|null $user
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $from_status
+ * @property string $to_status
+ * @property int|null $changed_by
+ * @property \Illuminate\Support\Carbon $changed_at
+ * @property string|null $reason
+ * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereChangedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereChangedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereFromStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereToStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|GuideStatusLog whereUserId($value)
  */
 	class GuideStatusLog extends \Eloquent {}
 }
@@ -1805,6 +1902,7 @@ namespace App\Models{
  * @property string $location
  * @property string|null $city
  * @property string|null $country
+ * @property string|null $country_iso
  * @property string|null $region
  * @property string|null $type
  * @property int|null $recommended_for_anfaenger
@@ -1940,6 +2038,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCatering($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCountryIso($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCourseOfAction($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guiding whereDescCourseOfAction($value)
@@ -2580,7 +2679,7 @@ namespace App\Models{
  * @property int $id
  * @property string $email
  * @property string|null $language
- * @property string|null $confirmed_at
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Newsletter newModelQuery()
@@ -2947,9 +3046,27 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property string $key
+ * @property bool $is_enabled
+ * @property string|null $frequency
+ * @property string|null $schedule_time
+ * @property int|null $day_of_week
+ * @property string|null $cron_expression
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereCronExpression($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereDayOfWeek($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereFrequency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereIsEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereKey($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereScheduleTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledTaskSetting whereUpdatedAt($value)
  */
 	class ScheduledTaskSetting extends \Eloquent {}
 }
@@ -3084,6 +3201,53 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property int $sort_order
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TermsSectionTranslation> $translations
+ * @property-read int|null $translations_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection active()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection ordered()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection whereSortOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSection whereUpdatedAt($value)
+ */
+	class TermsSection extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
+ * @property int $terms_section_id
+ * @property string $language
+ * @property string $title
+ * @property string $content
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\TermsSection $section
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereLanguage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereTermsSectionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TermsSectionTranslation whereUpdatedAt($value)
+ */
+	class TermsSectionTranslation extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property string|null $language
  * @property string $title
  * @property string $slug
@@ -3168,6 +3332,7 @@ namespace App\Models{
  * @property numeric|null $price_single_room_addition
  * @property string|null $downpayment_policy
  * @property string|null $currency
+ * @property bool $year_round_availability
  * @property string $status
  * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -3233,6 +3398,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Trip whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Trip whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Trip whereWaterTypes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Trip whereYearRoundAvailability($value)
  */
 	class Trip extends \Eloquent {}
 }
@@ -3384,6 +3550,10 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereFirstname($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideSubmittedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereGuideVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsActive($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsGuide($value)
@@ -3508,10 +3678,18 @@ namespace App\Models{
  * @property string|null $phone_country_code
  * @property string|null $city
  * @property string|null $country
+ * @property string|null $company_name
+ * @property string|null $legal_form
+ * @property int|null $founded_year
+ * @property string|null $contact_position
+ * @property string|null $trade_register_number
+ * @property string|null $trade_register_court
+ * @property string|null $tax_number
  * @property string|null $about_me
  * @property string|null $languages
  * @property string|null $favorite_fish
  * @property int|null $fishing_start_year
+ * @property array<array-key, mixed>|null $company_profile
  * @property string|null $proof_of_identity_file_path
  * @property string|null $fishing_permit_file_path
  * @property int $request_as_guide
@@ -3526,18 +3704,26 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereAddressNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereBirthday($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCompanyName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCompanyProfile($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereContactPosition($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFavoriteFish($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFishingPermitFilePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFishingStartYear($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereFoundedYear($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereLanguages($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereLegalForm($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePhoneCountryCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation wherePostal($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereProofOfIdentityFilePath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereRequestAsGuide($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTaxNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTradeRegisterCourt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereTradeRegisterNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|UserInformation whereUpdatedAt($value)
  */
 	class UserInformation extends \Eloquent {}
@@ -3806,9 +3992,23 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * @property int $id
+ * @property string $email
+ * @property string $country
+ * @property string $pillar
+ * @property string $locale
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup wherePillar($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VacationInterestSignup whereUpdatedAt($value)
  */
 	class VacationInterestSignup extends \Eloquent {}
 }

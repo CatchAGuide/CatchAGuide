@@ -35,8 +35,7 @@
 </div>
 @endsection
 
-@push('scripts')
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_key') }}&libraries=places"></script>
+@push('js_push')
 <script src="{{ asset('js/select2.min.js') }}"></script>
 @endpush
 

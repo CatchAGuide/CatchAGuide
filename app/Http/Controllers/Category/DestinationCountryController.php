@@ -357,9 +357,12 @@ class DestinationCountryController extends Controller
             $nearbyLng = $cleanedRequest->get('placeLng') ?: ($filterData['placeLng'] ?? null);
 
             if (! empty($nearbyLat) && ! empty($nearbyLng)) {
-                $otherguidings = $this->otherGuidingsBasedByLocation($nearbyLat, $nearbyLng, $allGuidings);
+                $excludeFromNearby = $allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator
+                    ? collect($allGuidings->items())
+                    : collect($allGuidings);
+                $otherguidings = $this->getOtherGuidingsBasedByLocation($nearbyLat, $nearbyLng, $excludeFromNearby);
             } else {
-                $otherguidings = $this->otherGuidings();
+                $otherguidings = $this->getOtherGuidings();
             }
         }
 
@@ -440,22 +443,13 @@ class DestinationCountryController extends Controller
             ];
 
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
-            
-            // Add guiding data for map updates
-            $guidingsData = collect($allGuidings->items())->map(function($guiding) {
-                return [
-                    'id' => $guiding->id,
-                    'slug' => $guiding->slug,
-                    'title' => $guiding->title,
-                    'location' => $guiding->location,
-                    'lat' => $guiding->lat,
-                    'lng' => $guiding->lng
-                ];
-            });
-            
+            $mapGuidings = $this->buildMapGuidingsPayload($allGuidings, $otherguidings);
+
             return response()->json(array_merge($responseData, [
                 'html' => $view,
-                'guidings' => $guidingsData,
+                'guidings' => $mapGuidings,
+                'allGuidings' => $mapGuidings,
+                'mapGuidings' => $mapGuidings,
                 'total' => is_object($guidings) ? $guidings->total() : count($guidings),
                 'filterCounts' => [
                     'targetFish' => $targetFishCounts ?? [],
@@ -526,21 +520,18 @@ class DestinationCountryController extends Controller
         ]);
     }
 
-    public function otherGuidings(){
-        $otherguidings = Guiding::inRandomOrder('1234')->where('status',1)->limit(10)->get();
-
-        return $otherguidings;
+    public function otherGuidings()
+    {
+        return $this->getOtherGuidings();
     }
 
-    public function otherGuidingsBasedByLocation($latitude,$longitude){
-        $nearestlisting = Guiding::select(['guidings.*']) // Include necessary attributes here
-        ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
-        ->orderBy('distance')
-        ->where('status',1)
-        ->limit(10)
-        ->get();
-
-        return $nearestlisting;
+    public function otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings = null)
+    {
+        return $this->getOtherGuidingsBasedByLocation(
+            $latitude,
+            $longitude,
+            collect($allGuidings ?? [])
+        );
     }
 
     public function getCoordinates($country, $region=null, $city=null)

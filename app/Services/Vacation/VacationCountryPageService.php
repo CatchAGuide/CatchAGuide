@@ -204,33 +204,26 @@ class VacationCountryPageService
         $markers = [];
 
         if ($filter->showsTrips() && $filter->pillar !== 'camps') {
-            foreach ($this->trips->queryForCountry($filter)
+            $trips = $this->trips->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['title', 'slug', 'latitude', 'longitude']) as $trip) {
-                $markers[] = [
-                    'lat' => (float) $trip->latitude,
-                    'lng' => (float) $trip->longitude,
-                    'title' => $trip->title,
-                    'url' => route('vacations.trips.show', $trip->slug),
-                    'pillar' => 'trip',
-                ];
-            }
+                ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path', 'price_per_person', 'currency']);
+
+            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromTrips($trips));
         }
 
         if ($filter->showsCamps() && $filter->pillar !== 'trips') {
-            foreach ($this->camps->queryForCountry($filter)
+            $camps = $this->camps->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['title', 'slug', 'latitude', 'longitude']) as $camp) {
-                $markers[] = [
-                    'lat' => (float) $camp->latitude,
-                    'lng' => (float) $camp->longitude,
-                    'title' => translate($camp->title),
-                    'url' => route('vacations.camps.show', $camp->slug),
-                    'pillar' => 'camp',
-                ];
+                ->with(['accommodations', 'specialOffers'])
+                ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path']);
+
+            foreach ($camps as $camp) {
+                $camp->title = translate($camp->title);
             }
+
+            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromCamps($camps));
         }
 
         return $markers;

@@ -83,12 +83,12 @@
             }, 500);
         }
 
-        initializeLocationAutocompleteForTrips();
         initializeTripTagify();
         setupTripStepNavigation();
         setupTripFormSubmission();
         initializeAvailabilityTable();
         initializeScheduleRows();
+        // Location autocomplete: shared maps location-input + CAGPlaces
         // CKEditor for description is initialized when user reaches step 4 (see goToTripStep) so it reads the textarea content correctly
         initializeTripHighlights();
 
@@ -691,43 +691,6 @@
             }
         });
         formData.set('availability_dates', JSON.stringify(rows));
-    }
-
-    function initializeLocationAutocompleteForTrips() {
-        const locationInput = $('#location');
-        const latitudeInput = $('#latitude');
-        const longitudeInput = $('#longitude');
-        const countryInput = $('#country');
-        const cityInput = $('#cityField');
-        const regionInput = $('#regionField');
-
-        if (typeof google !== 'undefined' && google.maps) {
-            const autocomplete = new google.maps.places.Autocomplete(locationInput[0], {
-                types: ['geocode'],
-            });
-
-            autocomplete.addListener('place_changed', function () {
-                const place = autocomplete.getPlace();
-
-                if (place.geometry && place.geometry.location) {
-                    latitudeInput.val(place.geometry.location.lat());
-                    longitudeInput.val(place.geometry.location.lng());
-
-                    const addressComponents = place.address_components || [];
-                    addressComponents.forEach(component => {
-                        if (component.types.includes('country')) {
-                            countryInput.val(component.long_name);
-                        }
-                        if (component.types.includes('locality')) {
-                            cityInput.val(component.long_name);
-                        }
-                        if (component.types.includes('administrative_area_level_1')) {
-                            regionInput.val(component.long_name);
-                        }
-                    });
-                }
-            });
-        }
     }
 
     function dataURLtoBlob(dataurl) {

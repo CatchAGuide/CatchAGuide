@@ -146,8 +146,11 @@ class Camp extends Model
     {
         $prices = [];
 
-        // Accommodations only - per_person_pricing (price_per_night, price_per_week)
-        $accommodations = $this->accommodations()->where('status', 'active')->get();
+        // Prefer eager-loaded relations (map markers / listings) to avoid N+1 queries
+        $accommodations = $this->relationLoaded('accommodations')
+            ? $this->accommodations->where('status', 'active')
+            : $this->accommodations()->where('status', 'active')->get();
+
         foreach ($accommodations as $accommodation) {
             $perPersonPricing = $accommodation->per_person_pricing;
             if (is_string($perPersonPricing)) {
@@ -168,8 +171,10 @@ class Camp extends Model
             }
         }
 
-        // Special offers only
-        $specialOffers = $this->specialOffers()->get();
+        $specialOffers = $this->relationLoaded('specialOffers')
+            ? $this->specialOffers
+            : $this->specialOffers()->get();
+
         foreach ($specialOffers as $offer) {
             $low = $offer->getLowestPrice();
             if ($low > 0) {
