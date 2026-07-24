@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Mail;
 use Illuminate\Http\Request;
 
+use App\Domain\Vacation\BookableListingPolicy;
 use App\Mail\ContactMail;
 use App\Models\Newsletter;
 use App\Mail\NewsletterMail;
@@ -11,8 +12,10 @@ use App\Mail\CustomerContactMail;
 use App\Mail\CustomerNewsletterMail;
 use App\Mail\VacationBookingAdminMail;
 use App\Mail\VacationBookingCustomerMail;
+use App\Models\Camp;
 use App\Models\ContactSubmission;
 use App\Models\CampVacationBooking;
+use App\Models\Trip;
 use App\Models\TripBooking;
 use App\Presenters\Vacation\TripInquiryPayloadFormatter;
 use App\Rules\Recaptcha;
@@ -35,6 +38,10 @@ class ZoisController extends Controller
         // Get source information if available
         $sourceType = $request->input('source_type', null);
         $sourceId = $request->input('source_id', null);
+
+        if ($rejection = $this->vacationListingNotBookableResponse($request, $sourceType, $sourceId)) {
+            return $rejection;
+        }
 
         $hasBookingDetails = $request->filled('preferred_date')
             && $request->filled('number_of_persons');
@@ -179,6 +186,42 @@ class ZoisController extends Controller
         }
 
         return back()->with('message', $successMessage);
+    }
+
+    /**
+     * Block trip/camp contact & booking submissions when the listing is not active (e.g. draft).
+     */
+    private function vacationListingNotBookableResponse(Request $request, mixed $sourceType, mixed $sourceId): mixed
+    {
+        if (!$sourceId) {
+            return null;
+        }
+
+        $type = strtolower((string) $sourceType);
+        $listing = match ($type) {
+            TripBooking::SOURCE_TRIP => Trip::query()->find((int) $sourceId),
+            CampVacationBooking::SOURCE_CAMP => Camp::query()->find((int) $sourceId),
+            default => null,
+        };
+
+        if ($listing === null) {
+            return null;
+        }
+
+        if (app(BookableListingPolicy::class)->isBookable($listing)) {
+            return null;
+        }
+
+        $message = __('vacations.draft_booking_rejected');
+
+        if ($request->ajax() || $request->has('source_type')) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 422);
+        }
+
+        return back()->withErrors(['listing' => $message]);
     }
 
     public function sendnewsletter(Request $request)

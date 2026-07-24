@@ -69,14 +69,32 @@
 @section('title', $tripView['title'] ?? __('trips.page_title_fallback'))
 @section('description', \Illuminate\Support\Str::limit(strip_tags($tripView['description']['full'] ?? ''), 155))
 
+@php
+    $isDraft = !empty($isDraft);
+@endphp
+
+@section('meta_robots')
+    @if($isDraft)
+        <meta name="robots" content="noindex, nofollow">
+    @endif
+@endsection
+
 @section('share_tags')
-    @if(!empty($canonicalUrl))
+    @if(!$isDraft && !empty($canonicalUrl))
         <link rel="canonical" href="{{ $canonicalUrl }}">
     @endif
 @endsection
 
 @section('content')
     <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
+        @if($isDraft)
+            <div class="container py-3">
+                <div class="alert alert-warning mb-0" role="status">
+                    <strong>{{ __('vacations.draft_review_banner_title') }}</strong>
+                    — {{ __('vacations.draft_review_banner_text') }}
+                </div>
+            </div>
+        @endif
         {{-- Full-width top: heading, gallery (same width as before), feature cards. Floating card starts after this. --}}
         <div class="trip-offer-page__top">
             @include('pages.vacations.partials.offer-breadcrumb', [
@@ -363,15 +381,17 @@
                                                 @endif
                                             </p>
                                         </div>
-                                        @if($isFullyBooked)
-                                            <a href="#contact" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--secondary">
-                                                {{ __('trips.inquire') }}
-                                            </a>
-                                        @else
-                                            <button type="button" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--primary" data-reserve-date="{{ $card['departure_date'] ?? '' }}">
-                                                {{ __('trips.book') }}
-                                            </button>
-                                        @endif
+                                        @unless($isDraft)
+                                            @if($isFullyBooked)
+                                                <a href="#contact" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--secondary">
+                                                    {{ __('trips.inquire') }}
+                                                </a>
+                                            @else
+                                                <button type="button" class="trip-offer-page__availability-trip-btn trip-offer-page__availability-trip-btn--primary" data-reserve-date="{{ $card['departure_date'] ?? '' }}">
+                                                    {{ __('trips.book') }}
+                                                </button>
+                                            @endif
+                                        @endunless
                                     </div>
                                 </li>
                             @endforeach
@@ -750,100 +770,105 @@
                     </section>
                 @endif
 
-                <div class="d-lg-none">
-                    @include('pages.trips.partials.contact-card')
-                </div>
+                @unless($isDraft)
+                    <div class="d-lg-none">
+                        @include('pages.trips.partials.contact-card')
+                    </div>
+                @endunless
 
             </main>
 
             <aside class="trip-offer-page__sidebar">
-                <div class="trip-offer-page__booking-card">
-                    <div class="trip-offer-page__booking-header">
-                        <div class="trip-offer-page__booking-header-grid">
-                            <div class="trip-offer-page__booking-price-block">
-                                <div class="trip-offer-page__booking-title-row">
-                                    <span class="trip-offer-page__booking-label">
-                                        {{ __('trips.price_per_person_short') }}
-                                    </span>
+                @unless($isDraft)
+                    <div class="trip-offer-page__booking-card">
+                        <div class="trip-offer-page__booking-header">
+                            <div class="trip-offer-page__booking-header-grid">
+                                <div class="trip-offer-page__booking-price-block">
+                                    <div class="trip-offer-page__booking-title-row">
+                                        <span class="trip-offer-page__booking-label">
+                                            {{ __('trips.price_per_person_short') }}
+                                        </span>
+                                    </div>
+                                    <div class="trip-offer-page__booking-price">
+                                        @if($tripView['price']['per_person'])
+                                            <span class="trip-offer-page__booking-amount">
+                                                € {{ number_format($tripView['price']['per_person'], 0) }}
+                                            </span>
+                                        @else
+                                            <span class="trip-offer-page__booking-amount">
+                                                {{ __('trips.pricing_title') }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="trip-offer-page__booking-price">
-                                    @if($tripView['price']['per_person'])
-                                        <span class="trip-offer-page__booking-amount">
-                                            € {{ number_format($tripView['price']['per_person'], 0) }}
-                                        </span>
-                                    @else
-                                        <span class="trip-offer-page__booking-amount">
-                                            {{ __('trips.pricing_title') }}
-                                        </span>
-                                    @endif
+                                <div class="trip-offer-page__booking-qty-block">
+                                    <p class="trip-offer-page__booking-field-label">
+                                        {{ __('trips.guests_label') }}
+                                    </p>
+                                    <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
+                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
+                                            –
+                                        </button>
+                                        <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>1</span>
+                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
+                                            +
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="trip-offer-page__booking-qty-block">
+                        </div>
+
+                        <div class="trip-offer-page__booking-body">
+                            {{-- Dated trips: schedule dropdown. Year-round: date only in the request modal. --}}
+                            @unless($isYearRoundTrip)
+                            <div class="trip-offer-page__booking-field-group">
                                 <p class="trip-offer-page__booking-field-label">
-                                    {{ __('trips.guests_label') }}
+                                    {{ __('trips.select_date') }}
                                 </p>
-                                <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
-                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
-                                        –
-                                    </button>
-                                    <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>1</span>
-                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
-                                        +
-                                    </button>
-                                </div>
+                                <select class="trip-offer-page__booking-select" name="departure_date" data-trip-selected-date aria-label="{{ __('trips.select_date') }}" required>
+                                    <option value="">{{ __('trips.choose_date') }}</option>
+                                    @if(!empty($availabilityCards))
+                                        @foreach($availabilityCards as $card)
+                                            @php
+                                                $status = $card['availability_status'] ?? 'available';
+                                                $label = $card['date_formatted'] ?? ($card['day'] ?? '') . '. ' . ($card['month'] ?? '') . ' ' . now()->year;
+                                                if (!empty($card['return_date_formatted'])) {
+                                                    $label .= ' - ' . $card['return_date_formatted'];
+                                                }
+                                                if ($status === 'fully_booked') {
+                                                    $label .= ' — ' . __('trips.availability_status_fully_booked');
+                                                } elseif ($status === 'almost_full' && isset($card['spots_available'])) {
+                                                    $label .= ' — ' . ($card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
+                                                }
+                                            @endphp
+                                            <option value="{{ $card['departure_date'] ?? '' }}"
+                                                {{ ($status === 'fully_booked') ? 'disabled' : '' }}
+                                                {{ (!empty($selectedDate) && ($card['departure_date'] ?? '') === $selectedDate) ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
-                        </div>
-                    </div>
+                            @endunless
 
-                    <div class="trip-offer-page__booking-body">
-                        {{-- Dated trips: schedule dropdown. Year-round: date only in the request modal. --}}
-                        @unless($isYearRoundTrip)
-                        <div class="trip-offer-page__booking-field-group">
-                            <p class="trip-offer-page__booking-field-label">
-                                {{ __('trips.select_date') }}
+                            <button type="button" class="trip-offer-page__booking-cta" data-analytics-trip-inquiry>
+                                {{ __('vacations.request_trip') }}
+                            </button>
+
+                            @if(!empty($tripView['cancellation_policy']))
+                            <p class="trip-offer-page__booking-footnote">
+                                {{ $tripView['cancellation_policy'] }}
                             </p>
-                            <select class="trip-offer-page__booking-select" name="departure_date" data-trip-selected-date aria-label="{{ __('trips.select_date') }}" required>
-                                <option value="">{{ __('trips.choose_date') }}</option>
-                                @if(!empty($availabilityCards))
-                                    @foreach($availabilityCards as $card)
-                                        @php
-                                            $status = $card['availability_status'] ?? 'available';
-                                            $label = $card['date_formatted'] ?? ($card['day'] ?? '') . '. ' . ($card['month'] ?? '') . ' ' . now()->year;
-                                            if (!empty($card['return_date_formatted'])) {
-                                                $label .= ' - ' . $card['return_date_formatted'];
-                                            }
-                                            if ($status === 'fully_booked') {
-                                                $label .= ' — ' . __('trips.availability_status_fully_booked');
-                                            } elseif ($status === 'almost_full' && isset($card['spots_available'])) {
-                                                $label .= ' — ' . ($card['spots_available'] == 1 ? __('trips.only_x_spot', ['count' => 1]) : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
-                                            }
-                                        @endphp
-                                        <option value="{{ $card['departure_date'] ?? '' }}"
-                                            {{ ($status === 'fully_booked') ? 'disabled' : '' }}
-                                            {{ (!empty($selectedDate) && ($card['departure_date'] ?? '') === $selectedDate) ? 'selected' : '' }}>
-                                            {{ $label }}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
+                            @endif
                         </div>
-                        @endunless
-
-                        <button type="button" class="trip-offer-page__booking-cta" data-analytics-trip-inquiry>
-                            {{ __('vacations.request_trip') }}
-                        </button>
-
-                        @if(!empty($tripView['cancellation_policy']))
-                        <p class="trip-offer-page__booking-footnote">
-                            {{ $tripView['cancellation_policy'] }}
-                        </p>
-                        @endif
                     </div>
-                </div>
 
-                <div class="d-none d-lg-block">
-                    @include('pages.trips.partials.contact-card')
-                </div>
+                    <div class="d-none d-lg-block">
+                        @include('pages.trips.partials.contact-card')
+                    </div>
+                @endunless
+
 
                 @if(isset($tripView['coordinates']['lat']) && isset($tripView['coordinates']['lng']) && is_numeric($tripView['coordinates']['lat']) && is_numeric($tripView['coordinates']['lng']))
                     <div class="trip-offer-page__map-wrap">
@@ -865,6 +890,7 @@
 
         @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
 
+        @unless($isDraft)
         <!-- Mobile Sticky Request Card (replaces the floating booking card) -->
         <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('vacations.request_trip') }}">
             <div class="trip-offer-page__mobile-sticky-inner">
@@ -891,6 +917,7 @@
                 </div>
             </div>
         </div>
+        @endunless
 
         <!-- Gallery Modal (matches Camp offer page) -->
         <div id="galleryModal" class="gallery-modal">

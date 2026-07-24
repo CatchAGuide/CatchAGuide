@@ -331,7 +331,9 @@ class BookingService
     {
         $expiresAt = Carbon::now()->addHours(24);
 
-        $dateDifference = Carbon::parse($selectedDate)->diffInDays(Carbon::now());
+        // Carbon 3 returns a signed diff by default; use absolute days until the tour.
+        $dateDifference = Carbon::now()->startOfDay()
+            ->diffInDays(Carbon::parse($selectedDate)->startOfDay(), true);
 
         if ($dateDifference > 3) {
             $expiresAt = Carbon::now()->addHours(48);

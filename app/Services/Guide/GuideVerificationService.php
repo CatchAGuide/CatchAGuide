@@ -32,6 +32,9 @@ class GuideVerificationService
                 'version' => $guideRequest->version + 1,
             ]);
 
+            // Capture before markVerified overwrites guide_verified_at.
+            $isFirstApproval = $this->isFirstGuideApproval($guideRequest->user);
+
             $user = $this->guideStatusService->markVerified(
                 $guideRequest->user,
                 $reviewerId,
@@ -44,7 +47,9 @@ class GuideVerificationService
 
             $this->autoPublishCompleteDrafts($user);
 
-            Mail::send(new GuideApprovedMail($user));
+            if ($isFirstApproval) {
+                Mail::send(new GuideApprovedMail($user));
+            }
 
             return $user;
         });
@@ -101,6 +106,9 @@ class GuideVerificationService
             return $this->approve($pendingRequest, $reviewerId);
         }
 
+        // Capture before markVerified overwrites guide_verified_at.
+        $isFirstApproval = $this->isFirstGuideApproval($user);
+
         // Admin customers checkmark / force-approve: allow verifying regular
         // customers (is_guide + guide_status null) and rejected applicants.
         $user = $this->guideStatusService->markVerified($user, $reviewerId, 'Admin activated guide status');
@@ -111,16 +119,28 @@ class GuideVerificationService
 
         $this->autoPublishCompleteDrafts($user);
 
-        try {
-            Mail::send(new GuideApprovedMail($user));
-        } catch (\Throwable $e) {
-            Log::error('Guide approved email failed', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
+        if ($isFirstApproval) {
+            try {
+                Mail::send(new GuideApprovedMail($user));
+            } catch (\Throwable $e) {
+                Log::error('Guide approved email failed', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $user;
+    }
+
+    /**
+     * True when the user has never been verified as a guide before.
+     * Admin toggle verified ↔ pending keeps guide_verified_at, so re-activation
+     * does not count as a first approval and must not resend the mail.
+     */
+    protected function isFirstGuideApproval(User $user): bool
+    {
+        return $user->guide_verified_at === null;
     }
 
     /**

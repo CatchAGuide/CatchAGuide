@@ -387,11 +387,12 @@ class ModernCheckoutApiController extends Controller
     {
         $expiresAt = Carbon::now()->addHours(24); // Default expiration time (24 hours)
 
-        // Calculate the difference between the selected date and the current date
-        $dateDifference = Carbon::parse($selectedDate)->diffInDays(Carbon::now());
+        // Carbon 3 returns a signed diff by default; use absolute days until the tour.
+        $dateDifference = Carbon::now()->startOfDay()
+            ->diffInDays(Carbon::parse($selectedDate)->startOfDay(), true);
 
         if ($dateDifference > 3) {
-            // If the selected date is more than 3 days from now, add 72 hours to the expiration time
+            // Tours more than 3 days away get a 48-hour guide response window
             $expiresAt = Carbon::now()->addHours(48);
         }
 

@@ -15,6 +15,14 @@
                     <a href="{{ route('admin.trips.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> {{ __('trips.back_to_list') }}
                     </a>
+                    @if(!empty($trip->slug))
+                        <a href="{{ route('vacations.trips.show', $trip->slug) }}"
+                           class="btn btn-outline-primary"
+                           target="_blank"
+                           rel="noopener">
+                            <i class="fas fa-external-link-alt"></i> View product page
+                        </a>
+                    @endif
                     <a href="{{ route('admin.trips.edit', $trip->id) }}" class="btn btn-warning">
                         <i class="fas fa-edit"></i> {{ __('trips.edit') }}
                     </a>

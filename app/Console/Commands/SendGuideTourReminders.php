@@ -32,15 +32,17 @@ class SendGuideTourReminders extends Command
      */
     public function handle()
     {
-        // Find bookings that will expire in 24 hours
-        // (bookings that were created 48 hours ago and have an expiration of 72 hours)
+        // Remind when ~24 hours remain on a longer response window (typically 48h).
+        // Skip newly created bookings: a 24h expiry window would otherwise match
+        // immediately and duplicate the initial "please respond" booking email.
         $now = Carbon::now();
         $twentyFourHoursLater = Carbon::now()->addHours(24);
         
         $query = Booking::where('status', 'pending')
             ->whereNotNull('expires_at')
             ->where('expires_at', '>', $now)
-            ->where('expires_at', '<=', $twentyFourHoursLater);
+            ->where('expires_at', '<=', $twentyFourHoursLater)
+            ->where('created_at', '<=', $now->copy()->subHours(20));
         
         $bookings = $query->get();
         
