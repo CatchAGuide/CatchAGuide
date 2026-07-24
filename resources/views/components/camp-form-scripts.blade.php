@@ -104,8 +104,7 @@
             }, 500);
         }
 
-        // Initialize location autocomplete
-        initializeLocationAutocomplete();
+        // Location autocomplete: handled by shared maps location-input + CAGPlaces
         
         // Initialize Select2 for multi-select dropdowns
         initializeSelect2();
@@ -819,45 +818,6 @@ function loadExistingData() {
     // Load images if they exist - handled by ImageManager
     if (formData.gallery_images && Array.isArray(formData.gallery_images)) {
         // Note: Images are now displayed in croppedImagesContainer to avoid duplication
-    }
-}
-
-function initializeLocationAutocomplete() {
-    const locationInput = $('#location');
-    const latitudeInput = $('#latitude');
-    const longitudeInput = $('#longitude');
-    const countryInput = $('#country');
-    const cityInput = $('#city');
-    const regionInput = $('#region');
-    
-    // Initialize Google Places Autocomplete
-    if (typeof google !== 'undefined' && google.maps) {
-        const autocomplete = new google.maps.places.Autocomplete(locationInput[0], {
-            types: ['geocode'],
-        });
-        
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            
-            if (place.geometry && place.geometry.location) {
-                latitudeInput.val(place.geometry.location.lat());
-                longitudeInput.val(place.geometry.location.lng());
-                
-                // Extract address components
-                const addressComponents = place.address_components;
-                addressComponents.forEach(component => {
-                    if (component.types.includes('country')) {
-                        countryInput.val(component.long_name);
-                    }
-                    if (component.types.includes('locality')) {
-                        cityInput.val(component.long_name);
-                    }
-                    if (component.types.includes('administrative_area_level_1')) {
-                        regionInput.val(component.long_name);
-                    }
-                });
-            }
-        });
     }
 }
 

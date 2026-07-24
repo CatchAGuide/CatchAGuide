@@ -84,17 +84,19 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="location" class="form-label fw-bold fs-5">
-                        {{ __('rental_boats.location') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('rental_boats.tooltip_location') }}"></i>
-                    </label>
-                    <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="{{ __('rental_boats.location_placeholder') }}">
-                    <input type="hidden" name="latitude" id="latitude" value="{{ $formData['lat'] ?? '' }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ $formData['lng'] ?? '' }}">
-                    <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
-                    <input type="hidden" name="city" id="city" value="{{ $formData['city'] ?? '' }}">
-                    <input type="hidden" name="region" id="region" value="{{ $formData['region'] ?? '' }}">
+                    <x-maps.location-input
+                        :label="__('rental_boats.location')"
+                        :tooltip="__('rental_boats.tooltip_location')"
+                        :placeholder="__('rental_boats.location_placeholder')"
+                        :value="$formData['location'] ?? ''"
+                        :lat="$formData['lat'] ?? ''"
+                        :lng="$formData['lng'] ?? ''"
+                        :country="$formData['country'] ?? ''"
+                        :city="$formData['city'] ?? ''"
+                        :region="$formData['region'] ?? ''"
+                        :types="['establishment', 'geocode']"
+                        wrapper-class=""
+                    />
                 </div>
 
                 <hr>

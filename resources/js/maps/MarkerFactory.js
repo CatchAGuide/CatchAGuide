@@ -1,17 +1,18 @@
 /**
- * MarkerFactory — primary / gray Leaflet divIcon pins + popup binding
+ * MarkerFactory — primary / gray / trip / camp Leaflet divIcon pins + popup binding
  */
 import mapsManager, { L } from './MapsManager';
 
 class MarkerFactory {
   createIcon(variant = 'primary') {
-    const isGray = variant === 'gray';
+    const normalized = ['gray', 'trip', 'camp'].includes(variant) ? variant : 'primary';
+    const isGray = normalized === 'gray';
     return L.divIcon({
-      className: `leaflet-div-icon cag-map-pin cag-map-pin--${isGray ? 'gray' : 'primary'}`,
+      className: `leaflet-div-icon cag-map-pin cag-map-pin--${normalized}`,
       html: `<div class="cag-map-pin__inner"><span class="cag-map-pin__glyph" aria-hidden="true"></span></div>`,
       iconSize: isGray ? [32, 44] : [28, 40],
       iconAnchor: isGray ? [16, 40] : [14, 36],
-      popupAnchor: [0, -32],
+      popupAnchor: [0, -34],
     });
   }
 
@@ -22,6 +23,7 @@ class MarkerFactory {
    * @param {string} [options.variant]
    * @param {string} [options.title]
    * @param {string} [options.popupHtml]
+   * @param {Object} [options.popupOptions]
    * @param {number} [options.zIndexOffset]
    * @returns {L.Marker}
    */
@@ -35,6 +37,7 @@ class MarkerFactory {
       icon: this.createIcon(variant),
       title: options.title || '',
       zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : variant === 'gray' ? 100 : 0,
+      riseOnHover: true,
     });
 
     if (options.map) {
@@ -45,6 +48,7 @@ class MarkerFactory {
       marker.bindPopup(options.popupHtml, {
         className: 'cag-map-popup',
         maxWidth: 220,
+        ...(options.popupOptions || {}),
       });
     }
 

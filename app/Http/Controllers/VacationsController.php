@@ -193,7 +193,7 @@ class VacationsController extends Controller
         $countryFilter = app(ListingCountryFilter::class);
         $countryFilterValues = $countryFilter->valuesForVacationDestination($row_data, $country, $filterData);
 
-        $query = Camp::with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+        $query = Camp::with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])
             ->where('status', 'active');
         $countryFilter->applyToQuery($query, $countryFilterValues);
 

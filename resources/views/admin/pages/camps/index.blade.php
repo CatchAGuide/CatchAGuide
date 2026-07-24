@@ -83,6 +83,19 @@
                                                 <td>{{ $camp->created_at->format('M d, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
+                                                        @if($camp->status === 'active')
+                                                            <a href="{{ route('admin.camps.change-status', $camp->id) }}"
+                                                               title="Deactivate Camp"
+                                                               class="btn btn-sm btn-danger">
+                                                                <i class="fa fa-times"></i>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.camps.change-status', $camp->id) }}"
+                                                               title="Activate Camp"
+                                                               class="btn btn-sm btn-success">
+                                                                <i class="fa fa-check"></i>
+                                                            </a>
+                                                        @endif
                                                         <a href="{{ route('admin.camps.show', $camp->id) }}"
                                                            class="btn btn-sm btn-primary"
                                                            title="View">

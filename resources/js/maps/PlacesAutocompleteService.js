@@ -232,6 +232,138 @@ class PlacesAutocompleteService {
     const types = (place && place.types) || locationData.place_types || [];
     setField('place_types', JSON.stringify(types));
   }
+
+  /**
+   * Resolve a CSS selector or element id into an input element.
+   * @param {string|HTMLElement|null} ref
+   * @returns {HTMLElement|null}
+   */
+  resolveField(ref) {
+    if (!ref) {
+      return null;
+    }
+    if (typeof ref !== 'string') {
+      return ref;
+    }
+    if (ref.startsWith('#') || ref.startsWith('.') || ref.startsWith('[')) {
+      return document.querySelector(ref);
+    }
+    return document.getElementById(ref);
+  }
+
+  setFieldValue(ref, value) {
+    const el = this.resolveField(ref);
+    if (el) {
+      el.value = value != null && value !== undefined ? value : '';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
+  /**
+   * Bind a form location input: deferred Places load + fill linked hidden fields.
+   * Supports data attributes on the input:
+   *   data-places-location
+   *   data-places-types='["geocode"]'
+   *   data-places-lat / lng / country / city / region / postal
+   *   data-places-fill-input="formatted_address|name|keep"
+   *
+   * @param {string|HTMLElement} inputRef
+   * @param {Object} [options]
+   * @returns {void}
+   */
+  bindLocationField(inputRef, options = {}) {
+    const input = this.resolveField(inputRef);
+    if (!input || input.dataset.cagPlacesLocationBound === '1') {
+      return;
+    }
+    input.dataset.cagPlacesLocationBound = '1';
+
+    const readOpt = (key, dataKey, fallback) => {
+      if (options[key] != null) {
+        return options[key];
+      }
+      if (dataKey && input.dataset[dataKey] != null && input.dataset[dataKey] !== '') {
+        return input.dataset[dataKey];
+      }
+      return fallback;
+    };
+
+    let types = options.types;
+    if (!types && input.dataset.placesTypes) {
+      try {
+        types = JSON.parse(input.dataset.placesTypes);
+      } catch (e) {
+        types = null;
+      }
+    }
+
+    const fieldMap = {
+      lat: readOpt('lat', 'placesLat', '#latitude'),
+      lng: readOpt('lng', 'placesLng', '#longitude'),
+      country: readOpt('country', 'placesCountry', '#country'),
+      city: readOpt('city', 'placesCity', '#city'),
+      region: readOpt('region', 'placesRegion', '#region'),
+      postal: readOpt('postal', 'placesPostal', null),
+    };
+
+    const fillInputMode = readOpt('fillInput', 'placesFillInput', 'formatted_address');
+    const onPlace = typeof options.onPlaceChanged === 'function' ? options.onPlaceChanged : null;
+
+    const boot = () => {
+      this.ensureLoaded()
+        .then(() => {
+          this.initAutocomplete(
+            input,
+            (place) => {
+              const data = this.extractLocationData(place);
+
+              this.setFieldValue(fieldMap.lat, data.lat);
+              this.setFieldValue(fieldMap.lng, data.lng);
+              this.setFieldValue(fieldMap.country, data.country);
+              this.setFieldValue(fieldMap.city, data.city);
+              this.setFieldValue(fieldMap.region, data.region);
+              if (fieldMap.postal) {
+                this.setFieldValue(fieldMap.postal, data.postal_code);
+              }
+
+              if (fillInputMode === 'formatted_address' && place.formatted_address) {
+                input.value = place.formatted_address;
+              } else if (fillInputMode === 'name' && place.name) {
+                input.value = place.name;
+              }
+
+              if (onPlace) {
+                onPlace(place, data);
+              }
+
+              input.dispatchEvent(
+                new CustomEvent('cag:place-selected', {
+                  bubbles: true,
+                  detail: { place, location: data },
+                })
+              );
+            },
+            types ? { types } : {}
+          );
+        })
+        .catch((err) => console.warn('Places location bind failed:', err));
+    };
+
+    input.addEventListener('focus', boot, { once: false });
+    input.addEventListener('click', boot, { once: false });
+  }
+
+  /**
+   * Auto-bind every [data-places-location] input in a root.
+   * @param {ParentNode} [root]
+   */
+  bootLocationFields(root) {
+    const scope = root || document;
+    scope.querySelectorAll('[data-places-location]').forEach((el) => {
+      this.bindLocationField(el);
+    });
+  }
 }
 
 const placesAutocompleteService = new PlacesAutocompleteService();

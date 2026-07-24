@@ -99,6 +99,19 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
+                                                        @if($trip->status === 'active')
+                                                            <a href="{{ route('admin.trips.change-status', $trip->id) }}"
+                                                               title="Deactivate Trip"
+                                                               class="btn btn-sm btn-danger">
+                                                                <i class="fa fa-times"></i>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.trips.change-status', $trip->id) }}"
+                                                               title="Activate Trip"
+                                                               class="btn btn-sm btn-success">
+                                                                <i class="fa fa-check"></i>
+                                                            </a>
+                                                        @endif
                                                         <a href="{{ route('vacations.trips.show', $trip->slug) }}"
                                                            class="btn btn-sm btn-outline-primary"
                                                            title="View product page"

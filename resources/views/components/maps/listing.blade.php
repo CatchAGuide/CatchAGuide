@@ -11,6 +11,7 @@
     'center' => null,
     'lazyModal' => true,
     'updatable' => true,
+    'interactivePreview' => false,
     'instanceKey' => 'listing',
     'mapId' => 'map',
     'class' => '',
@@ -51,5 +52,6 @@
     data-modal-id="{{ $modalId }}"
     data-lazy-modal="{{ $lazyModal ? 'true' : 'false' }}"
     data-updatable="{{ $updatable ? 'true' : 'false' }}"
+    data-interactive-preview="{{ $interactivePreview ? 'true' : 'false' }}"
     data-instance-key="{{ $instanceKey }}"
 ></div>

@@ -182,7 +182,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'hub_bridge_title' => 'Warum deinen Angelurlaub hier buchen?',
     'hub_bridge_eyebrow' => 'Angelurlaub mit Catch A Guide',
     'hub_bridge_lead' => 'Tippe ein Reiseziel auf der Karte — Camps und Guided Trips auf dem Kontinent.',
-    'hub_bridge_map_hint' => 'Pin wählen für Vorschau',
+    'hub_bridge_map_hint' => 'Pin hovern für Vorschau',
     'hub_bridge_spotlight_label' => 'Reiseziel im Fokus',
     'hub_bridge_explore' => 'Land entdecken',
     'hub_stat_countries_label' => 'Länder',

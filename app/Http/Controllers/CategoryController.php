@@ -15,10 +15,20 @@ use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
-    public function index($type)
+    public function index($type, Request $request)
     {
+        // Legacy/home links sometimes passed slug as a query param on the index route.
+        // Send those to the method/target detail page instead of the category listing.
+        if ($request->filled('slug')) {
+            return redirect()->route('category.targets', [
+                'type' => strtolower($type),
+                'slug' => $request->query('slug'),
+            ], 301);
+        }
+
+        $type = strtolower($type);
         $language = app()->getLocale();
-        $allTargets = CategoryPage::where('type', $type)
+        $allTargets = CategoryPage::whereRaw('LOWER(type) = ?', [$type])
             ->get()
             ->map(function($item) use ($language) {
                 $item->language = $item->language($language);
@@ -41,8 +51,12 @@ class CategoryController extends Controller
 
     public function targets($type, $slug, Request $request)
     {
+        $type = strtolower($type);
         $language = app()->getLocale();
-        $row_data = CategoryPage::whereSlug($slug)->whereType($type)->with('language', 'faq')->first();
+        $row_data = CategoryPage::whereSlug($slug)
+            ->whereRaw('LOWER(type) = ?', [$type])
+            ->with('language', 'faq')
+            ->first();
 
         if (!$row_data) {
             abort(404);
@@ -107,89 +121,14 @@ class CategoryController extends Controller
 
         if (Cache::has($cacheKey)) {
             $priceRangeData = Cache::get($cacheKey);
-            $priceRanges = $priceRangeData['ranges'];
+            $priceRanges = $priceRangeData['ranges'] ?? [];
             $overallMaxPrice = $priceRangeData['maxPrice'];
         } else {
-            // Optimize max price query
-            $maxPriceResult = DB::table('guidings')
-                ->selectRaw('MAX(
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END
-                ) as max_price')
-                ->publiclyVisible()
-                ->first();
-
-            $overallMaxPrice = ceil(($maxPriceResult->max_price ?? 5000) / 50) * 50;
-            
-            // Define price ranges
+            // Only max price is needed for the filter slider; skip full histogram scans.
+            $maxPriceResult = Guiding::publiclyVisibleQuery()->max('price');
+            $overallMaxPrice = ceil(((float) ($maxPriceResult ?? 5000)) / 50) * 50;
             $priceRanges = [];
-            $minPrice = 50;
-            $step = 50;
-            
-            for ($i = $minPrice; $i <= $overallMaxPrice; $i += $step) {
-                $rangeEnd = min($i + $step, $overallMaxPrice);
-                $priceRanges[] = [
-                    'min' => $i,
-                    'max' => $rangeEnd,
-                    'range' => "€{$i}-€{$rangeEnd}",
-                    'count' => 0
-                ];
-            }
-            
-            // Count guidings in each price range
-            $priceResults = DB::table('guidings')
-                ->select('id', DB::raw('
-                    CASE 
-                        WHEN JSON_VALID(prices) THEN (
-                            SELECT MIN(
-                                CASE 
-                                    WHEN person > 1 THEN CAST(amount AS DECIMAL(10,2)) / person
-                                    ELSE CAST(amount AS DECIMAL(10,2))
-                                END
-                            )
-                            FROM JSON_TABLE(
-                                prices,
-                                "$[*]" COLUMNS(
-                                    person INT PATH "$.person",
-                                    amount DECIMAL(10,2) PATH "$.amount"
-                                )
-                            ) as price_data
-                        )
-                        ELSE price
-                    END as lowest_price
-                '))
-                ->publiclyVisible()
-                ->get();
-            
-            foreach ($priceResults as $guiding) {
-                $price = $guiding->lowest_price;
-                if ($price >= $minPrice && $price <= $overallMaxPrice) {
-                    foreach ($priceRanges as &$range) {
-                        if ($price >= $range['min'] && $price < $range['max']) {
-                            $range['count']++;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Cache the results
+
             Cache::put($cacheKey, [
                 'ranges' => $priceRanges,
                 'maxPrice' => $overallMaxPrice
@@ -511,22 +450,43 @@ class CategoryController extends Controller
                 'overallMaxPrice' => $overallMaxPrice,
             ])->render();
             
-            // Add guiding data for map updates
-            $guidingsData = $guidings->map(function($guiding) {
+            // Add guiding data for map updates (primary + gray nearby)
+            $mainIds = $allGuidings->pluck('id')->map(fn ($id) => (int) $id)->all();
+            $mapGuidings = $allGuidings->map(function ($guiding) {
                 return [
                     'id' => $guiding->id,
                     'slug' => $guiding->slug,
                     'title' => $guiding->title,
                     'location' => $guiding->location,
                     'lat' => $guiding->lat,
-                    'lng' => $guiding->lng
+                    'lng' => $guiding->lng,
+                    'thumbnail_path' => $guiding->thumbnail_path ?? null,
+                    'is_gray' => false,
+                    'variant' => 'primary',
                 ];
-            });
-            
+            })->concat(
+                collect($otherguidings)
+                    ->filter(fn ($g) => ! in_array((int) $g->id, $mainIds, true))
+                    ->map(function ($guiding) {
+                        return [
+                            'id' => $guiding->id,
+                            'slug' => $guiding->slug,
+                            'title' => $guiding->title,
+                            'location' => $guiding->location,
+                            'lat' => $guiding->lat,
+                            'lng' => $guiding->lng,
+                            'thumbnail_path' => $guiding->thumbnail_path ?? null,
+                            'is_gray' => true,
+                            'variant' => 'gray',
+                        ];
+                    })
+            )->values();
+
             return response()->json([
                 'html' => $view,
-                'guidings' => $guidingsData,
-                'allGuidings' => $allGuidings,
+                'guidings' => $mapGuidings,
+                'allGuidings' => $mapGuidings,
+                'mapGuidings' => $mapGuidings,
                 'searchMessage' => $searchMessage,
                 'isMobile' => $isMobile,
                 'total' => $guidings->total(),
@@ -586,6 +546,30 @@ class CategoryController extends Controller
         $otherguidings = Guiding::inRandomOrder('1234')->publiclyVisible()->limit(10)->get();
 
         return $otherguidings;
+    }
+
+    public function otherGuidingsBasedByLocation($latitude, $longitude, $allGuidings = null)
+    {
+        $existingGuidingIds = collect($allGuidings)->pluck('id')->filter()->values()->all();
+
+        return Guiding::select(['guidings.*'])
+            ->selectRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) as distance", [
+                $longitude,
+                $latitude,
+            ])
+            ->whereRaw("ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?", [
+                $longitude,
+                $latitude,
+                200 * 1000,
+            ])
+            ->when(! empty($existingGuidingIds), function ($query) use ($existingGuidingIds) {
+                $query->whereNotIn('id', $existingGuidingIds);
+            })
+            ->publiclyVisible()
+            ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('distance')
+            ->limit(10)
+            ->get();
     }
     
     private function cleanRequestParameters(Request $request)

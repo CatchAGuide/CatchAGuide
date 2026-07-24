@@ -2,11 +2,11 @@
 
 namespace App\Support\Maps;
 
-use Illuminate\Support\Facades\View;
-
 class MapMarkerCollection
 {
     /**
+     * Build listing markers without per-item Blade renders (popup HTML is built client-side).
+     *
      * @param  iterable  $guidings
      * @param  array<int>  $grayIds
      * @return array<int, array<string, mixed>>
@@ -14,6 +14,7 @@ class MapMarkerCollection
     public static function fromGuidings(iterable $guidings, array $grayIds = []): array
     {
         $markers = [];
+        $grayLookup = array_fill_keys(array_map('intval', $grayIds), true);
 
         foreach ($guidings as $guiding) {
             if (empty($guiding->lat) || empty($guiding->lng)) {
@@ -21,24 +22,138 @@ class MapMarkerCollection
             }
 
             $id = (int) $guiding->id;
-            $isGray = in_array($id, $grayIds, true) || in_array($id, array_map('intval', $grayIds), true);
+            $title = (string) ($guiding->title ?? '');
+            $image = $guiding->thumbnail_path ?? null;
+            if ($image && function_exists('media_url')) {
+                $image = media_url($image);
+            }
+
+            $price = method_exists($guiding, 'getLowestPrice')
+                ? $guiding->getLowestPrice()
+                : ($guiding->price ?? null);
+            if ($price !== null && $price !== '' && (float) $price <= 0) {
+                $price = null;
+            }
 
             $markers[] = [
                 'id' => $id,
                 'lat' => (float) $guiding->lat,
                 'lng' => (float) $guiding->lng,
-                'variant' => $isGray ? 'gray' : 'primary',
-                'title' => method_exists($guiding, 'getTranslation')
-                    ? (string) translate($guiding->title)
-                    : (string) ($guiding->title ?? ''),
-                'popupHtml' => View::make('components.maps.popup-card', [
-                    'title' => translate($guiding->title ?? ''),
-                    'url' => route('guidings.show', [$guiding->id, $guiding->slug]),
-                    'location' => $guiding->location ?? '',
-                    'image' => function_exists('media_url') ? media_url($guiding->thumbnail_path ?? null) : ($guiding->thumbnail_path ?? ''),
-                    'price' => method_exists($guiding, 'getLowestPrice') ? $guiding->getLowestPrice() : null,
-                    'showPrice' => true,
-                ])->render(),
+                'variant' => isset($grayLookup[$id]) ? 'gray' : 'primary',
+                'pillar' => 'guiding',
+                'title' => $title,
+                'url' => route('guidings.show', [$guiding->id, $guiding->slug]),
+                'location' => (string) ($guiding->location ?? ''),
+                'image' => (string) ($image ?? ''),
+                'price' => $price,
+                'priceLabel' => $price !== null
+                    ? ('ab ' . $price . '€ p.P.')
+                    : null,
+                'badge' => function_exists('translate') ? translate('Guiding') : 'Guiding',
+                'cta' => __('vacations.view_details'),
+            ];
+        }
+
+        return $markers;
+    }
+
+    /**
+     * Structured vacation markers (trips) — popup HTML built client-side.
+     *
+     * @param  iterable  $trips
+     * @return array<int, array<string, mixed>>
+     */
+    public static function fromTrips(iterable $trips): array
+    {
+        $markers = [];
+
+        foreach ($trips as $trip) {
+            $lat = $trip->latitude ?? $trip->lat ?? null;
+            $lng = $trip->longitude ?? $trip->lng ?? null;
+            if (empty($lat) || empty($lng)) {
+                continue;
+            }
+
+            $image = $trip->thumbnail_path ?? null;
+            if ($image && function_exists('media_url')) {
+                $image = media_url($image);
+            }
+
+            $currency = $trip->currency ?? 'EUR';
+            $sym = $currency === 'EUR' ? '€' : (($currency === 'USD' ? '$' : $currency . ' '));
+            $price = isset($trip->price_per_person) && (float) $trip->price_per_person > 0
+                ? (float) $trip->price_per_person
+                : null;
+
+            $markers[] = [
+                'id' => (int) ($trip->id ?? 0),
+                'lat' => (float) $lat,
+                'lng' => (float) $lng,
+                'variant' => 'trip',
+                'pillar' => 'trip',
+                'title' => (string) ($trip->title ?? ''),
+                'url' => route('vacations.trips.show', $trip->slug),
+                'location' => (string) ($trip->location ?? ''),
+                'image' => (string) ($image ?? ''),
+                'price' => $price,
+                'priceLabel' => $price !== null
+                    ? __('vacations.price_from_per_person', ['price' => $sym . number_format($price, 0)])
+                    : null,
+                'badge' => __('vacations.badge_trip'),
+                'cta' => __('vacations.view_details'),
+            ];
+        }
+
+        return $markers;
+    }
+
+    /**
+     * Structured vacation markers (camps) — popup HTML built client-side.
+     * Eager-load accommodations + specialOffers before calling to avoid N+1.
+     *
+     * @param  iterable  $camps
+     * @return array<int, array<string, mixed>>
+     */
+    public static function fromCamps(iterable $camps): array
+    {
+        $markers = [];
+
+        foreach ($camps as $camp) {
+            $lat = $camp->latitude ?? $camp->lat ?? null;
+            $lng = $camp->longitude ?? $camp->lng ?? null;
+            if (empty($lat) || empty($lng)) {
+                continue;
+            }
+
+            $image = $camp->thumbnail_path ?? null;
+            if ($image && function_exists('media_url')) {
+                $image = media_url($image);
+            }
+
+            $price = null;
+            if (method_exists($camp, 'getLowestAccommodationOrOfferPrice')) {
+                $price = $camp->getLowestAccommodationOrOfferPrice();
+            } elseif (method_exists($camp, 'getLowestPrice')) {
+                $raw = $camp->getLowestPrice();
+                $price = $raw > 0 ? (float) $raw : null;
+            }
+
+            $markers[] = [
+                'id' => (int) ($camp->id ?? 0),
+                'lat' => (float) $lat,
+                'lng' => (float) $lng,
+                'variant' => 'camp',
+                'pillar' => 'camp',
+                'title' => (string) ($camp->title ?? ''),
+                'url' => route('vacations.camps.show', $camp->slug),
+                'location' => (string) ($camp->location ?? $camp->city ?? ''),
+                'image' => (string) ($image ?? ''),
+                'price' => $price,
+                'priceLabel' => $price !== null
+                    ? __('vacations.price_from_per_night', ['price' => '€' . number_format($price, 0)])
+                    : null,
+                'badge' => __('vacations.badge_camp'),
+                'cta' => __('vacations.view_details'),
             ];
         }
 
@@ -53,6 +168,7 @@ class MapMarkerCollection
     public static function fromVacations(iterable $vacations, array $grayIds = []): array
     {
         $markers = [];
+        $grayLookup = array_fill_keys(array_map('intval', $grayIds), true);
 
         foreach ($vacations as $vacation) {
             $lat = $vacation->latitude ?? $vacation->lat ?? null;
@@ -62,7 +178,7 @@ class MapMarkerCollection
             }
 
             $id = (int) $vacation->id;
-            $isGray = in_array($id, $grayIds, true) || in_array($id, array_map('intval', $grayIds), true);
+            $isGray = isset($grayLookup[$id]);
 
             $title = $vacation->title ?? $vacation->name ?? '';
             $slug = $vacation->slug ?? '';
@@ -85,8 +201,11 @@ class MapMarkerCollection
             }
 
             $price = null;
-            if (method_exists($vacation, 'getLowestPrice')) {
-                $price = $vacation->getLowestPrice();
+            if (method_exists($vacation, 'getLowestAccommodationOrOfferPrice')) {
+                $price = $vacation->getLowestAccommodationOrOfferPrice();
+            } elseif (method_exists($vacation, 'getLowestPrice')) {
+                $raw = $vacation->getLowestPrice();
+                $price = $raw > 0 ? (float) $raw : null;
             } elseif (isset($vacation->price)) {
                 $price = $vacation->price;
             }
@@ -95,16 +214,18 @@ class MapMarkerCollection
                 'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
-                'variant' => $isGray ? 'gray' : 'primary',
+                'variant' => $isGray ? 'gray' : 'camp',
+                'pillar' => 'camp',
                 'title' => (string) $title,
-                'popupHtml' => View::make('components.maps.popup-card', [
-                    'title' => $title,
-                    'url' => $url,
-                    'location' => $vacation->location ?? $vacation->city ?? '',
-                    'image' => $image ?? '',
-                    'price' => $price,
-                    'showPrice' => $price !== null,
-                ])->render(),
+                'url' => $url,
+                'location' => (string) ($vacation->location ?? $vacation->city ?? ''),
+                'image' => (string) ($image ?? ''),
+                'price' => $price,
+                'priceLabel' => $price !== null
+                    ? __('vacations.price_from_per_night', ['price' => '€' . number_format((float) $price, 0)])
+                    : null,
+                'badge' => __('vacations.badge_camp'),
+                'cta' => __('vacations.view_details'),
             ];
         }
 

@@ -725,41 +725,30 @@
     </div>
     <!--News One End-->
 
-    <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
-            <div class="modal-content" style="height:90%;">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0" style="height: calc(100% - 56px);">
-                    @php
-                        $grayIds = [];
-                        $vacationMapMarkers = \App\Support\Maps\MapMarkerCollection::fromVacations($vacations, $grayIds);
-                        $mapCenterLat = request()->get('placeLat')
-                            ?: (isset($vacations[0]) ? $vacations[0]->latitude : config('services.maps.default_center.lat'));
-                        $mapCenterLng = request()->get('placeLng')
-                            ?: (isset($vacations[0]) ? $vacations[0]->longitude : config('services.maps.default_center.lng'));
-                    @endphp
-                    <x-maps.listing
-                        :markers="$vacationMapMarkers"
-                        layout="modal"
-                        modal-id="mapModal"
-                        map-id="map"
-                        height="100%"
-                        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
-                        instance-key="vacations"
-                        :cluster="true"
-                        :show-gray-nearby="true"
-                        :single-zoom="12"
-                        :default-zoom="5"
-                        :lazy-modal="true"
-                        :updatable="true"
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
+    @php
+        $grayIds = [];
+        $vacationMapMarkers = \App\Support\Maps\MapMarkerCollection::fromVacations($vacations, $grayIds);
+        $mapCenterLat = request()->get('placeLat')
+            ?: (isset($vacations[0]) ? $vacations[0]->latitude : config('services.maps.default_center.lat'));
+        $mapCenterLng = request()->get('placeLng')
+            ?: (isset($vacations[0]) ? $vacations[0]->longitude : config('services.maps.default_center.lng'));
+    @endphp
+    <x-maps.listing-modal
+        modal-id="mapModal"
+        :title="__('vacations.show_on_map')"
+        :result-count="count($vacationMapMarkers)"
+        map-id="map"
+        :markers="$vacationMapMarkers"
+        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+        instance-key="vacations"
+        :cluster="true"
+        :show-gray-nearby="true"
+        :single-zoom="12"
+        :default-zoom="5"
+        :lazy-modal="true"
+        :updatable="true"
+        :interactive-preview="true"
+    />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">

@@ -55,10 +55,23 @@ function bindHeaderPlacesDeferred() {
   });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bindHeaderPlacesDeferred);
-} else {
+function bootAllPlacesFields() {
+  placesAutocompleteService.bootLocationFields(document);
   bindHeaderPlacesDeferred();
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAllPlacesFields);
+} else {
+  bootAllPlacesFields();
+}
+
+// Re-scan after dynamic form steps / Livewire morphs
+document.addEventListener('cag:places-rescan', () => {
+  placesAutocompleteService.bootLocationFields(document);
+});
+
+window.CAGPlaces.bindLocationField = (...args) => placesAutocompleteService.bindLocationField(...args);
+window.CAGPlaces.bootLocationFields = (...args) => placesAutocompleteService.bootLocationFields(...args);
 
 export { placesAutocompleteService };

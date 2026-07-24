@@ -12,7 +12,12 @@ trait ScopesPubliclyVisibleGuidings
     {
         $query = $query->where($query->getModel()->getTable() . '.status', 1);
 
-        if (! Schema::hasColumn('users', 'guide_status')) {
+        static $hasGuideStatusColumn = null;
+        if ($hasGuideStatusColumn === null) {
+            $hasGuideStatusColumn = Schema::hasColumn('users', 'guide_status');
+        }
+
+        if (! $hasGuideStatusColumn) {
             return $query->whereHas('user', function (Builder $userQuery) {
                 $userQuery->whereIn('is_guide', [1, '1', true]);
             });

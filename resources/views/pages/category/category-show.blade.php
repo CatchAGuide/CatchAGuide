@@ -551,7 +551,7 @@
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li><a href="{{ route('category.types', ['type' => 'targets']) }}">{{ $row_data->type }} Fish</a></li>
+                            <li><a href="{{ route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                             <li class="active">{{ $row_data->source->name }}</li>
                         </ul>
@@ -757,6 +757,7 @@
                         :default-zoom="5"
                         :lazy-modal="true"
                         :updatable="true"
+                        :interactive-preview="true"
                     />
                 </div>
             </div>

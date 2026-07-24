@@ -846,6 +846,7 @@
                         :default-zoom="5"
                         :lazy-modal="true"
                         :updatable="true"
+                        :interactive-preview="true"
                     />
                 </div>
             </div>
