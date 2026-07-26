@@ -35,7 +35,7 @@ class GuestBookingRequestMail extends Mailable
         $this->guide = $guide;
         
         // Set properties for email logging
-        $this->language = $user->language ?? app()->getLocale();
+        $this->language = $booking->customerLocale();
         $this->target = 'booking_' . $booking->id;
     }
 

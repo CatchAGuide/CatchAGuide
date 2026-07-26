@@ -212,41 +212,18 @@ class EmailLogZeroRecipientRepair
         if ($bookingId === null) {
             return null;
         }
-        $booking = Booking::query()->find($bookingId);
-        if (! $booking) {
-            return null;
-        }
 
-        if ($booking->email) {
-            return $booking->email;
-        }
-
-        return $booking->user?->email;
+        return Booking::query()->find($bookingId)?->customerEmail();
     }
 
     private function guestReviewEmail(?int $bookingId): ?string
     {
-        if ($bookingId === null) {
-            return null;
-        }
-        $booking = Booking::query()->find($bookingId);
-
-        return $booking?->user?->email;
+        return $this->bookingGuestEmail($bookingId);
     }
 
     private function guestBookingExpiredEmail(?int $bookingId): ?string
     {
-        if ($bookingId === null) {
-            return null;
-        }
-        $booking = Booking::query()->find($bookingId);
-        if (! $booking) {
-            return null;
-        }
-
-        $user = User::query()->whereKey($booking->user_id)->first();
-
-        return $user?->email ?? $booking->email;
+        return $this->bookingGuestEmail($bookingId);
     }
 
     private function vacationGuestEmail(?int $vacationBookingId): ?string

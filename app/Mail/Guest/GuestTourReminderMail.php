@@ -33,7 +33,7 @@ class GuestTourReminderMail extends Mailable
         $this->booking = $booking;
         
         // Set properties for email logging
-        $this->language = $booking->is_guest ? $booking->email : $booking->user?->language ?? app()->getLocale();
+        $this->language = $booking->customerLocale();
         $this->target = 'booking_' . $booking->id;
     }
 

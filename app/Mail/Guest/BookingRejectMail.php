@@ -20,7 +20,7 @@ class BookingRejectMail extends Mailable
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-        $this->language = $booking->user?->language ?? app()->getLocale();
+        $this->language = $booking->customerLocale();
         $this->target = 'booking_' . $booking->id;
     }
 

@@ -31,7 +31,8 @@ class SendGuestTourReminders extends Command
      */
     public function handle()
     {
-        $bookings = Booking::where('book_date', '>=', Carbon::now()->addDays(2)->startOfDay())
+        $bookings = Booking::with(['registeredUser', 'guestUser', 'guiding.user', 'blocked_event'])
+            ->where('book_date', '>=', Carbon::now()->addDays(2)->startOfDay())
             ->where('book_date', '<', Carbon::now()->addDays(3)->startOfDay())
             ->where('status', 'accepted')
             ->get();
@@ -39,10 +40,15 @@ class SendGuestTourReminders extends Command
         $count = 0;
         foreach ($bookings as $booking) {
             try {
-                // Send reminder email
-                $email = $booking->is_guest ? $booking->email : $booking->user->email;
+                $email = $booking->customerEmail();
+                if (! $email) {
+                    $this->warn("Skipping booking #{$booking->id}: no customer email.");
+                    continue;
+                }
+
                 if (!CheckEmailLog('guest_tour_reminder', 'booking_' . $booking->id, $email)) {
                     Mail::to($email)
+                        ->locale($booking->customerLocale())
                         ->send(new GuestTourReminderMail($booking));
                 }
                 

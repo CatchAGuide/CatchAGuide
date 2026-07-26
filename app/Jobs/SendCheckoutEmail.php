@@ -41,15 +41,15 @@ class SendCheckoutEmail implements ShouldQueue
      */
     public function handle()
     {
-        // Determine locales per recipient
-        $guestLocale = $this->user->language ?? app()->getLocale();
+        $guestEmail = $this->booking->customerEmail();
+        $guestLocale = $this->booking->customerLocale();
         $guideLocale = $this->guide->language ?? app()->getLocale();
         $ceoLocale = 'de';
 
-        // Guest email (locale from booking/domain)
-        if (!CheckEmailLog('guest_booking_request', 'booking_' . $this->booking->id, $this->booking->email)) {
-            Log::info('********************************************************************************** Sending guest booking request email to ' . $this->booking->email . ' with locale ' . app()->getLocale());
-            Mail::to($this->booking->email)
+        // Guest email — always use booking snapshot / is_guest-aware customer email
+        if ($guestEmail && !CheckEmailLog('guest_booking_request', 'booking_' . $this->booking->id, $guestEmail)) {
+            Log::info('Sending guest booking request email to ' . $guestEmail . ' with locale ' . $guestLocale);
+            Mail::to($guestEmail)
                 ->locale($guestLocale)
                 ->queue(new GuestBookingRequestMail($this->booking, $this->user, $this->guiding, $this->guide));
         }
@@ -65,7 +65,7 @@ class SendCheckoutEmail implements ShouldQueue
         // CEO notification (default to DE)
         $email = config('mail.admin_email');
         if (!CheckEmailLog('ceo_booking_notification', 'admin_booking_' . $this->booking->id, $email)) {
-            Log::info('Sending CEO booking notification email to ' . $email . ' with locale ' . $ceoLocale . '*****************************************************************************************');
+            Log::info('Sending CEO booking notification email to ' . $email . ' with locale ' . $ceoLocale);
             Mail::to($email)
                 ->locale($ceoLocale)
                 ->queue(new BookingRequestMailToCEO($this->booking));

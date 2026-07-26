@@ -316,4 +316,36 @@ class Booking extends Model
         
         return $this->phone ?? '';
     }
+
+    /**
+     * Email for guest-facing booking notifications.
+     * Prefer the booking snapshot email, then User / UserGuest via is_guest.
+     */
+    public function customerEmail(): ?string
+    {
+        if (is_string($this->email) && trim($this->email) !== '') {
+            return trim($this->email);
+        }
+
+        $email = $this->user?->email;
+
+        return is_string($email) && trim($email) !== '' ? trim($email) : null;
+    }
+
+    /**
+     * Locale for guest-facing booking notifications.
+     */
+    public function customerLocale(): string
+    {
+        if (is_string($this->language) && $this->language !== '') {
+            return $this->language;
+        }
+
+        $userLanguage = $this->user?->language ?? null;
+        if (is_string($userLanguage) && $userLanguage !== '') {
+            return $userLanguage;
+        }
+
+        return app()->getLocale();
+    }
 }

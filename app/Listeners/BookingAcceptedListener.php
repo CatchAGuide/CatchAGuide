@@ -24,10 +24,11 @@ class BookingAcceptedListener  implements ShouldQueue
             return;
         }
 
-        $bookingUserEmail = $event->booking->email ? $event->booking->email : $event->booking->user->email;
+        $bookingUserEmail = $event->booking->customerEmail();
+        $guestLocale = $event->booking->customerLocale();
         if ($event->status === 'accepted') {
-            if (!CheckEmailLog('booking_accept_mail', 'booking_' . $event->booking->id, $bookingUserEmail)) {
-                Mail::to($bookingUserEmail)->locale($event->booking->language ?? app()->getLocale())->send(new BookingAcceptMail($event->booking));
+            if ($bookingUserEmail && !CheckEmailLog('booking_accept_mail', 'booking_' . $event->booking->id, $bookingUserEmail)) {
+                Mail::to($bookingUserEmail)->locale($guestLocale)->send(new BookingAcceptMail($event->booking));
             }
 
             if (!CheckEmailLog('guide_booking_accepted_mail', 'booking_' . $event->booking->id, $event->booking->guiding->user->email)) {
@@ -41,8 +42,8 @@ class BookingAcceptedListener  implements ShouldQueue
         }
 
         if ($event->status === 'rejected') {
-            if (!CheckEmailLog('booking_reject_mail', 'booking_' . $event->booking->id, $bookingUserEmail)) {
-                Mail::to($bookingUserEmail)->locale($event->booking->language ?? app()->getLocale())->send(new BookingRejectMail($event->booking));
+            if ($bookingUserEmail && !CheckEmailLog('booking_reject_mail', 'booking_' . $event->booking->id, $bookingUserEmail)) {
+                Mail::to($bookingUserEmail)->locale($guestLocale)->send(new BookingRejectMail($event->booking));
             }
 
             $email = config('mail.admin_email');

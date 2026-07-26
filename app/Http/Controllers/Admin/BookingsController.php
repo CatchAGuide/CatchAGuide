@@ -324,7 +324,7 @@ class BookingsController extends Controller
             $guide = $booking->guiding->user;
             $guiding = $booking->guiding;
             
-            $guestEmail = $booking->email ?: ($user->email ?? null);
+            $guestEmail = $booking->customerEmail();
             $guideEmail = $guide->email;
             
             // Validate we have email addresses
