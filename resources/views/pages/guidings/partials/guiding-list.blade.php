@@ -1,3 +1,16 @@
+@php
+    $placeLat = request()->get('placeLat', request()->get('placelat'));
+    $placeLng = request()->get('placeLng', request()->get('placelng'));
+    $hasPlaceCoords = filled($placeLat) && filled($placeLng);
+    $mainGuidingIds = collect($guidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $guidings->items() : $guidings)
+        ->pluck('id')
+        ->map(fn ($id) => (int) $id)
+        ->all();
+    $otherGuidingsUnique = collect($otherguidings ?? [])
+        ->reject(fn ($g) => in_array((int) $g->id, $mainGuidingIds, true))
+        ->values();
+@endphp
+
 @if(count($guidings))
     <div class="filter-sort-container">
         {{-- Sort By Dropdown --}}
@@ -125,19 +138,19 @@
     {!! $guidings->links('vendor.pagination.default') !!}
 @endif
 
-@if(count($otherguidings) && ( request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != ""))
+@if($otherGuidingsUnique->count() && $hasPlaceCoords)
 <hr>
-<div class="my-0 section-title">
-    <h2 class="h4 text-dark fw-bolder">{{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? translate('Additional Fishing Tour close to') . ' ' . request()->place : translate('Additional Fishing Tour') }}</h2> 
+<div class="my-0 section-title" id="other-guidings-section">
+    <h2 class="h4 text-dark fw-bolder">{{ translate('Additional Fishing Tour close to') }} {{ request()->place }}</h2>
 </div>
 <br>
 <div class="row">
     <div class="col-lg-12 col-sm-12">
         <div class="tours-list__right">
             <div class="tours-list__inner guidings-list">
-                @include('pages.guidings.partials.guiding-card', ['guidings' => $otherguidings])
+                @include('pages.guidings.partials.guiding-card', ['guidings' => $otherGuidingsUnique])
             </div>
         </div>
     </div>
 </div>
-@endif 
+@endif

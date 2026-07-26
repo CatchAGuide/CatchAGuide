@@ -89,8 +89,7 @@
             }, 500);
         }
 
-        // Initialize location autocomplete
-        initializeLocationAutocomplete();
+        // Location autocomplete via shared CAGPlaces (maps location-input)
         
         // Initialize Tagify for accommodations, rental boats, and guidings
         setTimeout(() => {
@@ -169,40 +168,6 @@
                     console.error('ImageManager not initialized');
                 }
             });
-        }
-    }
-
-    function initializeLocationAutocomplete() {
-        if (typeof google !== 'undefined' && google.maps) {
-            const locationInput = document.getElementById('location');
-            if (locationInput) {
-                const autocomplete = new google.maps.places.Autocomplete(locationInput);
-                autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    if (place.geometry) {
-                        const latInput = document.getElementById('latitude');
-                        const lngInput = document.getElementById('longitude');
-                        const countryInput = document.getElementById('country');
-                        const cityInput = document.getElementById('city');
-                        const regionInput = document.getElementById('region');
-                        
-                        if (latInput) latInput.value = place.geometry.location.lat();
-                        if (lngInput) lngInput.value = place.geometry.location.lng();
-                        
-                        place.address_components.forEach(component => {
-                            if (component.types.includes('country') && countryInput) {
-                                countryInput.value = component.long_name;
-                            }
-                            if (component.types.includes('locality') && cityInput) {
-                                cityInput.value = component.long_name;
-                            }
-                            if (component.types.includes('administrative_area_level_1') && regionInput) {
-                                regionInput.value = component.long_name;
-                            }
-                        });
-                    }
-                });
-            }
         }
     }
 

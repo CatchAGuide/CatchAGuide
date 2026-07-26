@@ -112,51 +112,34 @@ class VacationPillarPageService
     }
 
     /**
-     * @return array<int, array{lat: float, lng: float, title: string, url: string, pillar: string}>
+     * @return array<int, array<string, mixed>>
      */
     private function buildMapMarkers(VacationListingFilter $filter, VacationPillar $pillar): array
     {
-        $markers = [];
-
         if ($pillar === VacationPillar::Trips) {
             $trips = $this->trips->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['id', 'title', 'slug', 'latitude', 'longitude']);
+                ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path', 'price_per_person', 'currency']);
 
             $this->viewTranslation->applyToCollection($trips, ListingTranslationService::TYPE_TRIP);
 
-            foreach ($trips as $trip) {
-                $markers[] = [
-                    'lat' => (float) $trip->latitude,
-                    'lng' => (float) $trip->longitude,
-                    'title' => $trip->title,
-                    'url' => route('vacations.trips.show', $trip->slug),
-                    'pillar' => 'trip',
-                ];
-            }
+            return \App\Support\Maps\MapMarkerCollection::fromTrips($trips);
         }
 
         if ($pillar === VacationPillar::Camps) {
             $camps = $this->camps->queryForCountry($filter)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
-                ->get(['id', 'title', 'slug', 'latitude', 'longitude']);
+                ->with(['accommodations', 'specialOffers'])
+                ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path']);
 
             $this->viewTranslation->applyToCollection($camps, ListingTranslationService::TYPE_CAMP);
 
-            foreach ($camps as $camp) {
-                $markers[] = [
-                    'lat' => (float) $camp->latitude,
-                    'lng' => (float) $camp->longitude,
-                    'title' => $camp->title,
-                    'url' => route('vacations.camps.show', $camp->slug),
-                    'pillar' => 'camp',
-                ];
-            }
+            return \App\Support\Maps\MapMarkerCollection::fromCamps($camps);
         }
 
-        return $markers;
+        return [];
     }
 
     /**

@@ -34,12 +34,22 @@
 <script src="{{ asset('assets/vendors/cropperjs/cropper.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/masonry/masonry.pkgd.min.js') }}" async></script>
 
-@if(!empty(config('services.google_maps.api_key')))
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places,geocoding,marker&loading=async"></script>
-@else
-<script>console.error('GOOGLE_MAPS_API_KEY is not set — Google Maps script was not loaded.');</script>
+<script>
+    window.CAG_MAPS_CONFIG = window.CAG_MAPS_CONFIG || {
+        tileUrl: @json(config('services.maps.tile_url')),
+        attribution: @json(config('services.maps.attribution')),
+        defaultCenter: {
+            lat: {{ (float) config('services.maps.default_center.lat') }},
+            lng: {{ (float) config('services.maps.default_center.lng') }}
+        },
+        defaultZoom: {{ (int) config('services.maps.default_zoom') }},
+        googleMapsApiKey: @json(config('services.google_maps.api_key'))
+    };
+</script>
+@if(empty(config('services.google_maps.api_key')))
+<script>console.error('GOOGLE_MAPS_API_KEY is not set — Places Autocomplete will not work.');</script>
 @endif
-@include('layouts.includes.maps-utils')
+<script src="{{ mix('js/places.js') }}" defer></script>
 
 <script>
     @if(Session::has('message'))
@@ -139,27 +149,8 @@
     selectTarget.trigger('change');
 </script>
 <script>
-    // Helper: run a callback once the Google Maps JS API is ready
-    function runWhenGoogleMapsReady(callback, maxAttempts = 50, interval = 200) {
-        let attempts = 0;
-        const timer = setInterval(function () {
-            if (window.google && google.maps) {
-                clearInterval(timer);
-                callback();
-            } else if (++attempts >= maxAttempts) {
-                clearInterval(timer);
-                console.warn('Google Maps JS API not available after waiting – skipping callback.');
-            }
-        }, interval);
-    }
-
-    // Config for mobile search modal (searchPlace) – initialized only when modal is shown so dropdown works on mobile
     const guidingSearchPlaceLogUrl = @json(route('guidings.search-place-log.store'));
 
-    /**
-     * Persist Google Places selection from the navbar / header search (guidings flow).
-     * Server records client IP, app locale, and structured place fields.
-     */
     function postGuidingSearchPlaceLog(place, config, MapsManager) {
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
         if (!token || !MapsManager || typeof MapsManager.extractLocationData !== 'function') {
@@ -213,7 +204,6 @@
         region: 'LocationRegion'
     };
 
-    // Inputs that are visible on load (not inside a hidden modal) – init on page load
     const searchInputsOnLoad = [
         { input: 'searchPlaceMobile', lat: 'LocationLatMobile', lng: 'LocationLngMobile', city: 'LocationCityMobile', country: 'LocationCountryMobile', region: 'LocationRegionMobile' },
         { input: 'searchPlaceDesktop', lat: 'LocationLatDesktop', lng: 'LocationLngDesktop', city: 'LocationCityDesktop', country: 'LocationCountryDesktop', region: 'LocationRegionDesktop' },
@@ -246,62 +236,55 @@
         MapsManager.initAutocomplete(config.input, callback);
     }
 
-    // Initialize search inputs that are visible on page load (excludes searchPlace in modal)
+    var headerPlacesInited = false;
     function initializeGooglePlaces() {
         const MapsManager = window.GoogleMapsManager;
         if (!MapsManager) {
             console.warn('GoogleMapsManager not available – skipping autocomplete init.');
             return;
         }
-        searchInputsOnLoad.forEach(function(config) {
-            initAutocompleteForConfig(MapsManager, config);
-        });
+        const ensure = MapsManager.ensurePlacesLoaded
+            ? MapsManager.ensurePlacesLoaded()
+            : (window.CAGPlaces ? window.CAGPlaces.ensureLoaded() : Promise.resolve());
+        ensure.then(function () {
+            searchInputsOnLoad.forEach(function(config) {
+                initAutocompleteForConfig(MapsManager, config);
+            });
+            headerPlacesInited = true;
+        }).catch(function () {});
     }
 
-    // Initialize only the mobile search modal Location input (so suggestions show on mobile when modal is visible)
+    window.__cagInitHeaderPlaces = function () {
+        if (headerPlacesInited) return;
+        initializeGooglePlaces();
+    };
+
     var searchPlaceModalAutocompleteInited = false;
     function initializeSearchModalPlaces() {
         if (searchPlaceModalAutocompleteInited) return;
         const MapsManager = window.GoogleMapsManager;
         if (!MapsManager || !document.getElementById(searchModalPlaceConfig.input)) return;
-        searchPlaceModalAutocompleteInited = true;
-        initAutocompleteForConfig(MapsManager, searchModalPlaceConfig);
+        const ensure = MapsManager.ensurePlacesLoaded
+            ? MapsManager.ensurePlacesLoaded()
+            : (window.CAGPlaces ? window.CAGPlaces.ensureLoaded() : Promise.resolve());
+        ensure.then(function () {
+            searchPlaceModalAutocompleteInited = true;
+            initAutocompleteForConfig(MapsManager, searchModalPlaceConfig);
+        }).catch(function () {});
     }
 
-    // Initialize on page load (but only once Google Maps is actually ready)
-    window.addEventListener('load', function () {
-        const MapsManager = window.GoogleMapsManager;
-        if (MapsManager) {
-            MapsManager.waitForGoogleMaps(initializeGooglePlaces);
-        } else {
-            runWhenGoogleMapsReady(initializeGooglePlaces);
-        }
-    });
-
-    // When mobile search modal is shown, init Places Autocomplete for searchPlace so suggestions appear (fix for mobile)
     document.addEventListener('DOMContentLoaded', function() {
         const searchModal = document.getElementById('searchModal');
         if (searchModal) {
             searchModal.addEventListener('shown.bs.modal', function () {
-                const MapsManager = window.GoogleMapsManager;
-                if (MapsManager) {
-                    MapsManager.waitForGoogleMaps(initializeSearchModalPlaces);
-                } else {
-                    runWhenGoogleMapsReady(initializeSearchModalPlaces);
-                }
+                initializeSearchModalPlaces();
             });
         }
-        // Other modals: re-run full init in case they contain other search inputs
         ['mobileMenuModal'].forEach(function(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.addEventListener('shown.bs.modal', function () {
-                    const MapsManager = window.GoogleMapsManager;
-                    if (MapsManager) {
-                        MapsManager.waitForGoogleMaps(initializeGooglePlaces);
-                    } else {
-                        runWhenGoogleMapsReady(initializeGooglePlaces);
-                    }
+                    window.__cagInitHeaderPlaces();
                 });
             }
         });

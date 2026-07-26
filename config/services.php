@@ -42,6 +42,20 @@ return [
         'map_id' => env('GOOGLE_MAPS_MAP_ID', 'DEMO_MAP_ID'),
     ],
 
+    /*
+    | Leaflet / free tile maps (product + listing UI). Places Autocomplete still uses google_maps.
+    */
+    'maps' => [
+        'engine' => env('MAPS_ENGINE', 'leaflet'),
+        'tile_url' => env('MAPS_TILE_URL', 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'),
+        'attribution' => env('MAPS_ATTRIBUTION', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'),
+        'default_center' => [
+            'lat' => (float) env('MAPS_DEFAULT_LAT', 51.165691),
+            'lng' => (float) env('MAPS_DEFAULT_LNG', 10.451526),
+        ],
+        'default_zoom' => (int) env('MAPS_DEFAULT_ZOOM', 5),
+    ],
+
     'translation' => [
         'driver' => env('TRANSLATION_SERVICE', 'gemini'), // Options: 'gemini' or 'google'
     ],

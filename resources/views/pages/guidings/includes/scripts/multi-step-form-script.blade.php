@@ -116,70 +116,7 @@
         seasonal_trip: { field: 'Seasonal Trip', step: 8 },
     };
     
-    function initAutocomplete() {
-        const locationInput = document.getElementById('location');
-        if (!locationInput) {
-            return;
-        }
-
-        // Gracefully handle cases where Google Maps / Places is not loaded
-        if (
-            typeof window.google === 'undefined' ||
-            !google.maps ||
-            !google.maps.places ||
-            !google.maps.places.Autocomplete
-        ) {
-            console.warn('Google Places Autocomplete is not available on this page.');
-            return;
-        }
-
-        autocomplete = new google.maps.places.Autocomplete(
-            locationInput,
-            {
-                types: ['(regions)']
-            }
-        );
-
-        autocomplete.addListener('place_changed', function () {
-            const place = autocomplete.getPlace();
-            if (!place.geometry || !place.address_components) return;
-            place.address_components.forEach(component => {
-                const types = component.types;
-
-                $('#latitude').val(place.geometry.location.lat());
-                $('#longitude').val(place.geometry.location.lng());
-
-                if (types.includes('locality')) {
-                    $('#city').val(component.long_name);
-                    city = component.long_name;
-                } else if (types.includes('country')) {
-                    country = component.long_name;
-                    $('#country').val(country);
-                } else if (types.includes('postal_code')) {
-                    postal_code = component.long_name;
-                    $('#postal_code').val(postal_code);
-                } else if (types.includes('administrative_area_level_1')) {
-                    region = component.long_name;
-                    $('#region').val(region);
-                }
-            });
-        });
-    }
-
-    // Load Google Maps API with Places library when not already loaded (required for Create Guiding location autocomplete)
-    function loadGoogleMapsAPIForGuiding() {
-        if (typeof window.google !== 'undefined' && window.google.maps && window.google.maps.places) {
-            initAutocomplete();
-            return;
-        }
-        if (window.__guidingMapsScriptLoading) return;
-        window.__guidingMapsScriptLoading = true;
-        var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places&callback=initAutocomplete';
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-    }
+    // Location autocomplete: shared maps location-input + CAGPlaces (PlacesAutocompleteService)
 
     function handleImageUpload(event) {
         const files = event.target.files;
@@ -2133,7 +2070,7 @@
             $textarea.toggle(this.checked);
         });
 
-        loadGoogleMapsAPIForGuiding();
+        // Location autocomplete via shared CAGPlaces (maps location-input)
 
         // Duration selection logic
         $('input[name="duration"]').change(function() {

@@ -365,10 +365,60 @@ trait GuidingFilterOptimization
      */
     protected function shouldLoadOtherGuidings($allGuidings): bool
     {
-        $count = $allGuidings instanceof \Countable ? count($allGuidings) : 0;
+        if ($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator) {
+            $count = method_exists($allGuidings, 'total') ? $allGuidings->total() : $allGuidings->count();
+        } else {
+            $count = $allGuidings instanceof \Countable ? count($allGuidings) : 0;
+        }
         $max = (int) config('location_search.nearby_section_max_main_results', 12);
 
         return $count === 0 || $count <= $max;
+    }
+
+    /**
+     * Slim map payload for AJAX remaps (primary + gray nearby markers).
+     *
+     * @param  iterable  $allGuidings
+     * @param  iterable  $otherguidings
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildMapGuidingsPayload($allGuidings, $otherguidings = []): array
+    {
+        $main = collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator
+            ? $allGuidings->items()
+            : $allGuidings);
+
+        $others = collect($otherguidings);
+        $mainIds = $main->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $toPayload = function ($guiding, bool $isGray) {
+            return [
+                'id' => $guiding->id,
+                'slug' => $guiding->slug ?? null,
+                'title' => $guiding->title ?? '',
+                'location' => $guiding->location ?? '',
+                'lat' => $guiding->lat ?? null,
+                'lng' => $guiding->lng ?? null,
+                'thumbnail_path' => $guiding->thumbnail_path ?? null,
+                'lowest_price' => $guiding->lowest_price
+                    ?? $guiding->price
+                    ?? null,
+                'is_gray' => $isGray,
+                'variant' => $isGray ? 'gray' : 'primary',
+            ];
+        };
+
+        return $main
+            ->filter(fn ($g) => ! empty($g->lat) && ! empty($g->lng))
+            ->map(fn ($g) => $toPayload($g, false))
+            ->concat(
+                $others
+                    ->filter(fn ($g) => ! in_array((int) $g->id, $mainIds, true))
+                    ->filter(fn ($g) => ! empty($g->lat) && ! empty($g->lng))
+                    ->map(fn ($g) => $toPayload($g, true))
+            )
+            ->values()
+            ->all();
     }
 
     /**
@@ -409,7 +459,9 @@ trait GuidingFilterOptimization
                 $latitude,
                 200 * 1000 // 200km converted to meters
             ])
-            ->whereNotIn('id', $existingGuidingIds) // Exclude existing guidings
+            ->when(! empty($existingGuidingIds), function ($query) use ($existingGuidingIds) {
+                $query->whereNotIn('id', $existingGuidingIds);
+            })
             ->publiclyVisible()
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance') // Sort by nearest first

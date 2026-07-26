@@ -82,20 +82,20 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="location" class="form-label fw-bold fs-5">
-                        {{ __('trips.location') }}
-                    </label>
-                    <input type="search"
-                           class="form-control"
-                           id="location"
-                           name="location"
-                           value="{{ $formData['location'] ?? '' }}"
-                           placeholder="{{ __('trips.location_placeholder') }}">
-                    <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? '' }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? '' }}">
-                    <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
-                    <input type="hidden" name="city" id="cityField" value="{{ $formData['city'] ?? '' }}">
-                    <input type="hidden" name="region" id="regionField" value="{{ $formData['region'] ?? '' }}">
+                    <x-maps.location-input
+                        :label="__('trips.location')"
+                        :placeholder="__('trips.location_placeholder')"
+                        :value="$formData['location'] ?? ''"
+                        :lat="$formData['latitude'] ?? ''"
+                        :lng="$formData['longitude'] ?? ''"
+                        :country="$formData['country'] ?? ''"
+                        :city="$formData['city'] ?? ''"
+                        :region="$formData['region'] ?? ''"
+                        city-id="cityField"
+                        region-id="regionField"
+                        :types="['geocode']"
+                        wrapper-class=""
+                    />
                 </div>
 
                 <hr>

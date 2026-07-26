@@ -182,7 +182,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_bridge_title' => 'Why book your fishing holiday here?',
     'hub_bridge_eyebrow' => 'Fishing holidays with Catch A Guide',
     'hub_bridge_lead' => 'Tap a destination on the map — camps and guided trips across the continent.',
-    'hub_bridge_map_hint' => 'Select a pin to preview',
+    'hub_bridge_map_hint' => 'Hover a pin to preview',
     'hub_bridge_spotlight_label' => 'Featured destination',
     'hub_bridge_explore' => 'Explore country',
     'hub_stat_countries_label' => 'countries',

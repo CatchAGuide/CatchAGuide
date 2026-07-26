@@ -602,171 +602,23 @@
                     @endif
 
                     <!-- column-reverse-row-normal -->
-                    @if(count($guidings))
                     <div class="row">
                         <div class="col-lg-12 col-sm-12">
                             <div class="tours-list__right">
                                 <div class="tours-list__inner" id="guidings-list">
-                                    <div class="filter-sort-container">
-                                        {{-- Sort By Dropdown --}}
-                                        @if(!$agent->ismobile())
-                                        <div class="d-flex align-items-center">
-                                            <span class="me-2">@lang('message.sortby'):</span>
-                                            <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
-                                                <select class="form-select form-select-sm" name="sortby" id="sortby-2" style="width: auto;">
-                                                    <option value="" disabled selected>@lang('message.choose')...</option>
-                                                    <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
-                                                    <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
-                                                    <option value="short-duration" {{request()->get('sortby') == 'short-duration' ? 'selected' : '' }}>@lang('message.shortduration')</option>
-                                                    <option value="long-duration" {{request()->get('sortby') == 'long-duration' ? 'selected' : '' }}>@lang('message.longduration')</option>
-                                                </select>
-                                                @foreach(request()->except('sortby') as $key => $value)
-                                                    @if(is_array($value))
-                                                        @foreach($value as $arrayValue)
-                                                            <input type="hidden" name="{{ $key }}[]" value="{{ $arrayValue }}">
-                                                        @endforeach
-                                                    @else
-                                                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-                                                    @endif
-                                                @endforeach
-                                            </form>
-                                        </div>
+                                    @include('pages.guidings.partials.guiding-list')
+                                    @if(count($guidings) && $guidings->hasPages())
+                                        @if($guidings->previousPageUrl())
+                                            <link rel="prev" href="{{ $guidings->previousPageUrl() }}" />
                                         @endif
-
-                                        {{-- Active Filters --}}
-                                        <div class="active-filters">
-                                            @if(request()->has('target_fish'))
-                                                @foreach(request()->get('target_fish') as $fishId)
-                                                    @php
-                                                        $fish = $targetFishOptions->firstWhere('id', $fishId);
-                                                    @endphp
-                                                    @if($fish)
-                                                        <span class="badge bg-light text-dark border">
-                                                            {{ app()->getLocale() == 'en' ? $fish->name_en : $fish->name }}
-                                                            <button type="button" class="btn-close ms-2" data-filter-type="target_fish" data-filter-id="{{ $fishId }}"></button>
-                                                        </span>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-
-                                            @if(request()->has('methods'))
-                                                @foreach(request()->get('methods') as $methodId)
-                                                    @php
-                                                        $method = $methodOptions->firstWhere('id', $methodId);
-                                                    @endphp
-                                                    @if($method)
-                                                        <span class="badge bg-light text-dark border">
-                                                            {{ app()->getLocale() == 'en' ? $method->name_en : $method->name }}
-                                                            <button type="button" class="btn-close ms-2" data-filter-type="methods" data-filter-id="{{ $methodId }}"></button>
-                                                        </span>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-
-                                            @if(request()->has('water'))
-                                                @foreach(request()->get('water') as $waterId)
-                                                    @php
-                                                        $water = $waterTypeOptions->firstWhere('id', $waterId);
-                                                    @endphp
-                                                    @if($water)
-                                                        <span class="badge bg-light text-dark border">
-                                                            {{ app()->getLocale() == 'en' ? $water->name_en : $water->name }}
-                                                            <button type="button" class="btn-close ms-2" data-filter-type="water" data-filter-id="{{ $waterId }}"></button>
-                                                        </span>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                            
-
-                                            {{-- Duration Type Filters --}}
-                                            @if(request()->has('duration_types'))
-                                                @foreach(request()->get('duration_types') as $durationType)
-                                                    <span class="badge bg-light text-dark border">
-                                                        @if($durationType == 'half_day')
-                                                            @lang('guidings.half_day')
-                                                        @elseif($durationType == 'full_day')
-                                                            @lang('guidings.full_day')
-                                                        @elseif($durationType == 'multi_day')
-                                                            @lang('guidings.multi_day')
-                                                        @endif
-                                                        <button type="button" class="btn-close ms-2" data-filter-type="duration_types" data-filter-id="{{ $durationType }}"></button>
-                                                    </span>
-                                                @endforeach
-                                            @endif
-
-                                            {{-- Number of Persons Filter --}}
-                                            @if(request()->has('num_persons'))
-                                                @php
-                                                    $numPersons = request()->get('num_persons');
-                                                @endphp
-                                                <span class="badge bg-light text-dark border">
-                                                    {{ $numPersons }} {{ $numPersons == 1 ? __('message.person') : __('message.persons') }}
-                                                    <button type="button" class="btn-close ms-2" data-filter-type="num_persons" data-filter-id="{{ $numPersons }}"></button>
-                                                </span>
-                                            @endif
-
-                                            {{-- Price Range Filter --}}
-                                            @php
-                                                $priceMin = request()->get('price_min');
-                                                $priceMax = request()->get('price_max');
-                                                $defaultMinPrice = 50;
-                                                $defaultMaxPrice = isset($overallMaxPrice) ? $overallMaxPrice : 1000;
-                                                $showPriceMin = isset($priceMin) && $priceMin != $defaultMinPrice;
-                                                $showPriceMax = isset($priceMax) && $priceMax != $defaultMaxPrice;
-                                            @endphp
-                                            @if($showPriceMin || $showPriceMax)
-                                                <span class="badge bg-light text-dark border">
-                                                    @if($showPriceMin && $showPriceMax)
-                                                        Price from €{{ $priceMin }} to €{{ $priceMax }}
-                                                    @elseif($showPriceMin)
-                                                        Price from €{{ $priceMin }}
-                                                    @elseif($showPriceMax)
-                                                        Price up to €{{ $priceMax }}
-                                                    @endif
-                                                    <button type="button" class="btn-close ms-2" data-filter-type="price_range" data-filter-id="price_range"></button>
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    @include('pages.guidings.partials.guiding-card', ['guidings' => $guidings])
-                                    
-                                    <!-- Pagination with SEO meta tags -->
-                                    @if($guidings->hasPages())
-                                        <div class="pagination-wrapper">
-                                            {!! $guidings->links('vendor.pagination.default') !!}
-                                            
-                                            <!-- Add pagination meta tags -->
-                                            @if($guidings->previousPageUrl())
-                                                <link rel="prev" href="{{ $guidings->previousPageUrl() }}" />
-                                            @endif
-                                            @if($guidings->nextPageUrl())
-                                                <link rel="next" href="{{ $guidings->nextPageUrl() }}" />
-                                            @endif
-                                        </div>
+                                        @if($guidings->nextPageUrl())
+                                            <link rel="next" href="{{ $guidings->nextPageUrl() }}" />
+                                        @endif
                                     @endif
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endif
-                    
-                    @if(count($otherguidings) && ( request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != ""))
-                    
-                    <hr>
-                    <div class="my-0 section-title">
-                        <h2 class="h4 text-dark fw-bolder">{{translate('Additional Fishing Tour close to') }} {{ request()->placeLat != null || request()->placelat != "" && request()->placeLng != null || request()->placelng != "" ? request()->place : '' }}</h2> 
-                    </div>
-                    <br>
-                    <div class="row">
-                        <div class="col-lg-12 col-sm-12">
-                            <div class="tours-list__right">
-                                <div class="tours-list__inner guidings-list">
-                                    @include('pages.guidings.partials.guiding-card', ['guidings' => $otherguidings])
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -800,7 +652,43 @@
                 </div>
 
                 {{-- Map fills the rest --}}
-                <div id="map" class="map-modal__map"></div>
+                @php
+                    $mapCenterLat = request()->get('placeLat')
+                        ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
+                    $mapCenterLng = request()->get('placeLng')
+                        ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
+
+                    if ($allGuidings->isEmpty()) {
+                        $mapSource = $otherguidings ?? collect();
+                        $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+                    } else {
+                        $mapSource = $allGuidings;
+                        if (isset($otherguidings) && count($otherguidings) > 0) {
+                            $mapSource = $allGuidings->concat($otherguidings);
+                        }
+                        $mapGrayIds = isset($otherguidings)
+                            ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                            : [];
+                    }
+                    $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+                @endphp
+                <x-maps.listing
+                    class="map-modal__map"
+                    :markers="$guidingMapMarkers"
+                    layout="modal"
+                    modal-id="mapModal"
+                    map-id="map"
+                    height="100%"
+                    :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+                    instance-key="guidings"
+                    :cluster="true"
+                    :show-gray-nearby="true"
+                    :single-zoom="12"
+                    :default-zoom="5"
+                    :lazy-modal="true"
+                    :updatable="true"
+                    :interactive-preview="true"
+                />
 
             </div>
         </div>
@@ -930,8 +818,6 @@
     $listingMediaPlaceholder = media_url(null);
 @endphp
 <script>
-    // Use centralized GoogleMapsManager
-    const MapsManager = window.GoogleMapsManager;
     const listingMediaUsesObjectStorage = @json($listingMediaUsesObjectStorage);
     const listingMediaCdnBase = @json($listingMediaCdnBase);
     const listingMediaEnvPrefix = @json($listingMediaEnvPrefix);
@@ -954,205 +840,28 @@
             : `/${normalized}`;
     }
 
-    let map; // Make map variable accessible in wider scope
-    let markerCluster; // Make markerCluster accessible in wider scope
-    let isDuplicateCoordinate;
-    const markers = [];
-    const infowindows = [];
-    const uniqueCoordinates = [];
-    let mapInitialized = false;
-
-    // Initialize map when modal is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        const mapModal = document.getElementById('mapModal');
-        if (mapModal) {
-            mapModal.addEventListener('shown.bs.modal', function () {
-                if (!mapInitialized) {
-                    MapsManager.waitForGoogleMaps(function() {
-                        initializeMap();
-                    });
-                } else if (map) {
-                    // If map already exists, trigger resize to fix dimensions
-                    MapsManager.resizeMap(map);
-                }
-            });
-        }
-    });
-
-    async function initializeMap() {
-        @php
-            $lat = isset($guidings[0]) ? $guidings[0]->lat : 51.165691;
-            $lng = isset($guidings[0]) ? $guidings[0]->lng : 10.451526;
-        @endphp
-        const position = { lat: {{request()->get('placeLat') ? request()->get('placeLat') : $lat }}, lng: {{request()->get('placeLng') ? request()->get('placeLng') : $lng }} }; 
-        
-        const { InfoWindow } = await MapsManager.loadLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await MapsManager.loadLibrary("marker");
-
-        // Initialize map only if it hasn't been initialized yet
-        if (!map) {
-            map = await MapsManager.initMap("map", {
-                zoom: 5,
-                center: position,
-                mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}",
-                streetViewControl: false,
-                clickableIcons: false
-            });
-        }
-
-        // Bounds and marker counter for primary (non-gray) markers
-        let redBounds = new google.maps.LatLngBounds();
-        let redMarkerCount = 0;
-        const redCoordinates = new Set();
-
-        @if($allGuidings->isEmpty())
-            @include('pages.guidings.partials.maps',[
-                'guidings' => $otherguidings,
-                'grayIds' => collect($otherguidings)->pluck('id')->toArray(),
-            ])
-        @else
-            @php
-                // Always append otherguidings to the displayed markers
-                $combinedGuidings = $allGuidings;
-                if (isset($otherguidings) && count($otherguidings) > 0) {
-                    $combinedGuidings = $allGuidings->concat($otherguidings);
-                }
-                $grayIds = isset($otherguidings) ? collect($otherguidings)->pluck('id')->toArray() : [];
-            @endphp
-            @include('pages.guidings.partials.maps',[
-                'guidings' => $combinedGuidings,
-                'grayIds' => $grayIds,
-            ])
-        @endif
-
-        // Focus map on red markers (main results)
-        if (redMarkerCount > 0) {
-            const uniqueCount = redCoordinates.size || redMarkerCount;
-            if (uniqueCount === 1) {
-                map.setCenter(redBounds.getCenter());
-                map.setZoom(12);
-            } else {
-                map.fitBounds(redBounds);
+    // Leaflet ListingMap registers window.updateMapWithGuidings; enrich AJAX payloads with media URLs
+    window.__cagEnrichGuidingsForMap = function (guidings) {
+        return (guidings || []).map(function (guiding) {
+            var price = guiding.lowest_price != null ? guiding.lowest_price : guiding.price;
+            if (price !== null && price !== '' && Number(price) <= 0) {
+                price = null;
             }
-        }
-
-        function getRandomOffset() {
-            return (Math.random() - 0.5) * 0.0080;
-        }
-
-        // Create marker cluster using centralized manager
-        if (markers.length > 0) {
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-            if (markerCluster) {
-                google.maps.event.addListener(markerCluster, 'clusterclick', function(cluster) {
-                    map.setZoom(map.getZoom() + 2);
-                    map.setCenter(cluster.getCenter());
-                });
-            }
-        }
-        
-        mapInitialized = true;
-        
-        // Trigger resize after a short delay to ensure modal is fully rendered
-        MapsManager.resizeMap(map);
-    }
-
-    window.updateMapWithGuidings = function(guidings) {
-        // Clear existing markers
-        markers.forEach(marker => marker.setMap(null));
-        
-        // Clear marker cluster
-        if (markerCluster) {
-            try {
-                markerCluster.clearMarkers();
-            } catch (error) {
-                console.warn('Error clearing marker cluster:', error);
-            }
-        }
-
-        // Clear arrays but keep the map instance
-        markers.length = 0;
-        infowindows.forEach(infowindow => infowindow.close());
-        infowindows.length = 0;
-        uniqueCoordinates.length = 0;
-
-        // Add new markers for each guiding
-        guidings.forEach(guiding => {
-            if (guiding.lat && guiding.lng) {
-                const location = { lat: parseFloat(guiding.lat), lng: parseFloat(guiding.lng) };
-
-                const isDuplicateCoordinate = uniqueCoordinates.some(coordinate => {
-                    return coordinate.lat === location.lat && coordinate.lng === location.lng;
-                });
-
-                let marker;
-
-                if (isDuplicateCoordinate) {
-                    marker = new google.maps.marker.AdvancedMarkerElement({
-                        position: {
-                            lat: location.lat + ((Math.random() - 0.5) * 0.0080),
-                            lng: location.lng + ((Math.random() - 0.5) * 0.0080)
-                        },
-                        map: map
-                    });
-                } else {
-                    marker = new google.maps.marker.AdvancedMarkerElement({
-                        position: location,
-                        map: map
-                    });
-                    uniqueCoordinates.push(location);
-                }
-
-                markers.push(marker);
-
-                const thumbnailPath = guiding.thumbnail_path
+            return Object.assign({}, guiding, {
+                thumbnail: guiding.thumbnail_path
                     ? resolveListingMediaUrl(guiding.thumbnail_path)
-                    : listingMediaPlaceholder;
-
-                const infowindow = new google.maps.InfoWindow({
-                    content: `
-                        <div class="card p-0 border-0" style="width: 200px; overflow: hidden;">
-                            <div class="card-body border-0 p-0">
-                                <div class="d-flex">
-                                     <img src="${thumbnailPath}" alt="${guiding.title}" style="width: 100%; height: 150px; object-fit: cover;">
-                                </div>
-                                <div class="p-2">
-                                    <a class="text-decoration-none" href="/guidings/${guiding.id}/${guiding.slug}">
-                                        <h5 class="card-title mb-1" style="font-size: 14px; font-weight: bold; color: #333;">${guiding.title}</h5>
-                                    </a>
-                                    <div class="text-muted small">${guiding.location}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `
-                });
-
-                infowindows.push(infowindow);
-
-                marker.addListener("gmp-click", () => {
-                    infowindows.forEach((iw) => {
-                        iw.close();
-                    });
-                    infowindow.open(map, marker);
-                });
-            }
+                    : listingMediaPlaceholder,
+                url: guiding.id && guiding.slug
+                    ? `/guidings/${guiding.id}/${guiding.slug}`
+                    : (guiding.url || '#'),
+                lowest_price: price,
+                price: price,
+                priceLabel: price != null ? ('ab ' + price + '€ p.P.') : null,
+                badge: guiding.badge || @json(function_exists('translate') ? translate('Guiding') : 'Guiding'),
+                cta: guiding.cta || @json(__('vacations.view_details')),
+                pillar: guiding.pillar || 'guiding',
+            });
         });
-
-        // Update marker cluster with new markers
-        if (markerCluster) {
-            try {
-                markerCluster.addMarkers(markers);
-            } catch (error) {
-                console.warn('Error adding markers to cluster:', error);
-                // If clustering fails, recreate it
-                if (markers.length > 0 && map) {
-                    markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-                }
-            }
-        } else if (markers.length > 0 && map) {
-            // Create cluster if it doesn't exist
-            markerCluster = MapsManager.createMarkerClusterer({ markers, map });
-        }
     };
 
     function getLocation() {

@@ -414,21 +414,13 @@ class GuidingsController extends Controller
         // Handle AJAX requests
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
-            
-            $guidingsData = $allGuidings->map(function($guiding) {
-                return [
-                    'id' => $guiding->id,
-                    'slug' => $guiding->slug,
-                    'title' => $guiding->title,
-                    'location' => $guiding->location,
-                    'lat' => $guiding->lat,
-                    'lng' => $guiding->lng
-                ];
-            });
-           
+            $mapGuidings = $this->buildMapGuidingsPayload($allGuidings, $otherguidings);
+
             return response()->json(array_merge($responseData, [
                 'html' => $view,
-                'guidings' => $guidingsData,
+                'guidings' => $mapGuidings,
+                'allGuidings' => $mapGuidings,
+                'mapGuidings' => $mapGuidings,
             ]));
         }
 
@@ -660,21 +652,13 @@ class GuidingsController extends Controller
         // Handle AJAX requests
         if ($request->ajax()) {
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
-            
-            $guidingsData = $allGuidings->map(function($guiding) {
-                return [
-                    'id' => $guiding->id,
-                    'slug' => $guiding->slug,
-                    'title' => $guiding->title,
-                    'location' => $guiding->location,
-                    'lat' => $guiding->lat,
-                    'lng' => $guiding->lng
-                ];
-            });
-            
+            $mapGuidings = $this->buildMapGuidingsPayload($allGuidings, $otherguidings);
+
             return response()->json(array_merge($responseData, [
                 'html' => $view,
-                'guidings' => $guidingsData,
+                'guidings' => $mapGuidings,
+                'allGuidings' => $mapGuidings,
+                'mapGuidings' => $mapGuidings,
             ]));
         }
 

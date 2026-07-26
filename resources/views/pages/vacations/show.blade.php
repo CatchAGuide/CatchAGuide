@@ -1044,7 +1044,16 @@
     </section>
 
     <!-- Map Section -->
-    <div id="map" class="mb-5" style="height: 400px;"></div>
+    <x-maps.product
+        id="map"
+        class="mb-5"
+        :lat="$vacation->latitude ?? 41.40338"
+        :lng="$vacation->longitude ?? 2.17403"
+        :title="translate($vacation->title ?? '')"
+        height="400px"
+        :zoom="10"
+        :lazy="true"
+    />
 
     @if ($sameCountries && count($sameCountries) > 0)
     <section class="tour-details-two mb-5 p-0">
@@ -1171,41 +1180,7 @@
 
 @section('js_after')
 <script>
-
-// Use centralized GoogleMapsManager
-const MapsManager = window.GoogleMapsManager;
-
-async function initMap() {
-    const location = { 
-        lat: {{ $vacation->latitude ?? 41.40338 }}, 
-        lng: {{ $vacation->longitude ?? 2.17403 }} 
-    };
-    
-    MapsManager.waitForGoogleMaps(async function() {
-        const map = await MapsManager.initMap('map', {
-            zoom: 10,
-            center: location,
-            mapTypeControl: false,
-            streetViewControl: false,
-            mapId: "{{ config('services.google_maps.map_id', 'DEMO_MAP_ID') }}"
-        });
-
-        // Create marker using centralized manager
-        const marker = await MapsManager.createMarker({
-            map: map,
-            position: location
-        });
-    });
-}
-
 document.addEventListener("DOMContentLoaded", function() {
-    // Use centralized manager - no need to load script dynamically
-    initMap();
-    } else {
-        // If Google Maps API is already loaded, just call initMap
-        initMap();
-    }
-
     // Define initOwlCarousel function first
     function initOwlCarousel() {
         const $toursList = $(".tours-list__inner");

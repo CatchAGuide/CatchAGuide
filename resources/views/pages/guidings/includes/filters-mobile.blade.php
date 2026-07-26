@@ -576,10 +576,10 @@
                 
                 // Update the filter options based on available results
                 FilterManager.updateFilters(data);
-                
-                // Update map if it exists
+
+                const mapData = data.mapGuidings || data.allGuidings || data.guidings || [];
                 if (typeof window.updateMapWithGuidings === 'function') {
-                    window.updateMapWithGuidings(data.allGuidings);
+                    window.updateMapWithGuidings(Array.isArray(mapData) ? mapData : Object.values(mapData || {}));
                 }
                 
                 // Hide loading overlay

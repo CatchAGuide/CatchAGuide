@@ -654,10 +654,10 @@
 
 
                 FilterManager.updateFilters(data);
-                
-                // Update the filter options based on available results
-                if (typeof window.updateMapWithGuidings === 'function' && data.allGuidings.length > 0) {
-                    window.updateMapWithGuidings(data.allGuidings);
+
+                const mapData = data.mapGuidings || data.allGuidings || data.guidings || [];
+                if (typeof window.updateMapWithGuidings === 'function') {
+                    window.updateMapWithGuidings(Array.isArray(mapData) ? mapData : Object.values(mapData || {}));
                 }
             
                 // Hide loading overlay

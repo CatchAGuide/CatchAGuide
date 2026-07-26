@@ -2710,33 +2710,7 @@ $vac-country-panel: #313041;
     }
 }
 
-.vacation-country-map-modal {
-    max-width: 96%;
-    width: 96%;
-
-    .modal-content {
-        height: min(90vh, 720px);
-    }
-
-    &__canvas {
-        flex: 1 1 auto;
-        min-height: 420px;
-        padding: 0 !important;
-    }
-}
-
-.vacation-country-map-popup {
-    &__title {
-        display: block;
-        font-weight: 700;
-        color: $vac-ink;
-        text-decoration: none;
-
-        &:hover {
-            color: $vac-brand;
-        }
-    }
-}
+/* Vacation map pin previews use shared .cag-map-preview styles in _leaflet-maps.scss */
 
 .vacation-country__sidebar-filters {
     .vacation-filters--sidebar {

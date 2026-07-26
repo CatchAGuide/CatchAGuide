@@ -74,7 +74,16 @@
 <!-- CUSTOM JS -->
 <script src="{{ asset('assets/admin/js/custom.js') }}"></script>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.api_key') }}&libraries=places,geocoding,marker"></script>
+<script>
+    window.CAG_MAPS_CONFIG = window.CAG_MAPS_CONFIG || {
+        googleMapsApiKey: @json(config('services.google_maps.api_key'))
+    };
+</script>
+@if(!empty(config('services.google_maps.api_key')))
+<script src="{{ mix('js/places.js') }}" defer></script>
+@else
+<script>console.error('GOOGLE_MAPS_API_KEY is not set — Places Autocomplete will not work.');</script>
+@endif
 <script src="/js/app.js"></script>
 {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
 

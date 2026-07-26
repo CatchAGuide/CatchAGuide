@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @push('styles')
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
     <style>
         /* Trip request modal: avoid native <select> overflow on mobile */
         #tripContactModal .modal-dialog {
@@ -874,7 +873,16 @@
                 @if(isset($tripView['coordinates']['lat']) && isset($tripView['coordinates']['lng']) && is_numeric($tripView['coordinates']['lat']) && is_numeric($tripView['coordinates']['lng']))
                     <div class="trip-offer-page__map-wrap">
                         <p class="trip-offer-page__map-label">{{ __('trips.location_on_map') }}</p>
-                        <div id="tripOfferMap" class="trip-offer-page__map" data-lat="{{ $tripView['coordinates']['lat'] }}" data-lng="{{ $tripView['coordinates']['lng'] }}" data-title="{{ e($tripView['title'] ?? '') }}" aria-hidden="true"></div>
+                        <x-maps.product
+                            id="tripOfferMap"
+                            class="trip-offer-page__map"
+                            :lat="$tripView['coordinates']['lat']"
+                            :lng="$tripView['coordinates']['lng']"
+                            :title="$tripView['title'] ?? ''"
+                            height="200px"
+                            :zoom="11"
+                            :lazy="true"
+                        />
                     </div>
                 @endif
             </aside>
@@ -1614,38 +1622,6 @@
 
                 submitBtn.addEventListener('click', handleSubmit);
             })();
-
-            // Small map below booking card (Leaflet + OSM)
-            var mapEl = document.getElementById('tripOfferMap');
-            var mapData = tripOfferData.map;
-            // Fallback: read from data attributes if JSON map was missing (e.g. escaped payload)
-            if (mapEl && !mapData && mapEl.getAttribute('data-lat') != null && mapEl.getAttribute('data-lng') != null) {
-                var latNum = parseFloat(mapEl.getAttribute('data-lat'));
-                var lngNum = parseFloat(mapEl.getAttribute('data-lng'));
-                if (!isNaN(latNum) && !isNaN(lngNum)) {
-                    mapData = { lat: latNum, lng: lngNum, title: (mapEl.getAttribute('data-title') || 'Trip location') };
-                }
-            }
-            if (mapData && mapEl) {
-                var lat = mapData.lat, lng = mapData.lng, title = mapData.title || 'Trip location';
-                function initTripMap() {
-                    if (typeof L === 'undefined') return;
-                    var map = L.map('tripOfferMap').setView([lat, lng], 11);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    }).addTo(map);
-                    L.marker([lat, lng]).addTo(map).bindPopup(title);
-                    setTimeout(function () { map.invalidateSize(); }, 100);
-                }
-                if (typeof L !== 'undefined') initTripMap();
-                else {
-                    var s = document.createElement('script');
-                    s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                    s.crossOrigin = 'anonymous';
-                    s.onload = initTripMap;
-                    document.head.appendChild(s);
-                }
-            }
         });
     </script>
 @endsection

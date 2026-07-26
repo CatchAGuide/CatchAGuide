@@ -83,13 +83,17 @@
                                                 <td>{{ $camp->created_at->format('M d, Y') }}</td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
-                                                        @if(!empty($camp->slug))
-                                                            <a href="{{ route('vacations.camps.show', $camp->slug) }}"
-                                                               class="btn btn-sm btn-outline-primary"
-                                                               title="View product page"
-                                                               target="_blank"
-                                                               rel="noopener">
-                                                                <i class="fa fa-external-link-alt"></i>
+                                                        @if($camp->status === 'active')
+                                                            <a href="{{ route('admin.camps.change-status', $camp->id) }}"
+                                                               title="Deactivate Camp"
+                                                               class="btn btn-sm btn-danger">
+                                                                <i class="fa fa-times"></i>
+                                                            </a>
+                                                        @else
+                                                            <a href="{{ route('admin.camps.change-status', $camp->id) }}"
+                                                               title="Activate Camp"
+                                                               class="btn btn-sm btn-success">
+                                                                <i class="fa fa-check"></i>
                                                             </a>
                                                         @endif
                                                         <a href="{{ route('admin.camps.show', $camp->id) }}"

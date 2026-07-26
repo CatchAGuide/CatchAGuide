@@ -327,8 +327,7 @@
         }, 100);
         }
 
-        // Initialize location autocomplete
-        initializeLocationAutocomplete();
+        // Location autocomplete via shared CAGPlaces (maps location-input)
         
         // Load all existing form data if editing (after functions are defined)
         loadExistingFormData();
@@ -401,44 +400,6 @@
             });
         } else {
             console.error('File input element not found');
-        }
-    }
-
-    function initializeLocationAutocomplete() {
-        const locationInput = document.getElementById('location');
-        if (locationInput && typeof google !== 'undefined') {
-                const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-                    types: ['establishment', 'geocode'],
-                    fields: ['place_id', 'formatted_address', 'geometry', 'address_components']
-                });
-
-            autocomplete.addListener('place_changed', function() {
-                    const place = autocomplete.getPlace();
-                    if (place.geometry) {
-                        document.getElementById('latitude').value = place.geometry.location.lat();
-                        document.getElementById('longitude').value = place.geometry.location.lng();
-                        
-                        // Extract address components
-                        const addressComponents = place.address_components;
-                        let country = '', city = '', region = '';
-                        
-                            addressComponents.forEach(component => {
-                                if (component.types.includes('country')) {
-                                    country = component.long_name;
-                                }
-                                if (component.types.includes('locality') || component.types.includes('administrative_area_level_1')) {
-                                    city = component.long_name;
-                                }
-                                if (component.types.includes('administrative_area_level_1')) {
-                                    region = component.long_name;
-                                }
-                            });
-                        
-                        document.getElementById('country').value = country;
-                        document.getElementById('city').value = city;
-                        document.getElementById('region').value = region;
-                    }
-                });
         }
     }
 

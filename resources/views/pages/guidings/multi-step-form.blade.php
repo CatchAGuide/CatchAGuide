@@ -82,18 +82,22 @@
                 <hr>
 
                 <div class="form-group">
-                    <label for="location" class="form-label fw-bold fs-5">
-                        {{ __('newguidings.location') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('newguidings.tooltip_location') }}"></i>
-                    </label>
-                    <input type="search" class="form-control" id="location" name="location" value="{{ $formData['location'] ?? '' }}" placeholder="{{ __('newguidings.location_placeholder') }}">
-                    <input type="hidden" name="latitude" id="latitude" value="{{ $formData['latitude'] ?? '' }}">
-                    <input type="hidden" name="longitude" id="longitude" value="{{ $formData['longitude'] ?? '' }}">
-                    <input type="hidden" name="country" id="country" value="{{ $formData['country'] ?? '' }}">
-                    <input type="hidden" name="city" id="city" value="{{ $formData['city'] ?? '' }}">
-                    <input type="hidden" name="region" id="region" value="{{ $formData['region'] ?? '' }}">
-                    <input type="hidden" name="postal_code" id="postal_code" value="{{ $formData['postal_code'] ?? '' }}">
+                    <x-maps.location-input
+                        :label="__('newguidings.location')"
+                        :tooltip="__('newguidings.tooltip_location')"
+                        :placeholder="__('newguidings.location_placeholder')"
+                        :value="$formData['location'] ?? ''"
+                        :lat="$formData['latitude'] ?? ''"
+                        :lng="$formData['longitude'] ?? ''"
+                        :country="$formData['country'] ?? ''"
+                        :city="$formData['city'] ?? ''"
+                        :region="$formData['region'] ?? ''"
+                        postal-name="postal_code"
+                        postal-id="postal_code"
+                        :postal="$formData['postal_code'] ?? ''"
+                        :types="['(regions)']"
+                        wrapper-class=""
+                    />
                 </div>
 
                 <hr>
