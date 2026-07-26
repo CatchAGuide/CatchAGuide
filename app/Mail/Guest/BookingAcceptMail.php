@@ -28,7 +28,7 @@ class BookingAcceptMail extends Mailable
     public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-        $this->language = $booking->user?->language ?? app()->getLocale();
+        $this->language = $booking->customerLocale();
         $this->target = 'booking_' . $booking->id;
         
         // Generate ICS content and get/create feed using the trait

@@ -1619,20 +1619,6 @@
 
 
 
-<script>
-function initialize() {
-    var input = document.getElementById('searchPlace');
-    var autocomplete = new google.maps.places.Autocomplete(input);
-    google.maps.event.addListener(autocomplete, 'place_changed', function () {
-        var place = autocomplete.getPlace();
-        document.getElementById('placeLat').value = place.geometry.location.lat();
-        document.getElementById('placeLng').value = place.geometry.location.lng();
-    });
-}
-
-window.addEventListener('load', initialize);
-
-</script>
-
+{{-- Places autocomplete for header/search is handled by places.js + layouts/includes/scripts.blade.php --}}
 
 @endsection

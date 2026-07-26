@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Booking;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Guest\GuestReviewMail;
@@ -47,7 +46,8 @@ class SendOutReviewEmails extends Command
         $yesterday = Carbon::now()->subDay();
         $dayBeforeYesterday = Carbon::now()->subDays(2);
         
-        $bookings = Booking::where('status', 'accepted')
+        $bookings = Booking::with(['registeredUser', 'guestUser'])
+            ->where('status', 'accepted')
             ->where('book_date', '>=', $dayBeforeYesterday)
             ->where('book_date', '<', $yesterday)
             ->where('is_reviewed', 0)
@@ -56,10 +56,16 @@ class SendOutReviewEmails extends Command
         
         $count = 0;
         foreach ($bookings as $booking) {
-            app()->setLocale($booking?->user?->language ?? app()->getLocale());
+            $email = $booking->customerEmail();
+            if (! $email) {
+                $this->warn("Skipping booking #{$booking->id}: no customer email.");
+                continue;
+            }
 
-            if (!CheckEmailLog('guest_review', 'booking_' . $booking->id, $booking->user->email)) {
-                Mail::to($booking->user->email)->send(new GuestReviewMail($booking));
+            app()->setLocale($booking->customerLocale());
+
+            if (!CheckEmailLog('guest_review', 'booking_' . $booking->id, $email)) {
+                Mail::to($email)->send(new GuestReviewMail($booking));
                 $count++;
             }
         }

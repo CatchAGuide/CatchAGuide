@@ -44,12 +44,16 @@ class SendGuideTourReminders extends Command
             ->where('expires_at', '<=', $twentyFourHoursLater)
             ->where('created_at', '<=', $now->copy()->subHours(20));
         
-        $bookings = $query->get();
+        $bookings = $query->with(['guiding.user', 'registeredUser', 'guestUser'])->get();
         
         $count = 0;
         foreach ($bookings as $booking) {
             // Get the guide from the guiding relationship
-            $guide = $booking->guiding->user;
+            $guide = $booking->guiding?->user;
+            if (! $guide) {
+                $this->warn("Skipping booking #{$booking->id}: missing guide.");
+                continue;
+            }
             
             // Define language and type for logging
             $language = $guide->language ?? config('app.locale');

@@ -29,7 +29,7 @@ class GuestReviewMail extends Mailable
         $this->booking = $booking;
         $this->guide = $booking->guiding;
         $this->user = $booking->user;
-        $this->language = $this->user?->language ?? app()->getLocale();
+        $this->language = $booking->customerLocale();
         $this->target = 'booking_' . $booking->id;
     }
 

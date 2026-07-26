@@ -35,7 +35,8 @@ class SendGuestReviews extends Command
         $yesterday = Carbon::now()->subDay();
         $dayBeforeYesterday = Carbon::now()->subDays(2);
         
-        $bookings = Booking::where('status', 'accepted')
+        $bookings = Booking::with(['registeredUser', 'guestUser', 'guiding.user'])
+            ->where('status', 'accepted')
             ->where('book_date', '>=', $dayBeforeYesterday)
             ->where('book_date', '<', $yesterday)
             ->where('is_reviewed', 0)

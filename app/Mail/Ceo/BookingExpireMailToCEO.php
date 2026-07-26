@@ -28,7 +28,7 @@ class BookingExpireMailToCEO extends Mailable
         $this->guiding = $guiding;
         $this->user = $user;
         $this->guide = $guide;
-        $this->language = $user->language;
+        $this->language = 'de';
         $this->target = 'booking_' . $booking->id;
     }
 
