@@ -196,10 +196,6 @@ Route::post('/guide/onboarding', [App\Http\Controllers\GuideOnboardingController
 
 Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');
 
-Route::get('/info',function(){
-    return phpinfo();
-});
-
 if (app()->environment('production')) {
     Route::middleware(['check_domain:catchaguide.de'])->group(function () {
         Route::prefix('angelmagazin')->name('blogde.')->group(function () {
