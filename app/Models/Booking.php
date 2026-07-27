@@ -105,6 +105,21 @@ class Booking extends Model
     }
 
     /**
+     * Never queue-restore the conditional `user` relation.
+     *
+     * SerializesModels reloads relations via loadMissing(), which eager-loads
+     * on an empty prototype (is_guest = null) and always hits the users table.
+     * Guest bookings then show the wrong person (users.id == user_guests.id).
+     */
+    public function getQueueableRelations()
+    {
+        return array_values(array_filter(
+            parent::getQueueableRelations(),
+            static fn (string $relation) => $relation !== 'user' && ! str_starts_with($relation, 'user.')
+        ));
+    }
+
+    /**
      * @return BelongsTo
      */
     public function guiding(): BelongsTo

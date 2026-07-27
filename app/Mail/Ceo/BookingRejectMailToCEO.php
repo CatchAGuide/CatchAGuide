@@ -24,11 +24,12 @@ class BookingRejectMailToCEO extends Mailable
 
     public function build()
     {
+        // Resolve via is_guest-aware accessor (do not eager-load / queue-restore `user`)
         return $this->view('mails.ceo.reject_mail_to_ceo')->with([
             'booking' => $this->booking,
             'user' => $this->booking->user,
             'guiding' => $this->booking->guiding,
-            'guide' => $this->booking->guiding->user,
+            'guide' => $this->booking->guiding?->user,
         ])->subject(__('profile.gr-rejected')." – Catch A Guide");
     }
 }

@@ -196,10 +196,6 @@ Route::post('/guide/onboarding', [App\Http\Controllers\GuideOnboardingController
 
 Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');
 
-Route::get('/info',function(){
-    return phpinfo();
-});
-
 if (app()->environment('production')) {
     Route::middleware(['check_domain:catchaguide.de'])->group(function () {
         Route::prefix('angelmagazin')->name('blogde.')->group(function () {
@@ -642,6 +638,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('guide-requests/{guideRequest}/reject', [\App\Http\Controllers\Admin\GuideRequestReviewController::class, 'reject'])->name('guide-requests.reject');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
+        Route::get('email-logs/{emailLog}', [EmailLogsController::class, 'show'])->name('email-logs.show');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
         Route::get('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'showComment'])->name('contact-requests.comment.show');
         Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');
