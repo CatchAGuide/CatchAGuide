@@ -14,16 +14,17 @@ Route::prefix('oauth')->name('oauth.')->group(function () {
 });
 
 // iCal Feed Routes (Import) - Protected by auth
+// Static paths must be registered before /{feed} to avoid route conflicts.
 Route::prefix('ical-feeds')->name('ical-feeds.')->middleware('auth:web')->group(function () {
     Route::get('/', [ICalFeedController::class, 'index'])->name('index');
     Route::post('/', [ICalFeedController::class, 'store'])->name('store');
+    Route::post('/sync-all', [ICalFeedController::class, 'syncAll'])->name('sync-all');
+    Route::post('/sync-all-command', [ICalFeedController::class, 'syncAllCommand'])->name('sync-all-command');
+    Route::post('/validate-url', [ICalFeedController::class, 'validateUrl'])->name('validate-url');
     Route::get('/{feed}', [ICalFeedController::class, 'show'])->name('show');
     Route::put('/{feed}', [ICalFeedController::class, 'update'])->name('update');
     Route::delete('/{feed}', [ICalFeedController::class, 'destroy'])->name('destroy');
     Route::post('/{feed}/sync', [ICalFeedController::class, 'sync'])->name('sync');
-    Route::post('/sync-all', [ICalFeedController::class, 'syncAll'])->name('sync-all');
-    Route::post('/sync-all-command', [ICalFeedController::class, 'syncAllCommand'])->name('sync-all-command');
-    Route::post('/validate-url', [ICalFeedController::class, 'validateUrl'])->name('validate-url');
 });
 
 // User iCal Feed Routes (Export) - Protected by auth
@@ -38,7 +39,7 @@ Route::prefix('user-ical-feeds')->name('user-ical-feeds.')->middleware('auth:web
     Route::get('/{feed}/otp', [UserICalFeedController::class, 'getCurrentOTP'])->name('otp');
 });
 
-Route::get('ical/feed/{token}', [UserICalFeedController::class, 'generateFeed'])->name('ical.feed');
+Route::get('ical/feed/{token}/{otp?}', [UserICalFeedController::class, 'generateFeed'])->name('ical.feed');
 
 // Webhook Routes
 Route::prefix('webhooks')->name('webhooks.')->group(function () {

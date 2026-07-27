@@ -90,10 +90,10 @@ return [
 
         'bookings_send_guide_reminders_12hrs' => [
             'label' => 'Guide reminders (12h)',
-            'description' => 'Optional 12-hour guide reminders (bookings:send-guide-reminders-12hrs).',
+            'description' => 'Guide reminders 12 hours before expiry (bookings:send-guide-reminders-12hrs).',
             'command' => 'bookings:send-guide-reminders-12hrs',
             'default' => [
-                'enabled' => false,
+                'enabled' => true,
                 'frequency' => 'hourly',
                 'schedule_time' => null,
                 'day_of_week' => null,
