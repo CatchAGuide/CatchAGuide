@@ -61,7 +61,7 @@ class CreateAutomaticBookingReviews extends Command
             ->whereNotNull('guiding_id')
             ->whereNotNull('user_id')
             ->whereDoesntHave('review')
-            ->with(['guiding.user', 'calendar_schedule', 'blocked_event', 'user'])
+            ->with(['guiding.user', 'calendar_schedule', 'blocked_event', 'registeredUser', 'guestUser'])
             ->orderBy('id');
 
         if ($onlyBookingId !== null) {

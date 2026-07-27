@@ -62,13 +62,13 @@ class SendCheckoutEmail implements ShouldQueue
                 ->queue(new GuideBookingRequestMail($this->booking, $this->user, $this->guiding, $this->guide));
         }
 
-        // CEO notification (default to DE)
+        // CEO notification (default to DE) — pass customer explicitly (same as guest/guide)
         $email = config('mail.admin_email');
         if (!CheckEmailLog('ceo_booking_notification', 'admin_booking_' . $this->booking->id, $email)) {
             Log::info('Sending CEO booking notification email to ' . $email . ' with locale ' . $ceoLocale);
             Mail::to($email)
                 ->locale($ceoLocale)
-                ->queue(new BookingRequestMailToCEO($this->booking));
+                ->queue(new BookingRequestMailToCEO($this->booking, $this->user, $this->guiding, $this->guide));
         }
     }
 }
