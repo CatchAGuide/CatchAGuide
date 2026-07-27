@@ -1607,7 +1607,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ route('ical-feeds.sync', '') }}/${feedId}`, {
+            fetch('{{ route("ical-feeds.sync", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1644,7 +1644,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ route('ical-feeds.destroy', '') }}/${feedId}`, {
+            fetch('{{ route("ical-feeds.destroy", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1748,7 +1748,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ route('user-ical-feeds.regenerate-token', '') }}/${feedId}`, {
+            fetch('{{ route("user-ical-feeds.regenerate-token", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1785,7 +1785,7 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             button.disabled = true;
             
-            fetch(`{{ route('user-ical-feeds.destroy', '') }}/${feedId}`, {
+            fetch('{{ route("user-ical-feeds.destroy", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -2754,7 +2754,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`/ical-feeds/${feedId}/sync`, {
+            fetch('{{ route("ical-feeds.sync", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2792,7 +2792,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`/ical-feeds/${feedId}`, {
+            fetch('{{ route("ical-feeds.destroy", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2827,7 +2827,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`{{ route('user-ical-feeds.regenerate-token', '') }}/${feedId}`, {
+            fetch('{{ route("user-ical-feeds.regenerate-token", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2865,7 +2865,7 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            fetch(`{{ route('user-ical-feeds.destroy', '') }}/${feedId}`, {
+            fetch('{{ route("user-ical-feeds.destroy", ["feed" => "__FEED_ID__"]) }}'.replace('__FEED_ID__', feedId), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

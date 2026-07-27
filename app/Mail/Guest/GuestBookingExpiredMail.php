@@ -21,8 +21,8 @@ class GuestBookingExpiredMail extends Mailable
     protected $user;
     protected $guiding;
     protected $guide;
-    protected $language;
-    protected $target;
+    public $language;
+    public $target;
     public $type = 'guest_booking_expired';
 
 

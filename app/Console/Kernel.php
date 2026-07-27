@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');
         $schedule->command('bookings:send-guest-tour-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders')->hourly();
-        // $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
+        $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
       
         // Generate guiding filter mappings every hour
         $schedule->command('guidings:generate-filters')

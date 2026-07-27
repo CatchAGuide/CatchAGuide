@@ -94,6 +94,7 @@ class EmailLogZeroRecipientRepair
             'guide_booking_request' => $this->guideUserEmailFromGuideBookingTarget($target),
 
             'guide_reminder',
+            'guide_reminder_12hrs',
             'guide_booking_accepted_mail',
             'guide_booking_expired',
             'guide_booking_invoice',

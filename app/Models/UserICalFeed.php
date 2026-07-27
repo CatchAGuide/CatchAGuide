@@ -112,7 +112,7 @@ class UserICalFeed extends Model
      */
     public function getFeedUrl(): string
     {
-        return url("/ical/feed/{$this->feed_token}");
+        return route('ical.feed', ['token' => $this->feed_token]);
     }
 
     /**
@@ -120,8 +120,10 @@ class UserICalFeed extends Model
      */
     public function getSecureFeedUrl(): string
     {
-        $otp = $this->generateOTP();
-        return url("/ical/feed/{$this->feed_token}/{$otp}");
+        return route('ical.feed', [
+            'token' => $this->feed_token,
+            'otp' => $this->generateOTP(),
+        ]);
     }
 
     /**
