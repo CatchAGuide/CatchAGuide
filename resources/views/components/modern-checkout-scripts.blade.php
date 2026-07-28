@@ -285,11 +285,16 @@ function checkoutApp() {
             this.alerts.error = '';
 
             try {
+                const recaptchaToken = (typeof grecaptcha !== 'undefined' && grecaptcha.getResponse)
+                    ? grecaptcha.getResponse()
+                    : '';
+
                 const response = await axios.post('/api/checkout/submit-booking', {
                     guiding_id: this.guidingId,
                     persons: this.persons,
                     selected_date: this.selectedDate,
                     selected_extras: Object.values(this.selectedExtras),
+                    'g-recaptcha-response': recaptchaToken,
                     form_data: {
                         first_name: this.form.firstName,
                         last_name: this.form.lastName,
@@ -323,6 +328,9 @@ function checkoutApp() {
                     this.showError(errors.join(', '));
                 } else {
                     this.showError('Error submitting booking. Please try again.');
+                }
+                if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
+                    try { grecaptcha.reset(); } catch (e) {}
                 }
             } finally {
                 this.loading = false;

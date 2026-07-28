@@ -51,6 +51,7 @@ class SearchRequest extends Component
 
     public $budgetToSpend;
     public int $counter = 1;
+    public $recaptcha = '';
 
     protected $rules = [];
 
@@ -63,14 +64,34 @@ class SearchRequest extends Component
         $this->page = 1;
     }
 
-    public function save(){
+    public function save()
+    {
+        if (! \Illuminate\Support\Facades\RateLimiter::attempt(
+            'search-request:'.request()->ip(),
+            5,
+            fn () => true,
+            60
+        )) {
+            $this->addError('email', __('validation.throttle', [
+                'seconds' => 60,
+                'minutes' => 1,
+            ]));
+
+            return;
+        }
 
         $this->rules = [
-            'name' => ['required','string'],
-            'email' => ['required','email'],
+            'name' => ['required', 'string'],
+            'email' => ['required', 'email'],
             'phone' => ['required', 'numeric'],
-            'comments' => ['nullable','string'],
+            'comments' => ['nullable', 'string'],
         ];
+
+        $recaptchaRules = \App\Rules\Recaptcha::production();
+        if ($recaptchaRules !== []) {
+            $this->recaptcha = request()->input('g-recaptcha-response', $this->recaptcha);
+            $this->rules['recaptcha'] = $recaptchaRules;
+        }
 
         $this->validate();
 

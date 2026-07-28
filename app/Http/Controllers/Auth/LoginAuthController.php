@@ -23,7 +23,9 @@ class LoginAuthController extends Controller
         $credentials = $request->only(['email', 'password']);
         $remember = $request->filled('remember');
 
-        if(Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -32,6 +34,13 @@ class LoginAuthController extends Controller
             }
             return redirect()->intended(route('profile.index'));
         }
+
+        \Illuminate\Support\Facades\Log::warning('Failed user login attempt', [
+            'guard' => 'web',
+            'email' => $request->input('email'),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         if ($request->ajax()) {
             return response()->json([

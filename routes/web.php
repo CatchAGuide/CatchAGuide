@@ -41,7 +41,6 @@ use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThrea
 use App\Http\Controllers\AssistantChatController;
 use App\Http\Controllers\BookingAssistantPreviewController;
 use App\Http\Controllers\FAQController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\RatingsController;
 use App\Http\Controllers\SiteMapController;
 use App\Http\Controllers\GuidingSearchPlaceLogController;
@@ -111,11 +110,21 @@ Route::post('/guidings/search-place-log', [GuidingSearchPlaceLogController::clas
     ->name('guidings.search-place-log.store');
 Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switchLanguage'])->name('language.switch');
 
-Route::get('/booking-accept/{token}',[BookingController::class,'accept'])->name('booking.accept');
-Route::get('/booking-reject/{token}',[BookingController::class,'reject'])->name('booking.reject');
-Route::post('/update/reject/{booking}',[BookingController::class,'rejectProcess'])->name('booking.rejection');
-Route::get('/booking/reschedule/{token}',[BookingController::class,'reschedule'])->name('booking.reschedule');
-Route::post('/booking/reschedule/store',[BookingController::class,'rescheduleStore'])->name('booking.reschedule.store');
+Route::get('/booking-accept/{token}',[BookingController::class,'accept'])
+    ->middleware('throttle:10,1')
+    ->name('booking.accept');
+Route::get('/booking-reject/{token}',[BookingController::class,'reject'])
+    ->middleware('throttle:10,1')
+    ->name('booking.reject');
+Route::post('/update/reject/{token}',[BookingController::class,'rejectProcess'])
+    ->middleware('throttle:10,1')
+    ->name('booking.rejection');
+Route::get('/booking/reschedule/{token}',[BookingController::class,'reschedule'])
+    ->middleware('throttle:10,1')
+    ->name('booking.reschedule');
+Route::post('/booking/reschedule/store',[BookingController::class,'rescheduleStore'])
+    ->middleware('throttle:10,1')
+    ->name('booking.reschedule.store');
 
 Route::get('/reject/success',function(){
     return view('pages.additional.reject_success');
@@ -139,7 +148,9 @@ Route::get('/all-countries',function(){
     return view('pages.countries.index');
 })->name('allcountries');
 
-Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])->name('upload');
+Route::post('/upload/{guiding?}', [FileUploadController::class, 'upload'])
+    ->middleware(['auth:web,employees', 'throttle:30,1'])
+    ->name('upload');
 
 
 Route::post('/newguiding', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('profile.newguiding.store');
@@ -265,8 +276,11 @@ Route::middleware('auth:web')->group(function () {
 
     Route::get('events', [\App\Http\Controllers\Api\EventsController::class, 'index']);
 
-    Route::get('chat',[ChatController::class, 'index'])->name('chat');
-    Route::get('sendMessage/{user}', [ChatController::class, 'createChat'])->name('chat.create');
+    // Legacy user-to-user chat removed — redirect old bookmarks to profile
+    Route::redirect('chat', '/profile', 301)->name('chat');
+    Route::get('sendMessage/{user}', function () {
+        return redirect()->route('profile.index');
+    })->name('chat.create');
 
     Route::get('wishlist/add-or-remove/{guiding}', [\App\Http\Controllers\WishlistController::class, 'addOrRemove'])->name('wishlist.add-or-remove');
 
@@ -312,7 +326,9 @@ Route::get('trips/{slug}', [TripOfferController::class, 'show'])
     ->middleware('ddos:search');
 
 Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
-Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])->name('store.request');
+Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])
+    ->middleware('throttle:5,1')
+    ->name('store.request');
 
 Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
@@ -349,7 +365,9 @@ Route::name('law.')->group(function() {
 });
 
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
-Route::post('login', [LoginAuthController::class, 'login'])->name('login');//->middleware('guest:employees');
+Route::post('login', [LoginAuthController::class, 'login'])
+    ->middleware('throttle:5,1')
+    ->name('login');//->middleware('guest:employees');
 Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
 Route::get('registration-verfication', [RegisterController::class, 'verfication'])->name('registration-verfication');//->middleware('guest:employees');
@@ -387,7 +405,9 @@ Route::post('/change-password', [PasswordController::class, 'changePassword'])
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
-        Route::post('login', [AuthenticationController::class, 'login'])->name('login');//->middleware('guest:employees');
+        Route::post('login', [AuthenticationController::class, 'login'])
+            ->middleware('throttle:5,1')
+            ->name('login');//->middleware('guest:employees');
         Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
     });
 

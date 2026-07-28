@@ -569,7 +569,7 @@
                         </div>
                     </div>
                     
-                    <form id="rejection-form" action="{{route('booking.rejection',$booking)}}" method="POST">
+                    <form id="rejection-form" action="{{ route('booking.rejection', $booking->token) }}" method="POST">
                         @csrf
                         
                         <!-- Calendar section -->

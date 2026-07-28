@@ -357,20 +357,26 @@ class ProfileController extends Controller
             abort(404);
         }
 
-        if(auth()->user()->id == $booking->guiding->user->id){    
-            $booking->status = 'accepted';
-            $booking->save();
-    
-            $blockedevent = BlockedEvent::find($booking->blocked_event_id);
-            if($blockedevent) {
-                $blockedevent->type = 'booking';
-                $blockedevent->save();
-            }
+        $isGuideOwner = auth('web')->check()
+            && (int) auth('web')->id() === (int) $booking->guiding?->user_id;
+        $isAdmin = auth('employees')->check();
 
-            event(new BookingStatusChanged($booking, 'accepted'));
-
-            return redirect()->route('profile.bookings')->with(['message' => 'Booking Accepted Successfully']);
+        if(!$isGuideOwner && !$isAdmin){
+            abort(403);
         }
+
+        $booking->status = 'accepted';
+        $booking->save();
+
+        $blockedevent = BlockedEvent::find($booking->blocked_event_id);
+        if($blockedevent) {
+            $blockedevent->type = 'booking';
+            $blockedevent->save();
+        }
+
+        event(new BookingStatusChanged($booking, 'accepted'));
+
+        return redirect()->route('profile.bookings')->with(['message' => 'Booking Accepted Successfully']);
     }
     public function reject(Booking $booking){
 
@@ -378,10 +384,15 @@ class ProfileController extends Controller
             abort(404);
         }
 
+        $isGuideOwner = (int) auth('web')->id() === (int) $booking->guiding?->user_id;
+        if (!$isGuideOwner && !auth('employees')->check()) {
+            abort(403);
+        }
+
         return view('pages.additional.rejected',[
             'booking' => $booking,
         ]);
-        
+
     }
 
     public function favoriteguides()

@@ -183,6 +183,8 @@ class GuidingsController extends Controller
         $formData = [
             'id' => $guiding->id,
             'is_update' => 1,
+            'status' => $guiding->status,
+            'user_id' => $guiding->user_id,
             //step1
             'title' => $guiding->title,
             'location' => $guiding->location,

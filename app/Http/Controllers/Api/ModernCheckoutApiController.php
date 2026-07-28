@@ -192,7 +192,8 @@ class ModernCheckoutApiController extends Controller
             'form_data.country_code' => 'required|string',
             'form_data.policy_accepted' => 'required|accepted',
             'selected_extras' => 'array',
-            'extra_quantities' => 'array'
+            'extra_quantities' => 'array',
+            'g-recaptcha-response' => \App\Rules\Recaptcha::production(),
         ]);
 
         if ($validator->fails()) {

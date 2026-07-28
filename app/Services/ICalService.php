@@ -18,7 +18,9 @@ class ICalService
     public function syncFeed(ICalFeed $feed, bool $cleanup = true): array
     {
         try {
-            // Fetch the iCal feed
+            // Fetch only after SSRF checks pass
+            $this->assertSafeOutboundUrl($feed->feed_url);
+
             $response = Http::timeout(30)->get($feed->feed_url);
             
             if (!$response->successful()) {
@@ -537,6 +539,11 @@ class ICalService
     public function validateFeedUrl(string $url): array
     {
         try {
+            $safety = $this->assertSafeOutboundUrl($url, throw: false);
+            if ($safety !== true) {
+                return ['valid' => false, 'error' => $safety];
+            }
+
             $response = Http::timeout(10)->head($url);
             
             if (!$response->successful()) {
@@ -544,10 +551,19 @@ class ICalService
             }
 
             // Try to fetch a small portion to check if it's valid iCal
-            $response = Http::timeout(10)->get($url);
+            $response = Http::timeout(10)->withOptions(['allow_redirects' => ['max' => 3]])->get($url);
             
             if (!$response->successful()) {
                 return ['valid' => false, 'error' => "Failed to fetch feed content"];
+            }
+
+            // Re-check final effective URI if available
+            $effectiveUri = method_exists($response, 'effectiveUri') ? (string) $response->effectiveUri() : $url;
+            if ($effectiveUri !== '') {
+                $redirectSafety = $this->assertSafeOutboundUrl($effectiveUri, throw: false);
+                if ($redirectSafety !== true) {
+                    return ['valid' => false, 'error' => $redirectSafety];
+                }
             }
 
             $content = $response->body();
@@ -562,5 +578,61 @@ class ICalService
         } catch (\Exception $e) {
             return ['valid' => false, 'error' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Block SSRF targets: non-http(s), private/reserved IPs, cloud metadata hosts.
+     *
+     * @return true|string true when safe, or error message when $throw is false
+     */
+    public function assertSafeOutboundUrl(string $url, bool $throw = true): bool|string
+    {
+        $parts = parse_url($url);
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        $host = strtolower((string) ($parts['host'] ?? ''));
+
+        if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
+            $error = 'Only http/https calendar URLs are allowed';
+            if ($throw) {
+                throw new \InvalidArgumentException($error);
+            }
+            return $error;
+        }
+
+        $blockedHosts = [
+            'localhost',
+            'metadata.google.internal',
+            'metadata.google.com',
+            '169.254.169.254',
+            'metadata',
+        ];
+
+        if (in_array($host, $blockedHosts, true) || str_ends_with($host, '.local') || str_ends_with($host, '.internal')) {
+            $error = 'This calendar URL is not allowed';
+            if ($throw) {
+                throw new \InvalidArgumentException($error);
+            }
+            return $error;
+        }
+
+        $ips = [];
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            $ips[] = $host;
+        } else {
+            $resolved = @gethostbynamel($host) ?: [];
+            $ips = array_merge($ips, $resolved);
+        }
+
+        foreach ($ips as $ip) {
+            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                $error = 'This calendar URL points to a private or reserved network';
+                if ($throw) {
+                    throw new \InvalidArgumentException($error);
+                }
+                return $error;
+            }
+        }
+
+        return true;
     }
 } 

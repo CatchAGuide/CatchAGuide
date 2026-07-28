@@ -41,8 +41,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Modern Checkout API Routes
 Route::prefix('checkout')->group(function () {
     Route::get('/guiding/{id}', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'getGuiding']);
-    Route::post('/calculate-price', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'calculatePrice']);
-    Route::post('/submit-booking', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'submitBooking']);
+    Route::post('/calculate-price', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'calculatePrice'])
+        ->middleware('throttle:30,1');
+    Route::post('/submit-booking', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'submitBooking'])
+        ->middleware('throttle:5,1');
     Route::get('/available-dates/{guidingId}', [\App\Http\Controllers\Api\ModernCheckoutApiController::class, 'getAvailableDates']);
 });
 

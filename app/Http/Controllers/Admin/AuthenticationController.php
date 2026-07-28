@@ -21,9 +21,18 @@ class AuthenticationController extends Controller
     {
         $this->validator($request);
 
-        if(Auth::guard('employees')->attempt($request->only(['email', 'password']))) {
+        if (Auth::guard('employees')->attempt($request->only(['email', 'password']))) {
+            $request->session()->regenerate();
+
             return redirect()->intended(route('admin.index'));
         }
+
+        \Illuminate\Support\Facades\Log::warning('Failed employee login attempt', [
+            'guard' => 'employees',
+            'email' => $request->input('email'),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return redirect()->back()->withInput()->with('error', 'Login failed. Please try again.');
     }

@@ -247,6 +247,16 @@ if (! function_exists('get_thread_excerpt')) {
 }
 
 
+if (! function_exists('clean_html')) {
+    /**
+     * Sanitize rich HTML for safe {!! !!} output (guides, FAQs, CMS content).
+     */
+    function clean_html(?string $html): string
+    {
+        return \App\Support\HtmlSanitizer::clean($html);
+    }
+}
+
 if (! function_exists('get_faqs_by_page')) {
     function get_faqs_by_page($page)
     {

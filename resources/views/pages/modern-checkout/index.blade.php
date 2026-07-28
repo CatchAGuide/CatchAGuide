@@ -283,6 +283,11 @@
                         </label>
                     </div>
 
+                    <!-- reCAPTCHA (production) -->
+                    <div class="mobile-order-9 mb-3">
+                        <x-recaptcha />
+                    </div>
+
                     <!-- Submit Button -->
                     <button class="submit-button mobile-order-9"
                         @click="submitBooking()"
