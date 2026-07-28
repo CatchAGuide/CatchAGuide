@@ -21,23 +21,25 @@
 
 <x-maps.assets />
 
-<div
-    id="{{ $mapId }}"
-    {{ $attributes->class(['cag-map', 'cag-map--product', $class]) }}
-    style="height: {{ $height }};"
-    data-maps-product
-    data-lat="{{ $lat }}"
-    data-lng="{{ $lng }}"
-    data-zoom="{{ $zoom }}"
-    @if($title) data-title="{{ $title }}" @endif
-    data-scroll-wheel="{{ $scrollWheel ? 'true' : 'false' }}"
-    data-dragging="{{ $dragging ? 'true' : 'false' }}"
-    data-marker-variant="{{ $markerVariant }}"
-    data-on-marker-click="{{ $onMarkerClick }}"
-    @if($modalTarget) data-modal-target="{{ $modalTarget }}" @endif
-    data-lazy="{{ $lazy ? 'true' : 'false' }}"
->
-    @if($popupHtml && $onMarkerClick === 'popup')
-        <template data-maps-popup>{!! $popupHtml !!}</template>
-    @endif
+<div class="cag-map-frame {{ $class }}">
+    <div
+        id="{{ $mapId }}"
+        {{ $attributes->class(['cag-map', 'cag-map--product']) }}
+        style="height: {{ $height }};"
+        data-maps-product
+        data-lat="{{ $lat }}"
+        data-lng="{{ $lng }}"
+        data-zoom="{{ $zoom }}"
+        @if($title) data-title="{{ $title }}" @endif
+        data-scroll-wheel="{{ $scrollWheel ? 'true' : 'false' }}"
+        data-dragging="{{ $dragging ? 'true' : 'false' }}"
+        data-marker-variant="{{ $markerVariant }}"
+        data-on-marker-click="{{ $onMarkerClick }}"
+        @if($modalTarget) data-modal-target="{{ $modalTarget }}" @endif
+        data-lazy="{{ $lazy ? 'true' : 'false' }}"
+    >
+        @if($popupHtml && $onMarkerClick === 'popup')
+            <template data-maps-popup>{!! $popupHtml !!}</template>
+        @endif
+    </div>
 </div>

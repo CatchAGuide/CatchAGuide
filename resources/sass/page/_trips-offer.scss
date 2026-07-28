@@ -123,13 +123,24 @@ $trip-offer-lh-relaxed: 1.7;
 
     &__map-link {
         border: 0;
-        background: transparent;
+        background: rgba(232, 93, 59, 0.08);
         color: $trip-offer-theme-accent;
         font-weight: $trip-offer-weight-semibold;
         display: inline-flex;
         align-items: center;
-        gap: .25rem;
+        gap: .35rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
         cursor: pointer;
+        transition: background .18s ease, color .18s ease, transform .18s ease;
+
+        &:hover,
+        &:focus-visible {
+            background: rgba(232, 93, 59, 0.14);
+            color: darken($trip-offer-theme-accent, 6%);
+            transform: translateY(-1px);
+            outline: none;
+        }
     }
 
     &__gallery-container {
@@ -2333,8 +2344,16 @@ $trip-offer-lh-relaxed: 1.7;
         background: $trip-offer-theme-surface;
         border-radius: 1rem;
         overflow: hidden;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
-        border: 1px solid $trip-offer-theme-border;
+        box-shadow:
+            0 1px 2px rgba(49, 48, 65, 0.04),
+            0 10px 28px rgba(49, 48, 65, 0.08);
+        border: 1px solid rgba(49, 48, 65, 0.1);
+
+        .cag-map-frame {
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
 
         @media (max-width: 991.98px) {
             margin-top: 0;
@@ -2342,13 +2361,26 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__map-label {
+        display: flex;
+        align-items: center;
+        gap: .45rem;
         margin: 0;
-        padding: .75rem 1rem .5rem;
+        padding: .85rem 1rem .55rem;
         font-size: $trip-offer-text-xs;
         font-weight: $trip-offer-weight-semibold;
-        letter-spacing: .04em;
+        letter-spacing: .05em;
         text-transform: uppercase;
         color: #64748b;
+
+        &::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            background: $trip-offer-theme-accent;
+            flex: 0 0 auto;
+        }
     }
 
     &__map {

@@ -158,32 +158,17 @@
     }
 
     @media only screen and (max-width: 450px) {
-        #map-placeholder a.btn {
-            top: 35%;
-            left: 30%;
-        }
-
         .page-header {
             margin-top: -60px!important;
         }
     }
 
     @media only screen and (min-width: 451px) and (max-width: 766px) {
-        #map-placeholder a.btn {
-            top: 40%;
-            left: 35%;
-        }
-
         .page-header {
             margin-top: -60px!important;
         }
     }
     @media only screen and (min-width: 767px) and (max-width: 991px) {
-        #map-placeholder a.btn {
-            top: 45%;
-            left: 45%;
-        }
-
         .page-header {
             margin-top: -30px!important;
         }
@@ -214,17 +199,6 @@
     }
     .new-bg{
         background:#313041;
-    }
-    #map-placeholder {
-        position: relative;
-        width:100%;
-        height: 200px;
-        background-image: url({{ url('') }}/assets/images/map-bg.png);
-    }
-    #map-placeholder a.btn {
-        position: absolute;
-        top: calc(50% - 19px);
-        right: calc(50% - 81px);
     }
     #guidings-menu-search {
         position: absolute;
@@ -585,10 +559,14 @@
 
                 <!-- Desktop Filter -->
                 <div id="filterCard" class="col-sm-12 col-lg-3">        
-                    <div class="card mb-2 d-none d-sm-block">
-                        <div id="map-placeholder">
-                            <a class="btn btn-primary" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
-                        </div>
+                    <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
+                        <x-maps.preview-trigger
+                            id="openMapModal"
+                            target="#mapModal"
+                            tag="a"
+                            :label="__('destination.show_on_map')"
+                            :result-count="count($allGuidings ?? [])"
+                        />
                     </div>            
                     @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                 </div>

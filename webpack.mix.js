@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mix = require("laravel-mix");
 
 /*
@@ -11,10 +12,22 @@ const mix = require("laravel-mix");
  |
  */
 
+// Node/OpenSSL 3 rejects md4. loader-utils then falls back to a WASM hasher,
+// which OOMs on memory-limited shared hosts (SiteGround) when hashing
+// Leaflet PNGs and other assets via file-loader.
+const origCreateHash = crypto.createHash;
+crypto.createHash = (algorithm, options) =>
+  origCreateHash(algorithm === "md4" ? "sha256" : algorithm, options);
+
 mix.webpackConfig({
   stats: {
     children: true,
   },
+  output: {
+    hashFunction: "sha256",
+  },
+  // Lower peak memory during production builds on shared hosting.
+  parallelism: 1,
 });
 
 mix.sass("resources/sass/app.scss", "public/css/app.css");

@@ -39,12 +39,6 @@
             width: 100%!important;
         }
     }
-    #map-placeholder {
-        width:100%;
-        height: 200px;
-        background-image: url({{ url('') }}/assets/images/map-bg.png);
-        text-align: center;
-    }    
     #offcanvasBottomSearch {
         height: 90%!important;
     }
@@ -108,11 +102,6 @@
         background-color: #E8604C !important;
         color: #fff !important;
         border: 2px solid #E8604C !important;
-    }
-    .show-more-maps {
-        background-color: var(--thm-black) !important;
-        color: #fff !important;
-        border: 2px solid !important;
     }
     .cag-btn {
         background-color: #E8604C !important;
@@ -188,20 +177,6 @@
     /* Ensure proper spacing for vacation cards */
     .guiding-list-item {
         margin-bottom: 20px !important;
-    }
-    
-    /* Ensure map placeholder button is centered - override SCSS */
-    #vacations-category #map-placeholder {
-        position: relative !important;
-    }
-    
-    #vacations-category #map-placeholder button {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: auto !important;
-        margin: 0 !important;
     }
 </style>
 @endsection
@@ -288,10 +263,12 @@
                         </div>
                     </div>
                     <div class="col-sm-12 col-lg-3">
-                        <div class="card mb-2 d-none d-sm-block">
-                            <div id="map-placeholder">
-                                <button class="btn btn-primary show-more-maps" data-bs-target="#mapModal" data-bs-toggle="modal">@lang('vacations.show_on_map')</button>
-                            </div>
+                        <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
+                            <x-maps.preview-trigger
+                                target="#mapModal"
+                                :label="__('vacations.show_on_map')"
+                                :result-count="isset($vacations) ? count($vacations) : null"
+                            />
                         </div>
                         {{-- Sorting section - commented out --}}
                         {{-- <div class="card d-block d-none d-sm-block mb-1">

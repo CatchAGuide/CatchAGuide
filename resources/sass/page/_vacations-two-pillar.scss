@@ -2598,7 +2598,25 @@ $vac-country-panel: #313041;
     }
 
     &__map-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
         white-space: nowrap;
+        border-radius: 10px !important;
+        padding: .55rem .9rem !important;
+        font-weight: 700;
+        background: #313041 !important;
+        border-color: #313041 !important;
+        box-shadow: 0 4px 12px rgba(49, 48, 65, 0.18);
+        transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+
+        &:hover,
+        &:focus-visible {
+            background: #e85d3b !important;
+            border-color: #e85d3b !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(232, 93, 59, 0.28);
+        }
     }
 
     &--sidebar {
@@ -2769,31 +2787,15 @@ $vac-country-panel: #313041;
 }
 
 .vacation-country__map-card {
-    border: 1px solid $vac-border;
-    border-radius: $vac-radius;
+    border: 1px solid rgba(49, 48, 65, 0.1);
+    border-radius: 14px;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(49, 48, 65, 0.06);
 }
 
 .vacation-country__map-placeholder {
-    position: relative;
-    width: 100%;
+    /* Shared teaser styles live in _leaflet-maps.scss */
     height: 200px;
-    background-image: url('/assets/images/map-bg.png');
-    background-size: cover;
-    background-position: center;
-
-    .show-more-maps {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: auto;
-        margin: 0;
-        background-color: var(--thm-black) !important;
-        color: #fff !important;
-        border: 2px solid var(--thm-black) !important;
-        white-space: nowrap;
-    }
 }
 
 .vacation-country__sidebar-stats {

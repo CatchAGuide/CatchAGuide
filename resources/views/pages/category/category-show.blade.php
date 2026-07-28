@@ -569,10 +569,14 @@
                 <h5 class="mb-2">{{ $row_data->source->name }}</h5>
                 <div class="row mb-5">
                     <div id="filterCard" class="col-sm-12 col-lg-3">        
-                        <div class="card mb-2 d-none d-sm-block">
-                            <div id="map-placeholder">
-                                <a class="btn btn-primary" id="openMapModal" data-bs-target="#mapModal" data-bs-toggle="modal" href="javascript:void(0)">@lang('destination.show_on_map')</a>
-                            </div>
+                        <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
+                            <x-maps.preview-trigger
+                                id="openMapModal"
+                                target="#mapModal"
+                                tag="a"
+                                :label="__('destination.show_on_map')"
+                                :result-count="isset($allGuidings) ? count($allGuidings) : null"
+                            />
                         </div>            
                         @include('pages.guidings.includes.filters', ['formAction' => route('guidings.index')])
                     </div>
@@ -714,55 +718,43 @@
     </div>
     <!--News One End-->
 
-    <div class="modal show" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl" style="max-width: 100%; width: 96%; height:100%;">
-            <div class="modal-content" style="height:90%;">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mapModalLabel">Map</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0" style="height: calc(100% - 56px);">
-                    @php
-                        if ($allGuidings->isEmpty()) {
-                            $mapSource = $otherguidings ?? collect();
-                            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
-                        } else {
-                            $mapSource = $allGuidings instanceof \Illuminate\Support\Collection
-                                ? $allGuidings
-                                : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
-                            if (isset($otherguidings) && count($otherguidings) > 0) {
-                                $mapSource = $mapSource->concat($otherguidings);
-                            }
-                            $mapGrayIds = isset($otherguidings)
-                                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
-                                : [];
-                        }
-                        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
-                        $mapCenterLat = request()->get('placeLat')
-                            ?: (isset($guides[0]) ? $guides[0]->lat : config('services.maps.default_center.lat'));
-                        $mapCenterLng = request()->get('placeLng')
-                            ?: (isset($guides[0]) ? $guides[0]->lng : config('services.maps.default_center.lng'));
-                    @endphp
-                    <x-maps.listing
-                        :markers="$guidingMapMarkers"
-                        layout="modal"
-                        modal-id="mapModal"
-                        map-id="map"
-                        height="100%"
-                        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
-                        instance-key="category"
-                        :cluster="true"
-                        :show-gray-nearby="true"
-                        :single-zoom="12"
-                        :default-zoom="5"
-                        :lazy-modal="true"
-                        :updatable="true"
-                        :interactive-preview="true"
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
+    @php
+        if ($allGuidings->isEmpty()) {
+            $mapSource = $otherguidings ?? collect();
+            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        } else {
+            $mapSource = $allGuidings instanceof \Illuminate\Support\Collection
+                ? $allGuidings
+                : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+            if (isset($otherguidings) && count($otherguidings) > 0) {
+                $mapSource = $mapSource->concat($otherguidings);
+            }
+            $mapGrayIds = isset($otherguidings)
+                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                : [];
+        }
+        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+        $mapCenterLat = request()->get('placeLat')
+            ?: (isset($guides[0]) ? $guides[0]->lat : config('services.maps.default_center.lat'));
+        $mapCenterLng = request()->get('placeLng')
+            ?: (isset($guides[0]) ? $guides[0]->lng : config('services.maps.default_center.lng'));
+    @endphp
+    <x-maps.listing-modal
+        modal-id="mapModal"
+        :title="__('destination.show_on_map')"
+        :result-count="count($guidingMapMarkers)"
+        map-id="map"
+        :markers="$guidingMapMarkers"
+        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+        instance-key="category"
+        :cluster="true"
+        :show-gray-nearby="true"
+        :single-zoom="12"
+        :default-zoom="5"
+        :lazy-modal="true"
+        :updatable="true"
+        :interactive-preview="true"
+    />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">
