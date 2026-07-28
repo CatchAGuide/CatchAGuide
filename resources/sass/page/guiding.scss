@@ -109,11 +109,11 @@
         padding-top: max(12px, env(safe-area-inset-top, 0px));
         padding-left: max(14px, env(safe-area-inset-left, 0px));
         padding-right: max(14px, env(safe-area-inset-right, 0px));
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(15, 23, 42, .07);
-        box-shadow: 0 2px 12px rgba(15, 23, 42, .08);
+        background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid rgba(49, 48, 65, .08);
+        box-shadow: 0 8px 24px rgba(49, 48, 65, .1);
 
         @media (min-width: 768px) {
             padding: 16px 24px;
@@ -134,11 +134,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: #313041;
-        border-radius: 10px;
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(145deg, #3a3950, #313041);
+        border-radius: 11px;
         flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(49, 48, 65, 0.28);
 
         svg {
             width: 18px;
@@ -148,18 +149,20 @@
     }
 
     &__title {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
-        color: #0f172a;
+        color: #313041;
         margin: 0;
         line-height: 1.2;
+        letter-spacing: 0.01em;
     }
 
     &__subtitle {
         display: block;
         font-size: 11px;
         color: #64748b;
-        font-weight: 500;
+        font-weight: 600;
+        margin-top: 2px;
     }
 
     &__close {
@@ -168,12 +171,12 @@
         justify-content: center;
         width: 40px;
         height: 40px;
-        background: rgba(15, 23, 42, .06);
+        background: rgba(49, 48, 65, .06);
         border: none;
-        border-radius: 10px;
+        border-radius: 11px;
         color: #334155;
         cursor: pointer;
-        transition: background 0.18s ease, color 0.18s ease;
+        transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
         flex-shrink: 0;
         -webkit-tap-highlight-color: transparent;
 
@@ -184,9 +187,13 @@
 
         &:hover,
         &:focus-visible {
-            background: rgba(15, 23, 42, .12);
-            color: #0f172a;
+            background: rgba(232, 93, 59, .12);
+            color: #e85d3b;
             outline: none;
+        }
+
+        &:active {
+            transform: scale(0.96);
         }
 
         @media (max-width: 767px) {
@@ -233,20 +240,10 @@
     padding: 0 !important;
 }
 
-#map-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-  padding: 20px;
-  
-  .btn {
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    min-width: 160px;
-    border-radius: 6px;
-  }
+#map-placeholder,
+.filter-card-map {
+  min-height: 180px;
+  padding: 0;
 }
 
 // Loading animation for lazy images
@@ -353,9 +350,16 @@
 .tour-details-two__location-map {
   position: relative;
   display: block;
-  height: 380px;
   width: 100%;
-  border-radius: var(--thm-border-radius);
+  margin-top: 0.5rem;
+
+  .cag-map-frame {
+    min-height: 380px;
+  }
+
+  .cag-map--product {
+    min-height: 380px;
+  }
 }
 
 .tour-details-two__related-tours {

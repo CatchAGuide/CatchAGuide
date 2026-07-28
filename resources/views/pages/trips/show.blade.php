@@ -882,6 +882,7 @@
                             height="200px"
                             :zoom="11"
                             :lazy="true"
+                            marker-variant="trip"
                         />
                     </div>
                 @endif

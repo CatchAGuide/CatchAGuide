@@ -1053,6 +1053,7 @@
         height="400px"
         :zoom="10"
         :lazy="true"
+        marker-variant="camp"
     />
 
     @if ($sameCountries && count($sameCountries) > 0)

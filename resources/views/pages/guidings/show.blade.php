@@ -365,17 +365,19 @@ transform: translate3d(0,0,0); width: 100%;">
             <div class="tour-details-two__location {{$agent->ismobile() ? 'text-center' : ''}}">
                 <h3 class="tour-details-two__title">{{ translate('Karte') }}</h3>
                 @if(!empty($guiding->lat) && !empty($guiding->lng))
-                    <x-maps.product
-                        id="map"
-                        :lat="$guiding->lat"
-                        :lng="$guiding->lng"
-                        :title="translate($guiding->title)"
-                        height="400px"
-                        :zoom="10"
-                        :lazy="true"
-                        on-marker-click="modal"
-                        modal-target="#guidingModal{{ $guiding->id }}"
-                    />
+                    <div class="tour-details-two__location-map">
+                        <x-maps.product
+                            id="map"
+                            :lat="$guiding->lat"
+                            :lng="$guiding->lng"
+                            :title="translate($guiding->title)"
+                            height="400px"
+                            :zoom="10"
+                            :lazy="true"
+                            on-marker-click="modal"
+                            modal-target="#guidingModal{{ $guiding->id }}"
+                        />
+                    </div>
                 @endif
             </div>
 

@@ -489,6 +489,7 @@
             height="400px"
             :zoom="10"
             :lazy="true"
+            marker-variant="camp"
         />
 
         <!-- Special Offers Section -->

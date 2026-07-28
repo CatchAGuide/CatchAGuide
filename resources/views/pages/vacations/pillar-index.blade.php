@@ -88,16 +88,10 @@
 
             @if($hasMap)
                 <div class="card vacation-country__map-card mt-3">
-                    <div id="map-placeholder" class="vacation-country__map-placeholder">
-                        <button
-                            type="button"
-                            class="btn btn-primary show-more-maps"
-                            data-bs-target="#vacationCountryMapModal"
-                            data-bs-toggle="modal"
-                        >
-                            @lang('vacations.show_on_map')
-                        </button>
-                    </div>
+                    <x-maps.preview-trigger
+                        target="#vacationCountryMapModal"
+                        :label="__('vacations.show_on_map')"
+                    />
                 </div>
             @endif
         </aside>
