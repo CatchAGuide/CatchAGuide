@@ -814,7 +814,9 @@ class GuidingsController extends Controller
         }
 
         $user = Auth::user();
-        if (! $user) {
+        if (Auth::guard('employees')->check()) {
+            // Admins preview every tour, including drafts and deactivated ones.
+        } elseif (! $user) {
             $query = $query->publiclyVisible();
         } else {
             $query = $query->where(function ($inner) use ($user) {

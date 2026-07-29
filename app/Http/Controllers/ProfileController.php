@@ -164,7 +164,7 @@ class ProfileController extends Controller
         return redirect()->route('profile.guide-profile')->with('message', __('profile.guide_profile_saved'));
     }
 
-    public function myguidings()
+    public function myguidings(Request $request)
     {
         // Get all guidings for the authenticated user and check for duplicates
         $allGuidings = Guiding::where('user_id', auth()->user()->id)->get();
@@ -208,7 +208,45 @@ class ProfileController extends Controller
         }
 
         // Get fresh data after removing duplicates
-        $guidings = Guiding::where('user_id', auth()->user()->id)->paginate(20);
+        $userGuidings = fn() => Guiding::where('user_id', auth()->user()->id);
+
+        $statusCounts = [
+            'all' => $userGuidings()->count(),
+            'active' => $userGuidings()->where('status', 1)->count(),
+            'draft' => $userGuidings()->where('status', 2)->count(),
+        ];
+        $statusCounts['inactive'] = max(0, $statusCounts['all'] - $statusCounts['active'] - $statusCounts['draft']);
+
+        $status = in_array($request->query('status'), ['active', 'inactive', 'draft'], true)
+            ? $request->query('status')
+            : 'all';
+        $search = trim((string) $request->query('search', ''));
+
+        $query = $userGuidings();
+
+        if ($status === 'active') {
+            $query->where('status', 1);
+        } elseif ($status === 'draft') {
+            $query->where('status', 2);
+        } elseif ($status === 'inactive') {
+            $query->where(function ($q) {
+                $q->whereNull('status')->orWhereNotIn('status', [1, 2]);
+            });
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $term = '%'.$search.'%';
+                $q->where('title', 'like', $term)
+                    ->orWhere('location', 'like', $term)
+                    ->orWhere('city', 'like', $term)
+                    ->orWhere('country', 'like', $term);
+            });
+        }
+
+        $guidings = $query->orderByDesc('created_at')
+            ->paginate(20)
+            ->withQueryString();
 
         // Add a flash message if duplicates were removed
         if($duplicatesRemoved) {
@@ -216,7 +254,10 @@ class ProfileController extends Controller
         }
 
         return view('pages.profile.myguidings',[
-            'guidings' => $guidings
+            'guidings' => $guidings,
+            'statusCounts' => $statusCounts,
+            'activeStatus' => $status,
+            'searchTerm' => $search,
         ]);
     }
 
@@ -391,6 +432,7 @@ class ProfileController extends Controller
 
         return view('pages.additional.rejected',[
             'booking' => $booking,
+            'blocked_events' => $booking->guiding?->getBlockedEvents() ?? [],
         ]);
 
     }

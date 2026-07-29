@@ -1,4 +1,5 @@
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+{{-- Alpine is already bundled with the Livewire scripts in the layout; loading it again
+     boots a second instance that duplicates every init() and click handler. --}}
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
 function checkoutApp() {
@@ -62,6 +63,7 @@ function checkoutApp() {
         loading: false,
         submitted: false,
         isLoggedIn: {{ auth()->check() ? 'true' : 'false' }},
+        priceRequestTimer: null,
 
         // Computed
         get canSubmit() {
@@ -180,8 +182,16 @@ function checkoutApp() {
             }
         },
 
+        // Coalesces the bursts produced by repeated +/- or date clicks into one request.
+        queuePriceCalculation(delay = 300) {
+            clearTimeout(this.priceRequestTimer);
+            this.priceRequestTimer = setTimeout(() => this.calculatePrice(), delay);
+        },
+
         async calculatePrice() {
             if (!this.guiding) return;
+
+            clearTimeout(this.priceRequestTimer);
 
             try {
                 const response = await axios.post('/api/checkout/calculate-price', {
@@ -264,7 +274,7 @@ function checkoutApp() {
         updatePersons(newCount) {
             const maxGuests = this.guiding?.max_guest || 10;
             this.persons = Math.max(1, Math.min(maxGuests, newCount));
-            this.calculatePrice();
+            this.queuePriceCalculation();
         },
 
         setMode(newMode) {
@@ -279,7 +289,7 @@ function checkoutApp() {
         },
 
         async submitBooking() {
-            if (!this.canSubmit) return;
+            if (!this.canSubmit || this.loading) return;
 
             this.loading = true;
             this.alerts.error = '';
@@ -323,13 +333,24 @@ function checkoutApp() {
                 }
             } catch (error) {
                 console.error('Error submitting booking:', error);
-                if (error.response?.data?.errors) {
+                const status = error.response?.status;
+
+                if (status === 429) {
+                    const retryAfter = parseInt(error.response?.data?.retry_after
+                        ?? error.response?.headers?.['retry-after'] ?? 0, 10);
+                    this.showError(retryAfter > 0
+                        ? '{{ __('checkout.too_many_requests') }} (' + retryAfter + 's)'
+                        : '{{ __('checkout.too_many_requests') }}');
+                } else if (error.response?.data?.errors) {
                     const errors = Object.values(error.response.data.errors).flat();
                     this.showError(errors.join(', '));
                 } else {
-                    this.showError('Error submitting booking. Please try again.');
+                    this.showError('{{ __('checkout.unexpected_error') }}');
                 }
-                if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
+
+                // A rejected request never reached validation, so the captcha token is still
+                // unused. Resetting it here would force the visitor to solve it again.
+                if (status === 422 && typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
                     try { grecaptcha.reset(); } catch (e) {}
                 }
             } finally {
@@ -501,7 +522,7 @@ function checkoutApp() {
         selectDate(dateStr) {
             console.log('Selecting date:', dateStr);
             this.selectedDate = dateStr;
-            this.calculatePrice();
+            this.queuePriceCalculation();
             // Re-render calendar to show selected state
             this.renderCalendar();
         },

@@ -690,6 +690,7 @@ return [
     'no_guidings_created' => 'Du hast noch keine Guidings erstellt!',
     'change_that_quickly' => 'Lass uns das schnell ändern',
     'more' => 'mehr',
+    'tours_count' => '{0} Keine Touren|{1} 1 Tour|[2,*] :count Touren',
 
     // Password & Security page translations
     'account_security' => 'Konto-Sicherheit',

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\LoginThrottle;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class LoginAuthController extends Controller
 {
@@ -20,10 +22,24 @@ class LoginAuthController extends Controller
      */
     public function login(Request $request)
     {
+        if (LoginThrottle::lockedOut($request)) {
+            $seconds = LoginThrottle::secondsUntilRetry($request);
+
+            Log::warning('Login attempt blocked by throttle', [
+                'guard' => 'web',
+                'email' => $request->input('email'),
+                'ip' => $request->ip(),
+                'retry_after' => $seconds,
+            ]);
+
+            return LoginThrottle::response($request, $seconds);
+        }
+
         $credentials = $request->only(['email', 'password']);
         $remember = $request->filled('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            LoginThrottle::clear($request);
             $request->session()->regenerate();
 
             if ($request->ajax()) {
@@ -35,12 +51,18 @@ class LoginAuthController extends Controller
             return redirect()->intended(route('profile.index'));
         }
 
-        \Illuminate\Support\Facades\Log::warning('Failed user login attempt', [
+        LoginThrottle::recordFailure($request);
+
+        Log::warning('Failed user login attempt', [
             'guard' => 'web',
             'email' => $request->input('email'),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
+
+        if (LoginThrottle::lockedOut($request)) {
+            return LoginThrottle::response($request, LoginThrottle::secondsUntilRetry($request));
+        }
 
         if ($request->ajax()) {
             return response()->json([
@@ -51,7 +73,7 @@ class LoginAuthController extends Controller
             ], 422);
         }
 
-        return $this->loginFailed()->withError('Invalid Username and Password');
+        return $this->loginFailed()->withErrors(['email' => __('auth.failed')]);
     }
 
     /**

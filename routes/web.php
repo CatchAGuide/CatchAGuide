@@ -252,8 +252,8 @@ Route::prefix('guides')->name('guides.')->group(function () {});
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout')->middleware(['throttle:5,1', 'ddos:checkout']);
 
 // Modern Checkout Routes (now becoming the main checkout)
-Route::get('/checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('checkout.index')->middleware(['throttle:10,1', 'ddos:checkout']);
-Route::post('/checkouts', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('checkout.store')->middleware(['throttle:5,1', 'ddos:checkout']);
+Route::get('/checkout', [\App\Http\Controllers\ModernCheckoutController::class, 'index'])->name('checkout.index')->middleware(['throttle:10,1,checkout-page:', 'ddos:checkout']);
+Route::post('/checkouts', [\App\Http\Controllers\ModernCheckoutController::class, 'store'])->name('checkout.store')->middleware(['throttle:5,1,checkout-store:', 'ddos:checkout']);
 Route::get('/checkout/thank-you/{bookingId}', [\App\Http\Controllers\ModernCheckoutController::class, 'thankYou'])->name('checkout.thank-you');
 
 
@@ -366,7 +366,7 @@ Route::name('law.')->group(function() {
 
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])
-    ->middleware('throttle:5,1')
+    ->middleware('throttle:login')
     ->name('login');//->middleware('guest:employees');
 Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
 Route::post('register', [RegisterController::class, 'register'])->name('register');//->middleware('guest:employees');
@@ -406,7 +406,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::name('auth.')->group(function () {
         Route::get('logins', [AuthenticationController::class, 'index'])->name('logins');//->middleware('guest:employees');
         Route::post('login', [AuthenticationController::class, 'login'])
-            ->middleware('throttle:5,1')
+            ->middleware('throttle:login')
             ->name('login');//->middleware('guest:employees');
         Route::post('logout', [LoginAuthController::class, 'logout'])->name('logout');//->middleware('auth:employees');
     });

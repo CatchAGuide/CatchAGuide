@@ -308,6 +308,11 @@
                                             }
                                         }
 
+                                        // Guidings without a slug go through the admin route, which backfills it before redirecting.
+                                        $publicUrl = !empty($guiding->slug)
+                                            ? route('guidings.show', [$guiding->id, $guiding->slug])
+                                            : route('admin.guidings.show', $guiding);
+
                                         $fullName = $guiding->user->full_name ?? '';
                                         $nameParts = preg_split('/\s+/', trim($fullName));
                                         $initials = '';
@@ -401,8 +406,8 @@
                                                     <a href="{{ route('admin.changeGuidingStatus', $guiding->id) }}" title="{{ __('admin.guidings.activate') }}" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
                                                 @endif
                                                 <a href="{{ route('admin.guidings.edit', $guiding) }}" class="btn btn-sm btn-secondary"><i class="fa fa-pen"></i></a>
-                                                <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="{{ __('admin.guidings.btn_show_details') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}"><i class="fa fa-search"></i></button>
-                                                <a href="{{ route('admin.guidings.show', $guiding) }}" class="btn btn-sm btn-outline-primary" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
+                                                <button type="button" class="btn btn-sm btn-primary btn-guiding-details" title="{{ __('admin.guidings.btn_show_details') }}" data-guiding-id="{{ $guiding->id }}" data-guiding-title="{{ e($guiding->title) }}" data-guiding-location="{{ e($guiding->location ?? '') }}" data-guiding-guide-name="{{ e($guiding->user->full_name ?? '') }}" data-guiding-url="{{ $publicUrl }}"><i class="fa fa-search"></i></button>
+                                                <a href="{{ $publicUrl }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" title="{{ __('admin.guidings.btn_open_page') }}"><i class="fa fa-external-link-alt"></i></a>
                                                 @if(!empty($missingLangs))
                                                     <button
                                                         type="button"
@@ -765,7 +770,7 @@
                 var t = window.adminGuidingsJs || {};
                 var modalTitle = (t.guiding_prefix || 'Guiding #') + id + ' - ' + title + (location ? ' | ' + location : '') + (guideName ? ' | ' + (t.guide_prefix || 'Guide:') + ' ' + guideName : '');
                 $('#guidingDetailsModalLabel').text(modalTitle);
-                $('#guidingDetailsShowLink').attr('href', showBaseUrl + '/' + id);
+                $('#guidingDetailsShowLink').attr('href', $(this).data('guiding-url') || (showBaseUrl + '/' + id));
                 $('#guidingDetailsContent').addClass('d-none');
                 $('#guidingDetailsError').addClass('d-none');
                 $('#guidingDetailsLoading').removeClass('d-none');

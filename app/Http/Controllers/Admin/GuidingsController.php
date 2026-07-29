@@ -152,17 +152,22 @@ class GuidingsController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Send the admin to the public product page of the guiding.
      *
      * @param  \App\Models\Guiding  $guiding
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function show(Guiding $guiding)
     {
-        $targets = Target::all();
-        $methods = Method::all();
-        $waters = Water::all();
-        return view('admin.pages.guidings.show', compact('guiding', 'waters', 'methods', 'targets'));
+        // Legacy guidings may have no slug, which makes the public URL unreachable.
+        if (empty($guiding->slug)) {
+            $guiding->slug = slugify(
+                ($guiding->title ?: 'guiding-' . $guiding->id) . '-in-' . ($guiding->location ?: 'location')
+            );
+            $guiding->save();
+        }
+
+        return redirect()->route('guidings.show', [$guiding->id, $guiding->slug]);
     }
 
     /**

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\LoginThrottle;
 use Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticationController extends Controller
 {
@@ -19,22 +21,42 @@ class AuthenticationController extends Controller
      */
     public function login(Request $request)
     {
+        if (LoginThrottle::lockedOut($request, 'employees')) {
+            $seconds = LoginThrottle::secondsUntilRetry($request, 'employees');
+
+            Log::warning('Employee login attempt blocked by throttle', [
+                'guard' => 'employees',
+                'email' => $request->input('email'),
+                'ip' => $request->ip(),
+                'retry_after' => $seconds,
+            ]);
+
+            return LoginThrottle::response($request, $seconds);
+        }
+
         $this->validator($request);
 
         if (Auth::guard('employees')->attempt($request->only(['email', 'password']))) {
+            LoginThrottle::clear($request, 'employees');
             $request->session()->regenerate();
 
             return redirect()->intended(route('admin.index'));
         }
 
-        \Illuminate\Support\Facades\Log::warning('Failed employee login attempt', [
+        LoginThrottle::recordFailure($request, 'employees');
+
+        Log::warning('Failed employee login attempt', [
             'guard' => 'employees',
             'email' => $request->input('email'),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
-        return redirect()->back()->withInput()->with('error', 'Login failed. Please try again.');
+        if (LoginThrottle::lockedOut($request, 'employees')) {
+            return LoginThrottle::response($request, LoginThrottle::secondsUntilRetry($request, 'employees'));
+        }
+
+        return redirect()->back()->withInput()->withErrors(['email' => __('auth.failed')]);
     }
 
     /**

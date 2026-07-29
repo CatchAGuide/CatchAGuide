@@ -72,7 +72,10 @@ enum VacationPillar: string
 
     public function countryTitleKey(): string
     {
-        return 'vacations.fishing_vacation_in_country';
+        return match ($this) {
+            self::Trips => 'vacations.pillar_country_trips_title',
+            self::Camps => 'vacations.pillar_country_camps_title',
+        };
     }
 
     public function emptyStateKey(): string

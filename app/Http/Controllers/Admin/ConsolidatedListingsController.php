@@ -253,7 +253,9 @@ class ConsolidatedListingsController extends Controller
                 'created_at' => optional($g->created_at)->format('Y-m-d H:i:s'),
                 'created_at_ts' => optional($g->created_at)->timestamp ?? 0,
                 'admin_edit_url' => route('admin.guidings.edit', $g),
-                'public_url' => route('admin.guidings.show', $g), // admin show is consistent
+                'public_url' => !empty($g->slug)
+                    ? route('guidings.show', [$g->id, $g->slug])
+                    : route('admin.guidings.show', $g),
             ];
         })->values();
     }

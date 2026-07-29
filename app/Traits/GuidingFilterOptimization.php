@@ -376,6 +376,40 @@ trait GuidingFilterOptimization
     }
 
     /**
+     * Fetch every guiding matching the current filters for the map.
+     *
+     * Must be called before the query is paginated. Only the columns the markers
+     * need are selected so loading the complete result set stays cheap.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $filteredQuery
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function fetchMapGuidings($filteredQuery)
+    {
+        $limit = (int) config('location_search.map_markers_max', 2000);
+
+        return (clone $filteredQuery)
+            ->setEagerLoads([])
+            ->select([
+                'guidings.id',
+                'guidings.slug',
+                'guidings.title',
+                'guidings.location',
+                'guidings.lat',
+                'guidings.lng',
+                'guidings.thumbnail_path',
+                'guidings.price',
+                'guidings.price_type',
+                'guidings.prices',
+                'guidings.max_guests',
+            ])
+            ->whereNotNull('guidings.lat')
+            ->whereNotNull('guidings.lng')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
      * Slim map payload for AJAX remaps (primary + gray nearby markers).
      *
      * @param  iterable  $allGuidings

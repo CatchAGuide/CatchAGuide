@@ -8,7 +8,7 @@
                 $guidingGalleryCount = is_array($guidingGalleryImages) ? count($guidingGalleryImages) : 0;
             @endphp
             <div class="guiding-card__gallery" data-gallery-images='@json($guidingGalleryImages)'>
-                <img src="{{ $guiding['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $guiding['title'] ?? 'Guiding' }}" data-gallery-image />
+                <img src="{{ $guiding['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $guiding['title'] ?? 'Guiding' }}" loading="lazy" decoding="async" data-gallery-image />
                 
                 @if($guidingGalleryCount > 0)
                 <div>

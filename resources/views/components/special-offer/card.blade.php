@@ -15,7 +15,7 @@
     <div class="special-offer-card__grid">
         <div class="special-offer-card__media">
             <div class="special-offer-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $specialOffer['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $specialOffer['title'] ?? 'Special Offer' }}" data-gallery-image data-open-modal style="cursor: pointer;" />
+                <img src="{{ $specialOffer['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $specialOffer['title'] ?? 'Special Offer' }}" loading="lazy" decoding="async" data-gallery-image data-open-modal style="cursor: pointer;" />
 
                 <div>
                     <button

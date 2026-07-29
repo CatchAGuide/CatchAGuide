@@ -26,7 +26,7 @@
     <div class="accommodation-card__grid">
         <div class="accommodation-card__media">
             <div class="accommodation-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" data-gallery-image data-open-modal style="cursor: pointer;" />
+                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" loading="lazy" decoding="async" data-gallery-image data-open-modal style="cursor: pointer;" />
 
                 <div>
                     <button

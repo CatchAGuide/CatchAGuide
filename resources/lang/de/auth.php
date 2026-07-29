@@ -15,4 +15,6 @@ return [
     'failed'   => 'Diese Kombination aus Zugangsdaten wurde nicht in unserer Datenbank gefunden.',
     'password' => 'Das eingegebene Passwort ist nicht korrekt.',
     'throttle' => 'Zu viele Loginversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
+    'throttle_minutes' => 'Zu viele Loginversuche. Versuchen Sie es bitte in :minutes Minuten nochmal.',
+    'throttle_generic' => 'Zu viele Loginversuche. Bitte warten Sie einen Moment und versuchen Sie es erneut.',
 ];

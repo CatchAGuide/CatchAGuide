@@ -662,7 +662,7 @@
                                     target="#mapModal"
                                     tag="a"
                                     :label="__('destination.show_on_map')"
-                                    :result-count="isset($allGuidings) ? count($allGuidings) : null"
+                                    :result-count="isset($mapGuidings) ? count($mapGuidings) : ($guidings_total ?? null)"
                                 />
                             </div>            
                             @include('pages.guidings.includes.filters', ['formAction' => request()->url()])
@@ -808,19 +808,22 @@
     <!--News One End-->
 
     @php
-        if ($allGuidings->isEmpty()) {
-            $mapSource = $otherguidings ?? collect();
-            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        // The map covers the whole filtered result set, not just the current page.
+        $mapSource = isset($mapGuidings)
+            ? collect($mapGuidings)
+            : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+
+        if ($mapSource->isEmpty()) {
+            $mapSource = collect($otherguidings ?? []);
+            $mapGrayIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
         } else {
-            $mapSource = $allGuidings instanceof \Illuminate\Support\Collection
-                ? $allGuidings
-                : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+            $mapGrayIds = [];
             if (isset($otherguidings) && count($otherguidings) > 0) {
-                $mapSource = $mapSource->concat($otherguidings);
+                $existingIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
+                $nearby = collect($otherguidings)->reject(fn ($g) => in_array((int) $g->id, $existingIds, true));
+                $mapGrayIds = $nearby->pluck('id')->map(fn ($id) => (int) $id)->all();
+                $mapSource = $mapSource->concat($nearby);
             }
-            $mapGrayIds = isset($otherguidings)
-                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
-                : [];
         }
         $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
         $mapCenterLat = request()->get('placeLat')
