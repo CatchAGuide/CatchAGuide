@@ -10,6 +10,7 @@ use App\Models\Camp;
 use App\Models\SpecialOffer;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
 class CampOfferController extends Controller
@@ -714,7 +715,10 @@ class CampOfferController extends Controller
         $targetFish = $guiding->getTargetFishNames();
         $fishingMethods = $guiding->getFishingMethodNames();
         $inclusions = $guiding->getInclusionNames();
-        
+
+        $durationLabel = $this->guidingDurationLabel($guiding);
+        $priceType = $guiding->price_type ?: 'per_boat';
+
         return [
             'id' => $guiding->id,
             'title' => $guiding->title,
@@ -722,12 +726,14 @@ class CampOfferController extends Controller
             'description' => $guiding->description ?? $guiding->desc_course_of_action,
             'thumbnail_path' => $this->getImageUrl($guiding->thumbnail_path),
             'gallery_images' => $this->getImageUrls($galleryImages ?? []),
-            'duration_hours' => $guiding->duration_type ?? 4,
+            'duration_hours' => $guiding->duration ?: null,
+            'duration_type' => $guiding->duration_type,
+            'duration_label' => $durationLabel,
             'max_persons' => $guiding->max_guests,
             'type' => $guiding->tour_type,
             'guiding_info' => [
                 'art' => $guiding->fishingFrom->name ?? 'Tour',
-                'dauer' => $guiding->duration_type . ' h',
+                'dauer' => $durationLabel,
                 'max_personen' => $guiding->max_guests,
                 'gewaesser' => $guiding->water_name ?? 'Water'
             ],
@@ -739,9 +745,44 @@ class CampOfferController extends Controller
             'price' => [
                 'amount' => $guiding->price,
                 'currency' => 'EUR',
-                'type' => $guiding->price_type ?? 'per_boat'
+                'type' => $priceType,
+                'display_type' => $this->humanizeEnumLabel($priceType, 'newguidings')
             ]
         ];
+    }
+
+    /**
+     * Build a readable duration for a guiding, e.g. "8 hours" or "Half Day"
+     * when no hour/day amount has been entered.
+     */
+    private function guidingDurationLabel(Guiding $guiding): ?string
+    {
+        $amount = (int) $guiding->duration;
+
+        if ($amount > 0) {
+            $unit = $guiding->duration_type === 'multi_day'
+                ? __('guidings.days')
+                : __('guidings.hours');
+
+            return $amount . ' ' . $unit;
+        }
+
+        return $guiding->duration_type
+            ? $this->humanizeEnumLabel($guiding->duration_type, 'guidings')
+            : null;
+    }
+
+    /**
+     * Turn a snake_case enum value into a display label, preferring the
+     * translation from the given lang file when one exists.
+     */
+    private function humanizeEnumLabel(string $value, string $langFile): string
+    {
+        $key = $langFile . '.' . $value;
+
+        return Lang::has($key)
+            ? __($key)
+            : ucwords(str_replace('_', ' ', $value));
     }
     
     /**
