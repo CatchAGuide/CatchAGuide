@@ -68,9 +68,9 @@ trait GuidingFilterOptimization
             return true;
         }
         
-        // Check number of persons
+        // Check number of persons - the sidebar posts this as a single scalar value
         $numPersons = $request->get('num_persons');
-        if ($numPersons && is_array($numPersons) && !empty(array_filter($numPersons))) {
+        if (is_array($numPersons) ? !empty(array_filter($numPersons)) : $numPersons !== null && $numPersons !== '') {
             return true;
         }
         
@@ -161,15 +161,12 @@ trait GuidingFilterOptimization
      */
     protected function getMaxPriceFromFilterData()
     {
-        // Use cached value if available to avoid loading filter service
-        $cacheKey = 'guiding_price_ranges';
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey)['maxPrice'];
+        $metadata = $this->getFilterService()->getMetadata();
+
+        if (! empty($metadata['maxPrice'])) {
+            return (int) $metadata['maxPrice'];
         }
 
-        // Only load filter service if cache miss
-        $metadata = $this->getFilterService()->getMetadata();
-        
         if (isset($metadata['counts']['price_ranges'])) {
             $maxPrice = 0;
             foreach (array_keys($metadata['counts']['price_ranges']) as $range) {
