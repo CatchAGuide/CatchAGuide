@@ -30,7 +30,10 @@ class VacationRedirectResolver
         }
 
         if (preg_match('#^trips/([^/]+)$#', $path, $m) && $m[1] !== '') {
-            return '/vacations/trips/' . $m[1] . $suffix;
+            $canonical = CountrySlug::canonicalize($m[1])
+                ?? mb_strtolower(CountrySlug::decode($m[1]), 'UTF-8');
+
+            return '/vacations/trips/' . $canonical . $suffix;
         }
 
         if (preg_match('#^vacations/c/([^/]+)$#', $path, $m)) {
@@ -74,6 +77,9 @@ class VacationRedirectResolver
             if ($camp?->slug) {
                 return '/vacations/camps/' . $camp->slug . $suffix;
             }
+
+            // Missing/inactive camp: do not invent a hop; let the request 404.
+            return null;
         }
 
         // vacations/{slug} -> lowercase country canonical URL, pillar split, or camps if slug is a camp
