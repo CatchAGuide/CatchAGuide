@@ -21,3 +21,4 @@
 
 <!-- Custom admin authentication styles (compiled from SCSS) -->
 <link rel="stylesheet" href="{{ asset('css/admin-auth.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/password-toggle.css') }}">

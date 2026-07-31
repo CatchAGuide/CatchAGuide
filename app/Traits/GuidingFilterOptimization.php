@@ -68,9 +68,9 @@ trait GuidingFilterOptimization
             return true;
         }
         
-        // Check number of persons
+        // Check number of persons - the sidebar posts this as a single scalar value
         $numPersons = $request->get('num_persons');
-        if ($numPersons && is_array($numPersons) && !empty(array_filter($numPersons))) {
+        if (is_array($numPersons) ? !empty(array_filter($numPersons)) : $numPersons !== null && $numPersons !== '') {
             return true;
         }
         
@@ -161,15 +161,12 @@ trait GuidingFilterOptimization
      */
     protected function getMaxPriceFromFilterData()
     {
-        // Use cached value if available to avoid loading filter service
-        $cacheKey = 'guiding_price_ranges';
-        if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey)['maxPrice'];
+        $metadata = $this->getFilterService()->getMetadata();
+
+        if (! empty($metadata['maxPrice'])) {
+            return (int) $metadata['maxPrice'];
         }
 
-        // Only load filter service if cache miss
-        $metadata = $this->getFilterService()->getMetadata();
-        
         if (isset($metadata['counts']['price_ranges'])) {
             $maxPrice = 0;
             foreach (array_keys($metadata['counts']['price_ranges']) as $range) {
@@ -373,6 +370,40 @@ trait GuidingFilterOptimization
         $max = (int) config('location_search.nearby_section_max_main_results', 12);
 
         return $count === 0 || $count <= $max;
+    }
+
+    /**
+     * Fetch every guiding matching the current filters for the map.
+     *
+     * Must be called before the query is paginated. Only the columns the markers
+     * need are selected so loading the complete result set stays cheap.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $filteredQuery
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function fetchMapGuidings($filteredQuery)
+    {
+        $limit = (int) config('location_search.map_markers_max', 2000);
+
+        return (clone $filteredQuery)
+            ->setEagerLoads([])
+            ->select([
+                'guidings.id',
+                'guidings.slug',
+                'guidings.title',
+                'guidings.location',
+                'guidings.lat',
+                'guidings.lng',
+                'guidings.thumbnail_path',
+                'guidings.price',
+                'guidings.price_type',
+                'guidings.prices',
+                'guidings.max_guests',
+            ])
+            ->whereNotNull('guidings.lat')
+            ->whereNotNull('guidings.lng')
+            ->limit($limit)
+            ->get();
     }
 
     /**

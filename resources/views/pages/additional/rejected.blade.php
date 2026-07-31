@@ -569,7 +569,7 @@
                         </div>
                     </div>
                     
-                    <form id="rejection-form" action="{{route('booking.rejection',$booking)}}" method="POST">
+                    <form id="rejection-form" action="{{ route('booking.rejection', $booking->token) }}" method="POST">
                         @csrf
                         
                         <!-- Calendar section -->
@@ -630,8 +630,8 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Clean up the booking date to remove time component if it exists
     let cleanBookingDate = bookingDate;
-    if (bookingDate && bookingDate.includes(' ')) {
-        cleanBookingDate = bookingDate.split(' ')[0]; 
+    if (bookingDate) {
+        cleanBookingDate = String(bookingDate).split(/[ T]/)[0];
     }
     
     let lockDays = [];
@@ -645,7 +645,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 // Create an array of all dates in the range
                 const dates = [];
                 for (let d = new Date(fromDate); d <= dueDate; d.setDate(d.getDate() + 1)) {
-                    dates.push(new Date(d));
+                    dates.push(d.toISOString().split('T')[0]); // Format as YYYY-MM-DD
                 }
                 return dates;
             }
@@ -655,13 +655,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Add booking date to locked days if it exists
     if (cleanBookingDate) {
-        try {
-            // Try different ways to parse the date to ensure it works
-            const bookDate = new Date(cleanBookingDate);
-            lockDays.push(bookDate);
-        } catch (e) {
-            console.error("Error parsing booking date:", e);
-        }
+        lockDays.push(cleanBookingDate);
     }
 
     // Array to store selected dates
@@ -913,6 +907,7 @@ document.addEventListener("DOMContentLoaded", function() {
             numberOfMonths: initCheckNumberOfColumns(),
             minDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // Tomorrow
             lockDays: lockDays,
+            lockDaysFormat: 'YYYY-MM-DD',
             lang: '{{app()->getLocale()}}',
             mobileFriendly: true,
             showTooltip: false,

@@ -17,8 +17,6 @@
                                 Buchungen</a></li>
                         <li><a href="{{ route('profile.favoriteguides') }}"><i
                                     class="fa fa-chevron-right"></i> Lieblingsguides</a></li>
-                        <li><a href="{{ route('chat') }}"><i class="fa fa-chevron-right"></i>
-                                Nachrichten ({{Auth::user()->countunreadmessages()}})</a></li>
                         @if(!Auth::user()->is_guide)
                             <li><a href="{{route('profile.becomeguide')}}"><i class="fa fa-chevron-right"></i>
                                     Als Guide verifizieren</a></li>

@@ -23,9 +23,19 @@
           <textarea class="form-control" rows="3" wire:model="comments"></textarea>
         </div>
     </div>
+    <div class="col-12 my-2" wire:ignore>
+        <x-recaptcha />
+        @error('recaptcha')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+        @enderror
+    </div>
 </div>
 
 <div class="my-2 d-flex justify-content-between">
     <button type="button" class="btn btn-outline-theme" wire:click="prev('0')">@lang('message.return')</button>
-    <button type="submit" class="btn btn-outline-theme">@lang('request.submit')</button>
+    <button
+        type="submit"
+        class="btn btn-outline-theme"
+        onclick="if (typeof grecaptcha !== 'undefined' && typeof Livewire !== 'undefined') { try { @this.set('recaptcha', grecaptcha.getResponse()); } catch (e) {} }"
+    >@lang('request.submit')</button>
 </div>

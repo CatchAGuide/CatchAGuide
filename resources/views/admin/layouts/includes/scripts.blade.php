@@ -95,6 +95,7 @@
 </script> --}}
 
 @livewireScripts
+<script src="{{ asset('assets/js/password-toggle.js') }}"></script>
 @yield('js_after')
 @stack('js_after')
 @stack('js_push')

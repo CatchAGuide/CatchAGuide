@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="{{ asset('assets/vendors/tagify/tagify.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/cropperjs/cropper.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/password-toggle.css') }}">
 
 <style>
     .pagination .page-item .page-link {

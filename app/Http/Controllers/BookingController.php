@@ -86,23 +86,42 @@ class BookingController extends Controller
         ]);
     }
 
-    public function rejectProcess(Booking $booking,RejectionRequest $request){
+    public function rejectProcess(string $token, RejectionRequest $request)
+    {
+        $booking = Booking::where('token', $token)->first();
+
+        if (!$booking) {
+            abort(404);
+        }
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('booking.rejectsuccess');
+        }
+
+        // Authenticated guide (or employee) may reject their own booking;
+        // unauthenticated email flow is allowed only with the secret token above.
+        if (auth('web')->check()) {
+            $guideId = $booking->guiding?->user_id;
+            if ((int) auth('web')->id() !== (int) $guideId && !auth('employees')->check()) {
+                abort(403);
+            }
+        }
 
         $booking->status = 'rejected';
         $booking->additional_information = $request->reason;
-        
+
         $alternativeDates = json_decode($request->alternative_dates);
         if (is_array($alternativeDates)) {
-            usort($alternativeDates, function($a, $b) {
+            usort($alternativeDates, function ($a, $b) {
                 return strtotime($a) - strtotime($b);
             });
             $booking->alternative_dates = json_encode($alternativeDates);
         } else {
             $booking->alternative_dates = $request->alternative_dates;
         }
-        
+
         $booking->save();
-     
+
         event(new BookingStatusChanged($booking, 'rejected'));
 
         return redirect()->route('booking.rejectsuccess');

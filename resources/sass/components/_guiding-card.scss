@@ -1,4 +1,4 @@
-// Guiding Card Component - All Styles in One File
+// Guiding Card Component - Minimized & Expanded layouts
 .guiding-card {
     background: #fff;
     border: 1px solid rgba(15, 23, 42, .08);
@@ -18,30 +18,65 @@
 
     &__grid {
         display: grid;
-        grid-template-columns: 320px 1fr; // Fixed image width
+        grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
+        grid-template-areas:
+            "media summary actions"
+            "media info-matrix info-matrix";
         gap: 16px;
         padding: 16px;
+        align-items: flex-start;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+        }
+
+        @media (max-width: 1024px) {
+            grid-template-columns: 260px minmax(0, 1fr);
+            grid-template-areas:
+                "media summary"
+                "media summary"
+                "info-matrix info-matrix"
+                "actions actions";
+        }
 
         @media (max-width: 768px) {
             grid-template-columns: 1fr;
+            grid-template-areas:
+                "media"
+                "summary"
+                "info-matrix"
+                "actions";
             gap: 12px;
             padding: 12px;
         }
     }
 
-    // Grid stays the same when expanded - only image height changes
-    &--expanded &__grid {
-        grid-template-columns: 320px 1fr; // Keep same width
+    // When info-matrix is hidden, adjust grid layout
+    &:not(&--expanded) &__grid {
+        grid-template-areas:
+            "media summary actions"
+            "media . .";
+
+        @media (max-width: 1024px) {
+            grid-template-areas:
+                "media summary"
+                "media summary"
+                "actions actions";
+        }
+
+        @media (max-width: 768px) {
+            grid-template-areas:
+                "media"
+                "summary"
+                "actions";
+        }
     }
 
-    &__left-column {
+    &__media {
+        grid-area: media;
         display: flex;
         flex-direction: column;
         gap: 12px;
-
-        @media (max-width: 768px) {
-            gap: 8px;
-        }
     }
 
     // Title and summary right after gallery
@@ -49,196 +84,147 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
-        
+
         // Mobile version - shown only on mobile
         &--mobile {
             display: flex;
-            
+
             @media (min-width: 769px) {
                 display: none !important;
             }
         }
     }
 
-    &__right-column {
+    &__left-panels {
+        margin-top: 4px;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        min-width: 0; // Prevent flex overflow
-
-        @media (max-width: 768px) {
-            gap: 8px;
-            
-            // Hide on mobile since we use title-after-gallery instead
-            .guiding-card__header,
-            .guiding-card__info-pills {
-                display: none !important;
-            }
-        }
     }
 
-    // Hide expandable content by default
-    [data-expanded-only] {
-        display: none !important;
-    }
-    
-    // Show expandable content when card is expanded
-    &--expanded {
-        .guiding-gallery__info-chips[data-expanded-only] {
-            display: flex !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-        
-        .guiding-card__detail-box[data-expanded-only] {
-            display: block !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-        
-        .guiding-card__info-matrix[data-expanded-only] {
-            display: grid !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    // Detail boxes
-    &__detail-box {
-        background: rgba(241, 245, 249, .6);
-        border: 1px solid rgba(15, 23, 42, .08);
-        border-radius: 12px;
-        padding: 8px;
-        margin-top: 12px;
-
-        &-title {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-    }
-
-    &__inclusives-chips {
+    &__summary {
+        grid-area: summary;
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
-    }
-
-    &__inclusive-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-
-        .guiding-card__check-icon {
-            color: #16a34a;
-        }
-    }
-
-    // Header & Pricing
-    &__header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
+        flex-direction: column;
         gap: 12px;
-        margin-bottom: 8px;
-
-        @media (max-width: 768px) {
-            flex-direction: column;
-            align-items: stretch;
-        }
-    }
-
-    &__info {
-        flex: 1;
         min-width: 0;
+
+        // Hide on mobile since we use title-after-gallery instead
+        @media (max-width: 768px) {
+            display: none !important;
+        }
     }
 
-    &__location {
+    &__summary-header {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 4px;
-        font-size: 12px;
-        color: #64748b;
-        margin-bottom: 4px;
-
-        &-icon {
-            flex-shrink: 0;
-        }
-
-        &-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
     }
 
     &__title {
+        margin: 0;
         font-size: 16px;
         font-weight: 600;
         color: #1e293b;
-        margin: 0 0 4px 0;
         line-height: 1.3;
     }
 
     &__description {
+        margin: 0;
         font-size: 13px;
         color: #475569;
-        line-height: 1.4;
-        margin: 0;
+        line-height: 1.5;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    &__pricing {
-        text-align: right;
+    &--expanded &__description {
+        display: block;
+        overflow: visible;
+    }
+
+    // Spec pills (duration / guests / tour type)
+    &__spec-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 12px;
+        color: #334155;
+    }
+
+    &__spec-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, .1);
+        background: rgba(241, 245, 249, .6);
+        font-size: 12px;
+        color: #334155;
+        line-height: 1;
+    }
+
+    &__spec-icon {
         flex-shrink: 0;
-        min-width: 140px;
+        color: #64748b;
+    }
+
+    // Actions column (price + expand toggle)
+    &__actions {
+        grid-area: actions;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 16px;
+    }
+
+    &__actions-column {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 8px;
+        gap: 10px;
+        align-self: flex-end;
 
-        @media (max-width: 768px) {
-            text-align: left;
-            min-width: auto;
+        @media (max-width: 1024px) {
             align-items: flex-start;
+            align-self: flex-start;
+        }
+    }
+
+    &__pricing {
+        text-align: right;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+
+        @media (max-width: 1024px) {
+            align-items: flex-start;
+            text-align: left;
         }
     }
 
     &__price-type {
         font-size: 12px;
         color: #64748b;
-        margin-bottom: 2px;
+        text-transform: capitalize;
+        margin: 0;
     }
 
     &__price-amount {
         font-size: 20px;
         font-weight: 600;
         color: #1e293b;
-        margin-bottom: 8px;
+        margin: 0;
     }
 
     &__select-btn {
         background: #16a34a;
-        color: white;
+        color: #fff;
         border: none;
         border-radius: 10px;
         padding: 9px 18px;
@@ -253,33 +239,6 @@
         }
     }
 
-    // Info Pills
-    &__info-pills {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 6px;
-        margin: 8px 0;
-    }
-
-    &__info-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 12px;
-        color: #334155;
-
-        &-icon {
-            flex-shrink: 0;
-            color: #64748b;
-        }
-    }
-
-    // Expand/Collapse Button (inline with pills)
     &__expand-btn {
         display: inline-flex;
         align-items: center;
@@ -295,7 +254,6 @@
         cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
-        margin-left: auto; // Push to the right
 
         &:hover {
             background: rgba(22, 163, 74, 0.15);
@@ -307,44 +265,130 @@
         }
     }
 
-    // Info Matrix
-    &__info-matrix {
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 12px;
-        margin: 12px 0;
+    &__expand-btn--secondary {
+        align-self: flex-end;
 
-        @media (max-width: 640px) {
-            grid-template-columns: 1fr !important;
+        @media (max-width: 1024px) {
+            align-self: flex-start;
         }
     }
 
+    // Hide expandable content by default
+    &__info-matrix[data-expanded-only],
+    &__left-panels[data-expanded-only] {
+        display: none !important;
+    }
+
+    &__info-matrix[data-expanded-only] {
+        grid-area: auto !important; // Remove from grid layout when hidden
+    }
+
+    // Show expandable content when card is expanded
+    &--expanded {
+        .guiding-card__info-matrix[data-expanded-only] {
+            display: grid !important;
+            grid-area: info-matrix !important; // Restore grid area when shown
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .guiding-card__left-panels[data-expanded-only] {
+            display: flex !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    }
+
+    &__info-matrix {
+        grid-area: info-matrix;
+        margin-top: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        width: 100%;
+
+        @media (max-width: 1200px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &__panel,
     &__info-box {
         background: rgba(241, 245, 249, .6);
         border: 1px solid rgba(15, 23, 42, .08);
         border-radius: 12px;
-        padding: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-        &-title {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
+    &__panel-title,
+    &__info-box-title {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        margin: 0;
+    }
 
-        &-content {
+    &__info-box-content {
+        font-size: 12px;
+        color: #334155;
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        li {
             font-size: 12px;
             color: #334155;
-            line-height: 1.4;
+            line-height: 1.6;
+
+            strong {
+                font-weight: 500;
+                color: #334155;
+            }
         }
     }
 
-    // Target Fish
-    &__target-fish-chips {
+    &__empty {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    // Chip rows shared by inclusives, target fish, methods and start times
+    &__chip-row {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 4px;
+    }
+
+    &__inclusive-chip,
+    &__method-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, .8);
+        border: 1px solid rgba(15, 23, 42, .1);
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #334155;
+        line-height: 1;
     }
 
     &__target-fish-chip {
@@ -358,39 +402,7 @@
         font-size: 11px;
         color: #15803d;
         font-weight: 500;
-    }
-
-    &__chip-icon {
-        flex-shrink: 0;
-        color: #16a34a;
-    }
-
-    // Methods
-    &__methods-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
-    }
-
-    &__method-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-    }
-
-    // Start Times
-    &__start-times-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
+        line-height: 1;
     }
 
     &__start-time-chip {
@@ -404,6 +416,24 @@
         font-size: 11px;
         color: #1e40af;
         font-weight: 500;
+        line-height: 1;
+    }
+
+    &__check-icon,
+    &__chip-icon {
+        flex-shrink: 0;
+        color: #16a34a;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 }
 
@@ -417,7 +447,7 @@
     border: 1px solid rgba(15, 23, 42, .08);
     background: #f1f5f9;
     aspect-ratio: 16/9; // Collapsed state
-    
+
     // Expanded state - square aspect ratio
     .guiding-card--expanded & {
         aspect-ratio: 1;
@@ -482,27 +512,6 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
 }
 
-.guiding-gallery__info-chips {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.guiding-gallery__info-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(255, 255, 255, .8);
-    border: 1px solid rgba(15, 23, 42, .1);
-    border-radius: 12px;
-    padding: 4px 8px;
-    font-size: 12px;
-    color: #334155;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
-}
 
 // ─── Mobile Card Redesign (max-width: 767px) ──────────────────────────────────
 @media (max-width: 767px) {
