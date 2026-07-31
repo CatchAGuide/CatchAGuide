@@ -2098,18 +2098,22 @@ class GuidingsController extends Controller
 
 
     public function edit(Guiding $guiding)
-    {      
+    {
+        $this->assertCanModifyGuiding($guiding);
+
         $targets = Target::all();
         $methods = Method::all();
         $waters = Water::all();
-        
 
         return view('pages.guidings.edit', compact('guiding','targets', 'methods', 'waters'));
     }
 
     public function edit_newguiding(Guiding $guiding)
     {
-        if (!auth('employees')->check() && (int) $guiding->user_id !== (int) auth('web')->id()) {
+        // Frontend edit is owner-only. Admins edit via admin.guidings.edit.
+        // Do not bypass on employees session here — shared admin+guide browser
+        // sessions were incorrectly allowing Guide A to open Guide B's form.
+        if ((int) $guiding->user_id !== (int) auth('web')->id()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -2223,6 +2227,8 @@ class GuidingsController extends Controller
 
     public function update(StoreGuidingRequest $request, Guiding $guiding)
     {
+        $this->assertCanModifyGuiding($guiding);
+
         $files = $request->files;
 
         $guiding->update([
@@ -2279,11 +2285,13 @@ class GuidingsController extends Controller
         return redirect()->back()->with(['message' => 'Das Guiding wurde erfolgreich bearbeitet!']);
     }
 
-    public function deleteImage(Guiding $guiding, $img){
+    public function deleteImage(Guiding $guiding, $img)
+    {
+        $this->assertCanModifyGuiding($guiding);
+
         app('asset')->deleteThumbnails($guiding, $img);
         app('asset')->deleteImage($guiding, $img);
- 
-     }
+    }
 
     public function deleteguiding($id)
     {
