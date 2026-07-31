@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\LoginThrottle;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -64,6 +65,25 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
 
+        // Inline "throttle:x,y" middleware keys every route by domain+IP only, so all
+        // of those routes share one counter. Named limiters get their own bucket, which
+        // keeps page loads and price recalculations from consuming the booking allowance.
+        RateLimiter::for('checkout-price', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        RateLimiter::for('checkout-submit', function (Request $request) {
+            return Limit::perMinute(5)
+                        ->by($request->ip())
+                        ->response(function (Request $request, array $headers) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => __('checkout.too_many_requests'),
+                                'retry_after' => (int) ($headers['Retry-After'] ?? 60),
+                            ], 429, $headers);
+                        });
+        });
+
         // Gemini translation specific rate limiting
         RateLimiter::for('gemini-translation', function (Request $request) {
             return Limit::perMinute(5) // 5 requests per minute
@@ -75,6 +95,21 @@ class RouteServiceProvider extends ServiceProvider
                                 'error' => 'Too many translation requests. Please try again later.',
                                 'retry_after' => 60
                             ], 429);
+                        });
+        });
+
+        // Outer safety net against credential stuffing floods. The per-account
+        // lockout lives in the login controllers; this only stops one IP from
+        // hammering the endpoint with many different email addresses.
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(20)
+                        ->by($request->ip())
+                        ->response(function (Request $request, array $headers) {
+                            return LoginThrottle::response(
+                                $request,
+                                (int) ($headers['Retry-After'] ?? 60),
+                                $headers
+                            );
                         });
         });
 

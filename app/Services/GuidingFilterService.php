@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
 class GuidingFilterService
@@ -27,26 +26,22 @@ class GuidingFilterService
     }
 
     /**
-     * Load filter data from cache or file
+     * Load the filter map, rebuilding it whenever the guiding data set has moved.
+     *
+     * The cache key carries a fingerprint of the current guidings, so a listing
+     * that is created, edited or unpublished can never be served from a map that
+     * predates it — previously a stale map made such listings invisible to every
+     * filter and hid their options from the sidebar.
      */
     private function loadFilterData()
     {
-        // Try to get from cache first
-        $this->filterData = Cache::get($this->cacheKey);
-        
-        if (!$this->filterData) {
-            // Load from file if not in cache
-            if (Storage::disk('local')->exists('cache/guiding-filters.json')) {
-                $jsonContent = Storage::disk('local')->get('cache/guiding-filters.json');
-                $this->filterData = json_decode($jsonContent, true);
-                
-                // Cache it for faster subsequent access
-                Cache::put($this->cacheKey, $this->filterData, $this->cacheTimeout);
-            } else {
-                // Return empty structure if file doesn't exist
-                $this->filterData = $this->getEmptyFilterStructure();
-            }
-        }
+        $builder = app(GuidingFilterMapBuilder::class);
+
+        $this->filterData = Cache::remember(
+            $this->cacheKey . ':' . $builder->fingerprint(),
+            $this->cacheTimeout,
+            fn () => $builder->build()
+        ) ?: $this->getEmptyFilterStructure();
     }
 
     /**
@@ -510,7 +505,13 @@ class GuidingFilterService
 
     private function getGuidingIdsForPersonCount($personCount)
     {
-        return $this->filterData['person_ranges'][$personCount] ?? [];
+        // OR logic across the selected group sizes; the sidebar only ever sends one.
+        $allIds = [];
+        foreach ((is_array($personCount) ? $personCount : [$personCount]) as $count) {
+            $allIds = array_merge($allIds, $this->filterData['person_ranges'][$count] ?? []);
+        }
+
+        return array_values(array_unique($allIds));
     }
 
     private function getGuidingIdsForPriceRange($request)
@@ -641,13 +642,24 @@ class GuidingFilterService
     }
 
     /**
-     * Clear the cache - useful when data is regenerated
+     * Rebuild the filter map and prime the cache with it.
+     */
+    public function refresh(): array
+    {
+        $builder = app(GuidingFilterMapBuilder::class);
+
+        $this->filterData = $builder->build();
+        Cache::put($this->cacheKey . ':' . $builder->fingerprint(), $this->filterData, $this->cacheTimeout);
+
+        return $this->filterData;
+    }
+
+    /**
+     * Force a rebuild of the filter map on the next read.
      */
     public function clearCache()
     {
-        Cache::forget($this->cacheKey);
-        $this->filterData = null;
-        $this->loadFilterData();
+        $this->refresh();
     }
 
     /**

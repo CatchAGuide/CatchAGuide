@@ -39,6 +39,7 @@
 
 <!-- Custom admin layout theme -->
 <link rel="stylesheet" href="{{ asset('css/admin-layout.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/css/password-toggle.css') }}" />
 
 <style type="text/css">
 

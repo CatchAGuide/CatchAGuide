@@ -18,6 +18,8 @@
                 <img
                     src="{{ $boat['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop' }}"
                     alt="{{ $boat['title'] ?? 'Boat' }}"
+                    loading="lazy"
+                    decoding="async"
                     data-gallery-image
                     data-open-modal
                     style="cursor: pointer;"

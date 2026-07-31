@@ -6,7 +6,7 @@
 <script src="{{ asset('assets/admin/plugins/bootstrap/js/bootstrap.min.js') }}"></script>
 
 <!-- SHOW PASSWORD JS -->
-<script src="{{ asset('assets/admin/js/show-password.min.js') }}"></script>
+<script src="{{ asset('assets/js/password-toggle.js') }}"></script>
 
 <!-- GENERATE OTP JS -->
 <script src="{{ asset('assets/admin/js/generate-otp.js') }}"></script>

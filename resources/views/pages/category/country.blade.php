@@ -662,7 +662,7 @@
                                     target="#mapModal"
                                     tag="a"
                                     :label="__('destination.show_on_map')"
-                                    :result-count="isset($allGuidings) ? count($allGuidings) : null"
+                                    :result-count="isset($mapGuidings) ? count($mapGuidings) : ($guidings_total ?? null)"
                                 />
                             </div>            
                             @include('pages.guidings.includes.filters', ['formAction' => request()->url()])
@@ -682,11 +682,11 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">{!! translate($row_data->content) !!}</div>
+                    <div class="mb-3">{!! clean_html(translate($row_data->content)) !!}</div>
 
                     @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
                         <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>
-                        <p>{!! translate($row_data->fish_avail_intro) !!}</p>
+                        <p>{!! clean_html(translate($row_data->fish_avail_intro)) !!}</p>
                         @if($fish_chart->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-bordered " id="fish_chart_table">
@@ -735,7 +735,7 @@
                         @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
                         <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
                             <h2>{{ translate($row_data->size_limit_title) }}</h2>
-                            <p>{!! translate($row_data->size_limit_intro) !!}</p>
+                            <p>{!! clean_html(translate($row_data->size_limit_intro)) !!}</p>
                             @if(!empty($fish_size_limit))
                             <table class="table table-bordered table-striped" id="fish_size_limit_table">
                                 <thead>
@@ -761,7 +761,7 @@
                         @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
                         <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
                             <h2>{{ translate($row_data->time_limit_title) }}</h2>
-                            <p>{!! translate($row_data->time_limit_intro) !!}</p>
+                            <p>{!! clean_html(translate($row_data->time_limit_intro)) !!}</p>
                             @if(!empty($fish_time_limit))
                             <table class="table table-bordered table-striped" id="fish_time_limit_table">
                                 <thead>
@@ -808,19 +808,22 @@
     <!--News One End-->
 
     @php
-        if ($allGuidings->isEmpty()) {
-            $mapSource = $otherguidings ?? collect();
-            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        // The map covers the whole filtered result set, not just the current page.
+        $mapSource = isset($mapGuidings)
+            ? collect($mapGuidings)
+            : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+
+        if ($mapSource->isEmpty()) {
+            $mapSource = collect($otherguidings ?? []);
+            $mapGrayIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
         } else {
-            $mapSource = $allGuidings instanceof \Illuminate\Support\Collection
-                ? $allGuidings
-                : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
+            $mapGrayIds = [];
             if (isset($otherguidings) && count($otherguidings) > 0) {
-                $mapSource = $mapSource->concat($otherguidings);
+                $existingIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
+                $nearby = collect($otherguidings)->reject(fn ($g) => in_array((int) $g->id, $existingIds, true));
+                $mapGrayIds = $nearby->pluck('id')->map(fn ($id) => (int) $id)->all();
+                $mapSource = $mapSource->concat($nearby);
             }
-            $mapGrayIds = isset($otherguidings)
-                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
-                : [];
         }
         $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
         $mapCenterLat = request()->get('placeLat')

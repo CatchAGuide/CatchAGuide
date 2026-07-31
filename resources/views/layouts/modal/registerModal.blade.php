@@ -286,8 +286,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         input.classList.add('is-invalid');
                         const feedback = document.createElement('div');
                         feedback.className = 'invalid-feedback';
+                        feedback.style.display = 'block';
                         feedback.textContent = data.errors[field][0];
-                        input.parentNode.appendChild(feedback);
+                        const wrapper = input.closest('.cag-password-toggle');
+                        if (wrapper && wrapper.parentNode) {
+                            wrapper.parentNode.insertBefore(feedback, wrapper.nextSibling);
+                        } else {
+                            input.parentNode.appendChild(feedback);
+                        }
                     } else {
                         // For errors not associated with a specific field
                         const errorDiv = document.createElement('div');
@@ -323,9 +329,12 @@ document.addEventListener('DOMContentLoaded', function() {
     registerForm.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', function() {
             this.classList.remove('is-invalid');
-            const feedback = this.parentNode.querySelector('.invalid-feedback');
-            if (feedback) {
-                feedback.remove();
+            const wrapper = this.closest('.cag-password-toggle');
+            const group = wrapper ? wrapper.parentNode : this.parentNode;
+            if (group) {
+                group.querySelectorAll(':scope > .invalid-feedback').forEach(function (el) {
+                    el.remove();
+                });
             }
         });
     });

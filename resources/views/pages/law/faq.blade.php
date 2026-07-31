@@ -54,7 +54,7 @@
                     </h2>
                     <div id="collapse-{{ $faq->id }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="heading-{{ $faq->id }}" data-bs-parent="#accordionExample">
                         <div class="accordion-body">
-                            {!!  translate($faq->answer) !!}
+                            {!! clean_html(translate($faq->answer)) !!}
                         </div>
                     </div>
                 </div>

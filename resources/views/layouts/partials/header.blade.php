@@ -115,7 +115,6 @@
                                                     @else
                                                         <li><a href="{{route('profile.becomeguide')}}">@lang('message.verify-guide')</a></li>
                                                     @endif
-                                                    <li><a href="{{route('chat')}}">@lang('message.my-news') ({{Auth::user()->countunreadmessages()}})</a></li>
                                                     <li><a href="javascript:void(0)" onclick="$('#logoutForm').submit();">@lang('message.logout')</a></li>
                                                 </ul>
                                             </li>

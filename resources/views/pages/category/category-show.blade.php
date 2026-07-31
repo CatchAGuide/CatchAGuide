@@ -563,7 +563,7 @@
         <div class="container">
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
-                    <div class="page-main-intro-text mb-1">{!! $row_data->language->introduction !!}</div>
+                    <div class="page-main-intro-text mb-1">{!! clean_html($row_data->language->introduction) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
                 <h5 class="mb-2">{{ $row_data->source->name }}</h5>
@@ -595,7 +595,7 @@
                     </div>
                 </div>
 
-                <div class="mb-3">{!! $row_data->language->content !!}</div>
+                <div class="mb-3">{!! clean_html($row_data->language->content) !!}</div>
 
                 @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
                     <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>

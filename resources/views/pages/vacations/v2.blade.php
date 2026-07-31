@@ -69,19 +69,19 @@
     <div class="camp-container">
         <div class="camp-gallery">
             <div class="camp-gallery__main" data-gallery-index="0">
-                <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}">
+                <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}" fetchpriority="high" decoding="async">
             </div>
             <div class="camp-gallery__right">
                 @foreach ($topRightImages as $index => $image)
                     <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
-                        <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }}" loading="lazy" decoding="async">
                     </div>
                 @endforeach
             </div>
             <div class="camp-gallery__bottom">
                 @foreach ($bottomStripImages as $index => $image)
                     <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
-                        <img src="{{ $image }}" alt="{{ $camp['title'] }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }}" loading="lazy" decoding="async">
                         @if($loop->last && $remainingGalleryCount > 0)
                             <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
                         @endif
@@ -99,7 +99,7 @@
             <div class="camp-gallery__mobile-carousel-scroll">
                 @foreach($mobileCarouselImages as $index => $image)
                     <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
-                        <img src="{{ $image }}" alt="{{ $camp['title'] }} - Image {{ $index + 2 }}">
+                        <img src="{{ $image }}" alt="{{ $camp['title'] }} - Image {{ $index + 2 }}" loading="lazy" decoding="async">
                     </div>
                 @endforeach
             </div>

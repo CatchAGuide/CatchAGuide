@@ -124,20 +124,20 @@
                 <div class="camp-gallery">
                     <div class="camp-gallery__main" data-gallery-index="0">
                         @if($primaryImage)
-                            <img src="{{ $primaryImage }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}">
+                            <img src="{{ $primaryImage }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}" fetchpriority="high" decoding="async">
                         @endif
                     </div>
                     <div class="camp-gallery__right">
                         @foreach ($topRightImages as $index => $image)
                             <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 1 }}">
-                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}" loading="lazy" decoding="async">
                             </div>
                         @endforeach
                     </div>
                     <div class="camp-gallery__bottom">
                         @foreach ($bottomStripImages as $index => $image)
                             <div class="camp-gallery__thumb" data-gallery-index="{{ $index + 3 }}">
-                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 4]) }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 4]) }}" loading="lazy" decoding="async">
                                 @if($loop->last && $remainingGalleryCount > 0)
                                     <div class="camp-gallery__more">+{{ $remainingGalleryCount }}</div>
                                 @endif
@@ -154,7 +154,7 @@
                     <div class="camp-gallery__mobile-carousel-scroll">
                         @foreach($mobileCarouselImages as $index => $image)
                             <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
-                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}">
+                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}" loading="lazy" decoding="async">
                             </div>
                         @endforeach
                     </div>
@@ -632,7 +632,7 @@
                                             <div class="trip-offer-page__guide-left">
                                                 <div class="trip-offer-page__guide-row">
                                                     @if(!empty($prov['photo']))
-                                                        <img src="{{ media_url($prov['photo'] ?? null) }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img">
+                                                        <img src="{{ media_url($prov['photo'] ?? null) }}" alt="{{ $prov['name'] ?? '' }}" class="trip-offer-page__guide-avatar-img" loading="lazy" decoding="async">
                                                     @else
                                                         <div class="trip-offer-page__guide-avatar-initials">
                                                             {{ strtoupper(mb_substr(($prov['name'] ?? '?'), 0, 2)) }}

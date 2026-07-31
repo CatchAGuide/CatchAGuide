@@ -9,6 +9,7 @@
                     ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
                 ) ? 'true' : 'false' 
              }}"
+             data-created="{{ $booking->created_at->getTimestamp() }}"
              data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
             <div class="booking-header">
                 <div style="flex: 1;">
@@ -144,6 +145,7 @@
                     ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
                 ) ? 'true' : 'false' 
              }}"
+             data-created="{{ $booking->created_at->getTimestamp() }}"
              data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
             <div class="booking-header">
                 <div style="flex: 1;">

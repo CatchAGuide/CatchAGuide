@@ -81,20 +81,56 @@ class GuidingsController extends Controller
 
     private function resolveGuidingOwnerUserId(StoreNewGuidingRequest $request): ?int
     {
+        // Regular guides can only own as themselves (ignore forged user_id).
+        if (!$this->isAdminActor($request)) {
+            return auth('web')->id();
+        }
+
+        // Employees/admins may assign any guide as owner.
         if ($request->filled('user_id')) {
             return (int) $request->input('user_id');
         }
 
-        return auth()->id();
+        // Prefer existing guiding owner on admin update/draft when user_id omitted.
+        if ($request->filled('guiding_id')) {
+            $existing = Guiding::find($request->input('guiding_id'));
+            if ($existing) {
+                return (int) $existing->user_id;
+            }
+        }
+
+        // Admin create without an explicit owner (legacy form has no guide picker).
+        return null;
+    }
+
+    private function assertCanModifyGuiding(Guiding $guiding, ?StoreNewGuidingRequest $request = null): void
+    {
+        // Admins/employees can edit any guiding.
+        if ($this->isAdminActor($request)) {
+            return;
+        }
+
+        if ((int) auth('web')->id() !== (int) $guiding->user_id) {
+            abort(403, 'You are not allowed to modify this guiding.');
+        }
+    }
+
+    /**
+     * True when the current actor is an employee/admin.
+     * Authorization must never rely on form fields like target_redirect.
+     */
+    private function isAdminActor(?StoreNewGuidingRequest $request = null): bool
+    {
+        return auth('employees')->check();
     }
 
     private function canActorPublishGuidings(StoreNewGuidingRequest $request): bool
     {
-        if (str_contains($request->input('target_redirect', ''), 'admin') || auth('employees')->check()) {
+        if ($this->isAdminActor($request)) {
             return true;
         }
 
-        return (bool) auth()->user()?->canPublishGuidings();
+        return (bool) auth('web')->user()?->canPublishGuidings();
     }
 
     /**
@@ -778,7 +814,9 @@ class GuidingsController extends Controller
         }
 
         $user = Auth::user();
-        if (! $user) {
+        if (Auth::guard('employees')->check()) {
+            // Admins preview every tour, including drafts and deactivated ones.
+        } elseif (! $user) {
             $query = $query->publiclyVisible();
         } else {
             $query = $query->where(function ($inner) use ($user) {
@@ -891,6 +929,10 @@ class GuidingsController extends Controller
                 ? Guiding::findOrFail($request->input('guiding_id'))
                 : new Guiding(['user_id' => $this->resolveGuidingOwnerUserId($request)]);
 
+            if ($isUpdate) {
+                $this->assertCanModifyGuiding($guiding, $request);
+            }
+
             // Store original status for updates
             $originalStatus = $isUpdate ? $guiding->status : null;
 
@@ -923,11 +965,12 @@ class GuidingsController extends Controller
                 $totalImageCount = max($totalImageCount, count(array_filter($imageListFromRequest)));
             }
 
-            $isAdminSubmit = str_contains($request->input('target_redirect', ''), 'admin');
-            $isAdminActor = $isAdminSubmit || auth('employees')->check();
+            $isAdminActor = $this->isAdminActor($request);
+            // Keep legacy redirect detection for post-save destination only (not authorization).
+            $isAdminSubmit = $isAdminActor || str_contains($request->input('target_redirect', ''), 'admin');
 
             // Require 5 images only for non-draft, non-admin submissions (profile create/update)
-            if (!$isDraft && !$isAdminSubmit && $totalImageCount < 5) {
+            if (!$isDraft && !$isAdminActor && $totalImageCount < 5) {
                 throw new \Exception('Please upload at least 5 images');
             }
 
@@ -1061,6 +1104,7 @@ class GuidingsController extends Controller
 
             if ($isUpdate && $request->input('guiding_id')) {
                 $guiding = Guiding::findOrFail($request->input('guiding_id'));
+                $this->assertCanModifyGuiding($guiding, $request);
                 $originalStatus = $guiding->status;
             } else {
                 $guiding = Guiding::where('user_id', $ownerUserId)
@@ -1073,6 +1117,8 @@ class GuidingsController extends Controller
 
                 if (!$guiding) {
                     $guiding = new Guiding(['user_id' => $ownerUserId]);
+                } else {
+                    $this->assertCanModifyGuiding($guiding, $request);
                 }
             }
 
@@ -2052,18 +2098,22 @@ class GuidingsController extends Controller
 
 
     public function edit(Guiding $guiding)
-    {      
+    {
+        $this->assertCanModifyGuiding($guiding);
+
         $targets = Target::all();
         $methods = Method::all();
         $waters = Water::all();
-        
 
         return view('pages.guidings.edit', compact('guiding','targets', 'methods', 'waters'));
     }
 
     public function edit_newguiding(Guiding $guiding)
     {
-        if ($guiding->user_id !== auth()->id()) {
+        // Frontend edit is owner-only. Admins edit via admin.guidings.edit.
+        // Do not bypass on employees session here — shared admin+guide browser
+        // sessions were incorrectly allowing Guide A to open Guide B's form.
+        if ((int) $guiding->user_id !== (int) auth('web')->id()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -2177,6 +2227,8 @@ class GuidingsController extends Controller
 
     public function update(StoreGuidingRequest $request, Guiding $guiding)
     {
+        $this->assertCanModifyGuiding($guiding);
+
         $files = $request->files;
 
         $guiding->update([
@@ -2233,16 +2285,25 @@ class GuidingsController extends Controller
         return redirect()->back()->with(['message' => 'Das Guiding wurde erfolgreich bearbeitet!']);
     }
 
-    public function deleteImage(Guiding $guiding, $img){
+    public function deleteImage(Guiding $guiding, $img)
+    {
+        $this->assertCanModifyGuiding($guiding);
+
         app('asset')->deleteThumbnails($guiding, $img);
         app('asset')->deleteImage($guiding, $img);
- 
-     }
+    }
 
     public function deleteguiding($id)
     {
         $guiding = Guiding::find($id);
-        if ($guiding->user_id == Auth::user()->id) {
+        if (!$guiding) {
+            return redirect()->back()->with('error', 'Guiding not found');
+        }
+
+        $isOwner = auth('web')->check() && (int) $guiding->user_id === (int) auth('web')->id();
+        $isAdmin = auth('employees')->check();
+
+        if ($isOwner || $isAdmin) {
             if ($guiding->status == 1)
                 $guiding->status = 0;
             else {
@@ -2250,9 +2311,9 @@ class GuidingsController extends Controller
             }
             $guiding->save();
             return redirect()->back()->with('message', "Das Guiding wurde erfolgreich deaktiviert");
-        } else {
-            return redirect()->back()->with('error', 'Du hast keine Berechtigung das Guiding zu löschen.. bitte wende Dich an einen Administrator');
         }
+
+        return redirect()->back()->with('error', 'Du hast keine Berechtigung das Guiding zu löschen.. bitte wende Dich an einen Administrator');
     }
 
     // request
@@ -2260,7 +2321,15 @@ class GuidingsController extends Controller
         return view('pages.guidings.search-request');
     }
 
-    public function bookingRequestStore(Request $request){
+    public function bookingRequestStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required',
+            'g-recaptcha-response' => \App\Rules\Recaptcha::production(),
+        ]);
+
         $guideRequest = new GuidingRequest;
         
         $guideRequest->guide_type = $request->guideType;

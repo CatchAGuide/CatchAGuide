@@ -69,7 +69,7 @@
 
                             <div>
                                 <label class="admin-auth__label" for="admin-password">{{ __('admin.auth.password_label') }}</label>
-                                <div class="admin-auth__input-group" id="Password-toggle">
+                                <div class="admin-auth__input-group">
                                     <span class="admin-auth__input-icon">
                                         <i class="zmdi zmdi-lock" aria-hidden="true"></i>
                                     </span>

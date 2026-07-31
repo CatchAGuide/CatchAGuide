@@ -384,6 +384,21 @@ class Checkout extends Component
     {
         $this->loading = true;
 
+        if (! \Illuminate\Support\Facades\RateLimiter::attempt(
+            'livewire-checkout:'.request()->ip(),
+            5,
+            fn () => true,
+            60
+        )) {
+            $this->loading = false;
+            $this->addError('userData.email', __('validation.throttle', [
+                'seconds' => 60,
+                'minutes' => 1,
+            ]));
+
+            return;
+        }
+
         // DDoS protection is handled by middleware and component-level validation
 
         $this->validateData();
