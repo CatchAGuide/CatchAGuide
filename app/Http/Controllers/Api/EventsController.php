@@ -58,6 +58,8 @@ class EventsController extends Controller
             'day' => 'array'
         ]);
 
+        $guidingId = $this->resolveOwnedGuidingId($request->guiding_id);
+
         $start = Carbon::parse($request->start);
         $end = Carbon::parse($request->end);
         $dayOfWeek = $request->get('day', []);
@@ -76,7 +78,7 @@ class EventsController extends Controller
                             'type' => $type,
                             'date' => $currentDate->format('Y-m-d'),
                             'note' => $note,
-                            'guiding_id' => $request->guiding_id,
+                            'guiding_id' => $guidingId,
                         ]);
                     }
                     $currentDate->addDay();
@@ -91,7 +93,7 @@ class EventsController extends Controller
                     'type' => $type,
                     'date' => $currentDate->format('Y-m-d'),
                     'note' => $note,
-                    'guiding_id' => $request->guiding_id,
+                    'guiding_id' => $guidingId,
                 ]);
                 $currentDate->addDay();
             }
@@ -120,7 +122,7 @@ class EventsController extends Controller
             'type' => $request->type,
             'date' => $request->date,
             'note' => $request->note,
-            'guiding_id' => $request->guiding_id,
+            'guiding_id' => $this->resolveOwnedGuidingId($request->guiding_id),
         ]);
 
         return response()->json([
@@ -206,6 +208,26 @@ class EventsController extends Controller
             ->get();
 
         return response()->json($guidings);
+    }
+
+    /**
+     * Only allow attaching schedules to guidings owned by the authenticated user.
+     */
+    private function resolveOwnedGuidingId(mixed $guidingId): ?int
+    {
+        if ($guidingId === null || $guidingId === '' || $guidingId === false) {
+            return null;
+        }
+
+        $owned = Guiding::where('id', (int) $guidingId)
+            ->where('user_id', auth()->id())
+            ->exists();
+
+        if (!$owned) {
+            abort(403, 'Invalid guiding selection.');
+        }
+
+        return (int) $guidingId;
     }
 
     /**

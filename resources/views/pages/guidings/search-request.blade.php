@@ -248,9 +248,9 @@
                         <div id="flush-{{$index}}" class="accordion-collapse collapse" aria-labelledby="flush-heading{{$index}}" data-bs-parent="#accordionFlush">
                             <div class="accordion-body">
                                 @if(app()->getlocale()=='de')
-                                {!!$faq->answer!!}
-                                @else
-                                {!!translate($faq->answer)!!}
+                                {!! clean_html($faq->answer) !!}
+                            @else
+                                {!! clean_html(translate($faq->answer)) !!}
                                 @endif
 
                             </div>

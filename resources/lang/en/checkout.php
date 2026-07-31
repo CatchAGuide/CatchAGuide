@@ -122,6 +122,7 @@ return [
     'hours_short' => 'h',
         'booking_failed' => 'Failed to submit booking',
         'unexpected_error' => 'An unexpected error occurred. Please try again.',
+        'too_many_requests' => 'Too many booking attempts. Please wait a moment and try again.',
         
         // Thank you page translations
         'booking_confirmed' => 'Booking Confirmed',

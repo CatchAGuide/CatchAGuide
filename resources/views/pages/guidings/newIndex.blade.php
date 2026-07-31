@@ -1058,7 +1058,7 @@
                         <span>@lang('guidings.Course_Action')</span>
                     </div>
                     <p class="text-wrapper">
-                        {!! $guiding->desc_course_of_action !!}
+                        {!! clean_html($guiding->desc_course_of_action) !!}
                     </p>
                 </div>
                 
@@ -1070,7 +1070,7 @@
                         <span>@lang('guidings.Tour_Highlights')</span>
                     </div>
                     <p class="text-wrapper">
-                        {!! $guiding->desc_tour_unique !!}
+                        {!! clean_html($guiding->desc_tour_unique) !!}
                     </p>
                 </div>
             @endif
@@ -1092,7 +1092,7 @@
                         @endif
 
                         @if($guiding->desc_starting_time)
-                            <p>{!! $guiding->desc_starting_time !!}</p>
+                            <p>{!! clean_html($guiding->desc_starting_time) !!}</p>
                         @endif
                     </div>
                 @endif
@@ -1102,7 +1102,7 @@
                         <div class="header-container">
                             <span> @lang('guidings.Meeting_Point')</span>
                         </div>
-                        <p>{!! $guiding->desc_meeting_point !!}</p>
+                        <p>{!! clean_html($guiding->desc_meeting_point) !!}</p>
                     </div>
                 @endif
             </div>

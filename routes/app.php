@@ -39,7 +39,9 @@ Route::prefix('user-ical-feeds')->name('user-ical-feeds.')->middleware('auth:web
     Route::get('/{feed}/otp', [UserICalFeedController::class, 'getCurrentOTP'])->name('otp');
 });
 
-Route::get('ical/feed/{token}/{otp?}', [UserICalFeedController::class, 'generateFeed'])->name('ical.feed');
+Route::get('ical/feed/{token}/{otp?}', [UserICalFeedController::class, 'generateFeed'])
+    ->middleware('throttle:60,1')
+    ->name('ical.feed');
 
 // Webhook Routes
 Route::prefix('webhooks')->name('webhooks.')->group(function () {

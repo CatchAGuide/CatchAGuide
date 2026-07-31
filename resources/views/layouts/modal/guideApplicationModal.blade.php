@@ -760,11 +760,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const input = form.querySelector(selector);
             if (input) {
                 input.classList.add('is-invalid');
-                const parent = input.closest('.col-md-6, .col-md-4, .col-md-8, .col-12, .form-check, .guide-modal-step') || input.parentNode;
                 const feedback = document.createElement('div');
                 feedback.className = 'invalid-feedback d-block small';
                 feedback.textContent = Array.isArray(errors[field]) ? errors[field][0] : errors[field];
-                input.parentNode.appendChild(feedback);
+                const wrapper = input.closest('.cag-password-toggle');
+                if (wrapper && wrapper.parentNode) {
+                    wrapper.parentNode.insertBefore(feedback, wrapper.nextSibling);
+                } else {
+                    input.parentNode.appendChild(feedback);
+                }
 
                 const stepEl = input.closest('.guide-modal-step');
                 if (stepEl) {

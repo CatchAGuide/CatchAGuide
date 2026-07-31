@@ -1,9 +1,9 @@
 {{-- Shared destination SEO blocks (fish chart, limits, FAQ). Expects $row_data, $fish_chart, $fish_size_limit, $fish_time_limit, $faq --}}
-<div class="mb-3">{!! $row_data->content !!}</div>
+<div class="mb-3">{!! clean_html($row_data->content) !!}</div>
 
 @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
     <h2 class="mb-2 mt-5">{{ $row_data->fish_avail_title }}</h2>
-    <p>{!! $row_data->fish_avail_intro !!}</p>
+    <p>{!! clean_html($row_data->fish_avail_intro) !!}</p>
     @if($fish_chart->count() > 0)
     <div class="table-responsive">
         <table class="table table-bordered " id="fish_chart_table">
@@ -52,7 +52,7 @@
     @if($row_data->size_limit_title != '' && $row_data->size_limit_intro != '')
     <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
         <h2>{{ $row_data->size_limit_title }}</h2>
-        <p>{!! $row_data->size_limit_intro !!}</p>
+        <p>{!! clean_html($row_data->size_limit_intro) !!}</p>
         @if(!empty($fish_size_limit))
         <table class="table table-bordered table-striped" id="fish_size_limit_table">
             <thead>
@@ -76,7 +76,7 @@
     @if($row_data->time_limit_title != '' && $row_data->time_limit_intro != '')
     <div class="col-sm-12 col-md-12 col-lg-12 mt-5">
         <h2>{{ $row_data->time_limit_title }}</h2>
-        <p>{!! $row_data->time_limit_intro !!}</p>
+        <p>{!! clean_html($row_data->time_limit_intro) !!}</p>
         @if(!empty($fish_time_limit))
         <table class="table table-bordered table-striped" id="fish_time_limit_table">
             <thead>

@@ -308,11 +308,18 @@ class DestinationCountryController extends Controller
         // Prepare results
         if ($hasCheckboxFilters && empty($checkboxFilteredIds)) {
             $allGuidings = collect();
+            $mapGuidings = collect();
+            $guidingsTotal = 0;
             $guidings = new \Illuminate\Pagination\LengthAwarePaginator(
                 collect(), 0, 20, 1, 
                 ['path' => request()->url(), 'pageName' => 'page']
             );
         } else {
+            // The map shows every match, so read the full set and the total before
+            // paginate() puts a limit/offset on the shared query builder.
+            $mapGuidings = $this->fetchMapGuidings($filteredQuery);
+            $guidingsTotal = (clone $filteredQuery)->count();
+
             // 3. Get all filtered guidings (for counts and filter options) - paginated for view
             $allGuidings = $filteredQuery->paginate(20);
         }
@@ -443,13 +450,13 @@ class DestinationCountryController extends Controller
             ];
 
             $view = view('pages.guidings.partials.guiding-list', $responseData)->render();
-            $mapGuidings = $this->buildMapGuidingsPayload($allGuidings, $otherguidings);
+            $mapPayload = $this->buildMapGuidingsPayload($mapGuidings, $otherguidings);
 
             return response()->json(array_merge($responseData, [
                 'html' => $view,
-                'guidings' => $mapGuidings,
-                'allGuidings' => $mapGuidings,
-                'mapGuidings' => $mapGuidings,
+                'guidings' => $mapPayload,
+                'allGuidings' => $mapPayload,
+                'mapGuidings' => $mapPayload,
                 'total' => is_object($guidings) ? $guidings->total() : count($guidings),
                 'filterCounts' => [
                     'targetFish' => $targetFishCounts ?? [],
@@ -471,7 +478,7 @@ class DestinationCountryController extends Controller
 
         // Return full view for non-AJAX requests
         return view('pages.category.country', [ 
-            'guidings_total' => $filteredQuery->count(),
+            'guidings_total' => $guidingsTotal,
             'row_data' => $row_data,
             'destination_type' => $destinationType,
             'regions' => $regions,
@@ -487,6 +494,7 @@ class DestinationCountryController extends Controller
             'guidings' => $allGuidings,
             'radius' => $radius,
             'allGuidings' => $allGuidings,
+            'mapGuidings' => $mapGuidings,
             'searchMessage' => $searchMessage,
             'otherguidings' => $otherguidings,
             'alltargets' => $alltargets,

@@ -19,6 +19,12 @@ return [
     'nearest_fallback_limit' => 50,
 
     /*
+    | Upper bound of markers loaded for a listing map. Maps show the full filtered
+    | result set rather than the current page, so this caps pathological cases.
+    */
+    'map_markers_max' => (int) env('LOCATION_SEARCH_MAP_MARKERS_MAX', 2000),
+
+    /*
     | Show "Additional Fishing Tour close to…" when main location results are at or below this count.
     */
     'nearby_section_max_main_results' => (int) env('LOCATION_SEARCH_NEARBY_MAX_MAIN_RESULTS', 12),

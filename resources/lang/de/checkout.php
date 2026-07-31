@@ -124,6 +124,7 @@ return [
     'hours_short' => 'h',
         'booking_failed' => 'Buchung konnte nicht übermittelt werden',
         'unexpected_error' => 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+        'too_many_requests' => 'Zu viele Buchungsversuche. Bitte warten Sie einen Moment und versuchen Sie es erneut.',
         
         // Thank you page translations
         'booking_confirmed' => 'Buchung Bestätigt',

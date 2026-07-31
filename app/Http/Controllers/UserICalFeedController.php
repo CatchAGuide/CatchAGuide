@@ -34,8 +34,9 @@ class UserICalFeedController extends Controller
             return response('Feed is not accessible', 403);
         }
 
-        // Verify OTP if provided
-        if ($otp && !$feed->verifyOTP($otp)) {
+        // Verify OTP when provided (optional for calendar app subscriptions —
+        // rotating OTP cannot be used by Google/Outlook polling; token is 64 chars).
+        if ($otp !== null && $otp !== '' && !$feed->verifyOTP($otp)) {
             return response('Invalid OTP', 401);
         }
 

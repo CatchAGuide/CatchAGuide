@@ -836,6 +836,7 @@
                             ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
                         ) ? 'true' : 'false' 
                      }}"
+                     data-created="{{ $booking->created_at->getTimestamp() }}"
                      data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
                     <div class="booking-header">
                         <div style="flex: 1;">
@@ -1228,6 +1229,7 @@
                             ($booking->blocked_event && \Carbon\Carbon::parse($booking->blocked_event->from)->isPast())
                         ) ? 'true' : 'false' 
                      }}"
+                     data-created="{{ $booking->created_at->getTimestamp() }}"
                      data-search="{{ strtolower($booking->guiding->title ?? 'untitled') }} {{ strtolower($booking->guiding->location ?? '') }}">
                     <div class="booking-header">
                         <div style="flex: 1;">
@@ -1629,6 +1631,26 @@
                 return document.querySelectorAll('.profile-bookings-container .booking-card');
             }
 
+            // My bookings and guide bookings are rendered as two separate lists, so pending
+            // ones have to be moved to the top of the combined list, newest first.
+            function movePendingBookingsToTop() {
+                const container = document.getElementById('bookingsContainer');
+                if (!container) {
+                    return;
+                }
+
+                const cards = Array.from(container.querySelectorAll(':scope > .booking-card'));
+                const anchor = cards.find(card => card.dataset.status !== 'pending');
+                if (!anchor) {
+                    return;
+                }
+
+                cards
+                    .filter(card => card.dataset.status === 'pending')
+                    .sort((a, b) => (parseInt(b.dataset.created, 10) || 0) - (parseInt(a.dataset.created, 10) || 0))
+                    .forEach(card => container.insertBefore(card, anchor));
+            }
+
             // Filter functionality
             function filterBookings() {
                 const activeTab = document.querySelector('.profile-bookings-container .filter-tab.active');
@@ -1837,7 +1859,8 @@
                             button.style.display = 'none';
                         }
                         
-                        // Re-apply filters to new cards
+                        // Re-apply sorting and filters to new cards
+                        movePendingBookingsToTop();
                         filterBookings();
                     })
                     .catch(error => {
@@ -1851,6 +1874,8 @@
                     });
                 });
             }
+
+            movePendingBookingsToTop();
 
             // Initialize with "Total Bookings" active
             const totalStat = document.querySelector('.clickable-stat[data-filter="all"]');

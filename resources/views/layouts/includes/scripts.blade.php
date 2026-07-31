@@ -1,5 +1,6 @@
 <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('assets/js/password-toggle.js') }}"></script>
 <script src="{{ asset('assets/vendors/jarallax/jarallax.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/jquery-ajaxchimp/jquery.ajaxchimp.min.js') }}"></script>
 <script src="{{ asset('assets/vendors/jquery-appear/jquery.appear.min.js') }}"></script>

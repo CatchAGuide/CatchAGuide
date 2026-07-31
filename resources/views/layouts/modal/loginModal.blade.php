@@ -167,57 +167,137 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => {
             if (response.status === 419) {
                 window.location.reload();
+                return null;
             }
-            return response.json();
+
+            // The throttle layer can answer with an HTML error page, so parse
+            // defensively instead of letting response.json() reject.
+            return response.text().then(body => {
+                let data = {};
+
+                try {
+                    data = body ? JSON.parse(body) : {};
+                } catch (e) {
+                    data = {};
+                }
+
+                if (response.status === 429 && !data.message) {
+                    data.message = @json(__('auth.throttle_generic'));
+                    data.retry_after = parseInt(response.headers.get('Retry-After'), 10) || 60;
+                }
+
+                return { status: response.status, data: data };
+            });
         })
-        .then(data => {
+        .then(result => {
+            if (!result) {
+                return;
+            }
+
+            const data = result.data;
+
             if (data.success) {
                 // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.querySelector('#loginModal'));
-                modal.hide();
-                
+                if (modal) {
+                    modal.hide();
+                }
+
                 // Refresh the current page
                 window.location.reload();
-            } else {
-                // Reset loading state
-                submitBtn.disabled = false;
-                submitBtn.querySelector('.normal-state').classList.remove('d-none');
-                submitBtn.querySelector('.loading-state').classList.add('d-none');
-                
-                // Display errors in the form
+                return;
+            }
+
+            resetSubmitState();
+
+            if (data.message) {
+                showAlert(data.message);
+            } else if (!data.errors) {
+                showAlert(@json(__('auth.failed')));
+            }
+
+            if (data.errors) {
                 Object.keys(data.errors).forEach(field => {
                     const input = loginForm.querySelector(`[name="${field}"]`);
                     if (input) {
                         input.classList.add('is-invalid');
+
+                        // The lockout text is already shown in the alert above.
+                        if (data.message === data.errors[field][0]) {
+                            return;
+                        }
+
                         const feedback = document.createElement('div');
                         feedback.className = 'invalid-feedback';
+                        feedback.style.display = 'block';
                         feedback.textContent = data.errors[field][0];
-                        input.parentNode.appendChild(feedback);
+                        const wrapper = input.closest('.cag-password-toggle');
+                        if (wrapper && wrapper.parentNode) {
+                            wrapper.parentNode.insertBefore(feedback, wrapper.nextSibling);
+                        } else {
+                            input.parentNode.appendChild(feedback);
+                        }
                     }
                 });
             }
+
+            if (result.status === 429) {
+                startLockoutCountdown(parseInt(data.retry_after, 10) || 60);
+            }
         })
         .catch(error => {
-            // Reset loading state
+            resetSubmitState();
+            showAlert(@json(__('auth.failed')));
+        });
+
+        function resetSubmitState() {
             submitBtn.disabled = false;
             submitBtn.querySelector('.normal-state').classList.remove('d-none');
             submitBtn.querySelector('.loading-state').classList.add('d-none');
-            
-            // Add error message
+        }
+
+        function showAlert(message) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'alert alert-danger mb-3';
-            errorDiv.textContent = 'An error occurred. Please try again.';
+            errorDiv.textContent = message;
             loginForm.insertBefore(errorDiv, loginForm.firstChild);
-        });
+        }
+
+        // Keep the button locked while the server side lockout is still running
+        // so the user is not invited to burn further attempts.
+        function startLockoutCountdown(seconds) {
+            const label = submitBtn.querySelector('.normal-state');
+            const originalLabel = label.textContent;
+            let remaining = seconds;
+
+            submitBtn.disabled = true;
+            label.textContent = originalLabel + ' (' + remaining + ')';
+
+            const timer = setInterval(function () {
+                remaining -= 1;
+
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    label.textContent = originalLabel;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                label.textContent = originalLabel + ' (' + remaining + ')';
+            }, 1000);
+        }
     });
 
     // Clear errors when input changes
     loginForm.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', function() {
             this.classList.remove('is-invalid');
-            const feedback = this.parentNode.querySelector('.invalid-feedback');
-            if (feedback) {
-                feedback.remove();
+            const wrapper = this.closest('.cag-password-toggle');
+            const group = wrapper ? wrapper.parentNode : this.parentNode;
+            if (group) {
+                group.querySelectorAll(':scope > .invalid-feedback').forEach(function (el) {
+                    el.remove();
+                });
             }
         });
     });
