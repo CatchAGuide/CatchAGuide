@@ -20,6 +20,13 @@
 @section('header_sub_title', $countrySubtitle)
 @section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
 
+@php $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class); @endphp
+@if($seoRobots->shouldNoindexVacations(request()))
+@section('meta_robots')
+    <meta name="robots" content="{{ $seoRobots->robotsContentForVacations(request()) }}" />
+@endsection
+@endif
+
 @section('content')
 <div class="container">
     <section class="page-header">

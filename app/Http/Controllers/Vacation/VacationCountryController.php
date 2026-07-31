@@ -64,12 +64,14 @@ class VacationCountryController extends Controller
             return redirect()->route(
                 $pillar === 'trips' ? 'vacations.trips.index' : 'vacations.camps.index',
                 $query,
+                301,
             );
         }
 
         return redirect()->route(
             $pillar === 'trips' ? 'vacations.trips.show' : 'vacations.camps.show',
             array_merge(['slug' => $countrySlug], $query),
+            301,
         );
     }
 

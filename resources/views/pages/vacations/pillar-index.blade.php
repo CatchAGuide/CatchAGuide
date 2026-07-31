@@ -9,6 +9,13 @@
 @section('header_sub_title', $vm->headerSubtitle())
 @section('description', $vm->metaDescription())
 
+@php $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class); @endphp
+@if($seoRobots->shouldNoindexVacations(request()))
+@section('meta_robots')
+    <meta name="robots" content="{{ $seoRobots->robotsContentForVacations(request()) }}" />
+@endsection
+@endif
+
 @section('content')
 <div class="container">
     <section class="page-header">

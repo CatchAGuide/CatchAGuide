@@ -2,48 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Seo\LocalePathMapper;
 use Illuminate\Http\Request;
 
 class LanguageController extends Controller
 {
+    public function __construct(
+        private readonly LocalePathMapper $localePathMapper,
+    ) {}
+
     public function switchLanguage(Request $request)
     {
         $validatedData = $request->validate([
             'language' => 'required|in:' . implode(',', config('app.locales')),
-            'redirect_url' => 'nullable|string'
+            'redirect_url' => 'nullable|string',
         ]);
 
         if (app()->environment('production')) {
-        
-            $english = ENV('EN_APP_URL', 'https://catchaguide.com');
-            $german = ENV('DE_APP_URL', 'https://catchaguide.de');
-    
-            // Use clean redirect URL if provided, otherwise use previous URL path
-            if ($request->has('redirect_url') && !empty($request->redirect_url)) {
-                $targetPath = $request->redirect_url;
+            $english = rtrim((string) config('cag.en_app_url', env('EN_APP_URL', 'https://www.catchaguide.com')), '/');
+            $german = rtrim((string) config('cag.de_app_url', env('DE_APP_URL', 'https://www.catchaguide.de')), '/');
+
+            if ($request->filled('redirect_url')) {
+                $targetPath = (string) $request->input('redirect_url');
             } else {
                 $previousUrl = url()->previous();
                 $previousUrlComponents = parse_url($previousUrl);
-                $targetPath = isset($previousUrlComponents['path']) ? $previousUrlComponents['path'] : '';
+                $targetPath = $previousUrlComponents['path'] ?? '';
             }
-            
-            if($validatedData['language'] == 'de'){
-                return redirect($german.$targetPath);
+
+            $targetPath = ltrim(parse_url($targetPath, PHP_URL_PATH) ?: $targetPath, '/');
+            $currentLang = app()->getLocale();
+            $targetLang = $validatedData['language'];
+            $mappedPath = $this->localePathMapper->mapPath($targetPath, $currentLang, $targetLang);
+
+            if ($targetLang === 'de') {
+                return redirect($german . ($mappedPath !== '' ? '/' . $mappedPath : ''));
             }
-            if($validatedData['language'] == 'en'){
-                return redirect($english.$targetPath);
+
+            if ($targetLang === 'en') {
+                return redirect($english . ($mappedPath !== '' ? '/' . $mappedPath : ''));
             }
         }
 
         app()->setLocale($validatedData['language']);
         session()->put('locale', $validatedData['language']);
-        
-        // If redirect_url is provided, redirect to the clean URL
-        if ($request->has('redirect_url') && !empty($request->redirect_url)) {
-            return redirect($request->redirect_url);
+
+        if ($request->filled('redirect_url')) {
+            return redirect($request->input('redirect_url'));
         }
-        
+
         return redirect()->back();
     }
-
 }

@@ -38,9 +38,12 @@
 @section('header_sub_title', '')
 
 <!-- Meta robots for filtered pages -->
-@if(request()->has('target_fish') || request()->has('methods') || request()->has('water') || request()->has('duration_types') || request()->has('num_persons') || request()->has('price_min') || request()->has('price_max'))
+@php
+    $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class);
+@endphp
+@if($seoRobots->shouldNoindexGuidings(request()))
     @section('meta_robots')
-    <meta name="robots" content="NOINDEX, NOFOLLOW" />
+    <meta name="robots" content="{{ $seoRobots->robotsContentForGuidings(request()) }}" />
     @endsection
 @endif
 
