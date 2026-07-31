@@ -14,11 +14,18 @@
     })(window,document,'script','dataLayer','GTM-K6VGF9NQ');</script>
     <!-- End Google Tag Manager -->
 
-    <link rel="canonical" href="{{ request()->url() }}" />
+    @hasSection('canonical')
+        @yield('canonical')
+    @else
+        <link rel="canonical" href="{{ request()->url() }}" />
+    @endif
     @include('components.seo.hreflang')
     <meta name="keywords" content="online catch guide" >
-    <meta name="robots" content="INDEX,FOLLOW" >
-    @yield('meta_robots')
+    @hasSection('meta_robots')
+        @yield('meta_robots')
+    @else
+        <meta name="robots" content="INDEX,FOLLOW" >
+    @endif
     <link rel="alternate" type="application/json" href="{{ url('/api/catalog/trips') }}" />
 
     @php

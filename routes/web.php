@@ -320,8 +320,8 @@ Route::name('additional.')->group(function () {
     Route::view('/for-agents', 'pages.additional.for-agents')->name('for_agents');
 });
 
+Route::redirect('destinationen', '/destination', 301)->name('destination_de');
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
-Route::get('destinationen', [DestinationCountryController::class, 'index'])->name('destination_de')->middleware('ddos:search');
 Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
 
 Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
@@ -359,25 +359,23 @@ Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showRese
 Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
 Route::get('robots.txt', function () {
-    $host = request()->getHost();
-
-    // Normalize host so both with and without "www." are handled correctly
-    $normalizedHost = str_replace('www.', '', $host);
-
-    if ($normalizedHost === 'catchaguide.com') {
-        // Point Google and other crawlers to the main EN sitemap
-        $content = "User-agent: *\n";
-        $content .= "Disallow: /api/catalog/\n";
-        $content .= "Sitemap: https://www.catchaguide.com/sitemap.xml\n";
-    } else {
-        // Default to the DE domain sitemap
-        $content = "User-agent: *\n";
-        $content .= "Disallow: /api/catalog/\n";
-        $content .= "Sitemap: https://www.catchaguide.de/sitemap.xml\n";
-    }
+    $content = "User-agent: *\n";
+    $content .= "Allow: /\n\n";
+    $content .= "Disallow: /admin/\n";
+    $content .= "Disallow: /profile/\n";
+    $content .= "Disallow: /login\n";
+    $content .= "Disallow: /register\n";
+    $content .= "Disallow: /password/\n";
+    $content .= "Disallow: /api/catalog/\n\n";
+    $content .= "Allow: /guidings\n";
+    $content .= "Allow: /vacations\n";
+    $content .= "Allow: /angelmagazin/\n";
+    $content .= "Allow: /fishing-magazine/\n\n";
+    $content .= "Sitemap: https://www.catchaguide.com/sitemap.xml\n";
+    $content .= "Sitemap: https://www.catchaguide.de/sitemap.xml\n";
 
     return response($content, 200)
-        ->header('Content-Type', 'text/plain');
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
 });
 
 Route::post('/change-password', [PasswordController::class, 'changePassword'])

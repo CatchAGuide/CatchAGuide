@@ -79,10 +79,13 @@
     @endif
 @endsection
 
-@section('share_tags')
+@section('canonical')
     @if(!$isDraft && !empty($canonicalUrl))
         <link rel="canonical" href="{{ $canonicalUrl }}">
     @endif
+@endsection
+
+@section('share_tags')
 @endsection
 
 @section('content')

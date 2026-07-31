@@ -11,10 +11,13 @@
     @endif
 @endsection
 
-@section('share_tags')
+@section('canonical')
     @if(!$isDraft && !empty($camp['slug']))
         <link rel="canonical" href="{{ route('vacations.camps.show', $camp['slug']) }}">
     @endif
+@endsection
+
+@section('share_tags')
 @endsection
 
 @section('content')

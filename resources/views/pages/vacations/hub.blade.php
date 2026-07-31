@@ -10,7 +10,12 @@
 
 @section('description', __('vacations.hub_header_subtitle'))
 
-
+@php $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class); @endphp
+@if($seoRobots->shouldNoindexVacations(request()))
+@section('meta_robots')
+    <meta name="robots" content="{{ $seoRobots->robotsContentForVacations(request()) }}" />
+@endsection
+@endif
 
 @section('content')
 
