@@ -24,7 +24,7 @@
         </div>
     </div>
     <div class="col-12 my-2" wire:ignore>
-        <x-recaptcha />
+        <x-recaptcha id="search-request-recaptcha" />
         @error('recaptcha')
             <div class="text-danger small mt-1">{{ $message }}</div>
         @enderror
@@ -36,6 +36,6 @@
     <button
         type="submit"
         class="btn btn-outline-theme"
-        onclick="if (typeof grecaptcha !== 'undefined' && typeof Livewire !== 'undefined') { try { @this.set('recaptcha', grecaptcha.getResponse()); } catch (e) {} }"
+        onclick="if (typeof RecaptchaWidget !== 'undefined' && typeof Livewire !== 'undefined') { try { @this.set('recaptcha', new RecaptchaWidget('#search-request-recaptcha').getResponse()); } catch (e) {} }"
     >@lang('request.submit')</button>
 </div>

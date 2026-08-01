@@ -285,7 +285,7 @@
 
                     <!-- reCAPTCHA (production) -->
                     <div class="mobile-order-9 mb-3">
-                        <x-recaptcha />
+                        <x-recaptcha id="checkout-recaptcha" />
                     </div>
 
                     <!-- Submit Button -->
