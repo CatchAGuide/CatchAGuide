@@ -294,10 +294,12 @@ function checkoutApp() {
             this.loading = true;
             this.alerts.error = '';
 
+            const captcha = typeof RecaptchaWidget !== 'undefined'
+                ? new RecaptchaWidget('#checkout-recaptcha')
+                : null;
+
             try {
-                const recaptchaToken = (typeof grecaptcha !== 'undefined' && grecaptcha.getResponse)
-                    ? grecaptcha.getResponse()
-                    : '';
+                const recaptchaToken = captcha ? captcha.getResponse() : '';
 
                 const response = await axios.post('/api/checkout/submit-booking', {
                     guiding_id: this.guidingId,
@@ -348,10 +350,11 @@ function checkoutApp() {
                     this.showError('{{ __('checkout.unexpected_error') }}');
                 }
 
-                // A rejected request never reached validation, so the captcha token is still
-                // unused. Resetting it here would force the visitor to solve it again.
-                if (status === 422 && typeof grecaptcha !== 'undefined' && grecaptcha.reset) {
-                    try { grecaptcha.reset(); } catch (e) {}
+                // Only a request that reached validation consumed the token. After a rejection
+                // (e.g. rate limiting) the token is still unused, so keep it and spare the
+                // visitor another challenge.
+                if (status === 422) {
+                    captcha?.reset();
                 }
             } finally {
                 this.loading = false;
