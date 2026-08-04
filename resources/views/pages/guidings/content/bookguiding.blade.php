@@ -76,6 +76,11 @@
                     {{ __('booking.contact_form') }}
                     <i class="fas fa-arrow-right ms-2"></i>
                 </a>
+                @include('partials.product-report.cta', [
+                    'reportSourceType' => 'guiding',
+                    'reportSourceId' => $guiding->id,
+                    'reportedUrl' => url()->current(),
+                ])
             </div>
         </div>
     </div>

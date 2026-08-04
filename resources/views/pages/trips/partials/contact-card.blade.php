@@ -24,6 +24,13 @@
                 {{ $buttonLabel }}
                 <i class="fas fa-arrow-right ms-2"></i>
             </a>
+            @if(!empty($reportSourceType) && !empty($reportSourceId))
+                @include('partials.product-report.cta', [
+                    'reportSourceType' => $reportSourceType,
+                    'reportSourceId' => $reportSourceId,
+                    'reportedUrl' => $reportedUrl ?? url()->current(),
+                ])
+            @endif
         </div>
     </div>
 </div>

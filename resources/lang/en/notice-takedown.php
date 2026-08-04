@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'page_title' => 'Notice & Takedown',
+    'heading' => 'Notice & Takedown Procedure',
+    'intro' => 'If you believe a listing on Catch A Guide is fraudulent, stolen, inaccurate, or infringes your rights, you can submit a report. Our team reviews every report manually and will follow up by email.',
+    'how_it_works_title' => 'How it works',
+    'how_it_works' => [
+        'Submit the form below (or use “Report this listing” on any tour, trip, or camp page).',
+        'We email you a confirmation and notify our team.',
+        'We review the listing and take appropriate action when needed. Listings are not automatically removed.',
+        'We aim to respond within a few business days.',
+    ],
+    'form_title' => 'Submit a report',
+    'report_listing' => 'Report this listing',
+    'modal_title' => 'Report this listing',
+    'your_name' => 'Your name',
+    'email' => 'Email',
+    'phone' => 'Phone',
+    'reason' => 'Reason',
+    'reason_placeholder' => 'Select a reason',
+    'description' => 'Describe your concern',
+    'description_hint' => 'Please include enough detail for us to investigate (min. 20 characters).',
+    'reported_url' => 'URL of the page you are reporting',
+    'reported_url_hint' => 'Paste the full link to the listing or page.',
+    'submit' => 'Submit report',
+    'success' => 'Thank you. Your report has been submitted. We have emailed you a confirmation and our team will review it.',
+    'error' => 'Something went wrong. Please try again.',
+    'reasons' => [
+        'fraud' => 'Fraud or scam',
+        'stolen_listing' => 'Stolen or unauthorized listing',
+        'inaccurate' => 'Inaccurate or misleading content',
+        'copyright' => 'Copyright or intellectual property',
+        'other' => 'Other concern',
+    ],
+];
