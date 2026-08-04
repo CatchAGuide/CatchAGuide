@@ -102,6 +102,9 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
                 </li>
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.product-reports.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.product-reports.index') }}"><i class="side-menu__icon fe fe-flag"></i><span class="side-menu__label">Product reports</span></a>
+                </li>
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.newsletter-subscribers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Newsletter subscribers</span></a>
                 </li>
                 <li class="slide">

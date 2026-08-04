@@ -89,7 +89,9 @@
                     Soweit die Inhalte auf dieser Seite nicht vom Dienstanbieter erstellt wurden, werden die
                     Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet.
                     Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen
-                    entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden derartige Inhalte umgehend
+                    entsprechenden Hinweis über unser
+                    <a href="{{ route('law.notice-and-takedown') }}">Hinweis- und Entfernungsverfahren</a>.
+                    Bei Bekanntwerden von Rechtsverletzungen werden derartige Inhalte umgehend
                     entfernt.
                 </p>
                 @elseif(app()->getLocale() == 'en')
@@ -138,7 +140,9 @@
                 <h5>Copyright</h5>
                 <p>
                     The content and works created by the service provider on these pages are subject to German copyright law. The reproduction, adaptation, distribution, and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator. Downloads and copies of this page are only permitted for private, non-commercial use. <br>
-                    Insofar as the content on this page was not created by the service provider, the copyrights of third parties are respected. In particular, third-party content is marked as such. If you nevertheless become aware of a copyright infringement, please let us know. Upon becoming aware of legal violations, we will remove such content immediately.
+                    Insofar as the content on this page was not created by the service provider, the copyrights of third parties are respected. In particular, third-party content is marked as such. If you nevertheless become aware of a copyright infringement, please let us know via our
+                    <a href="{{ route('law.notice-and-takedown') }}">Notice &amp; Takedown Procedure</a>.
+                    Upon becoming aware of legal violations, we will remove such content immediately.
                 </p>
                 @endif
 

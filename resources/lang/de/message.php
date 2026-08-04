@@ -52,6 +52,8 @@ return [
     'imprint' => 'Impressum',
     'data-protection' => 'Datenschutzerklärung',
     'conditions' => 'AGB',
+    'notice-takedown' => 'Hinweis & Entfernung',
+    'product-reports' => 'Produktmeldungen',
     'term-conditions' => "AGB'S",
     'accept-policy' => 'Datenschutzbestimmungen',
 

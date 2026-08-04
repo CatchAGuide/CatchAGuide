@@ -50,6 +50,8 @@ return [
     'imprint' => 'Imprint',
     'data-protection' => 'Data Protection',
     'conditions' => 'Conditions',
+    'notice-takedown' => 'Notice & Takedown',
+    'product-reports' => 'Product reports',
     'term-conditions' => 'Terms and conditions',
     'accept-policy' => 'Privacy Policy',
     

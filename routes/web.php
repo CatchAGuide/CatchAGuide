@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
+use App\Http\Controllers\Admin\ProductReportsController;
+use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\Admin\NewsletterSubscribersController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\AdminTermsSectionController;
@@ -362,7 +364,12 @@ Route::name('law.')->group(function() {
     Route::get('/data-protection', [TermsController::class, 'dataProtection'])->name('data-protection');
     Route::get('/agb/{section?}', [TermsController::class, 'show'])->whereNumber('section')->name('agb');
     Route::get('/faq', [FAQController::class, 'index'])->name('faq');
+    Route::get('/notice-and-takedown', [ProductReportController::class, 'show'])->name('notice-and-takedown');
 });
+
+Route::post('/product-reports', [ProductReportController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('product-reports.store');
 
 Route::get('login', [LoginAuthController::class, 'index'])->name('login');//->middleware('guest:employees');
 Route::post('login', [LoginAuthController::class, 'login'])
@@ -661,6 +668,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');
         Route::post('contact-requests/reply', [ContactRequestsController::class, 'sendReply'])->name('contact-requests.reply');
         Route::patch('contact-requests/{contactSubmission}/status', [ContactRequestsController::class, 'updateStatus'])->name('contact-requests.update-status');
+
+        Route::get('product-reports', [ProductReportsController::class, 'index'])->name('product-reports.index');
+        Route::get('product-reports/{productReport}/comment', [ProductReportsController::class, 'showComment'])->name('product-reports.comment.show');
+        Route::post('product-reports/{productReport}/comment', [ProductReportsController::class, 'updateComment'])->name('product-reports.comment.update');
+        Route::patch('product-reports/{productReport}/status', [ProductReportsController::class, 'updateStatus'])->name('product-reports.update-status');
 
         Route::get('newsletter-subscribers', [NewsletterSubscribersController::class, 'index'])->name('newsletter-subscribers.index');
         Route::delete('newsletter-subscribers/{newsletter}', [NewsletterSubscribersController::class, 'destroy'])->name('newsletter-subscribers.destroy');
