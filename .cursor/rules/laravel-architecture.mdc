@@ -1,0 +1,48 @@
+---
+description: SOLID/SRP, DRY reuse, Eloquent-first, Laravel coding standards
+alwaysApply: true
+---
+
+# Architecture & Laravel Standards
+
+This is a Laravel 13 / PHP 8.5 / Livewire 3 app. Prefer current Laravel conventions (Form Requests, Actions/Services, thin controllers, Eloquent).
+
+## SOLID / SRP
+
+- One clear responsibility per class/method; extract Services, Actions, or Traits when logic grows.
+- Controllers orchestrate; they do not own business rules, queries, or formatting.
+- Prefer small, composable methods over large multi-purpose blocks.
+
+## Avoid redundancy (DRY)
+
+- Before adding helpers, queries, or UI patterns, search the codebase for existing Services, Traits, scopes, Livewire components, and Blade partials.
+- Reuse and extend what exists; do not duplicate near-identical logic.
+
+## Imports & namespaces
+
+- Always `use` classes at the top of the file.
+- Never call classes via fully qualified inline names like `\App\Models\User::...` when an import works.
+
+```php
+// ❌ BAD
+$user = \App\Models\User::find($id);
+
+// ✅ GOOD
+use App\Models\User;
+$user = User::find($id);
+```
+
+## Eloquent over query builder / DB facade
+
+- Prefer Eloquent models, relationships, and scopes.
+- Use `DB::` / raw SQL only when Eloquent is clearly unsuitable; justify briefly if doing so.
+- Prefer eager loading (`with`) to avoid N+1 queries.
+
+## Formatting
+
+- Use at most one blank line between logical blocks; never stacks of empty lines.
+- Match surrounding file style; keep diffs focused.
+
+## Clarify before guessing
+
+- If requirements, edge cases, or the right reuse target are unclear, ask before implementing.

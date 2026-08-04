@@ -194,6 +194,30 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'guide_type' => 'guide type',
+        'firstname' => 'first name',
+        'lastname' => 'last name',
+        'email' => 'email',
+        'password' => 'password',
+        'terms' => 'terms',
+        'privacy' => 'privacy policy',
+        'lawcard' => 'fishing license confirmation',
+        'lawcard_nature' => 'nature protection confirmation',
+        'lawcard_truthful' => 'truthful information confirmation',
+        'information' => [
+            'address' => 'street',
+            'address_number' => 'house number',
+            'postal' => 'postal code',
+            'city' => 'city',
+            'country' => 'country',
+            'phone' => 'phone number',
+            'birthday' => 'birthday',
+            'company_name' => 'company name',
+            'legal_form' => 'legal form',
+            'taxId' => 'VAT identification number',
+            'tax_number' => 'tax number',
+        ],
+    ],
 
 ];

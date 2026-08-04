@@ -1,0 +1,39 @@
+---
+description: Require tests, lean E2E, and near-complete shipping quality
+alwaysApply: true
+---
+
+# Testing & Shipping Quality
+
+Ship work as close to complete as practical: correct behavior, both locales, no secrets leaked, and tests covering the change.
+
+## Required tests (default)
+
+- Every meaningful change needs automated tests before considering it done.
+- Prefer **PHPUnit** under `tests/Unit` and `tests/Feature` (already configured).
+- Unit-test Services, Traits, pure logic; Feature-test HTTP / Livewire / auth flows.
+- Keep tests focused and small — cover the change and critical edge cases, not the whole app.
+- Run the relevant suite (`php artisan test --filter=...`) and fix failures before finishing.
+
+## E2E (Playwright) — only when needed
+
+- Browser E2E lives under `e2e/` with Playwright.
+- Use E2E sparingly for critical happy paths (e.g. checkout, onboarding submit), not for every CRUD tweak.
+- Prefer PHPUnit Feature tests when they can assert the same behavior cheaper.
+- Do not dump full Playwright traces/logs into chat; report pass/fail + the failing assertion.
+
+```bash
+# Unit / Feature
+php artisan test --filter=GuideStatus
+
+# E2E smoke (when relevant)
+npx playwright test
+```
+
+## Definition of done
+
+- Behavior matches the request (happy path + obvious failures).
+- New user-facing copy has `en` + `de` keys.
+- No hardcoded secrets; billable APIs stay on-demand / bounded.
+- Tests added or updated and passing for the touched behavior.
+- No obvious pagespeed regressions (N+1, huge payloads, unused heavy assets).

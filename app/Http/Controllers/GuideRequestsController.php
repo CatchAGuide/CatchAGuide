@@ -15,13 +15,9 @@ class GuideRequestsController extends Controller
             ->orderBy('submitted_at')
             ->get();
 
+        // Pending is guide_status only; is_guide 0/null both mean normal user.
         $legacyPending = User::query()
-            ->where(function ($q) {
-                $q->where('guide_status', GuideStatus::PENDING)
-                    ->orWhere(function ($legacy) {
-                        $legacy->whereNull('guide_status')->where('is_guide', 0);
-                    });
-            })
+            ->where('guide_status', GuideStatus::PENDING)
             ->whereDoesntHave('guideRequests', fn ($q) => $q->where('decision', 'pending'))
             ->with('information')
             ->get();

@@ -12,7 +12,6 @@ package-lock.json
 /public
 /vendor
 /stubs
-/tests
 .env
 .env.strato
 .phpunit.result.cache
@@ -51,3 +50,7 @@ database/migrations/2024_11_06_191646_add_spatial_index_to_guidings.php
 database/seeders/LocationBoundarySeeder.php
 storage/debugbar/
 .cursor/worktrees.json
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

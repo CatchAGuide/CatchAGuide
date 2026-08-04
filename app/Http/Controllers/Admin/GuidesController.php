@@ -24,29 +24,7 @@ class GuidesController extends Controller
      */
     public function index()
     {
-        $guides = User::where('is_guide', true)->whereHas('information', function ($query) {
-            return $query->where('request_as_guide', false);
-        })->get();
-
-        /*
-        foreach ($guides as $guide) {
-            $merchants[] = trim($guide->merchant_id);
-        }
-
-        $merchants = array_filter($merchants, 'strlen');
-        $merchantList = implode(',', $merchants);
-        $merchantStatuses = (new OppApiService())->retrieveFilteredMerchants($merchantList);
-        $statusArray = array($merchantStatuses);
-
-        foreach ($statusArray[0]->data as $key => $status) {
-            $merchantUid = $statusArray[0]->data[$key]->uid;
-            $merchantLevel = $statusArray[0]->data[$key]->compliance->level;
-            $merchantStatus = $statusArray[0]->data[$key]->compliance->status;
-            $merchantUrl = $statusArray[0]->data[$key]->compliance->overview_url;
-            $result = User::where('merchant_id', $merchantUid)->update(['merchant_status' => $merchantLevel, 'merchant_compliance_status' => $merchantStatus, 'merchant_verification_url' => $merchantUrl]);
-        }
-*/
-        $guides = User::where('is_guide', true)->whereHas('information', function ($query) {
+        $guides = User::whereVerifiedGuide()->whereHas('information', function ($query) {
             return $query->where('request_as_guide', false);
         })->get();
 
@@ -138,9 +116,12 @@ class GuidesController extends Controller
     public function changeGuideStatus(User $guide)
     {
         $verificationService = app(GuideVerificationService::class);
+        $statusService = app(\App\Services\Guide\GuideStatusService::class);
 
-        if ($guide->isVerifiedGuide()) {
-            app(\App\Services\Guide\GuideStatusService::class)->markPending(
+        // Deactivating a guide (verified or still pending) must become a normal user,
+        // not leave them stuck as pending.
+        if ($guide->isVerifiedGuide() || $guide->isPendingGuide()) {
+            $statusService->markAsCustomer(
                 $guide,
                 auth()->id(),
                 'Admin deactivated guide status'

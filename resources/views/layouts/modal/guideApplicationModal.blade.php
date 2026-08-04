@@ -185,7 +185,8 @@
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label small fw-semibold">{{ translate('Country') }}</label>
-                                <input type="text" name="information[country]" class="form-control" value="DE" autocomplete="country">
+                                <input type="text" name="information[country]" class="form-control" value="DE" maxlength="3" placeholder="DE" autocomplete="country">
+                                <small class="form-text text-muted">{{ __('profile.onboarding_country_hint') }}</small>
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label small fw-semibold">{{ translate('Telefonnummer') }} <span class="text-danger">*</span></label>

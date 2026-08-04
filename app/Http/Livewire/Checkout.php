@@ -415,7 +415,7 @@ class Checkout extends Component
             $userId = $user->id;
             
             // Update phone for registered user
-            if (!$user->is_guide) {
+            if ($user->hasInactiveGuideFlag()) {
                 $user->phone = $this->userData['phone'];
                 $user->phone_country_code = $this->userData['countryCode'];
                 $user->save();

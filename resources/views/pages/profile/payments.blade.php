@@ -325,7 +325,7 @@
         </div>
     @endif
 
-    @if(auth()->user()->is_guide)
+    @if(auth()->user()->isVerifiedGuide())
         <form action="{{route('profile.payments.update')}}" method="POST" id="paymentMethodsForm">
             @csrf
             @method('PUT')
@@ -435,7 +435,7 @@
     </div> --}}
 
     <!-- Floating Save Button -->
-    @if(auth()->user()->is_guide)
+    @if(auth()->user()->isVerifiedGuide())
         <button type="button" class="floating-save-btn" id="floatingSaveBtn" onclick="const form = document.getElementById('paymentMethodsForm'); if(form) form.submit();">
             <i class="fas fa-save"></i> Save Changes
         </button>
@@ -511,7 +511,7 @@
         }
 
         // Floating Save Button functionality
-        @if(auth()->user()->is_guide)
+        @if(auth()->user()->isVerifiedGuide())
             let formChanged = false;
             const floatingSaveBtn = document.getElementById('floatingSaveBtn');
             const paymentMethodsForm = document.getElementById('paymentMethodsForm');

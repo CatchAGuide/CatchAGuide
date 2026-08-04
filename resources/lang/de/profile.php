@@ -768,6 +768,7 @@ return [
     'onboarding_email_locked' => 'Die E-Mail kann hier nicht geändert werden. Bitte kontaktiere den Support bei Änderungswünschen.',
     'onboarding_after_submit' => 'Nach dem Absenden kannst Du Dein Guide-Profil und Zahlungsoptionen ausfüllen, während wir Deine Anfrage prüfen (in der Regel innerhalb von 24 Stunden).',
     'onboarding_payment_note' => 'Zahlungsmethoden und Dein öffentliches Guide-Profil richtest Du nach dem Absenden auf der Guide-Profil-Seite ein.',
+    'onboarding_country_hint' => 'Ländercode (ISO), z. B. DE',
     'lawcard_nature_text' => 'Hiermit bestätige ich, dass ich gegen keine Regeln des lokalen Natur- und Tierschutzes verstoße.',
     'lawcard_truthful_text' => 'Hiermit bestätige ich, dass alle angegebenen Daten wahrheitsgemäß und vollständig sind.',
     'please_login_access' => 'Bitte melden Sie sich an, um auf Ihr Profil zuzugreifen',

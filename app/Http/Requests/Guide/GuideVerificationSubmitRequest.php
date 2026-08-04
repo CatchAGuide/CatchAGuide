@@ -63,4 +63,48 @@ class GuideVerificationSubmitRequest extends FormRequest
 
         return $rules;
     }
+
+    public function attributes(): array
+    {
+        return [
+            'guide_type' => __('validation.attributes.guide_type'),
+            'information.address' => __('validation.attributes.information.address'),
+            'information.address_number' => __('validation.attributes.information.address_number'),
+            'information.postal' => __('validation.attributes.information.postal'),
+            'information.city' => __('validation.attributes.information.city'),
+            'information.country' => __('validation.attributes.information.country'),
+            'information.phone' => __('validation.attributes.information.phone'),
+            'information.birthday' => __('validation.attributes.information.birthday'),
+            'information.company_name' => __('validation.attributes.information.company_name'),
+            'information.legal_form' => __('validation.attributes.information.legal_form'),
+            'information.taxId' => __('validation.attributes.information.taxId'),
+            'information.tax_number' => __('validation.attributes.information.tax_number'),
+            'lawcard' => __('validation.attributes.lawcard'),
+            'lawcard_nature' => __('validation.attributes.lawcard_nature'),
+            'lawcard_truthful' => __('validation.attributes.lawcard_truthful'),
+            'firstname' => __('validation.attributes.firstname'),
+            'lastname' => __('validation.attributes.lastname'),
+            'email' => __('validation.attributes.email'),
+            'password' => __('validation.attributes.password'),
+            'terms' => __('validation.attributes.terms'),
+            'privacy' => __('validation.attributes.privacy'),
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $country = $this->input('information.country');
+        if (is_string($country)) {
+            $country = strtoupper(trim($country));
+            // Prefill from older profiles may store full names ("Deutschland") — keep ISO codes only.
+            if (strlen($country) > 3) {
+                $country = null;
+            }
+            $this->merge([
+                'information' => array_merge($this->input('information', []), [
+                    'country' => $country,
+                ]),
+            ]);
+        }
+    }
 }

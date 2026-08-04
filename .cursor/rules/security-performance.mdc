@@ -1,0 +1,34 @@
+---
+description: Protect secrets, control billable APIs, and keep pages fast
+alwaysApply: true
+---
+
+# Security, Cost & Performance
+
+## Secrets & credentials
+
+- Never hardcode API keys, tokens, or secrets in code, views, JS, or commits.
+- Read secrets from `.env` / `config()` only; never expose them to the frontend or logs.
+- Do not dump config, env, or request payloads that may contain credentials.
+
+## Billable / third-party APIs
+
+- Treat Maps, Translate, SMS, email, storage, and similar APIs as cost-sensitive.
+- Avoid unbounded loops, retries, or bulk calls that can spike usage.
+- Prefer caching, batching, and “call only when needed” (on-demand) over eager/always-on requests.
+- If a change could increase paid API volume, call it out and confirm before shipping.
+
+## Image / media uploads
+
+- New image and media uploads must go to object storage (DigitalOcean Spaces / S3), not local `public/` or `storage/app` as the primary store.
+- Use the configured media disk (`config('media_storage.disk')`, default `do_spaces`) via Laravel `Storage::disk(...)`.
+- Do not invent a parallel upload path; reuse existing Spaces/S3 helpers and disk config in `config/filesystems.php` / `config/media_storage.php`.
+- Keep credentials in env (`DO_SPACES_*` / `AWS_*`); never hardcode bucket keys or public write URLs that bypass auth.
+
+## Page speed
+
+- Minimize extra queries, assets, and blocking work on page load.
+- Eager-load relationships; avoid N+1 in lists and Livewire renders.
+- Prefer lazy-loading images/media and loading heavy JS/CSS only where used.
+- Keep Livewire payloads and re-renders small; avoid shipping large unused collections to the view.
+- Do not add heavy libraries or unoptimized images without a clear need.
