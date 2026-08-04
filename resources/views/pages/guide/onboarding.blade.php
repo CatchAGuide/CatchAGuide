@@ -452,7 +452,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('guide-onboarding-form');
-    const steps = Array.from(document.querySelectorAll('.wizard-step'));
+    if (!form) return;
+
+    const steps = Array.from(form.querySelectorAll('.wizard-step'));
     const progressItems = Array.from(document.querySelectorAll('.guide-wizard-progress__item'));
     const hasServerErrors = {{ $errors->any() ? 'true' : 'false' }};
     let current = 0;
@@ -474,12 +476,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function toggleCompanyFields() {
-        const isCompany = document.querySelector('input[name="guide_type"]:checked')?.value === 'company';
-        document.querySelectorAll('.company-only').forEach(el => {
+        // Scope to this form — the page also embeds guideApplicationModal with its own guide_type radios.
+        const isCompany = form.querySelector('input[name="guide_type"]:checked')?.value === 'company';
+        form.querySelectorAll('.company-only').forEach(el => {
             el.style.display = isCompany ? '' : 'none';
             el.querySelectorAll('input,select').forEach(inp => inp.required = !!isCompany);
         });
-        document.querySelectorAll('.private-only').forEach(el => {
+        form.querySelectorAll('.private-only').forEach(el => {
             el.style.display = isCompany ? 'none' : '';
         });
     }
@@ -518,26 +521,24 @@ document.addEventListener('DOMContentLoaded', function () {
         return detailsIndex >= 0 ? detailsIndex : 0;
     }
 
-    document.querySelectorAll('.wizard-next').forEach(btn => {
+    form.querySelectorAll('.wizard-next').forEach(btn => {
         btn.addEventListener('click', () => {
             if (!validateCurrentStep()) return;
             if (current < steps.length - 1) showStep(current + 1);
         });
     });
-    document.querySelectorAll('.wizard-prev').forEach(btn => {
+    form.querySelectorAll('.wizard-prev').forEach(btn => {
         btn.addEventListener('click', () => { if (current > 0) showStep(current - 1); });
     });
-    document.querySelectorAll('input[name="guide_type"]').forEach(r => {
+    form.querySelectorAll('input[name="guide_type"]').forEach(r => {
         r.addEventListener('change', toggleCompanyFields);
     });
 
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            if (!validateAllSteps()) {
-                e.preventDefault();
-            }
-        });
-    }
+    form.addEventListener('submit', function (e) {
+        if (!validateAllSteps()) {
+            e.preventDefault();
+        }
+    });
 
     showStep(initialStepIndex());
 });
