@@ -32,7 +32,7 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <input type="text" class="form-control" name="phone" placeholder="{{ __('notice-takedown.phone') }}" maxlength="40">
+                            <input type="text" class="form-control" name="phone" placeholder="{{ __('notice-takedown.phone') }}" required maxlength="40">
                         </div>
 
                         <div class="form-group mb-3">

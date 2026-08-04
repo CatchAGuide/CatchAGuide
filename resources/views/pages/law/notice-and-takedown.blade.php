@@ -62,7 +62,7 @@
                         <div class="row">
                             <div class="col-xl-12">
                                 <div class="comment-form__input-box">
-                                    <input type="text" name="phone" value="{{ old('phone') }}" placeholder="{{ __('notice-takedown.phone') }}" maxlength="40">
+                                    <input type="text" name="phone" value="{{ old('phone') }}" placeholder="{{ __('notice-takedown.phone') }}" required maxlength="40">
                                 </div>
                             </div>
                         </div>

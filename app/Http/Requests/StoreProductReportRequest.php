@@ -42,7 +42,7 @@ class StoreProductReportRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:40'],
+            'phone' => ['required', 'string', 'max:40'],
             'reason' => ['required', 'string', Rule::in(ProductReport::reasonKeys())],
             'description' => ['required', 'string', 'min:20', 'max:5000'],
             'reported_url' => ['required', 'string', 'max:2048'],

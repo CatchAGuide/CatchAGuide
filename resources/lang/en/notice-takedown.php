@@ -16,7 +16,7 @@ return [
     'modal_title' => 'Report this listing',
     'your_name' => 'Your name',
     'email' => 'Email',
-    'phone' => 'Phone (optional)',
+    'phone' => 'Phone',
     'reason' => 'Reason',
     'reason_placeholder' => 'Select a reason',
     'description' => 'Describe your concern',

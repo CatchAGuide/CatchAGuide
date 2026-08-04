@@ -16,7 +16,7 @@ return [
     'modal_title' => 'Dieses Angebot melden',
     'your_name' => 'Ihr Name',
     'email' => 'E-Mail',
-    'phone' => 'Telefon (optional)',
+    'phone' => 'Telefon',
     'reason' => 'Grund',
     'reason_placeholder' => 'Grund auswählen',
     'description' => 'Beschreiben Sie Ihr Anliegen',
