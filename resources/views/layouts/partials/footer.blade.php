@@ -59,6 +59,7 @@
                                 <li><a href="{{route('law.imprint')}}">@lang('message.imprint')</a></li>
                                 <li><a href="{{route('law.data-protection')}}">@lang('message.data-protection')</a></li>
                                 <li><a href="{{route('law.agb')}}">@lang('message.conditions')</a></li>
+                                <li><a href="{{route('law.notice-and-takedown')}}">@lang('message.notice-takedown')</a></li>
                                 <li><a href="{{route('law.faq')}}">FAQ</a></li>
                             </ul>
                         </div>

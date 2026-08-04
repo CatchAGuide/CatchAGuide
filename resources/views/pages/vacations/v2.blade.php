@@ -171,6 +171,9 @@
                             'message' => __('vacations.general_contact_message'),
                             'buttonLabel' => __('vacations.general_contact_form'),
                             'showTripAnalytics' => false,
+                            'reportSourceType' => 'camp',
+                            'reportSourceId' => $camp['id'] ?? null,
+                            'reportedUrl' => url()->current(),
                         ])
                     </div>
                     @endunless
@@ -189,6 +192,9 @@
                                     'message' => __('vacations.general_contact_message'),
                                     'buttonLabel' => __('vacations.general_contact_form'),
                                     'showTripAnalytics' => false,
+                                    'reportSourceType' => 'camp',
+                                    'reportSourceId' => $camp['id'] ?? null,
+                                    'reportedUrl' => url()->current(),
                                 ])
                             </div>
                             @endunless
@@ -1403,6 +1409,11 @@ function initDescriptionToggles() {
 }
 
 </script>
+@include('partials.product-report.modal', [
+    'reportSourceType' => 'camp',
+    'reportSourceId' => $camp['id'] ?? null,
+    'reportedUrl' => url()->current(),
+])
 @endsection
 
 @push('scripts')

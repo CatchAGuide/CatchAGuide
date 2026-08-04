@@ -775,7 +775,11 @@
 
                 @unless($isDraft)
                     <div class="d-lg-none">
-                        @include('pages.trips.partials.contact-card')
+                        @include('pages.trips.partials.contact-card', [
+                            'reportSourceType' => 'trip',
+                            'reportSourceId' => $tripView['id'] ?? null,
+                            'reportedUrl' => url()->current(),
+                        ])
                     </div>
                 @endunless
 
@@ -868,7 +872,11 @@
                     </div>
 
                     <div class="d-none d-lg-block">
-                        @include('pages.trips.partials.contact-card')
+                        @include('pages.trips.partials.contact-card', [
+                            'reportSourceType' => 'trip',
+                            'reportSourceId' => $tripView['id'] ?? null,
+                            'reportedUrl' => url()->current(),
+                        ])
                     </div>
                 @endunless
 
@@ -1628,5 +1636,10 @@
             })();
         });
     </script>
+    @include('partials.product-report.modal', [
+        'reportSourceType' => 'trip',
+        'reportSourceId' => $tripView['id'] ?? null,
+        'reportedUrl' => url()->current(),
+    ])
 @endsection
 

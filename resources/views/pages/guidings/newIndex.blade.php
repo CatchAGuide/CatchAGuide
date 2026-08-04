@@ -1148,6 +1148,11 @@
                         @lang('guidings.Contact_Form')
                         <i class="fas fa-arrow-right ms-2"></i>
                     </a>
+                    @include('partials.product-report.cta', [
+                        'reportSourceType' => 'guiding',
+                        'reportSourceId' => $guiding->id,
+                        'reportedUrl' => url()->current(),
+                    ])
                 </div>
             </div>
         </div>
@@ -2676,5 +2681,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+@include('partials.product-report.modal', [
+    'reportSourceType' => 'guiding',
+    'reportSourceId' => $guiding->id,
+    'reportedUrl' => url()->current(),
+])
 @endsection
 

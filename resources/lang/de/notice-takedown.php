@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'page_title' => 'Hinweis & Entfernung',
+    'heading' => 'Hinweis- und Entfernungsverfahren',
+    'intro' => 'Wenn Sie der Meinung sind, dass ein Angebot auf Catch A Guide betrügerisch, gestohlen, unzutreffend ist oder Ihre Rechte verletzt, können Sie eine Meldung einreichen. Unser Team prüft jede Meldung manuell und meldet sich per E-Mail.',
+    'how_it_works_title' => 'So funktioniert es',
+    'how_it_works' => [
+        'Füllen Sie das Formular unten aus (oder nutzen Sie „Dieses Angebot melden“ auf einer Tour-, Trip- oder Camp-Seite).',
+        'Sie erhalten eine Bestätigung per E-Mail und unser Team wird benachrichtigt.',
+        'Wir prüfen das Angebot und ergreifen bei Bedarf Maßnahmen. Angebote werden nicht automatisch entfernt.',
+        'Wir bemühen uns, innerhalb weniger Werktage zu antworten.',
+    ],
+    'form_title' => 'Meldung einreichen',
+    'report_listing' => 'Dieses Angebot melden',
+    'modal_title' => 'Dieses Angebot melden',
+    'your_name' => 'Ihr Name',
+    'email' => 'E-Mail',
+    'phone' => 'Telefon',
+    'reason' => 'Grund',
+    'reason_placeholder' => 'Grund auswählen',
+    'description' => 'Beschreiben Sie Ihr Anliegen',
+    'description_hint' => 'Bitte geben Sie genügend Details an, damit wir prüfen können (mind. 20 Zeichen).',
+    'reported_url' => 'URL der Seite, die Sie melden',
+    'reported_url_hint' => 'Fügen Sie den vollständigen Link zum Angebot oder zur Seite ein.',
+    'submit' => 'Meldung absenden',
+    'success' => 'Vielen Dank. Ihre Meldung wurde übermittelt. Wir haben Ihnen eine Bestätigung per E-Mail gesendet und unser Team wird sie prüfen.',
+    'error' => 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+    'reasons' => [
+        'fraud' => 'Betrug oder Betrugsversuch',
+        'stolen_listing' => 'Gestohlenes oder unbefugtes Angebot',
+        'inaccurate' => 'Unzutreffende oder irreführende Inhalte',
+        'copyright' => 'Urheberrecht oder geistiges Eigentum',
+        'other' => 'Sonstiges Anliegen',
+    ],
+];
