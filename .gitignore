@@ -1,15 +1,65 @@
 /node_modules
 package-lock.json
-/public/assets/2024
-/public/assets/2024_backup
-/public/assets/images
+
+# -----------------------------------------------------------------------------
+# public/ - track small app static assets; skip bulky media & generated junk.
+# User/content images live on the storage bucket now.
+# -----------------------------------------------------------------------------
+
+# Vite / Mix hot file & storage symlink target
 /public/hot
 /public/storage
+
+# Large user/content image trees (bucket-backed)
 /public/images
 /public/images2
+/public/guidings-images
+/public/vacations-images
+/public/accommodations
+/public/blog
+/public/newblog
+/public/camps
+/public/category
+/public/files
+/public/rental-boats
+/public/special-offers
+/public/trips
+/public/uploads
+/public/cache
+
+# Bulky dated / content galleries under assets (keep css, js, fonts, images, admin, vendors)
+/public/assets/2024
+/public/assets/2024_backup
+/public/assets/guides
+/public/assets/guidings
+
+# Generated sitemaps & misc exports
 /public/sitemap_index.xml
+/public/sitemaps
+/public/NewENSitemap.xml
+/public/de
+/public/Productpage_Vacations.csv
+
+# Nested tooling / junk accidentally living under public
+/public/.git
+/public/.ddev
+/public/.well-known
+/public/test
+/public/deploy
+/public/devtools
+/public/bootstrap
+/public/php_errorlog
+/public/**/*.log
+/public/phpunit.xml
+/public/.styleci.yml
+
+# OS / editor junk under public
+/public/**/Thumbs.db
+
+# Local-only backups (e.g. nested public/.git moved aside)
+/_local_backup/
+
 /storage/*.key
-/public
 /vendor
 /stubs
 .env
@@ -28,7 +78,9 @@ composer.lock
 /bootstrap/cache/*.php
 
 /storage/app/public/*
+# Ignore stray .htaccess copies, but keep the Laravel public entrypoint
 .htaccess
+!public/.htaccess
 .well-known/*
 4690525.sql
 DB.sql
