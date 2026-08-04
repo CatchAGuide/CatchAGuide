@@ -17,7 +17,7 @@
                                 Buchungen</a></li>
                         <li><a href="{{ route('profile.favoriteguides') }}"><i
                                     class="fa fa-chevron-right"></i> Lieblingsguides</a></li>
-                        @if(!Auth::user()->is_guide)
+                        @if(Auth::user()->canApplyAsGuide())
                             <li><a href="{{route('profile.becomeguide')}}"><i class="fa fa-chevron-right"></i>
                                     Als Guide verifizieren</a></li>
                         @endif
@@ -39,7 +39,7 @@
                     <ul class="list-unstyled">
                         <li><a href="{{ route('profile.settings') }}"><i class="fa fa-chevron-right"></i>
                                 Konto Einstellungen</a></li>
-                        @if(Auth::user()->is_guide)
+                        @if(Auth::user()->canAccessGuideDashboard())
                             <li><a href="{{ route('profile.myguidings') }}"><i class="fa fa-chevron-right"></i>
                                     Meine Guidings</a></li>
                             <li><a href="{{ route('profile.guidebookings') }}"><i class="fa fa-chevron-right"></i>

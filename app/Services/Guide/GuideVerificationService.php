@@ -110,7 +110,7 @@ class GuideVerificationService
         $isFirstApproval = $this->isFirstGuideApproval($user);
 
         // Admin customers checkmark / force-approve: allow verifying regular
-        // customers (is_guide + guide_status null) and rejected applicants.
+        // customers (is_guide 0 or null + guide_status null) and rejected applicants.
         $user = $this->guideStatusService->markVerified($user, $reviewerId, 'Admin activated guide status');
 
         if ($user->information) {

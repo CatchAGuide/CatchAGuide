@@ -20,7 +20,7 @@ class GuideAnalyticsController extends Controller
         // Function 1: Active guides with NO guidings that are active (1) or draft (2)
         // These are guides who have zero active/draft tours - either no guidings at all,
         // or only deactivated (status 0) guidings
-        $guidesWithoutActiveOrDraftGuidings = User::where('is_guide', true)
+        $guidesWithoutActiveOrDraftGuidings = User::whereVerifiedGuide()
             ->whereDoesntHave('guidings', function ($query) {
                 $query->whereIn('status', [1, 2]);
             })
@@ -32,7 +32,7 @@ class GuideAnalyticsController extends Controller
         $guidesWithoutActiveOrDraftCount = $guidesWithoutActiveOrDraftGuidings->count();
 
         // Function 2: Guidings per guide with deactivation analysis
-        $guidesWithGuidingsStats = User::where('is_guide', true)
+        $guidesWithGuidingsStats = User::whereVerifiedGuide()
             ->whereHas('guidings')
             ->withCount([
                 'guidings',
@@ -72,8 +72,8 @@ class GuideAnalyticsController extends Controller
             });
 
         // Summary stats for KPI cards
-        $totalGuides = User::where('is_guide', true)->count();
-        $guidesWithActiveTours = User::where('is_guide', true)
+        $totalGuides = User::whereVerifiedGuide()->count();
+        $guidesWithActiveTours = User::whereVerifiedGuide()
             ->whereHas('guidings', fn ($q) => $q->where('status', 1))
             ->count();
         $totalDeactivatedGuidings = Guiding::where('status', 0)->count();

@@ -196,23 +196,32 @@
                         <p class="text-muted mb-0">{{ translate('Your current address for verification') }}</p>
                     </div>
                 </div>
+                @php
+                    $selectedGuideType = old('guide_type', 'private');
+                    $isCompanySelected = $selectedGuideType === 'company';
+                    $countryPrefill = old('information.country', $user?->information?->country ?? 'DE');
+                    if (is_string($countryPrefill) && strlen($countryPrefill) > 3) {
+                        $countryPrefill = 'DE';
+                    }
+                @endphp
                 <div class="section-content">
                     <div class="row g-4">
-                        <div class="col-md-6 company-only" style="display:none">
+                        <div class="col-md-6 company-only" @if(!$isCompanySelected) style="display:none" @endif>
                             <label class="form-label">{{ translate('Company Name') }} <span class="required">*</span></label>
                             <input type="text" name="information[company_name]" class="form-control"
+                                @if($isCompanySelected) required @endif
                                 value="{{ old('information.company_name', $user?->information?->company_name) }}">
                         </div>
-                        <div class="col-md-6 company-only" style="display:none">
+                        <div class="col-md-6 company-only" @if(!$isCompanySelected) style="display:none" @endif>
                             <label class="form-label">{{ translate('Legal Form') }} <span class="required">*</span></label>
-                            <select name="information[legal_form]" class="form-select">
+                            <select name="information[legal_form]" class="form-select" @if($isCompanySelected) required @endif>
                                 <option value="">—</option>
                                 @foreach(['GmbH','UG','GbR','Einzelunternehmen','e.K.','AG','sonstige'] as $form)
                                     <option value="{{ $form }}" @selected(old('information.legal_form', $user?->information?->legal_form) === $form)>{{ $form }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6 private-only">
+                        <div class="col-md-6 private-only" @if($isCompanySelected) style="display:none" @endif>
                             <label class="form-label">{{ translate('Geburtstag') }}</label>
                             <input type="date" max="{{ now()->format('Y-m-d') }}" name="information[birthday]" class="form-control"
                                 value="{{ old('information.birthday', optional($user?->information?->birthday)->format('Y-m-d')) }}">
@@ -240,7 +249,9 @@
                         <div class="col-md-6">
                             <label class="form-label">{{ translate('Country') }}</label>
                             <input type="text" name="information[country]" class="form-control"
-                                value="{{ old('information.country', $user?->information?->country ?? 'DE') }}">
+                                maxlength="3" placeholder="DE" autocomplete="country"
+                                value="{{ $countryPrefill }}">
+                            <small class="form-text text-muted">{{ __('profile.onboarding_country_hint') }}</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">{{ translate('Telefonnummer') }} <span class="required">*</span></label>
@@ -440,8 +451,10 @@
 @parent
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('guide-onboarding-form');
     const steps = Array.from(document.querySelectorAll('.wizard-step'));
     const progressItems = Array.from(document.querySelectorAll('.guide-wizard-progress__item'));
+    const hasServerErrors = {{ $errors->any() ? 'true' : 'false' }};
     let current = 0;
 
     function updateProgress() {
@@ -471,17 +484,38 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function validateCurrentStep() {
-        const step = steps[current];
+    function validateStep(step) {
         const fields = step.querySelectorAll('input, select, textarea');
         for (const field of fields) {
-            if (field.offsetParent === null || field.disabled || field.type === 'hidden') continue;
+            const companyOnly = field.closest('.company-only');
+            const privateOnly = field.closest('.private-only');
+            if (companyOnly && companyOnly.style.display === 'none') continue;
+            if (privateOnly && privateOnly.style.display === 'none') continue;
+            if (field.disabled || field.type === 'hidden') continue;
             if (!field.checkValidity()) {
+                showStep(steps.indexOf(step));
                 field.reportValidity();
                 return false;
             }
         }
         return true;
+    }
+
+    function validateCurrentStep() {
+        return validateStep(steps[current]);
+    }
+
+    function validateAllSteps() {
+        for (const step of steps) {
+            if (!validateStep(step)) return false;
+        }
+        return true;
+    }
+
+    function initialStepIndex() {
+        if (!hasServerErrors) return 0;
+        const detailsIndex = steps.findIndex(s => s.dataset.stepId === 'details');
+        return detailsIndex >= 0 ? detailsIndex : 0;
     }
 
     document.querySelectorAll('.wizard-next').forEach(btn => {
@@ -497,7 +531,15 @@ document.addEventListener('DOMContentLoaded', function () {
         r.addEventListener('change', toggleCompanyFields);
     });
 
-    showStep(0);
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (!validateAllSteps()) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    showStep(initialStepIndex());
 });
 </script>
 @endsection

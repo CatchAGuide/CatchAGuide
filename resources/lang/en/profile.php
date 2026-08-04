@@ -768,6 +768,7 @@ return [
     'onboarding_email_locked' => 'Email cannot be changed here. Contact support if you need to update it.',
     'onboarding_after_submit' => 'After submission you can complete your guide profile and payment options while we review your application (usually within 24 hours).',
     'onboarding_payment_note' => 'Payment methods and your public guide bio are set up on the guide profile page after you submit this application.',
+    'onboarding_country_hint' => 'ISO country code, e.g. DE',
     'lawcard_nature_text' => 'I confirm that I do not violate any local nature or animal protection laws.',
     'lawcard_truthful_text' => 'I confirm that all information provided is truthful and complete.',
     'please_login_access' => 'Please log in to access your profile',

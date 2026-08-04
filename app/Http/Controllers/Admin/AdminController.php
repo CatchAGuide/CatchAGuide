@@ -94,21 +94,22 @@ class AdminController extends Controller
         $lastYearBookingsTotal = $lastYearBookingsAccepted + $lastYearBookingsCancelled + $lastYearBookingsPending;
         
         // Customer statistics
-        $registeredUsers = User::where('is_guide', false)->orWhereNull('is_guide')->count();
+        // is_guide 0 and null both count as non-guide / customer
+        $registeredUsers = User::whereInactiveGuideFlag()->count();
         $guestUsers = UserGuest::count();
         $totalCustomers = $registeredUsers + $guestUsers;
         
         // Guide and Tour statistics
-        $totalGuides = User::where('is_guide', true)->count();
+        $totalGuides = User::whereVerifiedGuide()->count();
         $activeTours = Guiding::where('status', 1)->count();
-        $guidesWithActiveTours = User::where('is_guide', true)
+        $guidesWithActiveTours = User::whereVerifiedGuide()
             ->whereHas('guidings', function($query) {
                 $query->where('status', 1);
             })
             ->count();
 
         // Guides without active or draft guidings (no guidings yet, or only deactivated)
-        $guidesWithoutActiveOrDraftGuidings = User::where('is_guide', true)
+        $guidesWithoutActiveOrDraftGuidings = User::whereVerifiedGuide()
             ->whereDoesntHave('guidings', function($query) {
                 $query->whereIn('status', [1, 2]);
             })
@@ -375,12 +376,11 @@ class AdminController extends Controller
 
     private function getCustomerRetentionData(array $testUserIds, array $testUserEmails)
     {
-        // Calculate total customers (excluding guides)
-        $totalCustomers = User::where('is_guide', false)->orWhereNull('is_guide')->count();
+        // Calculate total customers (excluding guides) — is_guide 0 and null both count
+        $totalCustomers = User::whereInactiveGuideFlag()->count();
         
         // Calculate repeat customers using a subquery
-        $repeatCustomers = User::where('is_guide', false)
-            ->orWhereNull('is_guide')
+        $repeatCustomers = User::whereInactiveGuideFlag()
             ->whereExists(function ($query) use ($testUserIds, $testUserEmails) {
                 $query->selectRaw('1')
                       ->from('bookings')

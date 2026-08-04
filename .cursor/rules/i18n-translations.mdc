@@ -1,0 +1,24 @@
+---
+description: Always use translation files; never hardcode user-facing text
+alwaysApply: true
+---
+
+# Internationalization
+
+Locales live under `resources/lang/{en,de}/`. User-facing copy must go through translations.
+
+## Rules
+
+- Do not hardcode UI strings in Blade, Livewire, controllers, validation messages, flashes, or emails.
+- Use `__('file.key')`, `@lang`, or `trans()` with the existing file structure (e.g. `profile.php`, `validation.php`).
+- When adding copy, update **both** `en` and `de` for the same key.
+- Prefer extending an existing lang file over creating a new one unless the domain is clearly new.
+- Validation messages belong in lang files / Form Request `messages()` that reference translation keys.
+
+```blade
+{{-- ❌ BAD --}}
+<button>Submit application</button>
+
+{{-- ✅ GOOD --}}
+<button>{{ __('profile.submit_application') }}</button>
+```

@@ -316,7 +316,7 @@ class ModernCheckoutApiController extends Controller
     {
         if ($currentUser) {
             // Update phone for registered user
-            if (!$currentUser->is_guide) {
+            if ($currentUser->hasInactiveGuideFlag()) {
                 $currentUser->phone = $formData['phone'];
                 $currentUser->phone_country_code = $formData['country_code'];
                 $currentUser->save();

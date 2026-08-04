@@ -31,9 +31,9 @@
                             <a href="https://www.instagram.com/catchaguide_official/"><i class="fab fa-instagram"></i></a>
                         </div>
                         <div class="main-header__top-right-btn-box">
-                            @if(Auth::check() && !Auth::user()->is_guide)
+                            @if(Auth::check() && Auth::user()->canApplyAsGuide())
                                 <a href="{{route('profile.becomeguide')}}" class="thm-btn main-header__top-right-btn">@lang('message.TagLine')</a>
-                            @elseif(Auth::check() && Auth::user()->is_guide)
+                            @elseif(Auth::check() && Auth::user()->canAccessGuideDashboard())
                                 <a href="{{route('profile.index')}}" class="thm-btn main-header__top-right-btn">@lang('message.myaccount')</a>
                             @else
                                 <a href="{{route('login')}}" class="thm-btn main-header__top-right-btn">@lang('message.TagLine')</a>
@@ -107,12 +107,12 @@
                                                     <li><a href="{{route('profile.favoriteguides')}}">@lang('message.favorite-guidings') ({{ auth()->user()->wishlist_items()->count() }})</a></li>
                                                     {{--<li><a href="{{route('profile.payments')}}">Zahlungsdetails</a></li>--}}
 
-                                                    @if(auth()->user()->is_guide)
+                                                    @if(auth()->user()->canAccessGuideDashboard())
                                                         <li><a href="{{route('profile.calendar')}}">@lang('message.calendar')</a></li>
                                                         <li><a href="{{route('profile.myguidings')}}">@lang('message.my-guiding')</a></li>
                                                         <li><a href="{{ route('profile.guidebookings') }}">@lang('profile.bookedWithMe')</a></li>
                                                         <li><a href="{{route('profile.newguiding')}}">@lang('profile.creategiud')</a></li>
-                                                    @else
+                                                    @elseif(auth()->user()->canApplyAsGuide())
                                                         <li><a href="{{route('profile.becomeguide')}}">@lang('message.verify-guide')</a></li>
                                                     @endif
                                                     <li><a href="javascript:void(0)" onclick="$('#logoutForm').submit();">@lang('message.logout')</a></li>

@@ -46,7 +46,7 @@ class Review extends Model
 
     public function guide()
     {
-        return $this->belongsTo(User::class)->where('is_guide', true);
+        return $this->belongsTo(User::class)->whereVerifiedGuide();
     }
 
     public function booking()

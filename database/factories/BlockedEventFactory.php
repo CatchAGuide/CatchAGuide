@@ -19,7 +19,7 @@ class BlockedEventFactory extends Factory
             'from' => Carbon::now(),
             'due'=>Carbon::now(),
             'type'=> $this->faker->randomElement(['private', 'booking']),
-            'user_id' => User::where('is_guide', true)->get()->random()->id
+            'user_id' => User::whereVerifiedGuide()->get()->random()->id
         ];
     }
 }

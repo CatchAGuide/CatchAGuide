@@ -44,7 +44,7 @@
                                                 <td>{{ $customer->full_name }}</td>
                                                 <td>{{ $customer->email }}</td>
                                                 <td class="text-center">
-                                                    @if($customer->is_guide)
+                                                    @if($customer->isVerifiedGuide())
                                                         <span class="badge badge-success-light">Ja</span>
                                                     @else
                                                         <span class="badge badge-danger-light">Nein</span>
@@ -52,7 +52,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="btn-group">
-                                                        @if($customer->is_guide)
+                                                        @if($customer->isVerifiedGuide() || $customer->isPendingGuide())
                                                             <a href="{{ route('admin.guides.change-status', $customer) }}" title="Deaktiviere Guidezugang" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                         @else
                                                             <a href="{{ route('admin.guides.change-status', $customer) }}" title="Guide Zugang aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>

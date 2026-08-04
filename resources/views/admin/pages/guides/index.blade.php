@@ -55,7 +55,7 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group">
-                                                    @if($guide->is_guide)
+                                                    @if($guide->isVerifiedGuide() || $guide->isPendingGuide())
                                                         <a href="{{ route('admin.guides.change-status', $guide) }}" title="Guide Zugang löschen" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></a>
                                                     @else
                                                         <a href="{{ route('admin.guides.change-status', $guide) }}" title="Guide Zugang aktivieren" class="btn btn-sm btn-success"><i class="fa fa-check"></i></a>
