@@ -18,6 +18,13 @@ alwaysApply: true
 - Prefer caching, batching, and “call only when needed” (on-demand) over eager/always-on requests.
 - If a change could increase paid API volume, call it out and confirm before shipping.
 
+## Image / media uploads
+
+- New image and media uploads must go to object storage (DigitalOcean Spaces / S3), not local `public/` or `storage/app` as the primary store.
+- Use the configured media disk (`config('media_storage.disk')`, default `do_spaces`) via Laravel `Storage::disk(...)`.
+- Do not invent a parallel upload path; reuse existing Spaces/S3 helpers and disk config in `config/filesystems.php` / `config/media_storage.php`.
+- Keep credentials in env (`DO_SPACES_*` / `AWS_*`); never hardcode bucket keys or public write URLs that bypass auth.
+
 ## Page speed
 
 - Minimize extra queries, assets, and blocking work on page load.

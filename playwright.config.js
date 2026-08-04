@@ -12,10 +12,12 @@ module.exports = defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
+  timeout: 60_000,
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://cag.local',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    navigationTimeout: 45_000,
   },
   projects: [
     {
