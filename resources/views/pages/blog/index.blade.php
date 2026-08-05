@@ -1,62 +1,147 @@
 @extends('layouts.app-v2')
 
-@section('title', __('message.magazine_meta_title') . ' - ' . request()->segment(count(request()->segments())))
-@section('description',__('message.magazine_meta_description') . ' - ' . request()->segment(count(request()->segments())))
+@php
+    $metaTitle = __('message.magazine_meta_title');
+    $metaDescription = __('message.magazine_meta_description');
 
+    if (!empty($search)) {
+        $metaTitle = __('magazine.search_meta_title', ['query' => $search]);
+    } elseif (!empty($activeCategory)) {
+        $catLabel = getLocalizedValue($activeCategory);
+        $metaTitle = __('magazine.category_meta_title', ['category' => $catLabel]);
+        $metaDescription = __('magazine.category_meta_description', ['category' => $catLabel]);
+    }
+
+    $ogImage = null;
+    if (!empty($featured)) {
+        $ogImage = url($featured->getThumbnailPath());
+    } elseif ($threads->isNotEmpty()) {
+        $ogImage = url($threads->first()->getThumbnailPath());
+    }
+
+    $listItems = collect();
+    if (!empty($featured)) {
+        $listItems->push($featured);
+    }
+    $listItems = $listItems->concat($threads->items())->values();
+
+    $collectionJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'CollectionPage',
+        'name' => $metaTitle,
+        'description' => $metaDescription,
+        'url' => url()->current(),
+        'isPartOf' => [
+            '@type' => 'WebSite',
+            'name' => config('app.name', 'Catch A Guide'),
+            'url' => url('/'),
+        ],
+        'mainEntity' => [
+            '@type' => 'ItemList',
+            'numberOfItems' => $totalCount ?? $listItems->count(),
+            'itemListElement' => $listItems->take(20)->values()->map(function ($thread, $index) use ($blogPrefix) {
+                return [
+                    '@type' => 'ListItem',
+                    'position' => $index + 1,
+                    'url' => route($blogPrefix.'.thread.show', [$thread->slug]),
+                    'name' => $thread->title,
+                ];
+            })->all(),
+        ],
+    ];
+
+    $breadcrumbJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => array_values(array_filter([
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => __('magazine.breadcrumb_home'),
+                'item' => route('welcome'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => __('message.Magazine'),
+                'item' => route($blogPrefix.'.index'),
+            ],
+            !empty($activeCategory) ? [
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => getLocalizedValue($activeCategory),
+                'item' => route($blogPrefix.'.categories.show', $activeCategory),
+            ] : null,
+        ])),
+    ];
+@endphp
+
+@section('title', $metaTitle)
+@section('description', $metaDescription)
 @section('header_title', __('message.Magazine'))
-@section('header_sub_title', __('message.Magazine_subtitle'))
+@section('header_sub_title', !empty($activeCategory) ? getLocalizedValue($activeCategory) : __('message.Magazine_subtitle'))
 
+@section('canonical')
+    <link rel="canonical" href="{{ strtok(url()->current(), '?') }}" />
+@endsection
+
+@section('share_tags')
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{{ $metaTitle }}" />
+    <meta property="og:description" content="{{ $metaDescription }}" />
+    <meta property="og:url" content="{{ strtok(url()->current(), '?') }}" />
+    @if($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}" />
+    @endif
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $metaTitle }}" />
+    <meta name="twitter:description" content="{{ $metaDescription }}" />
+    @if($ogImage)
+        <meta name="twitter:image" content="{{ $ogImage }}" />
+    @endif
+    <script type="application/ld+json">{!! json_encode($collectionJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! json_encode($breadcrumbJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
+@endsection
 
 @section('content')
+<div class="cag-mag" data-analytics-page="magazine-index">
+    <div class="cag-mag__container">
+        <nav class="cag-mag-breadcrumbs" aria-label="Breadcrumb">
+            <ol>
+                <li><a href="{{ route('welcome') }}">{{ __('magazine.breadcrumb_home') }}</a></li>
+                <li><a href="{{ route($blogPrefix.'.index') }}">{{ __('message.Magazine') }}</a></li>
+                @if(!empty($activeCategory))
+                    <li aria-current="page">{{ getLocalizedValue($activeCategory) }}</li>
+                @endif
+            </ol>
+        </nav>
 
-<div class="container">
-    {{-- <section class="page-header">
-        <div class="page-header__bottom">
-            <div class="container">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
-                        <li class="active">{{ __('message.Magazine') }}</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section> --}}
-    <!--News One Start-->
-    <section class="news-one" style="padding: 25px;">
-        <div class="container">
-            <div class="row">
-                @php($i = 1)
+        @include('pages.blog.partials.filters')
+
+        @if(!empty($featured))
+            @include('pages.blog.partials.featured', ['featured' => $featured])
+        @endif
+
+        @if($threads->isNotEmpty())
+            <div class="cag-mag-grid">
                 @foreach($threads as $thread)
-                    <div class="col-xl-4 col-lg-6 col-md-6 wow fadeInUp" data-wow-delay="{{ $i }}00ms" style=" border-radius: 5px; border-color: #e8604c; border-width: 2px; border-style: solid; padding: 10px">
-                        <!--News One Single-->
-                        <div class="news-one__single">
-                            <div class="news-one__img">
-                                <div  style="height:300px; position: relative; overflow: hidden;">
-                                    <img src="{{ $thread->getThumbnailPath() }}" alt="">
-                                </div>
-
-                                <a href="{{ route($blogPrefix.'.thread.show',[$thread->slug]) }}">
-                                    <span class="news-one__plus"></span>
-                                </a>
-                                <div class="news-one__date">
-                                    <p>{{ $thread->created_at->format('d') }} <br> <span>{{ $thread->created_at->shortMonthName }}</span></p>
-                                </div>
-                            </div>
-                            <div class="news-one__content">
-                                <span>{{$thread->author}}</span>
-                                <h3 class="news-one__title">
-                                    <a href="{{ route($blogPrefix.'.thread.show',[$thread->slug]) }}">{{ translate($thread->title) }}</a>
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                    @php($i++)
+                    @include('pages.blog.partials.card', ['thread' => $thread])
                 @endforeach
             </div>
-        </div>
-    </section>
+            <div class="cag-mag-pagination">
+                {{ $threads->links('vendor.pagination.default') }}
+            </div>
+        @elseif(empty($featured))
+            <div class="cag-mag-empty">
+                <h2>{{ __('magazine.empty_title') }}</h2>
+                <p>{{ __('magazine.empty_text') }}</p>
+                <a href="{{ route($blogPrefix.'.index') }}" class="cag-mag-empty__btn" data-magazine-analytics="magazine_empty_reset">
+                    {{ __('magazine.empty_reset') }}
+                </a>
+            </div>
+        @endif
+    </div>
 </div>
-    <!--News One End-->
+
+@include('pages.blog.partials.analytics')
 @endsection

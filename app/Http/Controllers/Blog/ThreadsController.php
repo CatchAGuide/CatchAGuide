@@ -3,43 +3,37 @@
 namespace App\Http\Controllers\Blog;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\Blog\UpdateThreadRequest;
 use App\Models\Cache;
 use App\Models\Category;
 use App\Models\Thread;
-use Illuminate\Http\Request;
-
-use App\Support\SharedData;
+use App\Services\Magazine\MagazineListingService;
 
 class ThreadsController extends Controller
 {
+    public function __construct(
+        private MagazineListingService $magazine
+    ) {}
 
     public function show($slug)
     {
         $locale = app()->getLocale();
 
-        $thread = Thread::where('slug', $slug)->where('language', $locale)->first();
+        $thread = Thread::with('category')
+            ->where('slug', $slug)
+            ->where('language', $locale)
+            ->first();
 
-        if(!$thread){   
-            return redirect()->route('blog.index');
+        if (! $thread) {
+            return redirect()->route(app()->getLocale() === 'de' ? 'blogde.index' : 'blog.index');
         }
 
-        $recent = Thread::where('id', '!=', $thread->id)->where('language',$locale)->get();
-
-        $page = Cache::process('threads', $thread->id, 
+        $page = Cache::process('threads', $thread->id,
             'pages.blog.show', [
-            'thread' => $thread,
-            'recent_threads' => $recent,
-            'categories' => Category::all(),
-        ]);
+                'thread' => $thread,
+                'recent_threads' => $this->magazine->relatedThreads($thread, $locale),
+                'categories' => $this->magazine->categoriesWithCounts($locale),
+            ]);
 
         return $page;
-        
-        /*return view('pages.blog.show', [
-            'thread' => $thread,
-            'recent_threads' => $recent,
-            'categories' => Category::all(),
-        ]);*/
-
     }
 }
