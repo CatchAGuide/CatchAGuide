@@ -1,5 +1,12 @@
 /**
  * ImageManager - Enhanced image handling with compression
+ *
+ * Shared by listing upload UIs:
+ * - Guidings (multi-step form)
+ * - Camps, Trips, Accommodations, Rental boats, Special offers
+ *
+ * Keep API changes backward-compatible. Form-specific upload timeouts / spinners
+ * live outside this file (e.g. guiding-form-loading.js for guidings only).
  * 
  * Features:
  * - Image cropping with Cropper.js
@@ -626,7 +633,21 @@ class ImageManager {
                     }
                 }
 
-                const canvas = cropper.getCroppedCanvas();
+                // Cap canvas export size for all listing forms (guidings, camps, trips,
+                // accommodations, rental boats, special offers). Matches compressionSettings
+                // already used by compressImage(); avoids freezing on large phone photos.
+                const maxWidth = Number(this.compressionSettings.maxWidth) || 1920;
+                const maxHeight = Number(this.compressionSettings.maxHeight) || 1080;
+                const canvas = cropper.getCroppedCanvas({
+                    maxWidth,
+                    maxHeight,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'medium',
+                });
+                if (!canvas) {
+                    console.error(`Cropper returned no canvas for image ${index}`);
+                    return null;
+                }
                 const compressedDataUrl = this.compressImage(canvas, filename);
 
                 return {
