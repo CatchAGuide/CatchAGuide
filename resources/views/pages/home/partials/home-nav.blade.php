@@ -25,7 +25,7 @@
         <div class="cag-home-nav__actions">
             <form action="{{ route('language.switch') }}" method="POST" class="cag-home-nav__lang d-none d-md-flex" id="home-language-form">
                 @csrf
-                <select name="language" class="selectpicker header-language-select" data-width="fit" onchange="handleLanguageSwitch(this, 'home-language-form')">
+                <select name="language" class="selectpicker header-language-select" data-width="fit" data-style="btn cag-home-nav__lang-btn" onchange="handleLanguageSwitch(this, 'home-language-form')">
                     @foreach (config('app.locales') as $key => $locale)
                         <option value="{{ $locale }}"
                                 data-content='<span class="fi fi-{{$key}}"></span>'

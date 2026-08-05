@@ -53,6 +53,8 @@ return [
     'data-protection' => 'Datenschutzerklärung',
     'conditions' => 'AGB',
     'notice-takedown' => 'Hinweis & Entfernung',
+    'faq' => 'FAQ',
+    'for_agents' => 'Für KI-Agenten & Entwickler',
     'product-reports' => 'Produktmeldungen',
     'term-conditions' => "AGB'S",
     'accept-policy' => 'Datenschutzbestimmungen',

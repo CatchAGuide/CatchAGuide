@@ -51,6 +51,8 @@ return [
     'data-protection' => 'Data Protection',
     'conditions' => 'Conditions',
     'notice-takedown' => 'Notice & Takedown',
+    'faq' => 'FAQ',
+    'for_agents' => 'For AI agents & developers',
     'product-reports' => 'Product reports',
     'term-conditions' => 'Terms and conditions',
     'accept-policy' => 'Privacy Policy',

@@ -184,6 +184,12 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('assets/images/homepage/hero-vacation.webp', false);
         $response->assertSee('cag-home-hero__search', false);
         $response->assertSee('action="'.url('/offers').'"', false);
+        $response->assertSee('cag-home-nav__lang', false);
+        $response->assertSee('cag-home-nav__lang-btn', false);
+        $response->assertSee('cag-auth-modal', false);
+        $response->assertSee('cag-auth-modal__accent', false);
+        $response->assertSee('id="loginModal"', false);
+        $response->assertSee('id="guideApplicationModal"', false);
         $response->assertSee('cag-home-hero__doors', false);
         $response->assertSee('cag-home-hero__door-icon', false);
         $response->assertSee('fa-ship', false);
@@ -209,6 +215,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('href="/guidings/1/pike-fishing-day-tour"', false);
         $response->assertSee('cag-home-partner', false);
         $response->assertSee('cag-home-bottom-nav', false);
+        $response->assertSee('cag-footer', false);
+        $response->assertSee('info.catchaguide@gmail.com', false);
     }
 
     public function test_homepage_mixed_offers_include_type_markers(): void

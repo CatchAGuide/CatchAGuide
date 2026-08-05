@@ -157,6 +157,13 @@
                         <span class="side-menu__label">Terms & Conditions</span>
                     </a>
                 </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.monthly-highlights.*') ? 'active' : '' }}"
+                       href="{{ route('admin.monthly-highlights.index') }}">
+                        <i class="side-menu__icon fe fe-calendar"></i>
+                        <span class="side-menu__label">Monthly Highlights</span>
+                    </a>
+                </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-book-open"></i>

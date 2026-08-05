@@ -21,6 +21,7 @@ use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\Admin\NewsletterSubscribersController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
 use App\Http\Controllers\Admin\AdminTermsSectionController;
+use App\Http\Controllers\Admin\MonthlyHighlightController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
@@ -458,6 +459,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{termsSection}', [AdminTermsSectionController::class, 'destroy'])->name('destroy');
             Route::get('/{termsSection}/translation', [AdminTermsSectionController::class, 'getTranslation'])->name('translation');
         });
+
+        Route::resource('monthly-highlights', MonthlyHighlightController::class)->except(['show']);
 
         Route::get('guidings/search', [AdminGuidingsController::class, 'searchForSelect'])->name('guidings.search');
         Route::get('guidings/{guiding}/details', [AdminGuidingsController::class, 'details'])->name('guidings.details');

@@ -4,6 +4,8 @@ namespace App\Services\Homepage;
 
 use App\Models\Booking;
 use App\Models\CategoryPage;
+use App\Models\Country;
+use App\Models\MonthlyHighlight;
 use App\Models\Review;
 use App\Models\Target;
 use App\Models\Thread;
@@ -145,16 +147,93 @@ class HomepageLandingService
      */
     private function seasonModule(string $locale): array
     {
+        $monthNumber = (int) now()->month;
         $month = now()->translatedFormat('F');
-        $species = $this->targetSpecies($locale)->take(2);
+        $cacheKey = "homepage_season_v2_{$locale}_{$monthNumber}";
 
-        return [
-            'month' => $month,
-            'title' => __('homepage.season_title', ['month' => $month]),
-            'text' => __('homepage.season_text'),
-            'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
-            'species' => $species,
-        ];
+        return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($locale, $monthNumber, $month) {
+            $highlight = MonthlyHighlight::forMonth($monthNumber);
+
+            if ($highlight) {
+                return [
+                    'month' => $month,
+                    'title' => $highlight->localizedTitle($locale),
+                    'text' => $highlight->localizedSubtitle($locale) ?? __('homepage.season_text'),
+                    'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
+                    'species' => $this->resolveHighlightCards($highlight, $locale),
+                ];
+            }
+
+            return [
+                'month' => $month,
+                'title' => __('homepage.season_title', ['month' => $month]),
+                'text' => __('homepage.season_text'),
+                'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
+                'species' => $this->targetSpecies($locale)->take(MonthlyHighlight::MAX_ITEMS),
+            ];
+        });
+    }
+
+    /**
+     * @return Collection<int, array{name: string, slug: string, thumbnail: string, url: string, type: string}>
+     */
+    private function resolveHighlightCards(MonthlyHighlight $highlight, string $locale): Collection
+    {
+        $items = $highlight->normalizedItems();
+        if ($items->isEmpty()) {
+            return collect();
+        }
+
+        $countryIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_COUNTRY)->pluck('id')->all();
+        $targetPageIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_TARGET)->pluck('id')->all();
+
+        $countries = Country::query()
+            ->whereIn('id', $countryIds)
+            ->get()
+            ->keyBy('id');
+
+        $targetPages = CategoryPage::query()
+            ->where('type', 'Targets')
+            ->whereIn('id', $targetPageIds)
+            ->get()
+            ->keyBy('id');
+
+        $targets = Target::query()
+            ->whereIn('id', $targetPages->pluck('source_id')->filter()->unique())
+            ->get()
+            ->keyBy('id');
+
+        return $items->map(function (array $item) use ($countries, $targetPages, $targets) {
+            if ($item['type'] === MonthlyHighlight::ITEM_TYPE_COUNTRY) {
+                $country = $countries->get($item['id']);
+                if (! $country) {
+                    return null;
+                }
+
+                return [
+                    'type' => MonthlyHighlight::ITEM_TYPE_COUNTRY,
+                    'name' => $country->name,
+                    'slug' => $country->slug,
+                    'thumbnail' => $country->getThumbnailPath(),
+                    'url' => route('destination.country', ['country' => $country->slug]),
+                ];
+            }
+
+            $page = $targetPages->get($item['id']);
+            if (! $page) {
+                return null;
+            }
+
+            $target = $targets->get($page->source_id);
+
+            return [
+                'type' => MonthlyHighlight::ITEM_TYPE_TARGET,
+                'name' => $target?->name ?? $page->name,
+                'slug' => $page->slug,
+                'thumbnail' => $page->getThumbnailPath(),
+                'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
+            ];
+        })->filter()->values();
     }
 
     /**

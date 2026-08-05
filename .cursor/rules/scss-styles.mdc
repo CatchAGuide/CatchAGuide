@@ -1,0 +1,29 @@
+---
+description: Always write styles in SCSS under resources/sass; never plain CSS or other stylesheet formats
+alwaysApply: true
+---
+
+# SCSS Styles Only
+
+All new and updated styles must be written in **SCSS** (`.scss`). Do not add or edit plain CSS, Sass indented (`.sass`), Less, Stylus, or other stylesheet formats.
+
+## Rules
+
+- Put styles in `resources/sass/` (components, layout, page, settings, admin, profile — match existing structure).
+- Prefer partials (`_name.scss`) and `@import` them from the relevant entry (usually `resources/sass/app.scss`) when a new file is needed.
+- Reuse existing variables, breakpoints, colors, and helpers from `resources/sass/settings/` instead of hardcoding values.
+- Do not create or expand `resources/css/*.css`, standalone `.css` assets, or inline large style blocks when an SCSS partial fits.
+- Avoid dumping style rules into Blade/`<style>` tags except tiny one-off exceptions that cannot live in SCSS; prefer SCSS by default.
+- Do not introduce a parallel CSS pipeline; follow the existing Vite/Laravel Mix SCSS build.
+
+```scss
+// ❌ BAD — new plain CSS file
+// resources/css/my-feature.css
+.my-feature { color: #333; }
+
+// ✅ GOOD — SCSS partial + import from app.scss (or the right entry)
+// resources/sass/components/_my-feature.scss
+.my-feature {
+  color: $text-color;
+}
+```

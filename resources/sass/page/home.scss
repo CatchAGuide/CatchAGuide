@@ -277,8 +277,19 @@ $white: #ffffff;
     width: auto !important;
   }
 
-  .bootstrap-select > .dropdown-toggle {
+  .bootstrap-select > .dropdown-toggle,
+  .bootstrap-select > .dropdown-toggle.btn,
+  .bootstrap-select > .dropdown-toggle.btn-light,
+  .bootstrap-select > .dropdown-toggle.cag-home-nav__lang-btn {
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-bg: transparent;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-bg: transparent;
+    --bs-btn-active-border-color: transparent;
     background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
     border: 0 !important;
     box-shadow: none !important;
     padding: 0.25rem 0.15rem !important;
@@ -287,8 +298,11 @@ $white: #ffffff;
 
   .bootstrap-select > .dropdown-toggle:focus,
   .bootstrap-select > .dropdown-toggle:active,
-  .bootstrap-select.show > .dropdown-toggle {
+  .bootstrap-select > .dropdown-toggle:hover,
+  .bootstrap-select.show > .dropdown-toggle,
+  .bootstrap-select .show > .dropdown-toggle {
     background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     outline: none !important;
@@ -303,6 +317,12 @@ $white: #ffffff;
   .filter-option {
     display: flex;
     align-items: center;
+    background: transparent !important;
+  }
+
+  .filter-option-inner,
+  .filter-option-inner-inner {
+    background: transparent !important;
   }
 
   .filter-option .fi {
@@ -1049,6 +1069,7 @@ $white: #ffffff;
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
+  color: #fff !important;
 }
 
 .cag-home-season__text {
@@ -1058,8 +1079,16 @@ $white: #ffffff;
 
 .cag-home-season__species {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
+
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
 }
 
 .cag-home-season__species-card {

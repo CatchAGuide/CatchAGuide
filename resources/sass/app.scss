@@ -15,6 +15,7 @@
 @import "./layout/btn";
 @import "./layout/main-menu";
 @import "./layout/pagination";
+@import "./layout/footer";
 
 // Page
 @import "./page/home";
@@ -55,3 +56,4 @@
 @import "./components/rental-boat-card"; // The rental boat card component (all styles in one file)
 @import "./components/special-offer-card"; // The special offer card component (all styles in one file)
 @import "./components/booking-assistant-widget"; // Booking assistant chat widget (namespaced)
+@import "./components/auth-modals"; // Login / register / guide application modals

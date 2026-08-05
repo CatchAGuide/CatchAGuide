@@ -1,0 +1,608 @@
+// Auth modals — login, register, guide application (light modern theme)
+$auth-modal-primary: map-get($colors, "primary");
+$auth-modal-dark: map-get($colors, "dark");
+$auth-modal-light: map-get($colors, "light");
+$auth-modal-gray: map-get($colors, "gray");
+$auth-modal-border: map-get($colors, "border");
+$auth-modal-primary-hover: #d4523f;
+$auth-modal-bg: #ffffff;
+$auth-modal-soft: #f5f6f8;
+$auth-modal-ink: $auth-modal-dark;
+$auth-modal-muted: $auth-modal-gray;
+
+.cag-auth-modal.modal-content {
+  position: relative;
+  overflow: hidden;
+  background: $auth-modal-bg;
+  color: $auth-modal-ink;
+  border: 1px solid rgba($auth-modal-dark, 0.08);
+  border-radius: 1rem;
+  box-shadow:
+    0 4px 6px rgba($auth-modal-dark, 0.04),
+    0 24px 48px rgba($auth-modal-dark, 0.12);
+}
+
+.cag-auth-modal {
+  &__accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $auth-modal-primary 0%, #ff8a74 55%, $auth-modal-primary 100%);
+  }
+
+  &__intro {
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+
+  &__eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $auth-modal-primary;
+  }
+
+  &__title {
+    margin: 0 0 0.35rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: $auth-modal-ink;
+  }
+
+  &__sub {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: $auth-modal-muted;
+  }
+
+  &__footer {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+    text-align: center;
+    background: $auth-modal-soft;
+    border-radius: 0.75rem;
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: $auth-modal-muted;
+    }
+
+    a {
+      font-weight: 700;
+    }
+  }
+
+  .modal-header {
+    padding: 1rem 1.25rem 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .modal-body {
+    padding: 0.25rem 1.5rem 1.5rem !important;
+    color: $auth-modal-ink;
+  }
+
+  h3,
+  .fw-bold {
+    color: $auth-modal-ink;
+  }
+
+  .text-muted,
+  .form-check-label,
+  p {
+    color: $auth-modal-muted !important;
+  }
+
+  .form-label {
+    color: $auth-modal-ink;
+    font-weight: 600;
+  }
+
+  .form-control,
+  .form-select {
+    background: $auth-modal-soft;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    color: $auth-modal-ink;
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+
+    &::placeholder {
+      color: rgba($auth-modal-dark, 0.4);
+    }
+
+    &:hover {
+      background: darken($auth-modal-soft, 1.5%);
+    }
+
+    &:focus {
+      background: $auth-modal-light;
+      border-color: $auth-modal-primary;
+      color: $auth-modal-ink;
+      box-shadow: 0 0 0 0.2rem rgba($auth-modal-primary, 0.18);
+    }
+
+    &.is-invalid {
+      border-color: $auth-modal-primary;
+      background: rgba($auth-modal-primary, 0.04);
+    }
+  }
+
+  .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23313041' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px 10px;
+
+    option {
+      background: $auth-modal-light;
+      color: $auth-modal-ink;
+    }
+  }
+
+  .btn-close {
+    opacity: 0.45;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .theme-primary {
+    background-color: $auth-modal-primary;
+    border-color: $auth-modal-primary;
+    color: $auth-modal-light;
+    font-weight: 700;
+    border-radius: 0.65rem;
+    letter-spacing: 0.01em;
+    box-shadow: 0 8px 18px rgba($auth-modal-primary, 0.28);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      background-color: $auth-modal-primary-hover;
+      border-color: $auth-modal-primary-hover;
+      color: $auth-modal-light;
+      box-shadow: 0 10px 22px rgba($auth-modal-primary, 0.34);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  a {
+    color: $auth-modal-primary;
+    text-decoration: none;
+
+    &:hover {
+      color: $auth-modal-primary-hover;
+      text-decoration: underline;
+    }
+  }
+
+  .form-check-input {
+    background-color: $auth-modal-light;
+    border-color: rgba($auth-modal-dark, 0.25);
+
+    &:checked {
+      background-color: $auth-modal-primary;
+      border-color: $auth-modal-primary;
+    }
+
+    &:focus {
+      border-color: $auth-modal-primary;
+      box-shadow: 0 0 0 0.25rem rgba($auth-modal-primary, 0.2);
+    }
+  }
+
+  .alert-danger {
+    background: rgba($auth-modal-primary, 0.08);
+    border-color: rgba($auth-modal-primary, 0.28);
+    color: darken($auth-modal-primary, 8%);
+    border-radius: 0.65rem;
+  }
+
+  .invalid-feedback {
+    color: darken($auth-modal-primary, 6%);
+  }
+
+  .cag-password-toggle__btn {
+    color: rgba($auth-modal-dark, 0.45);
+
+    &:hover,
+    &:focus {
+      color: $auth-modal-primary;
+    }
+  }
+}
+
+#loginModal,
+#registerModal {
+  z-index: 1060 !important;
+
+  .modal-backdrop {
+    z-index: 1059 !important;
+  }
+
+  .form-control,
+  .theme-primary {
+    height: 50px;
+  }
+
+  .cag-auth-modal__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+}
+
+#guideApplicationModal {
+  z-index: 1060 !important;
+
+  .modal-backdrop {
+    z-index: 1059 !important;
+  }
+
+  .form-control,
+  .form-select {
+    height: 44px;
+  }
+
+  textarea.form-control {
+    height: auto;
+  }
+
+  .theme-primary {
+    height: 44px;
+    padding: 0 20px;
+  }
+
+  .form-label {
+    margin-bottom: 0.25rem;
+  }
+
+  .guide-modal-progress__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .guide-modal-progress__item {
+    flex: 1 1 120px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.6rem;
+    background: $auth-modal-soft;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    opacity: 0.7;
+    transition: all 0.25s ease;
+
+    &.is-active,
+    &.is-complete {
+      opacity: 1;
+      border-color: rgba($auth-modal-primary, 0.45);
+      background: rgba($auth-modal-primary, 0.08);
+    }
+
+    &.is-active {
+      box-shadow: 0 4px 12px rgba($auth-modal-primary, 0.12);
+    }
+  }
+
+  .guide-modal-progress__badge {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: $auth-modal-primary;
+    color: $auth-modal-light;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .guide-modal-progress__label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: $auth-modal-ink;
+    line-height: 1.15;
+  }
+
+  .guide-modal-type-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .guide-modal-type-card {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .guide-modal-type-card__input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .guide-modal-type-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1rem;
+    border: 1px solid rgba($auth-modal-dark, 0.08);
+    border-radius: 0.75rem;
+    background: $auth-modal-soft;
+    height: 100%;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 1.25rem;
+      color: $auth-modal-primary;
+    }
+
+    strong {
+      font-size: 0.9rem;
+      color: $auth-modal-ink;
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: $auth-modal-muted;
+    }
+  }
+
+  .guide-modal-type-card__input:checked + .guide-modal-type-card__body {
+    border-color: $auth-modal-primary;
+    background: rgba($auth-modal-primary, 0.06);
+    box-shadow: 0 4px 12px rgba($auth-modal-primary, 0.12);
+  }
+
+  .guide-modal-legal-check {
+    padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+    background: $auth-modal-soft;
+    border: 1px solid rgba($auth-modal-dark, 0.06);
+    border-radius: 0.65rem;
+  }
+
+  .guide-modal-consent {
+    margin: 0;
+    padding: 0.85rem 0.5rem;
+    background: $auth-modal-soft;
+    border: 1px solid rgba($auth-modal-dark, 0.06);
+    border-radius: 0.75rem;
+  }
+
+  .guide-modal-consent__text {
+    text-align: right;
+    border-right: 1px solid rgba($auth-modal-dark, 0.08);
+    padding-right: 1rem !important;
+
+    p {
+      line-height: 1.45;
+    }
+  }
+
+  .guide-modal-consent__checks {
+    text-align: left;
+    padding-left: 1rem !important;
+
+    .form-check {
+      display: flex;
+      align-items: center;
+      padding: 0;
+      margin: 0 0 0.4rem;
+      min-height: 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .form-check-input {
+      width: 1rem;
+      height: 1rem;
+      margin: 0 0.5rem 0 0;
+      float: none;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .form-check-label {
+      margin: 0;
+      line-height: 1.25;
+      cursor: pointer;
+
+      a {
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .guide-modal-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    border-top: 1px solid rgba($auth-modal-dark, 0.08);
+    padding-top: 1rem;
+
+    .btn {
+      white-space: nowrap;
+      min-width: 140px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .guide-modal-prev {
+    border: 1px solid rgba($auth-modal-dark, 0.16);
+    color: $auth-modal-muted;
+    background: $auth-modal-light;
+    height: 44px;
+    border-radius: 0.65rem;
+
+    &:not(:disabled):hover {
+      border-color: $auth-modal-dark;
+      color: $auth-modal-ink;
+      background: $auth-modal-soft;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  .guide-modal-next,
+  .guide-modal-submit {
+    margin-left: auto;
+  }
+
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @include media("<=tablet") {
+    .modal-dialog {
+      margin: 0.5rem;
+    }
+
+    .modal-body {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+
+    h3,
+    .cag-auth-modal__title {
+      font-size: 1.25rem;
+    }
+
+    .form-control,
+    .form-select {
+      height: 42px;
+      font-size: 0.95rem;
+    }
+
+    .theme-primary {
+      height: 42px;
+      font-size: 0.95rem;
+      padding: 0 14px;
+    }
+
+    .guide-modal-type-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .modal-dialog {
+      margin: 0;
+      max-width: 100%;
+      min-height: 100vh;
+    }
+
+    .modal-content {
+      min-height: 100vh;
+      border-radius: 0;
+    }
+
+    .modal-body {
+      padding-left: 0.9rem !important;
+      padding-right: 0.9rem !important;
+    }
+
+    .guide-modal-progress__list {
+      gap: 0.3rem;
+      justify-content: space-between;
+    }
+
+    .guide-modal-progress__label {
+      display: none;
+    }
+
+    .guide-modal-progress__item {
+      flex: 1 1 0;
+      justify-content: center;
+      min-width: 0;
+      padding: 0.4rem 0.35rem;
+
+      &.is-active {
+        flex: 2 1 0;
+
+        .guide-modal-progress__label {
+          display: inline;
+          font-size: 0.7rem;
+        }
+      }
+    }
+
+    .guide-modal-legal-check {
+      padding-left: 2rem;
+    }
+
+    .guide-modal-consent__text {
+      text-align: left;
+      border-right: 0;
+      border-bottom: 1px solid rgba($auth-modal-dark, 0.08);
+      padding-right: 0.75rem !important;
+      padding-bottom: 0.65rem;
+    }
+
+    .guide-modal-consent__checks {
+      padding-left: 0.75rem !important;
+      padding-top: 0.25rem;
+    }
+
+    .guide-modal-nav {
+      gap: 0.5rem;
+
+      .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0 10px;
+        font-size: 0.9rem;
+      }
+    }
+
+    .guide-modal-next,
+    .guide-modal-submit {
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .guide-modal-progress__badge {
+      width: 20px;
+      height: 20px;
+      font-size: 0.65rem;
+    }
+  }
+}
