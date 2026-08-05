@@ -20,6 +20,7 @@
         "resolve-url-loader": "^4.0.0",
         "sass": "^1.55.0",
         "sass-loader": "^12.6.0",
+        "webpack": "5.106.2",
         "webpackbar": "^7.0.0"
     },
     "dependencies": {
@@ -29,6 +30,7 @@
         "lucide": "^0.453.0"
     },
     "overrides": {
+        "webpack": "5.106.2",
         "webpackbar": "^7.0.0"
     }
 }

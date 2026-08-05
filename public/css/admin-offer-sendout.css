@@ -1,0 +1,83 @@
+.offer-sendout-page .offer-sendout-form-card,
+.offer-sendout-page .offer-sendout-preview-card {
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease;
+}
+.offer-sendout-page .offer-sendout-form-card:hover,
+.offer-sendout-page .offer-sendout-preview-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+}
+.offer-sendout-page .offer-sendout-form .recipient-wrap {
+  transition: opacity 0.2s ease;
+}
+.offer-sendout-page .offer-sendout-form .form-label {
+  color: #374151;
+}
+.offer-sendout-page .offer-sendout-form .btn-check:checked + .btn-outline-primary {
+  background-color: var(--bs-primary);
+  color: #fff;
+  border-color: var(--bs-primary);
+}
+.offer-sendout-page .offer-sendout-form .tagify {
+  border-radius: 6px;
+  min-height: 38px;
+  padding: 4px 8px;
+}
+.offer-sendout-page .offer-sendout-form .tagify__tag {
+  margin: 2px 4px 2px 0;
+}
+.offer-sendout-page .offer-sendout-form .tagify__input {
+  margin: 2px 0;
+}
+.offer-sendout-page .offer-sendout-form .tagify__dropdown__item--connected {
+  background-color: rgba(var(--bs-primary-rgb), 0.12);
+  font-weight: 600;
+  border-left: 3px solid var(--bs-primary);
+}
+.offer-sendout-page .offer-sendout-form .tagify__dropdown__item--connected:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+.offer-sendout-page .offer-sendout-form .component-prices-container {
+  margin-top: 4px;
+  padding-left: 2px;
+}
+.offer-sendout-page .offer-sendout-form .component-prices-container .component-price-row {
+  max-width: 100%;
+}
+.offer-sendout-page .offer-sendout-form .component-prices-container .component-price-row .input-group-text {
+  font-size: 0.8rem;
+  min-width: 0;
+}
+.offer-sendout-page .offer-sendout-form .component-prices-container .component-price-row .component-price-input {
+  max-width: 90px;
+}
+.offer-sendout-page .offer-preview-wrapper {
+  min-height: 420px;
+  background-color: #f1f5f9;
+  padding: 1.5rem;
+}
+.offer-sendout-page .offer-preview-content {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.offer-sendout-page .offer-preview-content img {
+  max-width: 100%;
+  height: auto;
+}
+.offer-sendout-page .offer-preview-content a {
+  word-break: break-word;
+}
+.offer-sendout-page .offer-preview-content table {
+  max-width: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .offer-sendout-page .offer-preview-wrapper {
+    min-height: 360px;
+  }
+}

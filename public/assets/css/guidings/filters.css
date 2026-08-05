@@ -1,0 +1,54 @@
+.price-range-slider {
+    padding: 10px 20px;
+    margin-bottom: 15px;
+}
+
+.price-display {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.noUi-connect {
+    background: #E8604C;
+}
+
+.noUi-handle {
+    border-radius: 3px;
+    background: #fff;
+    cursor: pointer;
+    border: 1px solid #E8604C;
+}
+
+.noUi-horizontal {
+    height: 8px;
+}
+
+.noUi-horizontal .noUi-handle {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -7px;
+}
+
+.noUi-handle:before,
+.noUi-handle:after {
+    display: none;
+}
+
+.price-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.price-label {
+    font-size: 14px;
+    color: #666;
+}
+
+@media (max-width: 767px) {
+    .price-range-slider {
+        display: none;
+    }
+}
