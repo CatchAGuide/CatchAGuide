@@ -43,12 +43,13 @@ class Handler extends ExceptionHandler
             if ($request->is('admin/*')) {
                 // Handle admin routes
                 return redirect()->route('admin.auth.logins')
-                    ->with('error', 'Your session has expired. Please log in again.');
+                    ->with('error', __('Sorry, your session has expired.'));
             }
-            
-            // Handle frontend routes
+
+            // Frontend: /login redirects to a public page and opens the login modal
             return redirect()->route('login')
-                ->with('error', 'Your session has expired. Please log in again.');
+                ->with('error', __('Sorry, your session has expired.'))
+                ->with('show_login_modal', true);
         });
     }
 }

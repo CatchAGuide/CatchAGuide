@@ -25,16 +25,16 @@
 @endphp
 
 @if($hasAnyOffers)
-<section class="cag-home-section cag-home-offers">
+<section class="cag-home-section cag-home-offers" data-cag-reveal>
     <div class="cag-home-container">
-        <div class="cag-home-section__header">
+        <div class="cag-home-section__header cag-reveal__header">
             <h2 class="cag-home-section__title">{{ __('homepage.offers_title') }}</h2>
         </div>
 
         @foreach($offerModuleConfig as $type => $module)
             @php $cards = $offerModules[$type] ?? collect(); @endphp
             @if($cards->isNotEmpty())
-                <div class="cag-home-offers__module" data-offer-module="{{ $type }}">
+                <div class="cag-home-offers__module cag-reveal__block" data-offer-module="{{ $type }}" style="--reveal-i: {{ $loop->index }}">
                     <div class="cag-home-offers__module-header">
                         <h3 class="cag-home-offers__module-title">{{ $module['title'] }}</h3>
                         <div class="cag-home-offers__module-tools">
@@ -58,7 +58,11 @@
                     <div class="cag-home-offers__viewport" data-offer-rail="{{ $type }}">
                         <div class="cag-home-offers__rail" role="list">
                             @foreach($cards as $card)
-                                @include('pages.home.partials.offer-card', ['card' => $card, 'type' => $type])
+                                @include('pages.home.partials.offer-card', [
+                                    'card' => $card,
+                                    'type' => $type,
+                                    'revealIndex' => min($loop->index, 6),
+                                ])
                             @endforeach
                         </div>
                     </div>

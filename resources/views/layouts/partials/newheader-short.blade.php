@@ -1305,33 +1305,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bindVacationCountrySelect(select, formId);
     }
     
-    document.querySelectorAll('.logout-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'  // This explicitly marks it as an AJAX request
-                },
-                body: JSON.stringify({
-                    _token: document.querySelector('meta[name="csrf-token"]').content
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
+    // Logout is handled in layouts.modal.loginModal (refresh + open login modal)
 
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

@@ -23,7 +23,7 @@
                     @auth
                         <a href="{{ route('profile.index') }}" class="cag-home-mobile-menu__item">@lang('homepage.header-profile')</a>
                         <a href="{{ route('profile.bookings') }}" class="cag-home-mobile-menu__item">@lang('profile.bookings')</a>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" class="logout-form">
                             @csrf
                             <button type="submit" class="cag-home-mobile-menu__item w-100 text-start border-0 bg-transparent">@lang('homepage.header-logout')</button>
                         </form>

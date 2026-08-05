@@ -1,5 +1,5 @@
 @if(($targetSpecies ?? collect())->isNotEmpty())
-<section class="cag-home-section cag-home-species">
+<section class="cag-home-section cag-home-species" data-species-spotlight>
     <div class="cag-home-container">
         <div class="cag-home-section__header cag-home-species__header">
             <div class="cag-home-species__heading">
@@ -11,26 +11,35 @@
             </a>
         </div>
 
-        <div class="cag-home-species__grid" role="list">
-            @foreach($targetSpecies as $species)
-                <a href="{{ $species['url'] }}" class="cag-home-species__card" role="listitem">
-                    <span class="cag-home-species__media">
+        <div class="cag-home-species__viewport" data-species-viewport>
+            <div class="cag-home-species__rail" role="list">
+                @foreach($targetSpecies as $species)
+                    <a
+                        href="{{ $species['url'] }}"
+                        class="cag-home-species__card"
+                        role="listitem"
+                        style="--species-i: {{ $loop->index }}"
+                    >
                         <img
+                            class="cag-home-species__img"
                             src="{{ $species['thumbnail'] }}"
                             alt="{{ $species['name'] }}"
                             loading="lazy"
-                            width="140"
-                            height="112"
+                            width="320"
+                            height="240"
                         >
-                    </span>
-                    <span class="cag-home-species__body">
-                        <span class="cag-home-species__name">{{ $species['name'] }}</span>
-                        <span class="cag-home-species__cta" aria-hidden="true">
-                            <i class="fas fa-arrow-right"></i>
+                        <span class="cag-home-species__fade" aria-hidden="true"></span>
+                        <span class="cag-home-species__shine" aria-hidden="true"></span>
+                        <span class="cag-home-species__meta">
+                            <span class="cag-home-species__name">{{ $species['name'] }}</span>
+                            <span class="cag-home-species__cta">
+                                {{ __('homepage.species_explore') }}
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </span>
                         </span>
-                    </span>
-                </a>
-            @endforeach
+                    </a>
+                @endforeach
+            </div>
         </div>
     </div>
 </section>

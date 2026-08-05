@@ -84,8 +84,81 @@
 </div>
 
 <script>
+window.__SHOW_LOGIN_MODAL__ = @json((bool) session('show_login_modal'));
+
+window.openLoginModal = function openLoginModal() {
+    const el = document.getElementById('loginModal');
+    // Bootstrap 5.0 (site bundle) has getInstance / new Modal, not getOrCreateInstance.
+    if (!el || !window.bootstrap || !bootstrap.Modal) {
+        return false;
+    }
+
+    const instance = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+    instance.show();
+    return true;
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.querySelector('#loginModal form');
+    if (!loginForm) {
+        return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const shouldOpenLogin = params.get('login') === '1' || window.__SHOW_LOGIN_MODAL__;
+
+    if (shouldOpenLogin) {
+        let attempts = 0;
+        const openWhenBootstrapReady = function () {
+            if (window.openLoginModal()) {
+                if (params.has('login')) {
+                    params.delete('login');
+                    const query = params.toString();
+                    const nextUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+                    window.history.replaceState({}, '', nextUrl);
+                }
+                return;
+            }
+
+            attempts += 1;
+            if (attempts < 40) {
+                // Header modal script can run before vendors/bootstrap is parsed.
+                window.setTimeout(openWhenBootstrapReady, 50);
+            }
+        };
+
+        openWhenBootstrapReady();
+    }
+
+    document.querySelectorAll('.logout-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                return;
+            }
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ _token: csrfToken })
+            })
+            .then(function (response) {
+                return response.ok ? response.json() : null;
+            })
+            .then(function (data) {
+                if (data?.success) {
+                    window.location.href = data.redirect || (window.location.pathname + '?login=1');
+                }
+            })
+            .catch(function () {});
+        });
+    });
 
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -111,7 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (response.status === 419) {
-                window.location.reload();
+                const url = new URL(window.location.href);
+                url.searchParams.set('login', '1');
+                window.location.href = url.toString();
                 return null;
             }
 
@@ -142,13 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = result.data;
 
             if (data.success) {
-                // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.querySelector('#loginModal'));
                 if (modal) {
                     modal.hide();
                 }
 
-                // Refresh the current page
+                // Always stay on the current page after login.
                 window.location.reload();
                 return;
             }

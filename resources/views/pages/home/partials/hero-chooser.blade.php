@@ -19,7 +19,7 @@
     ];
 @endphp
 
-<section class="cag-home-hero" data-hero-carousel>
+<section class="cag-home-hero" data-hero-carousel data-cag-reveal>
     <div class="cag-home-hero__media" aria-hidden="true">
         <div class="cag-home-hero__slides">
             @foreach($heroSlides as $index => $slide)
@@ -50,13 +50,14 @@
     </div>
 
     <div class="cag-home-hero__inner">
-        <div class="cag-home-hero__copy">
+        <div class="cag-home-hero__copy cag-reveal__item" style="--reveal-i: 0">
             <h1 class="cag-home-hero__title">{{ __('homepage.hero_h1') }}</h1>
             <p class="cag-home-hero__sub">{{ __('homepage.hero_sub') }}</p>
         </div>
 
         <form
-            class="cag-home-hero__search"
+            class="cag-home-hero__search cag-reveal__item"
+            style="--reveal-i: 1"
             action="{{ route('offers.index') }}"
             method="get"
             onsubmit="return validateSearch(event, 'homeHeroSearchPlace')"
@@ -90,7 +91,8 @@
         <div class="cag-home-hero__doors">
             <a
                 href="{{ route('guidings.index') }}"
-                class="cag-home-hero__door"
+                class="cag-home-hero__door cag-reveal__item"
+                style="--reveal-i: 2"
                 data-home-analytics="homepage_chooser_guidings_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
@@ -105,7 +107,8 @@
             </a>
             <a
                 href="{{ route('vacations.index') }}"
-                class="cag-home-hero__door"
+                class="cag-home-hero__door cag-reveal__item"
+                style="--reveal-i: 3"
                 data-home-analytics="homepage_chooser_vacations_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">

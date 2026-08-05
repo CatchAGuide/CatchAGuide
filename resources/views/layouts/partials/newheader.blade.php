@@ -1475,38 +1475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update logout form handling: stay on current page, clear session, then refresh in place
-    document.querySelectorAll('.logout-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            if (!csrfToken) return;
-
-            fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ _token: csrfToken })
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return null;
-                }
-                return response.ok ? response.json() : null;
-            })
-            .then(data => {
-                if (data?.success) {
-                    window.location.reload();
-                }
-            })
-            .catch(() => {});
-        });
-    });
+    // Logout is handled in layouts.modal.loginModal (refresh + open login modal)
 
     // Add input event listeners to place search inputs
     ['searchPlaceDesktop', 'searchPlaceMobile'].forEach(inputId => {

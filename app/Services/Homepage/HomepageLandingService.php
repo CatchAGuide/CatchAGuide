@@ -53,13 +53,28 @@ class HomepageLandingService
 
     private function targetSpecies(string $locale): Collection
     {
-        return Cache::remember("homepage_target_species_v3_{$locale}", now()->addMinutes(30), function () use ($locale) {
-            $pages = CategoryPage::query()
+        return Cache::remember("homepage_target_species_v5_{$locale}", now()->addMinutes(30), function () use ($locale) {
+            $limit = 10;
+
+            $favorites = CategoryPage::query()
                 ->where('type', 'Targets')
                 ->where('is_favorite', 1)
                 ->orderBy('name')
-                ->limit(6)
+                ->limit($limit)
                 ->get();
+
+            $pages = $favorites;
+
+            if ($pages->count() < $limit) {
+                $extra = CategoryPage::query()
+                    ->where('type', 'Targets')
+                    ->whereNotIn('id', $pages->pluck('id'))
+                    ->orderBy('name')
+                    ->limit($limit - $pages->count())
+                    ->get();
+
+                $pages = $pages->concat($extra);
+            }
 
             $targets = Target::query()
                 ->whereIn('id', $pages->pluck('source_id')->filter()->unique())
@@ -149,7 +164,7 @@ class HomepageLandingService
     {
         $monthNumber = (int) now()->month;
         $month = now()->translatedFormat('F');
-        $cacheKey = "homepage_season_v2_{$locale}_{$monthNumber}";
+        $cacheKey = "homepage_season_v3_{$locale}_{$monthNumber}";
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($locale, $monthNumber, $month) {
             $highlight = MonthlyHighlight::forMonth($monthNumber);

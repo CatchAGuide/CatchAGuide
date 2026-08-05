@@ -139,6 +139,142 @@ function validateSearch(event, inputId) {
         if (next) next.addEventListener('click', function () { scrollBy(1); });
     });
 
+    // First-view entrance for homepage sections (same idea as target fish)
+    var revealReduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var revealSections = Array.prototype.slice.call(document.querySelectorAll('[data-cag-reveal]'));
+    var activateReveal = function (section) {
+        section.classList.add('is-inview');
+    };
+    if (revealReduceMotion) {
+        revealSections.forEach(activateReveal);
+    } else if ('IntersectionObserver' in window) {
+        var revealObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                activateReveal(entry.target);
+                revealObserver.unobserve(entry.target);
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+        revealSections.forEach(function (section) {
+            revealObserver.observe(section);
+        });
+    } else {
+        revealSections.forEach(activateReveal);
+    }
+
+    // Target fish: staggered entrance + walking spotlight (not a rail auto-scroll)
+    var speciesSection = document.querySelector('[data-species-spotlight]');
+    if (speciesSection) {
+        var speciesViewport = speciesSection.querySelector('[data-species-viewport]');
+        var speciesCards = Array.prototype.slice.call(
+            speciesSection.querySelectorAll('.cag-home-species__card')
+        );
+        var speciesReduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var spotlightIndex = 0;
+        var spotlightTimer = null;
+        var spotlightPaused = false;
+        var entranceTimer = null;
+
+        var clearSpotlight = function () {
+            speciesCards.forEach(function (card) {
+                card.classList.remove('is-spotlight');
+            });
+        };
+
+        var ensureCardVisible = function (card) {
+            if (!speciesViewport || !card) return;
+            var viewLeft = speciesViewport.scrollLeft;
+            var viewRight = viewLeft + speciesViewport.clientWidth;
+            var cardLeft = card.offsetLeft;
+            var cardRight = cardLeft + card.offsetWidth;
+            var pad = 16;
+
+            if (cardLeft < viewLeft + pad) {
+                speciesViewport.scrollTo({ left: Math.max(0, cardLeft - pad), behavior: 'smooth' });
+            } else if (cardRight > viewRight - pad) {
+                speciesViewport.scrollTo({
+                    left: cardRight - speciesViewport.clientWidth + pad,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        var setSpotlight = function (index) {
+            if (!speciesCards.length) return;
+            clearSpotlight();
+            spotlightIndex = (index + speciesCards.length) % speciesCards.length;
+            var card = speciesCards[spotlightIndex];
+            card.classList.add('is-spotlight');
+            ensureCardVisible(card);
+        };
+
+        var stopSpotlight = function () {
+            if (spotlightTimer) {
+                window.clearInterval(spotlightTimer);
+                spotlightTimer = null;
+            }
+        };
+
+        var startSpotlight = function () {
+            if (speciesReduceMotion || speciesCards.length < 2 || spotlightPaused) return;
+            stopSpotlight();
+            setSpotlight(spotlightIndex);
+            spotlightTimer = window.setInterval(function () {
+                if (spotlightPaused) return;
+                setSpotlight(spotlightIndex + 1);
+            }, 2400);
+        };
+
+        var pauseSpotlight = function () {
+            spotlightPaused = true;
+            clearSpotlight();
+            stopSpotlight();
+        };
+
+        var resumeSpotlight = function () {
+            spotlightPaused = false;
+            startSpotlight();
+        };
+
+        var beginMotion = function () {
+            speciesSection.classList.add('is-inview');
+            if (entranceTimer) window.clearTimeout(entranceTimer);
+            entranceTimer = window.setTimeout(function () {
+                speciesSection.classList.add('is-ready');
+                startSpotlight();
+            }, Math.max(400, speciesCards.length * 70 + 200));
+        };
+
+        if ('IntersectionObserver' in window) {
+            var speciesObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        beginMotion();
+                        speciesObserver.disconnect();
+                    }
+                });
+            }, { threshold: 0.2 });
+            speciesObserver.observe(speciesSection);
+        } else {
+            beginMotion();
+        }
+
+        // Pause only while interacting with cards — not the whole section heading.
+        speciesCards.forEach(function (card) {
+            card.addEventListener('mouseenter', pauseSpotlight);
+            card.addEventListener('mouseleave', resumeSpotlight);
+            card.addEventListener('focusin', pauseSpotlight);
+            card.addEventListener('focusout', resumeSpotlight);
+        });
+
+        if (speciesViewport) {
+            speciesViewport.addEventListener('touchstart', pauseSpotlight, { passive: true });
+            speciesViewport.addEventListener('touchend', function () {
+                window.setTimeout(resumeSpotlight, 1200);
+            }, { passive: true });
+        }
+    }
+
     var reviewsRail = document.querySelector('[data-reviews-rail] .cag-home-reviews__rail');
     if (reviewsRail) {
         reviewsRail.addEventListener('touchstart', function () {

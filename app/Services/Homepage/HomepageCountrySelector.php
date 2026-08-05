@@ -20,7 +20,7 @@ class HomepageCountrySelector
     {
         $limit = $limit ?? self::FEATURED_LIMIT;
         $locale = app()->getLocale();
-        $cacheKey = "homepage_featured_countries_v2_{$locale}_{$limit}";
+        $cacheKey = "homepage_featured_countries_v3_{$locale}_{$limit}";
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit) {
             $countries = Country::query()

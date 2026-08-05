@@ -36,7 +36,51 @@
             </form>
 
             @auth
-                <a href="{{ route('profile.index') }}" class="cag-home-nav__login d-none d-md-inline">@lang('homepage.header-profile')</a>
+                @php
+                    $homeNavUser = Auth::user();
+                    $homeNavAvatar = $homeNavUser->profil_image
+                        ? asset('images/' . $homeNavUser->profil_image)
+                        : asset('images/placeholder_guide.jpg');
+                    $homeNavName = trim((string) $homeNavUser->firstname) ?: __('homepage.header-profile');
+                @endphp
+                <div class="cag-home-nav__profile dropdown d-none d-md-block">
+                    <button
+                        type="button"
+                        class="cag-home-nav__profile-toggle dropdown-toggle"
+                        id="homeNavProfileToggle"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                    >
+                        <img
+                            src="{{ $homeNavAvatar }}"
+                            alt=""
+                            class="cag-home-nav__avatar"
+                            width="32"
+                            height="32"
+                        >
+                        <span class="cag-home-nav__profile-name">{{ $homeNavName }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end cag-home-nav__profile-menu" aria-labelledby="homeNavProfileToggle">
+                        <a class="dropdown-item" href="{{ route('profile.index') }}">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>@lang('homepage.header-profile')</span>
+                        </a>
+                        <a class="dropdown-item" href="{{ route('profile.bookings') }}">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            <span>@lang('profile.bookings')</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                            @csrf
+                            <button type="submit" class="dropdown-item cag-home-nav__logout">
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                <span>@lang('homepage.header-logout')</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             @else
                 <a href="#" class="cag-home-nav__login d-none d-md-inline" data-bs-toggle="modal" data-bs-target="#loginModal">@lang('homepage.header-login')</a>
             @endauth
@@ -55,9 +99,21 @@
                 <i class="fas fa-bars" aria-hidden="true"></i>
             </button>
             @auth
-                <a href="{{ route('profile.index') }}" class="cag-home-nav__icon-btn d-md-none" aria-label="@lang('homepage.header-profile')">
-                    <i class="far fa-user-circle" aria-hidden="true"></i>
-                </a>
+                <button
+                    type="button"
+                    class="cag-home-nav__icon-btn cag-home-nav__avatar-btn d-md-none"
+                    data-bs-toggle="modal"
+                    data-bs-target="#mobileMenuModal"
+                    aria-label="@lang('homepage.header-profile')"
+                >
+                    <img
+                        src="{{ $homeNavAvatar }}"
+                        alt=""
+                        class="cag-home-nav__avatar"
+                        width="32"
+                        height="32"
+                    >
+                </button>
             @else
                 <a href="#" class="cag-home-nav__icon-btn d-md-none" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="@lang('homepage.header-login')">
                     <i class="far fa-user-circle" aria-hidden="true"></i>

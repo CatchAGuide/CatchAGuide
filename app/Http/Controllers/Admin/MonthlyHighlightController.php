@@ -100,7 +100,7 @@ class MonthlyHighlightController extends Controller
     private function forgetHomepageSeasonCache(int $month): void
     {
         foreach (['en', 'de'] as $locale) {
-            Cache::forget("homepage_season_v2_{$locale}_{$month}");
+            Cache::forget("homepage_season_v3_{$locale}_{$month}");
         }
     }
 

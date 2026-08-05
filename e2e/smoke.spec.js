@@ -36,7 +36,7 @@ test.describe('smoke', () => {
     { name: 'vacations hub', path: '/vacations' },
     { name: 'trips destinations', path: '/trips-destinations' },
     { name: 'guide onboarding', path: '/guide/onboarding' },
-    { name: 'login', path: '/login' },
+    { name: 'login redirect', path: '/login' },
     { name: 'password reset', path: '/password/reset' },
     { name: 'search request', path: '/searchrequest' },
     { name: 'contact', path: '/contact' },

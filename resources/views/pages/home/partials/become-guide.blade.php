@@ -1,5 +1,5 @@
-<section class="cag-home-partner">
-    <div class="cag-home-container cag-home-partner__inner">
+<section class="cag-home-partner" data-cag-reveal>
+    <div class="cag-home-container cag-home-partner__inner cag-reveal__block">
         <h2 class="cag-home-partner__title">{{ __('homepage.partner_title') }}</h2>
         <p class="cag-home-partner__text">{{ __('homepage.partner_text') }}</p>
         <div class="cag-home-partner__actions">

@@ -8,8 +8,9 @@
     $image = $image ?: $placeholder;
 @endphp
 <article
-    class="cag-home-offer"
+    class="cag-home-offer cag-reveal__item"
     role="listitem"
+    style="--reveal-i: {{ (int) ($revealIndex ?? 0) }}"
     data-home-analytics="homepage_mixed_offer_click"
     data-product-type="{{ $type }}"
 >

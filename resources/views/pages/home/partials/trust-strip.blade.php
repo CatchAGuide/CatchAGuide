@@ -1,7 +1,7 @@
-<section class="cag-home-section cag-home-trust">
+<section class="cag-home-section cag-home-trust" data-cag-reveal>
     <div class="cag-home-container">
         <div class="cag-home-trust__grid">
-            <div class="cag-home-trust__card cag-home-trust__card--rating">
+            <div class="cag-home-trust__card cag-home-trust__card--rating cag-reveal__item" style="--reveal-i: 0">
                 <strong class="cag-home-trust__value">{{ ($trust['rating'] ?? null) ?: '—' }}</strong>
                 <div class="cag-home-trust__approved">
                     <span class="cag-home-trust__approved-text">{{ __('homepage.trust_shopper_approved') }}</span>
@@ -16,7 +16,7 @@
                 @endif
             </div>
 
-            <div class="cag-home-trust__card">
+            <div class="cag-home-trust__card cag-reveal__item" style="--reveal-i: 1">
                 <span class="cag-home-trust__icon" aria-hidden="true">
                     <i class="fas fa-check"></i>
                 </span>
@@ -24,7 +24,7 @@
                 <span class="cag-home-trust__label">{{ __('homepage.trust_bookings_label') }}</span>
             </div>
 
-            <div class="cag-home-trust__card">
+            <div class="cag-home-trust__card cag-reveal__item" style="--reveal-i: 2">
                 <span class="cag-home-trust__icon" aria-hidden="true">
                     <i class="far fa-clock"></i>
                 </span>
@@ -32,7 +32,7 @@
                 <span class="cag-home-trust__label">{{ __('homepage.trust_reply_text') }}</span>
             </div>
 
-            <div class="cag-home-trust__card">
+            <div class="cag-home-trust__card cag-reveal__item" style="--reveal-i: 3">
                 <span class="cag-home-trust__icon" aria-hidden="true">
                     <i class="fas fa-shield-alt"></i>
                 </span>

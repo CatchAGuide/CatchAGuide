@@ -116,8 +116,9 @@ return [
     'trust_view_reviews' => 'View :count+ reviews',
 
     'species_title' => 'Most popular target fish',
-    'species_subtitle' => 'Choose your target species',
+    'species_subtitle' => 'Pick a species and find guided trips built around the fish you want to catch.',
     'species_view_all' => 'See all target fish',
+    'species_explore' => 'Explore',
 
     'season_badge' => 'Right now',
     'season_title' => 'What’s biting in :month?',

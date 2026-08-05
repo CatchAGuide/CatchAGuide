@@ -116,8 +116,9 @@ return [
     'trust_view_reviews' => ':count+ Bewertungen ansehen',
 
     'species_title' => 'Beliebteste Zielfische',
-    'species_subtitle' => 'Wähle deine Zielfischart',
+    'species_subtitle' => 'Wähle deine Art und finde geführte Touren rund um den Fisch, den du fangen willst.',
     'species_view_all' => 'Alle Zielfische ansehen',
+    'species_explore' => 'Entdecken',
 
     'season_badge' => 'Gerade jetzt',
     'season_title' => 'Was beißt im :month?',

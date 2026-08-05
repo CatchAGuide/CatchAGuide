@@ -1,11 +1,11 @@
 @if(($testimonials ?? collect())->isNotEmpty())
-<section id="cag-home-reviews" class="cag-home-section cag-home-reviews">
+<section id="cag-home-reviews" class="cag-home-section cag-home-reviews" data-cag-reveal>
     <div class="cag-home-container">
-        <div class="cag-home-section__header cag-home-section__header--center">
+        <div class="cag-home-section__header cag-home-section__header--center cag-reveal__header">
             <h2 class="cag-home-section__title">{{ __('homepage.reviews_title') }}</h2>
         </div>
 
-        <div class="cag-home-reviews__viewport" data-reviews-rail>
+        <div class="cag-home-reviews__viewport cag-reveal__block" data-reviews-rail>
             <div class="cag-home-reviews__rail" role="list">
                 @foreach([false, true] as $isClone)
                     @foreach($testimonials as $item)

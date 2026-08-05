@@ -1,7 +1,7 @@
 @if(!empty($season))
-<section class="cag-home-section cag-home-season">
+<section class="cag-home-section cag-home-season" data-cag-reveal>
     <div class="cag-home-container">
-        <div class="cag-home-season__card">
+        <div class="cag-home-season__card cag-reveal__block">
             <div class="cag-home-season__copy">
                 <span class="cag-home-season__badge">{{ __('homepage.season_badge') }}</span>
                 <h2 class="cag-home-season__title">{{ $season['title'] }}</h2>
@@ -14,7 +14,11 @@
             @if(($season['species'] ?? collect())->isNotEmpty())
                 <div class="cag-home-season__species">
                     @foreach($season['species'] as $species)
-                        <a href="{{ $species['url'] }}" class="cag-home-season__species-card">
+                        <a
+                            href="{{ $species['url'] }}"
+                            class="cag-home-season__species-card cag-reveal__item"
+                            style="--reveal-i: {{ $loop->index + 1 }}"
+                        >
                             <img src="{{ $species['thumbnail'] }}" alt="{{ $species['name'] }}" loading="lazy">
                             <span>{{ $species['name'] }}</span>
                         </a>

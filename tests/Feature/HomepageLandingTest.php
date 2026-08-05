@@ -205,8 +205,9 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('View 2,480+ reviews', false);
         $response->assertSee('cag-home-season', false);
         $response->assertDontSee('cag-home-guides', false);
-        $response->assertSee('cag-home-species__grid', false);
+        $response->assertSee('cag-home-species__rail', false);
         $response->assertSee('cag-home-species__card', false);
+        $response->assertSee('data-species-spotlight', false);
         $response->assertSee('Pike', false);
         $response->assertSee('cag-home-reviews', false);
         $response->assertSee('9.5', false);

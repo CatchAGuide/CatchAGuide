@@ -1,7 +1,7 @@
 @if(($featuredCountries ?? collect())->isNotEmpty())
-<section class="cag-home-section cag-home-destinations">
+<section class="cag-home-section cag-home-destinations" data-cag-reveal>
     <div class="cag-home-container">
-        <div class="cag-home-section__header">
+        <div class="cag-home-section__header cag-reveal__header">
             <h2 class="cag-home-section__title">{{ __('homepage.destinations_title') }}</h2>
             <div class="cag-home-section__tools">
                 <a
@@ -26,8 +26,9 @@
                     @foreach($featuredCountries as $country)
                         <a
                             href="{{ route('destination.country', ['country' => $country['slug']]) }}"
-                            class="cag-home-destinations__tile"
+                            class="cag-home-destinations__tile cag-reveal__item"
                             role="listitem"
+                            style="--reveal-i: {{ min($loop->index, 8) }}"
                             @if($isClone) aria-hidden="true" tabindex="-1" @endif
                             data-home-analytics="homepage_country_click"
                         >
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <div class="cag-home-destinations__all-mobile d-md-none">
+        <div class="cag-home-destinations__all-mobile d-md-none cag-reveal__header">
             <a href="{{ route('destination') }}" data-home-analytics="homepage_all_countries_click">
                 {{ __('homepage.countries_all') }}
             </a>
