@@ -18,8 +18,10 @@
 @include('pages.home.partials.mobile-menu-modal')
 
 <div class="cag-home" data-analytics-page="homepage">
-    @include('pages.home.partials.home-nav')
-    @include('pages.home.partials.hero-chooser')
+    <div class="cag-home-hero-shell">
+        @include('pages.home.partials.home-nav')
+        @include('pages.home.partials.hero-chooser')
+    </div>
     @include('pages.home.partials.country-grid')
     @include('pages.home.partials.trust-strip')
     @include('pages.home.partials.target-species')
@@ -145,6 +147,65 @@ function validateSearch(event, inputId) {
         reviewsRail.addEventListener('touchend', function () {
             reviewsRail.style.animationPlayState = '';
         });
+    }
+
+    var hero = document.querySelector('[data-hero-carousel]');
+    var homeNav = document.querySelector('.cag-home-hero-shell .cag-home-nav');
+    if (homeNav && hero) {
+        var syncNavSolid = function () {
+            homeNav.classList.toggle('is-solid', hero.getBoundingClientRect().bottom <= homeNav.offsetHeight + 12);
+        };
+        syncNavSolid();
+        window.addEventListener('scroll', syncNavSolid, { passive: true });
+        window.addEventListener('resize', syncNavSolid);
+    }
+
+    if (hero) {
+        var slides = Array.prototype.slice.call(hero.querySelectorAll('.cag-home-hero__image'));
+        var dots = Array.prototype.slice.call(hero.querySelectorAll('[data-hero-dot]'));
+        var index = 0;
+        var timer = null;
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var goTo = function (next) {
+            if (!slides.length) return;
+            index = (next + slides.length) % slides.length;
+            slides.forEach(function (slide, i) {
+                slide.classList.toggle('is-active', i === index);
+            });
+            dots.forEach(function (dot, i) {
+                var active = i === index;
+                dot.classList.toggle('is-active', active);
+                dot.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+        };
+
+        var start = function () {
+            if (reduceMotion || slides.length < 2) return;
+            stop();
+            timer = window.setInterval(function () {
+                goTo(index + 1);
+            }, 6500);
+        };
+        var stop = function () {
+            if (timer) {
+                window.clearInterval(timer);
+                timer = null;
+            }
+        };
+
+        dots.forEach(function (dot) {
+            dot.addEventListener('click', function () {
+                var target = parseInt(dot.getAttribute('data-hero-dot'), 10);
+                if (isNaN(target)) return;
+                goTo(target);
+                start();
+            });
+        });
+
+        hero.addEventListener('mouseenter', stop);
+        hero.addEventListener('mouseleave', start);
+        start();
     }
 })();
 </script>

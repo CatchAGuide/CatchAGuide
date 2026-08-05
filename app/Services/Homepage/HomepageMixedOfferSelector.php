@@ -24,23 +24,23 @@ class HomepageMixedOfferSelector
     /**
      * One collection per product module for homepage carousels.
      *
-     * @return array{tour: Collection, trip: Collection, camp: Collection}
+     * @return array{tour: Collection, camp: Collection, trip: Collection}
      */
     public function byModule(?int $perType = null): array
     {
         $perType = $perType ?? 8;
-        $cacheKey = 'homepage_offer_modules_v1_'.app()->getLocale().'_'.$perType;
+        $cacheKey = 'homepage_offer_modules_v2_'.app()->getLocale().'_'.$perType;
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($perType) {
             return [
                 'tour' => $this->popularGuidings($perType)
                     ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
                     ->values(),
-                'trip' => $this->trips->listForHub($perType)
-                    ->map(fn ($t) => $this->tripPresenter->present($t))
-                    ->values(),
                 'camp' => $this->camps->listForHub($perType)
                     ->map(fn ($c) => $this->campPresenter->present($c))
+                    ->values(),
+                'trip' => $this->trips->listForHub($perType)
+                    ->map(fn ($t) => $this->tripPresenter->present($t))
                     ->values(),
             ];
         });
@@ -56,8 +56,8 @@ class HomepageMixedOfferSelector
         $modules = $this->byModule($perType);
 
         return $modules['tour']
-            ->merge($modules['trip'])
             ->merge($modules['camp'])
+            ->merge($modules['trip'])
             ->take($limit)
             ->values();
     }

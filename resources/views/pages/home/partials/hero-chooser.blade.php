@@ -1,18 +1,52 @@
 @php
-    $heroImage = asset('assets/images/Coverbild_Startseite.webp');
+    $heroSlides = [
+        [
+            'src' => asset('assets/images/homepage/hero-tour.webp'),
+            'key' => 'tour',
+        ],
+        [
+            'src' => asset('assets/images/homepage/hero-camp.webp'),
+            'key' => 'camp',
+        ],
+        [
+            'src' => asset('assets/images/homepage/hero-trip.webp'),
+            'key' => 'trip',
+        ],
+        [
+            'src' => asset('assets/images/homepage/hero-vacation.webp'),
+            'key' => 'vacation',
+        ],
+    ];
 @endphp
 
-<section class="cag-home-hero">
+<section class="cag-home-hero" data-hero-carousel>
     <div class="cag-home-hero__media" aria-hidden="true">
-        <img
-            class="cag-home-hero__image"
-            src="{{ $heroImage }}"
-            alt=""
-            width="1920"
-            height="1080"
-            fetchpriority="high"
-        >
+        <div class="cag-home-hero__slides">
+            @foreach($heroSlides as $index => $slide)
+                <img
+                    class="cag-home-hero__image{{ $index === 0 ? ' is-active' : '' }}"
+                    src="{{ $slide['src'] }}"
+                    alt=""
+                    width="1920"
+                    height="1080"
+                    @if($index === 0) fetchpriority="high" @else loading="lazy" @endif
+                    data-hero-slide="{{ $slide['key'] }}"
+                >
+            @endforeach
+        </div>
         <div class="cag-home-hero__overlay"></div>
+    </div>
+
+    <div class="cag-home-hero__dots" role="tablist" aria-label="{{ __('homepage.hero_carousel_label') }}">
+        @foreach($heroSlides as $index => $slide)
+            <button
+                type="button"
+                class="cag-home-hero__dot{{ $index === 0 ? ' is-active' : '' }}"
+                data-hero-dot="{{ $index }}"
+                aria-label="{{ __('homepage.hero_carousel_slide', ['n' => $index + 1]) }}"
+                aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+            ></button>
+        @endforeach
     </div>
 
     <div class="cag-home-hero__inner">
@@ -59,9 +93,14 @@
                 class="cag-home-hero__door"
                 data-home-analytics="homepage_chooser_guidings_click"
             >
-                <span class="cag-home-hero__door-label">{{ __('homepage.chooser_tour_label') }}</span>
-                <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_title') }}</span>
-                <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_tour_sub') }}</span>
+                <span class="cag-home-hero__door-icon" aria-hidden="true">
+                    <i class="fas fa-ship"></i>
+                </span>
+                <span class="cag-home-hero__door-body">
+                    <span class="cag-home-hero__door-label">{{ __('homepage.chooser_tour_label') }}</span>
+                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_title') }}</span>
+                    <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_tour_sub') }}</span>
+                </span>
                 <span class="cag-home-hero__door-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
             </a>
             <a
@@ -69,9 +108,14 @@
                 class="cag-home-hero__door"
                 data-home-analytics="homepage_chooser_vacations_click"
             >
-                <span class="cag-home-hero__door-label">{{ __('homepage.chooser_vacation_label') }}</span>
-                <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_title') }}</span>
-                <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_vacation_sub') }}</span>
+                <span class="cag-home-hero__door-icon" aria-hidden="true">
+                    <i class="fas fa-suitcase-rolling"></i>
+                </span>
+                <span class="cag-home-hero__door-body">
+                    <span class="cag-home-hero__door-label">{{ __('homepage.chooser_vacation_label') }}</span>
+                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_title') }}</span>
+                    <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_vacation_sub') }}</span>
+                </span>
                 <span class="cag-home-hero__door-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
             </a>
         </div>

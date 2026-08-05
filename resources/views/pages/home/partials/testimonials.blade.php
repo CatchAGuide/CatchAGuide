@@ -31,7 +31,15 @@
                             </div>
                             <p class="cag-home-reviews__quote">“{{ $item['quote'] }}”</p>
                             @if(!empty($item['tour_title']))
-                                <p class="cag-home-reviews__tour">{{ $item['tour_title'] }}</p>
+                                @if(!empty($item['tour_url']))
+                                    <a
+                                        href="{{ $item['tour_url'] }}"
+                                        class="cag-home-reviews__tour"
+                                        @if($isClone) tabindex="-1" @endif
+                                    >{{ $item['tour_title'] }}</a>
+                                @else
+                                    <p class="cag-home-reviews__tour">{{ $item['tour_title'] }}</p>
+                                @endif
                             @endif
                         </blockquote>
                     @endforeach

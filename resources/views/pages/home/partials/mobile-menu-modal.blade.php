@@ -19,7 +19,6 @@
                 <div class="cag-home-mobile-menu__items">
                     <a href="{{ route('guidings.index') }}" class="cag-home-mobile-menu__item">@lang('homepage.filter-fishing-near-me')</a>
                     <a href="{{ route('vacations.index') }}" class="cag-home-mobile-menu__item">@lang('homepage.header-vacations')</a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="cag-home-mobile-menu__item">@lang('homepage.filter-magazine')</a>
                     <a href="{{ route('destination') }}" class="cag-home-mobile-menu__item">@lang('homepage.footer_destinations')</a>
                     @auth
                         <a href="{{ route('profile.index') }}" class="cag-home-mobile-menu__item">@lang('homepage.header-profile')</a>

@@ -5,6 +5,7 @@ namespace App\Services\Homepage;
 use App\Models\Booking;
 use App\Models\CategoryPage;
 use App\Models\Review;
+use App\Models\Target;
 use App\Models\Thread;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -23,7 +24,7 @@ class HomepageLandingService
      *     featuredCountries: Collection,
      *     countryCount: int,
      *     mixedOffers: Collection,
-     *     offerModules: array{tour: Collection, trip: Collection, camp: Collection},
+     *     offerModules: array{tour: Collection, camp: Collection, trip: Collection},
      *     targetSpecies: Collection,
      *     testimonials: Collection,
      *     magazineThreads: Collection,
@@ -50,23 +51,29 @@ class HomepageLandingService
 
     private function targetSpecies(string $locale): Collection
     {
-        return Cache::remember("homepage_target_species_{$locale}", now()->addMinutes(30), function () use ($locale) {
-            return CategoryPage::query()
+        return Cache::remember("homepage_target_species_v3_{$locale}", now()->addMinutes(30), function () use ($locale) {
+            $pages = CategoryPage::query()
                 ->where('type', 'Targets')
                 ->where('is_favorite', 1)
                 ->orderBy('name')
-                ->limit(8)
-                ->get()
-                ->map(function (CategoryPage $page) use ($locale) {
-                    $lang = $page->language($locale);
+                ->limit(6)
+                ->get();
 
-                    return [
-                        'name' => $lang?->title ?? $page->name,
-                        'slug' => $page->slug,
-                        'thumbnail' => $page->getThumbnailPath(),
-                        'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
-                    ];
-                });
+            $targets = Target::query()
+                ->whereIn('id', $pages->pluck('source_id')->filter()->unique())
+                ->get()
+                ->keyBy('id');
+
+            return $pages->map(function (CategoryPage $page) use ($targets) {
+                $target = $targets->get($page->source_id);
+
+                return [
+                    'name' => $target?->name ?? $page->name,
+                    'slug' => $page->slug,
+                    'thumbnail' => $page->getThumbnailPath(),
+                    'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
+                ];
+            });
         });
     }
 
@@ -75,9 +82,15 @@ class HomepageLandingService
      */
     private function testimonials(): Collection
     {
-        return Cache::remember('homepage_testimonials_v3_'.app()->getLocale(), now()->addMinutes(30), function () {
+        return Cache::remember('homepage_testimonials_v4_'.app()->getLocale(), now()->addMinutes(30), function () {
             $reviews = Review::query()
-                ->with(['guiding:id,title'])
+                ->with([
+                    'guiding:id,title,slug',
+                    'booking.calendar_schedule',
+                    'booking.blocked_event',
+                    'booking.guestUser:id,firstname',
+                    'booking.registeredUser:id,firstname',
+                ])
                 ->where(function ($q) {
                     $q->where('is_automatic', false)->orWhereNull('is_automatic');
                 })
@@ -89,22 +102,26 @@ class HomepageLandingService
                 ->limit(6)
                 ->get();
 
-            $authorNames = User::query()
-                ->whereIn('id', $reviews->pluck('user_id')->filter()->unique())
-                ->pluck('firstname', 'id');
-
             return $reviews
-                ->map(function (Review $review) use ($authorNames) {
-                    $tourTitle = $review->guiding?->title
-                        ? translate($review->guiding->title)
+                ->map(function (Review $review) {
+                    $guiding = $review->guiding;
+                    $booking = $review->booking;
+                    $author = $booking?->user?->firstname
+                        ?: User::query()->whereKey($review->user_id)->value('firstname');
+                    $tourDate = $booking?->getBookingDate() ?? $review->created_at;
+                    $tourTitle = $guiding?->title
+                        ? translate($guiding->title)
                         : null;
 
                     return [
-                        'quote' => Str::limit(strip_tags((string) $review->comment), 180),
+                        'quote' => Str::limit(strip_tags((string) translate($review->comment)), 180),
                         'score' => round((float) $review->grandtotal_score, 1),
-                        'author' => $authorNames[$review->user_id] ?? __('homepage.testimonial_guest'),
-                        'date' => optional($review->created_at)?->translatedFormat('M Y'),
+                        'author' => $author ?: __('homepage.testimonial_guest'),
+                        'date' => $tourDate?->translatedFormat('M Y'),
                         'tour_title' => $tourTitle ? Str::limit($tourTitle, 60) : null,
+                        'tour_url' => ($guiding?->id && $guiding?->slug)
+                            ? route('guidings.show', [$guiding->id, $guiding->slug])
+                            : null,
                     ];
                 })
                 ->filter(fn (array $item) => filled($item['quote']) && $item['score'] >= 8 && $item['score'] <= 10)

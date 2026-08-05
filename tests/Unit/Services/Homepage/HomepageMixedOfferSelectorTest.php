@@ -37,7 +37,7 @@ class HomepageMixedOfferSelectorTest extends TestCase
         $this->assertArrayHasKey('trip', $modules);
         $this->assertArrayHasKey('camp', $modules);
 
-        foreach (['tour', 'trip', 'camp'] as $type) {
+        foreach (['tour', 'camp', 'trip'] as $type) {
             $this->assertLessThanOrEqual(3, $modules[$type]->count());
             $this->assertTrue($modules[$type]->every(fn ($row) => ($row['type'] ?? null) === $type));
         }

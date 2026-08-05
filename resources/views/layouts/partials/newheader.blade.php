@@ -141,10 +141,6 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" 
-                       class="text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
-                    </a>
                 </div>
             </div>
 
@@ -239,10 +235,6 @@
                     <a href="{{ route('vacations.index') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
-                    </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" 
-                       class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
                     </a>
                 </div>
             </div>
@@ -1218,10 +1210,6 @@ input[type=number] {
                     <a href="{{ route('vacations.index') }}" class="menu-item {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs"></i>
                         <span>@lang('homepage.header-vacations')</span>
-                    </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="menu-item {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open"></i>
-                        <span>@lang('homepage.filter-magazine')</span>
                     </a>
                     
                     <div class="menu-divider"></div>

@@ -140,6 +140,7 @@ class HomepageLandingTest extends TestCase
                     'author' => 'Sam',
                     'date' => 'Mar 2026',
                     'tour_title' => 'Pike fishing day tour',
+                    'tour_url' => '/guidings/1/pike-fishing-day-tour',
                 ],
             ]),
             'magazineThreads' => collect(),
@@ -175,9 +176,18 @@ class HomepageLandingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('cag-home-nav', false);
+        $response->assertSee('cag-home-hero-shell', false);
+        $response->assertSee('data-hero-carousel', false);
+        $response->assertSee('assets/images/homepage/hero-tour.webp', false);
+        $response->assertSee('assets/images/homepage/hero-camp.webp', false);
+        $response->assertSee('assets/images/homepage/hero-trip.webp', false);
+        $response->assertSee('assets/images/homepage/hero-vacation.webp', false);
         $response->assertSee('cag-home-hero__search', false);
         $response->assertSee('action="'.url('/offers').'"', false);
         $response->assertSee('cag-home-hero__doors', false);
+        $response->assertSee('cag-home-hero__door-icon', false);
+        $response->assertSee('fa-ship', false);
+        $response->assertSee('fa-suitcase-rolling', false);
         $response->assertSee(route('guidings.index', [], false), false);
         $response->assertSee(route('vacations.index', [], false), false);
         $response->assertSee(route('destination.country', ['country' => 'deutschland'], false), false);
@@ -189,9 +199,14 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('View 2,480+ reviews', false);
         $response->assertSee('cag-home-season', false);
         $response->assertDontSee('cag-home-guides', false);
+        $response->assertSee('cag-home-species__grid', false);
+        $response->assertSee('cag-home-species__card', false);
+        $response->assertSee('Pike', false);
         $response->assertSee('cag-home-reviews', false);
         $response->assertSee('9.5', false);
         $response->assertSee('/10', false);
+        $response->assertSee('Pike fishing day tour', false);
+        $response->assertSee('href="/guidings/1/pike-fishing-day-tour"', false);
         $response->assertSee('cag-home-partner', false);
         $response->assertSee('cag-home-bottom-nav', false);
     }
@@ -210,5 +225,12 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('data-offer-rail="tour"', false);
         $response->assertSee('data-offer-rail="trip"', false);
         $response->assertSee('data-offer-rail="camp"', false);
+
+        $html = $response->getContent();
+        $campPos = strpos($html, 'data-offer-module="camp"');
+        $tripPos = strpos($html, 'data-offer-module="trip"');
+        $this->assertNotFalse($campPos);
+        $this->assertNotFalse($tripPos);
+        $this->assertLessThan($tripPos, $campPos, 'Camps module should appear before Trips on the homepage.');
     }
 }

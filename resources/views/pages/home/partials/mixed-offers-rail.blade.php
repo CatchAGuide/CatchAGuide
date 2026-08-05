@@ -1,8 +1,8 @@
 @php
     $offerModules = $offerModules ?? [
         'tour' => collect(),
-        'trip' => collect(),
         'camp' => collect(),
+        'trip' => collect(),
     ];
     $offerModuleConfig = [
         'tour' => [
@@ -10,15 +10,15 @@
             'browse' => __('homepage.mixed_browse_tours'),
             'url' => route('guidings.index'),
         ],
-        'trip' => [
-            'title' => __('homepage.offers_trips_title'),
-            'browse' => __('homepage.mixed_browse_trips'),
-            'url' => route('vacations.trips.index'),
-        ],
         'camp' => [
             'title' => __('homepage.offers_camps_title'),
             'browse' => __('homepage.mixed_browse_camps'),
             'url' => route('vacations.camps.index'),
+        ],
+        'trip' => [
+            'title' => __('homepage.offers_trips_title'),
+            'browse' => __('homepage.mixed_browse_trips'),
+            'url' => route('vacations.trips.index'),
         ],
     ];
     $hasAnyOffers = collect($offerModules)->contains(fn ($items) => $items instanceof \Illuminate\Support\Collection && $items->isNotEmpty());

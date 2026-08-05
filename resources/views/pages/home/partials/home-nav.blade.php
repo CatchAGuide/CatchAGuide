@@ -4,7 +4,14 @@
             <img
                 src="{{ asset('assets/images/logo/CatchAGuide2_Logo_JPEG.jpg') }}"
                 alt="Catch A Guide"
-                class="cag-home-nav__logo"
+                class="cag-home-nav__logo cag-home-nav__logo--color"
+                width="200"
+                height="48"
+            >
+            <img
+                src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}"
+                alt="Catch A Guide"
+                class="cag-home-nav__logo cag-home-nav__logo--light"
                 width="200"
                 height="48"
             >
@@ -12,8 +19,7 @@
 
         <nav class="cag-home-nav__links d-none d-md-flex" aria-label="Primary">
             <a href="{{ route('guidings.index') }}">@lang('homepage.filter-fishing-near-me')</a>
-            <a href="{{ route('vacations.index') }}" >@lang('homepage.header-vacations')</a>
-            <a href="{{ route($blogPrefix.'.index') }}">@lang('homepage.filter-magazine')</a>
+            <a href="{{ route('vacations.index') }}">@lang('homepage.header-vacations')</a>
         </nav>
 
         <div class="cag-home-nav__actions">
