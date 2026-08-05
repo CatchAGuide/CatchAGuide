@@ -86,4 +86,72 @@ return [
     'see-more' => 'See more',
 
     'listings-title' => 'All Fishing Tours',
+
+    'meta_title' => 'Book guided fishing tours & fishing vacations | Catch A Guide',
+    'meta_description' => 'Book guided day fishing tours and multi-day fishing vacations & camps across Europe. Local guides, verified ratings, easy booking.',
+
+    'hero_h1' => 'Fishing tours and vacations, booked with local guides',
+    'hero_sub' => 'Day trips with experts — or multi-day fishing holidays across Europe’s top fishing countries.',
+    'chooser_tour_label' => 'Tours',
+    'chooser_tour_title' => 'Guided day tour',
+    'chooser_tour_sub' => 'Half-day or full-day with a local guide',
+    'chooser_vacation_label' => 'Vacations',
+    'chooser_vacation_title' => 'Fishing vacation',
+    'chooser_vacation_sub' => 'Multi-day trips & camps',
+    'hero_search_placeholder' => 'Search by location or destination',
+
+    'destinations_title' => 'Featured Destinations',
+    'countries_all' => 'Show all countries',
+    'destination_from_price' => 'from :price / Person',
+
+    'trust_rating_label' => 'Average rating',
+    'trust_bookings_label' => 'Tours booked',
+    'trust_reply_title' => 'Fast Reply',
+    'trust_reply_text' => 'Guides reply within 24h',
+    'trust_cancel_title' => 'Risk-Free',
+    'trust_cancel_text' => 'Free cancellation',
+    'trust_shopper_approved' => 'Shopper Approved',
+    'trust_view_reviews' => 'View :count+ reviews',
+
+    'species_title' => 'Target Species',
+    'species_view_all' => 'View all',
+
+    'season_badge' => 'Prime season',
+    'season_title' => 'What’s biting in :month?',
+    'season_text' => 'Cooler waters and peak conditions — explore seasonal fishing ideas from our magazine.',
+    'season_cta' => 'Read the :month guide',
+
+    'offers_title' => 'Featured Offers',
+    'offers_tours_title' => 'Tours',
+    'offers_trips_title' => 'Trips',
+    'offers_camps_title' => 'Camps',
+    'offer_details' => 'Details',
+    'mixed_browse_tours' => 'Browse tours',
+    'mixed_browse_trips' => 'Browse trips',
+    'mixed_browse_camps' => 'Browse camps',
+    'offer_type_tour' => 'Tour',
+    'offer_type_trip' => 'Trip',
+    'offer_type_camp' => 'Camp',
+
+    'guides_title' => 'Meet Your Local Guides',
+    'guides_view_all' => 'View all guides',
+
+    'reviews_title' => 'What Our Anglers Say',
+    'testimonial_guest' => 'Angler',
+
+    'magazine_section_title' => 'From the Magazine',
+
+    'partner_title' => 'Partner with Catch A Guide',
+    'partner_text' => 'Are you a fishing guide, lodge owner, or boat rental service? Reach anglers across Europe.',
+    'partner_cta_primary' => 'List your offer',
+    'partner_cta_secondary' => 'Learn More',
+
+    'mobile_nav_label' => 'Mobile navigation',
+    'mobile_nav_explore' => 'Explore',
+    'mobile_nav_bookings' => 'Bookings',
+    'mobile_nav_saved' => 'Saved',
+    'mobile_nav_profile' => 'Profile',
+
+    'footer_vacations' => 'Fishing Vacations',
+    'footer_destinations' => 'Destinations',
 ];

@@ -209,7 +209,8 @@
         { input: 'searchPlaceMobile', lat: 'LocationLatMobile', lng: 'LocationLngMobile', city: 'LocationCityMobile', country: 'LocationCountryMobile', region: 'LocationRegionMobile' },
         { input: 'searchPlaceDesktop', lat: 'LocationLatDesktop', lng: 'LocationLngDesktop', city: 'LocationCityDesktop', country: 'LocationCountryDesktop', region: 'LocationRegionDesktop' },
         { input: 'searchPlaceHeaderDesktop', lat: 'LocationLatHeaderDesktop', lng: 'LocationLngHeaderDesktop', city: 'LocationCityHeaderDesktop', country: 'LocationCountryHeaderDesktop', region: 'LocationRegionHeaderDesktop' },
-        { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop' }
+        { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop' },
+        { input: 'homeHeroSearchPlace', lat: 'LocationLatHomeHero', lng: 'LocationLngHomeHero', city: 'LocationCityHomeHero', country: 'LocationCountryHomeHero', region: 'LocationRegionHomeHero' }
     ];
 
     function initAutocompleteForConfig(MapsManager, config, callback) {

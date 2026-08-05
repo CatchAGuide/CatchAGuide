@@ -258,6 +258,7 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
 
+    @unless(request()->is('/'))
     @include('layouts.partials.newheader', [
         'isVacation' => request()->is('vacations*'),
         'currentVacationCountry' => isset($row_data)
@@ -266,6 +267,7 @@
                 ? 'all-offers'
                 : (isset($vm) ? ($vm->destination->slug ?? null) : null)),
     ])
+    @endunless
 
     @yield('content')
 

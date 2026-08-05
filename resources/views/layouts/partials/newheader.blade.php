@@ -2,6 +2,7 @@
 @include('layouts.modal.registerModal')
 @include('layouts.modal.guideApplicationModal')
 @php
+    $isHomepage = request()->is('/');
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
     $vacationPillarCountrySlug = request()->route('slug');
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
@@ -20,7 +21,7 @@
         ? $vacationDestinations->countriesForSearch()
         : collect();
 @endphp
-<nav class="navbar-custom short-header long-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
+<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -118,10 +119,12 @@
                 </div>
             </div>
             
+            @unless($isHomepage)
             <div class="header-contents container">
                 <h1 class="h2 mt-5">@yield('header_title')</h1>
                 <p class="{{ $hideHeaderSubtitle ? 'visually-hidden' : '' }}">@yield('header_sub_title')</p>
             </div>
+            @endunless
             
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-1">
@@ -142,6 +145,7 @@
             </div>
 
             <!-- Mobile Search Summary (search-summary for destinations/category-page) -->
+            @unless($isHomepage)
             @if($isDestinationOrCategoryPage)
                 <div class="col-12 d-md-none mt-2">
                     <div class="search-summary" role="button" id="headerSearchTrigger">
@@ -215,6 +219,7 @@
             </div>
             @endif
             @endif
+            @endunless
         </div>
 
         <!-- Categories Row - Desktop -->
@@ -239,7 +244,7 @@
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(request()->segment(1) != 'guidings')
+    @if(!$isHomepage && request()->segment(1) != 'guidings')
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">

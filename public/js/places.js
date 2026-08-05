@@ -507,7 +507,7 @@ if (window.CAGMaps && window.CAGMaps.Places) {
   });
 }
 function bindHeaderPlacesDeferred() {
-  var inputIds = ['searchPlace', 'searchPlaceMobile', 'searchPlaceDesktop', 'searchPlaceHeaderDesktop', 'searchPlaceShortDesktop'];
+  var inputIds = ['searchPlace', 'searchPlaceMobile', 'searchPlaceDesktop', 'searchPlaceHeaderDesktop', 'searchPlaceShortDesktop', 'homeHeroSearchPlace'];
   _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_0__["default"].bindDeferredInputs(inputIds, function () {
     // Header wiring is done in scripts.blade.php via initializeGooglePlaces after ensureLoaded
     if (typeof window.__cagInitHeaderPlaces === 'function') {

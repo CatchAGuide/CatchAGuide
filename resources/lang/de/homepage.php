@@ -84,6 +84,74 @@ return [
 
     'faq-title' => 'Häufig gestellte Fragen',
     'see-more' => 'Mehr anzeigen',
-    
+
     'listings-title' => 'Alle Angeltouren',
+
+    'meta_title' => 'Geführte Angeltouren & Angelurlaub buchen | Catch A Guide',
+    'meta_description' => 'Buche geführte Tages-Angeltouren und mehrtägigen Angelurlaub & Camps in ganz Europa. Lokale Guides, verifizierte Bewertungen, einfache Buchung.',
+
+    'hero_h1' => 'Angeltouren und Angelurlaub, gebucht mit lokalen Guides',
+    'hero_sub' => 'Tagesausflüge mit Experten — oder mehrtägige Angelreisen in Europas besten Angelregionen.',
+    'chooser_tour_label' => 'Touren',
+    'chooser_tour_title' => 'Geführte Tagestour',
+    'chooser_tour_sub' => 'Halb- oder Ganztagestour mit lokalem Guide',
+    'chooser_vacation_label' => 'Angelurlaub',
+    'chooser_vacation_title' => 'Angelurlaub',
+    'chooser_vacation_sub' => 'Mehrtägige Trips & Camps',
+    'hero_search_placeholder' => 'Suche nach Ort oder Reiseziel',
+
+    'destinations_title' => 'Beliebte Reiseziele',
+    'countries_all' => 'Alle Länder ansehen',
+    'destination_from_price' => 'ab :price / Person',
+
+    'trust_rating_label' => 'Durchschnittsbewertung',
+    'trust_bookings_label' => 'Gebuchte Touren',
+    'trust_reply_title' => 'Schnelle Antwort',
+    'trust_reply_text' => 'Guides antworten in 24 Std.',
+    'trust_cancel_title' => 'Risikofrei',
+    'trust_cancel_text' => 'Kostenlose Stornierung',
+    'trust_shopper_approved' => 'Shopper Approved',
+    'trust_view_reviews' => ':count+ Bewertungen ansehen',
+
+    'species_title' => 'Zielfische',
+    'species_view_all' => 'Alle ansehen',
+
+    'season_badge' => 'Hauptsaison',
+    'season_title' => 'Was beißt im :month?',
+    'season_text' => 'Kühlere Gewässer und beste Bedingungen — entdecke saisonale Ideen aus unserem Magazin.',
+    'season_cta' => ':month-Guide lesen',
+
+    'offers_title' => 'Ausgewählte Angebote',
+    'offers_tours_title' => 'Touren',
+    'offers_trips_title' => 'Trips',
+    'offers_camps_title' => 'Camps',
+    'offer_details' => 'Details',
+    'mixed_browse_tours' => 'Touren entdecken',
+    'mixed_browse_trips' => 'Trips entdecken',
+    'mixed_browse_camps' => 'Camps entdecken',
+    'offer_type_tour' => 'Tour',
+    'offer_type_trip' => 'Trip',
+    'offer_type_camp' => 'Camp',
+
+    'guides_title' => 'Triff lokale Guides',
+    'guides_view_all' => 'Alle Guides ansehen',
+
+    'reviews_title' => 'Was unsere Angler sagen',
+    'testimonial_guest' => 'Angler',
+
+    'magazine_section_title' => 'Aus dem Magazin',
+
+    'partner_title' => 'Partner von Catch A Guide werden',
+    'partner_text' => 'Bist du Guide, Lodge-Betreiber oder Bootsverleiher? Erreiche Angler in ganz Europa.',
+    'partner_cta_primary' => 'Angebot eintragen',
+    'partner_cta_secondary' => 'Mehr erfahren',
+
+    'mobile_nav_label' => 'Mobile Navigation',
+    'mobile_nav_explore' => 'Entdecken',
+    'mobile_nav_bookings' => 'Buchungen',
+    'mobile_nav_saved' => 'Gespeichert',
+    'mobile_nav_profile' => 'Profil',
+
+    'footer_vacations' => 'Angelurlaub',
+    'footer_destinations' => 'Reiseziele',
 ];
