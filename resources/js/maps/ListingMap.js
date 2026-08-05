@@ -561,8 +561,11 @@ class ListingMap {
     const cta = this._escape(item.cta || '');
     const priceLabel = this._escape(item.priceLabel || '');
     const pillar =
-      item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'guiding' ? item.pillar : '';
-    const badgeTone = pillar === 'trip' || pillar === 'camp' ? pillar : 'primary';
+      item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding'
+        ? (item.pillar === 'guiding' ? 'tour' : item.pillar)
+        : '';
+    const badgeTone =
+      pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
     const price = item.price != null && item.price !== '' ? item.price : null;
 
     if (!title && !image && !location && !priceLabel && price == null) {

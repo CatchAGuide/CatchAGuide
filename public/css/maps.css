@@ -1068,6 +1068,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
   background: #e85d3b;
   box-shadow: 0 2px 8px rgba(232, 93, 59, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
+.leaflet-div-icon.cag-map-pin--tour .cag-map-pin__glyph,
+.cag-map-pin--tour .cag-map-pin__glyph {
+  border-color: #c94d3c;
+  background: #E8604C;
+  box-shadow: 0 2px 8px rgba(232, 96, 76, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
 .leaflet-div-icon.cag-map-pin--camp .cag-map-pin__glyph,
 .cag-map-pin--camp .cag-map-pin__glyph {
   border-color: #1f1e2c;
@@ -1247,6 +1253,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .cag-map-preview__badge--trip {
   background: #e85d3b;
+}
+.cag-map-preview__badge--tour {
+  background: #E8604C;
 }
 .cag-map-preview__badge--camp {
   background: #313041;

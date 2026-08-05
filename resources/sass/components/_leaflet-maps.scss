@@ -400,6 +400,14 @@
       0 0 0 2px rgba(255, 255, 255, 0.35);
   }
 
+  &--tour .cag-map-pin__glyph {
+    border-color: #c94d3c;
+    background: #E8604C;
+    box-shadow:
+      0 2px 8px rgba(232, 96, 76, 0.45),
+      0 0 0 2px rgba(255, 255, 255, 0.35);
+  }
+
   &--camp .cag-map-pin__glyph {
     border-color: #1f1e2c;
     background: #313041;
@@ -620,6 +628,10 @@
 
     &--trip {
       background: #e85d3b;
+    }
+
+    &--tour {
+      background: #E8604C;
     }
 
     &--camp {

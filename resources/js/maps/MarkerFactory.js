@@ -5,7 +5,7 @@ import mapsManager, { L } from './MapsManager';
 
 class MarkerFactory {
   createIcon(variant = 'primary') {
-    const normalized = ['gray', 'trip', 'camp'].includes(variant) ? variant : 'primary';
+    const normalized = ['gray', 'trip', 'camp', 'tour'].includes(variant) ? variant : 'primary';
     const isGray = normalized === 'gray';
     return L.divIcon({
       className: `leaflet-div-icon cag-map-pin cag-map-pin--${normalized}`,

@@ -176,6 +176,7 @@ class HomepageLandingTest extends TestCase
         $response->assertOk();
         $response->assertSee('cag-home-nav', false);
         $response->assertSee('cag-home-hero__search', false);
+        $response->assertSee('action="'.url('/offers').'"', false);
         $response->assertSee('cag-home-hero__doors', false);
         $response->assertSee(route('guidings.index', [], false), false);
         $response->assertSee(route('vacations.index', [], false), false);

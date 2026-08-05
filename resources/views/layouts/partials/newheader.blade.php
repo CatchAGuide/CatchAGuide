@@ -3,6 +3,7 @@
 @include('layouts.modal.guideApplicationModal')
 @php
     $isHomepage = request()->is('/');
+    $isOffers = request()->is('offers*') || request()->routeIs('offers.*');
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
     $vacationPillarCountrySlug = request()->route('slug');
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
@@ -20,8 +21,11 @@
     $vacationCountryOptions = ($isVacation ?? false)
         ? $vacationDestinations->countriesForSearch()
         : collect();
+    $globalSearchAction = ($isVacation ?? false)
+        ? route('vacations.index')
+        : ($isOffers ? route('offers.index') : route('guidings.index'));
 @endphp
-<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
+<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }} {{ $isOffers ? 'is-offers' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -177,10 +181,10 @@
             </div>
             @else
             <div id="filterContainer" class="col-12 d-md-none mt-3">
-            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
+            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
-                            <div class="col-md-4 column-input my-2">
+                            <div class="{{ $isOffers ? 'col-md-10' : 'col-md-4' }} column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
@@ -194,6 +198,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @unless($isOffers)
                             <div class="col-md-2 column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
@@ -210,6 +215,7 @@
                                            placeholder="@lang('homepage.searchbar-targetfish')...">
                                 </div>
                             </div>
+                            @endunless
                             <div class="col-md-2 col-12 column-button my-2">
                                         <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -247,7 +253,7 @@
     @if(!$isHomepage && request()->segment(1) != 'guidings')
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
+            <form id="global-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
@@ -282,6 +288,7 @@
                                 <input type="hidden" id="LocationRegionDesktop" name="region" value="{{ request()->region }}"/>
                                 @include('layouts.partials.geosearch-hidden-fields')
                             </div>
+                            @unless($isOffers)
                             <div class="search-input" style="width: 200px;">
                                 <i class="fa fa-user input-icon"></i>
                                 <input type="number" 
@@ -296,6 +303,7 @@
                                        id="tagify-fish-desktop"
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
+                            @endunless
                             <div class="my-1 px-0">
                                 <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -1107,7 +1115,7 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
+                <form id="mobile-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
                     @if ($isVacation)
                         <div class="mb-3">
                             <label class="form-label">{{translate('Country')}}</label>
@@ -1148,6 +1156,7 @@ input[type=number] {
                             </div>
                         </div>
 
+                        @unless($isOffers)
                         <div class="mb-3">
                             <label class="form-label">Number of Persons</label>
                             <div class="position-relative">
@@ -1169,6 +1178,7 @@ input[type=number] {
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
                         </div>
+                        @endunless
                     @endif
 
                     <button type="submit" class="btn btn-primary w-100">Search</button>

@@ -580,8 +580,8 @@ var ListingMap = /*#__PURE__*/function () {
       var badge = this._escape(item.badge || '');
       var cta = this._escape(item.cta || '');
       var priceLabel = this._escape(item.priceLabel || '');
-      var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'guiding' ? item.pillar : '';
-      var badgeTone = pillar === 'trip' || pillar === 'camp' ? pillar : 'primary';
+      var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding' ? item.pillar === 'guiding' ? 'tour' : item.pillar : '';
+      var badgeTone = pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
       var price = item.price != null && item.price !== '' ? item.price : null;
       if (!title && !image && !location && !priceLabel && price == null) {
         return null;
@@ -851,7 +851,7 @@ var MarkerFactory = /*#__PURE__*/function () {
     key: "createIcon",
     value: function createIcon() {
       var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'primary';
-      var normalized = ['gray', 'trip', 'camp'].includes(variant) ? variant : 'primary';
+      var normalized = ['gray', 'trip', 'camp', 'tour'].includes(variant) ? variant : 'primary';
       var isGray = normalized === 'gray';
       return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
         className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized),

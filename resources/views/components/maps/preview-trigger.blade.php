@@ -1,5 +1,6 @@
 @props([
-    'target' => '#mapModal',
+    'target' => null,
+    'modalId' => null,
     'label' => null,
     'resultCount' => null,
     'tag' => 'button',
@@ -9,6 +10,11 @@
 @php
     $label = $label ?? __('destination.show_on_map');
     $isButton = $tag === 'button';
+    if ($target === null || $target === '') {
+        $target = $modalId
+            ? (str_starts_with((string) $modalId, '#') ? (string) $modalId : '#'.$modalId)
+            : '#mapModal';
+    }
 @endphp
 
 <x-maps.assets />

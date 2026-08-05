@@ -1,0 +1,284 @@
+<?php
+
+namespace Tests\Feature\Offers;
+
+use App\Domain\Offers\OfferListingFilter;
+use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
+use App\Services\Offers\OfferCatalogPageService;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\URL;
+use Mockery;
+use Tests\TestCase;
+
+class OffersCatalogTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['app.url' => 'http://localhost']);
+        URL::forceRootUrl('http://localhost');
+
+        $this->withoutMiddleware([
+            \Illuminate\Routing\Middleware\ThrottleRequests::class,
+            \App\Http\Middleware\DDoSProtectionMiddleware::class,
+        ]);
+    }
+
+    public function test_offers_index_renders_chips_list_map_and_faq(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([
+                $this->card('tour', 'Dawn Pike Tour'),
+                $this->card('trip', 'Sweden Multi-Day'),
+                $this->card('camp', 'Lodge Weekend'),
+            ]),
+            markers: [
+                [
+                    'id' => 1,
+                    'lat' => 52.5,
+                    'lng' => 13.4,
+                    'pillar' => 'tour',
+                    'variant' => 'tour',
+                    'title' => 'Dawn Pike Tour',
+                    'badge' => 'Tour',
+                    'url' => '/guidings/1/dawn',
+                ],
+            ],
+        ));
+
+        $response = $this->get(route('offers.index'));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_all'), false);
+        $response->assertSee(__('offers.filter_tours'), false);
+        $response->assertSee(__('offers.filter_trips'), false);
+        $response->assertSee(__('offers.filter_camps'), false);
+        $response->assertSee('data-offers-list', false);
+        $response->assertSee('data-offer-type="tour"', false);
+        $response->assertSee('data-offer-type="trip"', false);
+        $response->assertSee('data-offer-type="camp"', false);
+        $response->assertSee('offersCatalogMapModal', false);
+        $response->assertSee('data-bs-target="#offersCatalogMapModal"', false);
+        $response->assertSee('data-offers-faq', false);
+        $response->assertSee(__('offers.faq_title'), false);
+    }
+
+    public function test_type_filter_limits_cards_to_requested_module(): void
+    {
+        $this->bindCatalog(function () {
+            $type = request()->query('type', 'all');
+
+            $cards = match ($type) {
+                'tour' => collect([$this->card('tour', 'Only Tour')]),
+                'trip' => collect([$this->card('trip', 'Only Trip')]),
+                'camp' => collect([$this->card('camp', 'Only Camp')]),
+                default => collect([
+                    $this->card('tour', 'Mixed Tour'),
+                    $this->card('trip', 'Mixed Trip'),
+                ]),
+            };
+
+            return $this->viewModel(type: $type, cards: $cards);
+        });
+
+        $tour = $this->get(route('offers.index', ['type' => 'tour']));
+        $tour->assertOk();
+        $tour->assertSee('data-offer-type="tour"', false);
+        $tour->assertSee('Only Tour');
+        $tour->assertDontSee('data-offer-type="trip"', false);
+        $tour->assertDontSee('data-offer-type="camp"', false);
+
+        $trip = $this->get(route('offers.index', ['type' => 'trip']));
+        $trip->assertOk();
+        $trip->assertSee('data-offer-type="trip"', false);
+        $trip->assertSee('Only Trip');
+        $trip->assertDontSee('data-offer-type="tour"', false);
+    }
+
+    public function test_offers_index_shows_place_context_without_duplicate_title(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([$this->card('tour', 'Dawn Pike Tour')]),
+            place: 'Germany',
+        ));
+
+        $response = $this->get(route('offers.index', ['place' => 'Germany']));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-place', false);
+        $response->assertSee('Germany', false);
+        $response->assertDontSee('class="offers-catalog__title', false);
+    }
+
+    public function test_offers_index_shows_merged_suggested_offers_when_empty(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect(),
+            place: 'Nowhere',
+            suggested: collect([
+                $this->card('tour', 'Nearby Suggested Tour'),
+                $this->card('trip', 'Nearby Suggested Trip'),
+                $this->card('camp', 'Nearby Suggested Camp'),
+            ]),
+            toursTotal: 1,
+            tripsTotal: 1,
+            campsTotal: 1,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => 'Nowhere',
+            'placeLat' => '50.1',
+            'placeLng' => '8.6',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-empty', false);
+        $response->assertSee('data-offers-suggested', false);
+        $response->assertSee('Nearby Suggested Tour', false);
+        $response->assertSee('Nearby Suggested Trip', false);
+        $response->assertSee('Nearby Suggested Camp', false);
+        $response->assertSee('data-offer-type="tour"', false);
+        $response->assertSee('data-offer-type="trip"', false);
+        $response->assertSee('data-offer-type="camp"', false);
+        $response->assertSee(__('offers.suggested_near', ['place' => 'Nowhere']), false);
+        $response->assertSee(__('offers.filter_all').' (3)', false);
+        $response->assertSee(__('offers.filter_tours').' (1)', false);
+        $response->assertSee(__('offers.filter_trips').' (1)', false);
+        $response->assertSee(__('offers.filter_camps').' (1)', false);
+    }
+
+    public function test_offers_index_shows_merged_suggested_offers_when_sparse_results(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([$this->card('tour', 'Main Tour')]),
+            place: 'Düsseldorf',
+            suggested: collect([
+                $this->card('tour', 'Nearby Extra Tour'),
+                $this->card('trip', 'Nearby Extra Trip'),
+                $this->card('camp', 'Nearby Extra Camp'),
+            ]),
+            toursTotal: 2,
+            tripsTotal: 1,
+            campsTotal: 1,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => 'Düsseldorf',
+            'placeLat' => '51.2',
+            'placeLng' => '6.8',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Main Tour', false);
+        $response->assertSee('data-offers-suggested', false);
+        $response->assertSee('Nearby Extra Tour', false);
+        $response->assertSee('Nearby Extra Trip', false);
+        $response->assertSee('Nearby Extra Camp', false);
+        $response->assertSee(__('offers.filter_all').' (4)', false);
+        $response->assertSee(__('offers.filter_tours').' (2)', false);
+        $response->assertSee(__('offers.results_found', ['count' => 4]), false);
+    }
+
+    /**
+     * @param  callable(): OfferCatalogViewModel  $factory
+     */
+    private function bindCatalog(callable $factory): void
+    {
+        $mock = Mockery::mock(OfferCatalogPageService::class);
+        $mock->shouldReceive('build')->andReturnUsing($factory);
+        $this->app->instance(OfferCatalogPageService::class, $mock);
+    }
+
+    private function viewModel(
+        string $type = 'all',
+        $cards = null,
+        array $markers = [],
+        ?string $place = null,
+        $suggested = null,
+        ?int $toursTotal = null,
+        ?int $tripsTotal = null,
+        ?int $campsTotal = null,
+    ): OfferCatalogViewModel {
+        $cards = $cards ?? collect();
+        $suggested = $suggested ?? collect();
+        $filter = OfferListingFilter::fromRequest(array_filter([
+            'type' => $type,
+            'place' => $place,
+        ]));
+        $paginator = new LengthAwarePaginator(
+            $cards->map(fn ($card) => ['type' => $card['type'], 'model' => null])->all(),
+            $cards->count(),
+            9,
+            1,
+            ['path' => route('offers.index')],
+        );
+
+        // Defaults match a mixed catalog page when callers omit explicit totals.
+        $toursTotal ??= 3;
+        $tripsTotal ??= 2;
+        $campsTotal ??= 1;
+        $listingsTotal = match ($type) {
+            'tour' => $toursTotal,
+            'trip' => $tripsTotal,
+            'camp' => $campsTotal,
+            default => $toursTotal + $tripsTotal + $campsTotal,
+        };
+
+        return new OfferCatalogViewModel(
+            filter: $filter,
+            listings: $paginator,
+            cards: $cards,
+            toursTotal: $toursTotal,
+            tripsTotal: $tripsTotal,
+            campsTotal: $campsTotal,
+            listingsTotal: $listingsTotal,
+            speciesOptions: collect(['Pike']),
+            countries: collect([['slug' => 'germany', 'name' => 'Germany']]),
+            faq: collect([
+                (object) [
+                    'question' => __('offers.faq_q1'),
+                    'answer' => __('offers.faq_a1'),
+                ],
+            ]),
+            mapMarkers: $markers,
+            suggestedCards: $suggested,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function card(string $type, string $title): array
+    {
+        return [
+            'type' => $type,
+            'id' => crc32($title),
+            'title' => $title,
+            'url' => '/offers/'.$type,
+            'image' => '/images/placeholder_guide.jpg',
+            'gallery_images' => ['/images/placeholder_guide.jpg'],
+            'badge' => ucfirst($type === 'tour' ? 'Tour' : $type),
+            'badge_class' => $type,
+            'location' => 'Test Location',
+            'listing_price_display' => '€100',
+            'listing_price_prefix' => 'from',
+            'listing_price_suffix' => '/ person',
+            'listing_cta' => 'View',
+            'cta' => 'View',
+            'target_fish_tags' => ['Pike'],
+            'target_fish_tags_extra' => 0,
+            'listing_included' => ['Rod & reel'],
+            'duration_label' => '8 Hours',
+            'guests_label' => 'Max 4 Personen',
+            'water_label' => 'Lake',
+            'boat_label' => 'Boat',
+            'rating' => 9.5,
+            'review_count' => 2,
+        ];
+    }
+}

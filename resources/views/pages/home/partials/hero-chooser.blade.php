@@ -23,7 +23,7 @@
 
         <form
             class="cag-home-hero__search"
-            action="{{ route('guidings.index') }}"
+            action="{{ route('offers.index') }}"
             method="get"
             onsubmit="return validateSearch(event, 'homeHeroSearchPlace')"
             data-home-analytics="homepage_search_submit"

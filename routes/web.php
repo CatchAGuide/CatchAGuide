@@ -54,6 +54,7 @@ use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\LanguageController;
 use \App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Blog\BlogController;
+use App\Http\Controllers\Offers\OffersController;
 use App\Http\Controllers\Vacation\VacationHubController;
 use App\Http\Controllers\Vacation\VacationCountryController;
 use App\Http\Controllers\Vacation\VacationPillarController;
@@ -301,6 +302,8 @@ Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('guidings.store');
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
+
+Route::get('offers', [OffersController::class, 'index'])->name('offers.index')->middleware('ddos:search');
 
 Route::get('vacations', [VacationHubController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::get('vacations/trips', [VacationPillarController::class, 'index'])->defaults('pillar', 'trips')->name('vacations.trips.index')->middleware('ddos:search');
