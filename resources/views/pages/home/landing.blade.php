@@ -55,6 +55,11 @@ function validateSearch(event, inputId) {
     return true;
 }
 (function () {
+    var homeRoot = document.querySelector('.cag-home');
+    if (homeRoot) {
+        homeRoot.classList.add('has-reveal-js');
+    }
+
     document.querySelectorAll('[data-home-analytics]').forEach(function (el) {
         el.addEventListener('click', function () {
             var name = el.getAttribute('data-home-analytics');

@@ -81,47 +81,52 @@ $white: #ffffff;
 }
 
 // Shared first-view entrance (IntersectionObserver → .is-inview)
-.cag-reveal__header,
-.cag-reveal__item,
-.cag-reveal__block {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
-}
-
-.cag-reveal__item {
-  transform: translateY(16px) scale(0.97);
-  transition-delay: calc(var(--reveal-i, 0) * 55ms);
-}
-
-.cag-reveal__header {
-  transition-delay: 0ms;
-}
-
-.cag-reveal__block {
-  transform: translateY(22px);
-  transition-delay: 60ms;
-}
-
-[data-cag-reveal].is-inview {
+// Only hide when JS arms reveals — keeps content visible without JS.
+.has-reveal-js {
   .cag-reveal__header,
   .cag-reveal__item,
   .cag-reveal__block {
-    opacity: 1;
-    transform: none;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .cag-reveal__item {
+    transform: translateY(16px) scale(0.97);
+    transition-delay: calc(var(--reveal-i, 0) * 55ms);
+  }
+
+  .cag-reveal__header {
+    transition-delay: 0ms;
+  }
+
+  .cag-reveal__block {
+    transform: translateY(22px);
+    transition-delay: calc(40ms + var(--reveal-i, 0) * 70ms);
+  }
+
+  [data-cag-reveal].is-inview {
+    .cag-reveal__header,
+    .cag-reveal__item,
+    .cag-reveal__block {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cag-reveal__header,
-  .cag-reveal__item,
-  .cag-reveal__block {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
+  .has-reveal-js {
+    .cag-reveal__header,
+    .cag-reveal__item,
+    .cag-reveal__block {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
   }
 }
 
