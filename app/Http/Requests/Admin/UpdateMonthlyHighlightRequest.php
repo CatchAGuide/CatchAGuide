@@ -16,31 +16,19 @@ class UpdateMonthlyHighlightRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $countryIds = collect($this->input('country_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values();
-
-        $targetIds = collect($this->input('target_ids', []))
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values();
-
-        $items = $countryIds
-            ->map(fn (int $id) => ['type' => MonthlyHighlight::ITEM_TYPE_COUNTRY, 'id' => $id])
-            ->concat(
-                $targetIds->map(fn (int $id) => ['type' => MonthlyHighlight::ITEM_TYPE_TARGET, 'id' => $id])
-            )
+        $cards = collect($this->input('cards', []))
+            ->take(MonthlyHighlight::MAX_ITEMS)
+            ->map(fn ($card) => [
+                'country_id' => filled($card['country_id'] ?? null) ? (int) $card['country_id'] : null,
+                'target_id' => filled($card['target_id'] ?? null) ? (int) $card['target_id'] : null,
+            ])
             ->values()
             ->all();
 
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'country_ids' => $countryIds->all(),
-            'target_ids' => $targetIds->all(),
-            'items' => $items,
+            'cards' => $cards,
+            'items' => MonthlyHighlight::itemsFromCardInput($cards),
         ]);
     }
 
@@ -59,10 +47,10 @@ class UpdateMonthlyHighlightRequest extends FormRequest
             'title_de' => ['required', 'string', 'max:255'],
             'subtitle_en' => ['nullable', 'string', 'max:1000'],
             'subtitle_de' => ['nullable', 'string', 'max:1000'],
-            'country_ids' => ['nullable', 'array'],
-            'country_ids.*' => ['integer', Rule::exists('c_countries', 'id')],
-            'target_ids' => ['nullable', 'array'],
-            'target_ids.*' => [
+            'cards' => ['nullable', 'array', 'max:'.MonthlyHighlight::MAX_ITEMS],
+            'cards.*.country_id' => ['nullable', 'integer', Rule::exists('c_countries', 'id')],
+            'cards.*.target_id' => [
+                'nullable',
                 'integer',
                 Rule::exists('category_pages', 'id')->where(fn ($q) => $q->where('type', 'Targets')),
             ],
@@ -74,12 +62,16 @@ class UpdateMonthlyHighlightRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            $total = count($this->input('country_ids', [])) + count($this->input('target_ids', []));
-            if ($total > MonthlyHighlight::MAX_ITEMS) {
-                $validator->errors()->add(
-                    'items',
-                    'Select at most '.MonthlyHighlight::MAX_ITEMS.' countries and target fish combined.'
-                );
+            foreach ($this->input('cards', []) as $index => $card) {
+                $hasCountry = filled($card['country_id'] ?? null);
+                $hasTarget = filled($card['target_id'] ?? null);
+
+                if ($hasCountry xor $hasTarget) {
+                    $validator->errors()->add(
+                        "cards.{$index}",
+                        'Each card needs both a country and a target fish.'
+                    );
+                }
             }
         });
     }

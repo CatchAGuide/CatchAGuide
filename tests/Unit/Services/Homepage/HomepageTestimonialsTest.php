@@ -25,11 +25,12 @@ class HomepageTestimonialsTest extends TestCase
         /** @var \Illuminate\Support\Collection $items */
         $items = $method->invoke($service);
 
-        $this->assertLessThanOrEqual(6, $items->count());
+        $this->assertLessThanOrEqual(15, $items->count());
         $this->assertTrue($items->every(function (array $row) {
-            return ($row['score'] ?? 0) >= 8
+            return ($row['score'] ?? 0) > 8
                 && ($row['score'] ?? 0) <= 10
                 && filled($row['quote'] ?? null)
+                && filled($row['author'] ?? null)
                 && ! str_starts_with((string) ($row['quote'] ?? ''), 'Successfully completed fishing tour');
         }));
     }
@@ -59,6 +60,19 @@ class HomepageTestimonialsTest extends TestCase
                 && array_key_exists('tour_title', $row);
         }));
 
+        $eligibleIds = Review::query()
+            ->where(function ($q) {
+                $q->where('is_automatic', false)->orWhereNull('is_automatic');
+            })
+            ->where('grandtotal_score', '>', 8)
+            ->where('grandtotal_score', '<=', 10)
+            ->whereNotNull('comment')
+            ->where('comment', '!=', '')
+            ->where('comment', 'not like', 'Successfully completed fishing tour%')
+            ->latest('id')
+            ->limit(15)
+            ->pluck('id');
+
         $guestReview = Review::query()
             ->with([
                 'guiding:id,title,slug',
@@ -67,12 +81,7 @@ class HomepageTestimonialsTest extends TestCase
                 'booking.guestUser:id,firstname',
                 'booking.registeredUser:id,firstname',
             ])
-            ->where(function ($q) {
-                $q->where('is_automatic', false)->orWhereNull('is_automatic');
-            })
-            ->whereBetween('grandtotal_score', [8, 10])
-            ->whereNotNull('comment')
-            ->where('comment', '!=', '')
+            ->whereIn('id', $eligibleIds)
             ->whereHas('booking', fn ($q) => $q->where('is_guest', true))
             ->whereHas('guiding', fn ($q) => $q->whereNotNull('slug'))
             ->latest('id')
@@ -87,7 +96,8 @@ class HomepageTestimonialsTest extends TestCase
         $expectedDate = ($guestReview->booking?->getBookingDate() ?? $guestReview->created_at)?->translatedFormat('M Y');
         $expectedUrl = route('guidings.show', [$guestReview->guiding->id, $guestReview->guiding->slug]);
 
-        $matched = $items->first(fn (array $row) => ($row['tour_url'] ?? null) === $expectedUrl);
+        $matched = $items->first(fn (array $row) => ($row['tour_url'] ?? null) === $expectedUrl
+            && ($row['author'] ?? null) === $expectedAuthor);
 
         if (! $matched) {
             $this->markTestSkipped('Guest review not in homepage testimonials sample window.');

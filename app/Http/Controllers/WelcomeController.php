@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CategoryPage;
 use App\Models\Guiding;
 use App\Services\Homepage\HomepageLandingService;
 use Illuminate\Http\Request;
@@ -18,6 +19,24 @@ class WelcomeController extends Controller
     public function index(): View
     {
         return view('pages.home.landing', $this->landing->build());
+    }
+
+    /**
+     * Former production homepage — now the Guidings marketing landing
+     * reached from the homepage product chooser.
+     */
+    public function guidingsLanding(): View
+    {
+        $allCategoryPages = CategoryPage::query()
+            ->orderBy('name', 'asc')
+            ->whereIn('type', ['Targets', 'Methods'])
+            ->where('is_favorite', 1)
+            ->get();
+
+        return view('pages.newhome-latest', [
+            'CategoryPage' => $allCategoryPages->where('type', 'Targets'),
+            'CategoryPageMethods' => $allCategoryPages->where('type', 'Methods'),
+        ]);
     }
 
     public function getUserLocation(Request $request)

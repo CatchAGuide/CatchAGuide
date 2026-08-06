@@ -1500,10 +1500,15 @@ body .main-menu .main-menu-wrapper__nav {
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
-@media (min-width: 992px) {
+@media (min-width: 768px) {
   .cag-home-trust__grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+  }
+}
+@media (min-width: 1200px) {
+  .cag-home-trust__grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
@@ -1872,89 +1877,178 @@ body .main-menu .main-menu-wrapper__nav {
     display: none;
   }
 }
-.cag-home-season__card {
-  background: var(--cag-slate);
-  color: #fff;
-  border-radius: 1rem;
-  padding: 1.75rem;
-  display: grid;
-  gap: 1.5rem;
+.cag-home-season {
+  background: linear-gradient(180deg, rgba(250, 245, 238, 0.92) 0%, rgba(238, 242, 246, 0.85) 100%);
+  border-block: 1px solid rgba(236, 232, 224, 0.85);
+}
+
+.cag-home-season__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 @media (min-width: 768px) {
-  .cag-home-season__card {
-    grid-template-columns: 1.4fr 1fr;
-    align-items: center;
-    padding: 2.5rem;
+  .cag-home-season__header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.75rem;
   }
 }
 
-.cag-home-season__badge {
-  display: inline-block;
-  background: rgba(232, 96, 76, 0.2);
-  color: #ffb4a7;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  margin-bottom: 0.75rem;
+.cag-home-season__heading {
+  max-width: 42rem;
 }
 
 .cag-home-season__title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: #fff !important;
+  margin: 0 0 0.5rem;
+  color: var(--cag-slate);
+}
+@media (min-width: 768px) {
+  .cag-home-season__title {
+    font-size: 1.75rem;
+  }
 }
 
 .cag-home-season__text {
-  opacity: 0.85;
-  margin-bottom: 1.25rem;
+  margin: 0;
+  color: var(--cag-gray);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+@media (min-width: 768px) {
+  .cag-home-season__text {
+    font-size: 1rem;
+  }
 }
 
-.cag-home-season__species {
+.cag-home-season__cta {
+  flex-shrink: 0;
+}
+.cag-home-season__cta i {
+  margin-left: 0.35rem;
+  font-size: 0.8em;
+}
+
+.cag-home-season__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
-@media (min-width: 480px) {
-  .cag-home-season__species {
+@media (min-width: 600px) {
+  .cag-home-season__grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-@media (min-width: 768px) {
-  .cag-home-season__species {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+@media (min-width: 992px) {
+  .cag-home-season__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
   }
 }
 
-.cag-home-season__species-card {
+.cag-home-season__card {
   position: relative;
-  border-radius: 0.75rem;
+  display: block;
+  border-radius: 0.85rem;
   overflow: hidden;
-  min-height: 140px;
+  aspect-ratio: 4/3;
+  min-height: 200px;
   text-decoration: none;
   color: #fff;
+  background: var(--cag-slate);
+  box-shadow: 0 8px 24px rgba(49, 48, 65, 0.08);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
 }
-.cag-home-season__species-card img {
+@media (min-width: 992px) {
+  .cag-home-season__card {
+    min-height: 240px;
+  }
+}
+.cag-home-season__card:hover, .cag-home-season__card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(49, 48, 65, 0.14);
+  outline: none;
+}
+.cag-home-season__card:hover .cag-home-season__img, .cag-home-season__card:focus-visible .cag-home-season__img {
+  transform: scale(1.04);
+}
+
+.cag-home-season__img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
-  position: absolute;
-  inset: 0;
-}
-.cag-home-season__species-card span {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
-  min-height: 140px;
-  padding: 0.85rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
-  font-weight: 700;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.cag-home-season__fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(20, 24, 36, 0.78) 0%, rgba(20, 24, 36, 0.25) 45%, rgba(20, 24, 36, 0.05) 100%);
+  pointer-events: none;
+}
+
+.cag-home-season__meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 1rem 1.1rem 1.15rem;
+}
+
+.cag-home-season__badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(160, 200, 230, 0.75);
+  background: rgba(20, 28, 40, 0.45);
+  color: #e8f2fa;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  backdrop-filter: blur(4px);
+}
+
+.cag-home-season__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+@media (min-width: 768px) {
+  .cag-home-season__name {
+    font-size: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cag-home-season__card,
+  .cag-home-season__img {
+    transition: none;
+  }
+  .cag-home-season__card:hover,
+  .cag-home-season__card:focus-visible {
+    transform: none;
+  }
+  .cag-home-season__card:hover .cag-home-season__img,
+  .cag-home-season__card:focus-visible .cag-home-season__img {
+    transform: none;
+  }
+}
 .cag-home-offers__module + .cag-home-offers__module {
   margin-top: 2rem;
 }
@@ -2315,44 +2409,105 @@ body .main-menu .main-menu-wrapper__nav {
   background: var(--cag-slate);
   color: #fff;
   padding: 3.5rem 0 4rem;
-  text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.55);
   margin-bottom: 0;
 }
 
+.cag-home-partner__intro {
+  text-align: center;
+  max-width: 40rem;
+  margin: 0 auto 2.5rem;
+}
+@media (min-width: 768px) {
+  .cag-home-partner__intro {
+    margin-bottom: 3rem;
+  }
+}
+
+.cag-home-partner__eyebrow {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cag-coral);
+}
+
 .cag-home-partner__title {
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-size: clamp(1.65rem, 3.2vw, 2.6rem);
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.85rem;
   color: #fff !important;
+  line-height: 1.2;
 }
 
 .cag-home-partner__text {
   max-width: 36rem;
   margin: 0 auto 1.5rem;
-  opacity: 0.92;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.55;
+  font-size: 0.95rem;
 }
 
 .cag-home-partner__actions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
   align-items: center;
 }
-@media (min-width: 576px) {
-  .cag-home-partner__actions {
-    flex-direction: row;
-    justify-content: center;
+
+.cag-home-partner__learn-more {
+  color: var(--cag-coral);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.cag-home-partner__learn-more:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.cag-home-partner__cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .cag-home-partner__cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
   }
 }
-.cag-home-partner__actions .cag-home-btn--ghost {
+
+.cag-home-partner__card {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.85rem;
+  padding: 1.35rem 1.25rem 1.5rem;
+  text-align: left;
 }
-.cag-home-partner__actions .cag-home-btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: #fff;
+
+.cag-home-partner__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-bottom: 0.85rem;
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.cag-home-partner__card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cag-home-partner__card-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .cag-home-bottom-nav {
@@ -8513,191 +8668,168 @@ div#masonry-grid img {
   }
 }
 
-.vacation-hub__countries .vacation-country-slider,
-.vacation-pillar-index__countries .vacation-country-slider {
-  background: #313041;
-  border-radius: calc(14px + 6px);
-  padding: clamp(1.35rem, 3vw, 2rem) clamp(1.1rem, 2.5vw, 1.75rem);
-}
-
-.vacation-country-slider__header {
+.vacation-country-rail__header {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.25rem;
 }
-.vacation-country-slider__intro {
+.vacation-country-rail__intro {
   min-width: 0;
   flex: 1;
 }
-.vacation-country-slider__title {
-  font-size: clamp(1.3rem, 2.6vw, 1.75rem);
-  font-weight: 800;
+.vacation-country-rail__title {
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
-  line-height: 1.15;
-  color: #fff;
+  line-height: 1.2;
+  color: #313041;
 }
-.vacation-country-slider__subtitle {
-  margin: 0.4rem 0 0;
+@media (min-width: 768px) {
+  .vacation-country-rail__title {
+    font-size: 1.5rem;
+  }
+}
+.vacation-country-rail__subtitle {
+  margin: 0.35rem 0 0;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: #666;
   line-height: 1.45;
   max-width: 36rem;
 }
-.vacation-country-slider__actions {
+.vacation-country-rail__tools {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
 }
-.vacation-country-slider__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.88rem;
-  font-weight: 600;
+.vacation-country-rail__link {
   color: #E85B40;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
 }
-.vacation-country-slider__link i {
-  font-size: 0.72rem;
-  transition: transform 0.15s ease;
+.vacation-country-rail__link:hover {
+  color: #c94a32;
+  text-decoration: underline;
 }
-.vacation-country-slider__link:hover {
-  color: rgb(236.385046729, 122.2672897196, 100.414953271);
-  text-decoration: none;
-}
-.vacation-country-slider__link:hover i {
-  transform: translateX(3px);
-}
-.vacation-country-slider__nav {
+.vacation-country-rail__nav {
   display: flex;
-  gap: 0.45rem;
-  flex-shrink: 0;
+  gap: 0.35rem;
 }
-.vacation-country-slider__btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+.vacation-country-rail__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #313041;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
-.vacation-country-slider__btn:hover:not(.swiper-button-disabled) {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
+.vacation-country-rail__btn:hover {
+  background: #f2f4f6;
 }
-.vacation-country-slider__btn.swiper-button-disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.vacation-country-slider__btn i {
+.vacation-country-rail__btn i {
   font-size: 0.8rem;
 }
-.vacation-country-slider__swiper {
-  overflow: hidden;
-  margin: 0 -0.1rem;
-  padding: 0.1rem;
-}
-.vacation-country-slider .swiper-slide {
-  height: auto;
-  display: flex;
-}
-@media (max-width: 767px) {
-  .vacation-country-slider__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .vacation-country-slider__actions {
-    justify-content: space-between;
-  }
-}
-
-.vacation-country-slide {
-  display: flex;
-  flex-direction: column;
+.vacation-country-rail__viewport {
   width: 100%;
-  min-height: 280px;
-  border-radius: calc(14px + 2px);
-  overflow: hidden;
-  text-decoration: none;
-  color: #fff;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.vacation-country-rail__viewport::-webkit-scrollbar {
+  display: none;
+}
+.vacation-country-rail__track {
+  display: flex;
+  gap: 1rem;
+  width: -moz-max-content;
+  width: max-content;
+}
+.vacation-country-rail__tile {
   position: relative;
-  background: #0d1522;
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  flex: 0 0 240px;
+  height: 180px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  text-decoration: none;
+  background: #313041;
+  color: #fff;
 }
-.vacation-country-slide:hover {
+@media (min-width: 768px) {
+  .vacation-country-rail__tile {
+    flex: 0 0 280px;
+    height: 200px;
+  }
+}
+.vacation-country-rail__tile:hover {
   color: #fff;
   text-decoration: none;
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
 }
-.vacation-country-slide__media {
-  position: absolute;
-  inset: 0;
+.vacation-country-rail__tile:hover .vacation-country-rail__img {
+  transform: scale(1.05);
 }
-.vacation-country-slide__media img {
+.vacation-country-rail__img {
   width: 100%;
   height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
-  display: block;
+  transition: transform 0.45s ease;
 }
-.vacation-country-slide__placeholder {
+.vacation-country-rail__placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #162033, #0a101a);
+  background: linear-gradient(145deg, #3a394f, #313041);
   color: rgba(255, 255, 255, 0.35);
-  font-size: 2.25rem;
+  font-size: 2rem;
 }
-.vacation-country-slide__overlay {
+.vacation-country-rail__fade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.22) 45%, rgba(0, 0, 0, 0.72) 100%);
+  background: linear-gradient(to top, rgba(49, 48, 65, 0.9), transparent 55%);
   pointer-events: none;
 }
-.vacation-country-slide__copy {
-  position: relative;
-  z-index: 1;
-  margin-top: auto;
-  padding: 1.35rem 1.15rem 1.2rem;
-}
-.vacation-country-slide__title {
-  margin: 0;
-  font-size: 1.12rem;
-  font-weight: 800;
-  line-height: 1.2;
+.vacation-country-rail__meta {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  right: 1rem;
   color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+  z-index: 1;
 }
-.vacation-country-slide__flag {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
-  -o-object-fit: cover;
-     object-fit: cover;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+.vacation-country-rail__name {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.2;
 }
-.vacation-country-slide__subtitle {
-  margin: 0.3rem 0 0;
-  font-size: 0.82rem;
+.vacation-country-rail__count {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.78);
+  opacity: 0.92;
+}
+@media (max-width: 767px) {
+  .vacation-country-rail__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .vacation-country-rail__tools {
+    justify-content: flex-end;
+  }
 }
 
 .vacation-filters {

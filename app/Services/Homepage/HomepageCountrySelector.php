@@ -20,26 +20,29 @@ class HomepageCountrySelector
     {
         $limit = $limit ?? self::FEATURED_LIMIT;
         $locale = app()->getLocale();
-        $cacheKey = "homepage_featured_countries_v3_{$locale}_{$limit}";
+        $cacheKey = "homepage_featured_countries_v4_{$locale}_{$limit}";
 
-        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit) {
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale) {
             $countries = Country::query()
+                ->with('translations')
                 ->orderBy('name')
                 ->get();
 
-            $withThumb = $countries->filter(fn (Country $c) => filled($c->thumbnail_path));
-            $withoutThumb = $countries->reject(fn (Country $c) => filled($c->thumbnail_path));
+            $unique = $this->uniqueByCountryCode($countries, $locale);
+
+            $withThumb = $unique->filter(fn (Country $c) => filled($c->thumbnail_path));
+            $withoutThumb = $unique->reject(fn (Country $c) => filled($c->thumbnail_path));
             $ordered = $withThumb->concat($withoutThumb)->take($limit);
 
             $minPrices = $this->minPricesByCountryIso($ordered);
 
-            return $ordered->map(function (Country $country) use ($minPrices) {
+            return $ordered->map(function (Country $country) use ($minPrices, $locale) {
                 $iso = strtoupper((string) ($country->countrycode ?? ''));
                 $fromPrice = $iso !== '' ? ($minPrices[$iso] ?? null) : null;
 
                 return [
                     'slug' => $country->slug,
-                    'name' => $country->name,
+                    'name' => $this->displayName($country, $locale),
                     'thumbnail' => $country->getThumbnailPath(),
                     'countrycode' => $country->countrycode,
                     'from_price' => $fromPrice,
@@ -55,9 +58,99 @@ class HomepageCountrySelector
 
     public function totalCount(): int
     {
-        return Cache::remember('homepage_country_total_count', now()->addHour(), function () {
-            return Country::query()->count();
+        return Cache::remember('homepage_country_total_count_v2', now()->addHour(), function () {
+            $countries = Country::query()->get(['id', 'countrycode']);
+
+            $withIso = $countries
+                ->filter(fn (Country $c) => filled($c->countrycode))
+                ->unique(fn (Country $c) => strtoupper((string) $c->countrycode));
+
+            $withoutIso = $countries->reject(fn (Country $c) => filled($c->countrycode));
+
+            return $withIso->count() + $withoutIso->count();
         });
+    }
+
+    /**
+     * Keep one row per ISO so EN/DE migration duplicates (Finland / Finnland) cannot both appear.
+     *
+     * @param  Collection<int, Country>  $countries
+     * @return Collection<int, Country>
+     */
+    private function uniqueByCountryCode(Collection $countries, string $locale): Collection
+    {
+        $preferred = $countries->sort(function (Country $a, Country $b) use ($locale) {
+            $thumbCmp = (filled($a->thumbnail_path) ? 0 : 1) <=> (filled($b->thumbnail_path) ? 0 : 1);
+            if ($thumbCmp !== 0) {
+                return $thumbCmp;
+            }
+
+            $localeCmp = ($this->hasLocaleTranslation($a, $locale) ? 0 : 1)
+                <=> ($this->hasLocaleTranslation($b, $locale) ? 0 : 1);
+            if ($localeCmp !== 0) {
+                return $localeCmp;
+            }
+
+            return $a->id <=> $b->id;
+        });
+
+        $seen = [];
+        $unique = collect();
+
+        foreach ($preferred as $country) {
+            $iso = strtoupper((string) ($country->countrycode ?? ''));
+
+            if ($iso === '') {
+                $unique->push($country);
+                continue;
+            }
+
+            if (isset($seen[$iso])) {
+                continue;
+            }
+
+            $seen[$iso] = true;
+            $unique->push($country);
+        }
+
+        return $unique->sortBy(fn (Country $c) => mb_strtolower($this->displayName($c, $locale)))->values();
+    }
+
+    public function labelFor(Country $country, ?string $locale = null): string
+    {
+        return $this->displayName($country, $locale ?? app()->getLocale());
+    }
+
+    private function displayName(Country $country, string $locale): string
+    {
+        // Prefer short locale labels (e.g. Finnland), not SEO translation titles.
+        $iso = strtoupper((string) ($country->countrycode ?? ''));
+        if ($iso !== '' && class_exists(\Symfony\Component\Intl\Countries::class)) {
+            try {
+                return \Symfony\Component\Intl\Countries::getName($iso, $locale);
+            } catch (\Throwable) {
+                // fall through
+            }
+        }
+
+        $globalKey = 'global.'.$country->name;
+        $translated = __($globalKey);
+        if ($translated !== $globalKey) {
+            return $translated;
+        }
+
+        return $country->name;
+    }
+
+    private function hasLocaleTranslation(Country $country, string $locale): bool
+    {
+        if (! $country->relationLoaded('translations')) {
+            return $country->translation($locale)->exists();
+        }
+
+        return $country->translations->contains(
+            fn ($translation) => $translation->language === $locale && filled($translation->title)
+        );
     }
 
     /**

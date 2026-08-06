@@ -108,6 +108,8 @@ return [
 
     'trust_rating_label' => 'Average rating',
     'trust_bookings_label' => 'Tours booked',
+    'trust_offers_label' => 'Offers',
+    'trust_countries_label' => 'Countries',
     'trust_reply_title' => 'Fast replies',
     'trust_reply_text' => 'Guides usually answer within 24h',
     'trust_cancel_title' => 'Book with ease',
@@ -124,6 +126,7 @@ return [
     'season_title' => 'What’s biting in :month?',
     'season_text' => 'Conditions shift fast — here’s what’s worth chasing this month, straight from our magazine.',
     'season_cta' => 'Read the :month guide',
+    'season_card_title' => ':fish in :country',
 
     'offers_title' => 'Popular with anglers',
     'offers_tours_title' => 'Guided fishing tours',
@@ -145,10 +148,17 @@ return [
 
     'magazine_section_title' => 'Stories that get you hooked',
 
-    'partner_title' => 'Got water. Need anglers?',
-    'partner_text' => 'Whether you guide, run a lodge, or rent boats — put your offer in front of anglers across Europe.',
-    'partner_cta_primary' => 'List your offer',
-    'partner_cta_secondary' => 'How it works',
+    'partner_eyebrow' => 'Become a Catch A Guide Partner',
+    'partner_title' => 'Maximize your bookings',
+    'partner_text' => 'Reach thousands of passionate anglers across Europe. Manage your guidings, accommodations, houseboats, or all-inclusive fishing trips with ease — and no fixed costs.',
+    'partner_cta_primary' => 'Register now',
+    'partner_cta_secondary' => 'Learn more',
+    'partner_card_risk_title' => 'No risk',
+    'partner_card_risk_text' => '10% commission, only on confirmed bookings. No setup fee or fixed costs.',
+    'partner_card_customers_title' => 'New customers',
+    'partner_card_customers_text' => 'Thousands of platform users from around the world search daily for new fishing experiences.',
+    'partner_card_control_title' => 'Full control',
+    'partner_card_control_text' => 'You set prices, dates, and group size. No exclusivity — your bookings stay yours.',
 
     'mobile_nav_label' => 'Mobile navigation',
     'mobile_nav_explore' => 'Explore',

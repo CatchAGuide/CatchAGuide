@@ -90,7 +90,7 @@
 
         <div class="cag-home-hero__doors">
             <a
-                href="{{ route('guidings.index') }}"
+                href="{{ route('guidings.landing') }}"
                 class="cag-home-hero__door cag-reveal__item"
                 style="--reveal-i: 2"
                 data-home-analytics="homepage_chooser_guidings_click"

@@ -39,6 +39,22 @@
                 <strong class="cag-home-trust__value">{{ __('homepage.trust_cancel_title') }}</strong>
                 <span class="cag-home-trust__label">{{ __('homepage.trust_cancel_text') }}</span>
             </div>
+
+            <div class="cag-home-trust__card cag-reveal__item" style="--reveal-i: 4">
+                <span class="cag-home-trust__icon" aria-hidden="true">
+                    <i class="fas fa-fish"></i>
+                </span>
+                <strong class="cag-home-trust__value">{{ ($trust['offers'] ?? null) ?: '450+' }}</strong>
+                <span class="cag-home-trust__label">{{ __('homepage.trust_offers_label') }}</span>
+            </div>
+
+            <div class="cag-home-trust__card cag-reveal__item" style="--reveal-i: 5">
+                <span class="cag-home-trust__icon" aria-hidden="true">
+                    <i class="fas fa-globe-europe"></i>
+                </span>
+                <strong class="cag-home-trust__value">{{ ($trust['countries'] ?? null) ?: '—' }}</strong>
+                <span class="cag-home-trust__label">{{ __('homepage.trust_countries_label') }}</span>
+            </div>
         </div>
     </div>
 </section>

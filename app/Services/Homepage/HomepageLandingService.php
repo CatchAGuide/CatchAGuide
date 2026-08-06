@@ -10,12 +10,16 @@ use App\Models\Review;
 use App\Models\Target;
 use App\Models\Thread;
 use App\Models\User;
+use App\Models\UserGuest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class HomepageLandingService
 {
+    /** Marketing floor for catalog size shown on the homepage trust band. */
+    public const TRUST_OFFERS_LABEL = '450+';
+
     public function __construct(
         private HomepageCountrySelector $countries,
         private HomepageMixedOfferSelector $mixedOffers,
@@ -37,17 +41,18 @@ class HomepageLandingService
     public function build(): array
     {
         $locale = app()->getLocale();
+        $countryCount = $this->countries->totalCount();
 
         return [
             'featuredCountries' => $this->countries->featured(8),
-            'countryCount' => $this->countries->totalCount(),
+            'countryCount' => $countryCount,
             'mixedOffers' => $this->mixedOffers->mixed(9),
             'offerModules' => $this->mixedOffers->byModule(8),
             'targetSpecies' => $this->targetSpecies($locale),
             'testimonials' => $this->testimonials(),
             'magazineThreads' => $this->magazineThreads($locale),
             'season' => $this->seasonModule($locale),
-            'trust' => $this->trustStats(),
+            'trust' => $this->trustStats($countryCount),
         ];
     }
 
@@ -95,36 +100,37 @@ class HomepageLandingService
     }
 
     /**
-     * Real guest reviews only: not automatic, grandtotal score 8–10.
+     * Latest real guest reviews only: not automatic, grandtotal score > 8.
      */
     private function testimonials(): Collection
     {
-        return Cache::remember('homepage_testimonials_v4_'.app()->getLocale(), now()->addMinutes(30), function () {
+        return Cache::remember('homepage_testimonials_v5_'.app()->getLocale(), now()->addMinutes(30), function () {
             $reviews = Review::query()
                 ->with([
                     'guiding:id,title,slug',
-                    'booking.calendar_schedule',
-                    'booking.blocked_event',
+                    'booking:id,user_id,is_guest,book_date,blocked_event_id',
+                    'booking.calendar_schedule:id,date',
+                    'booking.blocked_event:id,from',
                     'booking.guestUser:id,firstname',
                     'booking.registeredUser:id,firstname',
                 ])
                 ->where(function ($q) {
                     $q->where('is_automatic', false)->orWhereNull('is_automatic');
                 })
-                ->whereBetween('grandtotal_score', [8, 10])
+                ->where('grandtotal_score', '>', 8)
+                ->where('grandtotal_score', '<=', 10)
                 ->whereNotNull('comment')
                 ->where('comment', '!=', '')
                 ->where('comment', 'not like', 'Successfully completed fishing tour%')
                 ->latest('id')
-                ->limit(6)
+                ->limit(15)
                 ->get();
 
             return $reviews
                 ->map(function (Review $review) {
                     $guiding = $review->guiding;
                     $booking = $review->booking;
-                    $author = $booking?->user?->firstname
-                        ?: User::query()->whereKey($review->user_id)->value('firstname');
+                    $author = $this->testimonialAuthor($review, $booking);
                     $tourDate = $booking?->getBookingDate() ?? $review->created_at;
                     $tourTitle = $guiding?->title
                         ? translate($guiding->title)
@@ -141,9 +147,30 @@ class HomepageLandingService
                             : null,
                     ];
                 })
-                ->filter(fn (array $item) => filled($item['quote']) && $item['score'] >= 8 && $item['score'] <= 10)
+                ->filter(fn (array $item) => filled($item['quote']) && $item['score'] > 8 && $item['score'] <= 10)
                 ->values();
         });
+    }
+
+    /**
+     * Prefer the booking guest/registered firstname; never resolve guest IDs against users.
+     */
+    private function testimonialAuthor(Review $review, ?Booking $booking): ?string
+    {
+        $fromBooking = trim((string) ($booking?->user?->firstname ?? ''));
+        if ($fromBooking !== '') {
+            return $fromBooking;
+        }
+
+        if (! $review->user_id) {
+            return null;
+        }
+
+        if ($booking?->is_guest) {
+            return UserGuest::query()->whereKey($review->user_id)->value('firstname');
+        }
+
+        return User::query()->whereKey($review->user_id)->value('firstname');
     }
 
     private function magazineThreads(string $locale): Collection
@@ -164,7 +191,7 @@ class HomepageLandingService
     {
         $monthNumber = (int) now()->month;
         $month = now()->translatedFormat('F');
-        $cacheKey = "homepage_season_v3_{$locale}_{$monthNumber}";
+        $cacheKey = "homepage_season_v5_{$locale}_{$monthNumber}";
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($locale, $monthNumber, $month) {
             $highlight = MonthlyHighlight::forMonth($monthNumber);
@@ -184,13 +211,19 @@ class HomepageLandingService
                 'title' => __('homepage.season_title', ['month' => $month]),
                 'text' => __('homepage.season_text'),
                 'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
-                'species' => $this->targetSpecies($locale)->take(MonthlyHighlight::MAX_ITEMS),
+                'species' => $this->targetSpecies($locale)
+                    ->take(MonthlyHighlight::MAX_ITEMS)
+                    ->map(fn (array $card) => $card + [
+                        'type' => MonthlyHighlight::ITEM_TYPE_TARGET,
+                        'country' => null,
+                    ])
+                    ->values(),
             ];
         });
     }
 
     /**
-     * @return Collection<int, array{name: string, slug: string, thumbnail: string, url: string, type: string}>
+     * @return Collection<int, array{name: string, slug: string, thumbnail: string, url: string, type: string, country: ?string, fish?: string}>
      */
     private function resolveHighlightCards(MonthlyHighlight $highlight, string $locale): Collection
     {
@@ -199,8 +232,31 @@ class HomepageLandingService
             return collect();
         }
 
-        $countryIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_COUNTRY)->pluck('id')->all();
-        $targetPageIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_TARGET)->pluck('id')->all();
+        $countryIds = $items
+            ->flatMap(function (array $item) {
+                if ($item['type'] === MonthlyHighlight::ITEM_TYPE_PAIR) {
+                    return [$item['country_id']];
+                }
+
+                return $item['type'] === MonthlyHighlight::ITEM_TYPE_COUNTRY ? [$item['id']] : [];
+            })
+            ->unique()
+            ->filter()
+            ->values()
+            ->all();
+
+        $targetPageIds = $items
+            ->flatMap(function (array $item) {
+                if ($item['type'] === MonthlyHighlight::ITEM_TYPE_PAIR) {
+                    return [$item['target_id']];
+                }
+
+                return $item['type'] === MonthlyHighlight::ITEM_TYPE_TARGET ? [$item['id']] : [];
+            })
+            ->unique()
+            ->filter()
+            ->values()
+            ->all();
 
         $countries = Country::query()
             ->whereIn('id', $countryIds)
@@ -218,16 +274,44 @@ class HomepageLandingService
             ->get()
             ->keyBy('id');
 
-        return $items->map(function (array $item) use ($countries, $targetPages, $targets) {
+        return $items->map(function (array $item) use ($countries, $targetPages, $targets, $locale) {
+            if ($item['type'] === MonthlyHighlight::ITEM_TYPE_PAIR) {
+                $country = $countries->get($item['country_id']);
+                $page = $targetPages->get($item['target_id']);
+                if (! $country || ! $page) {
+                    return null;
+                }
+
+                $target = $targets->get($page->source_id);
+                $fishName = $target?->name ?? $page->name;
+                $countryName = $this->countries->labelFor($country, $locale);
+
+                return [
+                    'type' => MonthlyHighlight::ITEM_TYPE_PAIR,
+                    'fish' => $fishName,
+                    'country' => $countryName,
+                    'name' => __('homepage.season_card_title', [
+                        'fish' => $fishName,
+                        'country' => $countryName,
+                    ]),
+                    'slug' => $page->slug,
+                    'thumbnail' => $page->getThumbnailPath(),
+                    'url' => route('destination.country', ['country' => $country->slug]),
+                ];
+            }
+
             if ($item['type'] === MonthlyHighlight::ITEM_TYPE_COUNTRY) {
                 $country = $countries->get($item['id']);
                 if (! $country) {
                     return null;
                 }
 
+                $countryName = $this->countries->labelFor($country, $locale);
+
                 return [
                     'type' => MonthlyHighlight::ITEM_TYPE_COUNTRY,
-                    'name' => $country->name,
+                    'name' => $countryName,
+                    'country' => $countryName,
                     'slug' => $country->slug,
                     'thumbnail' => $country->getThumbnailPath(),
                     'url' => route('destination.country', ['country' => $country->slug]),
@@ -244,6 +328,7 @@ class HomepageLandingService
             return [
                 'type' => MonthlyHighlight::ITEM_TYPE_TARGET,
                 'name' => $target?->name ?? $page->name,
+                'country' => null,
                 'slug' => $page->slug,
                 'thumbnail' => $page->getThumbnailPath(),
                 'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
@@ -252,11 +337,24 @@ class HomepageLandingService
     }
 
     /**
-     * @return array{rating: ?string, bookings: ?string, reviews_count: int, reviews_label: ?string, rating_label: string, bookings_label: string}
+     * @return array{
+     *     rating: ?string,
+     *     bookings: ?string,
+     *     offers: string,
+     *     countries: ?string,
+     *     reviews_count: int,
+     *     reviews_label: ?string,
+     *     rating_label: string,
+     *     bookings_label: string,
+     *     offers_label: string,
+     *     countries_label: string
+     * }
      */
-    private function trustStats(): array
+    private function trustStats(int $countryCount): array
     {
-        return Cache::remember('homepage_trust_stats_v3', now()->addHour(), function () {
+        $locale = app()->getLocale();
+
+        return Cache::remember("homepage_trust_stats_v4_{$locale}_{$countryCount}", now()->addHour(), function () use ($countryCount) {
             $realReviews = Review::query()
                 ->where(function ($q) {
                     $q->where('is_automatic', false)->orWhereNull('is_automatic');
@@ -282,13 +380,21 @@ class HomepageLandingService
                 $reviewsLabel = __('homepage.trust_view_reviews', ['count' => $rounded]);
             }
 
+            $countriesLabel = $countryCount > 0
+                ? $countryCount.'+'
+                : null;
+
             return [
                 'rating' => $avg ? number_format((float) $avg, 1).'/10' : null,
                 'bookings' => $bookingsLabel,
+                'offers' => self::TRUST_OFFERS_LABEL,
+                'countries' => $countriesLabel,
                 'reviews_count' => $reviewsCount,
                 'reviews_label' => $reviewsLabel,
                 'rating_label' => __('homepage.trust_rating_label'),
                 'bookings_label' => __('homepage.trust_bookings_label'),
+                'offers_label' => __('homepage.trust_offers_label'),
+                'countries_label' => __('homepage.trust_countries_label'),
             ];
         });
     }

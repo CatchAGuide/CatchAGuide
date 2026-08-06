@@ -22,8 +22,8 @@
                             <div>
                                 <h3 class="card-title mb-1">@yield('title')</h3>
                                 <p class="text-muted mb-0 small">
-                                    Powers the homepage “Right now” season module. Pick up to
-                                    {{ \App\Models\MonthlyHighlight::MAX_ITEMS }} cards from countries and target fish.
+                                    Powers the homepage season module. Each card pairs a country with a target fish
+                                    (up to {{ \App\Models\MonthlyHighlight::MAX_ITEMS }} cards).
                                 </p>
                             </div>
                         </div>
@@ -93,43 +93,65 @@
                                     </div>
                                 </div>
 
-                                <h6 class="text-uppercase text-muted small fw-bold mb-2">
-                                    Homepage cards
-                                    <span class="badge bg-light text-dark ms-1" id="mh-selection-count">0 / {{ \App\Models\MonthlyHighlight::MAX_ITEMS }}</span>
-                                </h6>
+                                <h6 class="text-uppercase text-muted small fw-bold mb-2">Homepage cards</h6>
                                 <p class="text-muted small mb-3">
-                                    Combined limit: {{ \App\Models\MonthlyHighlight::MAX_ITEMS }} selections across both lists.
-                                    Cards link to destination / category pages.
+                                    Each row is one homepage card: country badge + target fish title.
+                                    Leave a row empty to skip it.
                                 </p>
 
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label for="country_ids" class="form-label fw-semibold">Countries</label>
-                                        <select name="country_ids[]" id="country_ids" class="form-control mh-select2" multiple="multiple"
-                                                data-placeholder="Search countries...">
-                                            @foreach($countryOptions as $option)
-                                                <option value="{{ $option['id'] }}"
-                                                    @selected(in_array((int) $option['id'], array_map('intval', old('country_ids', $selectedCountryIds)), true))>
-                                                    {{ $option['label'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="text-muted">{{ $countryOptions->count() }} available</small>
+                                @php
+                                    $oldCards = old('cards', $cards);
+                                @endphp
+
+                                @for($i = 0; $i < \App\Models\MonthlyHighlight::MAX_ITEMS; $i++)
+                                    @php
+                                        $card = $oldCards[$i] ?? ['country_id' => null, 'target_id' => null];
+                                    @endphp
+                                    <div class="border rounded p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-semibold">Card {{ $i + 1 }}</span>
+                                            @error('cards.'.$i)
+                                                <span class="text-danger small">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="cards_{{ $i }}_country_id" class="form-label fw-semibold">Country</label>
+                                                <select
+                                                    name="cards[{{ $i }}][country_id]"
+                                                    id="cards_{{ $i }}_country_id"
+                                                    class="form-control mh-select2"
+                                                    data-placeholder="Select country..."
+                                                >
+                                                    <option value=""></option>
+                                                    @foreach($countryOptions as $option)
+                                                        <option value="{{ $option['id'] }}"
+                                                            @selected((int) ($card['country_id'] ?? 0) === (int) $option['id'])>
+                                                            {{ $option['label'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="cards_{{ $i }}_target_id" class="form-label fw-semibold">Target fish</label>
+                                                <select
+                                                    name="cards[{{ $i }}][target_id]"
+                                                    id="cards_{{ $i }}_target_id"
+                                                    class="form-control mh-select2"
+                                                    data-placeholder="Select target fish..."
+                                                >
+                                                    <option value=""></option>
+                                                    @foreach($targetOptions as $option)
+                                                        <option value="{{ $option['id'] }}"
+                                                            @selected((int) ($card['target_id'] ?? 0) === (int) $option['id'])>
+                                                            {{ $option['label'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="target_ids" class="form-label fw-semibold">Target fish</label>
-                                        <select name="target_ids[]" id="target_ids" class="form-control mh-select2" multiple="multiple"
-                                                data-placeholder="Search target fish...">
-                                            @foreach($targetOptions as $option)
-                                                <option value="{{ $option['id'] }}"
-                                                    @selected(in_array((int) $option['id'], array_map('intval', old('target_ids', $selectedTargetIds)), true))>
-                                                    {{ $option['label'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="text-muted">{{ $targetOptions->count() }} available</small>
-                                    </div>
-                                </div>
+                                @endfor
                             </div>
 
                             <div class="card-footer d-flex justify-content-between align-items-center">
@@ -147,37 +169,8 @@
 @push('js_after')
 <script>
 jQuery(function ($) {
-    var maxItems = {{ \App\Models\MonthlyHighlight::MAX_ITEMS }};
-    var $countries = $('#country_ids');
-    var $targets = $('#target_ids');
-    var $count = $('#mh-selection-count');
-
-    if (!$countries.length || !$targets.length || typeof $.fn.select2 !== 'function') {
+    if (typeof $.fn.select2 !== 'function') {
         return;
-    }
-
-    function selectedTotal() {
-        return ($countries.val() || []).length + ($targets.val() || []).length;
-    }
-
-    function syncCount() {
-        $count.text(selectedTotal() + ' / ' + maxItems);
-    }
-
-    function enforceLimit(event) {
-        if (selectedTotal() <= maxItems) {
-            syncCount();
-            return;
-        }
-
-        var $el = $(event.target);
-        var values = ($el.val() || []).slice();
-        while (selectedTotal() > maxItems && values.length) {
-            values.pop();
-        }
-        $el.val(values).trigger('change.select2');
-        syncCount();
-        alert('You can select at most ' + maxItems + ' countries and target fish combined.');
     }
 
     $('.mh-select2').each(function () {
@@ -191,10 +184,6 @@ jQuery(function ($) {
             placeholder: $el.data('placeholder') || 'Select...'
         });
     });
-
-    $countries.on('change', enforceLimit);
-    $targets.on('change', enforceLimit);
-    syncCount();
 });
 </script>
 @endpush

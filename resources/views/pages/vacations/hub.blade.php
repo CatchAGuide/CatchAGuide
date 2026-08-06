@@ -58,17 +58,11 @@
                 :subtitle="__('vacations.hub_country_slider_subtitle')"
                 slider-id="countries"
             >
-
-                @foreach($hub->countryGrid as $row)
-
-                    <div class="swiper-slide">
-
-                        <x-vacation.country-slide :row="$row" />
-
-                    </div>
-
+                @foreach([false, true] as $isClone)
+                    @foreach($hub->countryGrid as $row)
+                        <x-vacation.country-slide :row="$row" :clone="$isClone" />
+                    @endforeach
                 @endforeach
-
             </x-vacation.country-slider>
 
         </section>

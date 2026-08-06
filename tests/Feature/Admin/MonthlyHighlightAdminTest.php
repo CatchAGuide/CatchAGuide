@@ -25,7 +25,7 @@ class MonthlyHighlightAdminTest extends TestCase
         return $employee;
     }
 
-    public function test_admin_can_create_monthly_highlight_with_mixed_items(): void
+    public function test_admin_can_create_monthly_highlight_with_pair_cards(): void
     {
         $this->actingAsEmployee();
 
@@ -44,8 +44,9 @@ class MonthlyHighlightAdminTest extends TestCase
             'title_de' => 'Was beißt im Dezember?',
             'subtitle_en' => 'Season picks',
             'subtitle_de' => 'Saisonale Tipps',
-            'country_ids' => [$country->id],
-            'target_ids' => [$targetPage->id],
+            'cards' => [
+                ['country_id' => $country->id, 'target_id' => $targetPage->id],
+            ],
             'is_active' => 1,
         ]);
 
@@ -62,17 +63,19 @@ class MonthlyHighlightAdminTest extends TestCase
 
         $highlight = MonthlyHighlight::query()->where('month', $month)->first();
         $this->assertNotNull($highlight);
-        $this->assertCount(2, $highlight->items);
+        $this->assertCount(1, $highlight->items);
+        $this->assertSame(MonthlyHighlight::ITEM_TYPE_PAIR, $highlight->items[0]['type']);
+        $this->assertSame((int) $country->id, $highlight->items[0]['country_id']);
+        $this->assertSame((int) $targetPage->id, $highlight->items[0]['target_id']);
     }
 
-    public function test_admin_rejects_more_than_three_items(): void
+    public function test_admin_rejects_partial_card(): void
     {
         $this->actingAsEmployee();
 
-        $countryIds = Country::query()->limit(2)->pluck('id');
-        $targetIds = CategoryPage::query()->where('type', 'Targets')->limit(2)->pluck('id');
-        if ($countryIds->count() < 2 || $targetIds->count() < 2) {
-            $this->markTestSkipped('Need enough countries and targets for max-items test.');
+        $country = Country::query()->first();
+        if (! $country) {
+            $this->markTestSkipped('Need at least one country.');
         }
 
         $month = 11;
@@ -80,10 +83,11 @@ class MonthlyHighlightAdminTest extends TestCase
 
         $response = $this->from('/admin/monthly-highlights/create')->post('/admin/monthly-highlights', [
             'month' => $month,
-            'title_en' => 'Too many items',
-            'title_de' => 'Zu viele Einträge',
-            'country_ids' => [$countryIds[0], $countryIds[1]],
-            'target_ids' => [$targetIds[0], $targetIds[1]],
+            'title_en' => 'Partial card',
+            'title_de' => 'Unvollständige Karte',
+            'cards' => [
+                ['country_id' => $country->id, 'target_id' => null],
+            ],
             'is_active' => 1,
         ]);
 
@@ -92,7 +96,7 @@ class MonthlyHighlightAdminTest extends TestCase
         }
 
         $response->assertRedirect('/admin/monthly-highlights/create');
-        $response->assertSessionHasErrors('items');
-        $this->assertDatabaseMissing('monthly_highlights', ['month' => $month, 'title_en' => 'Too many items']);
+        $response->assertSessionHasErrors('cards.0');
+        $this->assertDatabaseMissing('monthly_highlights', ['month' => $month, 'title_en' => 'Partial card']);
     }
 }

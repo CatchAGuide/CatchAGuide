@@ -1,31 +1,44 @@
 @if(!empty($season))
 <section class="cag-home-section cag-home-season" data-cag-reveal>
     <div class="cag-home-container">
-        <div class="cag-home-season__card cag-reveal__block">
-            <div class="cag-home-season__copy">
-                <span class="cag-home-season__badge">{{ __('homepage.season_badge') }}</span>
+        <div class="cag-home-season__header cag-reveal__header">
+            <div class="cag-home-season__heading">
                 <h2 class="cag-home-season__title">{{ $season['title'] }}</h2>
                 <p class="cag-home-season__text">{{ $season['text'] }}</p>
-                <a href="{{ $season['cta_url'] }}" class="cag-home-btn cag-home-btn--coral">
-                    {{ __('homepage.season_cta', ['month' => $season['month']]) }}
-                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </a>
             </div>
-            @if(($season['species'] ?? collect())->isNotEmpty())
-                <div class="cag-home-season__species">
-                    @foreach($season['species'] as $species)
-                        <a
-                            href="{{ $species['url'] }}"
-                            class="cag-home-season__species-card cag-reveal__item"
-                            style="--reveal-i: {{ $loop->index + 1 }}"
-                        >
-                            <img src="{{ $species['thumbnail'] }}" alt="{{ $species['name'] }}" loading="lazy">
-                            <span>{{ $species['name'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
+            <a href="{{ $season['cta_url'] }}" class="cag-home-section__link cag-home-season__cta">
+                {{ __('homepage.season_cta', ['month' => $season['month']]) }}
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
         </div>
+
+        @if(($season['species'] ?? collect())->isNotEmpty())
+            <div class="cag-home-season__grid">
+                @foreach($season['species'] as $species)
+                    <a
+                        href="{{ $species['url'] }}"
+                        class="cag-home-season__card cag-reveal__item"
+                        style="--reveal-i: {{ $loop->index + 1 }}"
+                    >
+                        <img
+                            class="cag-home-season__img"
+                            src="{{ $species['thumbnail'] }}"
+                            alt="{{ $species['name'] }}"
+                            loading="lazy"
+                            width="480"
+                            height="360"
+                        >
+                        <span class="cag-home-season__fade" aria-hidden="true"></span>
+                        <span class="cag-home-season__meta">
+                            @if(!empty($species['country']))
+                                <span class="cag-home-season__badge">{{ $species['country'] }}</span>
+                            @endif
+                            <span class="cag-home-season__name">{{ $species['name'] }}</span>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 @endif

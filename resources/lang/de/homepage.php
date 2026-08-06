@@ -108,6 +108,8 @@ return [
 
     'trust_rating_label' => 'Durchschnittsbewertung',
     'trust_bookings_label' => 'Gebuchte Touren',
+    'trust_offers_label' => 'Angebote',
+    'trust_countries_label' => 'Länder',
     'trust_reply_title' => 'Schnelle Antworten',
     'trust_reply_text' => 'Guides antworten meist in 24 Std.',
     'trust_cancel_title' => 'Entspannt buchen',
@@ -124,6 +126,7 @@ return [
     'season_title' => 'Was beißt im :month?',
     'season_text' => 'Bedingungen ändern sich schnell — hier lohnt sich der Wurf diesen Monat, direkt aus unserem Magazin.',
     'season_cta' => ':month-Guide lesen',
+    'season_card_title' => ':fish in :country',
 
     'offers_title' => 'Beliebt bei Anglern',
     'offers_tours_title' => 'Geführte Angeltouren',
@@ -145,10 +148,17 @@ return [
 
     'magazine_section_title' => 'Geschichten, die dich begeistern',
 
-    'partner_title' => 'Du hast Wasser. Dir fehlen Angler?',
-    'partner_text' => 'Ob Guide, Lodge oder Bootsverleih — bring dein Angebot vor Angler in ganz Europa.',
-    'partner_cta_primary' => 'Angebot eintragen',
-    'partner_cta_secondary' => 'So funktioniert’s',
+    'partner_eyebrow' => 'Werde Catch A Guide Partner',
+    'partner_title' => 'Maximiere deine Buchungen',
+    'partner_text' => 'Erreiche Tausende begeisterte Angler in ganz Europa. Verwalte deine Guidings, Unterkünfte, Hausboote oder All inkl Angelreisen spielend leicht und ohne Fixkosten.',
+    'partner_cta_primary' => 'Direkt registrieren',
+    'partner_cta_secondary' => 'Mehr erfahren',
+    'partner_card_risk_title' => 'Kein Risiko',
+    'partner_card_risk_text' => '10 % Provision, nur bei bestätigter Buchung. Keine Einrichtungsgebühr oder Fixkosten.',
+    'partner_card_customers_title' => 'Neue Kunden',
+    'partner_card_customers_text' => 'Tausende von Plattformnutzern aus aller Welt suchen täglich nach neuen Angelerlebnissen.',
+    'partner_card_control_title' => 'Volle Kontrolle',
+    'partner_card_control_text' => 'Du bestimmst Preise, Termine und Gruppengröße. Keine Exklusivität — deine Buchungen bleiben deine.',
 
     'mobile_nav_label' => 'Mobile Navigation',
     'mobile_nav_explore' => 'Entdecken',

@@ -5,6 +5,7 @@ namespace Tests\Unit\Services\Homepage;
 use App\Models\CategoryPage;
 use App\Models\Country;
 use App\Models\MonthlyHighlight;
+use App\Models\Target;
 use App\Services\Homepage\HomepageLandingService;
 use Illuminate\Support\Facades\Cache;
 use ReflectionMethod;
@@ -12,7 +13,7 @@ use Tests\TestCase;
 
 class HomepageMonthlyHighlightTest extends TestCase
 {
-    public function test_season_module_uses_active_monthly_highlight(): void
+    public function test_season_module_uses_active_monthly_highlight_pairs(): void
     {
         $month = (int) now()->month;
         $country = Country::query()->first();
@@ -31,8 +32,11 @@ class HomepageMonthlyHighlightTest extends TestCase
             'subtitle_en' => 'Highlight sub EN',
             'subtitle_de' => 'Highlight sub DE',
             'items' => [
-                ['type' => 'country', 'id' => $country->id],
-                ['type' => 'target', 'id' => $targetPage->id],
+                [
+                    'type' => MonthlyHighlight::ITEM_TYPE_PAIR,
+                    'country_id' => $country->id,
+                    'target_id' => $targetPage->id,
+                ],
             ],
             'is_active' => true,
         ];
@@ -49,16 +53,18 @@ class HomepageMonthlyHighlightTest extends TestCase
         $method->setAccessible(true);
         $season = $method->invoke($service, 'en');
 
+        $target = Target::query()->find($targetPage->source_id);
+        $fishName = $target?->name ?? $targetPage->name;
+
         $this->assertSame('Highlight title EN', $season['title']);
         $this->assertSame('Highlight sub EN', $season['text']);
         $this->assertLessThanOrEqual(3, $season['species']->count());
-        $this->assertTrue($season['species']->contains(fn ($card) => ($card['name'] ?? null) === $country->name));
+        $this->assertTrue($season['species']->contains(fn ($card) => ($card['fish'] ?? null) === $fishName));
+        $this->assertTrue($season['species']->contains(fn ($card) => filled($card['country'] ?? null)));
         $this->assertTrue($season['species']->every(fn ($card) => ! str_contains((string) ($card['name'] ?? ''), 'fishing tours')));
 
         if (! $existing) {
             $highlight->delete();
-        } else {
-            // leave restored state alone; test DB may keep highlight
         }
     }
 }

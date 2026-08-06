@@ -11,6 +11,8 @@ class MonthlyHighlight extends Model
 
     public const ITEM_TYPE_TARGET = 'target';
 
+    public const ITEM_TYPE_PAIR = 'pair';
+
     public const MAX_ITEMS = 3;
 
     protected $fillable = [
@@ -55,18 +57,77 @@ class MonthlyHighlight extends Model
     }
 
     /**
-     * @return Collection<int, array{type: string, id: int}>
+     * Build stored items from admin card rows (country + target pairs).
+     *
+     * @param  array<int, mixed>  $cards
+     * @return array<int, array{type: string, country_id: int, target_id: int}>
+     */
+    public static function itemsFromCardInput(array $cards): array
+    {
+        return collect($cards)
+            ->map(function ($card) {
+                if (! is_array($card)) {
+                    return null;
+                }
+
+                $countryId = (int) ($card['country_id'] ?? 0);
+                $targetId = (int) ($card['target_id'] ?? 0);
+
+                if ($countryId < 1 || $targetId < 1) {
+                    return null;
+                }
+
+                return [
+                    'type' => self::ITEM_TYPE_PAIR,
+                    'country_id' => $countryId,
+                    'target_id' => $targetId,
+                ];
+            })
+            ->filter()
+            ->take(self::MAX_ITEMS)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return Collection<int, array{type: string, id?: int, country_id?: int, target_id?: int}>
      */
     public function normalizedItems(): Collection
     {
         return collect($this->items ?? [])
-            ->filter(fn ($item) => is_array($item)
-                && in_array($item['type'] ?? null, [self::ITEM_TYPE_COUNTRY, self::ITEM_TYPE_TARGET], true)
-                && filled($item['id'] ?? null))
-            ->map(fn (array $item) => [
-                'type' => (string) $item['type'],
-                'id' => (int) $item['id'],
-            ])
+            ->map(function ($item) {
+                if (! is_array($item)) {
+                    return null;
+                }
+
+                $type = $item['type'] ?? null;
+
+                if ($type === self::ITEM_TYPE_PAIR) {
+                    $countryId = (int) ($item['country_id'] ?? 0);
+                    $targetId = (int) ($item['target_id'] ?? 0);
+
+                    if ($countryId < 1 || $targetId < 1) {
+                        return null;
+                    }
+
+                    return [
+                        'type' => self::ITEM_TYPE_PAIR,
+                        'country_id' => $countryId,
+                        'target_id' => $targetId,
+                    ];
+                }
+
+                if (in_array($type, [self::ITEM_TYPE_COUNTRY, self::ITEM_TYPE_TARGET], true)
+                    && filled($item['id'] ?? null)) {
+                    return [
+                        'type' => (string) $type,
+                        'id' => (int) $item['id'],
+                    ];
+                }
+
+                return null;
+            })
+            ->filter()
             ->take(self::MAX_ITEMS)
             ->values();
     }

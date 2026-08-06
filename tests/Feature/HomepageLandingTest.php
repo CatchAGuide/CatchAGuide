@@ -149,15 +149,38 @@ class HomepageLandingTest extends TestCase
                 'title' => "What's biting in October?",
                 'text' => 'Seasonal tips',
                 'cta_url' => '/fishing-magazine',
-                'species' => collect(),
+                'species' => collect([
+                    [
+                        'type' => 'pair',
+                        'fish' => 'Pike',
+                        'country' => 'Sweden',
+                        'name' => 'Pike in Sweden',
+                        'slug' => 'pike',
+                        'thumbnail' => '/assets/images/300x300.png',
+                        'url' => '/destination/sweden',
+                    ],
+                    [
+                        'type' => 'pair',
+                        'fish' => 'Atlantic Salmon',
+                        'country' => 'Norway',
+                        'name' => 'Atlantic Salmon in Norway',
+                        'slug' => 'atlantic-salmon',
+                        'thumbnail' => '/assets/images/300x300.png',
+                        'url' => '/destination/norway',
+                    ],
+                ]),
             ],
             'trust' => [
                 'rating' => '9.8/10',
                 'bookings' => '10,000+',
+                'offers' => '450+',
+                'countries' => '12+',
                 'reviews_count' => 2480,
                 'reviews_label' => 'View 2,480+ reviews',
                 'rating_label' => 'Average rating',
                 'bookings_label' => 'Tours booked',
+                'offers_label' => 'Offers',
+                'countries_label' => 'Countries',
             ],
         ]);
 
@@ -194,7 +217,7 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-hero__door-icon', false);
         $response->assertSee('fa-ship', false);
         $response->assertSee('fa-suitcase-rolling', false);
-        $response->assertSee(route('guidings.index', [], false), false);
+        $response->assertSee(route('guidings.landing', [], false), false);
         $response->assertSee(route('vacations.index', [], false), false);
         $response->assertSee(route('destination.country', ['country' => 'deutschland'], false), false);
         $response->assertSee('Germany', false);
@@ -203,7 +226,19 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-trust', false);
         $response->assertSee('Shopper Approved', false);
         $response->assertSee('View 2,480+ reviews', false);
+        $response->assertSee('450+', false);
+        $response->assertSee('12+', false);
+        $response->assertSee(__('homepage.trust_offers_label'), false);
+        $response->assertSee(__('homepage.trust_countries_label'), false);
         $response->assertSee('cag-home-season', false);
+        $response->assertSee('cag-home-season__grid', false);
+        $response->assertSee('cag-home-season__card', false);
+        $response->assertSee('biting in October?', false);
+        $response->assertSee('cag-home-season__badge', false);
+        $response->assertSee('Sweden', false);
+        $response->assertSee('Pike in Sweden', false);
+        $response->assertSee('Atlantic Salmon in Norway', false);
+        $response->assertDontSee('cag-home-season__species-card', false);
         $response->assertDontSee('cag-home-guides', false);
         $response->assertSee('cag-home-species__rail', false);
         $response->assertSee('cag-home-species__card', false);
@@ -215,6 +250,15 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('Pike fishing day tour', false);
         $response->assertSee('href="/guidings/1/pike-fishing-day-tour"', false);
         $response->assertSee('cag-home-partner', false);
+        $response->assertSee('cag-home-partner__cards', false);
+        $response->assertSee('cag-home-partner__card', false);
+        $response->assertSee('Werde Catch A Guide Partner', false);
+        $response->assertSee('Maximiere deine Buchungen', false);
+        $response->assertSee('Kein Risiko', false);
+        $response->assertSee('Neue Kunden', false);
+        $response->assertSee('Volle Kontrolle', false);
+        $response->assertSee('Direkt registrieren', false);
+        $response->assertSee('Mehr erfahren', false);
         $response->assertSee('cag-home-bottom-nav', false);
         $response->assertSee('cag-footer', false);
         $response->assertSee('info.catchaguide@gmail.com', false);

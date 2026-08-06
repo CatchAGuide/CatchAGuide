@@ -3,6 +3,7 @@
 @include('layouts.modal.guideApplicationModal')
 @php
     $isHomepage = request()->is('/');
+    $isGuidingsLanding = request()->routeIs('guidings.landing');
     $isOffers = request()->is('offers*') || request()->routeIs('offers.*');
     $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
     $vacationPillarCountrySlug = request()->route('slug');
@@ -24,8 +25,11 @@
     $globalSearchAction = ($isVacation ?? false)
         ? route('vacations.index')
         : ($isOffers ? route('offers.index') : route('guidings.index'));
+    // Guidings listing hides search; the former homepage (now guidings.landing) keeps it.
+    $showFloatingSearch = $isGuidingsLanding
+        || (! $isHomepage && request()->segment(1) !== 'guidings');
 @endphp
-<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }} {{ $isOffers ? 'is-offers' : '' }}">
+<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') && ! $isGuidingsLanding ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }} {{ $isOffers ? 'is-offers' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -242,7 +246,7 @@
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(!$isHomepage && request()->segment(1) != 'guidings')
+    @if($showFloatingSearch)
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
             <form id="global-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">

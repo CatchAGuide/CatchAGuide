@@ -100,7 +100,7 @@ class MonthlyHighlightController extends Controller
     private function forgetHomepageSeasonCache(int $month): void
     {
         foreach (['en', 'de'] as $locale) {
-            Cache::forget("homepage_season_v3_{$locale}_{$month}");
+            Cache::forget("homepage_season_v5_{$locale}_{$month}");
         }
     }
 
@@ -113,8 +113,7 @@ class MonthlyHighlightController extends Controller
      *     months: array<int, string>,
      *     countryOptions: \Illuminate\Support\Collection,
      *     targetOptions: \Illuminate\Support\Collection,
-     *     selectedCountryIds: array<int, int>,
-     *     selectedTargetIds: array<int, int>
+     *     cards: array<int, array{country_id: ?int, target_id: ?int}>
      * }
      */
     private function formData(?MonthlyHighlight $highlight, string $route, string $method, string $pageTitle): array
@@ -147,8 +146,6 @@ class MonthlyHighlightController extends Controller
             ])
             ->values();
 
-        $items = collect($highlight?->items ?? []);
-
         return [
             'highlight' => $highlight,
             'route' => $route,
@@ -157,17 +154,53 @@ class MonthlyHighlightController extends Controller
             'months' => $this->monthLabels(),
             'countryOptions' => $countryOptions,
             'targetOptions' => $targetOptions,
-            'selectedCountryIds' => $items
-                ->where('type', MonthlyHighlight::ITEM_TYPE_COUNTRY)
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->all(),
-            'selectedTargetIds' => $items
-                ->where('type', MonthlyHighlight::ITEM_TYPE_TARGET)
-                ->pluck('id')
-                ->map(fn ($id) => (int) $id)
-                ->all(),
+            'cards' => $this->cardsFromHighlight($highlight),
         ];
+    }
+
+    /**
+     * @return array<int, array{country_id: ?int, target_id: ?int}>
+     */
+    private function cardsFromHighlight(?MonthlyHighlight $highlight): array
+    {
+        $blank = array_fill(0, MonthlyHighlight::MAX_ITEMS, [
+            'country_id' => null,
+            'target_id' => null,
+        ]);
+
+        if (! $highlight) {
+            return $blank;
+        }
+
+        $items = $highlight->normalizedItems();
+        $cards = [];
+
+        $pairs = $items->where('type', MonthlyHighlight::ITEM_TYPE_PAIR)->values();
+        if ($pairs->isNotEmpty()) {
+            foreach ($pairs as $pair) {
+                $cards[] = [
+                    'country_id' => (int) $pair['country_id'],
+                    'target_id' => (int) $pair['target_id'],
+                ];
+            }
+        } else {
+            $countryIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_COUNTRY)->pluck('id')->values();
+            $targetIds = $items->where('type', MonthlyHighlight::ITEM_TYPE_TARGET)->pluck('id')->values();
+            $rows = max($countryIds->count(), $targetIds->count());
+
+            for ($i = 0; $i < $rows && count($cards) < MonthlyHighlight::MAX_ITEMS; $i++) {
+                $cards[] = [
+                    'country_id' => isset($countryIds[$i]) ? (int) $countryIds[$i] : null,
+                    'target_id' => isset($targetIds[$i]) ? (int) $targetIds[$i] : null,
+                ];
+            }
+        }
+
+        while (count($cards) < MonthlyHighlight::MAX_ITEMS) {
+            $cards[] = ['country_id' => null, 'target_id' => null];
+        }
+
+        return array_slice($cards, 0, MonthlyHighlight::MAX_ITEMS);
     }
 
     /**

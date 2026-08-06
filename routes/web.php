@@ -303,6 +303,7 @@ Route::middleware('auth:web')->group(function () {
 });
 
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
+Route::get('guidings/landing', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing');
 Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('ddos:search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('guidings.store');

@@ -1,45 +1,48 @@
-@props(['row', 'href' => null])
+@props([
+    'row',
+    'href' => null,
+    'clone' => false,
+])
 
 @php
-    $name = translate($row['name']);
+    $name = $row['name'] ?? '';
     $url = $href ?? route('vacations.country', $row['slug']);
-    $flagCode = ! empty($row['countrycode']) ? strtolower($row['countrycode']) : null;
+    $showMeta = array_key_exists('trips', $row) || array_key_exists('camps', $row);
+    $metaLabel = $showMeta
+        ? __('vacations.hub_country_trips_camps', [
+            'trips' => (int) ($row['trips'] ?? 0),
+            'camps' => (int) ($row['camps'] ?? 0),
+        ])
+        : null;
 @endphp
 
 <a
     href="{{ $url }}"
-    class="vacation-country-slide"
+    class="vacation-country-rail__tile"
+    role="listitem"
+    @if($clone) aria-hidden="true" tabindex="-1" @endif
     data-analytics-vacation-country="{{ $row['slug'] }}"
 >
-    <div class="vacation-country-slide__media">
-        @if(!empty($row['thumbnail_path']))
-            <img
-                src="{{ media_url($row['thumbnail_path']) }}"
-                alt="{{ $name }}"
-                loading="lazy"
-            >
-        @else
-            <div class="vacation-country-slide__placeholder" aria-hidden="true">
-                <i class="fas fa-map-marked-alt"></i>
-            </div>
+    @if(!empty($row['thumbnail_path']))
+        <img
+            src="{{ media_url($row['thumbnail_path']) }}"
+            alt="{{ $clone ? '' : $name }}"
+            class="vacation-country-rail__img"
+            loading="lazy"
+            width="320"
+            height="240"
+        >
+    @else
+        <span class="vacation-country-rail__placeholder" aria-hidden="true">
+            <i class="fas fa-map-marked-alt"></i>
+        </span>
+    @endif
+
+    <span class="vacation-country-rail__fade"></span>
+    <span class="vacation-country-rail__meta">
+        <span class="vacation-country-rail__name">{{ $name }}</span>
+        @if($metaLabel)
+            <span class="vacation-country-rail__count">{{ $metaLabel }}</span>
         @endif
-
-        <span class="vacation-country-slide__overlay" aria-hidden="true"></span>
-    </div>
-
-    <div class="vacation-country-slide__copy">
-        <h3 class="vacation-country-slide__title">
-            @if($flagCode)
-                <img
-                    class="vacation-country-slide__flag"
-                    src="{{ asset('flags/' . $flagCode . '.svg') }}"
-                    alt=""
-                    width="22"
-                    height="22"
-                    loading="lazy"
-                >
-            @endif
-            <span>{{ $name }}</span>
-        </h3>
-    </div>
+    </span>
 </a>
