@@ -421,6 +421,7 @@ var ListingMap = /*#__PURE__*/function () {
           }
         });
         this.map.on('movestart', function () {
+          if (_this2._ignoreMoveClose) return;
           if (_this2._activePreviewMarker && !_this2._activePreviewMarker._cagSticky) {
             _this2._closePreview(_this2._activePreviewMarker);
           }
@@ -635,7 +636,8 @@ var ListingMap = /*#__PURE__*/function () {
           maxWidth: previewWidth,
           minWidth: Math.min(236, previewWidth),
           closeButton: false,
-          autoPan: false,
+          autoPan: true,
+          autoPanPadding: [36, 36],
           offset: [0, -6]
         } : undefined;
         var marker = _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].createMarker({
@@ -808,6 +810,7 @@ var ListingMap = /*#__PURE__*/function () {
     /**
      * Hover from rail: show pin popup in place — never pan/zoom.
      * If the pin is inside a cluster, open a detached preview on the cluster.
+     * Sticky (clicked) previews stay open until outside click / other selection.
      */
   }, {
     key: "previewById",
@@ -819,26 +822,36 @@ var ListingMap = /*#__PURE__*/function () {
       });
       if (!marker) return;
       if (!on) {
+        // Sticky/selected click preview must survive leaving the rail card
         if (marker._cagSticky || this._selectedMarker === marker) {
           _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
-          this._closeDetachedPreview();
-          this._setClusterPreviewHighlight(null);
           return;
         }
         _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
         if (marker.isPopupOpen && marker.isPopupOpen()) {
           marker.closePopup();
         }
-        this._closeDetachedPreview();
-        this._setClusterPreviewHighlight(null);
+        if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+          this._closeDetachedPreview();
+          this._setClusterPreviewHighlight(null);
+        }
         if (this._activePreviewMarker === marker) {
           this._activePreviewMarker = null;
         }
-        this._emitPreview(null);
+        if (this._selectedMarker && this._selectedMarker._cagSticky) {
+          this._restoreStickyPreview();
+        } else {
+          this._emitPreview(null);
+        }
         return;
       }
 
-      // Close other non-sticky previews
+      // While a clicked sticky preview is open, ignore hover on other cards
+      if (this._selectedMarker && this._selectedMarker._cagSticky && this._selectedMarker !== marker) {
+        return;
+      }
+
+      // Close other non-sticky marker popups
       this.markers.forEach(function (m) {
         if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
           m.closePopup();
@@ -860,10 +873,33 @@ var ListingMap = /*#__PURE__*/function () {
         this._hydratePreviewImages(marker);
         this._wirePreviewPointerBridge(marker);
         this._wirePreviewCarousel(marker);
+        this._ensurePopupVisible(marker);
         return;
       }
 
-      // Pin is clustered (or otherwise not visible) — show preview without zooming
+      // Pin is clustered — show detached preview (hover or sticky)
+      this._openDetachedPreview(marker);
+    }
+  }, {
+    key: "_restoreStickyPreview",
+    value: function _restoreStickyPreview() {
+      var marker = this._selectedMarker;
+      if (!marker || !marker._cagSticky) return;
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      this._activePreviewMarker = marker;
+      this._emitPreview(marker._cagItem || null);
+      if (this._isMarkerVisibleOnMap(marker) && marker.getPopup && marker.getPopup()) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        this._hydratePreviewImages(marker);
+        this._wirePreviewPointerBridge(marker);
+        this._wirePreviewCarousel(marker);
+        this._ensurePopupVisible(marker);
+        return;
+      }
       this._openDetachedPreview(marker);
     }
   }, {
@@ -910,13 +946,19 @@ var ListingMap = /*#__PURE__*/function () {
       var latlng = clusterParent && clusterParent.getLatLng ? clusterParent.getLatLng() : marker.getLatLng();
       var previewWidth = this._previewCardWidth();
       var pillar = item.pillar || item.module || '';
+      var placement = this._resolvePopupPlacement(latlng, {
+        offsetHeight: 300
+      });
+      var offsetY = placement === 'below' ? 316 : -18;
+      var belowClass = placement === 'below' ? ' cag-map-popup--below' : '';
       var popup = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.popup({
-        className: "cag-map-popup cag-map-popup--interactive cag-map-popup--detached".concat(pillar ? " cag-map-popup--".concat(pillar) : ''),
+        className: "cag-map-popup cag-map-popup--interactive cag-map-popup--detached".concat(belowClass).concat(pillar ? " cag-map-popup--".concat(pillar) : ''),
         maxWidth: previewWidth,
         minWidth: Math.min(236, previewWidth),
         closeButton: false,
-        autoPan: false,
-        offset: [0, -18]
+        autoPan: true,
+        autoPanPadding: [36, 36],
+        offset: [0, offsetY]
       }).setLatLng(latlng).setContent(html);
       this._detachedPreview = popup;
       popup._cagDetachedFor = marker;
@@ -935,6 +977,7 @@ var ListingMap = /*#__PURE__*/function () {
         _this9._hydratePreviewImagesFromEl(el);
         _this9._wirePreviewCarouselFromEl(marker, el);
         _this9._wireDetachedPreviewBridge(marker, el);
+        _this9._ensurePopupVisible(popup);
       });
     }
   }, {
@@ -957,15 +1000,16 @@ var ListingMap = /*#__PURE__*/function () {
       if (dismiss) {
         _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
-          _this0._closeDetachedPreview();
-          _this0._setClusterPreviewHighlight(null);
-          if (_this0._selectedMarker !== marker) {
-            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
-            _this0._emitPreview(null);
-          }
+          marker._cagSticky = false;
+          _this0.clearSelection();
         });
       }
+
+      // Keep map click-to-dismiss from firing when interacting with the popup
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
+      _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'click', function (e) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e);
+      });
     }
   }, {
     key: "_isMarkerVisibleOnMap",
@@ -1016,9 +1060,7 @@ var ListingMap = /*#__PURE__*/function () {
           _this1._hydratePreviewImages(marker);
           _this1._wirePreviewPointerBridge(marker);
           _this1._wirePreviewCarousel(marker);
-          if (fromRailZoom) {
-            _this1._panPopupIntoView(marker);
-          }
+          _this1._ensurePopupVisible(marker);
         } else if (fromRail) {
           // Keep detached preview when not zooming into a cluster
           _this1._openDetachedPreview(marker);
@@ -1063,6 +1105,9 @@ var ListingMap = /*#__PURE__*/function () {
         this._selectedMarker = null;
       }
       this._clearStickyPreviews();
+      this._setClusterPreviewHighlight(null);
+      this._activePreviewMarker = null;
+      this._emitPreview(null);
       this._selectionListeners.forEach(function (fn) {
         try {
           fn(null);
@@ -1088,10 +1133,14 @@ var ListingMap = /*#__PURE__*/function () {
         setPinActive(true);
         _this10._activePreviewMarker = marker;
         _this10._emitPreview(marker._cagItem || null);
+        _this10._ensurePopupVisible(marker);
       });
       marker.on('popupclose', function () {
         setPinActive(false);
-        marker._cagSticky = false;
+        // Keep sticky flag while this listing remains the rail selection
+        if (_this10._selectedMarker !== marker) {
+          marker._cagSticky = false;
+        }
         if (_this10._activePreviewMarker === marker) {
           _this10._activePreviewMarker = null;
         }
@@ -1200,13 +1249,20 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_hydratePreviewImagesFromEl",
     value: function _hydratePreviewImagesFromEl(el) {
+      var _this12 = this;
       if (!el) return;
       el.querySelectorAll('img[data-src]').forEach(function (img) {
         if (img.getAttribute('src')) return;
         var src = img.getAttribute('data-src');
         if (!src) return;
         img.onload = function () {
-          return img.classList.add('is-loaded');
+          img.classList.add('is-loaded');
+          // Re-fit after image expands the card height
+          if (_this12._detachedPreview) {
+            _this12._ensurePopupVisible(_this12._detachedPreview);
+          } else if (_this12._activePreviewMarker) {
+            _this12._ensurePopupVisible(_this12._activePreviewMarker);
+          }
         };
         img.onerror = function () {
           return img.classList.add('is-error');
@@ -1225,7 +1281,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_wirePreviewCarouselFromEl",
     value: function _wirePreviewCarouselFromEl(marker, root) {
-      var _this12 = this;
+      var _this13 = this;
       if (!root) return;
       var carousel = root.querySelector('[data-cag-preview-carousel]');
       if (!carousel || carousel._cagCarouselWired) {
@@ -1256,7 +1312,7 @@ var ListingMap = /*#__PURE__*/function () {
         if (counter) {
           counter.textContent = "".concat(index + 1, "/").concat(slides.length);
         }
-        _this12._hydratePreviewImagesFromEl(root);
+        _this13._hydratePreviewImagesFromEl(root);
       };
       var bindNav = function bindNav(btn, delta) {
         if (!btn) return;
@@ -1280,34 +1336,152 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_panPopupIntoView",
     value: function _panPopupIntoView(marker) {
-      if (!this.map || !marker) return;
-      var popup = marker.getPopup && marker.getPopup();
-      var el = popup && popup.getElement && popup.getElement();
-      if (!el) return;
+      this._ensurePopupVisible(marker);
+    }
+
+    /**
+     * Keep preview fully inside the map viewport.
+     * Prefer flipping below when clipped at the top, then pan any remaining overflow.
+     * @param {L.Marker|L.Popup} source
+     */
+  }, {
+    key: "_ensurePopupVisible",
+    value: function _ensurePopupVisible(source) {
+      var _this14 = this;
+      if (!this.map || !source) return;
+      var popup = typeof source.getPopup === 'function' ? source.getPopup() : source;
+      if (!popup) return;
+      var run = function run() {
+        if (!_this14.map) return;
+        var stillDetached = popup === _this14._detachedPreview;
+        var stillMarkerPopup = typeof source.getPopup === 'function' && source.getPopup() === popup && source.isPopupOpen && source.isPopupOpen();
+        if (!stillDetached && typeof source.getPopup === 'function' && !stillMarkerPopup) {
+          return;
+        }
+        if (!stillDetached && typeof source.getPopup !== 'function' && popup !== _this14._detachedPreview) {
+          return;
+        }
+        var el = popup.getElement && popup.getElement();
+        if (!el) return;
+        var root = el.classList && el.classList.contains('leaflet-popup') ? el : el.closest ? el.closest('.leaflet-popup') : el;
+        if (!root) return;
+        var mapRect = _this14.map.getContainer().getBoundingClientRect();
+        var rect = root.getBoundingClientRect();
+        var edgePad = 18;
+        var clippedTop = rect.top < mapRect.top + edgePad;
+        var clippedBottom = rect.bottom > mapRect.bottom - edgePad;
+        var height = Math.max(root.offsetHeight || 0, 240);
+
+        // If the card is cut off at the top, force it below the pin
+        if (clippedTop && !clippedBottom) {
+          _this14._applyPopupPlacement(popup, root, 'below', height);
+        } else {
+          var latlng = popup.getLatLng && popup.getLatLng();
+          if (latlng) {
+            var placement = _this14._resolvePopupPlacement(latlng, root);
+            _this14._applyPopupPlacement(popup, root, placement, height);
+          }
+        }
+
+        // Leaflet built-in pan as a first pass
+        try {
+          if (typeof popup._adjustPan === 'function') {
+            var prevAutoPan = popup.options.autoPan;
+            popup.options.autoPan = true;
+            popup.options.autoPanPadding = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.point(36, 36);
+            popup._adjustPan();
+            popup.options.autoPan = prevAutoPan;
+          }
+        } catch (e) {
+          /* ignore */
+        }
+        _this14._panPopupElementIntoView(root);
+      };
+      requestAnimationFrame(function () {
+        return requestAnimationFrame(run);
+      });
+      if (this._popupVisibilityTimers) {
+        this._popupVisibilityTimers.forEach(function (t) {
+          return clearTimeout(t);
+        });
+      }
+      this._popupVisibilityTimers = [setTimeout(run, 80), setTimeout(run, 280), setTimeout(run, 560)];
+    }
+  }, {
+    key: "_resolvePopupPlacement",
+    value: function _resolvePopupPlacement(latlng, el) {
+      var pt = this.map.latLngToContainerPoint(latlng);
+      var size = this.map.getSize();
+      var height = Math.max(el && el.offsetHeight || 0, 260);
+      var pad = 24;
+      var spaceAbove = pt.y - pad;
+      var spaceBelow = size.y - pt.y - pad;
+
+      // Flip when the card would not fit above the pin
+      if (spaceAbove < height && spaceBelow >= Math.min(height, spaceAbove + 40)) {
+        return 'below';
+      }
+      return 'above';
+    }
+  }, {
+    key: "_applyPopupPlacement",
+    value: function _applyPopupPlacement(popup, el, placement, height) {
+      var h = height || el && el.offsetHeight || 280;
+      // Leaflet anchors the tip at latlng; positive offset.y shifts the card downward.
+      // To place the whole card under the pin, offset by roughly the card height.
+      var offsetY = placement === 'below' ? Math.round(h) + 16 : -8;
+      popup.options.offset = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.point(0, offsetY);
+      var root = el && el.classList && el.classList.contains('leaflet-popup') ? el : el && el.closest ? el.closest('.leaflet-popup') : el;
+      if (root && root.classList) {
+        root.classList.toggle('cag-map-popup--below', placement === 'below');
+      }
+      if (typeof popup.options.className === 'string') {
+        popup.options.className = popup.options.className.replace(/\s*cag-map-popup--below\b/g, '').trim();
+        if (placement === 'below') {
+          popup.options.className += ' cag-map-popup--below';
+        }
+      }
+      if (typeof popup._updatePosition === 'function') {
+        popup._updatePosition();
+      }
+    }
+  }, {
+    key: "_panPopupElementIntoView",
+    value: function _panPopupElementIntoView(el) {
+      var _this15 = this;
+      if (!this.map || !el) return;
       var pad = {
-        x: 28,
-        y: 88
+        top: 20,
+        right: 24,
+        bottom: 24,
+        left: 24
       };
       var rect = el.getBoundingClientRect();
       var mapRect = this.map.getContainer().getBoundingClientRect();
       var dx = 0;
       var dy = 0;
-      if (rect.left < mapRect.left + pad.x) {
-        dx = rect.left - (mapRect.left + pad.x);
-      } else if (rect.right > mapRect.right - pad.x) {
-        dx = rect.right - (mapRect.right - pad.x);
+      if (rect.left < mapRect.left + pad.left) {
+        dx = rect.left - (mapRect.left + pad.left);
+      } else if (rect.right > mapRect.right - pad.right) {
+        dx = rect.right - (mapRect.right - pad.right);
       }
-      if (rect.top < mapRect.top + pad.y) {
-        dy = rect.top - (mapRect.top + pad.y);
-      } else if (rect.bottom > mapRect.bottom - pad.y) {
-        dy = rect.bottom - (mapRect.bottom - pad.y);
+      if (rect.top < mapRect.top + pad.top) {
+        dy = rect.top - (mapRect.top + pad.top);
+      } else if (rect.bottom > mapRect.bottom - pad.bottom) {
+        dy = rect.bottom - (mapRect.bottom - pad.bottom);
       }
-      if (dx !== 0 || dy !== 0) {
-        this.map.panBy([dx, dy], {
-          animate: true,
-          duration: 0.25
-        });
+      if (dx === 0 && dy === 0) return;
+      this._ignoreMoveClose = true;
+      this.map.panBy([dx, dy], {
+        animate: true,
+        duration: 0.3
+      });
+      if (this._ignoreMoveCloseTimer) {
+        clearTimeout(this._ignoreMoveCloseTimer);
       }
+      this._ignoreMoveCloseTimer = setTimeout(function () {
+        _this15._ignoreMoveClose = false;
+      }, 400);
     }
   }, {
     key: "_closePreview",
@@ -1426,7 +1600,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "buildInteractivePreviewHtml",
     value: function buildInteractivePreviewHtml() {
-      var _this13 = this;
+      var _this16 = this;
       var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var title = this._escape(item.title || '');
       var location = this._escape(item.location || '');
@@ -1448,7 +1622,7 @@ var ListingMap = /*#__PURE__*/function () {
       var cardWidth = this._previewCardWidth();
       var hasCarousel = images.length > 1;
       var slidesHtml = images.length ? images.map(function (src, i) {
-        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this13._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
+        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this16._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
       }).join('') : '';
       var navHtml = hasCarousel ? "\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--prev\" data-cag-preview-prev aria-label=\"".concat(prevLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8249;</span>\n          </button>\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--next\" data-cag-preview-next aria-label=\"").concat(nextLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8250;</span>\n          </button>\n          <div class=\"cag-map-preview__dots\" role=\"tablist\">\n            ").concat(images.map(function (_, i) {
         return "<button type=\"button\" class=\"cag-map-preview__dot".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-dot aria-label=\"").concat(i + 1, "\" aria-current=\"").concat(i === 0 ? 'true' : 'false', "\" tabindex=\"0\"></button>");

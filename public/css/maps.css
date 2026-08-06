@@ -1319,6 +1319,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-popup--interactive .leaflet-popup-tip, .cag-map-popup--vacation .leaflet-popup-tip {
   box-shadow: none;
 }
+.cag-map-popup {
+  /* Popup opens under the pin when there isn't enough room above */
+}
+.cag-map-popup--below .leaflet-popup-content-wrapper {
+  /* tip sits above the card */
+}
+.cag-map-popup--below .leaflet-popup-tip-container {
+  top: 0;
+  bottom: auto;
+  margin-top: -20px;
+  margin-bottom: 0;
+  order: -1;
+}
+.cag-map-popup--below .leaflet-popup-tip {
+  margin: 0 auto;
+  transform: translateY(11px) rotate(225deg);
+  box-shadow: none;
+}
 
 .cag-map-preview {
   position: relative;

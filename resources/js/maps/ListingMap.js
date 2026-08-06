@@ -200,6 +200,7 @@ class ListingMap {
         }
       });
       this.map.on('movestart', () => {
+        if (this._ignoreMoveClose) return;
         if (this._activePreviewMarker && !this._activePreviewMarker._cagSticky) {
           this._closePreview(this._activePreviewMarker);
         }
@@ -398,7 +399,8 @@ class ListingMap {
             maxWidth: previewWidth,
             minWidth: Math.min(236, previewWidth),
             closeButton: false,
-            autoPan: false,
+            autoPan: true,
+            autoPanPadding: [36, 36],
             offset: [0, -6],
           }
         : undefined;
@@ -555,32 +557,49 @@ class ListingMap {
   /**
    * Hover from rail: show pin popup in place — never pan/zoom.
    * If the pin is inside a cluster, open a detached preview on the cluster.
+   * Sticky (clicked) previews stay open until outside click / other selection.
    */
   previewById(id, on = true) {
     const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
     if (!marker) return;
 
     if (!on) {
+      // Sticky/selected click preview must survive leaving the rail card
       if (marker._cagSticky || this._selectedMarker === marker) {
         markerFactory.setSelected(marker, true);
-        this._closeDetachedPreview();
-        this._setClusterPreviewHighlight(null);
         return;
       }
+
       markerFactory.setSelected(marker, false);
       if (marker.isPopupOpen && marker.isPopupOpen()) {
         marker.closePopup();
       }
-      this._closeDetachedPreview();
-      this._setClusterPreviewHighlight(null);
+      if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+      }
       if (this._activePreviewMarker === marker) {
         this._activePreviewMarker = null;
       }
-      this._emitPreview(null);
+
+      if (this._selectedMarker && this._selectedMarker._cagSticky) {
+        this._restoreStickyPreview();
+      } else {
+        this._emitPreview(null);
+      }
       return;
     }
 
-    // Close other non-sticky previews
+    // While a clicked sticky preview is open, ignore hover on other cards
+    if (
+      this._selectedMarker &&
+      this._selectedMarker._cagSticky &&
+      this._selectedMarker !== marker
+    ) {
+      return;
+    }
+
+    // Close other non-sticky marker popups
     this.markers.forEach((m) => {
       if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
         m.closePopup();
@@ -604,10 +623,35 @@ class ListingMap {
       this._hydratePreviewImages(marker);
       this._wirePreviewPointerBridge(marker);
       this._wirePreviewCarousel(marker);
+      this._ensurePopupVisible(marker);
       return;
     }
 
-    // Pin is clustered (or otherwise not visible) — show preview without zooming
+    // Pin is clustered — show detached preview (hover or sticky)
+    this._openDetachedPreview(marker);
+  }
+
+  _restoreStickyPreview() {
+    const marker = this._selectedMarker;
+    if (!marker || !marker._cagSticky) return;
+
+    markerFactory.setSelected(marker, true);
+    this._activePreviewMarker = marker;
+    this._emitPreview(marker._cagItem || null);
+
+    if (this._isMarkerVisibleOnMap(marker) && marker.getPopup && marker.getPopup()) {
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      if (!marker.isPopupOpen()) {
+        marker.openPopup();
+      }
+      this._hydratePreviewImages(marker);
+      this._wirePreviewPointerBridge(marker);
+      this._wirePreviewCarousel(marker);
+      this._ensurePopupVisible(marker);
+      return;
+    }
+
     this._openDetachedPreview(marker);
   }
 
@@ -659,15 +703,19 @@ class ListingMap {
 
     const previewWidth = this._previewCardWidth();
     const pillar = item.pillar || item.module || '';
+    const placement = this._resolvePopupPlacement(latlng, { offsetHeight: 300 });
+    const offsetY = placement === 'below' ? 316 : -18;
+    const belowClass = placement === 'below' ? ' cag-map-popup--below' : '';
     const popup = L.popup({
-      className: `cag-map-popup cag-map-popup--interactive cag-map-popup--detached${
+      className: `cag-map-popup cag-map-popup--interactive cag-map-popup--detached${belowClass}${
         pillar ? ` cag-map-popup--${pillar}` : ''
       }`,
       maxWidth: previewWidth,
       minWidth: Math.min(236, previewWidth),
       closeButton: false,
-      autoPan: false,
-      offset: [0, -18],
+      autoPan: true,
+      autoPanPadding: [36, 36],
+      offset: [0, offsetY],
     })
       .setLatLng(latlng)
       .setContent(html);
@@ -691,6 +739,7 @@ class ListingMap {
       this._hydratePreviewImagesFromEl(el);
       this._wirePreviewCarouselFromEl(marker, el);
       this._wireDetachedPreviewBridge(marker, el);
+      this._ensurePopupVisible(popup);
     });
   }
 
@@ -711,16 +760,16 @@ class ListingMap {
     if (dismiss) {
       L.DomEvent.on(dismiss, 'click', (e) => {
         L.DomEvent.stop(e);
-        this._closeDetachedPreview();
-        this._setClusterPreviewHighlight(null);
-        if (this._selectedMarker !== marker) {
-          markerFactory.setSelected(marker, false);
-          this._emitPreview(null);
-        }
+        marker._cagSticky = false;
+        this.clearSelection();
       });
     }
 
+    // Keep map click-to-dismiss from firing when interacting with the popup
     L.DomEvent.disableClickPropagation(el);
+    L.DomEvent.on(el, 'click', (e) => {
+      L.DomEvent.stopPropagation(e);
+    });
   }
 
   _isMarkerVisibleOnMap(marker) {
@@ -771,9 +820,7 @@ class ListingMap {
         this._hydratePreviewImages(marker);
         this._wirePreviewPointerBridge(marker);
         this._wirePreviewCarousel(marker);
-        if (fromRailZoom) {
-          this._panPopupIntoView(marker);
-        }
+        this._ensurePopupVisible(marker);
       } else if (fromRail) {
         // Keep detached preview when not zooming into a cluster
         this._openDetachedPreview(marker);
@@ -815,6 +862,9 @@ class ListingMap {
       this._selectedMarker = null;
     }
     this._clearStickyPreviews();
+    this._setClusterPreviewHighlight(null);
+    this._activePreviewMarker = null;
+    this._emitPreview(null);
     this._selectionListeners.forEach((fn) => {
       try {
         fn(null);
@@ -839,11 +889,15 @@ class ListingMap {
       setPinActive(true);
       this._activePreviewMarker = marker;
       this._emitPreview(marker._cagItem || null);
+      this._ensurePopupVisible(marker);
     });
 
     marker.on('popupclose', () => {
       setPinActive(false);
-      marker._cagSticky = false;
+      // Keep sticky flag while this listing remains the rail selection
+      if (this._selectedMarker !== marker) {
+        marker._cagSticky = false;
+      }
       if (this._activePreviewMarker === marker) {
         this._activePreviewMarker = null;
       }
@@ -957,7 +1011,15 @@ class ListingMap {
       if (img.getAttribute('src')) return;
       const src = img.getAttribute('data-src');
       if (!src) return;
-      img.onload = () => img.classList.add('is-loaded');
+      img.onload = () => {
+        img.classList.add('is-loaded');
+        // Re-fit after image expands the card height
+        if (this._detachedPreview) {
+          this._ensurePopupVisible(this._detachedPreview);
+        } else if (this._activePreviewMarker) {
+          this._ensurePopupVisible(this._activePreviewMarker);
+        }
+      };
       img.onerror = () => img.classList.add('is-error');
       img.setAttribute('src', src);
       img.removeAttribute('data-src');
@@ -1034,31 +1096,165 @@ class ListingMap {
   }
 
   _panPopupIntoView(marker) {
-    if (!this.map || !marker) return;
-    const popup = marker.getPopup && marker.getPopup();
-    const el = popup && popup.getElement && popup.getElement();
-    if (!el) return;
+    this._ensurePopupVisible(marker);
+  }
 
-    const pad = { x: 28, y: 88 };
+  /**
+   * Keep preview fully inside the map viewport.
+   * Prefer flipping below when clipped at the top, then pan any remaining overflow.
+   * @param {L.Marker|L.Popup} source
+   */
+  _ensurePopupVisible(source) {
+    if (!this.map || !source) return;
+
+    const popup = typeof source.getPopup === 'function' ? source.getPopup() : source;
+    if (!popup) return;
+
+    const run = () => {
+      if (!this.map) return;
+
+      const stillDetached = popup === this._detachedPreview;
+      const stillMarkerPopup =
+        typeof source.getPopup === 'function' &&
+        source.getPopup() === popup &&
+        source.isPopupOpen &&
+        source.isPopupOpen();
+      if (!stillDetached && typeof source.getPopup === 'function' && !stillMarkerPopup) {
+        return;
+      }
+      if (!stillDetached && typeof source.getPopup !== 'function' && popup !== this._detachedPreview) {
+        return;
+      }
+
+      const el = popup.getElement && popup.getElement();
+      if (!el) return;
+
+      const root =
+        el.classList && el.classList.contains('leaflet-popup')
+          ? el
+          : el.closest
+            ? el.closest('.leaflet-popup')
+            : el;
+      if (!root) return;
+
+      const mapRect = this.map.getContainer().getBoundingClientRect();
+      let rect = root.getBoundingClientRect();
+      const edgePad = 18;
+      const clippedTop = rect.top < mapRect.top + edgePad;
+      const clippedBottom = rect.bottom > mapRect.bottom - edgePad;
+      const height = Math.max(root.offsetHeight || 0, 240);
+
+      // If the card is cut off at the top, force it below the pin
+      if (clippedTop && !clippedBottom) {
+        this._applyPopupPlacement(popup, root, 'below', height);
+      } else {
+        const latlng = popup.getLatLng && popup.getLatLng();
+        if (latlng) {
+          const placement = this._resolvePopupPlacement(latlng, root);
+          this._applyPopupPlacement(popup, root, placement, height);
+        }
+      }
+
+      // Leaflet built-in pan as a first pass
+      try {
+        if (typeof popup._adjustPan === 'function') {
+          const prevAutoPan = popup.options.autoPan;
+          popup.options.autoPan = true;
+          popup.options.autoPanPadding = L.point(36, 36);
+          popup._adjustPan();
+          popup.options.autoPan = prevAutoPan;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+
+      this._panPopupElementIntoView(root);
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(run));
+    if (this._popupVisibilityTimers) {
+      this._popupVisibilityTimers.forEach((t) => clearTimeout(t));
+    }
+    this._popupVisibilityTimers = [setTimeout(run, 80), setTimeout(run, 280), setTimeout(run, 560)];
+  }
+
+  _resolvePopupPlacement(latlng, el) {
+    const pt = this.map.latLngToContainerPoint(latlng);
+    const size = this.map.getSize();
+    const height = Math.max((el && el.offsetHeight) || 0, 260);
+    const pad = 24;
+    const spaceAbove = pt.y - pad;
+    const spaceBelow = size.y - pt.y - pad;
+
+    // Flip when the card would not fit above the pin
+    if (spaceAbove < height && spaceBelow >= Math.min(height, spaceAbove + 40)) {
+      return 'below';
+    }
+    return 'above';
+  }
+
+  _applyPopupPlacement(popup, el, placement, height) {
+    const h = height || (el && el.offsetHeight) || 280;
+    // Leaflet anchors the tip at latlng; positive offset.y shifts the card downward.
+    // To place the whole card under the pin, offset by roughly the card height.
+    const offsetY = placement === 'below' ? Math.round(h) + 16 : -8;
+    popup.options.offset = L.point(0, offsetY);
+
+    const root =
+      el && el.classList && el.classList.contains('leaflet-popup')
+        ? el
+        : el && el.closest
+          ? el.closest('.leaflet-popup')
+          : el;
+    if (root && root.classList) {
+      root.classList.toggle('cag-map-popup--below', placement === 'below');
+    }
+
+    if (typeof popup.options.className === 'string') {
+      popup.options.className = popup.options.className
+        .replace(/\s*cag-map-popup--below\b/g, '')
+        .trim();
+      if (placement === 'below') {
+        popup.options.className += ' cag-map-popup--below';
+      }
+    }
+
+    if (typeof popup._updatePosition === 'function') {
+      popup._updatePosition();
+    }
+  }
+
+  _panPopupElementIntoView(el) {
+    if (!this.map || !el) return;
+
+    const pad = { top: 20, right: 24, bottom: 24, left: 24 };
     const rect = el.getBoundingClientRect();
     const mapRect = this.map.getContainer().getBoundingClientRect();
     let dx = 0;
     let dy = 0;
 
-    if (rect.left < mapRect.left + pad.x) {
-      dx = rect.left - (mapRect.left + pad.x);
-    } else if (rect.right > mapRect.right - pad.x) {
-      dx = rect.right - (mapRect.right - pad.x);
-    }
-    if (rect.top < mapRect.top + pad.y) {
-      dy = rect.top - (mapRect.top + pad.y);
-    } else if (rect.bottom > mapRect.bottom - pad.y) {
-      dy = rect.bottom - (mapRect.bottom - pad.y);
+    if (rect.left < mapRect.left + pad.left) {
+      dx = rect.left - (mapRect.left + pad.left);
+    } else if (rect.right > mapRect.right - pad.right) {
+      dx = rect.right - (mapRect.right - pad.right);
     }
 
-    if (dx !== 0 || dy !== 0) {
-      this.map.panBy([dx, dy], { animate: true, duration: 0.25 });
+    if (rect.top < mapRect.top + pad.top) {
+      dy = rect.top - (mapRect.top + pad.top);
+    } else if (rect.bottom > mapRect.bottom - pad.bottom) {
+      dy = rect.bottom - (mapRect.bottom - pad.bottom);
     }
+
+    if (dx === 0 && dy === 0) return;
+
+    this._ignoreMoveClose = true;
+    this.map.panBy([dx, dy], { animate: true, duration: 0.3 });
+    if (this._ignoreMoveCloseTimer) {
+      clearTimeout(this._ignoreMoveCloseTimer);
+    }
+    this._ignoreMoveCloseTimer = setTimeout(() => {
+      this._ignoreMoveClose = false;
+    }, 400);
   }
 
   _closePreview(marker) {
