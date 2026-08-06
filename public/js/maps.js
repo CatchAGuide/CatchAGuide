@@ -249,12 +249,15 @@ var ListingMap = /*#__PURE__*/function () {
     this._initialized = false;
     this._activePreviewMarker = null;
     this._selectedMarker = null;
+    this._detachedPreview = null;
+    this._clusterPreviewEl = null;
     this._hoverOpenTimer = null;
     this._hoverCloseTimer = null;
     this._viewportTimer = null;
     this._userInteracted = false;
     this._viewportListeners = [];
     this._selectionListeners = [];
+    this._previewListeners = [];
     this._landmarkLayer = null;
     this._canHover = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : true;
     this.options = _objectSpread(_objectSpread({}, this._parseOptions(el)), overrideOptions);
@@ -448,6 +451,24 @@ var ListingMap = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "onPreviewChange",
+    value: function onPreviewChange(fn) {
+      if (typeof fn === 'function') {
+        this._previewListeners.push(fn);
+      }
+    }
+  }, {
+    key: "_emitPreview",
+    value: function _emitPreview(item) {
+      this._previewListeners.forEach(function (fn) {
+        try {
+          fn(item || null);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
     key: "_scheduleViewportEmit",
     value: function _scheduleViewportEmit() {
       var _this3 = this;
@@ -527,6 +548,8 @@ var ListingMap = /*#__PURE__*/function () {
     value: function clearMarkers() {
       var _this4 = this;
       this._clearHoverTimers();
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
       this._activePreviewMarker = null;
       this._selectedMarker = null;
       if (this.cluster) {
@@ -596,8 +619,9 @@ var ListingMap = /*#__PURE__*/function () {
             lng: parseFloat(item.lng)
           });
         }
-        var variant = item.variant || item.pillar || 'primary';
-        if (!_this5.options.showGrayNearby && variant === 'gray') {
+        var isGray = item.variant === 'gray' || item.is_gray || item.isGray;
+        var colorVariant = isGray ? 'gray' : _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].resolveColorVariant(item.variant || item.pillar, item.module || item.pillar);
+        if (!_this5.options.showGrayNearby && isGray) {
           return;
         }
         var chipPrice = item.price != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(item.price, locale) : null;
@@ -619,17 +643,18 @@ var ListingMap = /*#__PURE__*/function () {
             lat: lat,
             lng: lng
           },
-          variant: variant,
+          variant: colorVariant,
+          module: item.module || item.pillar || colorVariant,
           title: item.title || '',
           popupHtml: popupHtml || null,
           popupOptions: popupOptions,
-          zIndexOffset: variant === 'gray' ? 100 : 0,
-          priceChip: usePriceChips && variant !== 'gray',
+          zIndexOffset: isGray ? 100 : 0,
+          priceChip: usePriceChips && !isGray,
           price: item.price,
           priceLabel: chipPrice
         });
         marker.options = marker.options || {};
-        marker.options.cagVariant = variant;
+        marker.options.cagVariant = colorVariant;
         marker._cagItem = item;
         marker._cagSticky = false;
         if (railMode && interactive) {
@@ -648,7 +673,7 @@ var ListingMap = /*#__PURE__*/function () {
           });
         }
         _this5.markers.push(marker);
-        if (variant === 'gray') {
+        if (isGray) {
           grayMarkers.push(marker);
           return;
         }
@@ -746,6 +771,26 @@ var ListingMap = /*#__PURE__*/function () {
         this.selectMarker(marker, opts);
       }
     }
+
+    /**
+     * Zoom/spiderfy to a pin from the rail (button or double-click).
+     * Shows the real marker popup after the pin is visible.
+     */
+  }, {
+    key: "zoomToById",
+    value: function zoomToById(id) {
+      var marker = this.markers.find(function (m) {
+        return m._cagItem && String(m._cagItem.id) === String(id);
+      });
+      if (!marker) return;
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      this.selectMarker(marker, {
+        pan: true,
+        allowZoom: true,
+        source: 'rail-zoom'
+      });
+    }
   }, {
     key: "highlightById",
     value: function highlightById(id, on) {
@@ -759,9 +804,187 @@ var ListingMap = /*#__PURE__*/function () {
         _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, !!on);
       }
     }
+
+    /**
+     * Hover from rail: show pin popup in place — never pan/zoom.
+     * If the pin is inside a cluster, open a detached preview on the cluster.
+     */
+  }, {
+    key: "previewById",
+    value: function previewById(id) {
+      var _this8 = this;
+      var on = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var marker = this.markers.find(function (m) {
+        return m._cagItem && String(m._cagItem.id) === String(id);
+      });
+      if (!marker) return;
+      if (!on) {
+        if (marker._cagSticky || this._selectedMarker === marker) {
+          _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+          this._closeDetachedPreview();
+          this._setClusterPreviewHighlight(null);
+          return;
+        }
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
+        if (marker.isPopupOpen && marker.isPopupOpen()) {
+          marker.closePopup();
+        }
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        if (this._activePreviewMarker === marker) {
+          this._activePreviewMarker = null;
+        }
+        this._emitPreview(null);
+        return;
+      }
+
+      // Close other non-sticky previews
+      this.markers.forEach(function (m) {
+        if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
+          m.closePopup();
+          if (_this8._selectedMarker !== m) {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(m, false);
+          }
+        }
+      });
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      this._activePreviewMarker = marker;
+      this._emitPreview(marker._cagItem || null);
+      var visible = this._isMarkerVisibleOnMap(marker);
+      if (visible && marker.getPopup && marker.getPopup()) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        this._hydratePreviewImages(marker);
+        this._wirePreviewPointerBridge(marker);
+        this._wirePreviewCarousel(marker);
+        return;
+      }
+
+      // Pin is clustered (or otherwise not visible) — show preview without zooming
+      this._openDetachedPreview(marker);
+    }
+  }, {
+    key: "_getClusterParent",
+    value: function _getClusterParent(marker) {
+      if (!marker || !this.cluster || typeof this.cluster.getVisibleParent !== 'function') {
+        return null;
+      }
+      try {
+        var parent = this.cluster.getVisibleParent(marker);
+        if (parent && parent !== marker) {
+          return parent;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      return null;
+    }
+  }, {
+    key: "_setClusterPreviewHighlight",
+    value: function _setClusterPreviewHighlight(clusterMarker) {
+      if (this._clusterPreviewEl) {
+        this._clusterPreviewEl.classList.remove('cag-map-cluster--preview');
+        this._clusterPreviewEl = null;
+      }
+      if (!clusterMarker) return;
+      var el = clusterMarker.getElement && clusterMarker.getElement();
+      if (el) {
+        el.classList.add('cag-map-cluster--preview');
+        this._clusterPreviewEl = el;
+      }
+    }
+  }, {
+    key: "_openDetachedPreview",
+    value: function _openDetachedPreview(marker) {
+      var _this9 = this;
+      if (!this.map || !marker) return;
+      var item = marker._cagItem || {};
+      var html = marker.getPopup && marker.getPopup() && marker.getPopup().getContent && marker.getPopup().getContent() || this.buildInteractivePreviewHtml(item);
+      if (!html) return;
+      this._closeDetachedPreview();
+      var clusterParent = this._getClusterParent(marker);
+      this._setClusterPreviewHighlight(clusterParent);
+      var latlng = clusterParent && clusterParent.getLatLng ? clusterParent.getLatLng() : marker.getLatLng();
+      var previewWidth = this._previewCardWidth();
+      var pillar = item.pillar || item.module || '';
+      var popup = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.popup({
+        className: "cag-map-popup cag-map-popup--interactive cag-map-popup--detached".concat(pillar ? " cag-map-popup--".concat(pillar) : ''),
+        maxWidth: previewWidth,
+        minWidth: Math.min(236, previewWidth),
+        closeButton: false,
+        autoPan: false,
+        offset: [0, -18]
+      }).setLatLng(latlng).setContent(html);
+      this._detachedPreview = popup;
+      popup._cagDetachedFor = marker;
+      popup.on('remove', function () {
+        if (_this9._detachedPreview === popup) {
+          _this9._detachedPreview = null;
+        }
+      });
+      popup.openOn(this.map);
+
+      // Allow DOM to mount before wiring carousel / lazy images
+      requestAnimationFrame(function () {
+        if (_this9._detachedPreview !== popup) return;
+        var el = popup.getElement && popup.getElement();
+        if (!el) return;
+        _this9._hydratePreviewImagesFromEl(el);
+        _this9._wirePreviewCarouselFromEl(marker, el);
+        _this9._wireDetachedPreviewBridge(marker, el);
+      });
+    }
+  }, {
+    key: "_closeDetachedPreview",
+    value: function _closeDetachedPreview() {
+      if (!this._detachedPreview) return;
+      var popup = this._detachedPreview;
+      this._detachedPreview = null;
+      if (this.map) {
+        this.map.closePopup(popup);
+      }
+    }
+  }, {
+    key: "_wireDetachedPreviewBridge",
+    value: function _wireDetachedPreviewBridge(marker, el) {
+      var _this0 = this;
+      if (!el || el._cagDetachedBridgeWired) return;
+      el._cagDetachedBridgeWired = true;
+      var dismiss = el.querySelector('.cag-map-preview__dismiss');
+      if (dismiss) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          _this0._closeDetachedPreview();
+          _this0._setClusterPreviewHighlight(null);
+          if (_this0._selectedMarker !== marker) {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
+            _this0._emitPreview(null);
+          }
+        });
+      }
+      _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
+    }
+  }, {
+    key: "_isMarkerVisibleOnMap",
+    value: function _isMarkerVisibleOnMap(marker) {
+      if (!marker || !this.map) return false;
+      if (this.cluster && typeof this.cluster.getVisibleParent === 'function') {
+        try {
+          var parent = this.cluster.getVisibleParent(marker);
+          return parent === marker;
+        } catch (e) {
+          /* fall through */
+        }
+      }
+      return this.map.hasLayer(marker);
+    }
   }, {
     key: "selectMarker",
     value: function selectMarker(marker) {
+      var _this1 = this;
       var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       if (!marker) return;
       if (this._selectedMarker && this._selectedMarker !== marker) {
@@ -769,24 +992,13 @@ var ListingMap = /*#__PURE__*/function () {
       }
       this._selectedMarker = marker;
       _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
-      if (this.cluster && this.cluster.zoomToShowLayer) {
-        try {
-          this.cluster.zoomToShowLayer(marker, function () {
-            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
-          });
-        } catch (e) {
-          /* ignore */
-        }
-      }
-      if (opts.pan && this.map) {
-        this.map.panTo(marker.getLatLng(), {
-          animate: true
-        });
-      }
-
-      // Open popup when selecting from the rail (map clicks open it in the click handler)
-      if (opts.source === 'rail' && this.options.interactivePreview) {
-        this.markers.forEach(function (m) {
+      var fromRail = opts.source === 'rail';
+      var fromRailZoom = opts.source === 'rail-zoom';
+      // Preview-only rail interactions never zoom; "Show on map" / double-click do
+      var allowZoom = fromRailZoom || !fromRail && opts.allowZoom !== false;
+      var openRailPreview = function openRailPreview() {
+        if (!_this1.options.interactivePreview || !fromRail && !fromRailZoom) return;
+        _this1.markers.forEach(function (m) {
           if (m !== marker) {
             m._cagSticky = false;
             if (m.isPopupOpen && m.isPopupOpen()) {
@@ -795,10 +1007,44 @@ var ListingMap = /*#__PURE__*/function () {
           }
         });
         marker._cagSticky = true;
-        if (!marker.isPopupOpen()) {
-          marker.openPopup();
+        _this1._closeDetachedPreview();
+        _this1._setClusterPreviewHighlight(null);
+        if (_this1._isMarkerVisibleOnMap(marker)) {
+          if (!marker.isPopupOpen()) {
+            marker.openPopup();
+          }
+          _this1._hydratePreviewImages(marker);
+          _this1._wirePreviewPointerBridge(marker);
+          _this1._wirePreviewCarousel(marker);
+          if (fromRailZoom) {
+            _this1._panPopupIntoView(marker);
+          }
+        } else if (fromRail) {
+          // Keep detached preview when not zooming into a cluster
+          _this1._openDetachedPreview(marker);
         }
-        this._panPopupIntoView(marker);
+      };
+      if (allowZoom && this.cluster && typeof this.cluster.zoomToShowLayer === 'function') {
+        try {
+          this.cluster.zoomToShowLayer(marker, function () {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+            openRailPreview();
+          });
+        } catch (e) {
+          if (opts.pan && this.map) {
+            this.map.panTo(marker.getLatLng(), {
+              animate: true
+            });
+          }
+          openRailPreview();
+        }
+      } else {
+        if (opts.pan && this.map) {
+          this.map.panTo(marker.getLatLng(), {
+            animate: true
+          });
+        }
+        openRailPreview();
       }
       var item = marker._cagItem || null;
       this._selectionListeners.forEach(function (fn) {
@@ -828,7 +1074,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_bindInteractivePreview",
     value: function _bindInteractivePreview(marker) {
-      var _this8 = this;
+      var _this10 = this;
       var setPinActive = function setPinActive(active) {
         var el = marker.getElement && marker.getElement();
         if (!el) return;
@@ -836,23 +1082,30 @@ var ListingMap = /*#__PURE__*/function () {
         el.classList.toggle('cag-map-chip--selected', !!active && marker._cagPriceChip);
       };
       marker.on('popupopen', function () {
-        _this8._hydratePreviewImages(marker);
-        _this8._wirePreviewPointerBridge(marker);
+        _this10._hydratePreviewImages(marker);
+        _this10._wirePreviewPointerBridge(marker);
+        _this10._wirePreviewCarousel(marker);
         setPinActive(true);
-        _this8._activePreviewMarker = marker;
+        _this10._activePreviewMarker = marker;
+        _this10._emitPreview(marker._cagItem || null);
       });
       marker.on('popupclose', function () {
         setPinActive(false);
         marker._cagSticky = false;
-        if (_this8._activePreviewMarker === marker) {
-          _this8._activePreviewMarker = null;
+        if (_this10._activePreviewMarker === marker) {
+          _this10._activePreviewMarker = null;
+        }
+        if (_this10._selectedMarker !== marker) {
+          _this10._emitPreview(null);
         }
       });
       marker.on('click', function (e) {
         if (e && e.originalEvent) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
         }
-        _this8.markers.forEach(function (m) {
+        _this10._closeDetachedPreview();
+        _this10._setClusterPreviewHighlight(null);
+        _this10.markers.forEach(function (m) {
           if (m !== marker) {
             m._cagSticky = false;
             if (m.isPopupOpen && m.isPopupOpen()) {
@@ -865,18 +1118,22 @@ var ListingMap = /*#__PURE__*/function () {
           marker.openPopup();
         }
         setPinActive(true);
-        _this8._panPopupIntoView(marker);
+        _this10.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+        _this10._panPopupIntoView(marker);
       });
       if (!this._canHover) {
         return;
       }
       marker.on('mouseover', function () {
-        _this8._clearHoverTimers();
-        _this8._hoverOpenTimer = setTimeout(function () {
-          if (_this8._activePreviewMarker && _this8._activePreviewMarker !== marker && _this8._activePreviewMarker._cagSticky) {
+        _this10._clearHoverTimers();
+        _this10._hoverOpenTimer = setTimeout(function () {
+          if (_this10._activePreviewMarker && _this10._activePreviewMarker !== marker && _this10._activePreviewMarker._cagSticky) {
             return;
           }
-          _this8.markers.forEach(function (m) {
+          _this10.markers.forEach(function (m) {
             if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
               m.closePopup();
             }
@@ -885,13 +1142,17 @@ var ListingMap = /*#__PURE__*/function () {
             marker.openPopup();
           }
           setPinActive(true);
+          _this10._emitPreview(marker._cagItem || null);
         }, 70);
       });
       marker.on('mouseout', function () {
-        _this8._clearHoverTimers();
-        _this8._hoverCloseTimer = setTimeout(function () {
+        _this10._clearHoverTimers();
+        _this10._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky && !marker._cagPointerOnPopup) {
-            _this8._closePreview(marker);
+            _this10._closePreview(marker);
+            if (_this10._selectedMarker !== marker) {
+              _this10._emitPreview(null);
+            }
           }
         }, 140);
       });
@@ -899,7 +1160,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_wirePreviewPointerBridge",
     value: function _wirePreviewPointerBridge(marker) {
-      var _this9 = this;
+      var _this11 = this;
       var popup = marker.getPopup && marker.getPopup();
       var el = popup && popup.getElement && popup.getElement();
       if (!el || el._cagBridgeWired) {
@@ -908,14 +1169,14 @@ var ListingMap = /*#__PURE__*/function () {
       el._cagBridgeWired = true;
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseenter', function () {
         marker._cagPointerOnPopup = true;
-        _this9._clearHoverTimers();
+        _this11._clearHoverTimers();
       });
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseleave', function () {
         marker._cagPointerOnPopup = false;
-        _this9._clearHoverTimers();
-        _this9._hoverCloseTimer = setTimeout(function () {
+        _this11._clearHoverTimers();
+        _this11._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky) {
-            _this9._closePreview(marker);
+            _this11._closePreview(marker);
           }
         }, 120);
       });
@@ -924,7 +1185,7 @@ var ListingMap = /*#__PURE__*/function () {
         _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
           marker._cagSticky = false;
-          _this9._closePreview(marker);
+          _this11._closePreview(marker);
         });
       }
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
@@ -934,6 +1195,11 @@ var ListingMap = /*#__PURE__*/function () {
     value: function _hydratePreviewImages(marker) {
       var popup = marker.getPopup && marker.getPopup();
       var el = popup && popup.getElement && popup.getElement();
+      this._hydratePreviewImagesFromEl(el);
+    }
+  }, {
+    key: "_hydratePreviewImagesFromEl",
+    value: function _hydratePreviewImagesFromEl(el) {
       if (!el) return;
       el.querySelectorAll('img[data-src]').forEach(function (img) {
         if (img.getAttribute('src')) return;
@@ -948,6 +1214,68 @@ var ListingMap = /*#__PURE__*/function () {
         img.setAttribute('src', src);
         img.removeAttribute('data-src');
       });
+    }
+  }, {
+    key: "_wirePreviewCarousel",
+    value: function _wirePreviewCarousel(marker) {
+      var popup = marker.getPopup && marker.getPopup();
+      var root = popup && popup.getElement && popup.getElement();
+      this._wirePreviewCarouselFromEl(marker, root);
+    }
+  }, {
+    key: "_wirePreviewCarouselFromEl",
+    value: function _wirePreviewCarouselFromEl(marker, root) {
+      var _this12 = this;
+      if (!root) return;
+      var carousel = root.querySelector('[data-cag-preview-carousel]');
+      if (!carousel || carousel._cagCarouselWired) {
+        return;
+      }
+      carousel._cagCarouselWired = true;
+      var slides = Array.from(carousel.querySelectorAll('[data-cag-preview-slide]'));
+      if (slides.length < 2) {
+        return;
+      }
+      var index = Math.max(0, slides.findIndex(function (s) {
+        return s.classList.contains('is-active');
+      }));
+      if (index < 0) index = 0;
+      var dots = Array.from(carousel.querySelectorAll('[data-cag-preview-dot]'));
+      var prevBtn = carousel.querySelector('[data-cag-preview-prev]');
+      var nextBtn = carousel.querySelector('[data-cag-preview-next]');
+      var counter = carousel.querySelector('[data-cag-preview-counter]');
+      var show = function show(nextIndex) {
+        index = (nextIndex % slides.length + slides.length) % slides.length;
+        slides.forEach(function (slide, i) {
+          slide.classList.toggle('is-active', i === index);
+        });
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('is-active', i === index);
+          dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+        });
+        if (counter) {
+          counter.textContent = "".concat(index + 1, "/").concat(slides.length);
+        }
+        _this12._hydratePreviewImagesFromEl(root);
+      };
+      var bindNav = function bindNav(btn, delta) {
+        if (!btn) return;
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(btn, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          if (marker) marker._cagSticky = true;
+          show(index + delta);
+        });
+      };
+      bindNav(prevBtn, -1);
+      bindNav(nextBtn, 1);
+      dots.forEach(function (dot, i) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dot, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          if (marker) marker._cagSticky = true;
+          show(i);
+        });
+      });
+      show(index);
     }
   }, {
     key: "_panPopupIntoView",
@@ -993,10 +1321,16 @@ var ListingMap = /*#__PURE__*/function () {
       if (marker.isPopupOpen && marker.isPopupOpen()) {
         marker.closePopup();
       }
+      if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+      }
     }
   }, {
     key: "_clearStickyPreviews",
     value: function _clearStickyPreviews() {
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
       this.markers.forEach(function (m) {
         m._cagSticky = false;
         if (m.isPopupOpen && m.isPopupOpen()) {
@@ -1045,20 +1379,31 @@ var ListingMap = /*#__PURE__*/function () {
         var price = g.lowest_price != null ? g.lowest_price : g.price;
         var normalizedPrice = price != null && price !== '' && Number(price) > 0 ? price : null;
         var chip = normalizedPrice != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(normalizedPrice, locale) : null;
+        var pillar = g.pillar || g.module || 'guiding';
+        var module = g.module || (pillar === 'trip' ? 'trip' : pillar === 'camp' ? 'camp' : 'tour');
         return {
           id: g.id,
           lat: g.lat,
           lng: g.lng,
           variant: g.variant || (g.is_gray || g.isGray ? 'gray' : 'primary'),
-          pillar: g.pillar || 'guiding',
+          pillar: pillar,
+          module: module,
+          moduleLabel: g.moduleLabel || g.badge || '',
           title: g.title || '',
           location: g.location || '',
           price: normalizedPrice,
           priceLabel: g.priceLabel || (chip ? priceTpl.replace(':price', chip) : null),
-          badge: g.badge || '',
+          badge: g.badge || g.moduleLabel || '',
           cta: g.cta || '',
           url: g.url || g.link || '#',
-          image: g.thumbnail || g.thumbnail_path || g.image || ''
+          image: g.thumbnail || g.thumbnail_path || g.image || '',
+          images: Array.isArray(g.images) ? g.images : [],
+          durationLabel: g.durationLabel || g.duration_label || '',
+          guestsLabel: g.guestsLabel || g.guests_label || '',
+          maxGuests: g.maxGuests || g.max_guests || null,
+          rating: g.rating != null ? g.rating : null,
+          reviewCount: g.reviewCount != null ? g.reviewCount : g.review_count != null ? g.review_count : null,
+          boatLabel: g.boatLabel || g.boat_label || ''
         };
       });
       this.setMarkers(markers, opts);
@@ -1081,14 +1426,19 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "buildInteractivePreviewHtml",
     value: function buildInteractivePreviewHtml() {
+      var _this13 = this;
       var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var title = this._escape(item.title || '');
       var location = this._escape(item.location || '');
       var url = this._escape(item.url || item.link || '#');
-      var image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
+      var images = this._previewImages(item);
+      var image = images[0] || '';
       var badge = this._escape(item.badge || '');
       var cta = this._escape(item.cta || '');
       var priceLabel = this._escape(item.priceLabel || '');
+      var i18n = this._previewI18n();
+      var prevLabel = this._escape(i18n.prev || 'Previous image');
+      var nextLabel = this._escape(i18n.next || 'Next image');
       var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding' ? item.pillar === 'guiding' ? 'tour' : item.pillar : '';
       var badgeTone = pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
       if (!title && !image && !location && !priceLabel) {
@@ -1096,7 +1446,49 @@ var ListingMap = /*#__PURE__*/function () {
       }
       var priceBlock = priceLabel ? "<div class=\"cag-map-preview__price\">".concat(priceLabel, "</div>") : '';
       var cardWidth = this._previewCardWidth();
-      return "\n      <div class=\"cag-map-preview\" data-pillar=\"".concat(pillar, "\" style=\"width:").concat(cardWidth, "px\">\n        <button type=\"button\" class=\"cag-map-preview__dismiss\" aria-label=\"Close\" tabindex=\"0\">&times;</button>\n        <a class=\"cag-map-preview__link\" href=\"").concat(url, "\">\n          <div class=\"cag-map-preview__media").concat(image ? '' : ' cag-map-preview__media--empty', "\">\n            ").concat(image ? "<img class=\"cag-map-preview__image\" data-src=\"".concat(image, "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">") : '', "\n            ").concat(badge ? "<span class=\"cag-map-preview__badge cag-map-preview__badge--".concat(badgeTone, "\">").concat(badge, "</span>") : '', "\n          </div>\n          <div class=\"cag-map-preview__body\">\n            <h5 class=\"cag-map-preview__title\">").concat(title, "</h5>\n            ").concat(location ? "<div class=\"cag-map-preview__location\"><span aria-hidden=\"true\"></span>".concat(location, "</div>") : '', "\n            <div class=\"cag-map-preview__footer\">\n              ").concat(priceBlock, "\n              ").concat(cta ? "<span class=\"cag-map-preview__cta\">".concat(cta, "</span>") : '', "\n            </div>\n          </div>\n        </a>\n      </div>");
+      var hasCarousel = images.length > 1;
+      var slidesHtml = images.length ? images.map(function (src, i) {
+        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this13._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
+      }).join('') : '';
+      var navHtml = hasCarousel ? "\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--prev\" data-cag-preview-prev aria-label=\"".concat(prevLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8249;</span>\n          </button>\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--next\" data-cag-preview-next aria-label=\"").concat(nextLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8250;</span>\n          </button>\n          <div class=\"cag-map-preview__dots\" role=\"tablist\">\n            ").concat(images.map(function (_, i) {
+        return "<button type=\"button\" class=\"cag-map-preview__dot".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-dot aria-label=\"").concat(i + 1, "\" aria-current=\"").concat(i === 0 ? 'true' : 'false', "\" tabindex=\"0\"></button>");
+      }).join(''), "\n          </div>\n          <span class=\"cag-map-preview__counter\" data-cag-preview-counter>1/").concat(images.length, "</span>") : '';
+      var mediaInner = images.length ? "<div class=\"cag-map-preview__carousel\" data-cag-preview-carousel>\n            <a class=\"cag-map-preview__media-link\" href=\"".concat(url, "\" tabindex=\"-1\">").concat(slidesHtml, "</a>\n            ").concat(navHtml, "\n          </div>") : '';
+      return "\n      <div class=\"cag-map-preview\" data-pillar=\"".concat(pillar, "\" style=\"width:").concat(cardWidth, "px\">\n        <button type=\"button\" class=\"cag-map-preview__dismiss\" aria-label=\"Close\" tabindex=\"0\">&times;</button>\n        <div class=\"cag-map-preview__media").concat(image ? '' : ' cag-map-preview__media--empty', "\">\n          ").concat(mediaInner, "\n          ").concat(badge ? "<span class=\"cag-map-preview__badge cag-map-preview__badge--".concat(badgeTone, "\">").concat(badge, "</span>") : '', "\n        </div>\n        <a class=\"cag-map-preview__link\" href=\"").concat(url, "\">\n          <div class=\"cag-map-preview__body\">\n            <h5 class=\"cag-map-preview__title\">").concat(title, "</h5>\n            ").concat(location ? "<div class=\"cag-map-preview__location\"><span aria-hidden=\"true\"></span>".concat(location, "</div>") : '', "\n            <div class=\"cag-map-preview__footer\">\n              ").concat(priceBlock, "\n              ").concat(cta ? "<span class=\"cag-map-preview__cta\">".concat(cta, "</span>") : '', "\n            </div>\n          </div>\n        </a>\n      </div>");
+    }
+  }, {
+    key: "_previewImages",
+    value: function _previewImages() {
+      var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var list = [];
+      var seen = Object.create(null);
+      var push = function push(src) {
+        if (!src || typeof src !== 'string') return;
+        var trimmed = src.trim();
+        if (!trimmed || seen[trimmed]) return;
+        seen[trimmed] = true;
+        list.push(trimmed);
+      };
+      if (Array.isArray(item.images)) {
+        item.images.forEach(push);
+      }
+      push(item.image || item.thumbnail || item.thumbnail_path || '');
+      return list.slice(0, 5);
+    }
+  }, {
+    key: "_previewI18n",
+    value: function _previewI18n() {
+      if (this._previewI18nCache) {
+        return this._previewI18nCache;
+      }
+      try {
+        var modal = this.el && this.el.closest ? this.el.closest('[data-maps-i18n]') : null;
+        var raw = modal && modal.getAttribute('data-maps-i18n');
+        this._previewI18nCache = raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        this._previewI18nCache = {};
+      }
+      return this._previewI18nCache;
     }
 
     /** @deprecated Use buildInteractivePreviewHtml */
@@ -1464,30 +1856,57 @@ var MapModalRail = /*#__PURE__*/function () {
       this.listingMap.onSelectionChange(function (item) {
         return _this.renderSelection(item);
       });
+      this.listingMap.onPreviewChange(function (item) {
+        return _this.setHoveredId(item && item.id != null ? item.id : null);
+      });
       this.listEl.addEventListener('click', function (e) {
         var card = e.target.closest('[data-map-rail-id]');
         if (!card) return;
+        // Allow "View details" (and any real link) to navigate to the product page
+        if (e.target.closest('a[href]')) {
+          return;
+        }
         var id = card.getAttribute('data-map-rail-id');
-        if (e.target.closest('a[href]') && !e.target.closest('[data-map-rail-select]')) {
+        // Explicit "Show on map" zooms to the pin
+        if (e.target.closest('[data-map-rail-zoom]')) {
+          e.preventDefault();
+          e.stopPropagation();
+          _this.listingMap.zoomToById(id);
           return;
         }
         e.preventDefault();
         _this.listingMap.selectById(id, {
-          pan: true,
+          pan: false,
+          allowZoom: false,
           source: 'rail'
         });
+      });
+      this.listEl.addEventListener('dblclick', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        if (e.target.closest('a[href]')) return;
+        e.preventDefault();
+        var id = card.getAttribute('data-map-rail-id');
+        _this.listingMap.zoomToById(id);
       });
       this.listEl.addEventListener('mouseover', function (e) {
         var card = e.target.closest('[data-map-rail-id]');
         if (!card) return;
-        _this.listingMap.highlightById(card.getAttribute('data-map-rail-id'), true);
+        var id = card.getAttribute('data-map-rail-id');
+        if (_this._hoverRailId === id) return;
+        _this._hoverRailId = id;
+        _this.listingMap.previewById(id, true);
       });
       this.listEl.addEventListener('mouseout', function (e) {
         var card = e.target.closest('[data-map-rail-id]');
         if (!card) return;
         var related = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('[data-map-rail-id]') : null;
         if (related === card) return;
-        _this.listingMap.highlightById(card.getAttribute('data-map-rail-id'), false);
+        var id = card.getAttribute('data-map-rail-id');
+        if (_this._hoverRailId === id) {
+          _this._hoverRailId = null;
+        }
+        _this.listingMap.previewById(id, false);
       });
       if (this.toggleBtn) {
         this.toggleBtn.addEventListener('click', function () {
@@ -1575,8 +1994,22 @@ var MapModalRail = /*#__PURE__*/function () {
         var location = _this4._escape(item.location || '');
         var image = _this4._escape(item.image || '');
         var url = _this4._escape(item.url || '#');
+        var module = _this4._normalizeModule(item.module || item.pillar || 'tour');
+        var moduleLabel = _this4._escape(item.moduleLabel || item.badge || '');
         var price = item.priceLabel || (item.price != null ? (_this4.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
-        return "\n          <article class=\"map-modal__rail-card".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select>\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"96\" height=\"72\">") : '', "\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this4._escape(price), "</span>") : '', "\n                <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(_this4._escape(_this4.i18n.view_details || 'Details'), "</a>\n              </div>\n            </div>\n          </article>");
+        var duration = _this4._escape(item.durationLabel || '');
+        var guests = _this4._escape(item.guestsLabel || '');
+        var boat = _this4._escape(item.boatLabel || '');
+        var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+        var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+        var cta = _this4._escape(item.cta || _this4.i18n.view_details || 'Details');
+        var showOnMap = _this4._escape(_this4.i18n.show_on_map || 'Show on map');
+        var metaBits = [duration, guests, boat].filter(Boolean);
+        var metaHtml = metaBits.length ? "<ul class=\"map-modal__rail-card-meta\">".concat(metaBits.map(function (bit) {
+          return "<li>".concat(bit, "</li>");
+        }).join(''), "</ul>") : '';
+        var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n              <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n              ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(_this4._escape((_this4.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n            </span>") : '';
+        return "\n          <article class=\"map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n              <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n                  <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n                </svg>\n              </button>\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <div class=\"map-modal__rail-card-topline\">\n                ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n                ").concat(ratingHtml, "\n              </div>\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              ").concat(metaHtml, "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this4._escape(price), "</span>") : '<span></span>', "\n                <div class=\"map-modal__rail-card-actions\">\n                  <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n                  <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n                </div>\n              </div>\n            </div>\n          </article>");
       }).join('');
       this.listEl.innerHTML = html;
       if (this._selectedId) {
@@ -1620,6 +2053,32 @@ var MapModalRail = /*#__PURE__*/function () {
       if (!window.matchMedia('(min-width: 992px)').matches) {
         this.setRailOpen(true);
       }
+    }
+  }, {
+    key: "setHoveredId",
+    value: function setHoveredId(id) {
+      var hoverId = id != null ? String(id) : null;
+      this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
+        var match = hoverId && el.getAttribute('data-map-rail-id') === hoverId;
+        el.classList.toggle('is-hovered', !!match);
+      });
+      if (hoverId && hoverId !== String(this._selectedId || '')) {
+        var card = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(hoverId), "\"]"));
+        if (card) {
+          card.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
+  }, {
+    key: "_normalizeModule",
+    value: function _normalizeModule(value) {
+      var v = String(value || '').toLowerCase();
+      if (v === 'trip' || v === 'trips') return 'trip';
+      if (v === 'camp' || v === 'camps' || v === 'vacation') return 'camp';
+      return 'tour';
     }
   }, {
     key: "_escapeAttrSelector",
@@ -1803,12 +2262,16 @@ var MapsManager = /*#__PURE__*/function () {
   }, {
     key: "createMarkerClusterer",
     value: function createMarkerClusterer(_ref) {
+      var _this2 = this;
       var map = _ref.map,
         markers = _ref.markers;
       var cluster = leaflet__WEBPACK_IMPORTED_MODULE_0___default().markerClusterGroup({
         showCoverageOnHover: false,
         maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true
+        spiderfyOnMaxZoom: true,
+        iconCreateFunction: function iconCreateFunction(clusterGroup) {
+          return _this2._createClusterIcon(clusterGroup);
+        }
       });
       if (Array.isArray(markers) && markers.length) {
         markers.forEach(function (m) {
@@ -1821,6 +2284,44 @@ var MapsManager = /*#__PURE__*/function () {
       });
       map.addLayer(cluster);
       return cluster;
+    }
+  }, {
+    key: "_createClusterIcon",
+    value: function _createClusterIcon(clusterGroup) {
+      var count = clusterGroup.getChildCount();
+      var size = 'small';
+      var dim = 42;
+      if (count >= 25) {
+        size = 'large';
+        dim = 56;
+      } else if (count >= 8) {
+        size = 'medium';
+        dim = 48;
+      }
+      var typeCounts = {
+        tour: 0,
+        trip: 0,
+        camp: 0
+      };
+      clusterGroup.getAllChildMarkers().forEach(function (m) {
+        var key = m.options && m.options.cagVariant || 'tour';
+        if (key === 'trip' || key === 'camp' || key === 'tour') {
+          typeCounts[key] += 1;
+        } else if (key !== 'gray') {
+          typeCounts.tour += 1;
+        }
+      });
+      var dominant = Object.keys(typeCounts).sort(function (a, b) {
+        return typeCounts[b] - typeCounts[a];
+      })[0] || 'tour';
+      var mixed = [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
+      var typeClass = mixed ? 'cag-map-cluster--mixed' : "cag-map-cluster--".concat(dominant);
+      return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
+        html: "\n        <span class=\"cag-map-cluster__ring\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__ring cag-map-cluster__ring--delay\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__core\">\n          <span class=\"cag-map-cluster__count\">".concat(count, "</span>\n          <span class=\"cag-map-cluster__hint\" aria-hidden=\"true\">+</span>\n        </span>"),
+        className: "leaflet-div-icon marker-cluster marker-cluster-".concat(size, " cag-map-cluster cag-map-cluster--").concat(size, " ").concat(typeClass),
+        iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(dim, dim),
+        iconAnchor: [Math.round(dim / 2), Math.round(dim / 2)]
+      });
     }
   }]);
 }();
@@ -1853,7 +2354,7 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
- * MarkerFactory — primary / gray / trip / camp / price-chip Leaflet divIcons
+ * MarkerFactory — primary / gray / trip / camp / tour / price-chip Leaflet divIcons
  */
 
 var MarkerFactory = /*#__PURE__*/function () {
@@ -1861,6 +2362,27 @@ var MarkerFactory = /*#__PURE__*/function () {
     _classCallCheck(this, MarkerFactory);
   }
   return _createClass(MarkerFactory, [{
+    key: "resolveColorVariant",
+    value:
+    /**
+     * Canonical map color key: gray | tour | trip | camp
+     * @param {string} [value]
+     * @param {string} [module]
+     * @returns {'gray'|'tour'|'trip'|'camp'}
+     */
+    function resolveColorVariant(value, module) {
+      var variant = String(value || '').toLowerCase().trim();
+      if (variant === 'gray') {
+        return 'gray';
+      }
+      var raw = String(module || value || '').toLowerCase().trim();
+      if (raw === 'gray') return 'gray';
+      if (raw === 'trip' || raw === 'trips') return 'trip';
+      if (raw === 'camp' || raw === 'camps' || raw === 'vacation') return 'camp';
+      // guiding / tour / primary / empty → tour (brand coral)
+      return 'tour';
+    }
+  }, {
     key: "formatPriceChip",
     value: function formatPriceChip(price) {
       var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'de';
@@ -1884,19 +2406,18 @@ var MarkerFactory = /*#__PURE__*/function () {
   }, {
     key: "createIcon",
     value: function createIcon() {
-      var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'primary';
+      var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'tour';
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var normalized = ['gray', 'trip', 'camp', 'tour'].includes(variant) ? variant : 'primary';
+      var normalized = this.resolveColorVariant(variant, options.module);
       var isGray = normalized === 'gray';
       var priceLabel = options.priceLabel || null;
       var selected = !!options.selected;
       if (priceLabel && !isGray) {
         var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         var selectedClass = selected ? ' cag-map-chip--selected' : '';
-        var pillarClass = normalized !== 'primary' ? " cag-map-chip--".concat(normalized) : '';
         var width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
         return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
-          className: "leaflet-div-icon cag-map-chip".concat(pillarClass).concat(selectedClass),
+          className: "leaflet-div-icon cag-map-chip cag-map-chip--".concat(normalized).concat(selectedClass),
           html: "<div class=\"cag-map-chip__inner\"><span class=\"cag-map-chip__price\">".concat(safe, "</span></div>"),
           iconSize: [width, 32],
           iconAnchor: [Math.round(width / 2), 16],
@@ -1917,6 +2438,7 @@ var MarkerFactory = /*#__PURE__*/function () {
      * @param {L.Map} options.map
      * @param {{lat:number,lng:number}|L.LatLng} options.position
      * @param {string} [options.variant]
+     * @param {string} [options.module]
      * @param {string} [options.title]
      * @param {string} [options.popupHtml]
      * @param {Object} [options.popupOptions]
@@ -1933,19 +2455,22 @@ var MarkerFactory = /*#__PURE__*/function () {
       var pos = options.position;
       var lat = typeof pos.lat === 'function' ? pos.lat() : pos.lat;
       var lng = typeof pos.lng === 'function' ? pos.lng() : pos.lng;
-      var variant = options.variant || 'primary';
+      var colorVariant = this.resolveColorVariant(options.variant, options.module);
       var priceLabel = options.priceChip && options.priceLabel ? options.priceLabel : options.priceChip && options.price != null ? this.formatPriceChip(options.price, _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de') : null;
       var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
-        icon: this.createIcon(variant, {
+        icon: this.createIcon(colorVariant, {
           priceLabel: priceLabel,
-          selected: options.selected
+          selected: options.selected,
+          module: options.module
         }),
         title: options.title || '',
-        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : variant === 'gray' ? 100 : 0,
+        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : colorVariant === 'gray' ? 100 : 0,
         riseOnHover: true
       });
       marker._cagPriceLabel = priceLabel;
       marker._cagPriceChip = !!priceLabel;
+      marker.options.cagVariant = colorVariant;
+      marker.options.cagModule = options.module || colorVariant;
       if (options.map) {
         marker.addTo(options.map);
       }
@@ -1961,11 +2486,12 @@ var MarkerFactory = /*#__PURE__*/function () {
     key: "setSelected",
     value: function setSelected(marker, selected) {
       if (!marker) return;
-      var variant = marker.options && marker.options.cagVariant || 'primary';
+      var variant = marker.options && marker.options.cagVariant || 'tour';
       var priceLabel = marker._cagPriceLabel || null;
       marker.setIcon(this.createIcon(variant, {
         priceLabel: marker._cagPriceChip ? priceLabel : null,
-        selected: !!selected
+        selected: !!selected,
+        module: marker.options && marker.options.cagModule
       }));
       var el = marker.getElement && marker.getElement();
       if (el) {

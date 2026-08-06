@@ -1029,8 +1029,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   height: 22px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  border: 2px solid #b91c1c;
-  background: #ea4335;
+  border: 2px solid #c94a32;
+  background: #e85d3b;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.35);
   position: relative;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
@@ -1062,23 +1062,36 @@ svg.leaflet-image-layer.leaflet-interactive path {
   margin: -3px 0 0 -3px;
   background: #fff;
 }
-.leaflet-div-icon.cag-map-pin--trip .cag-map-pin__glyph,
-.cag-map-pin--trip .cag-map-pin__glyph {
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Tours / guidings — brand coral */
+}
+.leaflet-div-icon.cag-map-pin--tour .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary .cag-map-pin__glyph,
+.cag-map-pin--tour .cag-map-pin__glyph,
+.cag-map-pin--primary .cag-map-pin__glyph {
   border-color: #c94a32;
   background: #e85d3b;
   box-shadow: 0 2px 8px rgba(232, 93, 59, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
-.leaflet-div-icon.cag-map-pin--tour .cag-map-pin__glyph,
-.cag-map-pin--tour .cag-map-pin__glyph {
-  border-color: #c94d3c;
-  background: #E8604C;
-  box-shadow: 0 2px 8px rgba(232, 96, 76, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Trips — teal */
+}
+.leaflet-div-icon.cag-map-pin--trip .cag-map-pin__glyph,
+.cag-map-pin--trip .cag-map-pin__glyph {
+  border-color: #0f766e;
+  background: #0d9488;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Camps — indigo */
 }
 .leaflet-div-icon.cag-map-pin--camp .cag-map-pin__glyph,
 .cag-map-pin--camp .cag-map-pin__glyph {
-  border-color: #1f1e2c;
-  background: #313041;
-  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #3730a3;
+  background: #4338ca;
+  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 .leaflet-div-icon.cag-map-pin--active, .leaflet-div-icon.cag-map-pin--selected,
 .cag-map-pin--active,
@@ -1090,6 +1103,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-pin--active .cag-map-pin__glyph,
 .cag-map-pin--selected .cag-map-pin__glyph {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(232, 93, 59, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(13, 148, 136, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(67, 56, 202, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 
 /* Price chips — brand accent selected state (not competitor black invert) */
@@ -1121,27 +1144,62 @@ svg.leaflet-image-layer.leaflet-interactive path {
   white-space: nowrap;
   letter-spacing: 0.01em;
 }
-.leaflet-div-icon.cag-map-chip--trip .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--tour .cag-map-chip__inner,
-.cag-map-chip--trip .cag-map-chip__inner,
-.cag-map-chip--tour .cag-map-chip__inner {
-  border-color: rgba(232, 93, 59, 0.45);
+.leaflet-div-icon.cag-map-chip--tour .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary .cag-map-chip__inner,
+.cag-map-chip--tour .cag-map-chip__inner,
+.cag-map-chip--primary .cag-map-chip__inner {
+  border-color: rgba(232, 93, 59, 0.55);
+  background: #fff;
+}
+.leaflet-div-icon.cag-map-chip--tour .cag-map-chip__price, .leaflet-div-icon.cag-map-chip--primary .cag-map-chip__price,
+.cag-map-chip--tour .cag-map-chip__price,
+.cag-map-chip--primary .cag-map-chip__price {
+  color: #c94a32;
+}
+.leaflet-div-icon.cag-map-chip--trip .cag-map-chip__inner,
+.cag-map-chip--trip .cag-map-chip__inner {
+  border-color: rgba(13, 148, 136, 0.55);
+  background: #fff;
+}
+.leaflet-div-icon.cag-map-chip--trip .cag-map-chip__price,
+.cag-map-chip--trip .cag-map-chip__price {
+  color: #0f766e;
 }
 .leaflet-div-icon.cag-map-chip--camp .cag-map-chip__inner,
 .cag-map-chip--camp .cag-map-chip__inner {
-  border-color: rgba(49, 48, 65, 0.28);
+  border-color: rgba(67, 56, 202, 0.5);
+  background: #fff;
+}
+.leaflet-div-icon.cag-map-chip--camp .cag-map-chip__price,
+.cag-map-chip--camp .cag-map-chip__price {
+  color: #4338ca;
 }
 .leaflet-div-icon.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip.cag-map-chip--selected .cag-map-chip__inner {
   transform: scale(1.08);
-  border-color: #e85d3b;
   background: #fff;
+  box-shadow: 0 4px 14px rgba(49, 48, 65, 0.16), 0 0 0 3px rgba(232, 93, 59, 0.22);
+}
+.leaflet-div-icon.cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner {
+  border-color: #e85d3b;
   box-shadow: 0 4px 14px rgba(232, 93, 59, 0.28), 0 0 0 3px rgba(232, 93, 59, 0.22);
+}
+.leaflet-div-icon.cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner {
+  border-color: #0d9488;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28), 0 0 0 3px rgba(13, 148, 136, 0.22);
+}
+.leaflet-div-icon.cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner {
+  border-color: #4338ca;
+  box-shadow: 0 4px 14px rgba(67, 56, 202, 0.28), 0 0 0 3px rgba(67, 56, 202, 0.22);
 }
 .leaflet-div-icon.cag-map-chip--selected .cag-map-chip__price, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__price,
 .cag-map-chip--selected .cag-map-chip__price,
 .cag-map-chip.cag-map-chip--selected .cag-map-chip__price {
-  color: #c94a32;
+  font-weight: 800;
 }
 
 /* Sparse OSM landmarks — low contrast vs charter chips */
@@ -1284,14 +1342,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-preview__link:hover .cag-map-preview__cta, .cag-map-preview__link:focus-visible .cag-map-preview__cta {
   transform: translateX(2px);
 }
-.cag-map-preview__link:hover .cag-map-preview__image.is-loaded, .cag-map-preview__link:focus-visible .cag-map-preview__image.is-loaded {
-  transform: scale(1.04);
-}
 .cag-map-preview__dismiss {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 3;
+  z-index: 5;
   width: 28px;
   height: 28px;
   border: 0;
@@ -1328,6 +1383,105 @@ svg.leaflet-image-layer.leaflet-interactive path {
   height: 42%;
   background: linear-gradient(to top, rgba(20, 18, 28, 0.45), transparent);
   pointer-events: none;
+  z-index: 1;
+}
+.cag-map-preview__carousel {
+  position: absolute;
+  inset: 0;
+}
+.cag-map-preview__media-link {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.cag-map-preview__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.cag-map-preview__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+.cag-map-preview__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #313041;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.cag-map-preview__nav:hover, .cag-map-preview__nav:focus-visible {
+  background: #fff;
+  outline: none;
+  opacity: 1;
+}
+.cag-map-preview__nav--prev {
+  left: 8px;
+}
+.cag-map-preview__nav--next {
+  right: 8px;
+}
+.cag-map-preview__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+.cag-map-preview__dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.cag-map-preview__dot.is-active {
+  background: #fff;
+  transform: scale(1.2);
+}
+.cag-map-preview__counter {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  z-index: 4;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: rgba(20, 18, 28, 0.45);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.cag-map-preview:hover .cag-map-preview__nav, .cag-map-preview:focus-within .cag-map-preview__nav {
+  opacity: 1;
 }
 .cag-map-preview__image {
   width: 100%;
@@ -1551,14 +1705,178 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
-  background-color: rgba(232, 93, 59, 0.28) !important;
+  background-color: transparent !important;
 }
 
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
-  background-color: #e85d3b !important;
+  background-color: transparent !important;
   color: #fff !important;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(232, 93, 59, 0.35);
+  box-shadow: none;
+}
+
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.leaflet-div-icon.cag-map-cluster__ring,
+.cag-map-cluster__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(232, 93, 59, 0.55);
+  background: rgba(232, 93, 59, 0.12);
+  animation: cag-map-cluster-pulse 2.2s ease-out infinite;
+  pointer-events: none;
+}
+.leaflet-div-icon.cag-map-cluster__ring--delay,
+.cag-map-cluster__ring--delay {
+  animation-delay: 1.1s;
+}
+.leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster__core {
+  position: relative;
+  z-index: 1;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: #e85d3b;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(232, 93, 59, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+  transition: transform 0.18s ease;
+}
+.leaflet-div-icon.cag-map-cluster__count,
+.cag-map-cluster__count {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.leaflet-div-icon.cag-map-cluster__hint,
+.cag-map-cluster__hint {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.9;
+  transform: translateY(-0.5px);
+}
+.leaflet-div-icon.cag-map-cluster--medium .leaflet-div-icon.cag-map-cluster__count,
+.leaflet-div-icon.cag-map-cluster--medium .cag-map-cluster__count,
+.cag-map-cluster--medium .leaflet-div-icon.cag-map-cluster__count,
+.cag-map-cluster--medium .cag-map-cluster__count {
+  font-size: 14px;
+}
+.leaflet-div-icon.cag-map-cluster--large .leaflet-div-icon.cag-map-cluster__count,
+.leaflet-div-icon.cag-map-cluster--large .cag-map-cluster__count,
+.cag-map-cluster--large .leaflet-div-icon.cag-map-cluster__count,
+.cag-map-cluster--large .cag-map-cluster__count {
+  font-size: 15px;
+}
+.leaflet-div-icon.cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__ring,
+.leaflet-div-icon.cag-map-cluster--tour .cag-map-cluster__ring,
+.cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__ring,
+.cag-map-cluster--tour .cag-map-cluster__ring {
+  border-color: rgba(232, 93, 59, 0.55);
+  background: rgba(232, 93, 59, 0.12);
+}
+.leaflet-div-icon.cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster--tour .cag-map-cluster__core,
+.cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster--tour .cag-map-cluster__core {
+  background: #e85d3b;
+  box-shadow: 0 3px 10px rgba(232, 93, 59, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.leaflet-div-icon.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__ring,
+.leaflet-div-icon.cag-map-cluster--trip .cag-map-cluster__ring,
+.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__ring,
+.cag-map-cluster--trip .cag-map-cluster__ring {
+  border-color: rgba(13, 148, 136, 0.55);
+  background: rgba(13, 148, 136, 0.12);
+}
+.leaflet-div-icon.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster--trip .cag-map-cluster__core,
+.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster--trip .cag-map-cluster__core {
+  background: #0d9488;
+  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.leaflet-div-icon.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__ring,
+.leaflet-div-icon.cag-map-cluster--camp .cag-map-cluster__ring,
+.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__ring,
+.cag-map-cluster--camp .cag-map-cluster__ring {
+  border-color: rgba(67, 56, 202, 0.55);
+  background: rgba(67, 56, 202, 0.12);
+}
+.leaflet-div-icon.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster--camp .cag-map-cluster__core,
+.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster--camp .cag-map-cluster__core {
+  background: #4338ca;
+  box-shadow: 0 3px 10px rgba(67, 56, 202, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.leaflet-div-icon.cag-map-cluster--mixed .leaflet-div-icon.cag-map-cluster__ring,
+.leaflet-div-icon.cag-map-cluster--mixed .cag-map-cluster__ring,
+.cag-map-cluster--mixed .leaflet-div-icon.cag-map-cluster__ring,
+.cag-map-cluster--mixed .cag-map-cluster__ring {
+  border-color: rgba(49, 48, 65, 0.35);
+  background: rgba(49, 48, 65, 0.08);
+}
+.leaflet-div-icon.cag-map-cluster--mixed .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster--mixed .cag-map-cluster__core,
+.cag-map-cluster--mixed .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster--mixed .cag-map-cluster__core {
+  background: linear-gradient(135deg, #e85d3b 0%, #0d9488 52%, #4338ca 100%);
+  box-shadow: 0 3px 10px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.leaflet-div-icon.cag-map-cluster:hover .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster:hover .cag-map-cluster__core,
+.cag-map-cluster:hover .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster:hover .cag-map-cluster__core {
+  transform: scale(1.06);
+}
+.leaflet-div-icon.cag-map-cluster--preview,
+.cag-map-cluster--preview {
+  z-index: 650 !important;
+}
+.leaflet-div-icon.cag-map-cluster--preview .cag-map-cluster__core,
+.cag-map-cluster--preview .cag-map-cluster__core {
+  transform: scale(1.12);
+}
+.leaflet-div-icon.cag-map-cluster--preview .cag-map-cluster__ring,
+.cag-map-cluster--preview .cag-map-cluster__ring {
+  animation-duration: 1.4s;
+  border-width: 2.5px;
+  opacity: 1;
+}
+
+@keyframes cag-map-cluster-pulse {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-map-cluster__ring {
+    animation: none;
+    opacity: 0.35;
+    transform: scale(1);
+  }
 }

@@ -503,7 +503,7 @@ class OfferCatalogPageService
             $guidings = (clone $tourQuery)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
-                ->get(['id', 'title', 'slug', 'location', 'lat', 'lng', 'thumbnail_path', 'price', 'prices', 'price_type', 'max_guests']);
+                ->get(['id', 'title', 'slug', 'location', 'lat', 'lng', 'thumbnail_path', 'price', 'prices', 'price_type', 'max_guests', 'duration', 'duration_type', 'is_boat']);
 
             foreach ($guidings as $guiding) {
                 $guiding->title = translate($guiding->title);
@@ -558,6 +558,7 @@ class OfferCatalogPageService
                 $marker['variant'] = 'gray';
                 $marker['badge'] = __('offers.badge_tour');
                 $marker['cta'] = __('offers.see_details');
+                $marker = array_merge($marker, MapMarkerCollection::moduleFields(MapMarkerCollection::MODULE_TOUR));
             }
             unset($marker);
             $markers = array_merge($markers, $suggestedMarkers);
@@ -598,6 +599,7 @@ class OfferCatalogPageService
             $marker['variant'] = $variant;
             $marker['badge'] = __('offers.badge_tour');
             $marker['cta'] = __('offers.see_details');
+            $marker = array_merge($marker, MapMarkerCollection::moduleFields(MapMarkerCollection::MODULE_TOUR));
             if (! empty($marker['price'])) {
                 $marker['priceLabel'] = __('vacations.price_from_per_person', [
                     'price' => '€'.number_format((float) $marker['price'], 0),

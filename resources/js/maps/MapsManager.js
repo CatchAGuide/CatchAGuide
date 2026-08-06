@@ -127,6 +127,7 @@ class MapsManager {
       showCoverageOnHover: false,
       maxClusterRadius: 50,
       spiderfyOnMaxZoom: true,
+      iconCreateFunction: (clusterGroup) => this._createClusterIcon(clusterGroup),
     });
 
     if (Array.isArray(markers) && markers.length) {
@@ -140,6 +141,48 @@ class MapsManager {
 
     map.addLayer(cluster);
     return cluster;
+  }
+
+  _createClusterIcon(clusterGroup) {
+    const count = clusterGroup.getChildCount();
+    let size = 'small';
+    let dim = 42;
+    if (count >= 25) {
+      size = 'large';
+      dim = 56;
+    } else if (count >= 8) {
+      size = 'medium';
+      dim = 48;
+    }
+
+    const typeCounts = { tour: 0, trip: 0, camp: 0 };
+    clusterGroup.getAllChildMarkers().forEach((m) => {
+      const key = (m.options && m.options.cagVariant) || 'tour';
+      if (key === 'trip' || key === 'camp' || key === 'tour') {
+        typeCounts[key] += 1;
+      } else if (key !== 'gray') {
+        typeCounts.tour += 1;
+      }
+    });
+
+    const dominant =
+      Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])[0] || 'tour';
+    const mixed =
+      [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
+    const typeClass = mixed ? 'cag-map-cluster--mixed' : `cag-map-cluster--${dominant}`;
+
+    return L.divIcon({
+      html: `
+        <span class="cag-map-cluster__ring" aria-hidden="true"></span>
+        <span class="cag-map-cluster__ring cag-map-cluster__ring--delay" aria-hidden="true"></span>
+        <span class="cag-map-cluster__core">
+          <span class="cag-map-cluster__count">${count}</span>
+          <span class="cag-map-cluster__hint" aria-hidden="true">+</span>
+        </span>`,
+      className: `leaflet-div-icon marker-cluster marker-cluster-${size} cag-map-cluster cag-map-cluster--${size} ${typeClass}`,
+      iconSize: L.point(dim, dim),
+      iconAnchor: [Math.round(dim / 2), Math.round(dim / 2)],
+    });
   }
 }
 

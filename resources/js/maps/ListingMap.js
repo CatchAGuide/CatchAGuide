@@ -21,12 +21,15 @@ class ListingMap {
     this._initialized = false;
     this._activePreviewMarker = null;
     this._selectedMarker = null;
+    this._detachedPreview = null;
+    this._clusterPreviewEl = null;
     this._hoverOpenTimer = null;
     this._hoverCloseTimer = null;
     this._viewportTimer = null;
     this._userInteracted = false;
     this._viewportListeners = [];
     this._selectionListeners = [];
+    this._previewListeners = [];
     this._landmarkLayer = null;
     this._canHover = typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
@@ -225,6 +228,22 @@ class ListingMap {
     }
   }
 
+  onPreviewChange(fn) {
+    if (typeof fn === 'function') {
+      this._previewListeners.push(fn);
+    }
+  }
+
+  _emitPreview(item) {
+    this._previewListeners.forEach((fn) => {
+      try {
+        fn(item || null);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  }
+
   _scheduleViewportEmit() {
     if (this._viewportTimer) clearTimeout(this._viewportTimer);
     this._viewportTimer = setTimeout(() => this.emitViewportChange(), 220);
@@ -285,6 +304,8 @@ class ListingMap {
 
   clearMarkers() {
     this._clearHoverTimers();
+    this._closeDetachedPreview();
+    this._setClusterPreviewHighlight(null);
     this._activePreviewMarker = null;
     this._selectedMarker = null;
 
@@ -351,8 +372,11 @@ class ListingMap {
         uniqueCoords.push({ lat: parseFloat(item.lat), lng: parseFloat(item.lng) });
       }
 
-      const variant = item.variant || item.pillar || 'primary';
-      if (!this.options.showGrayNearby && variant === 'gray') {
+      const isGray = item.variant === 'gray' || item.is_gray || item.isGray;
+      const colorVariant = isGray
+        ? 'gray'
+        : markerFactory.resolveColorVariant(item.variant || item.pillar, item.module || item.pillar);
+      if (!this.options.showGrayNearby && isGray) {
         return;
       }
 
@@ -381,17 +405,18 @@ class ListingMap {
 
       const marker = markerFactory.createMarker({
         position: { lat, lng },
-        variant,
+        variant: colorVariant,
+        module: item.module || item.pillar || colorVariant,
         title: item.title || '',
         popupHtml: popupHtml || null,
         popupOptions,
-        zIndexOffset: variant === 'gray' ? 100 : 0,
-        priceChip: usePriceChips && variant !== 'gray',
+        zIndexOffset: isGray ? 100 : 0,
+        priceChip: usePriceChips && !isGray,
         price: item.price,
         priceLabel: chipPrice,
       });
       marker.options = marker.options || {};
-      marker.options.cagVariant = variant;
+      marker.options.cagVariant = colorVariant;
       marker._cagItem = item;
       marker._cagSticky = false;
 
@@ -413,7 +438,7 @@ class ListingMap {
 
       this.markers.push(marker);
 
-      if (variant === 'gray') {
+      if (isGray) {
         grayMarkers.push(marker);
         return;
       }
@@ -505,6 +530,18 @@ class ListingMap {
     }
   }
 
+  /**
+   * Zoom/spiderfy to a pin from the rail (button or double-click).
+   * Shows the real marker popup after the pin is visible.
+   */
+  zoomToById(id) {
+    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    if (!marker) return;
+    this._closeDetachedPreview();
+    this._setClusterPreviewHighlight(null);
+    this.selectMarker(marker, { pan: true, allowZoom: true, source: 'rail-zoom' });
+  }
+
   highlightById(id, on) {
     if (this._selectedMarker && String(this._selectedMarker._cagItem && this._selectedMarker._cagItem.id) === String(id)) {
       return;
@@ -513,6 +550,190 @@ class ListingMap {
     if (marker) {
       markerFactory.setSelected(marker, !!on);
     }
+  }
+
+  /**
+   * Hover from rail: show pin popup in place — never pan/zoom.
+   * If the pin is inside a cluster, open a detached preview on the cluster.
+   */
+  previewById(id, on = true) {
+    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    if (!marker) return;
+
+    if (!on) {
+      if (marker._cagSticky || this._selectedMarker === marker) {
+        markerFactory.setSelected(marker, true);
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        return;
+      }
+      markerFactory.setSelected(marker, false);
+      if (marker.isPopupOpen && marker.isPopupOpen()) {
+        marker.closePopup();
+      }
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      if (this._activePreviewMarker === marker) {
+        this._activePreviewMarker = null;
+      }
+      this._emitPreview(null);
+      return;
+    }
+
+    // Close other non-sticky previews
+    this.markers.forEach((m) => {
+      if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
+        m.closePopup();
+        if (this._selectedMarker !== m) {
+          markerFactory.setSelected(m, false);
+        }
+      }
+    });
+
+    markerFactory.setSelected(marker, true);
+    this._activePreviewMarker = marker;
+    this._emitPreview(marker._cagItem || null);
+
+    const visible = this._isMarkerVisibleOnMap(marker);
+    if (visible && marker.getPopup && marker.getPopup()) {
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      if (!marker.isPopupOpen()) {
+        marker.openPopup();
+      }
+      this._hydratePreviewImages(marker);
+      this._wirePreviewPointerBridge(marker);
+      this._wirePreviewCarousel(marker);
+      return;
+    }
+
+    // Pin is clustered (or otherwise not visible) — show preview without zooming
+    this._openDetachedPreview(marker);
+  }
+
+  _getClusterParent(marker) {
+    if (!marker || !this.cluster || typeof this.cluster.getVisibleParent !== 'function') {
+      return null;
+    }
+    try {
+      const parent = this.cluster.getVisibleParent(marker);
+      if (parent && parent !== marker) {
+        return parent;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    return null;
+  }
+
+  _setClusterPreviewHighlight(clusterMarker) {
+    if (this._clusterPreviewEl) {
+      this._clusterPreviewEl.classList.remove('cag-map-cluster--preview');
+      this._clusterPreviewEl = null;
+    }
+    if (!clusterMarker) return;
+    const el = clusterMarker.getElement && clusterMarker.getElement();
+    if (el) {
+      el.classList.add('cag-map-cluster--preview');
+      this._clusterPreviewEl = el;
+    }
+  }
+
+  _openDetachedPreview(marker) {
+    if (!this.map || !marker) return;
+
+    const item = marker._cagItem || {};
+    const html =
+      (marker.getPopup && marker.getPopup() && marker.getPopup().getContent && marker.getPopup().getContent()) ||
+      this.buildInteractivePreviewHtml(item);
+    if (!html) return;
+
+    this._closeDetachedPreview();
+
+    const clusterParent = this._getClusterParent(marker);
+    this._setClusterPreviewHighlight(clusterParent);
+
+    const latlng = clusterParent && clusterParent.getLatLng
+      ? clusterParent.getLatLng()
+      : marker.getLatLng();
+
+    const previewWidth = this._previewCardWidth();
+    const pillar = item.pillar || item.module || '';
+    const popup = L.popup({
+      className: `cag-map-popup cag-map-popup--interactive cag-map-popup--detached${
+        pillar ? ` cag-map-popup--${pillar}` : ''
+      }`,
+      maxWidth: previewWidth,
+      minWidth: Math.min(236, previewWidth),
+      closeButton: false,
+      autoPan: false,
+      offset: [0, -18],
+    })
+      .setLatLng(latlng)
+      .setContent(html);
+
+    this._detachedPreview = popup;
+    popup._cagDetachedFor = marker;
+
+    popup.on('remove', () => {
+      if (this._detachedPreview === popup) {
+        this._detachedPreview = null;
+      }
+    });
+
+    popup.openOn(this.map);
+
+    // Allow DOM to mount before wiring carousel / lazy images
+    requestAnimationFrame(() => {
+      if (this._detachedPreview !== popup) return;
+      const el = popup.getElement && popup.getElement();
+      if (!el) return;
+      this._hydratePreviewImagesFromEl(el);
+      this._wirePreviewCarouselFromEl(marker, el);
+      this._wireDetachedPreviewBridge(marker, el);
+    });
+  }
+
+  _closeDetachedPreview() {
+    if (!this._detachedPreview) return;
+    const popup = this._detachedPreview;
+    this._detachedPreview = null;
+    if (this.map) {
+      this.map.closePopup(popup);
+    }
+  }
+
+  _wireDetachedPreviewBridge(marker, el) {
+    if (!el || el._cagDetachedBridgeWired) return;
+    el._cagDetachedBridgeWired = true;
+
+    const dismiss = el.querySelector('.cag-map-preview__dismiss');
+    if (dismiss) {
+      L.DomEvent.on(dismiss, 'click', (e) => {
+        L.DomEvent.stop(e);
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        if (this._selectedMarker !== marker) {
+          markerFactory.setSelected(marker, false);
+          this._emitPreview(null);
+        }
+      });
+    }
+
+    L.DomEvent.disableClickPropagation(el);
+  }
+
+  _isMarkerVisibleOnMap(marker) {
+    if (!marker || !this.map) return false;
+    if (this.cluster && typeof this.cluster.getVisibleParent === 'function') {
+      try {
+        const parent = this.cluster.getVisibleParent(marker);
+        return parent === marker;
+      } catch (e) {
+        /* fall through */
+      }
+    }
+    return this.map.hasLayer(marker);
   }
 
   selectMarker(marker, opts = {}) {
@@ -525,22 +746,13 @@ class ListingMap {
     this._selectedMarker = marker;
     markerFactory.setSelected(marker, true);
 
-    if (this.cluster && this.cluster.zoomToShowLayer) {
-      try {
-        this.cluster.zoomToShowLayer(marker, () => {
-          markerFactory.setSelected(marker, true);
-        });
-      } catch (e) {
-        /* ignore */
-      }
-    }
+    const fromRail = opts.source === 'rail';
+    const fromRailZoom = opts.source === 'rail-zoom';
+    // Preview-only rail interactions never zoom; "Show on map" / double-click do
+    const allowZoom = fromRailZoom || (!fromRail && opts.allowZoom !== false);
 
-    if (opts.pan && this.map) {
-      this.map.panTo(marker.getLatLng(), { animate: true });
-    }
-
-    // Open popup when selecting from the rail (map clicks open it in the click handler)
-    if (opts.source === 'rail' && this.options.interactivePreview) {
+    const openRailPreview = () => {
+      if (!this.options.interactivePreview || (!fromRail && !fromRailZoom)) return;
       this.markers.forEach((m) => {
         if (m !== marker) {
           m._cagSticky = false;
@@ -550,10 +762,41 @@ class ListingMap {
         }
       });
       marker._cagSticky = true;
-      if (!marker.isPopupOpen()) {
-        marker.openPopup();
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      if (this._isMarkerVisibleOnMap(marker)) {
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        this._hydratePreviewImages(marker);
+        this._wirePreviewPointerBridge(marker);
+        this._wirePreviewCarousel(marker);
+        if (fromRailZoom) {
+          this._panPopupIntoView(marker);
+        }
+      } else if (fromRail) {
+        // Keep detached preview when not zooming into a cluster
+        this._openDetachedPreview(marker);
       }
-      this._panPopupIntoView(marker);
+    };
+
+    if (allowZoom && this.cluster && typeof this.cluster.zoomToShowLayer === 'function') {
+      try {
+        this.cluster.zoomToShowLayer(marker, () => {
+          markerFactory.setSelected(marker, true);
+          openRailPreview();
+        });
+      } catch (e) {
+        if (opts.pan && this.map) {
+          this.map.panTo(marker.getLatLng(), { animate: true });
+        }
+        openRailPreview();
+      }
+    } else {
+      if (opts.pan && this.map) {
+        this.map.panTo(marker.getLatLng(), { animate: true });
+      }
+      openRailPreview();
     }
 
     const item = marker._cagItem || null;
@@ -592,8 +835,10 @@ class ListingMap {
     marker.on('popupopen', () => {
       this._hydratePreviewImages(marker);
       this._wirePreviewPointerBridge(marker);
+      this._wirePreviewCarousel(marker);
       setPinActive(true);
       this._activePreviewMarker = marker;
+      this._emitPreview(marker._cagItem || null);
     });
 
     marker.on('popupclose', () => {
@@ -602,12 +847,17 @@ class ListingMap {
       if (this._activePreviewMarker === marker) {
         this._activePreviewMarker = null;
       }
+      if (this._selectedMarker !== marker) {
+        this._emitPreview(null);
+      }
     });
 
     marker.on('click', (e) => {
       if (e && e.originalEvent) {
         L.DomEvent.stopPropagation(e.originalEvent);
       }
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
       this.markers.forEach((m) => {
         if (m !== marker) {
           m._cagSticky = false;
@@ -621,6 +871,7 @@ class ListingMap {
         marker.openPopup();
       }
       setPinActive(true);
+      this.selectMarker(marker, { pan: false, source: 'map' });
       this._panPopupIntoView(marker);
     });
 
@@ -643,6 +894,7 @@ class ListingMap {
           marker.openPopup();
         }
         setPinActive(true);
+        this._emitPreview(marker._cagItem || null);
       }, 70);
     });
 
@@ -651,6 +903,9 @@ class ListingMap {
       this._hoverCloseTimer = setTimeout(() => {
         if (!marker._cagSticky && !marker._cagPointerOnPopup) {
           this._closePreview(marker);
+          if (this._selectedMarker !== marker) {
+            this._emitPreview(null);
+          }
         }
       }, 140);
     });
@@ -693,8 +948,11 @@ class ListingMap {
   _hydratePreviewImages(marker) {
     const popup = marker.getPopup && marker.getPopup();
     const el = popup && popup.getElement && popup.getElement();
-    if (!el) return;
+    this._hydratePreviewImagesFromEl(el);
+  }
 
+  _hydratePreviewImagesFromEl(el) {
+    if (!el) return;
     el.querySelectorAll('img[data-src]').forEach((img) => {
       if (img.getAttribute('src')) return;
       const src = img.getAttribute('data-src');
@@ -704,6 +962,75 @@ class ListingMap {
       img.setAttribute('src', src);
       img.removeAttribute('data-src');
     });
+  }
+
+  _wirePreviewCarousel(marker) {
+    const popup = marker.getPopup && marker.getPopup();
+    const root = popup && popup.getElement && popup.getElement();
+    this._wirePreviewCarouselFromEl(marker, root);
+  }
+
+  _wirePreviewCarouselFromEl(marker, root) {
+    if (!root) return;
+
+    const carousel = root.querySelector('[data-cag-preview-carousel]');
+    if (!carousel || carousel._cagCarouselWired) {
+      return;
+    }
+    carousel._cagCarouselWired = true;
+
+    const slides = Array.from(carousel.querySelectorAll('[data-cag-preview-slide]'));
+    if (slides.length < 2) {
+      return;
+    }
+
+    let index = Math.max(
+      0,
+      slides.findIndex((s) => s.classList.contains('is-active'))
+    );
+    if (index < 0) index = 0;
+
+    const dots = Array.from(carousel.querySelectorAll('[data-cag-preview-dot]'));
+    const prevBtn = carousel.querySelector('[data-cag-preview-prev]');
+    const nextBtn = carousel.querySelector('[data-cag-preview-next]');
+    const counter = carousel.querySelector('[data-cag-preview-counter]');
+
+    const show = (nextIndex) => {
+      index = ((nextIndex % slides.length) + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === index);
+        dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+      });
+      if (counter) {
+        counter.textContent = `${index + 1}/${slides.length}`;
+      }
+      this._hydratePreviewImagesFromEl(root);
+    };
+
+    const bindNav = (btn, delta) => {
+      if (!btn) return;
+      L.DomEvent.on(btn, 'click', (e) => {
+        L.DomEvent.stop(e);
+        if (marker) marker._cagSticky = true;
+        show(index + delta);
+      });
+    };
+
+    bindNav(prevBtn, -1);
+    bindNav(nextBtn, 1);
+
+    dots.forEach((dot, i) => {
+      L.DomEvent.on(dot, 'click', (e) => {
+        L.DomEvent.stop(e);
+        if (marker) marker._cagSticky = true;
+        show(i);
+      });
+    });
+
+    show(index);
   }
 
   _panPopupIntoView(marker) {
@@ -744,9 +1071,15 @@ class ListingMap {
     if (marker.isPopupOpen && marker.isPopupOpen()) {
       marker.closePopup();
     }
+    if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+    }
   }
 
   _clearStickyPreviews() {
+    this._closeDetachedPreview();
+    this._setClusterPreviewHighlight(null);
     this.markers.forEach((m) => {
       m._cagSticky = false;
       if (m.isPopupOpen && m.isPopupOpen()) {
@@ -787,21 +1120,34 @@ class ListingMap {
       const price = g.lowest_price != null ? g.lowest_price : g.price;
       const normalizedPrice = price != null && price !== '' && Number(price) > 0 ? price : null;
       const chip = normalizedPrice != null ? markerFactory.formatPriceChip(normalizedPrice, locale) : null;
+      const pillar = g.pillar || g.module || 'guiding';
+      const module =
+        g.module ||
+        (pillar === 'trip' ? 'trip' : pillar === 'camp' ? 'camp' : 'tour');
 
       return {
         id: g.id,
         lat: g.lat,
         lng: g.lng,
         variant: g.variant || (g.is_gray || g.isGray ? 'gray' : 'primary'),
-        pillar: g.pillar || 'guiding',
+        pillar,
+        module,
+        moduleLabel: g.moduleLabel || g.badge || '',
         title: g.title || '',
         location: g.location || '',
         price: normalizedPrice,
         priceLabel: g.priceLabel || (chip ? priceTpl.replace(':price', chip) : null),
-        badge: g.badge || '',
+        badge: g.badge || g.moduleLabel || '',
         cta: g.cta || '',
         url: g.url || g.link || '#',
         image: g.thumbnail || g.thumbnail_path || g.image || '',
+        images: Array.isArray(g.images) ? g.images : [],
+        durationLabel: g.durationLabel || g.duration_label || '',
+        guestsLabel: g.guestsLabel || g.guests_label || '',
+        maxGuests: g.maxGuests || g.max_guests || null,
+        rating: g.rating != null ? g.rating : null,
+        reviewCount: g.reviewCount != null ? g.reviewCount : g.review_count != null ? g.review_count : null,
+        boatLabel: g.boatLabel || g.boat_label || '',
       };
     });
 
@@ -837,10 +1183,14 @@ class ListingMap {
     const title = this._escape(item.title || '');
     const location = this._escape(item.location || '');
     const url = this._escape(item.url || item.link || '#');
-    const image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
+    const images = this._previewImages(item);
+    const image = images[0] || '';
     const badge = this._escape(item.badge || '');
     const cta = this._escape(item.cta || '');
     const priceLabel = this._escape(item.priceLabel || '');
+    const i18n = this._previewI18n();
+    const prevLabel = this._escape(i18n.prev || 'Previous image');
+    const nextLabel = this._escape(i18n.next || 'Next image');
     const pillar =
       item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding'
         ? item.pillar === 'guiding'
@@ -855,19 +1205,53 @@ class ListingMap {
 
     const priceBlock = priceLabel ? `<div class="cag-map-preview__price">${priceLabel}</div>` : '';
     const cardWidth = this._previewCardWidth();
+    const hasCarousel = images.length > 1;
+
+    const slidesHtml = images.length
+      ? images
+          .map(
+            (src, i) => `
+            <div class="cag-map-preview__slide${i === 0 ? ' is-active' : ''}" data-cag-preview-slide>
+              <img class="cag-map-preview__image" data-src="${this._escape(src)}" alt="" decoding="async" width="${cardWidth}" height="150">
+            </div>`
+          )
+          .join('')
+      : '';
+
+    const navHtml = hasCarousel
+      ? `
+          <button type="button" class="cag-map-preview__nav cag-map-preview__nav--prev" data-cag-preview-prev aria-label="${prevLabel}" tabindex="0">
+            <span aria-hidden="true">&#8249;</span>
+          </button>
+          <button type="button" class="cag-map-preview__nav cag-map-preview__nav--next" data-cag-preview-next aria-label="${nextLabel}" tabindex="0">
+            <span aria-hidden="true">&#8250;</span>
+          </button>
+          <div class="cag-map-preview__dots" role="tablist">
+            ${images
+              .map(
+                (_, i) =>
+                  `<button type="button" class="cag-map-preview__dot${i === 0 ? ' is-active' : ''}" data-cag-preview-dot aria-label="${i + 1}" aria-current="${i === 0 ? 'true' : 'false'}" tabindex="0"></button>`
+              )
+              .join('')}
+          </div>
+          <span class="cag-map-preview__counter" data-cag-preview-counter>1/${images.length}</span>`
+      : '';
+
+    const mediaInner = images.length
+      ? `<div class="cag-map-preview__carousel" data-cag-preview-carousel>
+            <a class="cag-map-preview__media-link" href="${url}" tabindex="-1">${slidesHtml}</a>
+            ${navHtml}
+          </div>`
+      : '';
 
     return `
       <div class="cag-map-preview" data-pillar="${pillar}" style="width:${cardWidth}px">
         <button type="button" class="cag-map-preview__dismiss" aria-label="Close" tabindex="0">&times;</button>
+        <div class="cag-map-preview__media${image ? '' : ' cag-map-preview__media--empty'}">
+          ${mediaInner}
+          ${badge ? `<span class="cag-map-preview__badge cag-map-preview__badge--${badgeTone}">${badge}</span>` : ''}
+        </div>
         <a class="cag-map-preview__link" href="${url}">
-          <div class="cag-map-preview__media${image ? '' : ' cag-map-preview__media--empty'}">
-            ${
-              image
-                ? `<img class="cag-map-preview__image" data-src="${image}" alt="" decoding="async" width="${cardWidth}" height="150">`
-                : ''
-            }
-            ${badge ? `<span class="cag-map-preview__badge cag-map-preview__badge--${badgeTone}">${badge}</span>` : ''}
-          </div>
           <div class="cag-map-preview__body">
             <h5 class="cag-map-preview__title">${title}</h5>
             ${location ? `<div class="cag-map-preview__location"><span aria-hidden="true"></span>${location}</div>` : ''}
@@ -878,6 +1262,38 @@ class ListingMap {
           </div>
         </a>
       </div>`;
+  }
+
+  _previewImages(item = {}) {
+    const list = [];
+    const seen = Object.create(null);
+    const push = (src) => {
+      if (!src || typeof src !== 'string') return;
+      const trimmed = src.trim();
+      if (!trimmed || seen[trimmed]) return;
+      seen[trimmed] = true;
+      list.push(trimmed);
+    };
+
+    if (Array.isArray(item.images)) {
+      item.images.forEach(push);
+    }
+    push(item.image || item.thumbnail || item.thumbnail_path || '');
+    return list.slice(0, 5);
+  }
+
+  _previewI18n() {
+    if (this._previewI18nCache) {
+      return this._previewI18nCache;
+    }
+    try {
+      const modal = this.el && this.el.closest ? this.el.closest('[data-maps-i18n]') : null;
+      const raw = modal && modal.getAttribute('data-maps-i18n');
+      this._previewI18nCache = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      this._previewI18nCache = {};
+    }
+    return this._previewI18nCache;
   }
 
   /** @deprecated Use buildInteractivePreviewHtml */

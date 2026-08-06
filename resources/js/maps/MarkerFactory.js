@@ -1,9 +1,32 @@
 /**
- * MarkerFactory — primary / gray / trip / camp / price-chip Leaflet divIcons
+ * MarkerFactory — primary / gray / trip / camp / tour / price-chip Leaflet divIcons
  */
 import mapsManager, { L } from './MapsManager';
 
 class MarkerFactory {
+  /**
+   * Canonical map color key: gray | tour | trip | camp
+   * @param {string} [value]
+   * @param {string} [module]
+   * @returns {'gray'|'tour'|'trip'|'camp'}
+   */
+  resolveColorVariant(value, module) {
+    const variant = String(value || '')
+      .toLowerCase()
+      .trim();
+    if (variant === 'gray') {
+      return 'gray';
+    }
+    const raw = String(module || value || '')
+      .toLowerCase()
+      .trim();
+    if (raw === 'gray') return 'gray';
+    if (raw === 'trip' || raw === 'trips') return 'trip';
+    if (raw === 'camp' || raw === 'camps' || raw === 'vacation') return 'camp';
+    // guiding / tour / primary / empty → tour (brand coral)
+    return 'tour';
+  }
+
   formatPriceChip(price, locale = 'de') {
     if (price == null || price === '') {
       return null;
@@ -23,8 +46,8 @@ class MarkerFactory {
     }
   }
 
-  createIcon(variant = 'primary', options = {}) {
-    const normalized = ['gray', 'trip', 'camp', 'tour'].includes(variant) ? variant : 'primary';
+  createIcon(variant = 'tour', options = {}) {
+    const normalized = this.resolveColorVariant(variant, options.module);
     const isGray = normalized === 'gray';
     const priceLabel = options.priceLabel || null;
     const selected = !!options.selected;
@@ -36,10 +59,9 @@ class MarkerFactory {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
       const selectedClass = selected ? ' cag-map-chip--selected' : '';
-      const pillarClass = normalized !== 'primary' ? ` cag-map-chip--${normalized}` : '';
       const width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
       return L.divIcon({
-        className: `leaflet-div-icon cag-map-chip${pillarClass}${selectedClass}`,
+        className: `leaflet-div-icon cag-map-chip cag-map-chip--${normalized}${selectedClass}`,
         html: `<div class="cag-map-chip__inner"><span class="cag-map-chip__price">${safe}</span></div>`,
         iconSize: [width, 32],
         iconAnchor: [Math.round(width / 2), 16],
@@ -61,6 +83,7 @@ class MarkerFactory {
    * @param {L.Map} options.map
    * @param {{lat:number,lng:number}|L.LatLng} options.position
    * @param {string} [options.variant]
+   * @param {string} [options.module]
    * @param {string} [options.title]
    * @param {string} [options.popupHtml]
    * @param {Object} [options.popupOptions]
@@ -74,7 +97,7 @@ class MarkerFactory {
     const pos = options.position;
     const lat = typeof pos.lat === 'function' ? pos.lat() : pos.lat;
     const lng = typeof pos.lng === 'function' ? pos.lng() : pos.lng;
-    const variant = options.variant || 'primary';
+    const colorVariant = this.resolveColorVariant(options.variant, options.module);
     const priceLabel =
       options.priceChip && options.priceLabel
         ? options.priceLabel
@@ -83,17 +106,20 @@ class MarkerFactory {
           : null;
 
     const marker = L.marker([lat, lng], {
-      icon: this.createIcon(variant, {
+      icon: this.createIcon(colorVariant, {
         priceLabel,
         selected: options.selected,
+        module: options.module,
       }),
       title: options.title || '',
-      zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : variant === 'gray' ? 100 : 0,
+      zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : colorVariant === 'gray' ? 100 : 0,
       riseOnHover: true,
     });
 
     marker._cagPriceLabel = priceLabel;
     marker._cagPriceChip = !!priceLabel;
+    marker.options.cagVariant = colorVariant;
+    marker.options.cagModule = options.module || colorVariant;
 
     if (options.map) {
       marker.addTo(options.map);
@@ -112,12 +138,13 @@ class MarkerFactory {
 
   setSelected(marker, selected) {
     if (!marker) return;
-    const variant = (marker.options && marker.options.cagVariant) || 'primary';
+    const variant = (marker.options && marker.options.cagVariant) || 'tour';
     const priceLabel = marker._cagPriceLabel || null;
     marker.setIcon(
       this.createIcon(variant, {
         priceLabel: marker._cagPriceChip ? priceLabel : null,
         selected: !!selected,
+        module: marker.options && marker.options.cagModule,
       })
     );
     const el = marker.getElement && marker.getElement();
