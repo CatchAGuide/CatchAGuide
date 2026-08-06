@@ -47,7 +47,9 @@ class MapMarkerCollection
                 'image' => (string) ($image ?? ''),
                 'price' => $price,
                 'priceLabel' => $price !== null
-                    ? ('ab ' . $price . '€ p.P.')
+                    ? __('destination.map_price_from', [
+                        'price' => '€'.number_format((float) $price, 0, ',', '.'),
+                    ])
                     : null,
                 'badge' => function_exists('translate') ? translate('Guiding') : 'Guiding',
                 'cta' => __('vacations.view_details'),

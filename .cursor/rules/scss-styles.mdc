@@ -1,11 +1,17 @@
 ---
-description: Always write styles in SCSS under resources/sass; never plain CSS or other stylesheet formats
+description: Write styles only in resources/sass SCSS; never edit compiled public/css (overwritten by npm run dev)
 alwaysApply: true
 ---
 
 # SCSS Styles Only
 
-All new and updated styles must be written in **SCSS** (`.scss`). Do not add or edit plain CSS, Sass indented (`.sass`), Less, Stylus, or other stylesheet formats.
+All new and updated styles must be written in **SCSS** (`.scss`) under `resources/sass/`. Do not add or edit plain CSS, Sass indented (`.sass`), Less, Stylus, or other stylesheet formats.
+
+## Source vs compiled output
+
+- Edit **source** files only: `resources/sass/**/*.scss`.
+- **Never** edit compiled CSS under `public/css/` (e.g. `public/css/app.css`, `public/css/maps.css`). Those files are rebuilt and cleared/overwritten by `npm run dev` / Mix — changes there will be lost.
+- After SCSS changes, rely on the build (`npm run dev` / `npm run watch`) to regenerate `public/css/`.
 
 ## Rules
 
@@ -17,6 +23,10 @@ All new and updated styles must be written in **SCSS** (`.scss`). Do not add or 
 - Do not introduce a parallel CSS pipeline; follow the existing Vite/Laravel Mix SCSS build.
 
 ```scss
+// ❌ BAD — edit compiled CSS (wiped by npm run dev)
+// public/css/app.css
+.my-feature { color: #333; }
+
 // ❌ BAD — new plain CSS file
 // resources/css/my-feature.css
 .my-feature { color: #333; }

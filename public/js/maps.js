@@ -1,6 +1,204 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./resources/js/maps/LandmarkLayer.js"
+/*!********************************************!*\
+  !*** ./resources/js/maps/LandmarkLayer.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LandmarkLayer)
+/* harmony export */ });
+/* harmony import */ var _MapsManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MapsManager */ "./resources/js/maps/MapsManager.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * LandmarkLayer — sparse OSM POIs via cached Laravel proxy
+ */
+
+var LandmarkLayer = /*#__PURE__*/function () {
+  /**
+   * @param {import('./ListingMap').default} listingMap
+   */
+  function LandmarkLayer(listingMap) {
+    _classCallCheck(this, LandmarkLayer);
+    this.listingMap = listingMap;
+    this.layer = null;
+    this._timer = null;
+    this._lastKey = '';
+    this._abort = null;
+    this.minZoom = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config && _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.landmarksMinZoom || 10;
+    this.url = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config && _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.landmarksUrl || '/maps/landmarks';
+  }
+  return _createClass(LandmarkLayer, [{
+    key: "attach",
+    value: function attach() {
+      var _this = this;
+      if (!this.listingMap.map) return;
+      this.layer = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup().addTo(this.listingMap.map);
+      this.listingMap.map.on('moveend', function () {
+        return _this.scheduleFetch();
+      });
+      this.listingMap.map.on('zoomend', function () {
+        return _this.scheduleFetch();
+      });
+      this.scheduleFetch();
+    }
+  }, {
+    key: "scheduleFetch",
+    value: function scheduleFetch() {
+      var _this2 = this;
+      if (this._timer) clearTimeout(this._timer);
+      this._timer = setTimeout(function () {
+        return _this2.fetch();
+      }, 350);
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      if (this.layer) {
+        this.layer.clearLayers();
+      }
+      this._lastKey = '';
+    }
+  }, {
+    key: "fetch",
+    value: function (_fetch) {
+      function fetch() {
+        return _fetch.apply(this, arguments);
+      }
+      fetch.toString = function () {
+        return _fetch.toString();
+      };
+      return fetch;
+    }(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var map, zoom, b, sw, ne, key, params, res, data, landmarks, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            map = this.listingMap.map;
+            if (!(!map || !this.layer)) {
+              _context.n = 1;
+              break;
+            }
+            return _context.a(2);
+          case 1:
+            zoom = map.getZoom();
+            if (!(zoom < this.minZoom)) {
+              _context.n = 2;
+              break;
+            }
+            this.clear();
+            return _context.a(2);
+          case 2:
+            b = map.getBounds();
+            sw = b.getSouthWest();
+            ne = b.getNorthEast();
+            key = [zoom, sw.lat.toFixed(2), sw.lng.toFixed(2), ne.lat.toFixed(2), ne.lng.toFixed(2)].join('|');
+            if (!(key === this._lastKey)) {
+              _context.n = 3;
+              break;
+            }
+            return _context.a(2);
+          case 3:
+            if (this._abort) {
+              this._abort.abort();
+            }
+            this._abort = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            params = new URLSearchParams({
+              sw_lat: String(sw.lat),
+              sw_lng: String(sw.lng),
+              ne_lat: String(ne.lat),
+              ne_lng: String(ne.lng),
+              zoom: String(Math.round(zoom))
+            });
+            _context.p = 4;
+            _context.n = 5;
+            return fetch("".concat(this.url, "?").concat(params.toString()), {
+              headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              signal: this._abort ? this._abort.signal : undefined
+            });
+          case 5:
+            res = _context.v;
+            if (res.ok) {
+              _context.n = 6;
+              break;
+            }
+            return _context.a(2);
+          case 6:
+            _context.n = 7;
+            return res.json();
+          case 7:
+            data = _context.v;
+            landmarks = Array.isArray(data.landmarks) ? data.landmarks : [];
+            this._lastKey = key;
+            this.render(landmarks);
+            _context.n = 9;
+            break;
+          case 8:
+            _context.p = 8;
+            _t = _context.v;
+            if (!(_t && _t.name === 'AbortError')) {
+              _context.n = 9;
+              break;
+            }
+            return _context.a(2);
+          case 9:
+            return _context.a(2);
+        }
+      }, _callee, this, [[4, 8]]);
+    })))
+  }, {
+    key: "render",
+    value: function render(landmarks) {
+      var _this3 = this;
+      if (!this.layer) return;
+      this.layer.clearLayers();
+      landmarks.forEach(function (lm) {
+        var lat = parseFloat(lm.lat);
+        var lng = parseFloat(lm.lng);
+        if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+        var category = lm.category || 'attraction';
+        var name = lm.name || '';
+        var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
+          icon: _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+            className: "leaflet-div-icon cag-map-landmark cag-map-landmark--".concat(category),
+            html: "<span class=\"cag-map-landmark__dot\" aria-hidden=\"true\"></span>".concat(name ? "<span class=\"cag-map-landmark__label\">".concat(_this3._escape(name), "</span>") : ''),
+            iconSize: [120, 28],
+            iconAnchor: [8, 8]
+          }),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: -200
+        });
+        _this3.layer.addLayer(marker);
+      });
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  }]);
+}();
+
+
+/***/ },
+
 /***/ "./resources/js/maps/ListingMap.js"
 /*!*****************************************!*\
   !*** ./resources/js/maps/ListingMap.js ***!
@@ -15,6 +213,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _MapsManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MapsManager */ "./resources/js/maps/MapsManager.js");
 /* harmony import */ var _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MarkerFactory */ "./resources/js/maps/MarkerFactory.js");
+/* harmony import */ var _LandmarkLayer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LandmarkLayer */ "./resources/js/maps/LandmarkLayer.js");
+/* harmony import */ var _MapModalRail__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./MapModalRail */ "./resources/js/maps/MapModalRail.js");
+/* harmony import */ var _MapModalFilters__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MapModalFilters */ "./resources/js/maps/MapModalFilters.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -25,8 +226,11 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
- * ListingMap — multi-marker listing / modal map with clustering + AJAX setMarkers
+ * ListingMap — multi-marker listing / modal map with clustering, viewport rail, price chips
  */
+
+
+
 
 
 var ListingMap = /*#__PURE__*/function () {
@@ -44,8 +248,14 @@ var ListingMap = /*#__PURE__*/function () {
     this.markers = [];
     this._initialized = false;
     this._activePreviewMarker = null;
+    this._selectedMarker = null;
     this._hoverOpenTimer = null;
     this._hoverCloseTimer = null;
+    this._viewportTimer = null;
+    this._userInteracted = false;
+    this._viewportListeners = [];
+    this._selectionListeners = [];
+    this._landmarkLayer = null;
     this._canHover = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : true;
     this.options = _objectSpread(_objectSpread({}, this._parseOptions(el)), overrideOptions);
   }
@@ -74,7 +284,6 @@ var ListingMap = /*#__PURE__*/function () {
         if (Array.isArray(fromScript)) {
           markers = fromScript;
         } else if (ds.markers) {
-          // Legacy fallback (small payloads only)
           markers = JSON.parse(ds.markers);
         }
       } catch (e) {
@@ -103,6 +312,9 @@ var ListingMap = /*#__PURE__*/function () {
         lazyModal: ds.lazyModal !== 'false' && ds.lazyModal !== '0',
         updatable: ds.updatable !== 'false' && ds.updatable !== '0',
         interactivePreview: ds.interactivePreview === 'true' || ds.interactivePreview === '1',
+        priceChips: ds.priceChips === 'true' || ds.priceChips === '1',
+        landmarks: ds.landmarks === 'true' || ds.landmarks === '1',
+        viewportRail: ds.viewportRail === 'true' || ds.viewportRail === '1',
         instanceKey: ds.instanceKey || el.id || 'listingMap'
       };
     }
@@ -125,8 +337,10 @@ var ListingMap = /*#__PURE__*/function () {
               start();
             } else {
               _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(_this.map);
+              _this.emitViewportChange();
             }
           });
+          this._bootModalHelpers(modal);
         } else {
           start();
         }
@@ -136,16 +350,31 @@ var ListingMap = /*#__PURE__*/function () {
       if (this.options.updatable) {
         window.__cagListingMaps = window.__cagListingMaps || {};
         window.__cagListingMaps[this.options.instanceKey] = this;
-        // Back-compat for listing filters — optional enrich hook from page scripts
         if (this.options.instanceKey === 'guidings' || this.options.instanceKey === 'category-country' || this.options.instanceKey === 'category-show' || this.options.instanceKey === 'category' || this.el.id === 'map') {
           window.updateMapWithGuidings = function (guidings) {
             var enrich = window.__cagEnrichGuidingsForMap;
             var payload = typeof enrich === 'function' ? enrich(guidings) : guidings;
-            _this.setMarkersFromGuidings(payload);
+            _this.setMarkersFromGuidings(payload, {
+              preserveView: _this._userInteracted
+            });
           };
         }
       }
       return this;
+    }
+  }, {
+    key: "_bootModalHelpers",
+    value: function _bootModalHelpers(modal) {
+      if (modal._cagMapHelpersBooted) {
+        return;
+      }
+      modal._cagMapHelpersBooted = true;
+      if (this.options.viewportRail) {
+        modal._cagMapRail = new _MapModalRail__WEBPACK_IMPORTED_MODULE_3__["default"](modal, this);
+      }
+      if (modal.getAttribute('data-map-show-chips') === 'true') {
+        modal._cagMapFilters = new _MapModalFilters__WEBPACK_IMPORTED_MODULE_4__["default"](modal);
+      }
     }
   }, {
     key: "_create",
@@ -163,23 +392,143 @@ var ListingMap = /*#__PURE__*/function () {
       this._initialized = true;
       this.setMarkers(this.options.markers);
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(this.map);
+      this.map.on('dragend', function () {
+        _this2._userInteracted = true;
+      });
+      this.map.on('zoomend', function () {
+        // fitBounds also fires zoomend; mark interaction only after first paint settle
+        if (_this2._markersReady) {
+          _this2._userInteracted = true;
+        }
+      });
+      if (this.options.viewportRail) {
+        this.map.on('moveend', function () {
+          return _this2._scheduleViewportEmit();
+        });
+        this.map.on('zoomend', function () {
+          return _this2._scheduleViewportEmit();
+        });
+        this._scheduleViewportEmit();
+      }
       if (this.options.interactivePreview) {
         this.map.on('click', function () {
-          return _this2._clearStickyPreviews();
+          _this2._clearStickyPreviews();
+          if (_this2.options.viewportRail) {
+            _this2.clearSelection();
+          }
         });
         this.map.on('movestart', function () {
           if (_this2._activePreviewMarker && !_this2._activePreviewMarker._cagSticky) {
             _this2._closePreview(_this2._activePreviewMarker);
           }
         });
+      } else if (this.options.viewportRail) {
+        this.map.on('click', function () {
+          return _this2.clearSelection();
+        });
       }
+      if (this.options.landmarks) {
+        this._landmarkLayer = new _LandmarkLayer__WEBPACK_IMPORTED_MODULE_2__["default"](this);
+        this._landmarkLayer.attach();
+      }
+      this._markersReady = true;
+    }
+  }, {
+    key: "onViewportChange",
+    value: function onViewportChange(fn) {
+      if (typeof fn === 'function') {
+        this._viewportListeners.push(fn);
+      }
+    }
+  }, {
+    key: "onSelectionChange",
+    value: function onSelectionChange(fn) {
+      if (typeof fn === 'function') {
+        this._selectionListeners.push(fn);
+      }
+    }
+  }, {
+    key: "_scheduleViewportEmit",
+    value: function _scheduleViewportEmit() {
+      var _this3 = this;
+      if (this._viewportTimer) clearTimeout(this._viewportTimer);
+      this._viewportTimer = setTimeout(function () {
+        return _this3.emitViewportChange();
+      }, 220);
+    }
+  }, {
+    key: "emitViewportChange",
+    value: function emitViewportChange() {
+      var payload = this.getVisiblePrimaryItems();
+      this._viewportListeners.forEach(function (fn) {
+        try {
+          fn(payload);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "getPrimaryItems",
+    value: function getPrimaryItems() {
+      return this.markers.filter(function (m) {
+        return m.options && m.options.cagVariant !== 'gray' && m._cagItem;
+      }).map(function (m) {
+        return m._cagItem;
+      });
+    }
+  }, {
+    key: "getVisiblePrimaryItems",
+    value: function getVisiblePrimaryItems() {
+      if (!this.map) {
+        var _items = this._dedupeItems(this.getPrimaryItems());
+        return {
+          items: _items,
+          ids: _items.map(function (i) {
+            return i.id;
+          }),
+          count: _items.length
+        };
+      }
+      var bounds = this.map.getBounds();
+      var items = [];
+      this.markers.forEach(function (m) {
+        if (!m._cagItem || m.options && m.options.cagVariant === 'gray') return;
+        var ll = m.getLatLng();
+        if (bounds.contains(ll)) {
+          items.push(m._cagItem);
+        }
+      });
+      var unique = this._dedupeItems(items);
+      return {
+        items: unique,
+        ids: unique.map(function (i) {
+          return i.id;
+        }),
+        count: unique.length
+      };
+    }
+  }, {
+    key: "_dedupeItems",
+    value: function _dedupeItems(items) {
+      var seen = new Set();
+      var out = [];
+      (items || []).forEach(function (item) {
+        if (!item || item.id == null) return;
+        var key = String(item.id);
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push(item);
+      });
+      return out;
     }
   }, {
     key: "clearMarkers",
     value: function clearMarkers() {
-      var _this3 = this;
+      var _this4 = this;
       this._clearHoverTimers();
       this._activePreviewMarker = null;
+      this._selectedMarker = null;
       if (this.cluster) {
         this.cluster.clearLayers();
         if (this.map) {
@@ -195,20 +544,22 @@ var ListingMap = /*#__PURE__*/function () {
         this.grayLayer = null;
       }
       this.markers.forEach(function (m) {
-        if (_this3.map && _this3.map.hasLayer(m)) {
-          _this3.map.removeLayer(m);
+        if (_this4.map && _this4.map.hasLayer(m)) {
+          _this4.map.removeLayer(m);
         }
       });
       this.markers = [];
     }
 
     /**
-     * @param {Array<{id?:*, lat:number, lng:number, variant?:string, popupHtml?:string, title?:string}>} items
+     * @param {Array} items
+     * @param {{fit?: boolean|null}} [opts]
      */
   }, {
     key: "setMarkers",
     value: function setMarkers(items) {
-      var _this4 = this;
+      var _this5 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       if (!this.map) {
         this.options.markers = items || [];
         return;
@@ -220,6 +571,10 @@ var ListingMap = /*#__PURE__*/function () {
       var primaryMarkers = [];
       var grayMarkers = [];
       var interactive = this.options.interactivePreview;
+      var railMode = this.options.viewportRail;
+      var usePriceChips = this.options.priceChips;
+      var locale = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de';
+      var priceTpl = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.priceFromTemplate || 'From :price';
       list.forEach(function (item) {
         if (item.lat == null || item.lng == null) {
           return;
@@ -242,17 +597,20 @@ var ListingMap = /*#__PURE__*/function () {
           });
         }
         var variant = item.variant || item.pillar || 'primary';
-        if (!_this4.options.showGrayNearby && variant === 'gray') {
+        if (!_this5.options.showGrayNearby && variant === 'gray') {
           return;
         }
-        var popupHtml = item.popupHtml || (interactive ? _this4.buildInteractivePreviewHtml(item) : _this4.buildPopupHtml(item));
-        var previewWidth = interactive ? _this4._previewCardWidth() : 220;
+        var chipPrice = item.price != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(item.price, locale) : null;
+        if (!item.priceLabel && chipPrice) {
+          item.priceLabel = priceTpl.replace(':price', chipPrice);
+        }
+        var popupHtml = item.popupHtml || (interactive ? _this5.buildInteractivePreviewHtml(item) : _this5.buildPopupHtml(item));
+        var previewWidth = interactive ? _this5._previewCardWidth() : 220;
         var popupOptions = interactive ? {
           className: "cag-map-popup cag-map-popup--interactive".concat(item.pillar ? " cag-map-popup--".concat(item.pillar) : ''),
           maxWidth: previewWidth,
           minWidth: Math.min(236, previewWidth),
           closeButton: false,
-          // Hover should feel instant; pan only when the user pins a card (click/tap)
           autoPan: false,
           offset: [0, -6]
         } : undefined;
@@ -263,26 +621,33 @@ var ListingMap = /*#__PURE__*/function () {
           },
           variant: variant,
           title: item.title || '',
-          popupHtml: popupHtml,
+          popupHtml: popupHtml || null,
           popupOptions: popupOptions,
-          zIndexOffset: variant === 'gray' ? 100 : 0
+          zIndexOffset: variant === 'gray' ? 100 : 0,
+          priceChip: usePriceChips && variant !== 'gray',
+          price: item.price,
+          priceLabel: chipPrice
         });
         marker.options = marker.options || {};
         marker.options.cagVariant = variant;
         marker._cagItem = item;
         marker._cagSticky = false;
-        if (interactive) {
-          _this4._bindInteractivePreview(marker);
+        if (railMode && interactive) {
+          _this5._bindRailSelectionWithPreview(marker);
+        } else if (railMode) {
+          _this5._bindRailSelection(marker);
+        } else if (interactive) {
+          _this5._bindInteractivePreview(marker);
         } else {
           marker.on('click', function () {
-            _this4.markers.forEach(function (m) {
+            _this5.markers.forEach(function (m) {
               if (m !== marker && m.isPopupOpen && m.isPopupOpen()) {
                 m.closePopup();
               }
             });
           });
         }
-        _this4.markers.push(marker);
+        _this5.markers.push(marker);
         if (variant === 'gray') {
           grayMarkers.push(marker);
           return;
@@ -290,8 +655,6 @@ var ListingMap = /*#__PURE__*/function () {
         primaryMarkers.push(marker);
         primaryLatLngs.push(_MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.latLng(parseFloat(item.lat), parseFloat(item.lng)));
       });
-
-      // Cluster only filtered/primary results so nearby (gray) pins never inflate cluster counts
       if (this.options.cluster && primaryMarkers.length) {
         this.cluster = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].createMarkerClusterer({
           map: this.map,
@@ -299,44 +662,197 @@ var ListingMap = /*#__PURE__*/function () {
         });
       } else {
         primaryMarkers.forEach(function (m) {
-          return m.addTo(_this4.map);
+          return m.addTo(_this5.map);
         });
       }
       if (grayMarkers.length) {
         this.grayLayer = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup(grayMarkers).addTo(this.map);
       }
-      if (this.options.fitPrimaryBounds && primaryLatLngs.length) {
+      var shouldFit = opts.fit != null ? opts.fit : this.options.fitPrimaryBounds && !this._userInteracted && !opts.preserveView;
+      if (shouldFit && primaryLatLngs.length) {
         this._fitPrimary(primaryLatLngs);
       }
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(this.map);
+      this.emitViewportChange();
+      // Re-check after layout/fitBounds settle so the rail matches visible pins
+      this._scheduleViewportEmit();
+    }
+  }, {
+    key: "_bindRailSelection",
+    value: function _bindRailSelection(marker) {
+      var _this6 = this;
+      marker.on('click', function (e) {
+        if (e && e.originalEvent) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
+        }
+        _this6.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+      });
+      if (!this._canHover) {
+        return;
+      }
+      marker.on('mouseover', function () {
+        if (_this6._selectedMarker === marker) return;
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      });
+      marker.on('mouseout', function () {
+        if (_this6._selectedMarker === marker) return;
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
+      });
+    }
+
+    /**
+     * Rail highlight + interactive map popup (click opens both).
+     */
+  }, {
+    key: "_bindRailSelectionWithPreview",
+    value: function _bindRailSelectionWithPreview(marker) {
+      var _this7 = this;
+      this._bindInteractivePreview(marker);
+      marker.off('click');
+      marker.on('click', function (e) {
+        if (e && e.originalEvent) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
+        }
+        _this7.markers.forEach(function (m) {
+          if (m !== marker) {
+            m._cagSticky = false;
+            if (m.isPopupOpen && m.isPopupOpen()) {
+              m.closePopup();
+            }
+          }
+        });
+        marker._cagSticky = true;
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        _this7.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+        _this7._panPopupIntoView(marker);
+      });
+    }
+  }, {
+    key: "selectById",
+    value: function selectById(id) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var marker = this.markers.find(function (m) {
+        return m._cagItem && String(m._cagItem.id) === String(id);
+      });
+      if (marker) {
+        this.selectMarker(marker, opts);
+      }
+    }
+  }, {
+    key: "highlightById",
+    value: function highlightById(id, on) {
+      if (this._selectedMarker && String(this._selectedMarker._cagItem && this._selectedMarker._cagItem.id) === String(id)) {
+        return;
+      }
+      var marker = this.markers.find(function (m) {
+        return m._cagItem && String(m._cagItem.id) === String(id);
+      });
+      if (marker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, !!on);
+      }
+    }
+  }, {
+    key: "selectMarker",
+    value: function selectMarker(marker) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      if (!marker) return;
+      if (this._selectedMarker && this._selectedMarker !== marker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(this._selectedMarker, false);
+      }
+      this._selectedMarker = marker;
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      if (this.cluster && this.cluster.zoomToShowLayer) {
+        try {
+          this.cluster.zoomToShowLayer(marker, function () {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+          });
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      if (opts.pan && this.map) {
+        this.map.panTo(marker.getLatLng(), {
+          animate: true
+        });
+      }
+
+      // Open popup when selecting from the rail (map clicks open it in the click handler)
+      if (opts.source === 'rail' && this.options.interactivePreview) {
+        this.markers.forEach(function (m) {
+          if (m !== marker) {
+            m._cagSticky = false;
+            if (m.isPopupOpen && m.isPopupOpen()) {
+              m.closePopup();
+            }
+          }
+        });
+        marker._cagSticky = true;
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        this._panPopupIntoView(marker);
+      }
+      var item = marker._cagItem || null;
+      this._selectionListeners.forEach(function (fn) {
+        try {
+          fn(item);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "clearSelection",
+    value: function clearSelection() {
+      if (this._selectedMarker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(this._selectedMarker, false);
+        this._selectedMarker = null;
+      }
+      this._clearStickyPreviews();
+      this._selectionListeners.forEach(function (fn) {
+        try {
+          fn(null);
+        } catch (e) {
+          /* ignore */
+        }
+      });
     }
   }, {
     key: "_bindInteractivePreview",
     value: function _bindInteractivePreview(marker) {
-      var _this5 = this;
+      var _this8 = this;
       var setPinActive = function setPinActive(active) {
         var el = marker.getElement && marker.getElement();
         if (!el) return;
         el.classList.toggle('cag-map-pin--active', !!active);
+        el.classList.toggle('cag-map-chip--selected', !!active && marker._cagPriceChip);
       };
       marker.on('popupopen', function () {
-        _this5._hydratePreviewImages(marker);
-        _this5._wirePreviewPointerBridge(marker);
+        _this8._hydratePreviewImages(marker);
+        _this8._wirePreviewPointerBridge(marker);
         setPinActive(true);
-        _this5._activePreviewMarker = marker;
+        _this8._activePreviewMarker = marker;
       });
       marker.on('popupclose', function () {
         setPinActive(false);
         marker._cagSticky = false;
-        if (_this5._activePreviewMarker === marker) {
-          _this5._activePreviewMarker = null;
+        if (_this8._activePreviewMarker === marker) {
+          _this8._activePreviewMarker = null;
         }
       });
       marker.on('click', function (e) {
         if (e && e.originalEvent) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
         }
-        _this5.markers.forEach(function (m) {
+        _this8.markers.forEach(function (m) {
           if (m !== marker) {
             m._cagSticky = false;
             if (m.isPopupOpen && m.isPopupOpen()) {
@@ -349,18 +865,18 @@ var ListingMap = /*#__PURE__*/function () {
           marker.openPopup();
         }
         setPinActive(true);
-        _this5._panPopupIntoView(marker);
+        _this8._panPopupIntoView(marker);
       });
       if (!this._canHover) {
         return;
       }
       marker.on('mouseover', function () {
-        _this5._clearHoverTimers();
-        _this5._hoverOpenTimer = setTimeout(function () {
-          if (_this5._activePreviewMarker && _this5._activePreviewMarker !== marker && _this5._activePreviewMarker._cagSticky) {
+        _this8._clearHoverTimers();
+        _this8._hoverOpenTimer = setTimeout(function () {
+          if (_this8._activePreviewMarker && _this8._activePreviewMarker !== marker && _this8._activePreviewMarker._cagSticky) {
             return;
           }
-          _this5.markers.forEach(function (m) {
+          _this8.markers.forEach(function (m) {
             if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
               m.closePopup();
             }
@@ -372,10 +888,10 @@ var ListingMap = /*#__PURE__*/function () {
         }, 70);
       });
       marker.on('mouseout', function () {
-        _this5._clearHoverTimers();
-        _this5._hoverCloseTimer = setTimeout(function () {
+        _this8._clearHoverTimers();
+        _this8._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky && !marker._cagPointerOnPopup) {
-            _this5._closePreview(marker);
+            _this8._closePreview(marker);
           }
         }, 140);
       });
@@ -383,7 +899,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_wirePreviewPointerBridge",
     value: function _wirePreviewPointerBridge(marker) {
-      var _this6 = this;
+      var _this9 = this;
       var popup = marker.getPopup && marker.getPopup();
       var el = popup && popup.getElement && popup.getElement();
       if (!el || el._cagBridgeWired) {
@@ -392,14 +908,14 @@ var ListingMap = /*#__PURE__*/function () {
       el._cagBridgeWired = true;
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseenter', function () {
         marker._cagPointerOnPopup = true;
-        _this6._clearHoverTimers();
+        _this9._clearHoverTimers();
       });
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseleave', function () {
         marker._cagPointerOnPopup = false;
-        _this6._clearHoverTimers();
-        _this6._hoverCloseTimer = setTimeout(function () {
+        _this9._clearHoverTimers();
+        _this9._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky) {
-            _this6._closePreview(marker);
+            _this9._closePreview(marker);
           }
         }, 120);
       });
@@ -408,11 +924,9 @@ var ListingMap = /*#__PURE__*/function () {
         _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
           marker._cagSticky = false;
-          _this6._closePreview(marker);
+          _this9._closePreview(marker);
         });
       }
-
-      // Keep popup clicks from bubbling to the map (which would clear sticky)
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
     }
   }, {
@@ -472,7 +986,10 @@ var ListingMap = /*#__PURE__*/function () {
     value: function _closePreview(marker) {
       if (!marker) return;
       var el = marker.getElement && marker.getElement();
-      if (el) el.classList.remove('cag-map-pin--active');
+      if (el) {
+        el.classList.remove('cag-map-pin--active');
+        el.classList.remove('cag-map-chip--selected');
+      }
       if (marker.isPopupOpen && marker.isPopupOpen()) {
         marker.closePopup();
       }
@@ -517,16 +1034,17 @@ var ListingMap = /*#__PURE__*/function () {
 
     /**
      * AJAX remap from guidings filter payload (server objects).
-     * Expects items with lat, lng, and optional popupHtml / id / title / location / price.
      */
   }, {
     key: "setMarkersFromGuidings",
     value: function setMarkersFromGuidings(guidings) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var locale = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de';
+      var priceTpl = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.priceFromTemplate || 'From :price';
       var markers = (guidings || []).map(function (g) {
         var price = g.lowest_price != null ? g.lowest_price : g.price;
         var normalizedPrice = price != null && price !== '' && Number(price) > 0 ? price : null;
-
-        // Prefer structured fields so interactive preview can render; ignore legacy popupHtml
+        var chip = normalizedPrice != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(normalizedPrice, locale) : null;
         return {
           id: g.id,
           lat: g.lat,
@@ -536,19 +1054,15 @@ var ListingMap = /*#__PURE__*/function () {
           title: g.title || '',
           location: g.location || '',
           price: normalizedPrice,
-          priceLabel: g.priceLabel || (normalizedPrice != null ? "ab ".concat(normalizedPrice, "\u20AC p.P.") : null),
+          priceLabel: g.priceLabel || (chip ? priceTpl.replace(':price', chip) : null),
           badge: g.badge || '',
           cta: g.cta || '',
           url: g.url || g.link || '#',
           image: g.thumbnail || g.thumbnail_path || g.image || ''
         };
       });
-      this.setMarkers(markers);
+      this.setMarkers(markers, opts);
     }
-
-    /**
-     * Build popup card HTML from structured marker fields (avoids server-side Blade per pin).
-     */
   }, {
     key: "buildPopupHtml",
     value: function buildPopupHtml() {
@@ -557,18 +1071,13 @@ var ListingMap = /*#__PURE__*/function () {
       var location = this._escape(item.location || '');
       var url = this._escape(item.url || item.link || '#');
       var image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
-      var price = item.price != null && item.price !== '' ? item.price : null;
-      if (!title && !image && !location && price == null) {
+      var priceLabel = this._escape(item.priceLabel || '');
+      if (!title && !image && !location && !priceLabel) {
         return null;
       }
-      var priceLine = price != null ? "<div class=\"cag-map-popup__price\"><span class=\"fw-bold\">ab ".concat(this._escape(String(price)), "\u20AC</span> p.P.</div>") : '';
+      var priceLine = priceLabel ? "<div class=\"cag-map-popup__price\"><span class=\"fw-bold\">".concat(priceLabel, "</span></div>") : '';
       return "\n      <div class=\"cag-map-popup__card\">\n        ".concat(image ? "<img class=\"cag-map-popup__image\" src=\"".concat(image, "\" alt=\"\">") : '', "\n        <div class=\"cag-map-popup__body\">\n          <a class=\"text-decoration-none\" href=\"").concat(url, "\">\n            <h5 class=\"cag-map-popup__title\">").concat(title, "</h5>\n          </a>\n          ").concat(location ? "<div class=\"cag-map-popup__location\">".concat(location, "</div>") : '', "\n          ").concat(priceLine, "\n        </div>\n      </div>");
     }
-
-    /**
-     * Rich interactive preview card — images hydrate on first open (keeps map boot light).
-     * Shared by vacations + guidings listing maps.
-     */
   }, {
     key: "buildInteractivePreviewHtml",
     value: function buildInteractivePreviewHtml() {
@@ -582,12 +1091,10 @@ var ListingMap = /*#__PURE__*/function () {
       var priceLabel = this._escape(item.priceLabel || '');
       var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding' ? item.pillar === 'guiding' ? 'tour' : item.pillar : '';
       var badgeTone = pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
-      var price = item.price != null && item.price !== '' ? item.price : null;
-      if (!title && !image && !location && !priceLabel && price == null) {
+      if (!title && !image && !location && !priceLabel) {
         return null;
       }
-      var fallbackPrice = !priceLabel && price != null ? "<span class=\"cag-map-preview__price-value\">ab ".concat(this._escape(String(price)), "\u20AC</span>") : '';
-      var priceBlock = priceLabel || fallbackPrice ? "<div class=\"cag-map-preview__price\">".concat(priceLabel || fallbackPrice, "</div>") : '';
+      var priceBlock = priceLabel ? "<div class=\"cag-map-preview__price\">".concat(priceLabel, "</div>") : '';
       var cardWidth = this._previewCardWidth();
       return "\n      <div class=\"cag-map-preview\" data-pillar=\"".concat(pillar, "\" style=\"width:").concat(cardWidth, "px\">\n        <button type=\"button\" class=\"cag-map-preview__dismiss\" aria-label=\"Close\" tabindex=\"0\">&times;</button>\n        <a class=\"cag-map-preview__link\" href=\"").concat(url, "\">\n          <div class=\"cag-map-preview__media").concat(image ? '' : ' cag-map-preview__media--empty', "\">\n            ").concat(image ? "<img class=\"cag-map-preview__image\" data-src=\"".concat(image, "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">") : '', "\n            ").concat(badge ? "<span class=\"cag-map-preview__badge cag-map-preview__badge--".concat(badgeTone, "\">").concat(badge, "</span>") : '', "\n          </div>\n          <div class=\"cag-map-preview__body\">\n            <h5 class=\"cag-map-preview__title\">").concat(title, "</h5>\n            ").concat(location ? "<div class=\"cag-map-preview__location\"><span aria-hidden=\"true\"></span>".concat(location, "</div>") : '', "\n            <div class=\"cag-map-preview__footer\">\n              ").concat(priceBlock, "\n              ").concat(cta ? "<span class=\"cag-map-preview__cta\">".concat(cta, "</span>") : '', "\n            </div>\n          </div>\n        </a>\n      </div>");
     }
@@ -623,6 +1130,512 @@ var ListingMap = /*#__PURE__*/function () {
   }]);
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ListingMap);
+
+
+/***/ },
+
+/***/ "./resources/js/maps/MapModalFilters.js"
+/*!**********************************************!*\
+  !*** ./resources/js/maps/MapModalFilters.js ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MapModalFilters)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * MapModalFilters — chip bar synced to existing listing filter form (#filterContainer)
+ */
+var CHIP_SECTIONS = {
+  filters: null,
+  duration: ['duration_types[]', 'duration_'],
+  price: ['price_min', 'price_max'],
+  target_fish: ['target_fish[]', 'fish_'],
+  methods: ['methods[]', 'method_'],
+  people: ['num_persons', 'persons_']
+};
+var MapModalFilters = /*#__PURE__*/function () {
+  /**
+   * @param {HTMLElement} modal
+   */
+  function MapModalFilters(modal) {
+    _classCallCheck(this, MapModalFilters);
+    this.modal = modal;
+    this.formId = modal.getAttribute('data-map-filter-form') || 'filterContainer';
+    this.chipsRoot = modal.querySelector('[data-map-filter-chips]');
+    this.panel = modal.querySelector('[data-map-filter-panel]');
+    this.panelBody = modal.querySelector('[data-map-filter-panel-body]');
+    this.panelTitle = modal.querySelector('[data-map-filter-panel-title]');
+    this.activeChip = null;
+    if (!this.chipsRoot || !this.panel) {
+      return;
+    }
+    this._bind();
+    this.refreshChipStates();
+  }
+  return _createClass(MapModalFilters, [{
+    key: "form",
+    get: function get() {
+      return document.getElementById(this.formId);
+    }
+  }, {
+    key: "_bind",
+    value: function _bind() {
+      var _this = this;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-map-chip');
+          if (_this.activeChip === key && !_this.panel.hidden) {
+            _this.closePanel();
+            return;
+          }
+          _this.openPanel(key, btn);
+        });
+      });
+      var closeBtn = this.modal.querySelector('[data-map-filter-panel-close]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          return _this.closePanel();
+        });
+      }
+      var applyBtn = this.modal.querySelector('[data-map-filter-apply]');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', function () {
+          _this._commitPanelToForm();
+          _this.closePanel();
+          _this._triggerFormFilter();
+        });
+      }
+      var clearBtn = this.modal.querySelector('[data-map-filter-clear]');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+          _this._clearSectionInPanel();
+        });
+      }
+      this.modal.addEventListener('shown.bs.modal', function () {
+        return _this.refreshChipStates();
+      });
+      var form = this.form;
+      if (form) {
+        form.addEventListener('change', function () {
+          return _this.refreshChipStates();
+        });
+      }
+    }
+  }, {
+    key: "openPanel",
+    value: function openPanel(key, chipBtn) {
+      var form = this.form;
+      if (!form) {
+        return;
+      }
+      this.activeChip = key;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (b) {
+        b.setAttribute('aria-expanded', b === chipBtn ? 'true' : 'false');
+        b.classList.toggle('is-open', b === chipBtn);
+      });
+      var title = chipBtn ? chipBtn.textContent.trim() : key;
+      if (this.panelTitle) {
+        this.panelTitle.textContent = title;
+      }
+      this.panelBody.innerHTML = this._buildPanelHtml(key, form);
+      this.panel.hidden = false;
+      this.modal.classList.add('map-modal--filters-open');
+    }
+  }, {
+    key: "closePanel",
+    value: function closePanel() {
+      this.panel.hidden = true;
+      this.modal.classList.remove('map-modal--filters-open');
+      this.activeChip = null;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (b) {
+        b.setAttribute('aria-expanded', 'false');
+        b.classList.remove('is-open');
+      });
+    }
+  }, {
+    key: "_buildPanelHtml",
+    value: function _buildPanelHtml(key, form) {
+      if (key === 'price') {
+        var min = form.querySelector('#price_min_main, [name="price_min"]');
+        var max = form.querySelector('#price_max_main, [name="price_max"]');
+        var minVal = min ? min.value : '';
+        var maxVal = max ? max.value : '';
+        return "\n        <div class=\"map-modal__filter-price\">\n          <label>\n            <span>Min \u20AC</span>\n            <input type=\"number\" inputmode=\"numeric\" data-panel-price-min value=\"".concat(this._escape(minVal), "\" min=\"0\" step=\"1\">\n          </label>\n          <label>\n            <span>Max \u20AC</span>\n            <input type=\"number\" inputmode=\"numeric\" data-panel-price-max value=\"").concat(this._escape(maxVal), "\" min=\"0\" step=\"1\">\n          </label>\n        </div>");
+      }
+      if (key === 'filters') {
+        return this._cloneCheckboxGroups(form, ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons']);
+      }
+      var meta = CHIP_SECTIONS[key];
+      if (!meta) {
+        return '<p class="map-modal__filter-empty">—</p>';
+      }
+      var name = meta[0];
+      return this._cloneCheckboxGroups(form, [name]);
+    }
+  }, {
+    key: "_cloneCheckboxGroups",
+    value: function _cloneCheckboxGroups(form, names) {
+      var _this2 = this;
+      var blocks = [];
+      names.forEach(function (name) {
+        var inputs = form.querySelectorAll("input[name=\"".concat(name, "\"]"));
+        if (!inputs.length) return;
+        var options = [];
+        inputs.forEach(function (input) {
+          if (input.closest('.d-none') && !input.checked) {
+            // still include checked hidden ones
+          }
+          var label = form.querySelector("label[for=\"".concat(input.id, "\"]"));
+          var text = label ? label.textContent.replace(/\s+/g, ' ').trim() : input.value;
+          options.push("\n          <label class=\"map-modal__filter-option\">\n            <input type=\"checkbox\" data-panel-filter-name=\"".concat(_this2._escape(name), "\" value=\"").concat(_this2._escape(input.value), "\" ").concat(input.checked ? 'checked' : '', ">\n            <span>").concat(_this2._escape(text), "</span>\n          </label>"));
+        });
+        if (options.length) {
+          blocks.push("<div class=\"map-modal__filter-group\">".concat(options.join(''), "</div>"));
+        }
+      });
+      if (!blocks.length) {
+        return '<p class="map-modal__filter-empty">—</p>';
+      }
+      return blocks.join('');
+    }
+  }, {
+    key: "_commitPanelToForm",
+    value: function _commitPanelToForm() {
+      var form = this.form;
+      if (!form || !this.panelBody) return;
+      if (this.activeChip === 'price') {
+        var minInput = this.panelBody.querySelector('[data-panel-price-min]');
+        var maxInput = this.panelBody.querySelector('[data-panel-price-max]');
+        var formMin = form.querySelector('#price_min_main, [name="price_min"]');
+        var formMax = form.querySelector('#price_max_main, [name="price_max"]');
+        if (formMin && minInput) formMin.value = minInput.value;
+        if (formMax && maxInput) formMax.value = maxInput.value;
+        return;
+      }
+      var panelInputs = this.panelBody.querySelectorAll('[data-panel-filter-name]');
+      var byName = {};
+      panelInputs.forEach(function (input) {
+        var name = input.getAttribute('data-panel-filter-name');
+        if (!byName[name]) byName[name] = [];
+        if (input.checked) byName[name].push(input.value);
+      });
+      Object.keys(byName).forEach(function (name) {
+        var selected = new Set(byName[name]);
+        form.querySelectorAll("input[name=\"".concat(name, "\"]")).forEach(function (input) {
+          var shouldCheck = selected.has(input.value);
+          if (name === 'num_persons') {
+            input.checked = shouldCheck;
+          } else {
+            input.checked = shouldCheck;
+          }
+        });
+      });
+    }
+  }, {
+    key: "_clearSectionInPanel",
+    value: function _clearSectionInPanel() {
+      if (!this.panelBody) return;
+      this.panelBody.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+        input.checked = false;
+      });
+      this.panelBody.querySelectorAll('[data-panel-price-min], [data-panel-price-max]').forEach(function (input) {
+        input.value = '';
+      });
+    }
+  }, {
+    key: "_triggerFormFilter",
+    value: function _triggerFormFilter() {
+      var form = this.form;
+      if (!form) return;
+      var firstCheckbox = form.querySelector('.filter-checkbox');
+      if (firstCheckbox) {
+        firstCheckbox.dispatchEvent(new Event('change', {
+          bubbles: true
+        }));
+        return;
+      }
+      form.dispatchEvent(new Event('change', {
+        bubbles: true
+      }));
+    }
+  }, {
+    key: "refreshChipStates",
+    value: function refreshChipStates() {
+      var form = this.form;
+      if (!form || !this.chipsRoot) return;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (btn) {
+        var key = btn.getAttribute('data-map-chip');
+        var active = false;
+        if (key === 'price') {
+          var min = form.querySelector('#price_min_main, [name="price_min"]');
+          var max = form.querySelector('#price_max_main, [name="price_max"]');
+          active = !!(min && min.value) || !!(max && max.value);
+        } else if (key === 'filters') {
+          active = !!form.querySelector('input.filter-checkbox:checked, input[name="target_fish[]"]:checked, input[name="methods[]"]:checked, input[name="duration_types[]"]:checked, input[name="num_persons"]:checked');
+        } else if (CHIP_SECTIONS[key]) {
+          var name = CHIP_SECTIONS[key][0];
+          active = !!form.querySelector("input[name=\"".concat(name, "\"]:checked"));
+        }
+        btn.classList.toggle('is-active', active);
+      });
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  }]);
+}();
+
+
+/***/ },
+
+/***/ "./resources/js/maps/MapModalRail.js"
+/*!*******************************************!*\
+  !*** ./resources/js/maps/MapModalRail.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MapModalRail)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * MapModalRail — viewport-synced listing rail + docked selection (not map overlay)
+ */
+var MapModalRail = /*#__PURE__*/function () {
+  /**
+   * @param {HTMLElement} modal
+   * @param {import('./ListingMap').default} listingMap
+   */
+  function MapModalRail(modal, listingMap) {
+    _classCallCheck(this, MapModalRail);
+    this.modal = modal;
+    this.listingMap = listingMap;
+    this.rail = modal.querySelector('[data-map-modal-rail]');
+    this.listEl = modal.querySelector('[data-map-rail-list]');
+    this.emptyEl = modal.querySelector('[data-map-rail-empty]');
+    this.selectionEl = modal.querySelector('[data-map-selection]');
+    this.countEl = modal.querySelector('[data-map-viewport-count]');
+    this.toggleBtn = modal.querySelector('[data-map-rail-toggle]');
+    this.toggleLabel = modal.querySelector('[data-map-rail-toggle-label]');
+    this.i18n = this._parseI18n();
+    this._itemsById = new Map();
+    this._selectedId = null;
+    this._railOpen = false;
+    if (!this.rail || !this.listEl) {
+      return;
+    }
+    this._bind();
+  }
+  return _createClass(MapModalRail, [{
+    key: "_parseI18n",
+    value: function _parseI18n() {
+      try {
+        var raw = this.modal.getAttribute('data-maps-i18n');
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+  }, {
+    key: "_bind",
+    value: function _bind() {
+      var _this = this;
+      this.listingMap.onViewportChange(function (payload) {
+        return _this.renderViewport(payload);
+      });
+      this.listingMap.onSelectionChange(function (item) {
+        return _this.renderSelection(item);
+      });
+      this.listEl.addEventListener('click', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        var id = card.getAttribute('data-map-rail-id');
+        if (e.target.closest('a[href]') && !e.target.closest('[data-map-rail-select]')) {
+          return;
+        }
+        e.preventDefault();
+        _this.listingMap.selectById(id, {
+          pan: true,
+          source: 'rail'
+        });
+      });
+      this.listEl.addEventListener('mouseover', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        _this.listingMap.highlightById(card.getAttribute('data-map-rail-id'), true);
+      });
+      this.listEl.addEventListener('mouseout', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        var related = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('[data-map-rail-id]') : null;
+        if (related === card) return;
+        _this.listingMap.highlightById(card.getAttribute('data-map-rail-id'), false);
+      });
+      if (this.toggleBtn) {
+        this.toggleBtn.addEventListener('click', function () {
+          return _this.toggleRail();
+        });
+      }
+      this.modal.addEventListener('shown.bs.modal', function () {
+        if (window.matchMedia('(min-width: 992px)').matches) {
+          _this.setRailOpen(true);
+        }
+        _this.listingMap.emitViewportChange();
+      });
+      this.modal.addEventListener('hidden.bs.modal', function () {
+        _this.setRailOpen(false);
+        _this.listingMap.clearSelection();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && _this.modal.classList.contains('show')) {
+          _this.listingMap.clearSelection();
+        }
+      });
+    }
+  }, {
+    key: "toggleRail",
+    value: function toggleRail() {
+      this.setRailOpen(!this._railOpen);
+    }
+  }, {
+    key: "setRailOpen",
+    value: function setRailOpen(open) {
+      var _this2 = this;
+      this._railOpen = !!open;
+      this.modal.classList.toggle('map-modal--rail-open', this._railOpen);
+      if (this.toggleBtn) {
+        this.toggleBtn.setAttribute('aria-expanded', this._railOpen ? 'true' : 'false');
+      }
+      if (this.toggleLabel) {
+        this.toggleLabel.textContent = this._railOpen ? this.i18n.hide_list || 'Hide list' : this.i18n.show_list || 'Show list';
+      }
+      if (this.listingMap && this.listingMap.invalidate) {
+        setTimeout(function () {
+          _this2.listingMap.invalidate();
+          _this2.listingMap.emitViewportChange();
+        }, 220);
+      }
+    }
+  }, {
+    key: "setItems",
+    value: function setItems(items) {
+      var _this3 = this;
+      this._itemsById = new Map();
+      (items || []).forEach(function (item) {
+        if (item && item.id != null && item.variant !== 'gray') {
+          _this3._itemsById.set(String(item.id), item);
+        }
+      });
+    }
+  }, {
+    key: "renderViewport",
+    value: function renderViewport() {
+      var _this4 = this;
+      var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var items = Array.isArray(payload.items) ? payload.items : [];
+      var count = payload.count != null ? payload.count : items.length;
+      if (this.countEl) {
+        if (count === 0) {
+          this.countEl.textContent = this.i18n.in_map_area_zero || 'No listings in map area';
+        } else if (count === 1) {
+          this.countEl.textContent = (this.i18n.in_map_area_one || ':count listing in map area').replace(':count', String(count));
+        } else {
+          this.countEl.textContent = (this.i18n.in_map_area || ':count listings in map area').replace(':count', String(count));
+        }
+      }
+      if (!this.listEl) return;
+      if (!items.length) {
+        this.listEl.innerHTML = '';
+        if (this.emptyEl) this.emptyEl.hidden = false;
+        return;
+      }
+      if (this.emptyEl) this.emptyEl.hidden = true;
+      var html = items.map(function (item) {
+        var id = _this4._escape(String(item.id));
+        var selected = String(item.id) === String(_this4._selectedId);
+        var title = _this4._escape(item.title || '');
+        var location = _this4._escape(item.location || '');
+        var image = _this4._escape(item.image || '');
+        var url = _this4._escape(item.url || '#');
+        var price = item.priceLabel || (item.price != null ? (_this4.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+        return "\n          <article class=\"map-modal__rail-card".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select>\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"96\" height=\"72\">") : '', "\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this4._escape(price), "</span>") : '', "\n                <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(_this4._escape(_this4.i18n.view_details || 'Details'), "</a>\n              </div>\n            </div>\n          </article>");
+      }).join('');
+      this.listEl.innerHTML = html;
+      if (this._selectedId) {
+        var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
+        if (selectedCard) {
+          selectedCard.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
+  }, {
+    key: "renderSelection",
+    value: function renderSelection(item) {
+      var _this5 = this;
+      // Keep the docked strip hidden — detail lives in the map popup.
+      // Rail only highlights the matching card.
+      if (this.selectionEl) {
+        this.selectionEl.hidden = true;
+        this.selectionEl.innerHTML = '';
+      }
+      if (!item) {
+        this._selectedId = null;
+        this.listEl.querySelectorAll('.map-modal__rail-card.is-selected').forEach(function (el) {
+          el.classList.remove('is-selected');
+        });
+        return;
+      }
+      this._selectedId = item.id != null ? String(item.id) : null;
+      this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
+        el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === _this5._selectedId);
+      });
+      var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
+      if (selectedCard) {
+        selectedCard.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+      if (!window.matchMedia('(min-width: 992px)').matches) {
+        this.setRailOpen(true);
+      }
+    }
+  }, {
+    key: "_escapeAttrSelector",
+    value: function _escapeAttrSelector(id) {
+      if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+        return CSS.escape(String(id));
+      }
+      return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+  }]);
+}();
 
 
 /***/ },
@@ -840,7 +1853,7 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
- * MarkerFactory — primary / gray / trip / camp Leaflet divIcon pins + popup binding
+ * MarkerFactory — primary / gray / trip / camp / price-chip Leaflet divIcons
  */
 
 var MarkerFactory = /*#__PURE__*/function () {
@@ -848,13 +1861,50 @@ var MarkerFactory = /*#__PURE__*/function () {
     _classCallCheck(this, MarkerFactory);
   }
   return _createClass(MarkerFactory, [{
+    key: "formatPriceChip",
+    value: function formatPriceChip(price) {
+      var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'de';
+      if (price == null || price === '') {
+        return null;
+      }
+      var num = Number(price);
+      if (!Number.isFinite(num) || num <= 0) {
+        return null;
+      }
+      try {
+        return new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'de-DE', {
+          style: 'currency',
+          currency: 'EUR',
+          maximumFractionDigits: 0
+        }).format(num);
+      } catch (e) {
+        return "\u20AC".concat(Math.round(num));
+      }
+    }
+  }, {
     key: "createIcon",
     value: function createIcon() {
       var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'primary';
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var normalized = ['gray', 'trip', 'camp', 'tour'].includes(variant) ? variant : 'primary';
       var isGray = normalized === 'gray';
+      var priceLabel = options.priceLabel || null;
+      var selected = !!options.selected;
+      if (priceLabel && !isGray) {
+        var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        var selectedClass = selected ? ' cag-map-chip--selected' : '';
+        var pillarClass = normalized !== 'primary' ? " cag-map-chip--".concat(normalized) : '';
+        var width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
+        return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+          className: "leaflet-div-icon cag-map-chip".concat(pillarClass).concat(selectedClass),
+          html: "<div class=\"cag-map-chip__inner\"><span class=\"cag-map-chip__price\">".concat(safe, "</span></div>"),
+          iconSize: [width, 32],
+          iconAnchor: [Math.round(width / 2), 16],
+          popupAnchor: [0, -18]
+        });
+      }
       return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
-        className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized),
+        className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized).concat(selected ? ' cag-map-pin--selected' : ''),
         html: "<div class=\"cag-map-pin__inner\"><span class=\"cag-map-pin__glyph\" aria-hidden=\"true\"></span></div>",
         iconSize: isGray ? [32, 44] : [28, 40],
         iconAnchor: isGray ? [16, 40] : [14, 36],
@@ -871,6 +1921,9 @@ var MarkerFactory = /*#__PURE__*/function () {
      * @param {string} [options.popupHtml]
      * @param {Object} [options.popupOptions]
      * @param {number} [options.zIndexOffset]
+     * @param {string|null} [options.priceLabel]
+     * @param {boolean} [options.priceChip]
+     * @param {boolean} [options.selected]
      * @returns {L.Marker}
      */
   }, {
@@ -881,12 +1934,18 @@ var MarkerFactory = /*#__PURE__*/function () {
       var lat = typeof pos.lat === 'function' ? pos.lat() : pos.lat;
       var lng = typeof pos.lng === 'function' ? pos.lng() : pos.lng;
       var variant = options.variant || 'primary';
+      var priceLabel = options.priceChip && options.priceLabel ? options.priceLabel : options.priceChip && options.price != null ? this.formatPriceChip(options.price, _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de') : null;
       var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
-        icon: this.createIcon(variant),
+        icon: this.createIcon(variant, {
+          priceLabel: priceLabel,
+          selected: options.selected
+        }),
         title: options.title || '',
         zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : variant === 'gray' ? 100 : 0,
         riseOnHover: true
       });
+      marker._cagPriceLabel = priceLabel;
+      marker._cagPriceChip = !!priceLabel;
       if (options.map) {
         marker.addTo(options.map);
       }
@@ -897,6 +1956,23 @@ var MarkerFactory = /*#__PURE__*/function () {
         }, options.popupOptions || {}));
       }
       return marker;
+    }
+  }, {
+    key: "setSelected",
+    value: function setSelected(marker, selected) {
+      if (!marker) return;
+      var variant = marker.options && marker.options.cagVariant || 'primary';
+      var priceLabel = marker._cagPriceLabel || null;
+      marker.setIcon(this.createIcon(variant, {
+        priceLabel: marker._cagPriceChip ? priceLabel : null,
+        selected: !!selected
+      }));
+      var el = marker.getElement && marker.getElement();
+      if (el) {
+        el.classList.toggle('cag-map-chip--selected', !!selected && !!marker._cagPriceChip);
+        el.classList.toggle('cag-map-pin--selected', !!selected && !marker._cagPriceChip);
+        el.classList.toggle('cag-map-pin--active', !!selected);
+      }
     }
   }, {
     key: "getRandomOffset",
@@ -18819,7 +19895,10 @@ var __webpack_exports__ = {};
   \************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LandmarkLayer: () => (/* reexport safe */ _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   ListingMap: () => (/* reexport safe */ _ListingMap__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   MapModalFilters: () => (/* reexport safe */ _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   MapModalRail: () => (/* reexport safe */ _MapModalRail__WEBPACK_IMPORTED_MODULE_5__["default"]),
 /* harmony export */   ProductMap: () => (/* reexport safe */ _ProductMap__WEBPACK_IMPORTED_MODULE_2__["default"]),
 /* harmony export */   bootAll: () => (/* binding */ bootAll),
 /* harmony export */   mapsManager: () => (/* reexport safe */ _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"]),
@@ -18831,9 +19910,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ProductMap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ProductMap */ "./resources/js/maps/ProductMap.js");
 /* harmony import */ var _ListingMap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ListingMap */ "./resources/js/maps/ListingMap.js");
 /* harmony import */ var _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./PlacesAutocompleteService */ "./resources/js/maps/PlacesAutocompleteService.js");
+/* harmony import */ var _MapModalRail__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./MapModalRail */ "./resources/js/maps/MapModalRail.js");
+/* harmony import */ var _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./MapModalFilters */ "./resources/js/maps/MapModalFilters.js");
+/* harmony import */ var _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./LandmarkLayer */ "./resources/js/maps/LandmarkLayer.js");
 /**
  * CAG Maps bundle — Leaflet product/listing maps + deferred Places shim
  */
+
+
+
 
 
 
@@ -18844,6 +19929,9 @@ window.CAGMaps = {
   MarkerFactory: _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"],
   ProductMap: _ProductMap__WEBPACK_IMPORTED_MODULE_2__["default"],
   ListingMap: _ListingMap__WEBPACK_IMPORTED_MODULE_3__["default"],
+  MapModalRail: _MapModalRail__WEBPACK_IMPORTED_MODULE_5__["default"],
+  MapModalFilters: _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__["default"],
+  LandmarkLayer: _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__["default"],
   Places: _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_4__["default"]
 };
 

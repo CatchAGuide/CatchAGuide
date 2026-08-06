@@ -846,6 +846,11 @@
         :lazy-modal="true"
         :updatable="true"
         :interactive-preview="true"
+        :show-rail="true"
+        :show-filter-chips="true"
+        :price-chips="true"
+        :landmarks="false"
+        filter-form-id="filterContainer"
     />
 
 @endsection

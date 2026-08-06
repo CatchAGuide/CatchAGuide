@@ -1080,14 +1080,125 @@ svg.leaflet-image-layer.leaflet-interactive path {
   background: #313041;
   box-shadow: 0 2px 8px rgba(49, 48, 65, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
-.leaflet-div-icon.cag-map-pin--active,
-.cag-map-pin--active {
+.leaflet-div-icon.cag-map-pin--active, .leaflet-div-icon.cag-map-pin--selected,
+.cag-map-pin--active,
+.cag-map-pin--selected {
   transform: scale(1.18) translateY(-2px);
   z-index: 600 !important;
 }
-.leaflet-div-icon.cag-map-pin--active .cag-map-pin__glyph,
-.cag-map-pin--active .cag-map-pin__glyph {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(255, 255, 255, 0.55);
+.leaflet-div-icon.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(232, 93, 59, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+/* Price chips — brand accent selected state (not competitor black invert) */
+.leaflet-div-icon.cag-map-chip,
+.cag-map-chip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.leaflet-div-icon.cag-map-chip__inner,
+.cag-map-chip__inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1.5px solid rgba(49, 48, 65, 0.18);
+  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.16);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.leaflet-div-icon.cag-map-chip__price,
+.cag-map-chip__price {
+  font-size: 12px;
+  font-weight: 700;
+  color: #313041;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.leaflet-div-icon.cag-map-chip--trip .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--tour .cag-map-chip__inner,
+.cag-map-chip--trip .cag-map-chip__inner,
+.cag-map-chip--tour .cag-map-chip__inner {
+  border-color: rgba(232, 93, 59, 0.45);
+}
+.leaflet-div-icon.cag-map-chip--camp .cag-map-chip__inner,
+.cag-map-chip--camp .cag-map-chip__inner {
+  border-color: rgba(49, 48, 65, 0.28);
+}
+.leaflet-div-icon.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner {
+  transform: scale(1.08);
+  border-color: #e85d3b;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(232, 93, 59, 0.28), 0 0 0 3px rgba(232, 93, 59, 0.22);
+}
+.leaflet-div-icon.cag-map-chip--selected .cag-map-chip__price, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__price,
+.cag-map-chip--selected .cag-map-chip__price,
+.cag-map-chip.cag-map-chip--selected .cag-map-chip__price {
+  color: #c94a32;
+}
+
+/* Sparse OSM landmarks — low contrast vs charter chips */
+.leaflet-div-icon.cag-map-landmark,
+.cag-map-landmark {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+.leaflet-div-icon.cag-map-landmark__dot,
+.cag-map-landmark__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #94a3b8;
+  box-shadow: 0 1px 4px rgba(49, 48, 65, 0.25);
+  flex: 0 0 auto;
+}
+.leaflet-div-icon.cag-map-landmark__label,
+.cag-map-landmark__label {
+  max-width: 110px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 1px 3px rgba(49, 48, 65, 0.12);
+}
+.leaflet-div-icon.cag-map-landmark--airport .cag-map-landmark__dot,
+.cag-map-landmark--airport .cag-map-landmark__dot {
+  background: #64748b;
+}
+.leaflet-div-icon.cag-map-landmark--harbour .cag-map-landmark__dot,
+.cag-map-landmark--harbour .cag-map-landmark__dot {
+  background: #0ea5e9;
+}
+.leaflet-div-icon.cag-map-landmark--park .cag-map-landmark__dot,
+.cag-map-landmark--park .cag-map-landmark__dot {
+  background: #22c55e;
+}
+.leaflet-div-icon.cag-map-landmark--attraction .cag-map-landmark__dot,
+.cag-map-landmark--attraction .cag-map-landmark__dot {
+  background: #a855f7;
+}
+.leaflet-div-icon.cag-map-landmark--town .cag-map-landmark__dot,
+.cag-map-landmark--town .cag-map-landmark__dot {
+  background: #475569;
 }
 
 .cag-map-popup .leaflet-popup-content-wrapper {
@@ -1398,24 +1509,37 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 100%;
 }
 
-/* Modal map controls */
+/* Modal map controls — override Leaflet/Bootstrap link blue */
+.map-modal .leaflet-bar,
 .map-modal .leaflet-control-zoom {
   border: 0 !important;
   border-radius: 12px !important;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(49, 48, 65, 0.16) !important;
 }
-.map-modal .leaflet-control-zoom a {
+.map-modal .leaflet-bar a,
+.map-modal .leaflet-control-zoom a,
+.map-modal .leaflet-control-zoom-in,
+.map-modal .leaflet-control-zoom-out {
   width: 38px !important;
   height: 38px !important;
   line-height: 38px !important;
   color: #313041 !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  border-bottom-color: rgba(49, 48, 65, 0.08) !important;
+  background: #fff !important;
+  background-color: #fff !important;
+  border-bottom: 1px solid rgba(49, 48, 65, 0.08) !important;
+  text-decoration: none !important;
 }
-.map-modal .leaflet-control-zoom a:hover, .map-modal .leaflet-control-zoom a:focus {
+.map-modal .leaflet-bar a:hover, .map-modal .leaflet-bar a:focus,
+.map-modal .leaflet-control-zoom a:hover,
+.map-modal .leaflet-control-zoom a:focus,
+.map-modal .leaflet-control-zoom-in:hover,
+.map-modal .leaflet-control-zoom-in:focus,
+.map-modal .leaflet-control-zoom-out:hover,
+.map-modal .leaflet-control-zoom-out:focus {
   color: #e85d3b !important;
   background: #fff !important;
+  background-color: #fff !important;
 }
 .map-modal .leaflet-control-attribution {
   background: rgba(255, 255, 255, 0.9) !important;

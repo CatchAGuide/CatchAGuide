@@ -47,6 +47,7 @@ use App\Http\Controllers\FAQController;
 use App\Http\Controllers\RatingsController;
 use App\Http\Controllers\SiteMapController;
 use App\Http\Controllers\GuidingSearchPlaceLogController;
+use App\Http\Controllers\MapLandmarkController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
@@ -112,6 +113,9 @@ Route::post('/get-user-location', [WelcomeController::class,'getUserLocation'])-
 Route::post('/guidings/search-place-log', [GuidingSearchPlaceLogController::class, 'store'])
     ->middleware('throttle:60,1')
     ->name('guidings.search-place-log.store');
+Route::get('/maps/landmarks', MapLandmarkController::class)
+    ->middleware('throttle:60,1')
+    ->name('maps.landmarks');
 Route::post('/language/switch', [App\Http\Controllers\LanguageController::class, 'switchLanguage'])->name('language.switch');
 
 Route::get('/booking-accept/{token}',[BookingController::class,'accept'])

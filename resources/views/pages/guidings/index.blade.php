@@ -606,74 +606,47 @@
     </section>
     <!--Tours List End-->
 
-    <div class="modal fade map-modal" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-        <div class="modal-dialog map-modal__dialog">
-            <div class="modal-content map-modal__content">
+    @php
+        $mapCenterLat = request()->get('placeLat')
+            ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
+        $mapCenterLng = request()->get('placeLng')
+            ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
 
-                {{-- Floating header bar over the map --}}
-                <div class="map-modal__header">
-                    <div class="map-modal__header-left">
-                        <span class="map-modal__pin-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                        </span>
-                        <div>
-                            <h6 class="map-modal__title" id="mapModalLabel">@lang('destination.show_on_map')</h6>
-                            @if(count($allGuidings) > 0)
-                            <span class="map-modal__subtitle">{{ count($allGuidings) }} {{ count($allGuidings) == 1 ? translate('result') : translate('results') }}</span>
-                            @endif
-                        </div>
-                    </div>
-                    <button type="button" class="map-modal__close" data-bs-dismiss="modal" aria-label="Close">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
-                </div>
-
-                {{-- Map fills the rest --}}
-                @php
-                    $mapCenterLat = request()->get('placeLat')
-                        ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
-                    $mapCenterLng = request()->get('placeLng')
-                        ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
-
-                    if ($allGuidings->isEmpty()) {
-                        $mapSource = $otherguidings ?? collect();
-                        $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
-                    } else {
-                        $mapSource = $allGuidings;
-                        if (isset($otherguidings) && count($otherguidings) > 0) {
-                            $mapSource = $allGuidings->concat($otherguidings);
-                        }
-                        $mapGrayIds = isset($otherguidings)
-                            ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
-                            : [];
-                    }
-                    $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
-                @endphp
-                <x-maps.listing
-                    class="map-modal__map"
-                    :markers="$guidingMapMarkers"
-                    layout="modal"
-                    modal-id="mapModal"
-                    map-id="map"
-                    height="100%"
-                    :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
-                    instance-key="guidings"
-                    :cluster="true"
-                    :show-gray-nearby="true"
-                    :single-zoom="12"
-                    :default-zoom="5"
-                    :lazy-modal="true"
-                    :updatable="true"
-                    :interactive-preview="true"
-                />
-
-            </div>
-        </div>
-    </div>
+        if ($allGuidings->isEmpty()) {
+            $mapSource = $otherguidings ?? collect();
+            $mapGrayIds = collect($mapSource)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        } else {
+            $mapSource = $allGuidings;
+            if (isset($otherguidings) && count($otherguidings) > 0) {
+                $mapSource = $allGuidings->concat($otherguidings);
+            }
+            $mapGrayIds = isset($otherguidings)
+                ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                : [];
+        }
+        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+    @endphp
+    <x-maps.listing-modal
+        modal-id="mapModal"
+        :title="__('destination.show_on_map')"
+        :result-count="count($allGuidings)"
+        map-id="map"
+        :markers="$guidingMapMarkers"
+        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
+        instance-key="guidings"
+        :cluster="true"
+        :show-gray-nearby="true"
+        :single-zoom="12"
+        :default-zoom="5"
+        :lazy-modal="true"
+        :updatable="true"
+        :interactive-preview="true"
+        :show-rail="true"
+        :show-filter-chips="true"
+        :price-chips="true"
+        :landmarks="false"
+        filter-form-id="filterContainer"
+    />
     <!-- Endmodal -->
 
     <br>

@@ -725,6 +725,10 @@
         :lazy-modal="true"
         :updatable="true"
         :interactive-preview="true"
+        :show-rail="true"
+        :show-filter-chips="false"
+        :price-chips="true"
+        :landmarks="false"
     />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">

@@ -54,6 +54,14 @@ return [
             'lng' => (float) env('MAPS_DEFAULT_LNG', 10.451526),
         ],
         'default_zoom' => (int) env('MAPS_DEFAULT_ZOOM', 5),
+        'landmarks' => [
+            'enabled' => env('MAPS_LANDMARKS_ENABLED', false),
+            'min_zoom' => (int) env('MAPS_LANDMARKS_MIN_ZOOM', 10),
+            'max_features' => (int) env('MAPS_LANDMARKS_MAX', 30),
+            'cache_ttl' => (int) env('MAPS_LANDMARKS_CACHE_TTL', 3600),
+            'timeout' => (int) env('MAPS_LANDMARKS_TIMEOUT', 8),
+            'overpass_url' => env('MAPS_OVERPASS_URL', 'https://overpass-api.de/api/interpreter'),
+        ],
     ],
 
     'translation' => [

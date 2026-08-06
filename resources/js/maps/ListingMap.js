@@ -1,8 +1,11 @@
 /**
- * ListingMap — multi-marker listing / modal map with clustering + AJAX setMarkers
+ * ListingMap — multi-marker listing / modal map with clustering, viewport rail, price chips
  */
 import mapsManager, { L } from './MapsManager';
 import markerFactory from './MarkerFactory';
+import LandmarkLayer from './LandmarkLayer';
+import MapModalRail from './MapModalRail';
+import MapModalFilters from './MapModalFilters';
 
 class ListingMap {
   /**
@@ -17,8 +20,14 @@ class ListingMap {
     this.markers = [];
     this._initialized = false;
     this._activePreviewMarker = null;
+    this._selectedMarker = null;
     this._hoverOpenTimer = null;
     this._hoverCloseTimer = null;
+    this._viewportTimer = null;
+    this._userInteracted = false;
+    this._viewportListeners = [];
+    this._selectionListeners = [];
+    this._landmarkLayer = null;
     this._canHover = typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
       : true;
@@ -49,7 +58,6 @@ class ListingMap {
       if (Array.isArray(fromScript)) {
         markers = fromScript;
       } else if (ds.markers) {
-        // Legacy fallback (small payloads only)
         markers = JSON.parse(ds.markers);
       }
     } catch (e) {
@@ -80,6 +88,9 @@ class ListingMap {
       lazyModal: ds.lazyModal !== 'false' && ds.lazyModal !== '0',
       updatable: ds.updatable !== 'false' && ds.updatable !== '0',
       interactivePreview: ds.interactivePreview === 'true' || ds.interactivePreview === '1',
+      priceChips: ds.priceChips === 'true' || ds.priceChips === '1',
+      landmarks: ds.landmarks === 'true' || ds.landmarks === '1',
+      viewportRail: ds.viewportRail === 'true' || ds.viewportRail === '1',
       instanceKey: ds.instanceKey || el.id || 'listingMap',
     };
   }
@@ -100,8 +111,10 @@ class ListingMap {
             start();
           } else {
             mapsManager.resizeMap(this.map);
+            this.emitViewportChange();
           }
         });
+        this._bootModalHelpers(modal);
       } else {
         start();
       }
@@ -112,7 +125,6 @@ class ListingMap {
     if (this.options.updatable) {
       window.__cagListingMaps = window.__cagListingMaps || {};
       window.__cagListingMaps[this.options.instanceKey] = this;
-      // Back-compat for listing filters — optional enrich hook from page scripts
       if (
         this.options.instanceKey === 'guidings' ||
         this.options.instanceKey === 'category-country' ||
@@ -123,12 +135,26 @@ class ListingMap {
         window.updateMapWithGuidings = (guidings) => {
           const enrich = window.__cagEnrichGuidingsForMap;
           const payload = typeof enrich === 'function' ? enrich(guidings) : guidings;
-          this.setMarkersFromGuidings(payload);
+          this.setMarkersFromGuidings(payload, { preserveView: this._userInteracted });
         };
       }
     }
 
     return this;
+  }
+
+  _bootModalHelpers(modal) {
+    if (modal._cagMapHelpersBooted) {
+      return;
+    }
+    modal._cagMapHelpersBooted = true;
+
+    if (this.options.viewportRail) {
+      modal._cagMapRail = new MapModalRail(modal, this);
+    }
+    if (modal.getAttribute('data-map-show-chips') === 'true') {
+      modal._cagMapFilters = new MapModalFilters(modal);
+    }
   }
 
   _create() {
@@ -147,19 +173,120 @@ class ListingMap {
     this.setMarkers(this.options.markers);
     mapsManager.resizeMap(this.map);
 
+    this.map.on('dragend', () => {
+      this._userInteracted = true;
+    });
+    this.map.on('zoomend', () => {
+      // fitBounds also fires zoomend; mark interaction only after first paint settle
+      if (this._markersReady) {
+        this._userInteracted = true;
+      }
+    });
+
+    if (this.options.viewportRail) {
+      this.map.on('moveend', () => this._scheduleViewportEmit());
+      this.map.on('zoomend', () => this._scheduleViewportEmit());
+      this._scheduleViewportEmit();
+    }
+
     if (this.options.interactivePreview) {
-      this.map.on('click', () => this._clearStickyPreviews());
+      this.map.on('click', () => {
+        this._clearStickyPreviews();
+        if (this.options.viewportRail) {
+          this.clearSelection();
+        }
+      });
       this.map.on('movestart', () => {
         if (this._activePreviewMarker && !this._activePreviewMarker._cagSticky) {
           this._closePreview(this._activePreviewMarker);
         }
       });
+    } else if (this.options.viewportRail) {
+      this.map.on('click', () => this.clearSelection());
     }
+
+    if (this.options.landmarks) {
+      this._landmarkLayer = new LandmarkLayer(this);
+      this._landmarkLayer.attach();
+    }
+
+    this._markersReady = true;
+  }
+
+  onViewportChange(fn) {
+    if (typeof fn === 'function') {
+      this._viewportListeners.push(fn);
+    }
+  }
+
+  onSelectionChange(fn) {
+    if (typeof fn === 'function') {
+      this._selectionListeners.push(fn);
+    }
+  }
+
+  _scheduleViewportEmit() {
+    if (this._viewportTimer) clearTimeout(this._viewportTimer);
+    this._viewportTimer = setTimeout(() => this.emitViewportChange(), 220);
+  }
+
+  emitViewportChange() {
+    const payload = this.getVisiblePrimaryItems();
+    this._viewportListeners.forEach((fn) => {
+      try {
+        fn(payload);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  }
+
+  getPrimaryItems() {
+    return this.markers
+      .filter((m) => m.options && m.options.cagVariant !== 'gray' && m._cagItem)
+      .map((m) => m._cagItem);
+  }
+
+  getVisiblePrimaryItems() {
+    if (!this.map) {
+      const items = this._dedupeItems(this.getPrimaryItems());
+      return { items, ids: items.map((i) => i.id), count: items.length };
+    }
+
+    const bounds = this.map.getBounds();
+    const items = [];
+    this.markers.forEach((m) => {
+      if (!m._cagItem || (m.options && m.options.cagVariant === 'gray')) return;
+      const ll = m.getLatLng();
+      if (bounds.contains(ll)) {
+        items.push(m._cagItem);
+      }
+    });
+    const unique = this._dedupeItems(items);
+    return {
+      items: unique,
+      ids: unique.map((i) => i.id),
+      count: unique.length,
+    };
+  }
+
+  _dedupeItems(items) {
+    const seen = new Set();
+    const out = [];
+    (items || []).forEach((item) => {
+      if (!item || item.id == null) return;
+      const key = String(item.id);
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push(item);
+    });
+    return out;
   }
 
   clearMarkers() {
     this._clearHoverTimers();
     this._activePreviewMarker = null;
+    this._selectedMarker = null;
 
     if (this.cluster) {
       this.cluster.clearLayers();
@@ -184,9 +311,10 @@ class ListingMap {
   }
 
   /**
-   * @param {Array<{id?:*, lat:number, lng:number, variant?:string, popupHtml?:string, title?:string}>} items
+   * @param {Array} items
+   * @param {{fit?: boolean|null}} [opts]
    */
-  setMarkers(items) {
+  setMarkers(items, opts = {}) {
     if (!this.map) {
       this.options.markers = items || [];
       return;
@@ -199,6 +327,10 @@ class ListingMap {
     const primaryMarkers = [];
     const grayMarkers = [];
     const interactive = this.options.interactivePreview;
+    const railMode = this.options.viewportRail;
+    const usePriceChips = this.options.priceChips;
+    const locale = mapsManager.config.locale || 'de';
+    const priceTpl = mapsManager.config.priceFromTemplate || 'From :price';
 
     list.forEach((item) => {
       if (item.lat == null || item.lng == null) {
@@ -224,7 +356,17 @@ class ListingMap {
         return;
       }
 
-      const popupHtml = item.popupHtml || (interactive ? this.buildInteractivePreviewHtml(item) : this.buildPopupHtml(item));
+      const chipPrice =
+        item.price != null
+          ? markerFactory.formatPriceChip(item.price, locale)
+          : null;
+      if (!item.priceLabel && chipPrice) {
+        item.priceLabel = priceTpl.replace(':price', chipPrice);
+      }
+
+      const popupHtml =
+        item.popupHtml ||
+        (interactive ? this.buildInteractivePreviewHtml(item) : this.buildPopupHtml(item));
       const previewWidth = interactive ? this._previewCardWidth() : 220;
       const popupOptions = interactive
         ? {
@@ -232,7 +374,6 @@ class ListingMap {
             maxWidth: previewWidth,
             minWidth: Math.min(236, previewWidth),
             closeButton: false,
-            // Hover should feel instant; pan only when the user pins a card (click/tap)
             autoPan: false,
             offset: [0, -6],
           }
@@ -242,16 +383,23 @@ class ListingMap {
         position: { lat, lng },
         variant,
         title: item.title || '',
-        popupHtml,
+        popupHtml: popupHtml || null,
         popupOptions,
         zIndexOffset: variant === 'gray' ? 100 : 0,
+        priceChip: usePriceChips && variant !== 'gray',
+        price: item.price,
+        priceLabel: chipPrice,
       });
       marker.options = marker.options || {};
       marker.options.cagVariant = variant;
       marker._cagItem = item;
       marker._cagSticky = false;
 
-      if (interactive) {
+      if (railMode && interactive) {
+        this._bindRailSelectionWithPreview(marker);
+      } else if (railMode) {
+        this._bindRailSelection(marker);
+      } else if (interactive) {
         this._bindInteractivePreview(marker);
       } else {
         marker.on('click', () => {
@@ -274,7 +422,6 @@ class ListingMap {
       primaryLatLngs.push(L.latLng(parseFloat(item.lat), parseFloat(item.lng)));
     });
 
-    // Cluster only filtered/primary results so nearby (gray) pins never inflate cluster counts
     if (this.options.cluster && primaryMarkers.length) {
       this.cluster = mapsManager.createMarkerClusterer({
         map: this.map,
@@ -288,11 +435,150 @@ class ListingMap {
       this.grayLayer = L.layerGroup(grayMarkers).addTo(this.map);
     }
 
-    if (this.options.fitPrimaryBounds && primaryLatLngs.length) {
+    const shouldFit =
+      opts.fit != null ? opts.fit : this.options.fitPrimaryBounds && !this._userInteracted && !opts.preserveView;
+
+    if (shouldFit && primaryLatLngs.length) {
       this._fitPrimary(primaryLatLngs);
     }
 
     mapsManager.resizeMap(this.map);
+    this.emitViewportChange();
+    // Re-check after layout/fitBounds settle so the rail matches visible pins
+    this._scheduleViewportEmit();
+  }
+
+  _bindRailSelection(marker) {
+    marker.on('click', (e) => {
+      if (e && e.originalEvent) {
+        L.DomEvent.stopPropagation(e.originalEvent);
+      }
+      this.selectMarker(marker, { pan: false, source: 'map' });
+    });
+
+    if (!this._canHover) {
+      return;
+    }
+
+    marker.on('mouseover', () => {
+      if (this._selectedMarker === marker) return;
+      markerFactory.setSelected(marker, true);
+    });
+    marker.on('mouseout', () => {
+      if (this._selectedMarker === marker) return;
+      markerFactory.setSelected(marker, false);
+    });
+  }
+
+  /**
+   * Rail highlight + interactive map popup (click opens both).
+   */
+  _bindRailSelectionWithPreview(marker) {
+    this._bindInteractivePreview(marker);
+
+    marker.off('click');
+    marker.on('click', (e) => {
+      if (e && e.originalEvent) {
+        L.DomEvent.stopPropagation(e.originalEvent);
+      }
+      this.markers.forEach((m) => {
+        if (m !== marker) {
+          m._cagSticky = false;
+          if (m.isPopupOpen && m.isPopupOpen()) {
+            m.closePopup();
+          }
+        }
+      });
+      marker._cagSticky = true;
+      if (!marker.isPopupOpen()) {
+        marker.openPopup();
+      }
+      this.selectMarker(marker, { pan: false, source: 'map' });
+      this._panPopupIntoView(marker);
+    });
+  }
+
+  selectById(id, opts = {}) {
+    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    if (marker) {
+      this.selectMarker(marker, opts);
+    }
+  }
+
+  highlightById(id, on) {
+    if (this._selectedMarker && String(this._selectedMarker._cagItem && this._selectedMarker._cagItem.id) === String(id)) {
+      return;
+    }
+    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    if (marker) {
+      markerFactory.setSelected(marker, !!on);
+    }
+  }
+
+  selectMarker(marker, opts = {}) {
+    if (!marker) return;
+
+    if (this._selectedMarker && this._selectedMarker !== marker) {
+      markerFactory.setSelected(this._selectedMarker, false);
+    }
+
+    this._selectedMarker = marker;
+    markerFactory.setSelected(marker, true);
+
+    if (this.cluster && this.cluster.zoomToShowLayer) {
+      try {
+        this.cluster.zoomToShowLayer(marker, () => {
+          markerFactory.setSelected(marker, true);
+        });
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    if (opts.pan && this.map) {
+      this.map.panTo(marker.getLatLng(), { animate: true });
+    }
+
+    // Open popup when selecting from the rail (map clicks open it in the click handler)
+    if (opts.source === 'rail' && this.options.interactivePreview) {
+      this.markers.forEach((m) => {
+        if (m !== marker) {
+          m._cagSticky = false;
+          if (m.isPopupOpen && m.isPopupOpen()) {
+            m.closePopup();
+          }
+        }
+      });
+      marker._cagSticky = true;
+      if (!marker.isPopupOpen()) {
+        marker.openPopup();
+      }
+      this._panPopupIntoView(marker);
+    }
+
+    const item = marker._cagItem || null;
+    this._selectionListeners.forEach((fn) => {
+      try {
+        fn(item);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  }
+
+  clearSelection() {
+    if (this._selectedMarker) {
+      markerFactory.setSelected(this._selectedMarker, false);
+      this._selectedMarker = null;
+    }
+    this._clearStickyPreviews();
+    this._selectionListeners.forEach((fn) => {
+      try {
+        fn(null);
+      } catch (e) {
+        /* ignore */
+      }
+    });
   }
 
   _bindInteractivePreview(marker) {
@@ -300,6 +586,7 @@ class ListingMap {
       const el = marker.getElement && marker.getElement();
       if (!el) return;
       el.classList.toggle('cag-map-pin--active', !!active);
+      el.classList.toggle('cag-map-chip--selected', !!active && marker._cagPriceChip);
     };
 
     marker.on('popupopen', () => {
@@ -400,7 +687,6 @@ class ListingMap {
       });
     }
 
-    // Keep popup clicks from bubbling to the map (which would clear sticky)
     L.DomEvent.disableClickPropagation(el);
   }
 
@@ -451,7 +737,10 @@ class ListingMap {
   _closePreview(marker) {
     if (!marker) return;
     const el = marker.getElement && marker.getElement();
-    if (el) el.classList.remove('cag-map-pin--active');
+    if (el) {
+      el.classList.remove('cag-map-pin--active');
+      el.classList.remove('cag-map-chip--selected');
+    }
     if (marker.isPopupOpen && marker.isPopupOpen()) {
       marker.closePopup();
     }
@@ -489,14 +778,16 @@ class ListingMap {
 
   /**
    * AJAX remap from guidings filter payload (server objects).
-   * Expects items with lat, lng, and optional popupHtml / id / title / location / price.
    */
-  setMarkersFromGuidings(guidings) {
+  setMarkersFromGuidings(guidings, opts = {}) {
+    const locale = mapsManager.config.locale || 'de';
+    const priceTpl = mapsManager.config.priceFromTemplate || 'From :price';
+
     const markers = (guidings || []).map((g) => {
       const price = g.lowest_price != null ? g.lowest_price : g.price;
       const normalizedPrice = price != null && price !== '' && Number(price) > 0 ? price : null;
+      const chip = normalizedPrice != null ? markerFactory.formatPriceChip(normalizedPrice, locale) : null;
 
-      // Prefer structured fields so interactive preview can render; ignore legacy popupHtml
       return {
         id: g.id,
         lat: g.lat,
@@ -506,7 +797,7 @@ class ListingMap {
         title: g.title || '',
         location: g.location || '',
         price: normalizedPrice,
-        priceLabel: g.priceLabel || (normalizedPrice != null ? `ab ${normalizedPrice}€ p.P.` : null),
+        priceLabel: g.priceLabel || (chip ? priceTpl.replace(':price', chip) : null),
         badge: g.badge || '',
         cta: g.cta || '',
         url: g.url || g.link || '#',
@@ -514,26 +805,20 @@ class ListingMap {
       };
     });
 
-    this.setMarkers(markers);
+    this.setMarkers(markers, opts);
   }
 
-  /**
-   * Build popup card HTML from structured marker fields (avoids server-side Blade per pin).
-   */
   buildPopupHtml(item = {}) {
     const title = this._escape(item.title || '');
     const location = this._escape(item.location || '');
     const url = this._escape(item.url || item.link || '#');
     const image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
-    const price = item.price != null && item.price !== '' ? item.price : null;
-    if (!title && !image && !location && price == null) {
+    const priceLabel = this._escape(item.priceLabel || '');
+    if (!title && !image && !location && !priceLabel) {
       return null;
     }
 
-    const priceLine =
-      price != null
-        ? `<div class="cag-map-popup__price"><span class="fw-bold">ab ${this._escape(String(price))}€</span> p.P.</div>`
-        : '';
+    const priceLine = priceLabel ? `<div class="cag-map-popup__price"><span class="fw-bold">${priceLabel}</span></div>` : '';
 
     return `
       <div class="cag-map-popup__card">
@@ -548,10 +833,6 @@ class ListingMap {
       </div>`;
   }
 
-  /**
-   * Rich interactive preview card — images hydrate on first open (keeps map boot light).
-   * Shared by vacations + guidings listing maps.
-   */
   buildInteractivePreviewHtml(item = {}) {
     const title = this._escape(item.title || '');
     const location = this._escape(item.location || '');
@@ -562,26 +843,17 @@ class ListingMap {
     const priceLabel = this._escape(item.priceLabel || '');
     const pillar =
       item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding'
-        ? (item.pillar === 'guiding' ? 'tour' : item.pillar)
+        ? item.pillar === 'guiding'
+          ? 'tour'
+          : item.pillar
         : '';
-    const badgeTone =
-      pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
-    const price = item.price != null && item.price !== '' ? item.price : null;
+    const badgeTone = pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
 
-    if (!title && !image && !location && !priceLabel && price == null) {
+    if (!title && !image && !location && !priceLabel) {
       return null;
     }
 
-    const fallbackPrice =
-      !priceLabel && price != null
-        ? `<span class="cag-map-preview__price-value">ab ${this._escape(String(price))}€</span>`
-        : '';
-
-    const priceBlock =
-      priceLabel || fallbackPrice
-        ? `<div class="cag-map-preview__price">${priceLabel || fallbackPrice}</div>`
-        : '';
-
+    const priceBlock = priceLabel ? `<div class="cag-map-preview__price">${priceLabel}</div>` : '';
     const cardWidth = this._previewCardWidth();
 
     return `
