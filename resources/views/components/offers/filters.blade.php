@@ -5,6 +5,11 @@
     'campsTotal' => 0,
     'speciesOptions' => collect(),
     'countries' => collect(),
+    'methodOptions' => collect(),
+    'waterOptions' => collect(),
+    'tourDurationOptions' => collect(),
+    'tripDurationOptions' => collect(),
+    'accommodationTypeOptions' => collect(),
     'showTypeToggles' => true,
     'showMobileToolbar' => true,
     'showMapButton' => false,
@@ -17,38 +22,49 @@
 ])
 
 @php
+    use App\Domain\Offers\OfferListingFilter;
     use Illuminate\Support\Collection;
 
     $action = $action ?? route('offers.index');
     $total = ($toursTotal ?? 0) + ($tripsTotal ?? 0) + ($campsTotal ?? 0);
     $vacationsTotal = ($tripsTotal ?? 0) + ($campsTotal ?? 0);
+    $facetKeys = OfferListingFilter::PRODUCT_FACET_KEYS;
+    $managedKeys = array_merge(['species', 'country', 'sortby', 'type', 'vacation', 'num_guests'], $facetKeys);
     $query = request()->except(['page', 'type', 'vacation']);
     $speciesOptions = $speciesOptions instanceof Collection ? $speciesOptions : collect($speciesOptions ?? []);
     $countries = $countries instanceof Collection ? $countries : collect($countries ?? []);
+    $methodOptions = $methodOptions instanceof Collection ? $methodOptions : collect($methodOptions ?? []);
+    $waterOptions = $waterOptions instanceof Collection ? $waterOptions : collect($waterOptions ?? []);
+    $tourDurationOptions = $tourDurationOptions instanceof Collection ? $tourDurationOptions : collect($tourDurationOptions ?? []);
+    $tripDurationOptions = $tripDurationOptions instanceof Collection ? $tripDurationOptions : collect($tripDurationOptions ?? []);
+    $accommodationTypeOptions = $accommodationTypeOptions instanceof Collection ? $accommodationTypeOptions : collect($accommodationTypeOptions ?? []);
     $activeType = $filter->type ?? 'all';
     $activeVacation = $filter->vacation ?? 'all';
     $isVacation = $activeType === 'vacation';
-    $activeFilterCount = collect(['species', 'country', 'sortby', 'type', 'num_guests'])
+    $showTourFacets = $filter->showsTourFacets();
+    $showCampFacets = $filter->showsCampFacets();
+    $showTripFacets = $filter->showsTripFacets();
+    $activeFilterCount = collect(array_merge(['species', 'country', 'sortby', 'type', 'num_guests'], $facetKeys))
         ->filter(fn ($key) => filled(request()->get($key)))
         ->count();
-    $typeUrl = function (string $type) use ($action, $query, $typeLinks) {
+    $typeUrl = function (string $type) use ($action, $query, $typeLinks, $facetKeys) {
         if (is_array($typeLinks) && isset($typeLinks[$type])) {
             return $typeLinks[$type];
         }
 
-        $params = $query;
+        $params = collect($query)->except($facetKeys)->all();
         if ($type !== 'all') {
             $params['type'] = $type;
         }
 
         return $action.($params ? '?'.http_build_query($params) : '');
     };
-    $vacationUrl = function (string $vacation) use ($action, $query, $vacationLinks) {
+    $vacationUrl = function (string $vacation) use ($action, $query, $vacationLinks, $facetKeys) {
         if (is_array($vacationLinks) && isset($vacationLinks[$vacation])) {
             return $vacationLinks[$vacation];
         }
 
-        $params = $query;
+        $params = collect($query)->except($facetKeys)->all();
         $params['type'] = 'vacation';
         if ($vacation !== 'all') {
             $params['vacation'] = $vacation;
@@ -108,7 +124,7 @@
             @foreach($value as $v)
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
             @endforeach
-        @elseif(! in_array($key, ['species', 'country', 'sortby', 'type', 'vacation'], true))
+        @elseif(! in_array($key, $managedKeys, true))
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
     @endforeach
@@ -161,31 +177,21 @@
     @if($showDesktop)
     <div class="vacation-filters__desktop">
         <div class="vacation-filters__sidebar-stack">
-            @if($countries->isNotEmpty())
-                <div class="vacation-filters__field">
-                    <label class="form-label">{{ __('offers.filter_country') }}</label>
-                    <select name="country" class="form-select form-select-sm">
-                        <option value="">{{ __('offers.all_countries') }}</option>
-                        @foreach($countries as $row)
-                            <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
-                                {{ translate($row['name']) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
-
-            @if($speciesOptions->isNotEmpty())
-                <div class="vacation-filters__field">
-                    <label class="form-label">{{ __('offers.filter_species') }}</label>
-                    <select name="species" class="form-select form-select-sm">
-                        <option value="">{{ __('vacations.select') }}</option>
-                        @foreach($speciesOptions as $species)
-                            <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
+            @include('components.offers.partials.filter-fields', [
+                'selectClass' => 'form-select form-select-sm',
+                'fieldClass' => 'vacation-filters__field',
+                'filter' => $filter,
+                'countries' => $countries,
+                'speciesOptions' => $speciesOptions,
+                'methodOptions' => $methodOptions,
+                'waterOptions' => $waterOptions,
+                'tourDurationOptions' => $tourDurationOptions,
+                'tripDurationOptions' => $tripDurationOptions,
+                'accommodationTypeOptions' => $accommodationTypeOptions,
+                'showTourFacets' => $showTourFacets,
+                'showCampFacets' => $showCampFacets,
+                'showTripFacets' => $showTripFacets,
+            ])
 
             <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">{{ __('offers.apply_filters') }}</button>
         </div>
@@ -304,7 +310,7 @@
                         @foreach($value as $v)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
                         @endforeach
-                    @elseif(! in_array($key, ['species', 'country', 'sortby', 'type', 'vacation'], true))
+                    @elseif(! in_array($key, $managedKeys, true))
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                 @endforeach
@@ -351,31 +357,21 @@
                     </div>
                 @endif
 
-                @if($countries->isNotEmpty())
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('offers.filter_country') }}</label>
-                        <select name="country" class="form-select">
-                            <option value="">{{ __('offers.all_countries') }}</option>
-                            @foreach($countries as $row)
-                                <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
-                                    {{ translate($row['name']) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
-
-                @if($speciesOptions->isNotEmpty())
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('offers.filter_species') }}</label>
-                        <select name="species" class="form-select">
-                            <option value="">{{ __('vacations.select') }}</option>
-                            @foreach($speciesOptions as $species)
-                                <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
+                @include('components.offers.partials.filter-fields', [
+                    'selectClass' => 'form-select',
+                    'fieldClass' => 'mb-3',
+                    'filter' => $filter,
+                    'countries' => $countries,
+                    'speciesOptions' => $speciesOptions,
+                    'methodOptions' => $methodOptions,
+                    'waterOptions' => $waterOptions,
+                    'tourDurationOptions' => $tourDurationOptions,
+                    'tripDurationOptions' => $tripDurationOptions,
+                    'accommodationTypeOptions' => $accommodationTypeOptions,
+                    'showTourFacets' => $showTourFacets,
+                    'showCampFacets' => $showCampFacets,
+                    'showTripFacets' => $showTripFacets,
+                ])
 
                 <div class="mb-3">
                     <label class="form-label">{{ __('offers.filter_sort') }}</label>

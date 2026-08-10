@@ -19,6 +19,11 @@ final class OfferCatalogViewModel
         public readonly int $listingsTotal,
         public readonly Collection $speciesOptions,
         public readonly Collection $countries,
+        public readonly Collection $methodOptions,
+        public readonly Collection $waterOptions,
+        public readonly Collection $tourDurationOptions,
+        public readonly Collection $tripDurationOptions,
+        public readonly Collection $accommodationTypeOptions,
         public readonly Collection $faq,
         public readonly array $mapMarkers,
         public readonly Collection $suggestedCards,
@@ -68,6 +73,8 @@ final class OfferCatalogViewModel
     }
 
     /**
+     * Shared params preserved across type/vacation toggles (product facets intentionally omitted).
+     *
      * @return array<string, mixed>
      */
     public function sharedQueryParams(): array

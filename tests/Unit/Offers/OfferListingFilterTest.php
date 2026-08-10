@@ -143,4 +143,84 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame('all', $vacationAll->pillar);
         $this->assertSame('all', $all->pillar);
     }
+
+    public function test_parses_tour_facets_only_for_tour_type(): void
+    {
+        $tour = OfferListingFilter::fromRequest([
+            'type' => 'tour',
+            'methods' => '12',
+            'water' => ['7'],
+            'duration_types' => 'full_day',
+        ]);
+
+        $this->assertSame(12, $tour->methodId);
+        $this->assertSame(7, $tour->waterId);
+        $this->assertSame('full_day', $tour->durationType);
+        $this->assertTrue($tour->showsTourFacets());
+
+        $ignored = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'trip',
+            'methods' => '12',
+            'water' => '7',
+            'duration_types' => 'full_day',
+        ]);
+
+        $this->assertNull($ignored->methodId);
+        $this->assertNull($ignored->waterId);
+        $this->assertNull($ignored->durationType);
+        $this->assertFalse($ignored->showsTourFacets());
+    }
+
+    public function test_parses_camp_facets_only_for_camp_subfilter(): void
+    {
+        $camp = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'camp',
+            'accommodation_type' => '3',
+            'has_guiding' => '1',
+            'has_rental_boat' => '0',
+        ]);
+
+        $this->assertSame(3, $camp->accommodationTypeId);
+        $this->assertTrue($camp->hasGuiding);
+        $this->assertFalse($camp->hasRentalBoat);
+        $this->assertTrue($camp->showsCampFacets());
+
+        $ignored = OfferListingFilter::fromRequest([
+            'type' => 'tour',
+            'accommodation_type' => '3',
+            'has_guiding' => '1',
+            'has_rental_boat' => '0',
+        ]);
+
+        $this->assertNull($ignored->accommodationTypeId);
+        $this->assertNull($ignored->hasGuiding);
+        $this->assertNull($ignored->hasRentalBoat);
+    }
+
+    public function test_parses_trip_duration_bucket_only_for_trip_subfilter(): void
+    {
+        $trip = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'trip',
+            'duration' => '4-7',
+        ]);
+
+        $this->assertSame('4-7', $trip->tripDuration);
+        $this->assertTrue($trip->showsTripFacets());
+
+        $invalid = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'trip',
+            'duration' => 'two-weeks',
+        ]);
+        $this->assertNull($invalid->tripDuration);
+
+        $ignored = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'duration' => '4-7',
+        ]);
+        $this->assertNull($ignored->tripDuration);
+    }
 }

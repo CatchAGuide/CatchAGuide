@@ -11,7 +11,26 @@ final class OfferListingFilter
 
     public const VACATION_FILTERS = ['all', 'trip', 'camp'];
 
+    public const TOUR_DURATION_TYPES = ['half_day', 'full_day', 'multi_day'];
+
+    public const TRIP_DURATION_BUCKETS = ['1-3', '4-7', '8+'];
+
     public const MAX_GUESTS = 20;
+
+    /**
+     * Product-type facets that must not leak across type/vacation switches.
+     *
+     * @var list<string>
+     */
+    public const PRODUCT_FACET_KEYS = [
+        'methods',
+        'water',
+        'duration_types',
+        'duration',
+        'accommodation_type',
+        'has_guiding',
+        'has_rental_boat',
+    ];
 
     /**
      * @param  array<int, string>  $placeTypes
@@ -34,6 +53,13 @@ final class OfferListingFilter
         public readonly ?float $boundsSwLat = null,
         public readonly ?float $boundsSwLng = null,
         public readonly ?string $countryShort = null,
+        public readonly ?int $methodId = null,
+        public readonly ?int $waterId = null,
+        public readonly ?string $durationType = null,
+        public readonly ?string $tripDuration = null,
+        public readonly ?int $accommodationTypeId = null,
+        public readonly ?bool $hasGuiding = null,
+        public readonly ?bool $hasRentalBoat = null,
     ) {}
 
     public static function fromRequest(array $input): self
@@ -63,6 +89,32 @@ final class OfferListingFilter
         $lat = self::nullableFloat($input['placeLat'] ?? $input['place_lat'] ?? null);
         $lng = self::nullableFloat($input['placeLng'] ?? $input['place_lng'] ?? null);
 
+        $methodId = null;
+        $waterId = null;
+        $durationType = null;
+        $tripDuration = null;
+        $accommodationTypeId = null;
+        $hasGuiding = null;
+        $hasRentalBoat = null;
+
+        if ($rawType === 'tour') {
+            $methodId = self::nullablePositiveInt(self::firstScalar($input['methods'] ?? null));
+            $waterId = self::nullablePositiveInt(self::firstScalar($input['water'] ?? null));
+            $durationType = self::nullableString(self::firstScalar($input['duration_types'] ?? null));
+            if ($durationType !== null && ! in_array($durationType, self::TOUR_DURATION_TYPES, true)) {
+                $durationType = null;
+            }
+        } elseif ($rawType === 'vacation' && $vacation === 'camp') {
+            $accommodationTypeId = self::nullablePositiveInt($input['accommodation_type'] ?? null);
+            $hasGuiding = self::nullableBool($input['has_guiding'] ?? null);
+            $hasRentalBoat = self::nullableBool($input['has_rental_boat'] ?? null);
+        } elseif ($rawType === 'vacation' && $vacation === 'trip') {
+            $tripDuration = self::nullableString($input['duration'] ?? null);
+            if ($tripDuration !== null && ! in_array($tripDuration, self::TRIP_DURATION_BUCKETS, true)) {
+                $tripDuration = null;
+            }
+        }
+
         return new self(
             type: $rawType,
             vacation: $vacation,
@@ -81,6 +133,13 @@ final class OfferListingFilter
             boundsSwLat: self::nullableFloat($input['bounds_sw_lat'] ?? null),
             boundsSwLng: self::nullableFloat($input['bounds_sw_lng'] ?? null),
             countryShort: self::nullableString($input['country_short'] ?? null),
+            methodId: $methodId,
+            waterId: $waterId,
+            durationType: $durationType,
+            tripDuration: $tripDuration,
+            accommodationTypeId: $accommodationTypeId,
+            hasGuiding: $hasGuiding,
+            hasRentalBoat: $hasRentalBoat,
         );
     }
 
@@ -118,6 +177,21 @@ final class OfferListingFilter
         }
 
         return $this->vacation === 'all' || $this->vacation === 'camp';
+    }
+
+    public function showsTourFacets(): bool
+    {
+        return $this->type === 'tour';
+    }
+
+    public function showsCampFacets(): bool
+    {
+        return $this->type === 'vacation' && $this->vacation === 'camp';
+    }
+
+    public function showsTripFacets(): bool
+    {
+        return $this->type === 'vacation' && $this->vacation === 'trip';
     }
 
     public function toVacationFilter(): VacationListingFilter
@@ -179,6 +253,40 @@ final class OfferListingFilter
         return (float) $value;
     }
 
+    private static function nullablePositiveInt(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (! is_numeric($value)) {
+            return null;
+        }
+
+        $int = (int) $value;
+
+        return $int > 0 ? $int : null;
+    }
+
+    private static function nullableBool(mixed $value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        $normalized = strtolower((string) $value);
+
+        return match ($normalized) {
+            '1', 'true', 'yes' => true,
+            '0', 'false', 'no' => false,
+            default => null,
+        };
+    }
+
     private static function nullableGuests(mixed $value): ?int
     {
         if ($value === null || $value === '') {
@@ -195,6 +303,15 @@ final class OfferListingFilter
         }
 
         return min($guests, self::MAX_GUESTS);
+    }
+
+    private static function firstScalar(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            return $value[0] ?? null;
+        }
+
+        return $value;
     }
 
     /**

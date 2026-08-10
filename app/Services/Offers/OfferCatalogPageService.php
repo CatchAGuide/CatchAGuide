@@ -5,15 +5,19 @@ namespace App\Services\Offers;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Domain\Vacation\CountrySlug;
+use App\Models\AccommodationType;
 use App\Models\Camp;
 use App\Models\Guiding;
+use App\Models\Method;
 use App\Models\Trip;
+use App\Models\Water;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\GuidingFilterService;
 use App\Services\Location\GeospatialSearchService;
 use App\Services\Vacation\VacationFilterApplicator;
 use App\Support\Maps\MapMarkerCollection;
@@ -33,6 +37,7 @@ class OfferCatalogPageService
         private TripCardPresenter $tripPresenter,
         private CampCardPresenter $campPresenter,
         private GeospatialSearchService $geoSearch,
+        private GuidingFilterService $guidingFilters,
     ) {}
 
     public function build(Request $request): OfferCatalogViewModel
@@ -115,6 +120,11 @@ class OfferCatalogPageService
                 'slug' => $row['slug'],
                 'name' => $row['name'],
             ])->values(),
+            methodOptions: $this->methodOptions(),
+            waterOptions: $this->waterOptions(),
+            tourDurationOptions: $this->tourDurationOptions(),
+            tripDurationOptions: $this->tripDurationOptions(),
+            accommodationTypeOptions: $this->accommodationTypeOptions(),
             faq: $this->resolveFaq(),
             mapMarkers: $this->buildMapMarkers($filter, $tourQuery, $tripQuery, $campQuery, $suggestedItems),
             suggestedCards: $suggestedCards,
@@ -294,6 +304,8 @@ class OfferCatalogPageService
             $query->where('max_guests', '>=', $filter->numGuests);
         }
 
+        $this->applyTourFacets($query, $filter);
+
         if ($filter->placeLat !== null && $filter->placeLng !== null) {
             $geo = Guiding::locationFilter(
                 $filter->city,
@@ -338,6 +350,8 @@ class OfferCatalogPageService
             });
         }
 
+        $this->applyTripFacets($query, $filter);
+
         return $this->applyListingGeo($query, $filter, 'latitude', 'longitude');
     }
 
@@ -356,7 +370,138 @@ class OfferCatalogPageService
             });
         }
 
+        $this->applyCampFacets($query, $filter);
+
         return $this->applyListingGeo($query, $filter, 'latitude', 'longitude');
+    }
+
+    private function applyTourFacets(Builder $query, OfferListingFilter $filter): void
+    {
+        if (! $filter->showsTourFacets()) {
+            return;
+        }
+
+        $params = array_filter([
+            'methods' => $filter->methodId !== null ? [(string) $filter->methodId] : null,
+            'water' => $filter->waterId !== null ? [(string) $filter->waterId] : null,
+            'duration_types' => $filter->durationType !== null ? [$filter->durationType] : null,
+        ]);
+
+        if ($params === []) {
+            return;
+        }
+
+        $ids = $this->guidingFilters->getFilteredGuidingIds(Request::create('/', 'GET', $params));
+        $query->whereIn('guidings.id', $ids === [] ? [0] : $ids);
+    }
+
+    private function applyTripFacets(Builder $query, OfferListingFilter $filter): void
+    {
+        if (! $filter->showsTripFacets() || $filter->tripDuration === null) {
+            return;
+        }
+
+        match ($filter->tripDuration) {
+            '1-3' => $query->whereBetween('duration_days', [1, 3]),
+            '4-7' => $query->whereBetween('duration_days', [4, 7]),
+            '8+' => $query->where('duration_days', '>=', 8),
+            default => null,
+        };
+    }
+
+    private function applyCampFacets(Builder $query, OfferListingFilter $filter): void
+    {
+        if (! $filter->showsCampFacets()) {
+            return;
+        }
+
+        if ($filter->accommodationTypeId !== null) {
+            $typeId = $filter->accommodationTypeId;
+            $query->whereHas('accommodations', function (Builder $q) use ($typeId) {
+                $q->where('accommodations.status', 'active')
+                    ->where('accommodations.accommodation_type', $typeId);
+            });
+        }
+
+        if ($filter->hasGuiding === true) {
+            $query->whereHas('guidings');
+        } elseif ($filter->hasGuiding === false) {
+            $query->whereDoesntHave('guidings');
+        }
+
+        if ($filter->hasRentalBoat === true) {
+            $query->whereHas('rentalBoats');
+        } elseif ($filter->hasRentalBoat === false) {
+            $query->whereDoesntHave('rentalBoats');
+        }
+    }
+
+    /**
+     * @return Collection<int, array{id: int, name: string}>
+     */
+    private function methodOptions(): Collection
+    {
+        return Method::query()
+            ->orderByRaw("CASE WHEN ? = 'en' THEN name_en ELSE name END", [app()->getLocale()])
+            ->get(['id', 'name', 'name_en'])
+            ->map(fn (Method $method) => [
+                'id' => (int) $method->id,
+                'name' => (string) $method->name,
+            ])
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, array{id: int, name: string}>
+     */
+    private function waterOptions(): Collection
+    {
+        return Water::query()
+            ->orderByRaw("CASE WHEN ? = 'en' THEN name_en ELSE name END", [app()->getLocale()])
+            ->get(['id', 'name', 'name_en'])
+            ->map(fn (Water $water) => [
+                'id' => (int) $water->id,
+                'name' => (string) $water->name,
+            ])
+            ->values();
+    }
+
+    /**
+     * @return Collection<int, array{value: string, label: string}>
+     */
+    private function tourDurationOptions(): Collection
+    {
+        return collect(OfferListingFilter::TOUR_DURATION_TYPES)->map(fn (string $value) => [
+            'value' => $value,
+            'label' => __('guidings.'.$value),
+        ]);
+    }
+
+    /**
+     * @return Collection<int, array{value: string, label: string}>
+     */
+    private function tripDurationOptions(): Collection
+    {
+        return collect(OfferListingFilter::TRIP_DURATION_BUCKETS)->map(fn (string $value) => [
+            'value' => $value,
+            'label' => __('offers.filter_duration_'.$value),
+        ]);
+    }
+
+    /**
+     * @return Collection<int, array{id: int, name: string}>
+     */
+    private function accommodationTypeOptions(): Collection
+    {
+        return AccommodationType::query()
+            ->active()
+            ->ordered()
+            ->get(['id', 'name', 'name_en'])
+            ->map(fn (AccommodationType $type) => [
+                'id' => (int) $type->id,
+                'name' => (string) $type->name,
+            ])
+            ->values();
     }
 
     /**

@@ -65,8 +65,72 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-bs-target="#offersCatalogMapModal"', false);
         $response->assertSee('data-offers-faq', false);
         $response->assertSee(__('offers.faq_title'), false);
-        $response->assertSee('data-offers-persons-stepper', false);
-        $response->assertSee('name="num_guests"', false);
+    }
+
+    public function test_tour_type_renders_method_water_and_duration_filters(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            methodOptions: collect([['id' => 1, 'name' => 'Fly Fishing']]),
+            waterOptions: collect([['id' => 2, 'name' => 'Lake']]),
+            tourDurationOptions: collect([['value' => 'full_day', 'label' => 'Full Day']]),
+        ));
+
+        $response = $this->get(route('offers.index', ['type' => 'tour']));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_method'), false);
+        $response->assertSee(__('offers.filter_water_type'), false);
+        $response->assertSee(__('offers.filter_duration'), false);
+        $response->assertSee('name="methods"', false);
+        $response->assertSee('name="water"', false);
+        $response->assertSee('name="duration_types"', false);
+        $response->assertDontSee('name="accommodation_type"', false);
+        $response->assertDontSee('name="has_guiding"', false);
+    }
+
+    public function test_camp_subfilter_renders_accommodation_guiding_and_boat_filters(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'camp',
+            accommodationTypeOptions: collect([['id' => 3, 'name' => 'Cabin']]),
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'camp',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_accommodation_type'), false);
+        $response->assertSee(__('offers.filter_guiding'), false);
+        $response->assertSee(__('offers.filter_rental_boat'), false);
+        $response->assertSee('name="accommodation_type"', false);
+        $response->assertSee('name="has_guiding"', false);
+        $response->assertSee('name="has_rental_boat"', false);
+        $response->assertDontSee('name="methods"', false);
+        $response->assertDontSee('name="duration"', false);
+    }
+
+    public function test_trip_subfilter_renders_duration_bucket_filter(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'trip',
+            tripDurationOptions: collect([['value' => '1-3', 'label' => '1–3 days']]),
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'trip',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_duration'), false);
+        $response->assertSee('name="duration"', false);
+        $response->assertDontSee('name="methods"', false);
+        $response->assertDontSee('name="has_guiding"', false);
     }
 
     public function test_map_teaser_result_count_matches_listings_total(): void
@@ -316,6 +380,11 @@ class OffersCatalogTest extends TestCase
         ?int $toursTotal = null,
         ?int $tripsTotal = null,
         ?int $campsTotal = null,
+        $methodOptions = null,
+        $waterOptions = null,
+        $tourDurationOptions = null,
+        $tripDurationOptions = null,
+        $accommodationTypeOptions = null,
     ): OfferCatalogViewModel {
         $cards = $cards ?? collect();
         $suggested = $suggested ?? collect();
@@ -358,6 +427,11 @@ class OffersCatalogTest extends TestCase
             listingsTotal: $listingsTotal,
             speciesOptions: collect(['Pike']),
             countries: collect([['slug' => 'germany', 'name' => 'Germany']]),
+            methodOptions: $methodOptions ?? collect(),
+            waterOptions: $waterOptions ?? collect(),
+            tourDurationOptions: $tourDurationOptions ?? collect(),
+            tripDurationOptions: $tripDurationOptions ?? collect(),
+            accommodationTypeOptions: $accommodationTypeOptions ?? collect(),
             faq: collect([
                 (object) [
                     'question' => __('offers.faq_q1'),
