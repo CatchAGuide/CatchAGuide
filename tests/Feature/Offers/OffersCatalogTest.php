@@ -65,6 +65,11 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-bs-target="#offersCatalogMapModal"', false);
         $response->assertSee('data-offers-faq', false);
         $response->assertSee(__('offers.faq_title'), false);
+        $response->assertSee(__('offers.sort_recommended'), false);
+        $response->assertSee(__('offers.sort_newest'), false);
+        $response->assertSee(__('offers.sort_nearest'), false);
+        $response->assertSee(__('offers.sort_price_asc'), false);
+        $response->assertSee(__('offers.sort_price_desc'), false);
     }
 
     public function test_tour_type_renders_method_water_and_duration_filters(): void

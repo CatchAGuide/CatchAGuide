@@ -9,6 +9,7 @@ use App\Models\AccommodationType;
 use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Method;
+use App\Models\Review;
 use App\Models\Trip;
 use App\Models\Water;
 use App\Presenters\Offers\TourCardPresenter;
@@ -158,33 +159,68 @@ class OfferCatalogPageService
         Builder $campQuery,
         int $perPage,
     ): LengthAwarePaginator {
-        $needsPrice = in_array($filter->sortBy, ['price-asc', 'price-desc'], true);
+        $sortBy = $filter->effectiveSortBy();
+        $needsPrice = in_array($sortBy, ['price-asc', 'price-desc'], true);
+        $needsNearest = $sortBy === 'nearest';
+        $needsRecommended = $sortBy === 'recommended';
+        $origin = $needsNearest ? $filter->nearestOrigin() : null;
+        // No coordinates yet: nearest falls back to recommended until geolocation arrives.
+        if ($needsNearest && $origin === null) {
+            $needsNearest = false;
+            $needsRecommended = true;
+            $sortBy = 'recommended';
+        }
+
         $keys = collect();
 
         if ($filter->showsTours()) {
-            $tours = (clone $tourQuery)->get([
+            $tourColumns = [
                 'guidings.id',
                 'guidings.created_at',
                 'guidings.price',
                 'guidings.prices',
                 'guidings.price_type',
                 'guidings.max_guests',
-            ]);
+                'guidings.user_id',
+            ];
+            if ($needsNearest) {
+                $tourColumns[] = 'guidings.lat';
+                $tourColumns[] = 'guidings.lng';
+            }
+            $tours = (clone $tourQuery)->get($tourColumns);
+            $tourRatings = $needsRecommended
+                ? $this->averageRatingsByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
+                : [];
             $keys = $keys->concat($tours->map(fn (Guiding $guiding) => [
                 'type' => 'tour',
                 'id' => (int) $guiding->id,
                 'created_at' => $guiding->created_at,
                 'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
+                'rating' => $needsRecommended
+                    ? ($tourRatings[(int) $guiding->user_id] ?? null)
+                    : null,
+                'distance' => ($needsNearest && $origin !== null)
+                    ? $this->distanceKm($origin['lat'], $origin['lng'], $guiding->lat, $guiding->lng)
+                    : null,
             ]));
         }
 
         if ($filter->showsTrips()) {
-            $trips = (clone $tripQuery)->get(['id', 'created_at', 'price_per_person']);
+            $tripColumns = ['id', 'created_at', 'price_per_person'];
+            if ($needsNearest) {
+                $tripColumns[] = 'latitude';
+                $tripColumns[] = 'longitude';
+            }
+            $trips = (clone $tripQuery)->get($tripColumns);
             $keys = $keys->concat($trips->map(fn (Trip $trip) => [
                 'type' => 'trip',
                 'id' => (int) $trip->id,
                 'created_at' => $trip->created_at,
                 'price' => $needsPrice ? $trip->price_per_person : null,
+                'rating' => null,
+                'distance' => ($needsNearest && $origin !== null)
+                    ? $this->distanceKm($origin['lat'], $origin['lng'], $trip->latitude, $trip->longitude)
+                    : null,
             ]));
         }
 
@@ -193,18 +229,23 @@ class OfferCatalogPageService
             if ($needsPrice) {
                 $campBuilder->with(['accommodations', 'specialOffers']);
             }
-            $camps = $campBuilder->get($needsPrice
+            $campColumns = $needsPrice
                 ? ['*']
-                : ['id', 'created_at']);
+                : ($needsNearest ? ['id', 'created_at', 'latitude', 'longitude'] : ['id', 'created_at']);
+            $camps = $campBuilder->get($campColumns);
             $keys = $keys->concat($camps->map(fn (Camp $camp) => [
                 'type' => 'camp',
                 'id' => (int) $camp->id,
                 'created_at' => $camp->created_at,
                 'price' => $needsPrice ? $camp->getLowestAccommodationOrOfferPrice() : null,
+                'rating' => null,
+                'distance' => ($needsNearest && $origin !== null)
+                    ? $this->distanceKm($origin['lat'], $origin['lng'], $camp->latitude, $camp->longitude)
+                    : null,
             ]));
         }
 
-        $merged = $this->sortListingItems($keys, $filter);
+        $merged = $this->sortListingItems($keys, $filter, $sortBy);
         $page = LengthAwarePaginator::resolveCurrentPage();
         $total = $merged->count();
         $pageKeys = $merged->slice(($page - 1) * $perPage, $perPage)->values();
@@ -279,16 +320,72 @@ class OfferCatalogPageService
     }
 
     /**
-     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed}>  $items
+     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed, rating?: float|null, distance?: float|null}>  $items
      * @return Collection<int, array{type: string, model: mixed}>
      */
-    private function sortListingItems(Collection $items, OfferListingFilter $filter): Collection
+    private function sortListingItems(Collection $items, OfferListingFilter $filter, ?string $sortBy = null): Collection
     {
-        return match ($filter->sortBy) {
+        $sortBy ??= $filter->effectiveSortBy();
+
+        return match ($sortBy) {
             'price-asc' => $items->sortBy(fn ($item) => $item['price'] ?? PHP_FLOAT_MAX)->values(),
             'price-desc' => $items->sortByDesc(fn ($item) => $item['price'] ?? 0)->values(),
-            default => $items->sortByDesc('created_at')->values(),
+            'nearest' => $items->sortBy(fn ($item) => $item['distance'] ?? PHP_FLOAT_MAX)->values(),
+            'newest' => $items->sortByDesc('created_at')->values(),
+            default => $items->sort(function (array $a, array $b) {
+                $ratingA = $a['rating'] ?? null;
+                $ratingB = $b['rating'] ?? null;
+                if ($ratingA !== null && $ratingB !== null && abs($ratingA - $ratingB) > 0.0001) {
+                    return $ratingB <=> $ratingA;
+                }
+                if ($ratingA !== null && $ratingB === null) {
+                    return -1;
+                }
+                if ($ratingA === null && $ratingB !== null) {
+                    return 1;
+                }
+
+                return ($b['created_at'] ?? null) <=> ($a['created_at'] ?? null);
+            })->values(),
         };
+    }
+
+    /**
+     * @param  array<int, int>  $guideIds
+     * @return array<int, float>
+     */
+    private function averageRatingsByGuideId(array $guideIds): array
+    {
+        if ($guideIds === []) {
+            return [];
+        }
+
+        return Review::query()
+            ->whereIn('guide_id', $guideIds)
+            ->selectRaw('guide_id, AVG(grandtotal_score) as avg_score')
+            ->groupBy('guide_id')
+            ->pluck('avg_score', 'guide_id')
+            ->map(fn ($score) => (float) $score)
+            ->all();
+    }
+
+    private function distanceKm(float $fromLat, float $fromLng, mixed $toLat, mixed $toLng): ?float
+    {
+        if ($toLat === null || $toLng === null || $toLat === '' || $toLng === '') {
+            return null;
+        }
+        if (! is_numeric($toLat) || ! is_numeric($toLng)) {
+            return null;
+        }
+
+        $lat1 = deg2rad($fromLat);
+        $lat2 = deg2rad((float) $toLat);
+        $deltaLat = deg2rad((float) $toLat - $fromLat);
+        $deltaLng = deg2rad((float) $toLng - $fromLng);
+        $a = sin($deltaLat / 2) ** 2
+            + cos($lat1) * cos($lat2) * sin($deltaLng / 2) ** 2;
+
+        return 6371 * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 
     private function queryTours(OfferListingFilter $filter, Request $request): Builder

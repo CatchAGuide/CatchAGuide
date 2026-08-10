@@ -218,19 +218,29 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-start sfm-bar__dropdown">
                     <li>
-                        <a class="dropdown-item offers-mobile-sort-option {{ $currentSort === '' ? 'active' : '' }}"
+                        <a class="dropdown-item offers-mobile-sort-option {{ ($currentSort === '' || $currentSort === 'recommended') ? 'active' : '' }}"
                            href="javascript:void(0)"
-                           data-sort="">{{ __('message.newest') }}</a>
+                           data-sort="recommended">{{ __('offers.sort_recommended') }}</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item offers-mobile-sort-option {{ $currentSort === 'newest' ? 'active' : '' }}"
+                           href="javascript:void(0)"
+                           data-sort="newest">{{ __('offers.sort_newest') }}</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item offers-mobile-sort-option {{ $currentSort === 'nearest' ? 'active' : '' }}"
+                           href="javascript:void(0)"
+                           data-sort="nearest">{{ __('offers.sort_nearest') }}</a>
                     </li>
                     <li>
                         <a class="dropdown-item offers-mobile-sort-option {{ $currentSort === 'price-asc' ? 'active' : '' }}"
                            href="javascript:void(0)"
-                           data-sort="price-asc">@lang('message.lowprice')</a>
+                           data-sort="price-asc">{{ __('offers.sort_price_asc') }}</a>
                     </li>
                     <li>
                         <a class="dropdown-item offers-mobile-sort-option {{ $currentSort === 'price-desc' ? 'active' : '' }}"
                            href="javascript:void(0)"
-                           data-sort="price-desc">{{ __('trips.catalog_sort_price_desc') }}</a>
+                           data-sort="price-desc">{{ __('offers.sort_price_desc') }}</a>
                     </li>
                 </ul>
             </div>
@@ -276,20 +286,71 @@
     @once
         <script>
         document.addEventListener('DOMContentLoaded', function () {
+            function navigateWithSort(sortValue, coords) {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (sortValue) {
+                    urlParams.set('sortby', sortValue);
+                } else {
+                    urlParams.delete('sortby');
+                }
+                if (coords) {
+                    urlParams.set('user_lat', String(coords.lat));
+                    urlParams.set('user_lng', String(coords.lng));
+                }
+                if (sortValue !== 'nearest') {
+                    urlParams.delete('user_lat');
+                    urlParams.delete('user_lng');
+                }
+                const query = urlParams.toString();
+                window.location.href = query
+                    ? `${window.location.pathname}?${query}`
+                    : window.location.pathname;
+            }
+
+            function applySort(sortValue) {
+                if (sortValue !== 'nearest') {
+                    navigateWithSort(sortValue);
+                    return;
+                }
+
+                const existingLat = new URLSearchParams(window.location.search).get('user_lat')
+                    || new URLSearchParams(window.location.search).get('placeLat');
+                const existingLng = new URLSearchParams(window.location.search).get('user_lng')
+                    || new URLSearchParams(window.location.search).get('placeLng');
+                if (existingLat && existingLng) {
+                    navigateWithSort(sortValue, { lat: existingLat, lng: existingLng });
+                    return;
+                }
+
+                if (!navigator.geolocation) {
+                    navigateWithSort(sortValue);
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        navigateWithSort(sortValue, {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        });
+                    },
+                    function () {
+                        navigateWithSort(sortValue);
+                    },
+                    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+                );
+            }
+
             document.querySelectorAll('.offers-mobile-sort-option').forEach(function (option) {
                 option.addEventListener('click', function (event) {
                     event.preventDefault();
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const sortValue = this.dataset.sort;
-                    if (sortValue) {
-                        urlParams.set('sortby', sortValue);
-                    } else {
-                        urlParams.delete('sortby');
-                    }
-                    const query = urlParams.toString();
-                    window.location.href = query
-                        ? `${window.location.pathname}?${query}`
-                        : window.location.pathname;
+                    applySort(this.dataset.sort || 'recommended');
+                });
+            });
+
+            document.querySelectorAll('[data-offers-sort-select]').forEach(function (select) {
+                select.addEventListener('change', function () {
+                    applySort(this.value || 'recommended');
                 });
             });
         });
@@ -375,10 +436,8 @@
 
                 <div class="mb-3">
                     <label class="form-label">{{ __('offers.filter_sort') }}</label>
-                    <select name="sortby" class="form-select">
-                        <option value="">{{ __('message.newest') }}</option>
-                        <option value="price-asc" @selected(($filter->sortBy ?? '') === 'price-asc')>@lang('message.lowprice')</option>
-                        <option value="price-desc" @selected(($filter->sortBy ?? '') === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
+                    <select name="sortby" class="form-select" data-offers-sort-select>
+                        @include('components.offers.partials.sort-options', ['filter' => $filter, 'currentSort' => $currentSort])
                     </select>
                 </div>
 

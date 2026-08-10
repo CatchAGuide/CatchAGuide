@@ -223,4 +223,31 @@ class OfferListingFilterTest extends TestCase
         ]);
         $this->assertNull($ignored->tripDuration);
     }
+
+    public function test_parses_sort_options_and_user_location(): void
+    {
+        $nearest = OfferListingFilter::fromRequest([
+            'sortby' => 'nearest',
+            'user_lat' => '52.52',
+            'user_lng' => '13.40',
+        ]);
+        $this->assertSame('nearest', $nearest->sortBy);
+        $this->assertSame('nearest', $nearest->effectiveSortBy());
+        $this->assertSame(['lat' => 52.52, 'lng' => 13.40], $nearest->nearestOrigin());
+
+        $recommended = OfferListingFilter::fromRequest([]);
+        $this->assertNull($recommended->sortBy);
+        $this->assertSame('recommended', $recommended->effectiveSortBy());
+
+        $invalid = OfferListingFilter::fromRequest(['sortby' => 'popularity']);
+        $this->assertNull($invalid->sortBy);
+        $this->assertSame('recommended', $invalid->effectiveSortBy());
+
+        $fromPlace = OfferListingFilter::fromRequest([
+            'sortby' => 'nearest',
+            'placeLat' => '40.4',
+            'placeLng' => '-3.7',
+        ]);
+        $this->assertSame(['lat' => 40.4, 'lng' => -3.7], $fromPlace->nearestOrigin());
+    }
 }

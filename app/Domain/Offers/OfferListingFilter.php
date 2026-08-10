@@ -15,6 +15,14 @@ final class OfferListingFilter
 
     public const TRIP_DURATION_BUCKETS = ['1-3', '4-7', '8+'];
 
+    public const SORT_OPTIONS = [
+        'recommended',
+        'newest',
+        'nearest',
+        'price-asc',
+        'price-desc',
+    ];
+
     public const MAX_GUESTS = 20;
 
     /**
@@ -60,6 +68,8 @@ final class OfferListingFilter
         public readonly ?int $accommodationTypeId = null,
         public readonly ?bool $hasGuiding = null,
         public readonly ?bool $hasRentalBoat = null,
+        public readonly ?float $userLat = null,
+        public readonly ?float $userLng = null,
     ) {}
 
     public static function fromRequest(array $input): self
@@ -82,12 +92,14 @@ final class OfferListingFilter
         }
 
         $sortBy = self::nullableString($input['sortby'] ?? null);
-        if ($sortBy !== null && ! in_array($sortBy, ['newest', 'price-asc', 'price-desc'], true)) {
+        if ($sortBy !== null && ! in_array($sortBy, self::SORT_OPTIONS, true)) {
             $sortBy = null;
         }
 
         $lat = self::nullableFloat($input['placeLat'] ?? $input['place_lat'] ?? null);
         $lng = self::nullableFloat($input['placeLng'] ?? $input['place_lng'] ?? null);
+        $userLat = self::nullableFloat($input['user_lat'] ?? $input['userLat'] ?? null);
+        $userLng = self::nullableFloat($input['user_lng'] ?? $input['userLng'] ?? null);
 
         $methodId = null;
         $waterId = null;
@@ -140,12 +152,37 @@ final class OfferListingFilter
             accommodationTypeId: $accommodationTypeId,
             hasGuiding: $hasGuiding,
             hasRentalBoat: $hasRentalBoat,
+            userLat: $userLat,
+            userLng: $userLng,
         );
     }
 
     public function isVacation(): bool
     {
         return $this->type === 'vacation';
+    }
+
+    public function effectiveSortBy(): string
+    {
+        return $this->sortBy ?? 'recommended';
+    }
+
+    /**
+     * Coordinates used for nearest sort: explicit user location, else place search.
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function nearestOrigin(): ?array
+    {
+        if ($this->userLat !== null && $this->userLng !== null) {
+            return ['lat' => $this->userLat, 'lng' => $this->userLng];
+        }
+
+        if ($this->placeLat !== null && $this->placeLng !== null) {
+            return ['lat' => $this->placeLat, 'lng' => $this->placeLng];
+        }
+
+        return null;
     }
 
     public function showsTours(): bool

@@ -114,7 +114,7 @@
                         :vacation-links="$vm->vacationToggleUrls()"
                         :action="$vm->filterAction()"
                     />
-                    <form method="get" action="{{ $vm->filterAction() }}" class="offers-catalog__sort">
+                    <form method="get" action="{{ $vm->filterAction() }}" class="offers-catalog__sort" data-offers-sort-form>
                         @foreach($sortQuery as $key => $value)
                             @if(is_array($value))
                                 @foreach($value as $v)
@@ -125,10 +125,8 @@
                             @endif
                         @endforeach
                         <label for="offers-sortby" class="offers-catalog__sort-label">{{ __('offers.filter_sort') }}</label>
-                        <select id="offers-sortby" name="sortby" class="form-select form-select-sm" onchange="this.form.submit()">
-                            <option value="" @selected($currentSort === '' || $currentSort === 'newest')>{{ __('message.newest') }}</option>
-                            <option value="price-asc" @selected($currentSort === 'price-asc')>@lang('message.lowprice')</option>
-                            <option value="price-desc" @selected($currentSort === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
+                        <select id="offers-sortby" name="sortby" class="form-select form-select-sm" data-offers-sort-select>
+                            @include('components.offers.partials.sort-options', ['filter' => $vm->filter, 'currentSort' => $currentSort])
                         </select>
                     </form>
                 </div>

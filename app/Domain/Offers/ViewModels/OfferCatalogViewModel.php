@@ -90,6 +90,8 @@ final class OfferCatalogViewModel
             'region' => $this->filter->region,
             'num_guests' => $this->filter->numGuests,
             'country_short' => $this->filter->countryShort,
+            'user_lat' => $this->filter->userLat,
+            'user_lng' => $this->filter->userLng,
             'bounds_ne_lat' => $this->filter->boundsNeLat,
             'bounds_ne_lng' => $this->filter->boundsNeLng,
             'bounds_sw_lat' => $this->filter->boundsSwLat,
