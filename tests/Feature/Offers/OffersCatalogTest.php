@@ -445,6 +445,11 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.cta_tour'), false);
         $response->assertSee(__('vacations.see_more'), false);
         $response->assertSee(__('vacations.verified_short'), false);
+        $response->assertSee('offers-gallery-modal', false);
+        $response->assertSee('offers-gallery-modal__dock', false);
+        $response->assertSee('offers-gallery-modal__title', false);
+        $response->assertSee('data-offers-gallery-stage', false);
+        $response->assertSee('data-offers-gallery-modal-image', false);
     }
 
     /**

@@ -244,19 +244,134 @@
     </aside>
 
     @if($galleryCount > 0)
-        <div class="vacation-gallery-modal" data-vacation-modal="{{ $galleryId }}">
-            <div class="vacation-gallery-modal__content">
-                <button type="button" class="vacation-gallery-modal__close" aria-label="{{ __('vacations.gallery_close') }}">&times;</button>
-                @if($galleryCount > 1)
-                    <button type="button" class="vacation-gallery-modal__prev" aria-label="{{ __('vacations.gallery_prev') }}">&#10094;</button>
-                    <button type="button" class="vacation-gallery-modal__next" aria-label="{{ __('vacations.gallery_next') }}">&#10095;</button>
-                @endif
-                <img class="vacation-gallery-modal__image" src="" alt="{{ $card['title'] }}">
-                @if($galleryCount > 1)
-                    <div class="vacation-gallery-modal__counter">
-                        <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
+        <div
+            class="vacation-gallery-modal offers-gallery-modal offers-gallery-modal--{{ $type }}"
+            data-vacation-modal="{{ $galleryId }}"
+            role="dialog"
+            aria-modal="true"
+            aria-label="{{ $card['title'] }}"
+        >
+            <div class="offers-gallery-modal__shell">
+                <div class="offers-gallery-modal__top">
+                    <div class="offers-gallery-modal__top-left">
+                        <span class="offers-gallery-modal__badge">{{ $badge }}</span>
+                        @if($galleryCount > 1)
+                            <span class="offers-gallery-modal__counter vacation-gallery-modal__counter">
+                                <span class="vacation-gallery-modal__current">1</span>
+                                <span aria-hidden="true">/</span>
+                                <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
+                            </span>
+                        @endif
                     </div>
-                @endif
+                    <div class="offers-gallery-modal__top-right">
+                        @if($galleryCount > 1)
+                            <div class="offers-gallery-modal__top-nav">
+                                <button
+                                    type="button"
+                                    class="offers-gallery-modal__chip-nav"
+                                    data-offers-gallery-modal-prev
+                                    aria-label="{{ __('vacations.gallery_prev') }}"
+                                >&#10094;</button>
+                                <button
+                                    type="button"
+                                    class="offers-gallery-modal__chip-nav"
+                                    data-offers-gallery-modal-next
+                                    aria-label="{{ __('vacations.gallery_next') }}"
+                                >&#10095;</button>
+                            </div>
+                        @endif
+                        <button
+                            type="button"
+                            class="offers-gallery-modal__close"
+                            data-offers-gallery-modal-close
+                            aria-label="{{ __('vacations.gallery_close') }}"
+                        >&times;</button>
+                    </div>
+                </div>
+
+                <div class="offers-gallery-modal__stage" data-offers-gallery-stage>
+                    <div class="offers-gallery-modal__frame">
+                        <div
+                            class="offers-gallery-modal__loader"
+                            data-offers-gallery-loader
+                            hidden
+                            aria-hidden="true"
+                        >
+                            <span class="offers-gallery-modal__spinner" aria-hidden="true"></span>
+                            <span class="offers-gallery-modal__loader-text">{{ __('vacations.loading') }}</span>
+                        </div>
+                        <img
+                            class="offers-gallery-modal__image is-ready"
+                            data-offers-gallery-modal-image
+                            src="{{ $galleryFull[0] }}"
+                            alt="{{ $card['title'] }}"
+                            draggable="false"
+                            decoding="async"
+                        >
+                        @if($galleryCount > 1)
+                            <button
+                                type="button"
+                                class="offers-gallery-modal__nav offers-gallery-modal__nav--prev"
+                                data-offers-gallery-modal-prev
+                                aria-label="{{ __('vacations.gallery_prev') }}"
+                            >&#10094;</button>
+                            <button
+                                type="button"
+                                class="offers-gallery-modal__nav offers-gallery-modal__nav--next"
+                                data-offers-gallery-modal-next
+                                aria-label="{{ __('vacations.gallery_next') }}"
+                            >&#10095;</button>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="offers-gallery-modal__dock">
+                    <div class="offers-gallery-modal__info">
+                        <h3 class="offers-gallery-modal__title">{{ $card['title'] }}</h3>
+                        <div class="offers-gallery-modal__meta">
+                            @if(!empty($card['location']))
+                                <span class="offers-gallery-modal__location">
+                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                    {{ $card['location'] }}
+                                </span>
+                            @endif
+                            @if($rating)
+                                <span
+                                    class="offers-gallery-modal__score"
+                                    title="{{ trans_choice('offers.reviews_count', $reviewCount, ['count' => $reviewCount]) }}"
+                                >
+                                    <span class="offers-gallery-modal__score-value">{{ number_format($rating, 1) }}</span>
+                                    @if($reviewCount > 0)
+                                        <span class="offers-gallery-modal__score-meta">({{ $reviewCount }})</span>
+                                    @endif
+                                </span>
+                            @endif
+                        </div>
+                        @if(!empty($specs))
+                            <ul class="offers-gallery-modal__specs">
+                                @foreach(array_slice($specs, 0, 3) as $spec)
+                                    <li>{{ $spec['label'] }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    <div class="offers-gallery-modal__actions">
+                        @if($priceDisplay)
+                            <div class="offers-gallery-modal__price">
+                                @if($pricePrefix)
+                                    <span class="offers-gallery-modal__price-prefix">{{ $pricePrefix }}</span>
+                                @endif
+                                <span class="offers-gallery-modal__price-amount">{{ $priceDisplay }}</span>
+                                @if($priceSuffix)
+                                    <span class="offers-gallery-modal__price-suffix">{{ $priceSuffix }}</span>
+                                @endif
+                            </div>
+                        @endif
+                        <a href="{{ $card['url'] }}" class="offers-gallery-modal__cta">
+                            {{ $cta }}
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     @endif

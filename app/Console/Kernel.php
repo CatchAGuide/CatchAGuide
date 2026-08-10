@@ -33,10 +33,10 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
                 
         // Warm file existence cache every 2 hours
-        $schedule->command('cache:warm-files')
-                ->everyTwoHours()
-                ->withoutOverlapping()
-                ->runInBackground();
+        // $schedule->command('cache:warm-files')
+        //         ->everyTwoHours()
+        //         ->withoutOverlapping()
+        //         ->runInBackground();
                 
         // Image cleanup: report + fix DB refs to missing files (no orphan deletion by default)
         // $schedule->command('images:cleanup --report-only')
