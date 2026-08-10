@@ -75,6 +75,7 @@ class TourCardPresenter
         $card['water_label'] = $waters !== [] ? implode(', ', $waters) : null;
         $card['boat_label'] = $this->boatLabel($guiding);
         $card['whats_included_title'] = __('guidings.Whats_Included');
+        $card['verified'] = false;
 
         return $card;
     }

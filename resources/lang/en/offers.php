@@ -54,6 +54,8 @@ return [
     'suggested_near' => 'Additional offers close to :place',
     'suggested_count' => ':count nearby offers',
     'see_details' => 'Details',
+    'included_heading' => 'Included',
+    'reviews_count' => ':count review|:count reviews',
 
     'badge_tour' => 'Fishing tour',
     'badge_trip' => 'Fishing trip',

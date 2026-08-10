@@ -363,6 +363,90 @@ class OffersCatalogTest extends TestCase
         $this->assertStringContainsString('vacation=camp', $vacationUrls['camp']);
     }
 
+    public function test_type_toggle_urls_use_custom_catalog_base_url(): void
+    {
+        $vm = $this->viewModel(
+            type: 'all',
+            place: 'Spain',
+            country: 'spanien',
+        );
+        $vm = new OfferCatalogViewModel(
+            filter: $vm->filter,
+            listings: $vm->listings,
+            cards: $vm->cards,
+            toursTotal: $vm->toursTotal,
+            tripsTotal: $vm->tripsTotal,
+            campsTotal: $vm->campsTotal,
+            listingsTotal: $vm->listingsTotal,
+            speciesOptions: $vm->speciesOptions,
+            countries: $vm->countries,
+            methodOptions: $vm->methodOptions,
+            waterOptions: $vm->waterOptions,
+            tourDurationOptions: $vm->tourDurationOptions,
+            tripDurationOptions: $vm->tripDurationOptions,
+            accommodationTypeOptions: $vm->accommodationTypeOptions,
+            faq: $vm->faq,
+            mapMarkers: $vm->mapMarkers,
+            suggestedCards: $vm->suggestedCards,
+            catalogUrl: 'http://localhost/destination/spanien',
+            lockDestinationScope: true,
+        );
+
+        $urls = $vm->typeToggleUrls();
+        $this->assertStringStartsWith('http://localhost/destination/spanien', $urls['tour']);
+        $this->assertStringContainsString('type=tour', $urls['tour']);
+        $this->assertSame('http://localhost/destination/spanien', $vm->filterAction());
+        $this->assertArrayHasKey('country', $vm->lockedScopeParams());
+    }
+
+    public function test_offers_cards_render_uniform_specs_tags_and_availability(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([
+                array_merge($this->card('tour', 'Tour Card'), [
+                    'whats_included_title' => __('offers.included_heading'),
+                    'listing_cta' => __('offers.cta_tour'),
+                ]),
+                array_merge($this->card('trip', 'Trip Card'), [
+                    'water_label' => null,
+                    'boat_label' => null,
+                    'methods_label' => 'Spinning',
+                    'rating' => null,
+                    'review_count' => 0,
+                    'verified' => true,
+                    'listing_cta' => __('vacations.see_more'),
+                ]),
+                array_merge($this->card('camp', 'Camp Card'), [
+                    'water_label' => null,
+                    'boat_label' => null,
+                    'rating' => null,
+                    'review_count' => 0,
+                    'verified' => true,
+                    'listing_availability' => [
+                        ['label' => 'Guiding', 'available' => true],
+                        ['label' => 'Boat', 'available' => false],
+                    ],
+                    'listing_cta' => __('vacations.see_more'),
+                ]),
+            ]),
+        ));
+
+        $response = $this->get(route('offers.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-card-specs', false);
+        $response->assertSee('clock-new.svg', false);
+        $response->assertSee('user-new.svg', false);
+        $response->assertSee('data-offers-card-tags', false);
+        $response->assertSee('Pike', false);
+        $response->assertSee('data-offers-card-availability', false);
+        $response->assertSee(__('offers.included_heading'), false);
+        $response->assertSee(__('offers.cta_tour'), false);
+        $response->assertSee(__('vacations.see_more'), false);
+        $response->assertSee(__('vacations.verified_short'), false);
+    }
+
     /**
      * @param  callable(): OfferCatalogViewModel  $factory
      */

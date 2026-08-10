@@ -2,13 +2,17 @@
 
 namespace App\Services\Offers;
 
+use App\Domain\Offers\DestinationOfferScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Domain\Vacation\CountrySlug;
 use App\Models\AccommodationType;
 use App\Models\Camp;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Guiding;
 use App\Models\Method;
+use App\Models\Region;
 use App\Models\Review;
 use App\Models\Trip;
 use App\Models\Water;
@@ -43,7 +47,42 @@ class OfferCatalogPageService
 
     public function build(Request $request): OfferCatalogViewModel
     {
-        $filter = OfferListingFilter::fromRequest($request->all());
+        return $this->buildFromInput($request->all(), $request);
+    }
+
+    public function buildForDestination(
+        Request $request,
+        Country $country,
+        ?Region $region = null,
+        ?City $city = null,
+    ): OfferCatalogViewModel {
+        $input = DestinationOfferScope::mergeIntoRequest(
+            $request->all(),
+            $country,
+            $region,
+            $city,
+        );
+
+        return $this->buildFromInput(
+            $input,
+            $request,
+            catalogUrl: $request->url(),
+            lockDestinationScope: true,
+            includeFaq: false,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    private function buildFromInput(
+        array $input,
+        Request $request,
+        ?string $catalogUrl = null,
+        bool $lockDestinationScope = false,
+        bool $includeFaq = true,
+    ): OfferCatalogViewModel {
+        $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
         $perPage = (int) config('offers.per_page', 9);
         $hasGeo = $filter->placeLat !== null && $filter->placeLng !== null;
@@ -108,6 +147,13 @@ class OfferCatalogPageService
         $campsTotal += $suggestedItems->where('type', 'camp')->count();
         $listingsTotal = $this->resolveListingsTotal($filter, $toursTotal, $tripsTotal, $campsTotal);
 
+        $countries = $lockDestinationScope
+            ? collect()
+            : $this->destinations->countriesForHubGrid()->map(fn ($row) => [
+                'slug' => $row['slug'],
+                'name' => $row['name'],
+            ])->values();
+
         return new OfferCatalogViewModel(
             filter: $filter,
             listings: $listings,
@@ -117,18 +163,17 @@ class OfferCatalogPageService
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($filter->country)),
-            countries: $this->destinations->countriesForHubGrid()->map(fn ($row) => [
-                'slug' => $row['slug'],
-                'name' => $row['name'],
-            ])->values(),
+            countries: $countries,
             methodOptions: $this->methodOptions(),
             waterOptions: $this->waterOptions(),
             tourDurationOptions: $this->tourDurationOptions(),
             tripDurationOptions: $this->tripDurationOptions(),
             accommodationTypeOptions: $this->accommodationTypeOptions(),
-            faq: $this->resolveFaq(),
+            faq: $includeFaq ? $this->resolveFaq() : collect(),
             mapMarkers: $this->buildMapMarkers($filter, $tourQuery, $tripQuery, $campQuery, $suggestedItems),
             suggestedCards: $suggestedCards,
+            catalogUrl: $catalogUrl,
+            lockDestinationScope: $lockDestinationScope,
         );
     }
 

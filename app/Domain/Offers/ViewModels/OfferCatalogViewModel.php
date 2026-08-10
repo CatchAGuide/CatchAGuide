@@ -27,6 +27,8 @@ final class OfferCatalogViewModel
         public readonly Collection $faq,
         public readonly array $mapMarkers,
         public readonly Collection $suggestedCards,
+        public readonly ?string $catalogUrl = null,
+        public readonly bool $lockDestinationScope = false,
     ) {}
 
     public function pageTitle(): string
@@ -64,12 +66,41 @@ final class OfferCatalogViewModel
 
     public function filterAction(): string
     {
-        return route('offers.index');
+        return $this->catalogUrl ?: route('offers.index');
     }
 
     public function vacationsTotal(): int
     {
         return $this->tripsTotal + $this->campsTotal;
+    }
+
+    /**
+     * Geo / destination params that stay locked on destination-scoped catalogs.
+     *
+     * @return array<string, mixed>
+     */
+    public function lockedScopeParams(): array
+    {
+        if (! $this->lockDestinationScope) {
+            return [];
+        }
+
+        return array_filter([
+            'country' => $this->filter->country,
+            'country_short' => $this->filter->countryShort,
+            'place' => $this->filter->place,
+            'placeLat' => $this->filter->placeLat,
+            'placeLng' => $this->filter->placeLng,
+            'city' => $this->filter->city,
+            'region' => $this->filter->region,
+            'bounds_ne_lat' => $this->filter->boundsNeLat,
+            'bounds_ne_lng' => $this->filter->boundsNeLng,
+            'bounds_sw_lat' => $this->filter->boundsSwLat,
+            'bounds_sw_lng' => $this->filter->boundsSwLng,
+            'place_types' => $this->filter->placeTypes !== []
+                ? json_encode($this->filter->placeTypes)
+                : null,
+        ], fn ($v) => $v !== null && $v !== '');
     }
 
     /**
@@ -116,9 +147,7 @@ final class OfferCatalogViewModel
                 $params['type'] = $type;
             }
 
-            return $params === []
-                ? route('offers.index')
-                : route('offers.index', $params);
+            return $this->catalogUrlWithQuery($params);
         };
 
         return [
@@ -144,7 +173,7 @@ final class OfferCatalogViewModel
                 unset($params['vacation']);
             }
 
-            return route('offers.index', $params);
+            return $this->catalogUrlWithQuery($params);
         };
 
         return [
@@ -157,5 +186,21 @@ final class OfferCatalogViewModel
     public function resultsLabel(): string
     {
         return __('offers.results_count', ['count' => $this->listingsTotal]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function catalogUrlWithQuery(array $params): string
+    {
+        $base = $this->filterAction();
+
+        if ($params === []) {
+            return $base;
+        }
+
+        $separator = str_contains($base, '?') ? '&' : '?';
+
+        return $base.$separator.http_build_query($params);
     }
 }

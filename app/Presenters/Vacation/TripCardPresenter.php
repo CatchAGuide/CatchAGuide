@@ -96,9 +96,48 @@ class TripCardPresenter
             ? $sym . number_format((float) $trip->price_per_person, 0, ',', '.')
             : null;
         $card['listing_price_suffix'] = __('vacations.per_person_short');
-        $card['listing_cta'] = __('vacations.inquire_trip');
+        $card['listing_cta'] = __('vacations.see_more');
+        $card['duration_label'] = $card['duration_pill'];
+        $card['guests_label'] = $this->guestsLabel($trip);
+        $card['methods_label'] = $this->methodsLabel($trip);
+        $card['verified'] = true;
+        $card['whats_included_title'] = __('offers.included_heading');
+
+        $trust = $card['trust'] ?? null;
+        if (is_array($trust)) {
+            $card['rating'] = isset($trust['rating']) ? (float) $trust['rating'] : null;
+            $card['review_count'] = (int) ($trust['count'] ?? 0);
+        }
 
         return $card;
+    }
+
+    private function guestsLabel(Trip $trip): ?string
+    {
+        $min = $trip->group_size_min ? (int) $trip->group_size_min : null;
+        $max = $trip->group_size_max ? (int) $trip->group_size_max : null;
+
+        if ($min && $max) {
+            return __('vacations.trip_meta_group', ['min' => $min, 'max' => $max]);
+        }
+
+        if ($max) {
+            return __('vacations.trip_meta_group_max', ['max' => $max]);
+        }
+
+        return null;
+    }
+
+    private function methodsLabel(Trip $trip): ?string
+    {
+        $methods = collect($trip->getFishingMethodNames())
+            ->pluck('name')
+            ->filter()
+            ->take(2)
+            ->values()
+            ->all();
+
+        return $methods !== [] ? implode(', ', $methods) : null;
     }
 
     /**

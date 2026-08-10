@@ -19,6 +19,7 @@
     'vacationLinks' => null,
     'renderSection' => 'all',
     'mapModalId' => 'offersCatalogMapModal',
+    'lockedParams' => [],
 ])
 
 @php
@@ -29,7 +30,9 @@
     $total = ($toursTotal ?? 0) + ($tripsTotal ?? 0) + ($campsTotal ?? 0);
     $vacationsTotal = ($tripsTotal ?? 0) + ($campsTotal ?? 0);
     $facetKeys = OfferListingFilter::PRODUCT_FACET_KEYS;
-    $managedKeys = array_merge(['species', 'country', 'sortby', 'type', 'vacation', 'num_guests'], $facetKeys);
+    $lockedParams = is_array($lockedParams ?? null) ? $lockedParams : [];
+    $lockedKeys = array_keys($lockedParams);
+    $managedKeys = array_merge(['species', 'country', 'sortby', 'type', 'vacation', 'num_guests'], $facetKeys, $lockedKeys);
     $query = request()->except(['page', 'type', 'vacation']);
     $speciesOptions = $speciesOptions instanceof Collection ? $speciesOptions : collect($speciesOptions ?? []);
     $countries = $countries instanceof Collection ? $countries : collect($countries ?? []);
@@ -125,6 +128,16 @@
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
             @endforeach
         @elseif(! in_array($key, $managedKeys, true))
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endif
+    @endforeach
+
+    @foreach($lockedParams as $key => $value)
+        @if(is_array($value))
+            @foreach($value as $v)
+                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+            @endforeach
+        @else
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
     @endforeach
@@ -372,6 +385,16 @@
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
                         @endforeach
                     @elseif(! in_array($key, $managedKeys, true))
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+
+                @foreach($lockedParams as $key => $value)
+                    @if(is_array($value))
+                        @foreach($value as $v)
+                            <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                        @endforeach
+                    @else
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                 @endforeach

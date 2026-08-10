@@ -19,23 +19,52 @@
 
     $included = array_slice($card['listing_included'] ?? ($card['facilities'] ?? []), 0, 3);
     $includedExtra = (int) ($card['listing_included_extra'] ?? $card['facilities_extra'] ?? 0);
+    $includedTitle = $card['whats_included_title'] ?? __('offers.included_heading');
 
-    $metaItems = array_values(array_filter([
-        $card['duration_label'] ?? $card['duration_pill'] ?? null,
-        $card['guests_label'] ?? null,
-        $card['boat_label'] ?? null,
-        $card['water_label'] ?? null,
+    $duration = $card['duration_label'] ?? $card['duration_pill'] ?? null;
+    $guests = $card['guests_label'] ?? null;
+    $water = $card['water_label'] ?? null;
+    $boat = $card['boat_label'] ?? null;
+    $methods = $card['methods_label'] ?? null;
+    $availability = $card['listing_availability'] ?? [];
+
+    $specs = array_values(array_filter([
+        $duration ? [
+            'key' => 'duration',
+            'icon' => asset('assets/images/icons/clock-new.svg'),
+            'label' => $duration,
+        ] : null,
+        $guests ? [
+            'key' => 'guests',
+            'icon' => asset('assets/images/icons/user-new.svg'),
+            'label' => $guests,
+        ] : null,
+        $water ? [
+            'key' => 'water',
+            'icon' => asset('assets/images/icons/pelagic.png'),
+            'label' => $water,
+        ] : null,
+        $boat ? [
+            'key' => 'boat',
+            'icon' => asset('assets/images/icons/fishing-tool-new.svg'),
+            'label' => $boat,
+        ] : null,
+        (! $boat && $methods) ? [
+            'key' => 'methods',
+            'icon' => asset('assets/images/icons/fishing-tool-new.svg'),
+            'label' => $methods,
+        ] : null,
     ]));
 
     $badge = $card['badge'] ?? __('offers.badge_'.$type);
+    $imageBadge = $card['image_badge'] ?? null;
     $cta = $card['listing_cta'] ?? $card['cta'] ?? __('offers.see_details');
     $pricePrefix = $card['listing_price_prefix'] ?? __('vacations.starting_from_label');
     $priceDisplay = $card['listing_price_display'] ?? null;
     $priceSuffix = $card['listing_price_suffix'] ?? '';
-    $verified = $type !== 'tour' || ! empty($card['verified']);
-    if ($type === 'tour') {
-        $verified = false;
-    }
+    $rating = isset($card['rating']) ? (float) $card['rating'] : null;
+    $reviewCount = (int) ($card['review_count'] ?? 0);
+    $verified = ! empty($card['verified']) || in_array($type, ['trip', 'camp'], true);
 @endphp
 
 <article
@@ -59,6 +88,18 @@
                     loading="lazy"
                 >
                 @if($galleryCount > 1)
+                    <button
+                        type="button"
+                        class="offers-card__nav offers-card__nav--prev"
+                        data-offers-gallery-prev
+                        aria-label="{{ __('vacations.gallery_prev') }}"
+                    >&#10094;</button>
+                    <button
+                        type="button"
+                        class="offers-card__nav offers-card__nav--next"
+                        data-offers-gallery-next
+                        aria-label="{{ __('vacations.gallery_next') }}"
+                    >&#10095;</button>
                     <span class="offers-card__counter" data-vacation-image-counter>1/{{ $galleryCount }}</span>
                 @endif
             @else
@@ -66,32 +107,48 @@
             @endif
 
             <span class="offers-card__badge offers-card__badge--{{ $type }}">{{ $badge }}</span>
+
+            @if($imageBadge === 'top')
+                <span class="offers-card__ribbon">
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                    {{ __('vacations.top_rated_badge') }}
+                </span>
+            @elseif($imageBadge === 'limited')
+                <span class="offers-card__ribbon offers-card__ribbon--alt">
+                    <i class="fas fa-bolt" aria-hidden="true"></i>
+                    {{ __('vacations.limited_avail_badge') }}
+                </span>
+            @endif
         </div>
     </div>
 
-    <div class="offers-card__body">
-        <div class="offers-card__top">
-            <div class="offers-card__headline">
+    <div class="offers-card__main">
+        <div class="offers-card__headline">
+            <div class="offers-card__headline-row">
                 <h3 class="offers-card__title">
-                    <a href="{{ $card['url'] }}">{{ Str::limit($card['title'], 72) }}</a>
+                    <a href="{{ $card['url'] }}" title="{{ $card['title'] }}">{{ $card['title'] }}</a>
                 </h3>
+                @if($rating)
+                    <div
+                        class="offers-card__score"
+                        title="{{ trans_choice('offers.reviews_count', $reviewCount, ['count' => $reviewCount]) }}"
+                        aria-label="{{ number_format($rating, 1) }}{{ $reviewCount > 0 ? ', '.trans_choice('offers.reviews_count', $reviewCount, ['count' => $reviewCount]) : '' }}"
+                    >
+                        <span class="offers-card__score-value">{{ number_format($rating, 1) }}</span>
+                        @if($reviewCount > 0)
+                            <span class="offers-card__score-meta">({{ $reviewCount }})</span>
+                        @endif
+                    </div>
+                @endif
+            </div>
+            <div class="offers-card__meta-row">
                 @if(!empty($card['location']))
                     <p class="offers-card__location">
                         <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                         <span>{{ $card['location'] }}</span>
                     </p>
                 @endif
-            </div>
-
-            <div class="offers-card__status">
-                @if(!empty($card['rating']))
-                    <div class="offers-card__rating">
-                        <span class="offers-card__rating-score">{{ number_format((float) $card['rating'], 1) }}</span>
-                        @if(!empty($card['review_count']))
-                            <span class="offers-card__rating-count">({{ (int) $card['review_count'] }})</span>
-                        @endif
-                    </div>
-                @elseif($verified)
+                @if($verified)
                     <span class="offers-card__verified">
                         <i class="fas fa-check-circle" aria-hidden="true"></i>
                         {{ __('vacations.verified_short') }}
@@ -100,65 +157,106 @@
             </div>
         </div>
 
-        @if($type === 'tour' && !empty($metaItems))
-            <ul class="offers-card__meta">
-                @foreach($metaItems as $item)
-                    <li>{{ $item }}</li>
+        @if(!empty($specs))
+            <ul class="offers-card__specs" data-offers-card-specs>
+                @foreach($specs as $spec)
+                    <li class="offers-card__spec offers-card__spec--{{ $spec['key'] }}">
+                        <span class="offers-card__spec-icon" aria-hidden="true">
+                            <img src="{{ $spec['icon'] }}" width="16" height="16" alt="">
+                        </span>
+                        <span class="offers-card__spec-label">{{ $spec['label'] }}</span>
+                    </li>
                 @endforeach
             </ul>
-        @elseif(!empty($visibleFish))
-            <div class="offers-card__tags">
+        @endif
+
+        @if(!empty($visibleFish))
+            <div class="offers-card__tags" data-offers-card-tags>
                 @foreach($visibleFish as $tag)
                     <span class="offers-card__tag">{{ $tag }}</span>
                 @endforeach
                 @if($fishExtra > 0)
-                    <span class="offers-card__tag offers-card__tag--more">+{{ $fishExtra }}</span>
+                    <a href="{{ $card['url'] }}" class="offers-card__tag offers-card__tag--more">
+                        +{{ $fishExtra }} {{ __('vacations.more') }}
+                    </a>
                 @endif
             </div>
         @endif
 
         @if(!empty($included))
-            <ul class="offers-card__included">
-                @foreach($included as $item)
-                    <li>
-                        <i class="fas fa-check" aria-hidden="true"></i>
-                        <span>{{ Str::limit($item, 64) }}</span>
-                    </li>
-                @endforeach
-                @if($includedExtra > 0)
-                    <li class="offers-card__included-more">+{{ $includedExtra }} {{ __('vacations.more') }}</li>
-                @endif
-            </ul>
+            <div class="offers-card__included-block">
+                <p class="offers-card__section-label">{{ $includedTitle }}</p>
+                <ul class="offers-card__included">
+                    @foreach($included as $item)
+                        <li>
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{ Str::limit($item, 36) }}</span>
+                        </li>
+                    @endforeach
+                    @if($includedExtra > 0)
+                        <li class="offers-card__included-more">
+                            +{{ $includedExtra }} {{ __('vacations.more') }}
+                        </li>
+                    @endif
+                </ul>
+            </div>
         @endif
 
-        <div class="offers-card__footer">
-            <div class="offers-card__price">
-                @if($priceDisplay)
-                    <span class="offers-card__price-prefix">{{ $pricePrefix }}</span>
-                    <span class="offers-card__price-value">
-                        {{ $priceDisplay }}
-                        @if($priceSuffix)
-                            <span class="offers-card__price-suffix">{{ $priceSuffix }}</span>
-                        @endif
-                    </span>
-                @endif
-            </div>
-            <a href="{{ $card['url'] }}" class="offers-card__cta offers-card__cta--{{ $type }}">
-                {{ __('offers.see_details') }}
-            </a>
-        </div>
+        @if(!empty($availability))
+            <ul class="offers-card__availability" data-offers-card-availability>
+                @foreach($availability as $item)
+                    <li @class([
+                        'offers-card__availability-item',
+                        'is-available' => ! empty($item['available']),
+                        'is-unavailable' => empty($item['available']),
+                    ])>
+                        <i
+                            @class([
+                                'fas',
+                                'fa-check-circle' => ! empty($item['available']),
+                                'fa-times-circle' => empty($item['available']),
+                            ])
+                            aria-hidden="true"
+                        ></i>
+                        <span>{{ $item['label'] ?? '' }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 
-    @if($galleryCount > 1)
+    <aside class="offers-card__aside">
+        @if($priceDisplay)
+            <div class="offers-card__price">
+                @if($pricePrefix)
+                    <span class="offers-card__price-prefix">{{ $pricePrefix }}</span>
+                @endif
+                <span class="offers-card__price-amount">{{ $priceDisplay }}</span>
+                @if($priceSuffix)
+                    <span class="offers-card__price-suffix">{{ $priceSuffix }}</span>
+                @endif
+            </div>
+        @endif
+
+        <a href="{{ $card['url'] }}" class="offers-card__cta offers-card__cta--{{ $type }}">
+            {{ $cta }}
+        </a>
+    </aside>
+
+    @if($galleryCount > 0)
         <div class="vacation-gallery-modal" data-vacation-modal="{{ $galleryId }}">
             <div class="vacation-gallery-modal__content">
                 <button type="button" class="vacation-gallery-modal__close" aria-label="{{ __('vacations.gallery_close') }}">&times;</button>
-                <button type="button" class="vacation-gallery-modal__prev" aria-label="{{ __('vacations.gallery_prev') }}">&#10094;</button>
-                <button type="button" class="vacation-gallery-modal__next" aria-label="{{ __('vacations.gallery_next') }}">&#10095;</button>
+                @if($galleryCount > 1)
+                    <button type="button" class="vacation-gallery-modal__prev" aria-label="{{ __('vacations.gallery_prev') }}">&#10094;</button>
+                    <button type="button" class="vacation-gallery-modal__next" aria-label="{{ __('vacations.gallery_next') }}">&#10095;</button>
+                @endif
                 <img class="vacation-gallery-modal__image" src="" alt="{{ $card['title'] }}">
-                <div class="vacation-gallery-modal__counter">
-                    <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
-                </div>
+                @if($galleryCount > 1)
+                    <div class="vacation-gallery-modal__counter">
+                        <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
+                    </div>
+                @endif
             </div>
         </div>
     @endif

@@ -593,7 +593,7 @@
             <div class="container">
                 <div class="col-12">
                     <div id="page-main-intro" class="mb-3">
-                        <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction)) !!}</div>
+                        <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction ?? '')) !!}</div>
                         <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                     </div>
                     @php
@@ -653,36 +653,15 @@
                     </div>
                     @endif
                     <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
-                    <div class="row mb-5">
-
-                        <div id="filterCard" class="col-sm-12 col-lg-3">        
-                            <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
-                                <x-maps.preview-trigger
-                                    id="openMapModal"
-                                    target="#mapModal"
-                                    tag="a"
-                                    :label="__('destination.show_on_map')"
-                                    :result-count="isset($mapGuidings) ? count($mapGuidings) : ($guidings_total ?? null)"
-                                />
-                            </div>            
-                            @include('pages.guidings.includes.filters', ['formAction' => request()->url()])
-                        </div>
-                        <div class="col-sm-12 col-lg-9 country-listing-item">
-                            <div class="tours-list__right">
-                                <div class="tours-list__inner" id="guidings-list">
-                                    @include('pages.guidings.partials.guiding-card', [
-                                        'guidings'         => $guidings,
-                                        'targetsMap'       => $targetsMap ?? null,
-                                        'fromDestination'  => true,
-                                        'destinationId'    => $row_data->id,
-                                    ])
-                                    {!! $guidings->links('vendor.pagination.default') !!}
-                                </div>
-                            </div>
-                        </div>
+                    <div class="offers-catalog-page mb-5">
+                        <x-offers.catalog-listing
+                            :vm="$vm"
+                            :show-faq="false"
+                            analytics-page="destination-offers-catalog"
+                        />
                     </div>
 
-                    <div class="mb-3">{!! clean_html(translate($row_data->content)) !!}</div>
+                    <div class="mb-3">{!! clean_html(translate($row_data->content ?? '')) !!}</div>
 
                     @if($row_data->fish_avail_title != '' && $row_data->fish_avail_intro != '')
                         <h2 class="mb-2 mt-5">{{ translate($row_data->fish_avail_title) }}</h2>
@@ -801,66 +780,14 @@
                         </div>
                     @endif
                 </div>
-                @include('pages.guidings.includes.filters-mobile', ['formAction' => request()->url()])
             </div>
         </div>
     </div>
-    <!--News One End-->
-
-    @php
-        // The map covers the whole filtered result set, not just the current page.
-        $mapSource = isset($mapGuidings)
-            ? collect($mapGuidings)
-            : collect($allGuidings instanceof \Illuminate\Contracts\Pagination\Paginator ? $allGuidings->items() : $allGuidings);
-
-        if ($mapSource->isEmpty()) {
-            $mapSource = collect($otherguidings ?? []);
-            $mapGrayIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
-        } else {
-            $mapGrayIds = [];
-            if (isset($otherguidings) && count($otherguidings) > 0) {
-                $existingIds = $mapSource->pluck('id')->map(fn ($id) => (int) $id)->all();
-                $nearby = collect($otherguidings)->reject(fn ($g) => in_array((int) $g->id, $existingIds, true));
-                $mapGrayIds = $nearby->pluck('id')->map(fn ($id) => (int) $id)->all();
-                $mapSource = $mapSource->concat($nearby);
-            }
-        }
-        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
-        $mapCenterLat = request()->get('placeLat')
-            ?: (isset($guidings[0]) ? $guidings[0]->lat : config('services.maps.default_center.lat'));
-        $mapCenterLng = request()->get('placeLng')
-            ?: (isset($guidings[0]) ? $guidings[0]->lng : config('services.maps.default_center.lng'));
-    @endphp
-    <x-maps.listing-modal
-        modal-id="mapModal"
-        :title="__('destination.show_on_map')"
-        :result-count="count($guidingMapMarkers)"
-        map-id="map"
-        :markers="$guidingMapMarkers"
-        :center="['lat' => (float) $mapCenterLat, 'lng' => (float) $mapCenterLng]"
-        instance-key="category-country"
-        :cluster="true"
-        :show-gray-nearby="true"
-        :single-zoom="12"
-        :default-zoom="5"
-        :lazy-modal="true"
-        :updatable="true"
-        :interactive-preview="true"
-        :show-rail="true"
-        :show-filter-chips="true"
-        :price-chips="true"
-        :landmarks="false"
-        filter-form-id="filterContainer"
-    />
-
 @endsection
 
 @section('js_after')
+@include('components.offers.partials.gallery-script')
 <script>
-    $('#sortby').on('change',function(){
-        $('#form-sortby').submit();
-    });
-    
     $(document).ready(function(){
         $('#carousel-regions').owlCarousel({
             loop: false,
@@ -869,35 +796,23 @@
             navText: ['<', '>'],
             autoplay: true,
             responsive: {
-                0: {
-                    items: 1
-                },
-                600: {
-                    items: 2
-                },
-                1000: {
-                    items: 4
-                }
+                0: { items: 1 },
+                600: { items: 2 },
+                1000: { items: 4 }
             }
         });
 
         $('#carousel-cities').owlCarousel({
-            loop: false,            // Infinite looping
-            margin: 10,            // Space between items
-            nav: true,             // Show next/prev buttons
-            dots: true,            // Show pagination dots
-            autoplay: true,        // Enable auto-play
+            loop: false,
+            margin: 10,
+            nav: true,
+            dots: true,
+            autoplay: true,
             navText: ['<', '>'],
             responsive: {
-                0: {
-                    items: 1   // Show 1 item on small screens
-                },
-                600: {
-                    items: 2   // Show 2 items on medium screens
-                },
-                1000: {
-                    items: 4   // Show 4 items on large screens
-                }
+                0: { items: 1 },
+                600: { items: 2 },
+                1000: { items: 4 }
             }
         });
     });
@@ -905,23 +820,23 @@
     let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
     itemsCollapseCities.forEach((el) => {
         const minPerSlide = (itemsCollapseCities.length >= 4) ? 4 : itemsCollapseCities.length;
-        let next = el.nextElementSibling
-        for (var i=1; i<minPerSlide; i++) {
+        let next = el.nextElementSibling;
+        for (var i = 1; i < minPerSlide; i++) {
             if (!next) {
-                next = itemsCollapseCities[0]
+                next = itemsCollapseCities[0];
             }
-            let cloneChild = next.cloneNode(true)
-            el.appendChild(cloneChild.children[0])
-            next = next.nextElementSibling
+            let cloneChild = next.cloneNode(true);
+            el.appendChild(cloneChild.children[0]);
+            next = next.nextElementSibling;
         }
     });
-    
+
     $(function() {
-        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;  // Adjust character count based on screen size
+        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
         var page_main_intro = $('.page-main-intro-text');
         var page_main_intro_text = page_main_intro.html();
         var page_main_intro_count = page_main_intro.text().length;
-        var ellipsis = "..."; 
+        var ellipsis = "...";
         var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
         var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
 
@@ -930,10 +845,9 @@
 
         if (page_main_intro_count >= word_char_count_allowed) {
             $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
-            //$('.more-text').show();
             $('.see-more').click(function(e) {
                 e.preventDefault();
-                var textContainer = $(this).prev('.page-main-intro-text'); // Get the content element
+                var textContainer = $(this).prev('.page-main-intro-text');
 
                 if ($(this).hasClass('less')) {
                     $(this).removeClass('less');
@@ -951,7 +865,6 @@
             $('.see-more').hide();
         }
 
-        // Re-adjust the text length if window is resized
         $(window).resize(function() {
             word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
             visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
@@ -962,180 +875,5 @@
             }
         });
     });
-
 </script>
-
-<script>
-    initializeSelect2();
-
-function initializeSelect2() {
-    var selectTarget = $('#target_fish, #target_fishOffCanvass');
-    var selectWater = $('#water, #waterOffCanvass');
-    var selectMethod = $('#methods, #methodsOffCanvass');
-    var selectPrice = $('#price_range, #price_rangeOffCanvass');
-    var selectGuests = $('#num_guests, #num-guestsOffCanvass');
-
-    // Clear all select2 instances first
-    selectTarget.empty();
-    selectWater.empty();
-    selectMethod.empty();
-
-    // Initialize select2 instances
-    selectWater.select2({
-        multiple: true,
-        placeholder: '@lang('message.body-type')',
-        width: 'resolve'
-    });
-
-    selectTarget.select2({
-        multiple: true,
-        placeholder: '@lang('message.target-fish')',
-        width: 'resolve'
-    });
-
-    selectMethod.select2({
-        multiple: true,
-        placeholder: '{{translate('fishing type')}}',
-        width: 'resolve'
-    });
-
-    // Get unique selected values from URL parameters
-    var selectedFish = @json(array_unique(request()->get('target_fish') ?? []));
-    var selectedWater = @json(array_unique(request()->get('water') ?? []));
-    var selectedMethods = @json(array_unique(request()->get('methods') ?? []));
-
-    // Add target fish options
-    @foreach($alltargets as $fish)
-        var fishname = '{{$fish->name}}';
-        @if(app()->getLocale() == 'en')
-            fishname = '{{$fish->name_en}}';
-        @endif
-        var fishOption = new Option(fishname, '{{ $fish->id }}', 
-            selectedFish.includes('{{ $fish->id }}'),
-            selectedFish.includes('{{ $fish->id }}')
-        );
-        selectTarget.append(fishOption);
-    @endforeach
-
-    // Add water options
-    @foreach($allwaters as $water)
-        var watername = '{{$water->name}}';
-        @if(app()->getLocale() == 'en')
-            watername = '{{$water->name_en}}';
-        @endif
-        var waterOption = new Option(watername, '{{ $water->id }}',
-            selectedWater.includes('{{ $water->id }}'),
-            selectedWater.includes('{{ $water->id }}')
-        );
-        selectWater.append(waterOption);
-    @endforeach
-
-    // Add fishing method options
-    @foreach($allfishingfrom as $method)
-        var methodname = '{{$method->name}}';
-        @if(app()->getLocale() == 'en')
-            methodname = '{{$method->name_en}}';
-        @endif
-        var methodOption = new Option(methodname, '{{ $method->id }}',
-            selectedMethods.includes('{{ $method->id }}'),
-            selectedMethods.includes('{{ $method->id }}')
-        );
-        selectMethod.append(methodOption);
-    @endforeach
-
-    // Set non-select2 values
-    if ('{{ request()->get('num_guests') }}') {
-        selectGuests.val('{{ request()->get('num_guests') }}');
-    }
-    
-    if ('{{ request()->get('price_range') }}') {
-        selectPrice.val('{{ request()->get('price_range') }}');
-    }
-
-    // Trigger final change events
-    selectTarget.trigger('change');
-    selectWater.trigger('change');
-    selectMethod.trigger('change');
-}
-
-// Add form submit handler to clean up parameters
-$('.filter-form, #filterContainerOffCanvass').on('submit', function(e) {
-    e.preventDefault();
-    
-    var formData = new FormData(this);
-    var params = new URLSearchParams();
-    var seenValues = new Map();
-
-    // Clean and add parameters without duplicates
-    for (var pair of formData.entries()) {
-        var key = pair[0];
-        var value = pair[1];
-
-        if (key.endsWith('[]')) {
-            // Handle array parameters
-            if (!seenValues.has(key)) {
-                seenValues.set(key, new Set());
-            }
-            if (!seenValues.get(key).has(value) && value) {
-                seenValues.get(key).add(value);
-                params.append(key, value);
-            }
-        } else if (value) {
-            params.append(key, value);
-        }
-    }
-
-    window.location.href = `${window.location.pathname}?${params.toString()}`;
-});
-
-$(document).ready(function() {
-    initializeSelect2();
-});
-</script>
-
-
-<script>
-    // Use centralized GoogleMapsManager (Places autocomplete shim)
-    const MapsManager = window.GoogleMapsManager;
-
-    // Initialize Places Autocomplete using centralized manager
-    function initialize() {
-        const input = document.getElementById('searchPlace');
-        if (!input || !MapsManager) return;
-        const boot = function () {
-            MapsManager.waitForGoogleMaps(function() {
-                MapsManager.initAutocomplete('searchPlace', function(place) {
-                    const locationData = MapsManager.extractLocationData(place);
-                    const latInput = document.getElementById('placeLat');
-                    const lngInput = document.getElementById('placeLng');
-                    if (latInput) latInput.value = locationData.lat;
-                    if (lngInput) lngInput.value = locationData.lng;
-                });
-            });
-        };
-        input.addEventListener('focus', boot, { once: true });
-        input.addEventListener('click', boot, { once: true });
-    }
-
-    window.addEventListener('load', initialize);
-
-window.addEventListener('load', function() {
-    var placeLatitude = '{{ request()->get('placeLat') }}';
-    var placeLongitude = '{{ request()->get('placeLng') }}';
-
-    if (placeLatitude && placeLongitude) {
-        document.getElementById('placeLat').value = placeLatitude;
-        document.getElementById('placeLng').value = placeLongitude;
-    }
-});     
-
-    // Filters are handled by FilterManager in the shared filters partial
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.30.2/minified.js"></script>
-
-
-
 @endsection
-
-@stack('guidingListingScripts')

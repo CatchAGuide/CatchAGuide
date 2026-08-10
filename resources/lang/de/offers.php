@@ -54,6 +54,8 @@ return [
     'suggested_near' => 'Weitere Angebote in der Nähe von :place',
     'suggested_count' => ':count Angebote in der Nähe',
     'see_details' => 'Details',
+    'included_heading' => 'Inklusive',
+    'reviews_count' => ':count Bewertung|:count Bewertungen',
 
     'badge_tour' => 'Angeltour',
     'badge_trip' => 'Angeltrip',
