@@ -184,7 +184,7 @@
             <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
-                            <div class="{{ $isOffers ? 'col-md-10' : 'col-md-4' }} column-input my-2">
+                            <div class="{{ $isOffers ? 'col-md-8' : 'col-md-4' }} column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
@@ -198,7 +198,20 @@
                                     </div>
                                 </div>
                             </div>
-                            @unless($isOffers)
+                            @if($isOffers)
+                            @php $offersGuestsMobile = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                            <div class="col-md-2 column-input my-2">
+                                <div class="offers-persons-stepper offers-persons-stepper--mobile" data-offers-persons-stepper>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                    <div class="offers-persons-stepper__value">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsMobile, ['count' => $offersGuestsMobile]) }}</span>
+                                    </div>
+                                    <input type="hidden" name="num_guests" value="{{ $offersGuestsMobile }}" data-offers-persons-input>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                                </div>
+                            </div>
+                            @else
                             <div class="col-md-2 column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
@@ -215,7 +228,7 @@
                                            placeholder="@lang('homepage.searchbar-targetfish')...">
                                 </div>
                             </div>
-                            @endunless
+                            @endif
                             <div class="col-md-2 col-12 column-button my-2">
                                         <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -284,7 +297,20 @@
                                 <input type="hidden" id="LocationRegionDesktop" name="region" value="{{ request()->region }}"/>
                                 @include('layouts.partials.geosearch-hidden-fields')
                             </div>
-                            @unless($isOffers)
+                            @if($isOffers)
+                            @php $offersGuestsDesktop = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                            <div class="search-input offers-persons-stepper-wrap" style="width: 220px;">
+                                <div class="offers-persons-stepper" data-offers-persons-stepper>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                    <div class="offers-persons-stepper__value">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsDesktop, ['count' => $offersGuestsDesktop]) }}</span>
+                                    </div>
+                                    <input type="hidden" name="num_guests" value="{{ $offersGuestsDesktop }}" data-offers-persons-input>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                                </div>
+                            </div>
+                            @else
                             <div class="search-input" style="width: 200px;">
                                 <i class="fa fa-user input-icon"></i>
                                 <input type="number" 
@@ -299,7 +325,7 @@
                                        id="tagify-fish-desktop"
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
-                            @endunless
+                            @endif
                             <div class="my-1 px-0">
                                 <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -1152,7 +1178,21 @@ input[type=number] {
                             </div>
                         </div>
 
-                        @unless($isOffers)
+                        @if($isOffers)
+                        @php $offersGuestsModal = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('homepage.searchbar-person') }}</label>
+                            <div class="offers-persons-stepper offers-persons-stepper--modal" data-offers-persons-stepper>
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                <div class="offers-persons-stepper__value">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsModal, ['count' => $offersGuestsModal]) }}</span>
+                                </div>
+                                <input type="hidden" name="num_guests" value="{{ $offersGuestsModal }}" data-offers-persons-input>
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                            </div>
+                        </div>
+                        @else
                         <div class="mb-3">
                             <label class="form-label">Number of Persons</label>
                             <div class="position-relative">
@@ -1174,7 +1214,7 @@ input[type=number] {
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
                         </div>
-                        @endunless
+                        @endif
                     @endif
 
                     <button type="submit" class="btn btn-primary w-100">Search</button>
@@ -1716,6 +1756,64 @@ function handleMobileLanguageSwitch(language) {
 
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.tagify-fish-input').forEach(initFishTagify);
+    });
+})();
+
+(function () {
+    @php
+        $offersPersonsLabels = [
+            'one' => trans_choice('offers.persons_count', 1, ['count' => ':count']),
+            'other' => trans_choice('offers.persons_count', 2, ['count' => ':count']),
+        ];
+    @endphp
+    var labels = @json($offersPersonsLabels);
+
+    function formatPersonsLabel(count) {
+        var template = count === 1 ? labels.one : labels.other;
+        return template.replace(':count', String(count));
+    }
+
+    function syncStepper(root) {
+        var input = root.querySelector('[data-offers-persons-input]');
+        var label = root.querySelector('[data-offers-persons-label]');
+        var minus = root.querySelector('[data-offers-persons-delta="-1"]');
+        var plus = root.querySelector('[data-offers-persons-delta="1"]');
+        if (!input || !label) {
+            return;
+        }
+        var value = Math.max(1, Math.min(20, parseInt(input.value, 10) || 1));
+        input.value = String(value);
+        label.textContent = formatPersonsLabel(value);
+        if (minus) {
+            minus.disabled = value <= 1;
+        }
+        if (plus) {
+            plus.disabled = value >= 20;
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-offers-persons-delta]');
+        if (!button) {
+            return;
+        }
+        var root = button.closest('[data-offers-persons-stepper]');
+        if (!root) {
+            return;
+        }
+        event.preventDefault();
+        var input = root.querySelector('[data-offers-persons-input]');
+        if (!input) {
+            return;
+        }
+        var delta = parseInt(button.getAttribute('data-offers-persons-delta'), 10) || 0;
+        var next = Math.max(1, Math.min(20, (parseInt(input.value, 10) || 1) + delta));
+        input.value = String(next);
+        syncStepper(root);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-offers-persons-stepper]').forEach(syncStepper);
     });
 })();
 </script>

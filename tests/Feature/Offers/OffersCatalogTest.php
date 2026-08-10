@@ -53,8 +53,10 @@ class OffersCatalogTest extends TestCase
         $response->assertOk();
         $response->assertSee(__('offers.filter_all'), false);
         $response->assertSee(__('offers.filter_tours'), false);
-        $response->assertSee(__('offers.filter_trips'), false);
-        $response->assertSee(__('offers.filter_camps'), false);
+        $response->assertSee(__('offers.filter_vacations'), false);
+        $response->assertDontSee('data-offers-vacation-subfilter', false);
+        $response->assertSee('offers-catalog__toolbar', false);
+        $response->assertSee('data-offers-type-filter', false);
         $response->assertSee('data-offers-list', false);
         $response->assertSee('data-offer-type="tour"', false);
         $response->assertSee('data-offer-type="trip"', false);
@@ -63,24 +65,98 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-bs-target="#offersCatalogMapModal"', false);
         $response->assertSee('data-offers-faq', false);
         $response->assertSee(__('offers.faq_title'), false);
+        $response->assertSee('data-offers-persons-stepper', false);
+        $response->assertSee('name="num_guests"', false);
+    }
+
+    public function test_map_teaser_result_count_matches_listings_total(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'trip',
+            cards: collect([$this->card('trip', 'Mapped Trip')]),
+            markers: [
+                [
+                    'id' => 10,
+                    'lat' => 39.5,
+                    'lng' => -0.4,
+                    'pillar' => 'trip',
+                    'variant' => 'trip',
+                    'title' => 'Mapped Trip',
+                    'badge' => 'Trip',
+                    'url' => '/vacations/trips/mapped',
+                ],
+            ],
+            toursTotal: 0,
+            tripsTotal: 26,
+            campsTotal: 0,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'trip',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_trips').' (26)', false);
+        $response->assertSee('26 '.translate('results'), false);
+        $response->assertDontSee('1 '.translate('result'), false);
+    }
+
+    public function test_vacation_chip_shows_subrow_and_consolidated_cards(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            cards: collect([
+                $this->card('trip', 'Vacation Trip'),
+                $this->card('camp', 'Vacation Camp'),
+            ]),
+            toursTotal: 3,
+            tripsTotal: 2,
+            campsTotal: 1,
+        ));
+
+        $response = $this->get(route('offers.index', ['type' => 'vacation']));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-vacation-subfilter', false);
+        $response->assertSee(__('offers.filter_vacations_all'), false);
+        $response->assertSee(__('offers.filter_trips'), false);
+        $response->assertSee(__('offers.filter_camps'), false);
+        $response->assertSee(__('offers.filter_vacations').' (3)', false);
+        $response->assertSee('data-offer-type="trip"', false);
+        $response->assertSee('data-offer-type="camp"', false);
+        $response->assertDontSee('data-offer-type="tour"', false);
     }
 
     public function test_type_filter_limits_cards_to_requested_module(): void
     {
         $this->bindCatalog(function () {
             $type = request()->query('type', 'all');
+            $vacation = request()->query('vacation', 'all');
 
-            $cards = match ($type) {
-                'tour' => collect([$this->card('tour', 'Only Tour')]),
-                'trip' => collect([$this->card('trip', 'Only Trip')]),
-                'camp' => collect([$this->card('camp', 'Only Camp')]),
+            $cards = match (true) {
+                $type === 'tour' => collect([$this->card('tour', 'Only Tour')]),
+                $type === 'vacation' && $vacation === 'trip' => collect([$this->card('trip', 'Only Trip')]),
+                $type === 'vacation' && $vacation === 'camp' => collect([$this->card('camp', 'Only Camp')]),
+                $type === 'vacation' => collect([
+                    $this->card('trip', 'Vacation Trip'),
+                    $this->card('camp', 'Vacation Camp'),
+                ]),
+                // Legacy type=trip|camp still remapped by filter; mock mirrors service intent.
+                $type === 'trip' => collect([$this->card('trip', 'Only Trip')]),
+                $type === 'camp' => collect([$this->card('camp', 'Only Camp')]),
                 default => collect([
                     $this->card('tour', 'Mixed Tour'),
                     $this->card('trip', 'Mixed Trip'),
                 ]),
             };
 
-            return $this->viewModel(type: $type, cards: $cards);
+            return $this->viewModel(
+                type: $type,
+                vacation: is_string($vacation) ? $vacation : 'all',
+                cards: $cards,
+            );
         });
 
         $tour = $this->get(route('offers.index', ['type' => 'tour']));
@@ -90,11 +166,22 @@ class OffersCatalogTest extends TestCase
         $tour->assertDontSee('data-offer-type="trip"', false);
         $tour->assertDontSee('data-offer-type="camp"', false);
 
-        $trip = $this->get(route('offers.index', ['type' => 'trip']));
-        $trip->assertOk();
-        $trip->assertSee('data-offer-type="trip"', false);
-        $trip->assertSee('Only Trip');
-        $trip->assertDontSee('data-offer-type="tour"', false);
+        $vacationTrips = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'trip',
+        ]));
+        $vacationTrips->assertOk();
+        $vacationTrips->assertSee('data-offers-vacation-subfilter', false);
+        $vacationTrips->assertSee('data-offer-type="trip"', false);
+        $vacationTrips->assertSee('Only Trip');
+        $vacationTrips->assertDontSee('data-offer-type="tour"', false);
+        $vacationTrips->assertDontSee('data-offer-type="camp"', false);
+
+        $legacyTrip = $this->get(route('offers.index', ['type' => 'trip']));
+        $legacyTrip->assertOk();
+        $legacyTrip->assertSee('data-offers-vacation-subfilter', false);
+        $legacyTrip->assertSee('data-offer-type="trip"', false);
+        $legacyTrip->assertSee('Only Trip');
     }
 
     public function test_offers_index_shows_place_context_without_duplicate_title(): void
@@ -147,8 +234,7 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.suggested_near', ['place' => 'Nowhere']), false);
         $response->assertSee(__('offers.filter_all').' (3)', false);
         $response->assertSee(__('offers.filter_tours').' (1)', false);
-        $response->assertSee(__('offers.filter_trips').' (1)', false);
-        $response->assertSee(__('offers.filter_camps').' (1)', false);
+        $response->assertSee(__('offers.filter_vacations').' (2)', false);
     }
 
     public function test_offers_index_shows_merged_suggested_offers_when_sparse_results(): void
@@ -181,7 +267,31 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('Nearby Extra Camp', false);
         $response->assertSee(__('offers.filter_all').' (4)', false);
         $response->assertSee(__('offers.filter_tours').' (2)', false);
-        $response->assertSee(__('offers.results_found', ['count' => 4]), false);
+        $response->assertSee(__('offers.filter_vacations').' (2)', false);
+    }
+
+    public function test_type_toggle_urls_preserve_place_and_omit_vacation_on_primary(): void
+    {
+        $vm = $this->viewModel(
+            type: 'vacation',
+            vacation: 'trip',
+            place: 'Spain',
+            country: 'spain',
+            numGuests: 2,
+        );
+
+        $urls = $vm->typeToggleUrls();
+        $this->assertStringContainsString('place=Spain', $urls['all']);
+        $this->assertStringContainsString('type=tour', $urls['tour']);
+        $this->assertStringContainsString('type=vacation', $urls['vacation']);
+        $this->assertStringNotContainsString('vacation=', $urls['vacation']);
+        $this->assertStringNotContainsString('vacation=', $urls['all']);
+
+        $vacationUrls = $vm->vacationToggleUrls();
+        $this->assertStringContainsString('type=vacation', $vacationUrls['all']);
+        $this->assertStringNotContainsString('vacation=', $vacationUrls['all']);
+        $this->assertStringContainsString('vacation=trip', $vacationUrls['trip']);
+        $this->assertStringContainsString('vacation=camp', $vacationUrls['camp']);
     }
 
     /**
@@ -196,9 +306,12 @@ class OffersCatalogTest extends TestCase
 
     private function viewModel(
         string $type = 'all',
+        string $vacation = 'all',
         $cards = null,
         array $markers = [],
         ?string $place = null,
+        ?string $country = null,
+        ?int $numGuests = null,
         $suggested = null,
         ?int $toursTotal = null,
         ?int $tripsTotal = null,
@@ -208,8 +321,11 @@ class OffersCatalogTest extends TestCase
         $suggested = $suggested ?? collect();
         $filter = OfferListingFilter::fromRequest(array_filter([
             'type' => $type,
+            'vacation' => $vacation !== 'all' ? $vacation : null,
             'place' => $place,
-        ]));
+            'country' => $country,
+            'num_guests' => $numGuests,
+        ], fn ($v) => $v !== null && $v !== ''));
         $paginator = new LengthAwarePaginator(
             $cards->map(fn ($card) => ['type' => $card['type'], 'model' => null])->all(),
             $cards->count(),
@@ -222,10 +338,13 @@ class OffersCatalogTest extends TestCase
         $toursTotal ??= 3;
         $tripsTotal ??= 2;
         $campsTotal ??= 1;
-        $listingsTotal = match ($type) {
-            'tour' => $toursTotal,
-            'trip' => $tripsTotal,
-            'camp' => $campsTotal,
+        $resolvedType = $filter->type;
+        $resolvedVacation = $filter->vacation;
+        $listingsTotal = match (true) {
+            $resolvedType === 'tour' => $toursTotal,
+            $resolvedType === 'vacation' && $resolvedVacation === 'trip' => $tripsTotal,
+            $resolvedType === 'vacation' && $resolvedVacation === 'camp' => $campsTotal,
+            $resolvedType === 'vacation' => $tripsTotal + $campsTotal,
             default => $toursTotal + $tripsTotal + $campsTotal,
         };
 

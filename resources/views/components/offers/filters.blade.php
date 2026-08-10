@@ -11,6 +11,7 @@
     'showDesktop' => true,
     'action' => null,
     'typeLinks' => null,
+    'vacationLinks' => null,
     'renderSection' => 'all',
     'mapModalId' => 'offersCatalogMapModal',
 ])
@@ -20,11 +21,14 @@
 
     $action = $action ?? route('offers.index');
     $total = ($toursTotal ?? 0) + ($tripsTotal ?? 0) + ($campsTotal ?? 0);
-    $query = request()->except(['page', 'type']);
+    $vacationsTotal = ($tripsTotal ?? 0) + ($campsTotal ?? 0);
+    $query = request()->except(['page', 'type', 'vacation']);
     $speciesOptions = $speciesOptions instanceof Collection ? $speciesOptions : collect($speciesOptions ?? []);
     $countries = $countries instanceof Collection ? $countries : collect($countries ?? []);
     $activeType = $filter->type ?? 'all';
-    $activeFilterCount = collect(['species', 'country', 'sortby', 'type'])
+    $activeVacation = $filter->vacation ?? 'all';
+    $isVacation = $activeType === 'vacation';
+    $activeFilterCount = collect(['species', 'country', 'sortby', 'type', 'num_guests'])
         ->filter(fn ($key) => filled(request()->get($key)))
         ->count();
     $typeUrl = function (string $type) use ($action, $query, $typeLinks) {
@@ -39,30 +43,29 @@
 
         return $action.($params ? '?'.http_build_query($params) : '');
     };
+    $vacationUrl = function (string $vacation) use ($action, $query, $vacationLinks) {
+        if (is_array($vacationLinks) && isset($vacationLinks[$vacation])) {
+            return $vacationLinks[$vacation];
+        }
+
+        $params = $query;
+        $params['type'] = 'vacation';
+        if ($vacation !== 'all') {
+            $params['vacation'] = $vacation;
+        }
+
+        return $action.'?'.http_build_query($params);
+    };
+    $showToolbar = $showTypeToggles && in_array($renderSection, ['all', 'toolbar'], true);
     $showSidebar = in_array($renderSection, ['all', 'sidebar'], true);
     $showMobile = $showMobileToolbar && in_array($renderSection, ['all', 'mobile'], true);
     $showOffcanvas = $showMobileToolbar && in_array($renderSection, ['all', 'offcanvas'], true);
     $currentSort = $filter->sortBy ?? '';
 @endphp
 
-@if($showSidebar)
-<form method="get" action="{{ $action }}" class="offers-filters vacation-filters vacation-filters--sidebar" id="offers-filters-form">
-    @foreach($query as $key => $value)
-        @if(is_array($value))
-            @foreach($value as $v)
-                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
-            @endforeach
-        @elseif(! in_array($key, ['species', 'country', 'sortby', 'type'], true))
-            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-        @endif
-    @endforeach
-
-    @if($activeType !== 'all')
-        <input type="hidden" name="type" value="{{ $activeType }}">
-    @endif
-
-    @if($showTypeToggles)
-        <div class="offers-filters__type-group vacation-filters__pillar-group" role="group" data-offers-type-filter>
+@if($showToolbar)
+    <div class="offers-filters__type-stack offers-filters__type-stack--toolbar" data-offers-type-filter>
+        <div class="offers-filters__type-group offers-filters__type-group--toolbar vacation-filters__pillar-group" role="group">
             <a href="{{ $typeUrl('all') }}"
                class="offers-filters__type-btn offers-filters__type-btn--all vacation-filters__pillar-btn {{ $activeType === 'all' ? 'is-active' : '' }}">
                 {{ __('offers.filter_all') }} ({{ $total }})
@@ -71,14 +74,87 @@
                class="offers-filters__type-btn offers-filters__type-btn--tour vacation-filters__pillar-btn {{ $activeType === 'tour' ? 'is-active' : '' }}">
                 {{ __('offers.filter_tours') }} ({{ $toursTotal }})
             </a>
-            <a href="{{ $typeUrl('trip') }}"
-               class="offers-filters__type-btn offers-filters__type-btn--trip vacation-filters__pillar-btn {{ $activeType === 'trip' ? 'is-active' : '' }}">
-                {{ __('offers.filter_trips') }} ({{ $tripsTotal }})
+            <a href="{{ $typeUrl('vacation') }}"
+               class="offers-filters__type-btn offers-filters__type-btn--vacation vacation-filters__pillar-btn {{ $isVacation ? 'is-active' : '' }}">
+                {{ __('offers.filter_vacations') }} ({{ $vacationsTotal }})
             </a>
-            <a href="{{ $typeUrl('camp') }}"
-               class="offers-filters__type-btn offers-filters__type-btn--camp vacation-filters__pillar-btn {{ $activeType === 'camp' ? 'is-active' : '' }}">
-                {{ __('offers.filter_camps') }} ({{ $campsTotal }})
-            </a>
+        </div>
+
+        @if($isVacation)
+            <div class="offers-filters__vacation-subrow" data-offers-vacation-subfilter>
+                <div class="offers-filters__type-group offers-filters__type-group--subrow vacation-filters__pillar-group" role="group">
+                    <a href="{{ $vacationUrl('all') }}"
+                       class="offers-filters__type-btn offers-filters__type-btn--vacation-all vacation-filters__pillar-btn {{ $activeVacation === 'all' ? 'is-active' : '' }}">
+                        {{ __('offers.filter_vacations_all') }} ({{ $vacationsTotal }})
+                    </a>
+                    <a href="{{ $vacationUrl('trip') }}"
+                       class="offers-filters__type-btn offers-filters__type-btn--trip vacation-filters__pillar-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}">
+                        {{ __('offers.filter_trips') }} ({{ $tripsTotal }})
+                    </a>
+                    <a href="{{ $vacationUrl('camp') }}"
+                       class="offers-filters__type-btn offers-filters__type-btn--camp vacation-filters__pillar-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}">
+                        {{ __('offers.filter_camps') }} ({{ $campsTotal }})
+                    </a>
+                </div>
+            </div>
+        @endif
+    </div>
+@endif
+
+@if($showSidebar)
+<form method="get" action="{{ $action }}" class="offers-filters vacation-filters vacation-filters--sidebar" id="offers-filters-form">
+    @foreach($query as $key => $value)
+        @if(is_array($value))
+            @foreach($value as $v)
+                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+            @endforeach
+        @elseif(! in_array($key, ['species', 'country', 'sortby', 'type', 'vacation'], true))
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endif
+    @endforeach
+
+    @if($activeType !== 'all')
+        <input type="hidden" name="type" value="{{ $activeType }}">
+    @endif
+    @if($isVacation && $activeVacation !== 'all')
+        <input type="hidden" name="vacation" value="{{ $activeVacation }}">
+    @endif
+
+    @if($showTypeToggles && $renderSection === 'all')
+        <div class="offers-filters__type-stack" data-offers-type-filter>
+            <div class="offers-filters__type-group vacation-filters__pillar-group" role="group">
+                <a href="{{ $typeUrl('all') }}"
+                   class="offers-filters__type-btn offers-filters__type-btn--all vacation-filters__pillar-btn {{ $activeType === 'all' ? 'is-active' : '' }}">
+                    {{ __('offers.filter_all') }} ({{ $total }})
+                </a>
+                <a href="{{ $typeUrl('tour') }}"
+                   class="offers-filters__type-btn offers-filters__type-btn--tour vacation-filters__pillar-btn {{ $activeType === 'tour' ? 'is-active' : '' }}">
+                    {{ __('offers.filter_tours') }} ({{ $toursTotal }})
+                </a>
+                <a href="{{ $typeUrl('vacation') }}"
+                   class="offers-filters__type-btn offers-filters__type-btn--vacation vacation-filters__pillar-btn {{ $isVacation ? 'is-active' : '' }}">
+                    {{ __('offers.filter_vacations') }} ({{ $vacationsTotal }})
+                </a>
+            </div>
+
+            @if($isVacation)
+                <div class="offers-filters__vacation-subrow" data-offers-vacation-subfilter>
+                    <div class="offers-filters__type-group offers-filters__type-group--subrow vacation-filters__pillar-group" role="group">
+                        <a href="{{ $vacationUrl('all') }}"
+                           class="offers-filters__type-btn offers-filters__type-btn--vacation-all vacation-filters__pillar-btn {{ $activeVacation === 'all' ? 'is-active' : '' }}">
+                            {{ __('offers.filter_vacations_all') }} ({{ $vacationsTotal }})
+                        </a>
+                        <a href="{{ $vacationUrl('trip') }}"
+                           class="offers-filters__type-btn offers-filters__type-btn--trip vacation-filters__pillar-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}">
+                            {{ __('offers.filter_trips') }} ({{ $tripsTotal }})
+                        </a>
+                        <a href="{{ $vacationUrl('camp') }}"
+                           class="offers-filters__type-btn offers-filters__type-btn--camp vacation-filters__pillar-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}">
+                            {{ __('offers.filter_camps') }} ({{ $campsTotal }})
+                        </a>
+                    </div>
+                </div>
+            @endif
         </div>
     @endif
 
@@ -228,27 +304,49 @@
                         @foreach($value as $v)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
                         @endforeach
-                    @elseif(! in_array($key, ['species', 'country', 'sortby', 'type'], true))
+                    @elseif(! in_array($key, ['species', 'country', 'sortby', 'type', 'vacation'], true))
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                 @endforeach
 
+                @if($activeType !== 'all')
+                    <input type="hidden" name="type" value="{{ $activeType }}">
+                @endif
+                @if($isVacation && $activeVacation !== 'all')
+                    <input type="hidden" name="vacation" value="{{ $activeVacation }}">
+                @endif
+
                 @if($showTypeToggles)
                     <div class="mb-3">
                         <label class="form-label">{{ __('offers.filter_type') }}</label>
-                        <div class="offers-filters__type-group vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
-                            <a href="{{ $typeUrl('all') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'all' ? 'is-active' : '' }}">
-                                {{ __('offers.filter_all') }} ({{ $total }})
-                            </a>
-                            <a href="{{ $typeUrl('tour') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'tour' ? 'is-active' : '' }}">
-                                {{ __('offers.filter_tours') }} ({{ $toursTotal }})
-                            </a>
-                            <a href="{{ $typeUrl('trip') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'trip' ? 'is-active' : '' }}">
-                                {{ __('offers.filter_trips') }} ({{ $tripsTotal }})
-                            </a>
-                            <a href="{{ $typeUrl('camp') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'camp' ? 'is-active' : '' }}">
-                                {{ __('offers.filter_camps') }} ({{ $campsTotal }})
-                            </a>
+                        <div class="offers-filters__type-stack" data-offers-type-filter>
+                            <div class="offers-filters__type-group vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
+                                <a href="{{ $typeUrl('all') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'all' ? 'is-active' : '' }}">
+                                    {{ __('offers.filter_all') }} ({{ $total }})
+                                </a>
+                                <a href="{{ $typeUrl('tour') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeType === 'tour' ? 'is-active' : '' }}">
+                                    {{ __('offers.filter_tours') }} ({{ $toursTotal }})
+                                </a>
+                                <a href="{{ $typeUrl('vacation') }}" class="offers-filters__type-btn offers-filters__type-btn--vacation vacation-filters__pillar-btn {{ $isVacation ? 'is-active' : '' }}">
+                                    {{ __('offers.filter_vacations') }} ({{ $vacationsTotal }})
+                                </a>
+                            </div>
+
+                            @if($isVacation)
+                                <div class="offers-filters__vacation-subrow" data-offers-vacation-subfilter>
+                                    <div class="offers-filters__type-group offers-filters__type-group--subrow vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
+                                        <a href="{{ $vacationUrl('all') }}" class="offers-filters__type-btn vacation-filters__pillar-btn {{ $activeVacation === 'all' ? 'is-active' : '' }}">
+                                            {{ __('offers.filter_vacations_all') }} ({{ $vacationsTotal }})
+                                        </a>
+                                        <a href="{{ $vacationUrl('trip') }}" class="offers-filters__type-btn offers-filters__type-btn--trip vacation-filters__pillar-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}">
+                                            {{ __('offers.filter_trips') }} ({{ $tripsTotal }})
+                                        </a>
+                                        <a href="{{ $vacationUrl('camp') }}" class="offers-filters__type-btn offers-filters__type-btn--camp vacation-filters__pillar-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}">
+                                            {{ __('offers.filter_camps') }} ({{ $campsTotal }})
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif

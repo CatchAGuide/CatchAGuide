@@ -41,7 +41,7 @@
         <x-maps.listing-modal
             modal-id="offersCatalogMapModal"
             :title="__('offers.map_modal_title')"
-            :result-count="count($listingMarkers)"
+            :result-count="$resultCount ?? count($listingMarkers)"
             map-id="offersCatalogMap"
             :markers="$listingMarkers"
             instance-key="offers-catalog"

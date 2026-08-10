@@ -7,6 +7,13 @@ return [
     'local_disk' => env('MEDIA_STORAGE_LOCAL_DISK', 'public'),
 
     /*
+    | Force CDN bucket folder (production|staging). When empty, derived from APP_ENV
+    | (production → production, everything else → staging). Use production locally
+    | when browsing a production DB dump so listing images resolve.
+    */
+    'bucket_prefix' => env('MEDIA_BUCKET_PREFIX'),
+
+    /*
     | URL generation: when true, managed media paths resolve straight to the DO CDN
     | URL with no remote HEAD/exists call (best for PageSpeed on listing pages).
     | Backend read/move/delete still use cached exists checks via exists_cache_ttl.

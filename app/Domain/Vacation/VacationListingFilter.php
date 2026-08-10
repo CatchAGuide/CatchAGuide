@@ -9,6 +9,7 @@ final class VacationListingFilter
         public readonly ?string $species = null,
         public readonly ?string $country = null,
         public readonly ?string $sortBy = null,
+        public readonly ?string $countryShort = null,
     ) {}
 
     public static function fromRequest(array $input, ?string $country = null): self
@@ -25,6 +26,7 @@ final class VacationListingFilter
             species: self::nullableString($input['species'] ?? null),
             country: self::normalizeCountry($resolvedCountry),
             sortBy: self::nullableString($input['sortby'] ?? null),
+            countryShort: self::nullableString($input['country_short'] ?? null),
         );
     }
 

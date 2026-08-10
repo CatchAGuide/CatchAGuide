@@ -26,30 +26,33 @@ final class OfferCatalogViewModel
 
     public function pageTitle(): string
     {
-        return match ($this->filter->type) {
-            'tour' => __('offers.title_tours'),
-            'trip' => __('offers.title_trips'),
-            'camp' => __('offers.title_camps'),
+        return match (true) {
+            $this->filter->type === 'tour' => __('offers.title_tours'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'trip' => __('offers.title_trips'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'camp' => __('offers.title_camps'),
+            $this->filter->type === 'vacation' => __('offers.title_vacations'),
             default => __('offers.title'),
         };
     }
 
     public function pageSubtitle(): string
     {
-        return match ($this->filter->type) {
-            'tour' => __('offers.subtitle_tours'),
-            'trip' => __('offers.subtitle_trips'),
-            'camp' => __('offers.subtitle_camps'),
+        return match (true) {
+            $this->filter->type === 'tour' => __('offers.subtitle_tours'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'trip' => __('offers.subtitle_trips'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'camp' => __('offers.subtitle_camps'),
+            $this->filter->type === 'vacation' => __('offers.subtitle_vacations'),
             default => __('offers.subtitle'),
         };
     }
 
     public function emptyStateMessage(): string
     {
-        return match ($this->filter->type) {
-            'tour' => __('offers.empty_tours'),
-            'trip' => __('offers.empty_trips'),
-            'camp' => __('offers.empty_camps'),
+        return match (true) {
+            $this->filter->type === 'tour' => __('offers.empty_tours'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'trip' => __('offers.empty_trips'),
+            $this->filter->type === 'vacation' && $this->filter->vacation === 'camp' => __('offers.empty_camps'),
+            $this->filter->type === 'vacation' => __('offers.empty_vacations'),
             default => __('offers.empty'),
         };
     }
@@ -59,12 +62,17 @@ final class OfferCatalogViewModel
         return route('offers.index');
     }
 
-    /**
-     * @return array{all: string, tour: string, trip: string, camp: string}
-     */
-    public function typeToggleUrls(): array
+    public function vacationsTotal(): int
     {
-        $query = array_filter([
+        return $this->tripsTotal + $this->campsTotal;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function sharedQueryParams(): array
+    {
+        return array_filter([
             'species' => $this->filter->species,
             'country' => $this->filter->country,
             'sortby' => $this->filter->sortBy,
@@ -73,10 +81,28 @@ final class OfferCatalogViewModel
             'placeLng' => $this->filter->placeLng,
             'city' => $this->filter->city,
             'region' => $this->filter->region,
+            'num_guests' => $this->filter->numGuests,
+            'country_short' => $this->filter->countryShort,
+            'bounds_ne_lat' => $this->filter->boundsNeLat,
+            'bounds_ne_lng' => $this->filter->boundsNeLng,
+            'bounds_sw_lat' => $this->filter->boundsSwLat,
+            'bounds_sw_lng' => $this->filter->boundsSwLng,
+            'place_types' => $this->filter->placeTypes !== []
+                ? json_encode($this->filter->placeTypes)
+                : null,
         ], fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * @return array{all: string, tour: string, vacation: string}
+     */
+    public function typeToggleUrls(): array
+    {
+        $query = $this->sharedQueryParams();
 
         $withQuery = function (string $type) use ($query): string {
             $params = $query;
+            unset($params['vacation']);
             if ($type !== 'all') {
                 $params['type'] = $type;
             }
@@ -89,8 +115,33 @@ final class OfferCatalogViewModel
         return [
             'all' => $withQuery('all'),
             'tour' => $withQuery('tour'),
-            'trip' => $withQuery('trip'),
-            'camp' => $withQuery('camp'),
+            'vacation' => $withQuery('vacation'),
+        ];
+    }
+
+    /**
+     * @return array{all: string, trip: string, camp: string}
+     */
+    public function vacationToggleUrls(): array
+    {
+        $query = $this->sharedQueryParams();
+        $query['type'] = 'vacation';
+
+        $withVacation = function (string $vacation) use ($query): string {
+            $params = $query;
+            if ($vacation !== 'all') {
+                $params['vacation'] = $vacation;
+            } else {
+                unset($params['vacation']);
+            }
+
+            return route('offers.index', $params);
+        };
+
+        return [
+            'all' => $withVacation('all'),
+            'trip' => $withVacation('trip'),
+            'camp' => $withVacation('camp'),
         ];
     }
 

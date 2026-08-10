@@ -35,12 +35,14 @@
     >
         @if(filled($vm->filter->place))
             <p class="offers-catalog__context" data-offers-place>
-                {{ __('offers.searching_near', ['place' => $vm->filter->place]) }}
             </p>
         @endif
 
         @if($hasMap)
-            @include('pages.offers.partials.map-modal', ['markers' => $vm->mapMarkers])
+            @include('pages.offers.partials.map-modal', [
+                'markers' => $vm->mapMarkers,
+                'resultCount' => $vm->listingsTotal,
+            ])
         @endif
 
         <div class="row offers-catalog__layout mb-5">
@@ -54,6 +56,7 @@
                     :species-options="$vm->speciesOptions"
                     :countries="$vm->countries"
                     :type-links="$vm->typeToggleUrls()"
+                    :vacation-links="$vm->vacationToggleUrls()"
                     :action="$vm->filterAction()"
                     :show-map-button="$hasMap"
                 />
@@ -65,7 +68,7 @@
                         <x-maps.preview-trigger
                             target="#offersCatalogMapModal"
                             :label="__('offers.show_on_map')"
-                            :result-count="count($vm->mapMarkers)"
+                            :result-count="$vm->listingsTotal"
                         />
                     </div>
                 @endif
@@ -80,20 +83,28 @@
                         :species-options="$vm->speciesOptions"
                         :countries="$vm->countries"
                         :type-links="$vm->typeToggleUrls()"
+                        :vacation-links="$vm->vacationToggleUrls()"
                         :action="$vm->filterAction()"
                         :show-map-button="false"
                         :show-mobile-toolbar="false"
+                        :show-type-toggles="false"
                     />
                 </div>
             </aside>
 
             <div class="col-12 col-lg-9 offers-catalog__main" data-offers-list>
-                <div class="offers-catalog__header">
-                    <div>
-                        <h2 class="offers-catalog__heading">{{ __('offers.explore_title') }}</h2>
-                        <p class="offers-catalog__count mb-0">{{ __('offers.results_found', ['count' => $vm->listingsTotal]) }}</p>
-                    </div>
-                    <form method="get" action="{{ $vm->filterAction() }}" class="offers-catalog__sort d-none d-sm-flex">
+                <div class="offers-catalog__toolbar d-none d-sm-flex">
+                    <x-offers.filters
+                        render-section="toolbar"
+                        :filter="$vm->filter"
+                        :tours-total="$vm->toursTotal"
+                        :trips-total="$vm->tripsTotal"
+                        :camps-total="$vm->campsTotal"
+                        :type-links="$vm->typeToggleUrls()"
+                        :vacation-links="$vm->vacationToggleUrls()"
+                        :action="$vm->filterAction()"
+                    />
+                    <form method="get" action="{{ $vm->filterAction() }}" class="offers-catalog__sort">
                         @foreach($sortQuery as $key => $value)
                             @if(is_array($value))
                                 @foreach($value as $v)
@@ -172,6 +183,7 @@
     :species-options="$vm->speciesOptions"
     :countries="$vm->countries"
     :type-links="$vm->typeToggleUrls()"
+    :vacation-links="$vm->vacationToggleUrls()"
     :action="$vm->filterAction()"
     :show-map-button="$hasMap"
 />

@@ -14,6 +14,7 @@ use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\Location\GeospatialSearchService;
 use App\Services\Vacation\VacationFilterApplicator;
 use App\Support\Maps\MapMarkerCollection;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,6 +32,7 @@ class OfferCatalogPageService
         private TourCardPresenter $tourPresenter,
         private TripCardPresenter $tripPresenter,
         private CampCardPresenter $campPresenter,
+        private GeospatialSearchService $geoSearch,
     ) {}
 
     public function build(Request $request): OfferCatalogViewModel
@@ -60,12 +62,7 @@ class OfferCatalogPageService
             return $card;
         });
 
-        $listingsTotal = match ($filter->type) {
-            'tour' => $toursTotal,
-            'trip' => $tripsTotal,
-            'camp' => $campsTotal,
-            default => $toursTotal + $tripsTotal + $campsTotal,
-        };
+        $listingsTotal = $this->resolveListingsTotal($filter, $toursTotal, $tripsTotal, $campsTotal);
 
         // Same trigger as guidings nearby section: empty or sparse main results.
         $maxMainForNearby = (int) config('location_search.nearby_section_max_main_results', 12);
@@ -103,12 +100,7 @@ class OfferCatalogPageService
         $toursTotal += $suggestedItems->where('type', 'tour')->count();
         $tripsTotal += $suggestedItems->where('type', 'trip')->count();
         $campsTotal += $suggestedItems->where('type', 'camp')->count();
-        $listingsTotal = match ($filter->type) {
-            'tour' => $toursTotal,
-            'trip' => $tripsTotal,
-            'camp' => $campsTotal,
-            default => $toursTotal + $tripsTotal + $campsTotal,
-        };
+        $listingsTotal = $this->resolveListingsTotal($filter, $toursTotal, $tripsTotal, $campsTotal);
 
         return new OfferCatalogViewModel(
             filter: $filter,
@@ -129,7 +121,24 @@ class OfferCatalogPageService
         );
     }
 
+    private function resolveListingsTotal(
+        OfferListingFilter $filter,
+        int $toursTotal,
+        int $tripsTotal,
+        int $campsTotal,
+    ): int {
+        return match (true) {
+            $filter->type === 'tour' => $toursTotal,
+            $filter->type === 'vacation' && $filter->vacation === 'trip' => $tripsTotal,
+            $filter->type === 'vacation' && $filter->vacation === 'camp' => $campsTotal,
+            $filter->type === 'vacation' => $tripsTotal + $campsTotal,
+            default => $toursTotal + $tripsTotal + $campsTotal,
+        };
+    }
+
     /**
+     * Merge tours + trips + camps into one sorted catalog, hydrating only the current page.
+     *
      * @return LengthAwarePaginator<int, array{type: string, model: mixed}>
      */
     private function buildListingsPaginator(
@@ -139,58 +148,124 @@ class OfferCatalogPageService
         Builder $campQuery,
         int $perPage,
     ): LengthAwarePaginator {
-        $items = collect();
+        $needsPrice = in_array($filter->sortBy, ['price-asc', 'price-desc'], true);
+        $keys = collect();
 
         if ($filter->showsTours()) {
-            $items = $items->concat(
-                (clone $tourQuery)
-                    ->with(['user.reviews', 'boatType'])
-                    ->get()
-                    ->map(fn (Guiding $guiding) => [
-                        'type' => 'tour',
-                        'model' => $guiding,
-                        'created_at' => $guiding->created_at,
-                        'price' => $guiding->getLowestPrice() ?: null,
-                    ])
-            );
+            $tours = (clone $tourQuery)->get([
+                'guidings.id',
+                'guidings.created_at',
+                'guidings.price',
+                'guidings.prices',
+                'guidings.price_type',
+                'guidings.max_guests',
+            ]);
+            $keys = $keys->concat($tours->map(fn (Guiding $guiding) => [
+                'type' => 'tour',
+                'id' => (int) $guiding->id,
+                'created_at' => $guiding->created_at,
+                'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
+            ]));
         }
 
         if ($filter->showsTrips()) {
-            $items = $items->concat(
-                (clone $tripQuery)->get()->map(fn ($trip) => [
-                    'type' => 'trip',
-                    'model' => $trip,
-                    'created_at' => $trip->created_at,
-                    'price' => $trip->price_per_person,
-                ])
-            );
+            $trips = (clone $tripQuery)->get(['id', 'created_at', 'price_per_person']);
+            $keys = $keys->concat($trips->map(fn (Trip $trip) => [
+                'type' => 'trip',
+                'id' => (int) $trip->id,
+                'created_at' => $trip->created_at,
+                'price' => $needsPrice ? $trip->price_per_person : null,
+            ]));
         }
 
         if ($filter->showsCamps()) {
-            $items = $items->concat(
-                (clone $campQuery)
-                    ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])
-                    ->get()
-                    ->map(fn ($camp) => [
-                        'type' => 'camp',
-                        'model' => $camp,
-                        'created_at' => $camp->created_at,
-                        'price' => $camp->getLowestAccommodationOrOfferPrice(),
-                    ])
-            );
+            $campBuilder = clone $campQuery;
+            if ($needsPrice) {
+                $campBuilder->with(['accommodations', 'specialOffers']);
+            }
+            $camps = $campBuilder->get($needsPrice
+                ? ['*']
+                : ['id', 'created_at']);
+            $keys = $keys->concat($camps->map(fn (Camp $camp) => [
+                'type' => 'camp',
+                'id' => (int) $camp->id,
+                'created_at' => $camp->created_at,
+                'price' => $needsPrice ? $camp->getLowestAccommodationOrOfferPrice() : null,
+            ]));
         }
 
-        $merged = $this->sortListingItems($items, $filter);
+        $merged = $this->sortListingItems($keys, $filter);
         $page = LengthAwarePaginator::resolveCurrentPage();
         $total = $merged->count();
+        $pageKeys = $merged->slice(($page - 1) * $perPage, $perPage)->values();
+        $pageItems = $this->hydrateListingPage($pageKeys, $tourQuery, $tripQuery, $campQuery);
 
         return new LengthAwarePaginator(
-            $merged->slice(($page - 1) * $perPage, $perPage)->values()->all(),
+            $pageItems->all(),
             $total,
             $perPage,
             $page,
             ['path' => request()->url(), 'query' => request()->except('page')],
         );
+    }
+
+    /**
+     * @param  Collection<int, array{type: string, id: int, created_at: mixed, price: mixed}>  $pageKeys
+     * @return Collection<int, array{type: string, model: mixed}>
+     */
+    private function hydrateListingPage(
+        Collection $pageKeys,
+        Builder $tourQuery,
+        Builder $tripQuery,
+        Builder $campQuery,
+    ): Collection {
+        if ($pageKeys->isEmpty()) {
+            return collect();
+        }
+
+        $tourIds = $pageKeys->where('type', 'tour')->pluck('id')->all();
+        $tripIds = $pageKeys->where('type', 'trip')->pluck('id')->all();
+        $campIds = $pageKeys->where('type', 'camp')->pluck('id')->all();
+
+        $toursById = $tourIds === []
+            ? collect()
+            : (clone $tourQuery)
+                ->with(['user.reviews', 'boatType'])
+                ->whereIn('guidings.id', $tourIds)
+                ->get()
+                ->keyBy('id');
+
+        $tripsById = $tripIds === []
+            ? collect()
+            : (clone $tripQuery)
+                ->whereIn('id', $tripIds)
+                ->get()
+                ->keyBy('id');
+
+        $campsById = $campIds === []
+            ? collect()
+            : (clone $campQuery)
+                ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])
+                ->whereIn('id', $campIds)
+                ->get()
+                ->keyBy('id');
+
+        return $pageKeys->map(function (array $key) use ($toursById, $tripsById, $campsById) {
+            $model = match ($key['type']) {
+                'tour' => $toursById->get($key['id']),
+                'trip' => $tripsById->get($key['id']),
+                default => $campsById->get($key['id']),
+            };
+
+            if ($model === null) {
+                return null;
+            }
+
+            return [
+                'type' => $key['type'],
+                'model' => $model,
+            ];
+        })->filter()->values();
     }
 
     /**
@@ -215,6 +290,10 @@ class OfferCatalogPageService
             $query->whereRaw('LOWER(CAST(target_fish AS CHAR)) LIKE ?', ['%'.$needle.'%']);
         }
 
+        if ($filter->numGuests !== null) {
+            $query->where('max_guests', '>=', $filter->numGuests);
+        }
+
         if ($filter->placeLat !== null && $filter->placeLng !== null) {
             $geo = Guiding::locationFilter(
                 $filter->city,
@@ -223,7 +302,7 @@ class OfferCatalogPageService
                 null,
                 $filter->placeLat,
                 $filter->placeLng,
-                function_exists('guidingLocationGeoParams') ? guidingLocationGeoParams($request) : [],
+                function_exists('guidingLocationGeoParams') ? guidingLocationGeoParams($request) : $filter->geoSearchParams(),
             );
             $ids = $geo['ids'] ?? [];
             if ($ids === []) {
@@ -234,7 +313,7 @@ class OfferCatalogPageService
         }
 
         if ($filter->country !== null && $filter->country !== '') {
-            $variants = CountrySlug::storageVariants($filter->country);
+            $variants = CountrySlug::storageVariants($filter->country, $filter->countryShort);
             $query->where(function (Builder $q) use ($variants) {
                 foreach ($variants as $variant) {
                     $lower = mb_strtolower($variant, 'UTF-8');
@@ -251,6 +330,14 @@ class OfferCatalogPageService
     {
         $query = $this->trips->queryForCountry($vacationFilter);
 
+        if ($filter->numGuests !== null) {
+            $guests = $filter->numGuests;
+            $query->where(function (Builder $q) use ($guests) {
+                $q->whereNull('group_size_max')
+                    ->orWhere('group_size_max', '>=', $guests);
+            });
+        }
+
         return $this->applyListingGeo($query, $filter, 'latitude', 'longitude');
     }
 
@@ -258,16 +345,53 @@ class OfferCatalogPageService
     {
         $query = $this->camps->queryForCountry($vacationFilter);
 
+        if ($filter->numGuests !== null) {
+            $guests = $filter->numGuests;
+            $query->whereHas('accommodations', function (Builder $q) use ($guests) {
+                $q->where('accommodations.status', 'active')
+                    ->where(function (Builder $capacity) use ($guests) {
+                        $capacity->whereNull('accommodations.max_occupancy')
+                            ->orWhere('accommodations.max_occupancy', '>=', $guests);
+                    });
+            });
+        }
+
         return $this->applyListingGeo($query, $filter, 'latitude', 'longitude');
     }
 
+    /**
+     * Align trip/camp geo with tours: country searches use country filter (or bbox),
+     * not a tight city radius around the country centroid.
+     */
     private function applyListingGeo(Builder $query, OfferListingFilter $filter, string $latCol, string $lngCol): Builder
     {
         if ($filter->placeLat === null || $filter->placeLng === null) {
             return $query;
         }
 
-        $radiusKm = (int) config('location_search.scopes.city.radius_fallback_km', 20);
+        $geoParams = $filter->geoSearchParams();
+        $placeTypes = $this->geoSearch->normalizePlaceTypes($geoParams['place_types'] ?? null);
+        $scope = $this->geoSearch->detectScope($placeTypes, $geoParams);
+
+        // Country-level place (e.g. Spain): country column filter already applied via repository.
+        $isCountryPlace = $scope === GeospatialSearchService::SCOPE_COUNTRY
+            || (filled($filter->country) && blank($filter->city) && blank($filter->region));
+
+        if ($isCountryPlace && filled($filter->country)) {
+            return $query;
+        }
+
+        $bounds = $this->geoSearch->normalizeBounds($geoParams);
+        if ($bounds !== null) {
+            return $query
+                ->whereNotNull($latCol)
+                ->whereNotNull($lngCol)
+                ->whereBetween($latCol, [$bounds['sw_lat'], $bounds['ne_lat']])
+                ->whereBetween($lngCol, [$bounds['sw_lng'], $bounds['ne_lng']]);
+        }
+
+        $scopeConfig = config("location_search.scopes.{$scope}", config('location_search.scopes.city'));
+        $radiusKm = (int) ($scopeConfig['radius_fallback_km'] ?? 20);
         $meters = $radiusKm * 1000;
 
         return $query

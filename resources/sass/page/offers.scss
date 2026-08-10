@@ -47,10 +47,24 @@ $muted: #787780;
   }
 
   &__header {
+    margin-bottom: 0.85rem;
+
+    &--sidebar {
+      margin-bottom: 1rem;
+    }
+
+    &--mobile {
+      margin-bottom: 1rem;
+    }
+  }
+
+  &__toolbar {
     display: flex;
-    align-items: flex-end;
+    width: 100%;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    flex-wrap: nowrap;
     margin-bottom: 1.25rem;
   }
 
@@ -59,6 +73,7 @@ $muted: #787780;
     font-weight: 700;
     margin: 0 0 0.2rem;
     color: $slate;
+    line-height: 1.25;
   }
 
   &__count,
@@ -72,8 +87,11 @@ $muted: #787780;
   }
 
   &__sort {
+    display: flex;
     align-items: center;
+    flex: 0 0 auto;
     gap: 0.5rem;
+    margin-left: auto;
   }
 
   &__sort-label {
@@ -133,17 +151,84 @@ $muted: #787780;
 }
 
 .offers-filters {
+  &__type-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    min-width: 0;
+
+    &--toolbar {
+      flex: 1 1 auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.55rem;
+      padding-right: 0.5rem;
+    }
+  }
+
   &__type-group {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
     margin-bottom: 1rem;
+
+    &--toolbar,
+    &--subrow {
+      display: flex !important;
+      margin-bottom: 0 !important;
+      flex: 0 1 auto;
+      min-width: 0;
+      justify-content: flex-start;
+      flex-direction: row !important;
+      flex-wrap: wrap;
+      width: auto !important;
+      align-items: center;
+    }
+
+    &--subrow {
+      gap: 0.35rem;
+    }
+  }
+
+  &__vacation-subrow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    width: auto;
+    max-width: 100%;
+    animation: offers-vacation-subrow-in 0.22s ease-out;
+  }
+
+  &__type-stack--toolbar &__vacation-subrow {
+    &::before {
+      content: '';
+      display: block;
+      flex: 0 0 auto;
+      width: 1px;
+      height: 1.15rem;
+      margin: 0 0.1rem 0 0.15rem;
+      background: rgba($slate, 0.16);
+    }
   }
 
   &__type-btn {
     border-radius: 999px !important;
     font-size: 0.8rem !important;
     padding: 0.4rem 0.75rem !important;
+    transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:hover:not(.is-active) {
+      transform: scale(1.02);
+      opacity: 0.92;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
 
     &.is-active {
       background: rgba($slate, 0.92) !important;
@@ -154,6 +239,12 @@ $muted: #787780;
     &--tour.is-active {
       background: $tour !important;
       border-color: $tour !important;
+    }
+
+    &--vacation.is-active,
+    &--vacation-all.is-active {
+      background: $trip !important;
+      border-color: $trip !important;
     }
 
     &--trip.is-active {
@@ -190,6 +281,87 @@ $muted: #787780;
       border-color: darken($slate, 6%);
     }
   }
+}
+
+.offers-persons-stepper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid #E85B40;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+
+  [data-offers-persons-input] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__btn {
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgba($slate, 0.18);
+    border-radius: 4px;
+    background: #fff;
+    color: $slate;
+    font-size: 1.1rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+      background: rgba($slate, 0.04);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  &__value {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $slate;
+    white-space: nowrap;
+    min-width: 0;
+
+    .fa-user {
+      color: $muted;
+      font-size: 0.85rem;
+    }
+  }
+
+  &--mobile,
+  &--modal {
+    min-height: 44px;
+  }
+}
+
+.short-header .search-input.offers-persons-stepper-wrap {
+  position: relative;
+  flex: 0 0 220px !important;
+  width: 220px !important;
+  max-width: 220px;
+  margin-right: 12px;
 }
 
 .offers-card {
@@ -503,5 +675,17 @@ $muted: #787780;
         border-color: $coral;
       }
     }
+  }
+}
+
+@keyframes offers-vacation-subrow-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

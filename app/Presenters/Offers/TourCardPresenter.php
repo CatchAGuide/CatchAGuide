@@ -10,7 +10,7 @@ class TourCardPresenter
     {
         $title = translate($guiding->title);
         $gallery = $this->galleryImages($guiding);
-        $image = $gallery[0] ?? (get_featured_image_link($guiding) ?: asset('images/placeholder_guide.jpg'));
+        $image = $gallery[0] ?? asset('images/placeholder_guide.jpg');
         $price = $guiding->getLowestPrice();
         $priceAmount = $price > 0
             ? '€'.number_format((float) $price, 0)
@@ -84,23 +84,7 @@ class TourCardPresenter
      */
     private function galleryImages(Guiding $guiding): array
     {
-        if (! empty($guiding->cached_gallery_images) && is_array($guiding->cached_gallery_images)) {
-            return array_values(array_filter($guiding->cached_gallery_images));
-        }
-
-        $decoded = is_string($guiding->gallery_images)
-            ? (json_decode($guiding->gallery_images, true) ?: [])
-            : (array) ($guiding->gallery_images ?? []);
-
-        $images = array_values(array_filter($decoded));
-        if ($images === []) {
-            $featured = get_featured_image_link($guiding);
-            if ($featured) {
-                $images[] = $featured;
-            }
-        }
-
-        return $images;
+        return get_galleries_image_link($guiding, 0);
     }
 
     /**
