@@ -30,7 +30,8 @@ class GuidingsCatalogHeaderTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('cag-site-nav', $html);
-        $this->assertStringContainsString('cag-site-nav--solid', $html);
+        $this->assertStringContainsString('cag-site-nav-shell', $html);
+        $this->assertStringContainsString('cag-site-nav--overlay', $html);
         $this->assertStringContainsString('guidings-page-header', $html);
         $this->assertStringContainsString('guidings-page-header__band', $html);
         $this->assertStringNotContainsString('guidings-page-header__image', $html);

@@ -19,9 +19,9 @@ class OfferCatalogPageServiceFacetTest extends TestCase
         $guidingFilters->shouldReceive('getFilteredGuidingIds')
             ->once()
             ->with(Mockery::on(function (Request $request) {
-                return $request->input('methods') === ['5']
+                return $request->input('methods') === ['5', '8']
                     && $request->input('water') === ['9']
-                    && $request->input('duration_types') === ['half_day'];
+                    && $request->input('duration_types') === ['half_day', 'full_day'];
             }))
             ->andReturn([11, 22]);
 
@@ -33,9 +33,9 @@ class OfferCatalogPageServiceFacetTest extends TestCase
 
         $this->invoke($service, 'applyTourFacets', $query, OfferListingFilter::fromRequest([
             'type' => 'tour',
-            'methods' => '5',
+            'methods' => ['5', '8'],
             'water' => '9',
-            'duration_types' => 'half_day',
+            'duration_types' => ['half_day', 'full_day'],
         ]));
     }
 

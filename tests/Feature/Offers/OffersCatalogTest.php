@@ -110,13 +110,13 @@ class OffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(__('offers.filter_species'), false);
-        $response->assertSee('data-offers-species-select', false);
-        $response->assertSee('data-offers-species-toggle', false);
-        $response->assertSee('data-offers-species-checkbox', false);
+        $response->assertSee('data-offers-multi-select', false);
+        $response->assertSee('data-offers-multi-toggle', false);
+        $response->assertSee('data-offers-multi-checkbox', false);
         $response->assertSee('name="species[]"', false);
         $response->assertSee('value="5"', false);
         $response->assertSee('Pike', false);
-        $response->assertSee('offers-species-select__tag', false);
+        $response->assertSee('offers-multi-select__tag', false);
         $response->assertSee(__('offers.filter_species_search'), false);
         $response->assertDontSee('<select name="species"', false);
     }
@@ -136,10 +136,16 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.filter_method'), false);
         $response->assertSee(__('offers.filter_water_type'), false);
         $response->assertSee(__('offers.filter_duration'), false);
-        $response->assertSee(__('offers.filter_show_all'), false);
-        $response->assertSee('name="methods"', false);
-        $response->assertSee('name="water"', false);
-        $response->assertSee('name="duration_types"', false);
+        $response->assertSee(__('offers.filter_method_placeholder'), false);
+        $response->assertSee(__('offers.filter_water_placeholder'), false);
+        $response->assertSee(__('offers.filter_duration_placeholder'), false);
+        $response->assertSee('data-input-name="methods[]"', false);
+        $response->assertSee('data-input-name="water[]"', false);
+        $response->assertSee('data-input-name="duration_types[]"', false);
+        $response->assertSee('data-offers-multi-select', false);
+        $response->assertDontSee('<select name="methods"', false);
+        $response->assertDontSee('<select name="water"', false);
+        $response->assertDontSee('<select name="duration_types"', false);
         $response->assertDontSee('name="accommodation_type"', false);
         $response->assertDontSee('name="has_guiding"', false);
     }

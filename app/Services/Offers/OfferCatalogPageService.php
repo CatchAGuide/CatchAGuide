@@ -592,9 +592,13 @@ class OfferCatalogPageService
         }
 
         $params = array_filter([
-            'methods' => $filter->methodId !== null ? [(string) $filter->methodId] : null,
-            'water' => $filter->waterId !== null ? [(string) $filter->waterId] : null,
-            'duration_types' => $filter->durationType !== null ? [$filter->durationType] : null,
+            'methods' => $filter->methodIds !== []
+                ? array_map(static fn (int $id): string => (string) $id, $filter->methodIds)
+                : null,
+            'water' => $filter->waterIds !== []
+                ? array_map(static fn (int $id): string => (string) $id, $filter->waterIds)
+                : null,
+            'duration_types' => $filter->durationTypes !== [] ? $filter->durationTypes : null,
         ]);
 
         if ($params === []) {

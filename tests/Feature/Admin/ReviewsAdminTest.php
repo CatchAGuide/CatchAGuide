@@ -5,11 +5,22 @@ namespace Tests\Feature\Admin;
 use App\Models\Employee;
 use App\Models\Review;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class ReviewsAdminTest extends TestCase
 {
     use DatabaseTransactions;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // APP_URL is often "cag.local" without a scheme; url() then prefixes
+        // paths as /cag.local/... and PHPUnit requests 404. Force a root URL.
+        config(['app.url' => 'http://cag.local']);
+        URL::forceRootUrl('http://cag.local');
+    }
 
     private function actingAsEmployee(): Employee
     {
@@ -27,10 +38,6 @@ class ReviewsAdminTest extends TestCase
     {
         $response = $this->get('/admin/reviews');
 
-        if ($response->status() === 404) {
-            $this->markTestSkipped('Admin reviews route not reachable in this test environment.');
-        }
-
         $response->assertRedirect();
     }
 
@@ -39,10 +46,6 @@ class ReviewsAdminTest extends TestCase
         $this->actingAsEmployee();
 
         $response = $this->get('/admin/reviews');
-
-        if ($response->status() === 404) {
-            $this->markTestSkipped('Admin reviews route not reachable in this test environment.');
-        }
 
         $response->assertOk();
         $response->assertSee(__('admin.reviews.page_title'), false);
@@ -65,11 +68,6 @@ class ReviewsAdminTest extends TestCase
         }
 
         $autoResponse = $this->get('/admin/reviews?is_automatic=1');
-
-        if ($autoResponse->status() === 404) {
-            $this->markTestSkipped('Admin reviews route not reachable in this test environment.');
-        }
-
         $autoResponse->assertOk();
         $autoResponse->assertViewHas('reviews', function ($reviews) {
             return $reviews->isNotEmpty()
@@ -94,10 +92,6 @@ class ReviewsAdminTest extends TestCase
         }
 
         $response = $this->getJson('/admin/reviews/' . $review->id);
-
-        if ($response->status() === 404) {
-            $this->markTestSkipped('Admin reviews route not reachable in this test environment.');
-        }
 
         $response->assertOk();
         $response->assertJsonPath('id', $review->id);

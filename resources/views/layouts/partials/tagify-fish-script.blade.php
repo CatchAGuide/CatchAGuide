@@ -25,6 +25,68 @@
         });
     }
 
+    function enableTagStripDrag(tagify) {
+        var strip = tagify && tagify.DOM && tagify.DOM.scope;
+        if (!strip || strip._fishDragBound) {
+            return;
+        }
+        strip._fishDragBound = true;
+
+        var isDragging = false;
+        var startX = 0;
+        var startScroll = 0;
+        var moved = false;
+
+        strip.addEventListener('pointerdown', function (event) {
+            // Keep remove/input interactions normal; drag empty strip / tags area.
+            if (event.button !== 0) {
+                return;
+            }
+            if (event.target.closest('.tagify__tag__removeBtn, .tagify__input')) {
+                return;
+            }
+            isDragging = true;
+            moved = false;
+            startX = event.clientX;
+            startScroll = strip.scrollLeft;
+            strip.setPointerCapture(event.pointerId);
+            strip.classList.add('is-dragging');
+        });
+
+        strip.addEventListener('pointermove', function (event) {
+            if (!isDragging) {
+                return;
+            }
+            var delta = event.clientX - startX;
+            if (Math.abs(delta) > 3) {
+                moved = true;
+            }
+            strip.scrollLeft = startScroll - delta;
+        });
+
+        function endDrag(event) {
+            if (!isDragging) {
+                return;
+            }
+            isDragging = false;
+            strip.classList.remove('is-dragging');
+            try {
+                strip.releasePointerCapture(event.pointerId);
+            } catch (e) {}
+        }
+
+        strip.addEventListener('pointerup', endDrag);
+        strip.addEventListener('pointercancel', endDrag);
+        strip.addEventListener('click', function (event) {
+            // Prevent accidental tag remove/open when finishing a drag.
+            if (moved) {
+                event.preventDefault();
+                event.stopPropagation();
+                moved = false;
+            }
+        }, true);
+    }
+
     function initFishTagify(inputEl) {
         if (!inputEl || inputEl._tagifyInited) return;
         inputEl._tagifyInited = true;
@@ -56,6 +118,7 @@
         });
 
         if (fishSegment) {
+            enableTagStripDrag(tagify);
             tagify.on('dropdown:show', function () {
                 var dd = tagify.DOM && tagify.DOM.dropdown;
                 if (!dd) {

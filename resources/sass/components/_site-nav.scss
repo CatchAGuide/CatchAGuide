@@ -153,7 +153,12 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__lang {
+  display: inline-flex;
   align-items: center;
+  align-self: center;
+  height: auto;
+  line-height: 1;
+  margin: 0;
 
   .bootstrap-select {
     width: auto !important;
@@ -169,12 +174,19 @@ $cag-site-sand: #faf5ee;
     --bs-btn-hover-border-color: transparent;
     --bs-btn-active-bg: transparent;
     --bs-btn-active-border-color: transparent;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center;
+    gap: 0.2rem;
+    min-height: 0 !important;
+    height: 1.5rem !important;
+    line-height: 1 !important;
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
     border: 0 !important;
     box-shadow: none !important;
-    padding: 0.25rem 0.15rem !important;
+    padding: 0 !important;
     outline: none !important;
   }
 
@@ -193,22 +205,41 @@ $cag-site-sand: #faf5ee;
   .bootstrap-select .dropdown-toggle::after {
     color: currentColor;
     opacity: 0.85;
-    margin-left: 0.35rem;
+    margin: 0 0 0 0.25rem !important;
+    vertical-align: middle;
+    align-self: center;
+    position: static;
+    border-top-width: 0.3em;
   }
 
   .filter-option {
-    display: flex;
-    align-items: center;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center;
+    height: 1.15rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
     background: transparent !important;
   }
 
   .filter-option-inner,
   .filter-option-inner-inner {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 1.15rem !important;
+    line-height: 1 !important;
+    padding: 0 !important;
     background: transparent !important;
   }
 
   .filter-option .fi {
-    font-size: 1.15em;
+    display: inline-block;
+    width: 1.15rem;
+    height: 0.85rem;
+    font-size: 1rem;
+    line-height: 0.85rem !important;
+    vertical-align: middle;
+    transform: none;
   }
 }
 
@@ -220,6 +251,10 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__login {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  line-height: 1;
   color: var(--cag-slate);
   font-weight: 700;
   text-decoration: none;

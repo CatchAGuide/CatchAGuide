@@ -749,7 +749,7 @@ $muted: #787780;
   }
 }
 
-.offers-species-select {
+.offers-multi-select {
   position: relative;
   width: 100%;
 
@@ -971,7 +971,7 @@ $muted: #787780;
 }
 
 .vacation-filters-offcanvas {
-  .offers-species-select__dropdown {
+  .offers-multi-select__dropdown {
     z-index: 1060;
   }
 }

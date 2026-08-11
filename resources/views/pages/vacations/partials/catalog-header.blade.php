@@ -13,14 +13,14 @@
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
 @endphp
-<div class="vacations-page-header-shell" data-vacations-header-shell>
+<div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
-        'overlay' => false,
+        'overlay' => true,
         'idPrefix' => 'vacations',
     ])
 
     <section class="vacations-page-header" data-vacations-page-header>
-        <div class="vacations-page-header__band">
+        <div class="vacations-page-header__band" data-vacations-header-band>
             <div class="vacations-page-header__inner vacations-page-header__inner--copy">
                 <div class="vacations-page-header__copy">
                     <h1 class="vacations-page-header__title">{{ $listingTitle }}</h1>
@@ -129,6 +129,18 @@
         event.preventDefault();
         goToCountry();
     });
+
+    var shell = document.querySelector('[data-vacations-header-shell]');
+    var nav = shell ? shell.querySelector('.cag-site-nav') : null;
+    var band = shell ? shell.querySelector('[data-vacations-header-band]') : null;
+    if (nav && band) {
+        function syncNavSolid() {
+            nav.classList.toggle('is-solid', band.getBoundingClientRect().bottom <= nav.offsetHeight + 12);
+        }
+        window.addEventListener('scroll', syncNavSolid, { passive: true });
+        window.addEventListener('resize', syncNavSolid);
+        syncNavSolid();
+    }
 })();
 </script>
 @endonce

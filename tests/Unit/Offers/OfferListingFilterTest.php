@@ -151,15 +151,25 @@ class OfferListingFilterTest extends TestCase
     {
         $tour = OfferListingFilter::fromRequest([
             'type' => 'tour',
-            'methods' => '12',
+            'methods' => ['12', '4'],
             'water' => ['7'],
-            'duration_types' => 'full_day',
+            'duration_types' => ['full_day', 'half_day', 'invalid'],
         ]);
 
-        $this->assertSame(12, $tour->methodId);
-        $this->assertSame(7, $tour->waterId);
-        $this->assertSame('full_day', $tour->durationType);
+        $this->assertSame([12, 4], $tour->methodIds);
+        $this->assertSame([7], $tour->waterIds);
+        $this->assertSame(['full_day', 'half_day'], $tour->durationTypes);
         $this->assertTrue($tour->showsTourFacets());
+
+        $legacyScalar = OfferListingFilter::fromRequest([
+            'type' => 'tour',
+            'methods' => '12',
+            'water' => '7',
+            'duration_types' => 'full_day',
+        ]);
+        $this->assertSame([12], $legacyScalar->methodIds);
+        $this->assertSame([7], $legacyScalar->waterIds);
+        $this->assertSame(['full_day'], $legacyScalar->durationTypes);
 
         $ignored = OfferListingFilter::fromRequest([
             'type' => 'vacation',
@@ -169,9 +179,9 @@ class OfferListingFilterTest extends TestCase
             'duration_types' => 'full_day',
         ]);
 
-        $this->assertNull($ignored->methodId);
-        $this->assertNull($ignored->waterId);
-        $this->assertNull($ignored->durationType);
+        $this->assertSame([], $ignored->methodIds);
+        $this->assertSame([], $ignored->waterIds);
+        $this->assertSame([], $ignored->durationTypes);
         $this->assertFalse($ignored->showsTourFacets());
     }
 

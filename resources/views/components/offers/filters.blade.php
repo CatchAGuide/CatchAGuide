@@ -172,6 +172,9 @@
                 'selectClass' => 'form-select form-select-sm',
                 'fieldClass' => 'vacation-filters__field',
                 'speciesInputPrefix' => 'offers-species-sidebar',
+                'methodsInputPrefix' => 'offers-methods-sidebar',
+                'waterInputPrefix' => 'offers-water-sidebar',
+                'durationInputPrefix' => 'offers-duration-sidebar',
                 'filter' => $filter,
                 'countries' => $countries,
                 'speciesOptions' => $speciesOptions,
@@ -198,7 +201,7 @@
     </div>
     @endif
 </form>
-@include('components.offers.partials.species-tagify-script')
+@include('components.offers.partials.multi-select-script')
 @endif
 
 @if($showMobile)
@@ -524,6 +527,9 @@
                     'selectClass' => 'form-select',
                     'fieldClass' => 'mb-3',
                     'speciesInputPrefix' => 'offers-species-offcanvas',
+                    'methodsInputPrefix' => 'offers-methods-offcanvas',
+                    'waterInputPrefix' => 'offers-water-offcanvas',
+                    'durationInputPrefix' => 'offers-duration-offcanvas',
                     'filter' => $filter,
                     'countries' => $countries,
                     'speciesOptions' => $speciesOptions,
@@ -552,7 +558,7 @@
                     </a>
                 @endif
             </form>
-            @include('components.offers.partials.species-tagify-script')
+            @include('components.offers.partials.multi-select-script')
         </div>
     </div>
 @endif

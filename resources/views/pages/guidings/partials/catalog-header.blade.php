@@ -9,14 +9,14 @@
         ? translate('Alle Guidings bei ').$place
         : translate('Alle Guidings'));
 @endphp
-<div class="guidings-page-header-shell" data-guidings-header-shell>
+<div class="guidings-page-header-shell cag-site-nav-shell" data-guidings-header-shell>
     @include('layouts.partials.site-nav', [
-        'overlay' => false,
+        'overlay' => true,
         'idPrefix' => 'guidings',
     ])
 
     <section class="guidings-page-header" data-guidings-page-header>
-        <div class="guidings-page-header__band">
+        <div class="guidings-page-header__band" data-guidings-header-band>
             <div class="guidings-page-header__inner guidings-page-header__inner--copy">
                 <div class="guidings-page-header__copy">
                     <h1 class="guidings-page-header__title">{{ $listingTitle }}</h1>
@@ -105,3 +105,25 @@
         </div>
     </section>
 </div>
+
+@once
+<script>
+(function () {
+    var shell = document.querySelector('[data-guidings-header-shell]');
+    if (!shell) {
+        return;
+    }
+    var nav = shell.querySelector('.cag-site-nav');
+    var band = shell.querySelector('[data-guidings-header-band]');
+    if (!nav || !band) {
+        return;
+    }
+    function syncNavSolid() {
+        nav.classList.toggle('is-solid', band.getBoundingClientRect().bottom <= nav.offsetHeight + 12);
+    }
+    window.addEventListener('scroll', syncNavSolid, { passive: true });
+    window.addEventListener('resize', syncNavSolid);
+    syncNavSolid();
+})();
+</script>
+@endonce

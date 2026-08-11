@@ -18,7 +18,8 @@ class VacationsCatalogHeaderTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('cag-site-nav', $html);
-        $this->assertStringContainsString('cag-site-nav--solid', $html);
+        $this->assertStringContainsString('cag-site-nav-shell', $html);
+        $this->assertStringContainsString('cag-site-nav--overlay', $html);
         $this->assertStringContainsString('vacations-page-header', $html);
         $this->assertStringContainsString('vacations-page-header__band', $html);
         $this->assertStringNotContainsString('vacations-page-header__image', $html);

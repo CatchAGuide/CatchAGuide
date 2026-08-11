@@ -44,6 +44,9 @@ final class OfferListingFilter
      * @param  list<int>  $speciesIds
      * @param  list<string>  $speciesNames
      * @param  array<int, string>  $placeTypes
+     * @param  list<int>  $methodIds
+     * @param  list<int>  $waterIds
+     * @param  list<string>  $durationTypes
      */
     public function __construct(
         public readonly string $type = 'all',
@@ -64,9 +67,9 @@ final class OfferListingFilter
         public readonly ?float $boundsSwLat = null,
         public readonly ?float $boundsSwLng = null,
         public readonly ?string $countryShort = null,
-        public readonly ?int $methodId = null,
-        public readonly ?int $waterId = null,
-        public readonly ?string $durationType = null,
+        public readonly array $methodIds = [],
+        public readonly array $waterIds = [],
+        public readonly array $durationTypes = [],
         public readonly ?string $tripDuration = null,
         public readonly ?int $accommodationTypeId = null,
         public readonly ?bool $hasGuiding = null,
@@ -104,21 +107,18 @@ final class OfferListingFilter
         $userLat = self::nullableFloat($input['user_lat'] ?? $input['userLat'] ?? null);
         $userLng = self::nullableFloat($input['user_lng'] ?? $input['userLng'] ?? null);
 
-        $methodId = null;
-        $waterId = null;
-        $durationType = null;
+        $methodIds = [];
+        $waterIds = [];
+        $durationTypes = [];
         $tripDuration = null;
         $accommodationTypeId = null;
         $hasGuiding = null;
         $hasRentalBoat = null;
 
         if ($rawType === 'tour') {
-            $methodId = self::nullablePositiveInt(self::firstScalar($input['methods'] ?? null));
-            $waterId = self::nullablePositiveInt(self::firstScalar($input['water'] ?? null));
-            $durationType = self::nullableString(self::firstScalar($input['duration_types'] ?? null));
-            if ($durationType !== null && ! in_array($durationType, self::TOUR_DURATION_TYPES, true)) {
-                $durationType = null;
-            }
+            $methodIds = self::normalizePositiveIntIds($input['methods'] ?? null);
+            $waterIds = self::normalizePositiveIntIds($input['water'] ?? null);
+            $durationTypes = self::normalizeDurationTypes($input['duration_types'] ?? null);
         } elseif ($rawType === 'vacation' && $vacation === 'camp') {
             $accommodationTypeId = self::nullablePositiveInt($input['accommodation_type'] ?? null);
             $hasGuiding = self::nullableBool($input['has_guiding'] ?? null);
@@ -151,9 +151,9 @@ final class OfferListingFilter
             boundsSwLat: self::nullableFloat($input['bounds_sw_lat'] ?? null),
             boundsSwLng: self::nullableFloat($input['bounds_sw_lng'] ?? null),
             countryShort: self::nullableString($input['country_short'] ?? null),
-            methodId: $methodId,
-            waterId: $waterId,
-            durationType: $durationType,
+            methodIds: $methodIds,
+            waterIds: $waterIds,
+            durationTypes: $durationTypes,
             tripDuration: $tripDuration,
             accommodationTypeId: $accommodationTypeId,
             hasGuiding: $hasGuiding,
@@ -354,13 +354,55 @@ final class OfferListingFilter
         return min($guests, self::MAX_GUESTS);
     }
 
-    private static function firstScalar(mixed $value): mixed
+    /**
+     * @return list<int>
+     */
+    private static function normalizePositiveIntIds(mixed $value): array
     {
-        if (is_array($value)) {
-            return $value[0] ?? null;
+        if ($value === null || $value === '') {
+            return [];
         }
 
-        return $value;
+        $items = is_array($value) ? $value : [$value];
+        $ids = [];
+
+        foreach ($items as $item) {
+            if ($item === null || $item === '') {
+                continue;
+            }
+
+            if (is_numeric($item) && (int) $item > 0) {
+                $ids[] = (int) $item;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function normalizeDurationTypes(mixed $value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        $items = is_array($value) ? $value : [$value];
+        $types = [];
+
+        foreach ($items as $item) {
+            if ($item === null || $item === '') {
+                continue;
+            }
+
+            $normalized = (string) $item;
+            if (in_array($normalized, self::TOUR_DURATION_TYPES, true)) {
+                $types[] = $normalized;
+            }
+        }
+
+        return array_values(array_unique($types));
     }
 
     /**
