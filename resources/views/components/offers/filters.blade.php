@@ -287,6 +287,82 @@
     @once
         <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const locationToastStorageKey = 'offersNearestLocationToast';
+            const locationMessages = {
+                requesting: @json(__('offers.location_requesting')),
+                denied: @json(__('offers.location_denied')),
+                unavailable: @json(__('offers.location_unavailable')),
+                unsupported: @json(__('offers.location_unsupported')),
+                fallbackRecommended: @json(__('offers.location_fallback_recommended')),
+            };
+
+            function notifyLocation(type, message) {
+                if (typeof toastr === 'undefined' || !message) {
+                    return;
+                }
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: type === 'info' ? 4000 : 8000,
+                    extendedTimeOut: 2000,
+                    positionClass: 'toast-top-right',
+                };
+                if (typeof toastr[type] === 'function') {
+                    toastr[type](message);
+                }
+            }
+
+            function queueLocationToast(type, message) {
+                try {
+                    sessionStorage.setItem(locationToastStorageKey, JSON.stringify({
+                        type: type,
+                        message: message,
+                    }));
+                } catch (e) {
+                    // Ignore storage failures; in-page toasts still work when we do not navigate.
+                }
+            }
+
+            function flushQueuedLocationToast() {
+                try {
+                    const raw = sessionStorage.getItem(locationToastStorageKey);
+                    if (!raw) {
+                        return;
+                    }
+                    sessionStorage.removeItem(locationToastStorageKey);
+                    const payload = JSON.parse(raw);
+                    notifyLocation(payload.type, payload.message);
+                } catch (e) {
+                    // Ignore invalid payloads.
+                }
+            }
+
+            flushQueuedLocationToast();
+
+            function existingNearestCoords() {
+                const params = new URLSearchParams(window.location.search);
+                const lat = params.get('user_lat') || params.get('placeLat');
+                const lng = params.get('user_lng') || params.get('placeLng');
+                if (!lat || !lng) {
+                    return null;
+                }
+                return { lat: lat, lng: lng };
+            }
+
+            function currentSortValue() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('sortby') || 'recommended';
+            }
+
+            function restoreSortControls() {
+                const previous = currentSortValue() === 'nearest' && !existingNearestCoords()
+                    ? 'recommended'
+                    : currentSortValue();
+                document.querySelectorAll('[data-offers-sort-select]').forEach(function (select) {
+                    select.value = previous;
+                });
+            }
+
             function navigateWithSort(sortValue, coords) {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (sortValue) {
@@ -308,38 +384,64 @@
                     : window.location.pathname;
             }
 
-            function applySort(sortValue) {
-                if (sortValue !== 'nearest') {
-                    navigateWithSort(sortValue);
+            function locationErrorMessage(error) {
+                if (!error || typeof error.code === 'undefined') {
+                    return locationMessages.unavailable;
+                }
+                // 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
+                if (error.code === 1) {
+                    return locationMessages.denied;
+                }
+                return locationMessages.unavailable;
+            }
+
+            function handleNearestLocationFailure(message, fallbackCoords) {
+                if (fallbackCoords) {
+                    queueLocationToast('warning', message);
+                    navigateWithSort('nearest', fallbackCoords);
                     return;
                 }
 
-                const existingLat = new URLSearchParams(window.location.search).get('user_lat')
-                    || new URLSearchParams(window.location.search).get('placeLat');
-                const existingLng = new URLSearchParams(window.location.search).get('user_lng')
-                    || new URLSearchParams(window.location.search).get('placeLng');
-                if (existingLat && existingLng) {
-                    navigateWithSort(sortValue, { lat: existingLat, lng: existingLng });
-                    return;
-                }
+                notifyLocation('warning', message);
+                notifyLocation('info', locationMessages.fallbackRecommended);
+                restoreSortControls();
+            }
+
+            function applyNearestSort() {
+                const fallbackCoords = existingNearestCoords();
 
                 if (!navigator.geolocation) {
-                    navigateWithSort(sortValue);
+                    handleNearestLocationFailure(locationMessages.unsupported, fallbackCoords);
                     return;
                 }
+
+                notifyLocation('info', locationMessages.requesting);
 
                 navigator.geolocation.getCurrentPosition(
                     function (position) {
-                        navigateWithSort(sortValue, {
+                        navigateWithSort('nearest', {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                         });
                     },
-                    function () {
-                        navigateWithSort(sortValue);
+                    function (error) {
+                        handleNearestLocationFailure(locationErrorMessage(error), fallbackCoords);
                     },
-                    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 8000,
+                        // Short cache: re-selecting nearest still rechecks, but can reuse a recent fix.
+                        maximumAge: 60000,
+                    }
                 );
+            }
+
+            function applySort(sortValue) {
+                if (sortValue === 'nearest') {
+                    applyNearestSort();
+                    return;
+                }
+                navigateWithSort(sortValue);
             }
 
             document.querySelectorAll('.offers-mobile-sort-option').forEach(function (option) {

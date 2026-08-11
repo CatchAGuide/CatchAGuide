@@ -74,49 +74,51 @@ function validateSearch(event, inputId) {
     });
 
     // Mouse drag-to-scroll for horizontal rails (touch keeps native pan).
+    // Capture only after the drag threshold so plain clicks still hit <a> cards.
     var enableDragScroll = function (el, opts) {
         if (!el || el.getAttribute('data-cag-drag-scroll') === '1') return;
         el.setAttribute('data-cag-drag-scroll', '1');
         opts = opts || {};
 
-        var capId = null;
+        var activePointerId = null;
         var startX = 0;
         var startSl = 0;
         var dragging = false;
         var suppressClick = false;
-        var threshold = 6;
+        var threshold = 8;
 
         var cleanup = function () {
-            if (capId !== null) {
-                try { el.releasePointerCapture(capId); } catch (err) {}
-                capId = null;
+            if (dragging && activePointerId !== null) {
+                try { el.releasePointerCapture(activePointerId); } catch (err) {}
             }
+            activePointerId = null;
             dragging = false;
             el.classList.remove('is-dragging');
         };
 
         el.addEventListener('dragstart', function (e) {
-            e.preventDefault();
+            // Prevent browser ghost-dragging images/links while we may scroll.
+            if (dragging) e.preventDefault();
         });
 
         el.addEventListener('pointerdown', function (e) {
             if (e.pointerType !== 'mouse' || e.button !== 0 || !e.isPrimary) return;
             if (e.target.closest('button, input, select, textarea')) return;
-            capId = e.pointerId;
+            activePointerId = e.pointerId;
             startX = e.clientX;
             startSl = el.scrollLeft;
             dragging = false;
             suppressClick = false;
-            try { el.setPointerCapture(capId); } catch (err) {}
-            if (typeof opts.onInteract === 'function') opts.onInteract();
         });
 
         el.addEventListener('pointermove', function (e) {
-            if (e.pointerId !== capId || e.pointerType !== 'mouse') return;
+            if (e.pointerId !== activePointerId || e.pointerType !== 'mouse') return;
             var dx = e.clientX - startX;
             if (!dragging && Math.abs(dx) > threshold) {
                 dragging = true;
                 el.classList.add('is-dragging');
+                try { el.setPointerCapture(activePointerId); } catch (err) {}
+                if (typeof opts.onInteract === 'function') opts.onInteract();
             }
             if (dragging) {
                 e.preventDefault();
@@ -126,7 +128,7 @@ function validateSearch(event, inputId) {
         }, { passive: false });
 
         el.addEventListener('pointerup', function (e) {
-            if (e.pointerId !== capId) return;
+            if (e.pointerId !== activePointerId) return;
             if (dragging) {
                 suppressClick = true;
                 window.setTimeout(function () { suppressClick = false; }, 200);

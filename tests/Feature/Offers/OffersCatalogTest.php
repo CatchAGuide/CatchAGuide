@@ -88,6 +88,9 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.sort_nearest'), false);
         $response->assertSee(__('offers.sort_price_asc'), false);
         $response->assertSee(__('offers.sort_price_desc'), false);
+        $response->assertSee('offersNearestLocationToast', false);
+        $response->assertSee('applyNearestSort', false);
+        $response->assertSee('navigator.geolocation.getCurrentPosition', false);
         $response->assertSee(__('offers.filter_show_all'), false);
         $response->assertSee('<select name="country"', false);
     }
