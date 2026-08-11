@@ -129,10 +129,11 @@ class OfferCatalogPageService
         $campsTotal = (clone $campQuery)->count();
 
         $listings = $this->buildListingsPaginator($filter, $tourQuery, $tripQuery, $campQuery, $perPage);
-        $cards = collect($listings->items())->map(function (array $item) {
+        $numGuests = $filter->numGuests;
+        $cards = collect($listings->items())->map(function (array $item) use ($numGuests) {
             $card = match ($item['type']) {
-                'tour' => $this->tourPresenter->presentListRow($item['model']),
-                'trip' => $this->tripPresenter->presentListRow($item['model']),
+                'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests),
+                'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests),
                 default => $this->campPresenter->presentListRow($item['model']),
             };
             $card['badge'] = __('offers.badge_'.$card['type']);
@@ -161,10 +162,10 @@ class OfferCatalogPageService
         }
 
         $suggestedCards = $suggestedItems
-            ->map(function (array $item) {
+            ->map(function (array $item) use ($numGuests) {
                 $card = match ($item['type']) {
-                    'tour' => $this->tourPresenter->presentListRow($item['model']),
-                    'trip' => $this->tripPresenter->presentListRow($item['model']),
+                    'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests),
+                    'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests),
                     default => $this->campPresenter->presentListRow($item['model']),
                 };
                 $card['badge'] = __('offers.badge_'.$card['type']);

@@ -2,6 +2,7 @@
 
 namespace App\Presenters\Offers;
 
+use App\Domain\Offers\OfferListingFilter;
 use App\Models\Guiding;
 
 class TourCardPresenter
@@ -51,22 +52,19 @@ class TourCardPresenter
         ];
     }
 
-    public function presentListRow(Guiding $guiding): array
+    public function presentListRow(Guiding $guiding, ?int $numGuests = null): array
     {
         $card = $this->present($guiding);
         $price = $guiding->getLowestPrice();
         $inclusions = $this->inclusionNames($guiding);
         $waters = $this->waterNames($guiding);
+        $guests = $numGuests ?? OfferListingFilter::DEFAULT_GUESTS;
 
         $card['layout'] = 'row';
         $card['image_badge'] = null;
         $card['listing_included'] = array_slice($inclusions, 0, 2);
         $card['listing_included_extra'] = max(0, count($inclusions) - 2);
-        $card['listing_price_prefix'] = __('message.from');
-        $card['listing_price_display'] = $price > 0
-            ? number_format((float) $price, 0, ',', '.').'€'
-            : null;
-        $card['listing_price_suffix'] = 'p.P.';
+        $card = array_merge($card, $this->listingPriceFields($guiding, $price, $guests));
         $card['listing_cta'] = __('offers.cta_tour');
         $card['rating'] = $this->averageRating($guiding);
         $card['review_count'] = $this->reviewCount($guiding);
@@ -78,6 +76,44 @@ class TourCardPresenter
         $card['verified'] = false;
 
         return $card;
+    }
+
+    /**
+     * @return array{
+     *     listing_price_prefix: string|null,
+     *     listing_price_display: string|null,
+     *     listing_price_suffix: string|null,
+     *     listing_price_note: string|null
+     * }
+     */
+    private function listingPriceFields(Guiding $guiding, int $lowestPerPerson, int $numGuests): array
+    {
+        $resolved = $guiding->resolvePriceForGuests(max(1, $numGuests));
+        if ($resolved !== null) {
+            return [
+                'listing_price_prefix' => null,
+                'listing_price_display' => $this->formatEuro($resolved['total']),
+                'listing_price_suffix' => null,
+                'listing_price_note' => __('offers.price_per_person_for_guests', [
+                    'price' => $this->formatEuro($resolved['per_person']),
+                    'count' => $resolved['guests'],
+                ]),
+            ];
+        }
+
+        return [
+            'listing_price_prefix' => __('message.from'),
+            'listing_price_display' => $lowestPerPerson > 0
+                ? $this->formatEuro($lowestPerPerson)
+                : null,
+            'listing_price_suffix' => __('offers.per_person_short'),
+            'listing_price_note' => null,
+        ];
+    }
+
+    private function formatEuro(float|int $amount): string
+    {
+        return number_format((float) $amount, 0, ',', '.').'€';
     }
 
     /**

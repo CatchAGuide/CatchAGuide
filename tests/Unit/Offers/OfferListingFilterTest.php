@@ -119,10 +119,10 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame('all', $filter->vacation);
     }
 
-    public function test_num_guests_is_clamped_and_optional(): void
+    public function test_num_guests_defaults_to_two_and_is_clamped(): void
     {
-        $this->assertNull(OfferListingFilter::fromRequest([])->numGuests);
-        $this->assertNull(OfferListingFilter::fromRequest(['num_guests' => '0'])->numGuests);
+        $this->assertSame(2, OfferListingFilter::fromRequest([])->numGuests);
+        $this->assertSame(2, OfferListingFilter::fromRequest(['num_guests' => '0'])->numGuests);
         $this->assertSame(20, OfferListingFilter::fromRequest(['num_guests' => '99'])->numGuests);
         $this->assertSame(4, OfferListingFilter::fromRequest(['num_persons' => '4'])->numGuests);
     }

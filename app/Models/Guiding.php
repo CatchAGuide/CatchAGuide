@@ -468,6 +468,65 @@ class Guiding extends Model
         }
     }
 
+    /**
+     * Resolve a listing/booking style total for a guest count.
+     *
+     * For per-person tiers, `amount` is the tour total for that person count.
+     * For fixed/per-boat pricing, `price` is the tour total regardless of guests.
+     *
+     * @return array{total: int, per_person: int, guests: int, is_fixed: bool}|null
+     */
+    public function resolvePriceForGuests(int $guests): ?array
+    {
+        $guests = max(1, $guests);
+
+        if ($this->price_type === 'per_person') {
+            $prices = collect(decode_if_json($this->prices, true) ?: [])
+                ->filter(fn ($price) => is_array($price)
+                    && isset($price['person'], $price['amount'])
+                    && (int) $price['person'] > 0
+                    && (float) $price['amount'] > 0)
+                ->map(fn (array $price) => [
+                    'person' => (int) $price['person'],
+                    'amount' => (float) $price['amount'],
+                ])
+                ->sortBy('person')
+                ->values();
+
+            if ($prices->isEmpty()) {
+                return null;
+            }
+
+            $entry = $prices->firstWhere('person', $guests)
+                ?? $prices->first(fn (array $price) => $price['person'] >= $guests)
+                ?? $prices->last();
+
+            $personCount = max(1, (int) $entry['person']);
+            $total = (int) round((float) $entry['amount']);
+
+            return [
+                'total' => $total,
+                'per_person' => (int) round($total / $personCount),
+                'guests' => $personCount,
+                'is_fixed' => false,
+            ];
+        }
+
+        $total = (float) $this->price;
+        if ($total <= 0) {
+            return null;
+        }
+
+        $roundedTotal = (int) round($total);
+
+        return [
+            'total' => $roundedTotal,
+            'per_person' => (int) round($roundedTotal / $guests),
+            'guests' => $guests,
+            'is_fixed' => true,
+        ];
+    }
+
     public function ratings(){
         return $this->hasMany(Rating::class,'guide_id','id');
     }

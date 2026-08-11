@@ -25,6 +25,8 @@ final class OfferListingFilter
 
     public const MAX_GUESTS = 20;
 
+    public const DEFAULT_GUESTS = 2;
+
     /**
      * Product-type facets that must not leak across type/vacation switches.
      *
@@ -144,7 +146,8 @@ final class OfferListingFilter
             placeLng: $lng,
             city: self::nullableString($input['city'] ?? null),
             region: self::nullableString($input['region'] ?? null),
-            numGuests: self::nullableGuests($input['num_guests'] ?? $input['num_persons'] ?? null),
+            numGuests: self::nullableGuests($input['num_guests'] ?? $input['num_persons'] ?? null)
+                ?? self::DEFAULT_GUESTS,
             placeTypes: self::normalizePlaceTypes($input['place_types'] ?? null),
             boundsNeLat: self::nullableFloat($input['bounds_ne_lat'] ?? null),
             boundsNeLng: self::nullableFloat($input['bounds_ne_lng'] ?? null),

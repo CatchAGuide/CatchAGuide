@@ -2,6 +2,7 @@
 
 namespace App\Presenters\Vacation;
 
+use App\Domain\Offers\OfferListingFilter;
 use App\Models\Trip;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
@@ -71,7 +72,7 @@ class TripCardPresenter
         ];
     }
 
-    public function presentListRow(Trip $trip): array
+    public function presentListRow(Trip $trip, ?int $numGuests = null): array
     {
         $card = $this->present($trip);
         $currency = $trip->currency ?: 'EUR';
@@ -93,11 +94,11 @@ class TripCardPresenter
         $card['target_fish_tags_extra'] = max(0, count($species) - 3);
         $card['listing_included'] = array_slice($allIncluded, 0, 3);
         $card['listing_included_extra'] = max(0, count($allIncluded) - 3);
-        $card['listing_price_prefix'] = __('vacations.starting_from_label');
-        $card['listing_price_display'] = $trip->price_per_person
-            ? $sym . number_format((float) $trip->price_per_person, 0, ',', '.')
-            : null;
-        $card['listing_price_suffix'] = __('vacations.per_person_short');
+        $card = array_merge($card, $this->listingPriceFields(
+            $trip,
+            $sym,
+            $numGuests ?? OfferListingFilter::DEFAULT_GUESTS
+        ));
         $card['listing_cta'] = __('vacations.see_more');
         $card['duration_label'] = $card['duration_pill'];
         $card['guests_label'] = $this->guestsLabel($trip);
@@ -106,6 +107,41 @@ class TripCardPresenter
         $card['whats_included_title'] = __('offers.included_heading');
 
         return $card;
+    }
+
+    /**
+     * @return array{
+     *     listing_price_prefix: string|null,
+     *     listing_price_display: string|null,
+     *     listing_price_suffix: string|null,
+     *     listing_price_note: string|null
+     * }
+     */
+    private function listingPriceFields(Trip $trip, string $sym, int $numGuests): array
+    {
+        $perPerson = $trip->price_per_person !== null ? (float) $trip->price_per_person : null;
+        if ($perPerson === null || $perPerson <= 0) {
+            return [
+                'listing_price_prefix' => __('vacations.starting_from_label'),
+                'listing_price_display' => null,
+                'listing_price_suffix' => __('vacations.per_person_short'),
+                'listing_price_note' => null,
+            ];
+        }
+
+        $format = static fn (float $amount): string => $sym.number_format($amount, 0, ',', '.');
+        $guests = max(1, $numGuests);
+        $total = $perPerson * $guests;
+
+        return [
+            'listing_price_prefix' => null,
+            'listing_price_display' => $format($total),
+            'listing_price_suffix' => null,
+            'listing_price_note' => __('offers.price_per_person_for_guests', [
+                'price' => $format($perPerson),
+                'count' => $guests,
+            ]),
+        ];
     }
 
     private function guestsLabel(Trip $trip): ?string

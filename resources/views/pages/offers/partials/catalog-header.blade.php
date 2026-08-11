@@ -1,5 +1,7 @@
 @php
-    $offersGuests = max(1, min(20, (int) (request()->num_guests ?: 2)));
+    use App\Domain\Offers\OfferListingFilter;
+
+    $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
     $placeValue = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng)
         ? request()->place
         : '';

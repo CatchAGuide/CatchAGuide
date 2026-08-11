@@ -62,6 +62,7 @@
     $pricePrefix = $card['listing_price_prefix'] ?? __('vacations.starting_from_label');
     $priceDisplay = $card['listing_price_display'] ?? null;
     $priceSuffix = $card['listing_price_suffix'] ?? '';
+    $priceNote = $card['listing_price_note'] ?? null;
     $rating = isset($card['rating']) ? (float) $card['rating'] : null;
     $reviewCount = (int) ($card['review_count'] ?? 0);
     $verified = ! empty($card['verified']) || in_array($type, ['trip', 'camp'], true);
@@ -227,13 +228,16 @@
 
     <aside class="offers-card__aside">
         @if($priceDisplay)
-            <div class="offers-card__price">
+            <div class="offers-card__price{{ $priceNote ? ' offers-card__price--guest-total' : '' }}">
                 @if($pricePrefix)
                     <span class="offers-card__price-prefix">{{ $pricePrefix }}</span>
                 @endif
                 <span class="offers-card__price-amount">{{ $priceDisplay }}</span>
                 @if($priceSuffix)
                     <span class="offers-card__price-suffix">{{ $priceSuffix }}</span>
+                @endif
+                @if($priceNote)
+                    <span class="offers-card__price-note">{{ $priceNote }}</span>
                 @endif
             </div>
         @endif
@@ -357,13 +361,16 @@
                     </div>
                     <div class="offers-gallery-modal__actions">
                         @if($priceDisplay)
-                            <div class="offers-gallery-modal__price">
+                            <div class="offers-gallery-modal__price{{ $priceNote ? ' offers-gallery-modal__price--guest-total' : '' }}">
                                 @if($pricePrefix)
                                     <span class="offers-gallery-modal__price-prefix">{{ $pricePrefix }}</span>
                                 @endif
                                 <span class="offers-gallery-modal__price-amount">{{ $priceDisplay }}</span>
                                 @if($priceSuffix)
                                     <span class="offers-gallery-modal__price-suffix">{{ $priceSuffix }}</span>
+                                @endif
+                                @if($priceNote)
+                                    <span class="offers-gallery-modal__price-note">{{ $priceNote }}</span>
                                 @endif
                             </div>
                         @endif

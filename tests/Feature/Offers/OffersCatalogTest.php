@@ -589,6 +589,39 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-offers-gallery-modal-image', false);
     }
 
+    public function test_guest_total_price_renders_with_subtle_per_person_note(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            cards: collect([
+                array_merge($this->card('tour', 'Guest Priced Tour'), [
+                    'listing_price_prefix' => null,
+                    'listing_price_display' => '256€',
+                    'listing_price_suffix' => null,
+                    'listing_price_note' => __('offers.price_per_person_for_guests', [
+                        'price' => '128€',
+                        'count' => 2,
+                    ]),
+                    'listing_cta' => __('offers.cta_tour'),
+                ]),
+            ]),
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'tour',
+            'num_guests' => 2,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('256€', false);
+        $response->assertSee('offers-card__price--guest-total', false);
+        $response->assertSee('offers-card__price-note', false);
+        $response->assertSee(__('offers.price_per_person_for_guests', [
+            'price' => '128€',
+            'count' => 2,
+        ]), false);
+    }
+
     /**
      * @param  callable(): OfferCatalogViewModel  $factory
      */

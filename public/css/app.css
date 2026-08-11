@@ -4176,6 +4176,22 @@ body .main-menu .main-menu-wrapper__nav {
   color: #E8604C;
   letter-spacing: -0.02em;
 }
+.offers-card__price-note {
+  margin-top: 0.2rem;
+  max-width: 8.5rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #787780;
+}
+.offers-card__price--guest-total .offers-card__price-suffix {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
 .offers-card__cta {
   display: inline-flex;
   align-items: center;
@@ -4231,8 +4247,17 @@ body .main-menu .main-menu-wrapper__nav {
     gap: 0.25rem 0.35rem;
     text-align: left;
   }
+  .offers-card__price--guest-total {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.12rem;
+  }
   .offers-card__price-amount {
     font-size: 1.15rem;
+  }
+  .offers-card__price-note {
+    max-width: none;
+    text-align: left;
   }
   .offers-card__cta {
     width: auto;
@@ -4639,6 +4664,17 @@ body .main-menu .main-menu-wrapper__nav {
   font-size: 1.35rem;
   font-weight: 800;
   color: #fff;
+}
+.offers-gallery-modal__price-note {
+  margin-top: 0.25rem;
+  max-width: 10rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: right;
 }
 .offers-gallery-modal__cta {
   display: inline-flex;

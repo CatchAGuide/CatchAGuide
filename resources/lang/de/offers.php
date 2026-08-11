@@ -45,6 +45,8 @@ return [
     'filter_duration_1-3' => '1–3 Tage',
     'filter_duration_4-7' => '4–7 Tage',
     'filter_duration_8+' => '8+ Tage',
+    'per_person_short' => 'p.P.',
+    'price_per_person_for_guests' => ':price pro Person',
     'filter_sort' => 'Sortieren',
     'sort_recommended' => 'Empfohlen',
     'sort_newest' => 'Neueste',
