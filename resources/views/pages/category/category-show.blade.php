@@ -553,7 +553,7 @@
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                             <li><a href="{{ route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li class="active">{{ $row_data->source->name }}</li>
+                            <li class="active">{{ $row_data->source->name ?? $row_data->name }}</li>
                         </ul>
                     </div>
                 </div>
@@ -566,7 +566,16 @@
                     <div class="page-main-intro-text mb-1">{!! clean_html($row_data->language->introduction) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ $row_data->source->name }}</h5>
+                <h5 class="mb-2">{{ $row_data->source->name ?? $row_data->name }}</h5>
+                @isset($vm)
+                    <div class="offers-catalog-page mb-5">
+                        <x-offers.catalog-listing
+                            :vm="$vm"
+                            :show-faq="false"
+                            analytics-page="target-fish-offers-catalog"
+                        />
+                    </div>
+                @else
                 <div class="row mb-5">
                     <div id="filterCard" class="col-sm-12 col-lg-3">        
                         <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
@@ -594,6 +603,7 @@
                         </div>
                     </div>
                 </div>
+                @endisset
 
                 <div class="mb-3">{!! clean_html($row_data->language->content) !!}</div>
 
@@ -718,6 +728,7 @@
     </div>
     <!--News One End-->
 
+    @unless(isset($vm))
     @php
         if ($allGuidings->isEmpty()) {
             $mapSource = $otherguidings ?? collect();
@@ -842,9 +853,50 @@
             </form>
         </div>
     </div>
+    @endunless
 @endsection
 
 @section('js_after')
+@isset($vm)
+@include('components.offers.partials.gallery-script')
+<script>
+    $(function() {
+        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
+        var page_main_intro = $('.page-main-intro-text');
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "...";
+        var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text = page_main_intro_text.substring(word_char_count_allowed);
+
+        if (page_main_intro_count >= word_char_count_allowed) {
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text');
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            $('.see-more').hide();
+        }
+    });
+</script>
+@endisset
+@unless(isset($vm))
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
@@ -1261,6 +1313,7 @@ window.addEventListener('load', function() {
 
 
 
+@endunless
 @endsection
 
 @stack('guidingListingScripts')

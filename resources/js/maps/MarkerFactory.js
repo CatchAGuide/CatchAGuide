@@ -23,7 +23,7 @@ class MarkerFactory {
     if (raw === 'gray') return 'gray';
     if (raw === 'trip' || raw === 'trips') return 'trip';
     if (raw === 'camp' || raw === 'camps' || raw === 'vacation') return 'camp';
-    // guiding / tour / primary / empty → tour (brand coral)
+    // guiding / tour / primary / empty → tour (ink slate identity)
     return 'tour';
   }
 

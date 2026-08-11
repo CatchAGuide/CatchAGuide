@@ -1,12 +1,12 @@
 // Two-pillar vacations — hub, country, cards, filters
-// Theme-aligned: trips = brand orange, camps = brand charcoal (#313041)
+// Category identity: trips = fjord blue, camps = lagoon teal; CTAs stay brand coral
 
-$vac-trip: $primary-color;
-$vac-trip-dark: #c94a32;
-$vac-trip-soft: $card;
-$vac-camp: #313041;
-$vac-camp-dark: #252238;
-$vac-camp-soft: rgba(#313041, 0.06);
+$vac-trip: $category-trip;
+$vac-trip-dark: $category-trip-end;
+$vac-trip-soft: $category-trip-soft;
+$vac-camp: $category-camp;
+$vac-camp-dark: $category-camp-end;
+$vac-camp-soft: $category-camp-soft;
 $vac-brand: $primary-color;
 $vac-ink: #313041;
 $vac-muted: #666;
@@ -19,24 +19,31 @@ $vac-radius: 14px;
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: .58rem;
-    font-weight: 800;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    padding: .28rem .5rem;
-    color: #fff;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
     z-index: 4;
-    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
     line-height: 1.2;
+    pointer-events: none;
+    @include badge-metallic-glare(3.6s, 0.2s);
 
     &--trip {
-        background: $vac-trip;
+        background: linear-gradient(145deg, $vac-trip 0%, $vac-trip-dark 100%);
     }
 
     &--camp {
-        background: $vac-camp;
+        background: linear-gradient(145deg, $vac-camp 0%, $vac-camp-dark 100%);
+    }
+
+    &--tour {
+        background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
     }
 }
 $vac-shadow: 0 4px 24px rgba(49, 48, 65, 0.08);
@@ -818,7 +825,9 @@ $vac-country-panel: #313041;
     display: flex;
     flex-direction: column;
     box-shadow: $vac-shadow;
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+
+    @include category-card-accent;
 
     &:hover {
         transform: translateY(-3px);
@@ -834,32 +843,65 @@ $vac-country-panel: #313041;
     }
 
     &--trip {
+        @include category-vars("trip");
+
         .vacation-pillar-badge--trip {
-            background: $vac-trip;
+            background: linear-gradient(145deg, $vac-trip 0%, $vac-trip-dark 100%);
         }
 
         .vacation-product-card__cta {
-            background: $vac-trip;
+            background: $vac-brand;
 
             &:hover {
-                background: $vac-trip-dark;
+                background: darken($vac-brand, 6%);
                 color: #fff;
             }
+        }
+
+        .vacation-product-card__location i {
+            color: $vac-trip;
         }
     }
 
     &--camp {
+        @include category-vars("camp");
+
         .vacation-pillar-badge--camp {
-            background: $vac-camp;
+            background: linear-gradient(145deg, $vac-camp 0%, $vac-camp-dark 100%);
         }
 
         .vacation-product-card__cta {
-            background: $vac-camp;
+            background: $vac-brand;
 
             &:hover {
-                background: $vac-camp-dark;
+                background: darken($vac-brand, 6%);
                 color: #fff;
             }
+        }
+
+        .vacation-product-card__location i {
+            color: $vac-camp;
+        }
+    }
+
+    &--tour {
+        @include category-vars("tour");
+
+        .vacation-pillar-badge--tour {
+            background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
+        }
+
+        .vacation-product-card__cta {
+            background: $vac-brand;
+
+            &:hover {
+                background: darken($vac-brand, 6%);
+                color: #fff;
+            }
+        }
+
+        .vacation-product-card__location i {
+            color: $category-tour;
         }
     }
 
@@ -1305,7 +1347,9 @@ $vac-country-panel: #313041;
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 14px rgba(49, 48, 65, .07);
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+
+    @include category-card-accent;
 
     &:hover {
         transform: translateY(-2px);
@@ -1313,30 +1357,34 @@ $vac-country-panel: #313041;
     }
 
     &--trip {
+        @include category-vars("trip");
+
         .vacation-pillar-badge--trip {
-            background: $vac-trip;
+            background: linear-gradient(145deg, $vac-trip 0%, $vac-trip-dark 100%);
         }
 
         .vacation-slider-card__cta {
-            background: $vac-trip;
+            background: $vac-brand;
 
             &:hover {
-                background: $vac-trip-dark;
+                background: darken($vac-brand, 6%);
                 color: #fff;
             }
         }
     }
 
     &--camp {
+        @include category-vars("camp");
+
         .vacation-pillar-badge--camp {
-            background: $vac-camp;
+            background: linear-gradient(145deg, $vac-camp 0%, $vac-camp-dark 100%);
         }
 
         .vacation-slider-card__cta {
-            background: $vac-camp;
+            background: $vac-brand;
 
             &:hover {
-                background: $vac-camp-dark;
+                background: darken($vac-brand, 6%);
                 color: #fff;
             }
         }
@@ -2505,6 +2553,7 @@ $vac-country-panel: #313041;
     }
 
     &__pillar-btn {
+        position: relative;
         display: inline-block;
         padding: .45rem 1rem;
         border-radius: 999px;
@@ -2531,18 +2580,21 @@ $vac-country-panel: #313041;
             background: $vac-trip;
             border-color: $vac-trip;
             color: #fff;
+            @include badge-metallic-glare(4s, 0.1s);
         }
 
         &--camps.is-active {
             background: $vac-camp;
             border-color: $vac-camp;
             color: #fff;
+            @include badge-metallic-glare(4s, 0.25s);
         }
 
         &--all.is-active {
             background: $vac-ink;
             border-color: $vac-ink;
             color: #fff;
+            @include badge-metallic-glare(4s, 0.15s);
         }
     }
 

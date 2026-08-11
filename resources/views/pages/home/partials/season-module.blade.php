@@ -6,10 +6,6 @@
                 <h2 class="cag-home-season__title">{{ $season['title'] }}</h2>
                 <p class="cag-home-season__text">{{ $season['text'] }}</p>
             </div>
-            <a href="{{ $season['cta_url'] }}" class="cag-home-section__link cag-home-season__cta">
-                {{ __('homepage.season_cta', ['month' => $season['month']]) }}
-                <i class="fas fa-arrow-right" aria-hidden="true"></i>
-            </a>
         </div>
 
         @if(($season['species'] ?? collect())->isNotEmpty())

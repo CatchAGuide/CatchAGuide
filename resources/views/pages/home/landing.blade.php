@@ -73,6 +73,77 @@ function validateSearch(event, inputId) {
         });
     });
 
+    // Mouse drag-to-scroll for horizontal rails (touch keeps native pan).
+    var enableDragScroll = function (el, opts) {
+        if (!el || el.getAttribute('data-cag-drag-scroll') === '1') return;
+        el.setAttribute('data-cag-drag-scroll', '1');
+        opts = opts || {};
+
+        var capId = null;
+        var startX = 0;
+        var startSl = 0;
+        var dragging = false;
+        var suppressClick = false;
+        var threshold = 6;
+
+        var cleanup = function () {
+            if (capId !== null) {
+                try { el.releasePointerCapture(capId); } catch (err) {}
+                capId = null;
+            }
+            dragging = false;
+            el.classList.remove('is-dragging');
+        };
+
+        el.addEventListener('dragstart', function (e) {
+            e.preventDefault();
+        });
+
+        el.addEventListener('pointerdown', function (e) {
+            if (e.pointerType !== 'mouse' || e.button !== 0 || !e.isPrimary) return;
+            if (e.target.closest('button, input, select, textarea')) return;
+            capId = e.pointerId;
+            startX = e.clientX;
+            startSl = el.scrollLeft;
+            dragging = false;
+            suppressClick = false;
+            try { el.setPointerCapture(capId); } catch (err) {}
+            if (typeof opts.onInteract === 'function') opts.onInteract();
+        });
+
+        el.addEventListener('pointermove', function (e) {
+            if (e.pointerId !== capId || e.pointerType !== 'mouse') return;
+            var dx = e.clientX - startX;
+            if (!dragging && Math.abs(dx) > threshold) {
+                dragging = true;
+                el.classList.add('is-dragging');
+            }
+            if (dragging) {
+                e.preventDefault();
+                el.scrollLeft = startSl - dx;
+                if (typeof opts.onInteract === 'function') opts.onInteract();
+            }
+        }, { passive: false });
+
+        el.addEventListener('pointerup', function (e) {
+            if (e.pointerId !== capId) return;
+            if (dragging) {
+                suppressClick = true;
+                window.setTimeout(function () { suppressClick = false; }, 200);
+            }
+            cleanup();
+        });
+
+        el.addEventListener('pointercancel', cleanup);
+
+        el.addEventListener('click', function (e) {
+            if (suppressClick) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+    };
+
     var rail = document.querySelector('[data-dest-rail]');
     if (rail) {
         var prev = document.querySelector('[data-dest-prev]');
@@ -92,6 +163,8 @@ function validateSearch(event, inputId) {
         if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
         if (next) next.addEventListener('click', function () { scrollBy(1); });
 
+        enableDragScroll(rail, { onInteract: pauseTemporarily });
+
         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!reduceMotion) {
             var loopWidth = 0;
@@ -99,19 +172,31 @@ function validateSearch(event, inputId) {
                 // Duplicated tiles: seamless loop at halfway
                 loopWidth = Math.floor(rail.scrollWidth / 2);
             };
+            var wrapLoop = function () {
+                if (loopWidth <= 0) return;
+                while (rail.scrollLeft >= loopWidth) {
+                    rail.scrollLeft -= loopWidth;
+                }
+                while (rail.scrollLeft < 0) {
+                    rail.scrollLeft += loopWidth;
+                }
+            };
             syncLoop();
             window.addEventListener('resize', syncLoop);
             if (typeof ResizeObserver !== 'undefined') {
                 new ResizeObserver(syncLoop).observe(rail);
             }
             rail.addEventListener('mouseenter', function () { paused = true; });
-            rail.addEventListener('mouseleave', function () { paused = false; });
+            rail.addEventListener('mouseleave', function () {
+                if (!rail.classList.contains('is-dragging')) paused = false;
+            });
             rail.addEventListener('touchstart', function () { paused = true; }, { passive: true });
             rail.addEventListener('touchend', function () {
                 if (resumeTimer) clearTimeout(resumeTimer);
                 resumeTimer = setTimeout(function () { paused = false; }, 1500);
             });
             rail.addEventListener('wheel', function () { pauseTemporarily(); }, { passive: true });
+            rail.addEventListener('scroll', wrapLoop, { passive: true });
 
             var last = performance.now();
             var tick = function (now) {
@@ -119,9 +204,7 @@ function validateSearch(event, inputId) {
                 last = now;
                 if (!paused && loopWidth > rail.clientWidth) {
                     rail.scrollLeft += (32 * dt) / 1000;
-                    if (rail.scrollLeft >= loopWidth) {
-                        rail.scrollLeft -= loopWidth;
-                    }
+                    wrapLoop();
                 }
                 requestAnimationFrame(tick);
             };
@@ -142,6 +225,7 @@ function validateSearch(event, inputId) {
         };
         if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
         if (next) next.addEventListener('click', function () { scrollBy(1); });
+        enableDragScroll(rail);
     });
 
     // First-view entrance for homepage sections (same idea as target fish)
@@ -186,31 +270,40 @@ function validateSearch(event, inputId) {
             });
         };
 
-        var ensureCardVisible = function (card) {
+        var ensureCardVisible = function (card, behavior) {
             if (!speciesViewport || !card) return;
-            var viewLeft = speciesViewport.scrollLeft;
-            var viewRight = viewLeft + speciesViewport.clientWidth;
-            var cardLeft = card.offsetLeft;
-            var cardRight = cardLeft + card.offsetWidth;
+            behavior = behavior || 'smooth';
+            var viewRect = speciesViewport.getBoundingClientRect();
+            var cardRect = card.getBoundingClientRect();
             var pad = 16;
+            var delta = 0;
 
-            if (cardLeft < viewLeft + pad) {
-                speciesViewport.scrollTo({ left: Math.max(0, cardLeft - pad), behavior: 'smooth' });
-            } else if (cardRight > viewRight - pad) {
-                speciesViewport.scrollTo({
-                    left: cardRight - speciesViewport.clientWidth + pad,
-                    behavior: 'smooth'
-                });
+            if (cardRect.left < viewRect.left + pad) {
+                delta = cardRect.left - viewRect.left - pad;
+            } else if (cardRect.right > viewRect.right - pad) {
+                delta = cardRect.right - viewRect.right + pad;
+            }
+
+            if (delta !== 0) {
+                speciesViewport.scrollBy({ left: delta, behavior: behavior });
             }
         };
 
         var setSpotlight = function (index) {
             if (!speciesCards.length) return;
+            var prevIndex = spotlightIndex;
             clearSpotlight();
             spotlightIndex = (index + speciesCards.length) % speciesCards.length;
             var card = speciesCards[spotlightIndex];
             card.classList.add('is-spotlight');
-            ensureCardVisible(card);
+
+            // When the walk wraps past the last card, snap back to the start.
+            var wrappedToStart = prevIndex === speciesCards.length - 1 && spotlightIndex === 0;
+            if (wrappedToStart) {
+                speciesViewport.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                ensureCardVisible(card, 'smooth');
+            }
         };
 
         var stopSpotlight = function () {
@@ -237,6 +330,7 @@ function validateSearch(event, inputId) {
         };
 
         var resumeSpotlight = function () {
+            if (speciesViewport && speciesViewport.classList.contains('is-dragging')) return;
             spotlightPaused = false;
             startSpotlight();
         };
@@ -273,10 +367,15 @@ function validateSearch(event, inputId) {
         });
 
         if (speciesViewport) {
+            enableDragScroll(speciesViewport, { onInteract: pauseSpotlight });
             speciesViewport.addEventListener('touchstart', pauseSpotlight, { passive: true });
             speciesViewport.addEventListener('touchend', function () {
                 window.setTimeout(resumeSpotlight, 1200);
             }, { passive: true });
+            speciesViewport.addEventListener('pointerup', function () {
+                if (!spotlightPaused) return;
+                window.setTimeout(resumeSpotlight, 1200);
+            });
         }
     }
 

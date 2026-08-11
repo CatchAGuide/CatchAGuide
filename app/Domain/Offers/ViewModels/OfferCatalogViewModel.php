@@ -29,6 +29,7 @@ final class OfferCatalogViewModel
         public readonly Collection $suggestedCards,
         public readonly ?string $catalogUrl = null,
         public readonly bool $lockDestinationScope = false,
+        public readonly bool $lockSpeciesScope = false,
     ) {}
 
     public function pageTitle(): string
@@ -75,32 +76,40 @@ final class OfferCatalogViewModel
     }
 
     /**
-     * Geo / destination params that stay locked on destination-scoped catalogs.
+     * Params that stay locked on destination- or species-scoped catalogs.
      *
      * @return array<string, mixed>
      */
     public function lockedScopeParams(): array
     {
-        if (! $this->lockDestinationScope) {
-            return [];
+        $params = [];
+
+        if ($this->lockSpeciesScope) {
+            $params['species'] = $this->filter->speciesIds !== []
+                ? $this->filter->speciesIds
+                : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null);
         }
 
-        return array_filter([
-            'country' => $this->filter->country,
-            'country_short' => $this->filter->countryShort,
-            'place' => $this->filter->place,
-            'placeLat' => $this->filter->placeLat,
-            'placeLng' => $this->filter->placeLng,
-            'city' => $this->filter->city,
-            'region' => $this->filter->region,
-            'bounds_ne_lat' => $this->filter->boundsNeLat,
-            'bounds_ne_lng' => $this->filter->boundsNeLng,
-            'bounds_sw_lat' => $this->filter->boundsSwLat,
-            'bounds_sw_lng' => $this->filter->boundsSwLng,
-            'place_types' => $this->filter->placeTypes !== []
-                ? json_encode($this->filter->placeTypes)
-                : null,
-        ], fn ($v) => $v !== null && $v !== '');
+        if ($this->lockDestinationScope) {
+            $params = array_merge($params, [
+                'country' => $this->filter->country,
+                'country_short' => $this->filter->countryShort,
+                'place' => $this->filter->place,
+                'placeLat' => $this->filter->placeLat,
+                'placeLng' => $this->filter->placeLng,
+                'city' => $this->filter->city,
+                'region' => $this->filter->region,
+                'bounds_ne_lat' => $this->filter->boundsNeLat,
+                'bounds_ne_lng' => $this->filter->boundsNeLng,
+                'bounds_sw_lat' => $this->filter->boundsSwLat,
+                'bounds_sw_lng' => $this->filter->boundsSwLng,
+                'place_types' => $this->filter->placeTypes !== []
+                    ? json_encode($this->filter->placeTypes)
+                    : null,
+            ]);
+        }
+
+        return array_filter($params, fn ($v) => $v !== null && $v !== '');
     }
 
     /**

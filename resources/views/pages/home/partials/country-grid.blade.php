@@ -37,6 +37,7 @@
                                 alt="{{ $isClone ? '' : $country['name'] }}"
                                 class="cag-home-destinations__img"
                                 loading="lazy"
+                                draggable="false"
                                 width="320"
                                 height="240"
                             >

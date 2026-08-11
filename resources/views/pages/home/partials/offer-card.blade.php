@@ -8,7 +8,7 @@
     $image = $image ?: $placeholder;
 @endphp
 <article
-    class="cag-home-offer cag-reveal__item"
+    class="cag-home-offer cag-home-offer--{{ $type }} cag-reveal__item"
     role="listitem"
     style="--reveal-i: {{ (int) ($revealIndex ?? 0) }}"
     data-home-analytics="homepage_mixed_offer_click"
@@ -23,7 +23,7 @@
             height="260"
             onerror="this.onerror=null;this.src='{{ $placeholder }}';"
         >
-        <span class="cag-home-offer__badge">{{ $card['badge'] ?? __('homepage.offer_type_' . $type) }}</span>
+        <span class="cag-home-offer__badge cag-home-offer__badge--{{ $type }}">{{ $card['badge'] ?? __('homepage.offer_type_' . $type) }}</span>
     </a>
     <div class="cag-home-offer__body">
         <h3 class="cag-home-offer__title">

@@ -185,13 +185,13 @@ class HomepageLandingService
     }
 
     /**
-     * @return array{month: string, title: string, text: string, cta_url: string, species: Collection}
+     * @return array{month: string, title: string, text: string, species: Collection}
      */
     private function seasonModule(string $locale): array
     {
         $monthNumber = (int) now()->month;
         $month = now()->translatedFormat('F');
-        $cacheKey = "homepage_season_v5_{$locale}_{$monthNumber}";
+        $cacheKey = "homepage_season_v6_{$locale}_{$monthNumber}";
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($locale, $monthNumber, $month) {
             $highlight = MonthlyHighlight::forMonth($monthNumber);
@@ -201,7 +201,6 @@ class HomepageLandingService
                     'month' => $month,
                     'title' => $highlight->localizedTitle($locale),
                     'text' => $highlight->localizedSubtitle($locale) ?? __('homepage.season_text'),
-                    'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
                     'species' => $this->resolveHighlightCards($highlight, $locale),
                 ];
             }
@@ -210,7 +209,6 @@ class HomepageLandingService
                 'month' => $month,
                 'title' => __('homepage.season_title', ['month' => $month]),
                 'text' => __('homepage.season_text'),
-                'cta_url' => route(($locale === 'de' ? 'blogde' : 'blog').'.index'),
                 'species' => $this->targetSpecies($locale)
                     ->take(MonthlyHighlight::MAX_ITEMS)
                     ->map(fn (array $card) => $card + [

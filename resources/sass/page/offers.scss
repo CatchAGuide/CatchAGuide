@@ -1,9 +1,9 @@
-// Offers catalog — homepage theme tokens (slate + coral)
+// Offers catalog — homepage theme tokens + shared category identity
 $slate: #313041;
 $coral: #E8604C;
-$trip: #e85d3b;
-$camp: #313041;
-$tour: #E8604C;
+$tour: $category-tour;
+$trip: $category-trip;
+$camp: $category-camp;
 $border: #ece8e0;
 $sand: #faf5ee;
 $bg: #f7f9fb;
@@ -611,6 +611,7 @@ $muted: #787780;
   }
 
   &__type-btn {
+    position: relative;
     border-radius: 999px !important;
     font-size: 0.8rem !important;
     padding: 0.4rem 0.75rem !important;
@@ -629,6 +630,7 @@ $muted: #787780;
       background: rgba($slate, 0.92) !important;
       border-color: $slate !important;
       color: #fff !important;
+      @include badge-metallic-glare(4s, 0.15s);
     }
 
     &--tour.is-active {
@@ -1066,10 +1068,19 @@ $muted: #787780;
   color: inherit;
   min-height: 0;
   box-shadow: 0 6px 18px rgba($slate, 0.05);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+
+  @include category-card-accent;
+
+  @each $type, $shades in $category-colors {
+    &--#{$type} {
+      @include category-vars($type);
+    }
+  }
 
   &:hover {
-    box-shadow: 0 12px 28px rgba($slate, 0.1);
+    box-shadow: 0 12px 28px var(--category-soft, rgba($slate, 0.1));
+    border-color: color-mix(in srgb, var(--category-color, #{$slate}) 26%, rgba($slate, 0.1));
     transform: translateY(-1px);
   }
 
@@ -1167,17 +1178,21 @@ $muted: #787780;
     padding: 0.28rem 0.55rem;
     border-radius: 6px;
     background: rgba($slate, 0.88);
+    @include badge-metallic-glare(3.7s, 0.1s);
 
     &--tour {
-      background: $tour;
+      @include category-vars("tour");
+      @include category-badge-fill;
     }
 
     &--trip {
-      background: $trip;
+      @include category-vars("trip");
+      @include category-badge-fill;
     }
 
     &--camp {
-      background: $camp;
+      @include category-vars("camp");
+      @include category-badge-fill;
     }
   }
 
@@ -1192,17 +1207,24 @@ $muted: #787780;
     font-size: 0.62rem;
     font-weight: 700;
     color: #fff;
-    background: rgba(17, 24, 39, 0.78);
+    background: linear-gradient(145deg, rgba(17, 24, 39, 0.92) 0%, rgba(49, 48, 65, 0.88) 100%);
     border-radius: 999px;
     padding: 0.22rem 0.55rem;
+    @include badge-metallic-glare(4.1s, 0.45s);
 
     i {
       color: #ffce00;
       font-size: 0.6rem;
+      position: relative;
+      z-index: 2;
     }
 
-    &--alt i {
-      color: #ffd166;
+    &--alt {
+      background: linear-gradient(145deg, $coral 0%, darken($coral, 8%) 100%);
+
+      i {
+        color: #ffd166;
+      }
     }
   }
 
@@ -1302,7 +1324,7 @@ $muted: #787780;
     min-width: 0;
 
     i {
-      color: $coral;
+      color: var(--category-color, $coral);
       font-size: 0.72rem;
     }
 
@@ -1527,29 +1549,17 @@ $muted: #787780;
 
     &:hover {
       color: #fff !important;
+      background: darken($coral, 5%);
     }
 
-    &--tour {
-      background: $tour;
-
-      &:hover {
-        background: darken($tour, 5%);
-      }
-    }
-
-    &--trip {
-      background: $trip;
-
-      &:hover {
-        background: darken($trip, 5%);
-      }
-    }
-
+    // Category modifiers kept for markup compatibility; CTA stays brand coral.
+    &--tour,
+    &--trip,
     &--camp {
-      background: $camp;
+      background: $coral;
 
       &:hover {
-        background: $coral;
+        background: darken($coral, 5%);
       }
     }
   }
@@ -1724,18 +1734,24 @@ $muted: #787780;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #fff;
-    background: rgba($coral, 0.95);
+    background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
     border-radius: 999px;
     padding: 0.28rem 0.65rem;
     white-space: nowrap;
+    position: relative;
+    @include badge-metallic-glare(3.9s, 0.25s);
+  }
+
+  &--tour &__badge {
+    background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
   }
 
   &--trip &__badge {
-    background: $trip;
+    background: linear-gradient(145deg, $category-trip 0%, $category-trip-end 100%);
   }
 
   &--camp &__badge {
-    background: $camp;
+    background: linear-gradient(145deg, $category-camp 0%, $category-camp-end 100%);
   }
 
   &__counter {
@@ -2043,22 +2059,6 @@ $muted: #787780;
       background: darken($coral, 5%);
       color: #fff !important;
       transform: translateY(-1px);
-    }
-  }
-
-  &--trip &__cta {
-    background: $trip;
-
-    &:hover {
-      background: darken($trip, 5%);
-    }
-  }
-
-  &--camp &__cta {
-    background: $camp;
-
-    &:hover {
-      background: $coral;
     }
   }
 }

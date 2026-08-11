@@ -556,18 +556,18 @@
         white-space: nowrap;
 
         &--tour {
-            background: rgba(232, 93, 59, 0.1);
-            color: #c94a32;
+            background: $category-tour-soft;
+            color: $category-tour;
         }
 
         &--trip {
-            background: rgba(15, 118, 110, 0.1);
-            color: #0f766e;
+            background: $category-trip-soft;
+            color: $category-trip-end;
         }
 
         &--camp {
-            background: rgba(67, 56, 202, 0.1);
-            color: #4338ca;
+            background: $category-camp-soft;
+            color: $category-camp-end;
         }
     }
 

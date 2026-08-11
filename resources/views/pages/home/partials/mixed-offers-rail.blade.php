@@ -34,9 +34,12 @@
         @foreach($offerModuleConfig as $type => $module)
             @php $cards = $offerModules[$type] ?? collect(); @endphp
             @if($cards->isNotEmpty())
-                <div class="cag-home-offers__module cag-reveal__block" data-offer-module="{{ $type }}" style="--reveal-i: {{ $loop->index }}">
+                <div class="cag-home-offers__module cag-home-offers__module--{{ $type }} cag-reveal__block" data-offer-module="{{ $type }}" style="--reveal-i: {{ $loop->index }}">
                     <div class="cag-home-offers__module-header">
-                        <h3 class="cag-home-offers__module-title">{{ $module['title'] }}</h3>
+                        <h3 class="cag-home-offers__module-title">
+                            <span class="cag-home-offers__module-mark" aria-hidden="true"></span>
+                            {{ $module['title'] }}
+                        </h3>
                         <div class="cag-home-offers__module-tools">
                             <a
                                 href="{{ $module['url'] }}"

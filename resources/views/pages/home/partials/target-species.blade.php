@@ -25,6 +25,7 @@
                             src="{{ $species['thumbnail'] }}"
                             alt="{{ $species['name'] }}"
                             loading="lazy"
+                            draggable="false"
                             width="320"
                             height="240"
                         >

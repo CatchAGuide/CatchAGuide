@@ -87,6 +87,23 @@ class OfferCatalogPageService
     }
 
     /**
+     * Target-fish category pages: lock species and list tours + vacation offers.
+     */
+    public function buildForTargetFish(Request $request, int $speciesId): OfferCatalogViewModel
+    {
+        $input = $request->all();
+        $input['species'] = [$speciesId];
+
+        return $this->buildFromInput(
+            $input,
+            $request,
+            catalogUrl: $request->url(),
+            lockSpeciesScope: true,
+            includeFaq: false,
+        );
+    }
+
+    /**
      * @param  array<string, mixed>  $input
      */
     private function buildFromInput(
@@ -94,6 +111,7 @@ class OfferCatalogPageService
         Request $request,
         ?string $catalogUrl = null,
         bool $lockDestinationScope = false,
+        bool $lockSpeciesScope = false,
         bool $includeFaq = true,
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
@@ -177,7 +195,9 @@ class OfferCatalogPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            speciesOptions: $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
+            speciesOptions: $lockSpeciesScope
+                ? collect()
+                : $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
             countries: $countries,
             methodOptions: $this->methodOptions(),
             waterOptions: $this->waterOptions(),
@@ -189,6 +209,7 @@ class OfferCatalogPageService
             suggestedCards: $suggestedCards,
             catalogUrl: $catalogUrl,
             lockDestinationScope: $lockDestinationScope,
+            lockSpeciesScope: $lockSpeciesScope,
         );
     }
 

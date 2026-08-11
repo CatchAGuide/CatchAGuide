@@ -9,9 +9,11 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
+use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
@@ -49,7 +51,7 @@ class CategoryController extends Controller
         return view('pages.category.category-index', $data);
     }
 
-    public function targets($type, $slug, Request $request)
+    public function targets($type, $slug, Request $request, OfferCatalogPageService $offerCatalog)
     {
         $type = strtolower($type);
         $language = app()->getLocale();
@@ -65,6 +67,34 @@ class CategoryController extends Controller
         $row_data->language = $row_data->language($language);
         $row_data->faq = $row_data->faq($language);
 
+        if ($type === 'targets') {
+            return $this->showTargetFishOffers($row_data, $request, $offerCatalog);
+        }
+
+        return $this->showLegacyGuidingCategory($type, $row_data, $request);
+    }
+
+    private function showTargetFishOffers(
+        CategoryPage $row_data,
+        Request $request,
+        OfferCatalogPageService $offerCatalog,
+    ): View {
+        $speciesId = (int) $row_data->source_id;
+        if ($speciesId <= 0) {
+            abort(404);
+        }
+
+        $vm = $offerCatalog->buildForTargetFish($request, $speciesId);
+
+        return view('pages.category.category-show', [
+            'row_data' => $row_data,
+            'title' => $row_data->language->title ?? $row_data->name,
+            'vm' => $vm,
+        ]);
+    }
+
+    private function showLegacyGuidingCategory(string $type, CategoryPage $row_data, Request $request)
+    {
         $title = $row_data->language->title;
         $filter_title = '';
         $searchMessage = '';

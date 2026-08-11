@@ -711,6 +711,46 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	line-height: 30px;
 	}
 @charset "UTF-8";
+@keyframes cag-badge-glare {
+  0% {
+    transform: translateX(-70%) skewX(-16deg);
+  }
+  42% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+.cag-badge-glare {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+}
+.cag-badge-glare::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: 0;
+  width: 48%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 32%, rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.18) 58%, transparent 78%);
+  transform: translateX(-70%) skewX(-16deg);
+  animation: cag-badge-glare 3.8s ease-in-out infinite;
+  animation-delay: 0s;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-badge-glare::after {
+    animation: none;
+    display: none;
+  }
+}
+
 /* Leaflet map components — teaser, pins, popups, clusters, frames, modal heights */
 .cag-map {
   width: 100%;
@@ -1064,34 +1104,34 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .leaflet-div-icon.cag-map-pin,
 .cag-map-pin {
-  /* Tours / guidings — brand coral */
+  /* Tours / guidings — ink slate */
 }
 .leaflet-div-icon.cag-map-pin--tour .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary .cag-map-pin__glyph,
 .cag-map-pin--tour .cag-map-pin__glyph,
 .cag-map-pin--primary .cag-map-pin__glyph {
-  border-color: #c94a32;
-  background: #e85d3b;
-  box-shadow: 0 2px 8px rgba(232, 93, 59, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #1f1e2a;
+  background: #313041;
+  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 .leaflet-div-icon.cag-map-pin,
 .cag-map-pin {
-  /* Trips — teal */
+  /* Trips — fjord blue */
 }
 .leaflet-div-icon.cag-map-pin--trip .cag-map-pin__glyph,
 .cag-map-pin--trip .cag-map-pin__glyph {
-  border-color: #0f766e;
-  background: #0d9488;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #165887;
+  background: #1f6fa8;
+  box-shadow: 0 2px 8px rgba(31, 111, 168, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 .leaflet-div-icon.cag-map-pin,
 .cag-map-pin {
-  /* Camps — indigo */
+  /* Camps — lagoon teal */
 }
 .leaflet-div-icon.cag-map-pin--camp .cag-map-pin__glyph,
 .cag-map-pin--camp .cag-map-pin__glyph {
-  border-color: #3730a3;
-  background: #4338ca;
-  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #086b63;
+  background: #0c8a7f;
+  box-shadow: 0 2px 8px rgba(12, 138, 127, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 .leaflet-div-icon.cag-map-pin--active, .leaflet-div-icon.cag-map-pin--selected,
 .cag-map-pin--active,
@@ -1102,17 +1142,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-div-icon.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--selected .cag-map-pin__glyph,
 .cag-map-pin--active .cag-map-pin__glyph,
 .cag-map-pin--selected .cag-map-pin__glyph {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(232, 93, 59, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--tour.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--tour.cag-map-pin--selected .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--tour.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--tour.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--primary.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--primary.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 .leaflet-div-icon.cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph,
 .cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph,
 .cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(13, 148, 136, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(31, 111, 168, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 .leaflet-div-icon.cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph,
 .cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph,
 .cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(67, 56, 202, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(12, 138, 127, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 
 /* Price chips — brand accent selected state (not competitor black invert) */
@@ -1147,54 +1194,54 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-div-icon.cag-map-chip--tour .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary .cag-map-chip__inner,
 .cag-map-chip--tour .cag-map-chip__inner,
 .cag-map-chip--primary .cag-map-chip__inner {
-  border-color: rgba(232, 93, 59, 0.55);
+  border-color: rgba(49, 48, 65, 0.45);
   background: #fff;
 }
 .leaflet-div-icon.cag-map-chip--tour .cag-map-chip__price, .leaflet-div-icon.cag-map-chip--primary .cag-map-chip__price,
 .cag-map-chip--tour .cag-map-chip__price,
 .cag-map-chip--primary .cag-map-chip__price {
-  color: #c94a32;
+  color: #313041;
 }
 .leaflet-div-icon.cag-map-chip--trip .cag-map-chip__inner,
 .cag-map-chip--trip .cag-map-chip__inner {
-  border-color: rgba(13, 148, 136, 0.55);
+  border-color: rgba(31, 111, 168, 0.5);
   background: #fff;
 }
 .leaflet-div-icon.cag-map-chip--trip .cag-map-chip__price,
 .cag-map-chip--trip .cag-map-chip__price {
-  color: #0f766e;
+  color: #165887;
 }
 .leaflet-div-icon.cag-map-chip--camp .cag-map-chip__inner,
 .cag-map-chip--camp .cag-map-chip__inner {
-  border-color: rgba(67, 56, 202, 0.5);
+  border-color: rgba(12, 138, 127, 0.5);
   background: #fff;
 }
 .leaflet-div-icon.cag-map-chip--camp .cag-map-chip__price,
 .cag-map-chip--camp .cag-map-chip__price {
-  color: #4338ca;
+  color: #086b63;
 }
 .leaflet-div-icon.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip.cag-map-chip--selected .cag-map-chip__inner {
   transform: scale(1.08);
   background: #fff;
-  box-shadow: 0 4px 14px rgba(49, 48, 65, 0.16), 0 0 0 3px rgba(232, 93, 59, 0.22);
+  box-shadow: 0 4px 14px rgba(49, 48, 65, 0.16), 0 0 0 3px rgba(49, 48, 65, 0.09);
 }
 .leaflet-div-icon.cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner {
-  border-color: #e85d3b;
-  box-shadow: 0 4px 14px rgba(232, 93, 59, 0.28), 0 0 0 3px rgba(232, 93, 59, 0.22);
+  border-color: #313041;
+  box-shadow: 0 4px 14px rgba(49, 48, 65, 0.28), 0 0 0 3px rgba(49, 48, 65, 0.09);
 }
 .leaflet-div-icon.cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner {
-  border-color: #0d9488;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28), 0 0 0 3px rgba(13, 148, 136, 0.22);
+  border-color: #1f6fa8;
+  box-shadow: 0 4px 14px rgba(31, 111, 168, 0.32), 0 0 0 3px rgba(31, 111, 168, 0.11);
 }
 .leaflet-div-icon.cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner,
 .cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner {
-  border-color: #4338ca;
-  box-shadow: 0 4px 14px rgba(67, 56, 202, 0.28), 0 0 0 3px rgba(67, 56, 202, 0.22);
+  border-color: #0c8a7f;
+  box-shadow: 0 4px 14px rgba(12, 138, 127, 0.32), 0 0 0 3px rgba(12, 138, 127, 0.11);
 }
 .leaflet-div-icon.cag-map-chip--selected .cag-map-chip__price, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__price,
 .cag-map-chip--selected .cag-map-chip__price,
@@ -1531,17 +1578,41 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #fff;
   border-radius: 6px;
   line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
 }
-.cag-map-preview__badge--trip {
-  background: #e85d3b;
+.cag-map-preview__badge::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: 0;
+  width: 48%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 32%, rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.18) 58%, transparent 78%);
+  transform: translateX(-70%) skewX(-16deg);
+  animation: cag-badge-glare 3.8s ease-in-out infinite;
+  animation-delay: 0.2s;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-map-preview__badge::after {
+    animation: none;
+    display: none;
+  }
 }
 .cag-map-preview__badge--tour {
-  background: #E8604C;
+  background: linear-gradient(145deg, #313041 0%, #1f1e2a 100%);
+}
+.cag-map-preview__badge--trip {
+  background: linear-gradient(145deg, #1f6fa8 0%, #165887 100%);
 }
 .cag-map-preview__badge--camp {
-  background: #313041;
+  background: linear-gradient(145deg, #0c8a7f 0%, #086b63 100%);
 }
 .cag-map-preview__badge--primary {
   background: #ea4335;
@@ -1804,43 +1875,43 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-div-icon.cag-map-cluster--tour .cag-map-cluster__ring,
 .cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__ring,
 .cag-map-cluster--tour .cag-map-cluster__ring {
-  border-color: rgba(232, 93, 59, 0.55);
-  background: rgba(232, 93, 59, 0.12);
+  border-color: rgba(49, 48, 65, 0.5);
+  background: rgba(49, 48, 65, 0.09);
 }
 .leaflet-div-icon.cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__core,
 .leaflet-div-icon.cag-map-cluster--tour .cag-map-cluster__core,
 .cag-map-cluster--tour .leaflet-div-icon.cag-map-cluster__core,
 .cag-map-cluster--tour .cag-map-cluster__core {
-  background: #e85d3b;
-  box-shadow: 0 3px 10px rgba(232, 93, 59, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+  background: #313041;
+  box-shadow: 0 3px 10px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 .leaflet-div-icon.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__ring,
 .leaflet-div-icon.cag-map-cluster--trip .cag-map-cluster__ring,
 .cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__ring,
 .cag-map-cluster--trip .cag-map-cluster__ring {
-  border-color: rgba(13, 148, 136, 0.55);
-  background: rgba(13, 148, 136, 0.12);
+  border-color: rgba(31, 111, 168, 0.5);
+  background: rgba(31, 111, 168, 0.11);
 }
 .leaflet-div-icon.cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__core,
 .leaflet-div-icon.cag-map-cluster--trip .cag-map-cluster__core,
 .cag-map-cluster--trip .leaflet-div-icon.cag-map-cluster__core,
 .cag-map-cluster--trip .cag-map-cluster__core {
-  background: #0d9488;
-  box-shadow: 0 3px 10px rgba(13, 148, 136, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+  background: #1f6fa8;
+  box-shadow: 0 3px 10px rgba(31, 111, 168, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 .leaflet-div-icon.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__ring,
 .leaflet-div-icon.cag-map-cluster--camp .cag-map-cluster__ring,
 .cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__ring,
 .cag-map-cluster--camp .cag-map-cluster__ring {
-  border-color: rgba(67, 56, 202, 0.55);
-  background: rgba(67, 56, 202, 0.12);
+  border-color: rgba(12, 138, 127, 0.5);
+  background: rgba(12, 138, 127, 0.11);
 }
 .leaflet-div-icon.cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__core,
 .leaflet-div-icon.cag-map-cluster--camp .cag-map-cluster__core,
 .cag-map-cluster--camp .leaflet-div-icon.cag-map-cluster__core,
 .cag-map-cluster--camp .cag-map-cluster__core {
-  background: #4338ca;
-  box-shadow: 0 3px 10px rgba(67, 56, 202, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.85);
+  background: #0c8a7f;
+  box-shadow: 0 3px 10px rgba(12, 138, 127, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.85);
 }
 .leaflet-div-icon.cag-map-cluster--mixed .leaflet-div-icon.cag-map-cluster__ring,
 .leaflet-div-icon.cag-map-cluster--mixed .cag-map-cluster__ring,
