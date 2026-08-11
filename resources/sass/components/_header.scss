@@ -205,3 +205,76 @@ $tf-dark:    #313041;
         padding: 4px 0;
     }
 }
+
+// Guidings catalog search — keep fish field flush with pill segments
+// (must live after base .tagify-fish-wrap rules; components load after page SCSS)
+.guidings-page-header {
+    .guidings-page-header__segment-control--tagify {
+        .tagify {
+            --tags-border-color: transparent;
+            --tags-hover-border-color: transparent;
+            --tags-focus-border-color: transparent;
+            height: auto;
+            min-height: 28px;
+            max-height: 52px;
+            padding: 0 0 0 1.35rem;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+
+            &:hover,
+            &.tagify--focus {
+                border: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+        }
+
+        .tagify-fish-icon {
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            color: #787780;
+        }
+    }
+
+    .guidings-page-header__segment--fish {
+        position: relative;
+        overflow: visible;
+
+        .tagify__dropdown.tagify__dropdown--fish {
+            position: absolute;
+            top: calc(100% + 0.35rem);
+            left: 0;
+            width: max(100%, 16rem);
+            min-width: 16rem;
+            max-width: 22rem;
+            margin: 0;
+            padding: 0.35rem;
+            border: 1px solid rgba($tf-dark, 0.1);
+            border-radius: 0.85rem;
+            box-shadow: 0 14px 36px rgba($tf-dark, 0.14);
+            transform: none;
+            z-index: 1300;
+
+            .tagify__dropdown__wrapper {
+                border: 0;
+                padding: 0;
+                max-height: 220px;
+            }
+
+            .tagify__dropdown__item {
+                border-radius: 0.55rem;
+                font-weight: 600;
+                color: $tf-dark;
+
+                &:hover,
+                &.tagify__dropdown__item--active {
+                    background: rgba($tf-dark, 0.06);
+                    color: $tf-dark;
+                }
+            }
+        }
+    }
+}

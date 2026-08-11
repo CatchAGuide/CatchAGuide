@@ -471,21 +471,11 @@
 </script>
 @endsection
 @section('content')
-    <div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">
-                            {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+    @include('pages.guidings.partials.catalog-header', [
+        'listingTitle' => $filteredTitle,
+        'listingSubtitle' => '',
+        'place' => $place ?? null,
+    ])
 
     <!--Tours List Start-->
     <section class="tours-list">
@@ -655,6 +645,7 @@
 @endsection
 
 @section('js_after')
+@include('layouts.partials.tagify-fish-script')
 <script>
     $('#sortby, #sortby-2').on('change', function() {
         const urlParams = new URLSearchParams(window.location.search);

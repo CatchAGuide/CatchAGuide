@@ -252,11 +252,23 @@
   
 <!-- /.preloader -->
 <div class="page-wrapper">
-  
-    @include('layouts.partials.newheader-short', [
-        'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($vacation) ? ($vacation->country ?? null) : null,
-    ])
+
+    @php
+        $useGuidingsSiteHeader = request()->routeIs('guidings.index');
+    @endphp
+
+    @if($useGuidingsSiteHeader)
+        @include('layouts.modal.loginModal')
+        @include('layouts.modal.registerModal')
+        @include('layouts.modal.guideApplicationModal')
+        @include('layouts.partials.site-mobile-menu')
+    @else
+        {{-- Legacy short chrome for non-migrated app-v2-1 pages --}}
+        @include('layouts.partials.newheader-short', [
+            'isVacation' => request()->is('vacations*'),
+            'currentVacationCountry' => isset($vacation) ? ($vacation->country ?? null) : null,
+        ])
+    @endif
 
     @yield('content')
 

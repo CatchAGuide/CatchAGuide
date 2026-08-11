@@ -28,21 +28,15 @@
 @endif
 
 @section('content')
-<div class="container">
-    <section class="page-header">
-        <div class="page-header__bottom breadcrumb-container">
-            <div class="page-header__bottom-inner">
-                <ul class="thm-breadcrumb list-unstyled">
-                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li><a href="{{ route('vacations.index') }}">{{ __('vacations.hub_breadcrumb') }}</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li class="active">{{ $breadcrumbLabel }}</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-</div>
+@include('pages.vacations.partials.catalog-header', [
+    'listingTitle' => $listingTitle,
+    'listingSubtitle' => $countrySubtitle,
+    'currentVacationCountry' => $isAllOffers ? 'all-offers' : ($destination->slug ?? null),
+    'breadcrumbItems' => [
+        ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+        ['label' => $breadcrumbLabel, 'url' => null],
+    ],
+])
 
 <div
     class="container vacation-country"

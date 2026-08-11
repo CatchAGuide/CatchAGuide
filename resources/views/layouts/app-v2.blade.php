@@ -259,16 +259,34 @@
 <div class="page-wrapper">
 
     @php
+        $useOffersSiteHeader = request()->is('offers*') || request()->routeIs('offers.*');
+        $useVacationsSiteHeader = request()->is('vacations')
+            || request()->routeIs('vacations.index')
+            || request()->routeIs('vacations.country')
+            || request()->routeIs('vacations.all-offers')
+            || request()->routeIs('vacations.trips.index')
+            || request()->routeIs('vacations.camps.index')
+            || request()->routeIs('vacations.trips.show')
+            || request()->routeIs('vacations.camps.show');
         $useLegacyHeader = ! request()->is('/')
-            && ! (request()->is('offers*') || request()->routeIs('offers.*'));
+            && ! $useOffersSiteHeader
+            && ! $useVacationsSiteHeader;
     @endphp
 
-    {{-- Homepage / offers include overlay site-nav inside their hero shells. --}}
-    @if(request()->is('offers*') || request()->routeIs('offers.*'))
+    {{-- Homepage / offers / vacations listings include site-nav in page content. --}}
+    @if($useOffersSiteHeader || $useVacationsSiteHeader)
         @include('layouts.modal.loginModal')
         @include('layouts.modal.registerModal')
         @include('layouts.modal.guideApplicationModal')
         @include('layouts.partials.site-mobile-menu')
+        @if($useVacationsSiteHeader)
+            <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
+                <div class="vacation-page-loading-overlay__panel" role="status">
+                    <div class="spinner-border text-danger" aria-hidden="true"></div>
+                    <span>{{ translate('Loading...') }}</span>
+                </div>
+            </div>
+        @endif
     @elseif($useLegacyHeader)
         {{-- Legacy dark chrome for non-migrated pages --}}
         @include('layouts.partials.newheader', [

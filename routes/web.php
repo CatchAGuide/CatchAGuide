@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\ContactRequestsController;
 use App\Http\Controllers\Admin\ProductReportsController;
+use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\Admin\NewsletterSubscribersController;
 use App\Http\Controllers\Admin\FAQController as AdminFaqController;
@@ -674,6 +675,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('email-logs/{emailLog}', [EmailLogsController::class, 'show'])->name('email-logs.show');
+        Route::get('reviews', [ReviewsController::class, 'index'])->name('reviews.index');
+        Route::get('reviews/{review}', [ReviewsController::class, 'show'])->name('reviews.show');
         Route::get('contact-requests', [ContactRequestsController::class, 'index'])->name('contact-requests.index');
         Route::get('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'showComment'])->name('contact-requests.comment.show');
         Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');

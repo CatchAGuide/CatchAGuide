@@ -99,6 +99,9 @@
                     <h3>Communications</h3>
                 </li>
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.reviews.index') }}"><i class="side-menu__icon fe fe-star"></i><span class="side-menu__label">{{ __('admin.reviews.nav') }}</span></a>
+                </li>
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
                 </li>
                 <li class="slide">

@@ -17,27 +17,32 @@
 @endif
 
 @section('content')
-<div class="container">
-    <section class="page-header">
-        <div class="page-header__bottom breadcrumb-container">
-            <div class="page-header__bottom-inner">
-                <ul class="thm-breadcrumb list-unstyled">
-                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li><a href="{{ route('vacations.index') }}">{{ __('vacations.hub_breadcrumb') }}</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    @if($vm->isCountryPage())
-                        <li><a href="{{ route($vm->pillar->indexRouteName()) }}">{{ __($vm->pillar->indexTitleKey()) }}</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">{{ $vm->pageTitle() }}</li>
-                    @else
-                        <li class="active">{{ __($vm->pillar->indexTitleKey()) }}</li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-    </section>
-</div>
+@php
+    $vacationsHeaderCrumbs = [
+        ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+    ];
+    if ($vm->isCountryPage()) {
+        $vacationsHeaderCrumbs[] = [
+            'label' => __($vm->pillar->indexTitleKey()),
+            'url' => route($vm->pillar->indexRouteName()),
+        ];
+        $vacationsHeaderCrumbs[] = [
+            'label' => $vm->pageTitle(),
+            'url' => null,
+        ];
+    } else {
+        $vacationsHeaderCrumbs[] = [
+            'label' => __($vm->pillar->indexTitleKey()),
+            'url' => null,
+        ];
+    }
+@endphp
+@include('pages.vacations.partials.catalog-header', [
+    'listingTitle' => $vm->pageTitle(),
+    'listingSubtitle' => $vm->headerSubtitle(),
+    'currentVacationCountry' => $vm->isCountryPage() ? ($vm->destination->slug ?? null) : null,
+    'breadcrumbItems' => $vacationsHeaderCrumbs,
+])
 
 <div
     class="container vacation-pillar-index vacation-pillar-index--{{ $vm->pillar->cssModifier() }}{{ $vm->isCountryPage() ? ' vacation-pillar-country' : '' }}"

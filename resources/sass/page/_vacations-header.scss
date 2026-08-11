@@ -1,0 +1,249 @@
+// Vacations listing header — gray band, no photo (matches guidings catalog chrome)
+$vacations-header-slate: #313041;
+$vacations-header-coral: #E8604C;
+$vacations-header-muted: #787780;
+
+.vacation-page-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.82);
+
+  &[hidden] {
+    display: none !important;
+  }
+
+  &__panel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    font-weight: 500;
+    color: $vacations-header-slate;
+  }
+}
+
+.vacations-page-header-shell {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.vacations-page-header {
+  &__band {
+    background: $vacations-header-slate;
+    color: #fff;
+    padding: 1.5rem 0 3rem;
+
+    @media (min-width: 768px) {
+      padding: 1.85rem 0 3.35rem;
+    }
+  }
+
+  &__inner {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 16px;
+
+    @media (min-width: 992px) {
+      padding: 0 64px;
+    }
+
+    &--search {
+      position: relative;
+      z-index: 2;
+      margin-top: -1.75rem;
+      padding-bottom: 0.5rem;
+
+      @media (min-width: 768px) {
+        margin-top: -2rem;
+      }
+    }
+  }
+
+  &__copy {
+    max-width: 48rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: #fff !important;
+  }
+
+  &__sub {
+    margin: 0.45rem 0 0;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
+  &__search {
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  &__search-box {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    align-items: stretch;
+    padding: 0.65rem;
+    border-radius: 1rem;
+    background: #fff;
+    border: 1px solid rgba($vacations-header-slate, 0.08);
+    box-shadow: 0 14px 36px rgba($vacations-header-slate, 0.14);
+
+    @media (min-width: 768px) {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0;
+      padding: 0.35rem 0.35rem 0.35rem 0.85rem;
+      align-items: center;
+      border-radius: 999px;
+    }
+  }
+
+  &__segment {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    @media (min-width: 768px) {
+      padding: 0.45rem 1rem;
+
+      &:hover,
+      &:focus-within {
+        background: rgba($vacations-header-slate, 0.04);
+      }
+    }
+  }
+
+  &__segment-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: $vacations-header-slate;
+    line-height: 1.2;
+  }
+
+  &__segment-control {
+    position: relative;
+    display: block;
+
+    > i {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $vacations-header-muted;
+      font-size: 0.85rem;
+      pointer-events: none;
+      z-index: 2;
+    }
+  }
+
+  &__country-select {
+    height: 28px;
+    width: 100%;
+    padding: 0 1.5rem 0 1.35rem;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: $vacations-header-slate;
+    box-shadow: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23787780' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.15rem center;
+
+    &:focus {
+      background-color: transparent;
+      box-shadow: none;
+      outline: none;
+    }
+  }
+
+  &__search-btn {
+    background: $vacations-header-coral;
+    color: #fff;
+    border: 0;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      background: #E85B40;
+      color: #fff;
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    @media (min-width: 768px) {
+      border-radius: 999px;
+    }
+  }
+
+  &__breadcrumbs {
+    margin-top: 1rem;
+  }
+
+  &__crumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+    color: $vacations-header-muted;
+
+    a {
+      color: $vacations-header-muted;
+      text-decoration: none;
+      font-weight: 600;
+
+      &:hover {
+        color: $vacations-header-coral;
+      }
+    }
+
+    .is-active {
+      color: $vacations-header-slate;
+      font-weight: 700;
+    }
+
+    .fa-chevron-right {
+      font-size: 0.65rem;
+      opacity: 0.55;
+    }
+  }
+}
