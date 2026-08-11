@@ -106,3 +106,4 @@ storage/debugbar/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.cursor/

@@ -9,7 +9,6 @@ use App\Services\Translation\ListingViewTranslationService;
 class CampCardPresenter
 {
     public function __construct(
-        private CampTrustSignalResolver $trust,
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
@@ -56,7 +55,10 @@ class CampCardPresenter
             'slider_cta' => __('vacations.book_now'),
             'cta' => __('vacations.book_now'),
             'cta_class' => 'camp',
-            'trust' => $this->trust->resolve($camp),
+            // Camps have no guest review flow; do not borrow guiding Review scores onto cards.
+            'trust' => null,
+            'rating' => null,
+            'review_count' => 0,
         ];
     }
 
@@ -87,12 +89,6 @@ class CampCardPresenter
         $card['listing_cta'] = __('vacations.see_more');
         $card['verified'] = true;
         $card['whats_included_title'] = __('offers.included_heading');
-
-        $trust = $card['trust'] ?? null;
-        if (is_array($trust)) {
-            $card['rating'] = isset($trust['rating']) ? (float) $trust['rating'] : null;
-            $card['review_count'] = (int) ($trust['count'] ?? 0);
-        }
 
         return $card;
     }
@@ -299,10 +295,7 @@ class CampCardPresenter
 
     private function imageBadge(Camp $camp): ?string
     {
-        if ($camp->guidings->isNotEmpty()) {
-            return 'top';
-        }
-
+        // "TOP RATED" must not be shown for linked guidings — camps are not reviewable.
         if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
             return 'limited';
         }

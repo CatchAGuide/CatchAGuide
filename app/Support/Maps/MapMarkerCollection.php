@@ -59,7 +59,7 @@ class MapMarkerCollection
                     : null,
                 'badge' => __('offers.badge_tour'),
                 'cta' => __('vacations.view_details'),
-            ], self::moduleFields($module), self::guidingListMeta($guiding));
+            ], self::moduleFields($module, $id), self::guidingListMeta($guiding));
         }
 
         return $markers;
@@ -92,8 +92,9 @@ class MapMarkerCollection
                 : null;
 
             $module = self::MODULE_TRIP;
+            $id = (int) ($trip->id ?? 0);
             $markers[] = array_merge([
-                'id' => (int) ($trip->id ?? 0),
+                'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
                 'variant' => 'trip',
@@ -109,7 +110,7 @@ class MapMarkerCollection
                     : null,
                 'badge' => __('offers.badge_trip'),
                 'cta' => __('vacations.view_details'),
-            ], self::moduleFields($module), self::tripListMeta($trip));
+            ], self::moduleFields($module, $id), self::tripListMeta($trip));
         }
 
         return $markers;
@@ -145,8 +146,9 @@ class MapMarkerCollection
             }
 
             $module = self::MODULE_CAMP;
+            $id = (int) ($camp->id ?? 0);
             $markers[] = array_merge([
-                'id' => (int) ($camp->id ?? 0),
+                'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
                 'variant' => 'camp',
@@ -162,7 +164,7 @@ class MapMarkerCollection
                     : null,
                 'badge' => __('offers.badge_camp'),
                 'cta' => __('vacations.view_details'),
-            ], self::moduleFields($module), self::campListMeta($camp));
+            ], self::moduleFields($module, $id), self::campListMeta($camp));
         }
 
         return $markers;
@@ -234,7 +236,7 @@ class MapMarkerCollection
                     : null,
                 'badge' => __('offers.badge_camp'),
                 'cta' => __('vacations.view_details'),
-            ], self::moduleFields($module));
+            ], self::moduleFields($module, $id));
         }
 
         return $markers;
@@ -255,7 +257,16 @@ class MapMarkerCollection
                 continue;
             }
             if (empty($mapped['module']) && ! empty($mapped['pillar'])) {
-                $mapped = array_merge($mapped, self::moduleFields(self::normalizeModule((string) $mapped['pillar'])));
+                $mapped = array_merge(
+                    $mapped,
+                    self::moduleFields(self::normalizeModule((string) $mapped['pillar']), $mapped['id'] ?? null)
+                );
+            }
+            if (empty($mapped['key']) && isset($mapped['id'])) {
+                $mapped['key'] = self::itemKey(
+                    (string) ($mapped['module'] ?? $mapped['pillar'] ?? self::MODULE_TOUR),
+                    $mapped['id']
+                );
             }
             $markers[] = $mapped;
         }
@@ -269,18 +280,32 @@ class MapMarkerCollection
     }
 
     /**
+     * Stable map identity across mixed offer types (tour / trip / camp share numeric IDs).
+     */
+    public static function itemKey(string $module, int|string $id): string
+    {
+        return self::normalizeModule($module).':'.$id;
+    }
+
+    /**
      * Canonical offer module for mixed listings (tour | trip | camp).
      *
-     * @return array{module: string, moduleLabel: string}
+     * @return array{module: string, moduleLabel: string, key?: string}
      */
-    public static function moduleFields(string $module): array
+    public static function moduleFields(string $module, int|string|null $id = null): array
     {
         $module = self::normalizeModule($module);
 
-        return [
+        $fields = [
             'module' => $module,
             'moduleLabel' => __('offers.badge_'.$module),
         ];
+
+        if ($id !== null && $id !== '') {
+            $fields['key'] = self::itemKey($module, $id);
+        }
+
+        return $fields;
     }
 
     public static function normalizeModule(string $value): string

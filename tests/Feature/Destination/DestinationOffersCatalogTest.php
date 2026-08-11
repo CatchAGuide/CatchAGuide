@@ -82,7 +82,8 @@ class DestinationOffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertSee('data-offer-type="camp"', false);
         $response->assertSee(__('offers.sort_recommended'), false);
-        $response->assertDontSee(__('offers.all_countries'), false);
+        // Destination scope hides the region dropdown (country is locked via hidden fields).
+        $response->assertDontSee('<select name="country"', false);
         $response->assertSee('name="country"', false);
         $response->assertSee('name="placeLat"', false);
         $response->assertSee('value="40.4"', false);
@@ -136,6 +137,9 @@ class DestinationOffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('data-offers-vacation-subfilter', false);
+        $response->assertSee('data-offers-vacation-type', false);
+        $response->assertSee('offers-filters__vacation-type-btns', false);
+        $response->assertSee('offers-filters__vacation-type-btn', false);
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertDontSee('data-offer-type="tour"', false);
     }

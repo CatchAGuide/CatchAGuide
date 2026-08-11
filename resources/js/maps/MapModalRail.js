@@ -1,3 +1,5 @@
+import { itemKey } from './mapItemIdentity';
+
 /**
  * MapModalRail — viewport-synced listing rail + docked selection (not map overlay)
  */
@@ -40,7 +42,7 @@ export default class MapModalRail {
   _bind() {
     this.listingMap.onViewportChange((payload) => this.renderViewport(payload));
     this.listingMap.onSelectionChange((item) => this.renderSelection(item));
-    this.listingMap.onPreviewChange((item) => this.setHoveredId(item && item.id != null ? item.id : null));
+    this.listingMap.onPreviewChange((item) => this.setHoveredId(item ? itemKey(item) : null));
 
     this.listEl.addEventListener('click', (e) => {
       const card = e.target.closest('[data-map-rail-id]');
@@ -142,8 +144,9 @@ export default class MapModalRail {
   setItems(items) {
     this._itemsById = new Map();
     (items || []).forEach((item) => {
-      if (item && item.id != null && item.variant !== 'gray') {
-        this._itemsById.set(String(item.id), item);
+      const key = itemKey(item);
+      if (key && item.variant !== 'gray') {
+        this._itemsById.set(key, item);
       }
     });
   }
@@ -180,8 +183,9 @@ export default class MapModalRail {
 
     const html = items
       .map((item) => {
-        const id = this._escape(String(item.id));
-        const selected = String(item.id) === String(this._selectedId);
+        const key = itemKey(item);
+        const id = this._escape(String(key || item.id));
+        const selected = key != null && String(key) === String(this._selectedId);
         const title = this._escape(item.title || '');
         const location = this._escape(item.location || '');
         const image = this._escape(item.image || '');
@@ -279,7 +283,7 @@ export default class MapModalRail {
       return;
     }
 
-    this._selectedId = item.id != null ? String(item.id) : null;
+    this._selectedId = itemKey(item);
 
     this.listEl.querySelectorAll('.map-modal__rail-card').forEach((el) => {
       el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === this._selectedId);

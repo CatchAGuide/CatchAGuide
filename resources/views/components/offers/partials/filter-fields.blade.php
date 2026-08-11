@@ -22,11 +22,39 @@
     ];
 @endphp
 
+@if($filter->isVacation() && is_callable($vacationUrl ?? null))
+    @php
+        $activeVacation = $filter->vacation ?? 'all';
+    @endphp
+    <div class="{{ $fieldClass }} offers-filters__vacation-type" data-offers-vacation-type>
+        <div
+            class="offers-filters__vacation-type-btns"
+            role="group"
+            aria-label="{{ __('offers.filter_vacation_type') }}"
+        >
+            <a
+                href="{{ $activeVacation === 'trip' ? $vacationUrl('all') : $vacationUrl('trip') }}"
+                class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
+                @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
+            >
+                {{ __('offers.filter_trips') }}
+            </a>
+            <a
+                href="{{ $activeVacation === 'camp' ? $vacationUrl('all') : $vacationUrl('camp') }}"
+                class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
+                @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
+            >
+                {{ __('offers.filter_camps') }}
+            </a>
+        </div>
+    </div>
+@endif
+
 @if($countries->isNotEmpty())
     <div class="{{ $fieldClass }}">
         <label class="form-label">{{ __('offers.filter_country') }}</label>
         <select name="country" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.all_countries') }}</option>
+            <option value="">{{ __('offers.filter_show_all') }}</option>
             @foreach($countries as $row)
                 <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
                     {{ translate($row['name']) }}
@@ -128,7 +156,7 @@
         <div class="{{ $fieldClass }}">
             <label class="form-label">{{ __('offers.filter_method') }}</label>
             <select name="methods" class="{{ $selectClass }}">
-                <option value="">{{ __('offers.select_any') }}</option>
+                <option value="">{{ __('offers.filter_show_all') }}</option>
                 @foreach($methodOptions as $method)
                     <option value="{{ $method['id'] }}" @selected(($filter->methodId ?? null) === (int) $method['id'])>
                         {{ $method['name'] }}
@@ -142,7 +170,7 @@
         <div class="{{ $fieldClass }}">
             <label class="form-label">{{ __('offers.filter_water_type') }}</label>
             <select name="water" class="{{ $selectClass }}">
-                <option value="">{{ __('offers.select_any') }}</option>
+                <option value="">{{ __('offers.filter_show_all') }}</option>
                 @foreach($waterOptions as $water)
                     <option value="{{ $water['id'] }}" @selected(($filter->waterId ?? null) === (int) $water['id'])>
                         {{ $water['name'] }}
@@ -156,7 +184,7 @@
         <div class="{{ $fieldClass }}">
             <label class="form-label">{{ __('offers.filter_duration') }}</label>
             <select name="duration_types" class="{{ $selectClass }}">
-                <option value="">{{ __('offers.select_any') }}</option>
+                <option value="">{{ __('offers.filter_show_all') }}</option>
                 @foreach($tourDurationOptions as $duration)
                     <option value="{{ $duration['value'] }}" @selected(($filter->durationType ?? '') === $duration['value'])>
                         {{ $duration['label'] }}
@@ -172,7 +200,7 @@
         <div class="{{ $fieldClass }}">
             <label class="form-label">{{ __('offers.filter_accommodation_type') }}</label>
             <select name="accommodation_type" class="{{ $selectClass }}">
-                <option value="">{{ __('offers.select_any') }}</option>
+                <option value="">{{ __('offers.filter_show_all') }}</option>
                 @foreach($accommodationTypeOptions as $type)
                     <option value="{{ $type['id'] }}" @selected(($filter->accommodationTypeId ?? null) === (int) $type['id'])>
                         {{ $type['name'] }}
@@ -185,7 +213,7 @@
     <div class="{{ $fieldClass }}">
         <label class="form-label">{{ __('offers.filter_guiding') }}</label>
         <select name="has_guiding" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.select_any') }}</option>
+            <option value="">{{ __('offers.filter_show_all') }}</option>
             <option value="1" @selected($filter->hasGuiding === true)>{{ __('offers.filter_yes') }}</option>
             <option value="0" @selected($filter->hasGuiding === false)>{{ __('offers.filter_no') }}</option>
         </select>
@@ -194,7 +222,7 @@
     <div class="{{ $fieldClass }}">
         <label class="form-label">{{ __('offers.filter_rental_boat') }}</label>
         <select name="has_rental_boat" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.select_any') }}</option>
+            <option value="">{{ __('offers.filter_show_all') }}</option>
             <option value="1" @selected($filter->hasRentalBoat === true)>{{ __('offers.filter_yes') }}</option>
             <option value="0" @selected($filter->hasRentalBoat === false)>{{ __('offers.filter_no') }}</option>
         </select>
@@ -205,7 +233,7 @@
     <div class="{{ $fieldClass }}">
         <label class="form-label">{{ __('offers.filter_duration') }}</label>
         <select name="duration" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.select_any') }}</option>
+            <option value="">{{ __('offers.filter_show_all') }}</option>
             @foreach($tripDurationOptions as $duration)
                 <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
                     {{ $duration['label'] }}

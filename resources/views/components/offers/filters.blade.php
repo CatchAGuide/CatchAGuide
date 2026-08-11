@@ -47,9 +47,24 @@
     $showTourFacets = $filter->showsTourFacets();
     $showCampFacets = $filter->showsCampFacets();
     $showTripFacets = $filter->showsTripFacets();
-    $activeFilterCount = collect(array_merge(['species', 'country', 'sortby', 'type', 'num_guests'], $facetKeys))
+    $activeFilterCount = collect(array_merge(['species', 'country', 'sortby', 'type', 'vacation', 'num_guests'], $facetKeys))
         ->filter(fn ($key) => filled(request()->get($key)))
         ->count();
+    $sidebarFilterKeys = array_merge(['species', 'country', 'sortby', 'vacation'], $facetKeys);
+    $hasSidebarFilters = collect($sidebarFilterKeys)
+        ->filter(fn ($key) => filled(request()->get($key)) && ! in_array($key, $lockedKeys, true))
+        ->isNotEmpty();
+    $clearFiltersUrl = (function () use ($action, $query, $lockedParams, $activeType, $sidebarFilterKeys) {
+        $params = collect($query)->except($sidebarFilterKeys)->all();
+        foreach ($lockedParams as $key => $value) {
+            $params[$key] = $value;
+        }
+        if ($activeType !== 'all') {
+            $params['type'] = $activeType;
+        }
+
+        return $action.($params ? '?'.http_build_query($params) : '');
+    })();
     $typeUrl = function (string $type) use ($action, $query, $typeLinks, $facetKeys) {
         if (is_array($typeLinks) && isset($typeLinks[$type])) {
             return $typeLinks[$type];
@@ -168,9 +183,17 @@
                 'showTourFacets' => $showTourFacets,
                 'showCampFacets' => $showCampFacets,
                 'showTripFacets' => $showTripFacets,
+                'vacationUrl' => $vacationUrl,
             ])
 
-            <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">{{ __('offers.apply_filters') }}</button>
+            <div class="vacation-filters__actions mt-2">
+                <button type="submit" class="btn btn-sm btn-primary w-100">{{ __('offers.apply_filters') }}</button>
+                @if($hasSidebarFilters)
+                    <a href="{{ $clearFiltersUrl }}" class="btn btn-sm btn-outline-secondary w-100 mt-2" data-offers-clear-filters>
+                        {{ __('offers.clear_filters') }}
+                    </a>
+                @endif
+            </div>
         </div>
     </div>
     @endif
@@ -410,6 +433,7 @@
                     'showTourFacets' => $showTourFacets,
                     'showCampFacets' => $showCampFacets,
                     'showTripFacets' => $showTripFacets,
+                    'vacationUrl' => $vacationUrl,
                 ])
 
                 <div class="mb-3">
@@ -420,6 +444,11 @@
                 </div>
 
                 <button type="submit" class="btn btn-orange w-100">{{ __('offers.apply_filters') }}</button>
+                @if($hasSidebarFilters)
+                    <a href="{{ $clearFiltersUrl }}" class="btn btn-outline-secondary w-100 mt-2" data-offers-clear-filters>
+                        {{ __('offers.clear_filters') }}
+                    </a>
+                @endif
             </form>
             @include('components.offers.partials.species-tagify-script')
         </div>

@@ -88,6 +88,8 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.sort_nearest'), false);
         $response->assertSee(__('offers.sort_price_asc'), false);
         $response->assertSee(__('offers.sort_price_desc'), false);
+        $response->assertSee(__('offers.filter_show_all'), false);
+        $response->assertSee('<select name="country"', false);
     }
 
     public function test_species_filter_renders_tagify_dropdown_control(): void
@@ -131,6 +133,7 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.filter_method'), false);
         $response->assertSee(__('offers.filter_water_type'), false);
         $response->assertSee(__('offers.filter_duration'), false);
+        $response->assertSee(__('offers.filter_show_all'), false);
         $response->assertSee('name="methods"', false);
         $response->assertSee('name="water"', false);
         $response->assertSee('name="duration_types"', false);
@@ -214,6 +217,86 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.filter_trips').' (26)', false);
         $response->assertSee('26 '.translate('results'), false);
         $response->assertDontSee('1 '.translate('result'), false);
+    }
+
+    public function test_vacation_pillar_renders_subtle_vacation_type_toggle(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'trip',
+            speciesOptions: collect([
+                ['id' => 5, 'name' => 'Pike'],
+            ]),
+            tripsTotal: 3,
+            campsTotal: 2,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'trip',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-vacation-type', false);
+        $response->assertSee('offers-filters__vacation-type-btns', false);
+        $response->assertSee('offers-filters__vacation-type-btn', false);
+        $response->assertSee(__('offers.filter_trips'), false);
+        $response->assertSee(__('offers.filter_camps'), false);
+        $response->assertDontSee('vacation-filters__pillar-btn--trips', false);
+        $response->assertDontSee(__('offers.filter_vacation_all'), false);
+        $response->assertDontSee('<select name="vacation"', false);
+    }
+
+    public function test_clear_filters_link_appears_when_sidebar_filters_active(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'camp',
+            country: 'spain',
+            speciesOptions: collect([
+                ['id' => 5, 'name' => 'Pike'],
+            ]),
+            speciesIds: [5],
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'camp',
+            'country' => 'spain',
+            'species' => [5],
+            'place' => 'Spain',
+            'placeLat' => '40.4',
+            'placeLng' => '-3.7',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.clear_filters'), false);
+        $response->assertSee('data-offers-clear-filters', false);
+
+        $clearHref = null;
+        if (preg_match('/data-offers-clear-filters[^>]*href="([^"]+)"/', $response->getContent(), $m)
+            || preg_match('/href="([^"]+)"[^>]*data-offers-clear-filters/', $response->getContent(), $m)) {
+            $clearHref = html_entity_decode($m[1], ENT_QUOTES);
+        }
+
+        $this->assertNotNull($clearHref);
+        $this->assertStringContainsString('type=vacation', $clearHref);
+        $this->assertStringContainsString('place=Spain', $clearHref);
+        $this->assertStringNotContainsString('vacation=camp', $clearHref);
+        $this->assertStringNotContainsString('country=spain', $clearHref);
+        $this->assertStringNotContainsString('species', $clearHref);
+    }
+
+    public function test_clear_filters_link_hidden_when_no_sidebar_filters(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+        ));
+
+        $response = $this->get(route('offers.index', ['type' => 'vacation']));
+
+        $response->assertOk();
+        $response->assertDontSee('data-offers-clear-filters', false);
     }
 
     public function test_vacation_chip_extends_trips_camps_inline_and_shows_consolidated_cards(): void

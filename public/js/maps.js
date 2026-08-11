@@ -216,6 +216,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _LandmarkLayer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LandmarkLayer */ "./resources/js/maps/LandmarkLayer.js");
 /* harmony import */ var _MapModalRail__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./MapModalRail */ "./resources/js/maps/MapModalRail.js");
 /* harmony import */ var _MapModalFilters__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MapModalFilters */ "./resources/js/maps/MapModalFilters.js");
+/* harmony import */ var _mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./mapItemIdentity */ "./resources/js/maps/mapItemIdentity.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -228,6 +229,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 /**
  * ListingMap — multi-marker listing / modal map with clustering, viewport rail, price chips
  */
+
 
 
 
@@ -507,7 +509,7 @@ var ListingMap = /*#__PURE__*/function () {
         return {
           items: _items,
           ids: _items.map(function (i) {
-            return i.id;
+            return (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(i);
           }),
           count: _items.length
         };
@@ -525,7 +527,7 @@ var ListingMap = /*#__PURE__*/function () {
       return {
         items: unique,
         ids: unique.map(function (i) {
-          return i.id;
+          return (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(i);
         }),
         count: unique.length
       };
@@ -536,13 +538,20 @@ var ListingMap = /*#__PURE__*/function () {
       var seen = new Set();
       var out = [];
       (items || []).forEach(function (item) {
-        if (!item || item.id == null) return;
-        var key = String(item.id);
+        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(item);
+        if (!key) return;
         if (seen.has(key)) return;
         seen.add(key);
         out.push(item);
       });
       return out;
+    }
+  }, {
+    key: "_findMarkerById",
+    value: function _findMarkerById(id) {
+      return this.markers.find(function (m) {
+        return m._cagItem && (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemsMatch)(m._cagItem, id);
+      });
     }
   }, {
     key: "clearMarkers",
@@ -766,9 +775,7 @@ var ListingMap = /*#__PURE__*/function () {
     key: "selectById",
     value: function selectById(id) {
       var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var marker = this.markers.find(function (m) {
-        return m._cagItem && String(m._cagItem.id) === String(id);
-      });
+      var marker = this._findMarkerById(id);
       if (marker) {
         this.selectMarker(marker, opts);
       }
@@ -781,9 +788,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "zoomToById",
     value: function zoomToById(id) {
-      var marker = this.markers.find(function (m) {
-        return m._cagItem && String(m._cagItem.id) === String(id);
-      });
+      var marker = this._findMarkerById(id);
       if (!marker) return;
       this._closeDetachedPreview();
       this._setClusterPreviewHighlight(null);
@@ -796,12 +801,10 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "highlightById",
     value: function highlightById(id, on) {
-      if (this._selectedMarker && String(this._selectedMarker._cagItem && this._selectedMarker._cagItem.id) === String(id)) {
+      if (this._selectedMarker && (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemsMatch)(this._selectedMarker._cagItem, id)) {
         return;
       }
-      var marker = this.markers.find(function (m) {
-        return m._cagItem && String(m._cagItem.id) === String(id);
-      });
+      var marker = this._findMarkerById(id);
       if (marker) {
         _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, !!on);
       }
@@ -817,9 +820,7 @@ var ListingMap = /*#__PURE__*/function () {
     value: function previewById(id) {
       var _this8 = this;
       var on = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var marker = this.markers.find(function (m) {
-        return m._cagItem && String(m._cagItem.id) === String(id);
-      });
+      var marker = this._findMarkerById(id);
       if (!marker) return;
       if (!on) {
         // Sticky/selected click preview must survive leaving the rail card
@@ -1557,6 +1558,7 @@ var ListingMap = /*#__PURE__*/function () {
         var module = g.module || (pillar === 'trip' ? 'trip' : pillar === 'camp' ? 'camp' : 'tour');
         return {
           id: g.id,
+          key: g.key || "".concat(module, ":").concat(g.id),
           lat: g.lat,
           lng: g.lng,
           variant: g.variant || (g.is_gray || g.isGray ? 'gray' : 'primary'),
@@ -1976,12 +1978,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ MapModalRail)
 /* harmony export */ });
+/* harmony import */ var _mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapItemIdentity */ "./resources/js/maps/mapItemIdentity.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
 /**
  * MapModalRail — viewport-synced listing rail + docked selection (not map overlay)
  */
@@ -2031,7 +2036,7 @@ var MapModalRail = /*#__PURE__*/function () {
         return _this.renderSelection(item);
       });
       this.listingMap.onPreviewChange(function (item) {
-        return _this.setHoveredId(item && item.id != null ? item.id : null);
+        return _this.setHoveredId(item ? (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item) : null);
       });
       this.listEl.addEventListener('click', function (e) {
         var card = e.target.closest('[data-map-rail-id]');
@@ -2133,8 +2138,9 @@ var MapModalRail = /*#__PURE__*/function () {
       var _this3 = this;
       this._itemsById = new Map();
       (items || []).forEach(function (item) {
-        if (item && item.id != null && item.variant !== 'gray') {
-          _this3._itemsById.set(String(item.id), item);
+        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+        if (key && item.variant !== 'gray') {
+          _this3._itemsById.set(key, item);
         }
       });
     }
@@ -2162,8 +2168,9 @@ var MapModalRail = /*#__PURE__*/function () {
       }
       if (this.emptyEl) this.emptyEl.hidden = true;
       var html = items.map(function (item) {
-        var id = _this4._escape(String(item.id));
-        var selected = String(item.id) === String(_this4._selectedId);
+        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+        var id = _this4._escape(String(key || item.id));
+        var selected = key != null && String(key) === String(_this4._selectedId);
         var title = _this4._escape(item.title || '');
         var location = _this4._escape(item.location || '');
         var image = _this4._escape(item.image || '');
@@ -2213,7 +2220,7 @@ var MapModalRail = /*#__PURE__*/function () {
         });
         return;
       }
-      this._selectedId = item.id != null ? String(item.id) : null;
+      this._selectedId = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
       this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
         el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === _this5._selectedId);
       });
@@ -3216,6 +3223,64 @@ var ProductMap = /*#__PURE__*/function () {
 }();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ProductMap);
 
+
+/***/ },
+
+/***/ "./resources/js/maps/mapItemIdentity.js"
+/*!**********************************************!*\
+  !*** ./resources/js/maps/mapItemIdentity.js ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   itemKey: () => (/* binding */ itemKey),
+/* harmony export */   itemsMatch: () => (/* binding */ itemsMatch),
+/* harmony export */   normalizeModule: () => (/* binding */ normalizeModule)
+/* harmony export */ });
+/**
+ * Stable identity for mixed offer map markers.
+ * Tours, trips, and camps share numeric IDs, so viewport counts and rail
+ * selection must key on module + id (e.g. trip:2 vs camp:2).
+ */
+
+function normalizeModule(value) {
+  var v = String(value || '').toLowerCase().trim();
+  if (v === 'trip' || v === 'trips') return 'trip';
+  if (v === 'camp' || v === 'camps' || v === 'vacation') return 'camp';
+  if (v === 'guiding' || v === 'tour' || v === 'primary') return 'tour';
+  return 'tour';
+}
+
+/**
+ * @param {{ id?: number|string, key?: string, module?: string, pillar?: string }|null|undefined} item
+ * @returns {string|null}
+ */
+function itemKey(item) {
+  if (!item || item.id == null) return null;
+  if (item.key != null && String(item.key) !== '') {
+    return String(item.key);
+  }
+  return "".concat(normalizeModule(item.module || item.pillar), ":").concat(item.id);
+}
+
+/**
+ * Match a marker item against a composite key (module:id) or legacy bare id.
+ * @param {{ id?: number|string, key?: string, module?: string, pillar?: string }|null|undefined} item
+ * @param {string|number|null|undefined} idOrKey
+ */
+function itemsMatch(item, idOrKey) {
+  if (!item || item.id == null || idOrKey == null) return false;
+  var needle = String(idOrKey);
+  var key = itemKey(item);
+  if (key === needle) return true;
+  // Legacy callers may pass a bare numeric id (tour-only maps).
+  if (!needle.includes(':')) {
+    return String(item.id) === needle;
+  }
+  return false;
+}
 
 /***/ },
 

@@ -6,6 +6,7 @@ import markerFactory from './MarkerFactory';
 import LandmarkLayer from './LandmarkLayer';
 import MapModalRail from './MapModalRail';
 import MapModalFilters from './MapModalFilters';
+import { itemKey, itemsMatch } from './mapItemIdentity';
 
 class ListingMap {
   /**
@@ -270,7 +271,7 @@ class ListingMap {
   getVisiblePrimaryItems() {
     if (!this.map) {
       const items = this._dedupeItems(this.getPrimaryItems());
-      return { items, ids: items.map((i) => i.id), count: items.length };
+      return { items, ids: items.map((i) => itemKey(i)), count: items.length };
     }
 
     const bounds = this.map.getBounds();
@@ -285,7 +286,7 @@ class ListingMap {
     const unique = this._dedupeItems(items);
     return {
       items: unique,
-      ids: unique.map((i) => i.id),
+      ids: unique.map((i) => itemKey(i)),
       count: unique.length,
     };
   }
@@ -294,13 +295,17 @@ class ListingMap {
     const seen = new Set();
     const out = [];
     (items || []).forEach((item) => {
-      if (!item || item.id == null) return;
-      const key = String(item.id);
+      const key = itemKey(item);
+      if (!key) return;
       if (seen.has(key)) return;
       seen.add(key);
       out.push(item);
     });
     return out;
+  }
+
+  _findMarkerById(id) {
+    return this.markers.find((m) => m._cagItem && itemsMatch(m._cagItem, id));
   }
 
   clearMarkers() {
@@ -526,7 +531,7 @@ class ListingMap {
   }
 
   selectById(id, opts = {}) {
-    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    const marker = this._findMarkerById(id);
     if (marker) {
       this.selectMarker(marker, opts);
     }
@@ -537,7 +542,7 @@ class ListingMap {
    * Shows the real marker popup after the pin is visible.
    */
   zoomToById(id) {
-    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    const marker = this._findMarkerById(id);
     if (!marker) return;
     this._closeDetachedPreview();
     this._setClusterPreviewHighlight(null);
@@ -545,10 +550,10 @@ class ListingMap {
   }
 
   highlightById(id, on) {
-    if (this._selectedMarker && String(this._selectedMarker._cagItem && this._selectedMarker._cagItem.id) === String(id)) {
+    if (this._selectedMarker && itemsMatch(this._selectedMarker._cagItem, id)) {
       return;
     }
-    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    const marker = this._findMarkerById(id);
     if (marker) {
       markerFactory.setSelected(marker, !!on);
     }
@@ -560,7 +565,7 @@ class ListingMap {
    * Sticky (clicked) previews stay open until outside click / other selection.
    */
   previewById(id, on = true) {
-    const marker = this.markers.find((m) => m._cagItem && String(m._cagItem.id) === String(id));
+    const marker = this._findMarkerById(id);
     if (!marker) return;
 
     if (!on) {
@@ -1323,6 +1328,7 @@ class ListingMap {
 
       return {
         id: g.id,
+        key: g.key || `${module}:${g.id}`,
         lat: g.lat,
         lng: g.lng,
         variant: g.variant || (g.is_gray || g.isGray ? 'gray' : 'primary'),

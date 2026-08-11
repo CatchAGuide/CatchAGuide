@@ -443,7 +443,10 @@ trait GuidingFilterOptimization
             $images = MapMarkerCollection::resolveImages($guiding);
             $image = $images[0] ?? $thumbnail;
 
-            $moduleFields = MapMarkerCollection::moduleFields(MapMarkerCollection::MODULE_TOUR);
+            $moduleFields = MapMarkerCollection::moduleFields(
+                MapMarkerCollection::MODULE_TOUR,
+                $guiding->id ?? null,
+            );
             $listMeta = MapMarkerCollection::guidingListMeta($guiding);
 
             return array_merge([

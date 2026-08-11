@@ -35,6 +35,17 @@ use Illuminate\Support\Collection;
 
 class OfferCatalogPageService
 {
+    /**
+     * Prior mean (1–10 scale) for Bayesian recommended ranking.
+     * Pulls sparse high averages toward a neutral-good baseline.
+     */
+    private const RECOMMENDED_PRIOR_MEAN = 7.0;
+
+    /**
+     * Prior weight in “virtual reviews” — higher = more reviews needed to outrank the prior.
+     */
+    private const RECOMMENDED_PRIOR_WEIGHT = 5;
+
     public function __construct(
         private TripListingRepository $trips,
         private CampListingRepository $camps,
@@ -237,8 +248,8 @@ class OfferCatalogPageService
                 $tourColumns[] = 'guidings.lng';
             }
             $tours = (clone $tourQuery)->get($tourColumns);
-            $tourRatings = $needsRecommended
-                ? $this->averageRatingsByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
+            $tourRecommended = $needsRecommended
+                ? $this->recommendedScoresByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
                 : [];
             $keys = $keys->concat($tours->map(fn (Guiding $guiding) => [
                 'type' => 'tour',
@@ -246,7 +257,7 @@ class OfferCatalogPageService
                 'created_at' => $guiding->created_at,
                 'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
                 'rating' => $needsRecommended
-                    ? ($tourRatings[(int) $guiding->user_id] ?? null)
+                    ? ($tourRecommended[(int) $guiding->user_id] ?? null)
                     : null,
                 'distance' => ($needsNearest && $origin !== null)
                     ? $this->distanceKm($origin['lat'], $origin['lng'], $guiding->lat, $guiding->lng)
@@ -382,6 +393,7 @@ class OfferCatalogPageService
             'nearest' => $items->sortBy(fn ($item) => $item['distance'] ?? PHP_FLOAT_MAX)->values(),
             'newest' => $items->sortByDesc('created_at')->values(),
             default => $items->sort(function (array $a, array $b) {
+                // `rating` holds the Bayesian recommended score (avg + review count).
                 $ratingA = $a['rating'] ?? null;
                 $ratingB = $b['rating'] ?? null;
                 if ($ratingA !== null && $ratingB !== null && abs($ratingA - $ratingB) > 0.0001) {
@@ -400,22 +412,46 @@ class OfferCatalogPageService
     }
 
     /**
+     * Bayesian recommended score per guide: blends average score with review volume
+     * so a single perfect review cannot outrank a strong, well-reviewed guide.
+     *
+     * score = (C × m + avg × n) / (C + n)
+     *
      * @param  array<int, int>  $guideIds
      * @return array<int, float>
      */
-    private function averageRatingsByGuideId(array $guideIds): array
+    private function recommendedScoresByGuideId(array $guideIds): array
     {
         if ($guideIds === []) {
             return [];
         }
 
-        return Review::query()
+        $rows = Review::query()
             ->whereIn('guide_id', $guideIds)
-            ->selectRaw('guide_id, AVG(grandtotal_score) as avg_score')
+            ->selectRaw('guide_id, AVG(grandtotal_score) as avg_score, COUNT(*) as review_count')
             ->groupBy('guide_id')
-            ->pluck('avg_score', 'guide_id')
-            ->map(fn ($score) => (float) $score)
-            ->all();
+            ->get();
+
+        $scores = [];
+        foreach ($rows as $row) {
+            $avg = (float) $row->avg_score;
+            $count = (int) $row->review_count;
+            if ($count < 1) {
+                continue;
+            }
+            $scores[(int) $row->guide_id] = $this->bayesianRecommendedScore($avg, $count);
+        }
+
+        return $scores;
+    }
+
+    private function bayesianRecommendedScore(float $averageScore, int $reviewCount): float
+    {
+        $priorWeight = self::RECOMMENDED_PRIOR_WEIGHT;
+        $priorMean = self::RECOMMENDED_PRIOR_MEAN;
+
+        return (($priorWeight * $priorMean) + ($averageScore * $reviewCount))
+            / ($priorWeight + $reviewCount);
     }
 
     private function distanceKm(float $fromLat, float $fromLng, mixed $toLat, mixed $toLng): ?float
@@ -1045,7 +1081,10 @@ class OfferCatalogPageService
                 $marker['variant'] = 'gray';
                 $marker['badge'] = __('offers.badge_tour');
                 $marker['cta'] = __('offers.see_details');
-                $marker = array_merge($marker, MapMarkerCollection::moduleFields(MapMarkerCollection::MODULE_TOUR));
+                $marker = array_merge($marker, MapMarkerCollection::moduleFields(
+                    MapMarkerCollection::MODULE_TOUR,
+                    $marker['id'] ?? null,
+                ));
             }
             unset($marker);
             $markers = array_merge($markers, $suggestedMarkers);
@@ -1086,7 +1125,10 @@ class OfferCatalogPageService
             $marker['variant'] = $variant;
             $marker['badge'] = __('offers.badge_tour');
             $marker['cta'] = __('offers.see_details');
-            $marker = array_merge($marker, MapMarkerCollection::moduleFields(MapMarkerCollection::MODULE_TOUR));
+            $marker = array_merge($marker, MapMarkerCollection::moduleFields(
+                MapMarkerCollection::MODULE_TOUR,
+                $marker['id'] ?? null,
+            ));
             if (! empty($marker['price'])) {
                 $marker['priceLabel'] = __('vacations.price_from_per_person', [
                     'price' => '€'.number_format((float) $marker['price'], 0),

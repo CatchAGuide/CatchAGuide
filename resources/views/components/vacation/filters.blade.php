@@ -82,7 +82,7 @@
                 <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_country') }}</label>
                     <select name="country" class="form-select form-select-sm">
-                        <option value="">{{ __('vacations.all_region') }}</option>
+                        <option value="">{{ __('vacations.filter_show_all') }}</option>
                         @foreach($countries as $row)
                             <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
                                 {{ translate($row['name']) }}
@@ -96,7 +96,7 @@
                 <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_species') }}</label>
                     <select name="species" class="form-select form-select-sm">
-                        <option value="">{{ __('vacations.select') }}</option>
+                        <option value="">{{ __('vacations.filter_show_all') }}</option>
                         @foreach($speciesOptions as $species)
                             @php
                                 $speciesId = is_array($species) ? (int) ($species['id'] ?? 0) : 0;
@@ -294,7 +294,7 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_country') }}</label>
                         <select name="country" class="form-select">
-                            <option value="">{{ __('vacations.all_region') }}</option>
+                            <option value="">{{ __('vacations.filter_show_all') }}</option>
                             @foreach($countries as $row)
                                 <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
                                     {{ translate($row['name']) }}
@@ -308,7 +308,7 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_species') }}</label>
                         <select name="species" class="form-select">
-                            <option value="">{{ __('vacations.select') }}</option>
+                            <option value="">{{ __('vacations.filter_show_all') }}</option>
                             @foreach($speciesOptions as $species)
                                 @php
                                     $speciesId = is_array($species) ? (int) ($species['id'] ?? 0) : 0;

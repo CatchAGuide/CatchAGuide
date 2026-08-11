@@ -9,7 +9,6 @@ use App\Services\Translation\ListingViewTranslationService;
 class TripCardPresenter
 {
     public function __construct(
-        private TripTrustSignalResolver $trust,
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
@@ -65,7 +64,10 @@ class TripCardPresenter
             'slider_cta' => __('vacations.inquire_trip'),
             'cta' => __('vacations.request_trip'),
             'cta_class' => 'trip',
-            'trust' => $this->trust->resolve($trip),
+            // Trips have no guest review flow; do not borrow guiding Review scores onto cards.
+            'trust' => null,
+            'rating' => null,
+            'review_count' => 0,
         ];
     }
 
@@ -102,12 +104,6 @@ class TripCardPresenter
         $card['methods_label'] = $this->methodsLabel($trip);
         $card['verified'] = true;
         $card['whats_included_title'] = __('offers.included_heading');
-
-        $trust = $card['trust'] ?? null;
-        if (is_array($trust)) {
-            $card['rating'] = isset($trust['rating']) ? (float) $trust['rating'] : null;
-            $card['review_count'] = (int) ($trust['count'] ?? 0);
-        }
 
         return $card;
     }
