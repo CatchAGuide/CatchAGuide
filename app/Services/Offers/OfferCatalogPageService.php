@@ -6,6 +6,7 @@ use App\Domain\Offers\DestinationOfferScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Domain\Vacation\CountrySlug;
+use App\Domain\Vacation\VacationListingFilter;
 use App\Models\AccommodationType;
 use App\Models\Camp;
 use App\Models\City;
@@ -16,6 +17,7 @@ use App\Models\Region;
 use App\Models\Review;
 use App\Models\Trip;
 use App\Models\Water;
+use App\Models\Target;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
@@ -43,6 +45,7 @@ class OfferCatalogPageService
         private CampCardPresenter $campPresenter,
         private GeospatialSearchService $geoSearch,
         private GuidingFilterService $guidingFilters,
+        private OfferFilterService $offerFilters,
     ) {}
 
     public function build(Request $request): OfferCatalogViewModel
@@ -84,12 +87,13 @@ class OfferCatalogPageService
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
+        $vacationGeoFilter = $this->vacationFilterWithoutSpecies($vacationFilter);
         $perPage = (int) config('offers.per_page', 9);
         $hasGeo = $filter->placeLat !== null && $filter->placeLng !== null;
 
         $tourQuery = $this->queryTours($filter, $request);
-        $tripQuery = $this->queryTrips($filter, $vacationFilter);
-        $campQuery = $this->queryCamps($filter, $vacationFilter);
+        $tripQuery = $this->queryTrips($filter, $vacationGeoFilter);
+        $campQuery = $this->queryCamps($filter, $vacationGeoFilter);
 
         $toursTotal = (clone $tourQuery)->count();
         $tripsTotal = (clone $tripQuery)->count();
@@ -162,7 +166,7 @@ class OfferCatalogPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($filter->country)),
+            speciesOptions: $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
             countries: $countries,
             methodOptions: $this->methodOptions(),
             waterOptions: $this->waterOptions(),
@@ -437,9 +441,8 @@ class OfferCatalogPageService
     {
         $query = Guiding::query()->publiclyVisible();
 
-        if ($filter->species !== null) {
-            $needle = strtolower($filter->species);
-            $query->whereRaw('LOWER(CAST(target_fish AS CHAR)) LIKE ?', ['%'.$needle.'%']);
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'tours', 'guidings.id', 'target_fish');
         }
 
         if ($filter->numGuests !== null) {
@@ -484,6 +487,10 @@ class OfferCatalogPageService
     {
         $query = $this->trips->queryForCountry($vacationFilter);
 
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'trips', 'trips.id', 'target_species');
+        }
+
         if ($filter->numGuests !== null) {
             $guests = $filter->numGuests;
             $query->where(function (Builder $q) use ($guests) {
@@ -500,6 +507,10 @@ class OfferCatalogPageService
     private function queryCamps(OfferListingFilter $filter, $vacationFilter): Builder
     {
         $query = $this->camps->queryForCountry($vacationFilter);
+
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'camps', 'camps.id', 'target_fish');
+        }
 
         if ($filter->numGuests !== null) {
             $guests = $filter->numGuests;
@@ -644,6 +655,71 @@ class OfferCatalogPageService
                 'name' => (string) $type->name,
             ])
             ->values();
+    }
+
+    private function vacationFilterWithoutSpecies(VacationListingFilter $filter): VacationListingFilter
+    {
+        return new VacationListingFilter(
+            pillar: $filter->pillar,
+            speciesIds: [],
+            speciesNames: [],
+            country: $filter->country,
+            sortBy: $filter->sortBy,
+            countryShort: $filter->countryShort,
+        );
+    }
+
+    /**
+     * @param  'tours'|'trips'|'camps'  $pillar
+     */
+    private function applyOptimizedSpeciesFilter(
+        Builder $query,
+        OfferListingFilter $filter,
+        string $pillar,
+        string $idColumn,
+        string $fallbackColumn,
+    ): void {
+        $speciesIds = $this->resolvedSpeciesIds($filter);
+        $listingIds = $this->offerFilters->listingIdsForSpecies($pillar, $speciesIds);
+
+        if ($listingIds !== null) {
+            $query->whereIn($idColumn, $listingIds !== [] ? $listingIds : [0]);
+
+            return;
+        }
+
+        $this->filterApplicator->applySpeciesColumnFilter(
+            $query,
+            $fallbackColumn,
+            $speciesIds,
+            $filter->speciesNames,
+        );
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function resolvedSpeciesIds(OfferListingFilter $filter): array
+    {
+        $ids = $filter->speciesIds;
+
+        if ($filter->speciesNames === []) {
+            return $ids;
+        }
+
+        $resolved = Target::query()
+            ->where(function (Builder $q) use ($filter) {
+                foreach ($filter->speciesNames as $name) {
+                    $lower = mb_strtolower($name, 'UTF-8');
+                    $q->orWhereRaw('LOWER(name) = ?', [$lower])
+                        ->orWhereRaw('LOWER(name_en) = ?', [$lower]);
+                }
+            })
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        return array_values(array_unique(array_merge($ids, $resolved)));
     }
 
     /**

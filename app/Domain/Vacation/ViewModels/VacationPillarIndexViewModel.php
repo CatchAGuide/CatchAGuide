@@ -89,9 +89,11 @@ final class VacationPillarIndexViewModel
     public function pillarToggleUrls(): array
     {
         $query = array_filter([
-            'species' => $this->filter->species,
+            'species' => $this->filter->speciesIds !== []
+                ? $this->filter->speciesIds
+                : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null),
             'sortby' => $this->filter->sortBy,
-        ]);
+        ], fn ($v) => $v !== null && $v !== '');
 
         $withQuery = fn (string $url) => $query === []
             ? $url

@@ -13,7 +13,8 @@ class OfferListingFilterTest extends TestCase
 
         $this->assertSame('all', $filter->type);
         $this->assertSame('all', $filter->vacation);
-        $this->assertNull($filter->species);
+        $this->assertSame([], $filter->speciesIds);
+        $this->assertSame([], $filter->speciesNames);
         $this->assertNull($filter->country);
         $this->assertTrue($filter->showsTours());
         $this->assertTrue($filter->showsTrips());
@@ -25,7 +26,7 @@ class OfferListingFilterTest extends TestCase
     {
         $filter = OfferListingFilter::fromRequest([
             'type' => 'tour',
-            'species' => 'Pike',
+            'species' => ['12', '7'],
             'country' => 'Germany',
             'sortby' => 'price-asc',
             'place' => 'Berlin',
@@ -42,7 +43,9 @@ class OfferListingFilterTest extends TestCase
 
         $this->assertSame('tour', $filter->type);
         $this->assertSame('all', $filter->vacation);
-        $this->assertSame('Pike', $filter->species);
+        $this->assertSame([12, 7], $filter->speciesIds);
+        $this->assertSame([], $filter->speciesNames);
+        $this->assertTrue($filter->hasSpeciesFilter());
         $this->assertSame('germany', $filter->country);
         $this->assertSame('price-asc', $filter->sortBy);
         $this->assertSame('Berlin', $filter->place);
@@ -249,5 +252,17 @@ class OfferListingFilterTest extends TestCase
             'placeLng' => '-3.7',
         ]);
         $this->assertSame(['lat' => 40.4, 'lng' => -3.7], $fromPlace->nearestOrigin());
+    }
+
+    public function test_parses_legacy_species_name_and_mixed_checkbox_values(): void
+    {
+        $legacy = OfferListingFilter::fromRequest(['species' => 'Pike']);
+        $this->assertSame([], $legacy->speciesIds);
+        $this->assertSame(['Pike'], $legacy->speciesNames);
+        $this->assertTrue($legacy->hasSpeciesFilter());
+
+        $mixed = OfferListingFilter::fromRequest(['species' => ['3', 'Hecht', '']]);
+        $this->assertSame([3], $mixed->speciesIds);
+        $this->assertSame(['Hecht'], $mixed->speciesNames);
     }
 }

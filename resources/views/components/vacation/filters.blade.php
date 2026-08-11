@@ -98,7 +98,14 @@
                     <select name="species" class="form-select form-select-sm">
                         <option value="">{{ __('vacations.select') }}</option>
                         @foreach($speciesOptions as $species)
-                            <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
+                            @php
+                                $speciesId = is_array($species) ? (int) ($species['id'] ?? 0) : 0;
+                                $speciesName = is_array($species) ? (string) ($species['name'] ?? '') : (string) $species;
+                                $isSelected = $speciesId > 0
+                                    ? in_array($speciesId, $filter->speciesIds ?? [], true)
+                                    : in_array($speciesName, $filter->speciesNames ?? [], true);
+                            @endphp
+                            <option value="{{ $speciesId > 0 ? $speciesId : $speciesName }}" @selected($isSelected)>{{ $speciesName }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -303,7 +310,14 @@
                         <select name="species" class="form-select">
                             <option value="">{{ __('vacations.select') }}</option>
                             @foreach($speciesOptions as $species)
-                                <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
+                                @php
+                                    $speciesId = is_array($species) ? (int) ($species['id'] ?? 0) : 0;
+                                    $speciesName = is_array($species) ? (string) ($species['name'] ?? '') : (string) $species;
+                                    $isSelected = $speciesId > 0
+                                        ? in_array($speciesId, $filter->speciesIds ?? [], true)
+                                        : in_array($speciesName, $filter->speciesNames ?? [], true);
+                                @endphp
+                                <option value="{{ $speciesId > 0 ? $speciesId : $speciesName }}" @selected($isSelected)>{{ $speciesName }}</option>
                             @endforeach
                         </select>
                     </div>

@@ -258,16 +258,28 @@
 <!-- /.preloader -->
 <div class="page-wrapper">
 
-    @unless(request()->is('/'))
-    @include('layouts.partials.newheader', [
-        'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($row_data)
-            ? ($row_data->slug ?? $row_data->name ?? null)
-            : (request()->routeIs('vacations.all-offers')
-                ? 'all-offers'
-                : (isset($vm) ? ($vm->destination->slug ?? null) : null)),
-    ])
-    @endunless
+    @php
+        $useLegacyHeader = ! request()->is('/')
+            && ! (request()->is('offers*') || request()->routeIs('offers.*'));
+    @endphp
+
+    {{-- Homepage / offers include overlay site-nav inside their hero shells. --}}
+    @if(request()->is('offers*') || request()->routeIs('offers.*'))
+        @include('layouts.modal.loginModal')
+        @include('layouts.modal.registerModal')
+        @include('layouts.modal.guideApplicationModal')
+        @include('layouts.partials.site-mobile-menu')
+    @elseif($useLegacyHeader)
+        {{-- Legacy dark chrome for non-migrated pages --}}
+        @include('layouts.partials.newheader', [
+            'isVacation' => request()->is('vacations*'),
+            'currentVacationCountry' => isset($row_data)
+                ? ($row_data->slug ?? $row_data->name ?? null)
+                : (request()->routeIs('vacations.all-offers')
+                    ? 'all-offers'
+                    : (isset($vm) ? ($vm->destination->slug ?? null) : null)),
+        ])
+    @endif
 
     @yield('content')
 

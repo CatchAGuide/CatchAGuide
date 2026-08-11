@@ -51,7 +51,25 @@ class OffersCatalogTest extends TestCase
         $response = $this->get(route('offers.index'));
 
         $response->assertOk();
+        $response->assertSee('cag-site-nav', false);
+        $response->assertSee('cag-site-nav-shell', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('navbar-custom short-header long-header is-offers', false);
+        $response->assertSee('offers-page-header', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee('data-offers-header-search', false);
+        $response->assertSee('data-offers-header-shell', false);
+        $response->assertSee('offersCatalogSearchPlace', false);
+        $response->assertSee('offers-page-header__segment--where', false);
+        $response->assertSee('offers-page-header__segment--who', false);
+        $response->assertSee('data-offers-persons-stepper', false);
+        $response->assertSee(__('offers.search_where'), false);
+        $response->assertSee(__('offers.nav_label'), false);
         $response->assertSee(__('offers.filter_all'), false);
+        $this->assertStringContainsString(
+            "'offersCatalogSearchPlace'",
+            (string) file_get_contents(resource_path('js/maps/places-entry.js'))
+        );
         $response->assertSee(__('offers.filter_tours'), false);
         $response->assertSee(__('offers.filter_vacations'), false);
         $response->assertDontSee('data-offers-vacation-subfilter', false);
@@ -70,6 +88,32 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('offers.sort_nearest'), false);
         $response->assertSee(__('offers.sort_price_asc'), false);
         $response->assertSee(__('offers.sort_price_desc'), false);
+    }
+
+    public function test_species_filter_renders_tagify_dropdown_control(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            speciesOptions: collect([
+                ['id' => 5, 'name' => 'Pike'],
+                ['id' => 8, 'name' => 'Perch'],
+            ]),
+            speciesIds: [5],
+        ));
+
+        $response = $this->get(route('offers.index', ['species' => [5]]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_species'), false);
+        $response->assertSee('data-offers-species-select', false);
+        $response->assertSee('data-offers-species-toggle', false);
+        $response->assertSee('data-offers-species-checkbox', false);
+        $response->assertSee('name="species[]"', false);
+        $response->assertSee('value="5"', false);
+        $response->assertSee('Pike', false);
+        $response->assertSee('offers-species-select__tag', false);
+        $response->assertSee(__('offers.filter_species_search'), false);
+        $response->assertDontSee('<select name="species"', false);
     }
 
     public function test_tour_type_renders_method_water_and_duration_filters(): void
@@ -172,7 +216,7 @@ class OffersCatalogTest extends TestCase
         $response->assertDontSee('1 '.translate('result'), false);
     }
 
-    public function test_vacation_chip_shows_subrow_and_consolidated_cards(): void
+    public function test_vacation_chip_extends_trips_camps_inline_and_shows_consolidated_cards(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(
             type: 'vacation',
@@ -189,7 +233,8 @@ class OffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('data-offers-vacation-subfilter', false);
-        $response->assertSee(__('offers.filter_vacations_all'), false);
+        $response->assertSee('offers-filters__vacation-extend', false);
+        $response->assertDontSee(__('offers.filter_vacations_all'), false);
         $response->assertSee(__('offers.filter_trips'), false);
         $response->assertSee(__('offers.filter_camps'), false);
         $response->assertSee(__('offers.filter_vacations').' (3)', false);
@@ -479,6 +524,8 @@ class OffersCatalogTest extends TestCase
         $tourDurationOptions = null,
         $tripDurationOptions = null,
         $accommodationTypeOptions = null,
+        $speciesOptions = null,
+        array $speciesIds = [],
     ): OfferCatalogViewModel {
         $cards = $cards ?? collect();
         $suggested = $suggested ?? collect();
@@ -488,6 +535,7 @@ class OffersCatalogTest extends TestCase
             'place' => $place,
             'country' => $country,
             'num_guests' => $numGuests,
+            'species' => $speciesIds !== [] ? $speciesIds : null,
         ], fn ($v) => $v !== null && $v !== ''));
         $paginator = new LengthAwarePaginator(
             $cards->map(fn ($card) => ['type' => $card['type'], 'model' => null])->all(),
@@ -519,7 +567,7 @@ class OffersCatalogTest extends TestCase
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            speciesOptions: collect(['Pike']),
+            speciesOptions: $speciesOptions ?? collect([['id' => 1, 'name' => 'Pike']]),
             countries: collect([['slug' => 'germany', 'name' => 'Germany']]),
             methodOptions: $methodOptions ?? collect(),
             waterOptions: $waterOptions ?? collect(),

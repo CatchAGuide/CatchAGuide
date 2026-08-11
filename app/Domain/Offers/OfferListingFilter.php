@@ -41,12 +41,15 @@ final class OfferListingFilter
     ];
 
     /**
+     * @param  list<int>  $speciesIds
+     * @param  list<string>  $speciesNames
      * @param  array<int, string>  $placeTypes
      */
     public function __construct(
         public readonly string $type = 'all',
         public readonly string $vacation = 'all',
-        public readonly ?string $species = null,
+        public readonly array $speciesIds = [],
+        public readonly array $speciesNames = [],
         public readonly ?string $country = null,
         public readonly ?string $sortBy = null,
         public readonly ?string $place = null,
@@ -127,10 +130,13 @@ final class OfferListingFilter
             }
         }
 
+        [$speciesIds, $speciesNames] = VacationListingFilter::normalizeSpecies($input['species'] ?? null);
+
         return new self(
             type: $rawType,
             vacation: $vacation,
-            species: self::nullableString($input['species'] ?? null),
+            speciesIds: $speciesIds,
+            speciesNames: $speciesNames,
             country: CountrySlug::canonicalize(self::nullableString($input['country'] ?? null)),
             sortBy: $sortBy,
             place: self::nullableString($input['place'] ?? null),
@@ -155,6 +161,11 @@ final class OfferListingFilter
             userLat: $userLat,
             userLng: $userLng,
         );
+    }
+
+    public function hasSpeciesFilter(): bool
+    {
+        return $this->speciesIds !== [] || $this->speciesNames !== [];
     }
 
     public function isVacation(): bool
@@ -241,7 +252,8 @@ final class OfferListingFilter
 
         return new VacationListingFilter(
             pillar: $pillar,
-            species: $this->species,
+            speciesIds: $this->speciesIds,
+            speciesNames: $this->speciesNames,
             country: $this->country,
             sortBy: $this->sortBy,
             countryShort: $this->countryShort,

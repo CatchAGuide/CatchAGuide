@@ -18,7 +18,7 @@
 @include('pages.home.partials.mobile-menu-modal')
 
 <div class="cag-home" data-analytics-page="homepage">
-    <div class="cag-home-hero-shell">
+    <div class="cag-home-hero-shell cag-site-nav-shell">
         @include('pages.home.partials.home-nav')
         @include('pages.home.partials.hero-chooser')
     </div>
@@ -291,7 +291,7 @@ function validateSearch(event, inputId) {
     }
 
     var hero = document.querySelector('[data-hero-carousel]');
-    var homeNav = document.querySelector('.cag-home-hero-shell .cag-home-nav');
+    var homeNav = document.querySelector('.cag-site-nav-shell .cag-site-nav');
     if (homeNav && hero) {
         var syncNavSolid = function () {
             homeNav.classList.toggle('is-solid', hero.getBoundingClientRect().bottom <= homeNav.offsetHeight + 12);

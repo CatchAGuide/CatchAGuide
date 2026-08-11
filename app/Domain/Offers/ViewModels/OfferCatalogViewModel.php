@@ -111,7 +111,9 @@ final class OfferCatalogViewModel
     public function sharedQueryParams(): array
     {
         return array_filter([
-            'species' => $this->filter->species,
+            'species' => $this->filter->speciesIds !== []
+                ? $this->filter->speciesIds
+                : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null),
             'country' => $this->filter->country,
             'sortby' => $this->filter->sortBy,
             'place' => $this->filter->place,

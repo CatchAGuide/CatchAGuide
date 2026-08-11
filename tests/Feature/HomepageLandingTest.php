@@ -198,7 +198,7 @@ class HomepageLandingTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk();
-        $response->assertSee('cag-home-nav', false);
+        $response->assertSee('cag-site-nav', false);
         $response->assertSee('cag-home-hero-shell', false);
         $response->assertSee('data-hero-carousel', false);
         $response->assertSee('assets/images/homepage/hero-tour.webp', false);
@@ -207,8 +207,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('assets/images/homepage/hero-vacation.webp', false);
         $response->assertSee('cag-home-hero__search', false);
         $response->assertSee('action="'.url('/offers').'"', false);
-        $response->assertSee('cag-home-nav__lang', false);
-        $response->assertSee('cag-home-nav__lang-btn', false);
+        $response->assertSee('cag-site-nav__lang', false);
+        $response->assertSee('cag-site-nav__lang-btn', false);
         $response->assertSee('cag-auth-modal', false);
         $response->assertSee('cag-auth-modal__accent', false);
         $response->assertSee('id="loginModal"', false);

@@ -185,7 +185,7 @@ class DestinationOffersCatalogTest extends TestCase
             tripsTotal: 1,
             campsTotal: 1,
             listingsTotal: $cards->count() ?: 3,
-            speciesOptions: collect(['Pike']),
+            speciesOptions: collect([['id' => 1, 'name' => 'Pike']]),
             countries: $lockDestinationScope ? collect() : collect([['slug' => 'germany', 'name' => 'Germany']]),
             methodOptions: collect(),
             waterOptions: collect(),

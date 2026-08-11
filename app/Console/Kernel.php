@@ -26,8 +26,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('bookings:send-guide-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
       
-        // Generate guiding filter mappings every hour
-        $schedule->command('guidings:generate-filters')
+        // Precompute catalog filter maps (guidings listing + offers tours/trips/camps)
+        $schedule->command('catalog:generate-filters --dump')
                 ->hourly()
                 ->withoutOverlapping()
                 ->runInBackground();

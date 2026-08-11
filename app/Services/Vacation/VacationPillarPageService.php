@@ -68,7 +68,8 @@ class VacationPillarPageService
 
         $filterAll = new VacationListingFilter(
             pillar: $pillar->value,
-            species: $filter->species,
+            speciesIds: $filter->speciesIds,
+            speciesNames: $filter->speciesNames,
             country: $countrySlug,
             sortBy: $filter->sortBy,
         );
