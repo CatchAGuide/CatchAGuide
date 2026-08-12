@@ -741,10 +741,15 @@ class OfferCatalogPageService
         string $idColumn,
         string $fallbackColumn,
     ): void {
-        $speciesIds = $this->resolvedSpeciesIds($filter);
-        $listingIds = $this->offerFilters->listingIdsForSpecies($pillar, $speciesIds);
+        [$speciesIds, $customNames] = $this->resolvedSpeciesSelection($filter);
+        $listingIdsFromCatalog = $this->offerFilters->listingIdsForSpecies($pillar, $speciesIds);
+        $listingIdsFromCustom = $this->offerFilters->listingIdsForCustomSpecies($pillar, $customNames);
 
-        if ($listingIds !== null) {
+        if ($listingIdsFromCatalog !== null || $listingIdsFromCustom !== null) {
+            $listingIds = array_values(array_unique(array_merge(
+                $listingIdsFromCatalog ?? [],
+                $listingIdsFromCustom ?? [],
+            )));
             $query->whereIn($idColumn, $listingIds !== [] ? $listingIds : [0]);
 
             return;
@@ -754,34 +759,68 @@ class OfferCatalogPageService
             $query,
             $fallbackColumn,
             $speciesIds,
-            $filter->speciesNames,
+            $customNames !== [] ? $customNames : $filter->speciesNames,
         );
     }
 
     /**
-     * @return list<int>
+     * Split selection into catalog target ids and unmatched custom names.
+     *
+     * @return array{0: list<int>, 1: list<string>}
      */
-    private function resolvedSpeciesIds(OfferListingFilter $filter): array
+    private function resolvedSpeciesSelection(OfferListingFilter $filter): array
     {
         $ids = $filter->speciesIds;
+        $customNames = [];
 
         if ($filter->speciesNames === []) {
-            return $ids;
+            return [$ids, $customNames];
         }
 
-        $resolved = Target::query()
-            ->where(function (Builder $q) use ($filter) {
-                foreach ($filter->speciesNames as $name) {
-                    $lower = mb_strtolower($name, 'UTF-8');
+        $nameKeys = [];
+        foreach ($filter->speciesNames as $name) {
+            $trimmed = trim((string) $name);
+            if ($trimmed === '') {
+                continue;
+            }
+            $nameKeys[mb_strtolower($trimmed, 'UTF-8')] = $trimmed;
+        }
+
+        if ($nameKeys === []) {
+            return [$ids, $customNames];
+        }
+
+        $resolvedByKey = [];
+        Target::query()
+            ->where(function (Builder $q) use ($nameKeys) {
+                foreach (array_keys($nameKeys) as $lower) {
                     $q->orWhereRaw('LOWER(name) = ?', [$lower])
                         ->orWhereRaw('LOWER(name_en) = ?', [$lower]);
                 }
             })
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+            ->get(['id', 'name', 'name_en'])
+            ->each(function (Target $target) use (&$resolvedByKey) {
+                $attrs = $target->getAttributes();
+                foreach (['name', 'name_en'] as $field) {
+                    $value = mb_strtolower(trim((string) ($attrs[$field] ?? '')), 'UTF-8');
+                    if ($value !== '') {
+                        $resolvedByKey[$value] = (int) $target->id;
+                    }
+                }
+            });
 
-        return array_values(array_unique(array_merge($ids, $resolved)));
+        foreach ($nameKeys as $lower => $label) {
+            if (isset($resolvedByKey[$lower])) {
+                $ids[] = $resolvedByKey[$lower];
+            } else {
+                $customNames[] = $label;
+            }
+        }
+
+        return [
+            array_values(array_unique($ids)),
+            array_values(array_unique($customNames)),
+        ];
     }
 
     /**

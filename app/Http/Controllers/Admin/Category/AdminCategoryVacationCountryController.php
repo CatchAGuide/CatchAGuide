@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin\Category;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Http\Controllers\Admin\Category\Concerns\HandlesScopedCategoryContent;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\DestinationFishChart;
@@ -12,15 +15,20 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Illuminate\Validation\Rule;
 use Exception;
 use App\Helpers\TranslationHelper;
+use App\Services\CategoryPage\CategoryPageContentService;
 
 class AdminCategoryVacationCountryController extends Controller
 {
+    use HandlesScopedCategoryContent;
+
     private $language;
     
-    public function __construct()
-    {
+    public function __construct(
+        private CategoryPageContentService $content,
+    ) {
         $this->language = [
             'en',
             'de'
@@ -204,24 +212,72 @@ class AdminCategoryVacationCountryController extends Controller
             'faq', 'faq_title', 'city', 'region'
         );
 
-        return view('admin.pages.category.vacations-form', $data);
+        $scopes = [CategoryPageScope::VACATIONS, CategoryPageScope::TRIPS, CategoryPageScope::CAMPS];
+        $scoped = $this->scopedEditorPayload(
+            $this->content,
+            CategoryPageEntityType::DESTINATION_COUNTRY,
+            $row->id,
+            $scopes,
+            CategoryPageScope::VACATIONS,
+        );
+
+        return view('admin.pages.category.vacations-form', array_merge($data, $scoped, [
+            'scopedEditorEnabled' => true,
+            'languageDataUrl' => route('admin.category.vacation-country.language-data', $row->id),
+        ]));
+    }
+
+    public function getLanguageData($id)
+    {
+        $destination = Destination::find($id);
+
+        if ($destination === null) {
+            return response()->json(['error' => 'Destination not found'], 404);
+        }
+
+        $scopes = [CategoryPageScope::VACATIONS, CategoryPageScope::TRIPS, CategoryPageScope::CAMPS];
+        $scope = request('scope', CategoryPageScope::VACATIONS);
+        if (! in_array($scope, $scopes, true)) {
+            $scope = CategoryPageScope::VACATIONS;
+        }
+
+        return response()->json(
+            $this->scopedLanguageDataResponse($this->content, CategoryPageEntityType::DESTINATION_COUNTRY, $destination->id, $scope)
+        );
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $scopes = [CategoryPageScope::VACATIONS, CategoryPageScope::TRIPS, CategoryPageScope::CAMPS];
+
+        $rules = [
             'name' => 'required|max:255|unique:destinations,name,'.$id.',id,type,vacations,deleted_at,null',
-            'title' => 'required|max:255',
-            'sub_title' => 'required|max:255',
-            'filters' => 'required'
-        ]);
+            'filters' => 'required',
+        ];
+
+        if ($request->filled('content_scope')) {
+            $rules['content_scope'] = ['required', Rule::in($scopes)];
+            $rules['languageSwitch'] = ['required', Rule::in(config('app.locales'))];
+            $rules['title'] = 'required|max:255';
+            $rules['sub_title'] = 'required|max:255';
+        } else {
+            $rules['title'] = 'required|max:255';
+            $rules['sub_title'] = 'required|max:255';
+        }
+
+        $request->validate($rules);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['language', 'name', 'title', 'sub_title', 'introduction', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro', 'faq_title']);
+            $data = $request->only(['language', 'name', 'fish_avail_title', 'fish_avail_intro', 'size_limit_title', 'size_limit_intro', 'time_limit_title', 'time_limit_intro']);
+
+            if (! $request->filled('content_scope')) {
+                $data = array_merge($data, $request->only(['title', 'sub_title', 'introduction', 'faq_title']));
+                $data['content'] = $request->body;
+            }
+
             $data['slug'] = $this->slug_format($request->name);
             $data['filters'] = json_encode($request->filters);
-            $data['content'] = $request->body;
             $data['countrycode'] = $request->countrycode ?? null;
 
             if($request->has('thumbnailImage')) {
@@ -230,6 +286,14 @@ class AdminCategoryVacationCountryController extends Controller
             }
 
             Destination::whereId($id)->update($data);
+
+            $this->saveScopedContent(
+                $request,
+                $this->content,
+                CategoryPageEntityType::DESTINATION_COUNTRY,
+                $id,
+                $scopes,
+            );
 
             if ($request->has('fish_chart')) {
                 foreach ($request->fish_chart as $key => $value) {
@@ -270,7 +334,7 @@ class AdminCategoryVacationCountryController extends Controller
                 }
             }
 
-            if ($request->has('faq')) {
+            if ($request->has('faq') && ! $request->filled('content_scope')) {
                 foreach ($request->faq as $key => $value) {
                     $value['language'] = $request->language;
                     if ($value['id'] == 0) {

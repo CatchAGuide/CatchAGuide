@@ -300,6 +300,97 @@ return [
         'accordion_people' => 'Gast, Guide & Buchung',
         'no_comment' => 'Kein Kommentar vorhanden.',
     ],
-];
 
-?>
+    'category_pages' => [
+        'hub_title' => 'SEO-Kategorieseiten',
+        'hub_intro' => 'Einzigartige SEO-Texte pro Dimension und Angebot verwalten. Global bezieht sich auf gemischte Katalog-Landings (Touren + Trips + Camps) — nicht die /offers-Listingseite selbst.',
+        'manage' => 'Verwalten',
+        'legacy' => 'Legacy',
+        'scopes_label' => 'Bereiche',
+        'global_note' => 'Global = SEO-Text für gemischten Katalog (kein /offers-Seitentyp).',
+
+        'scopes' => [
+            'global' => 'Global',
+            'tours' => 'Touren',
+            'vacations' => 'Angelurlaub',
+            'trips' => 'Trips',
+            'camps' => 'Camps',
+        ],
+
+        'dimensions' => [
+            'target_fish' => 'Zielfisch',
+            'methods' => 'Methoden',
+            'countries' => 'Länder',
+            'region' => 'Regionen',
+            'city' => 'Städte',
+            'trip_locations_legacy' => 'Trip-Standorte (Legacy)',
+        ],
+
+        'editor' => [
+            'identity' => 'Identität',
+            'content' => 'Inhalt',
+            'scope' => 'Angebotsbereich',
+            'locale' => 'Sprache',
+            'translate_en' => 'Ins Englische übersetzen',
+            'save' => 'Bereich speichern',
+            'filled' => 'Ausgefüllt',
+            'empty' => 'Leer',
+            'public_url' => 'Öffentliche URL',
+            'favorite' => 'Homepage-Favorit',
+            'back_to_list' => 'Zurück zur Liste',
+            'back_to_hub' => 'Kategorieseiten-Hub',
+        ],
+
+        'form' => [
+            'name' => 'Name',
+            'country_code' => 'Ländercode',
+            'country' => 'Land',
+            'region' => 'Region',
+            'select' => 'Auswählen',
+            'thumbnail' => 'Thumbnail',
+            'title' => 'Titel',
+            'sub_title' => 'Untertitel',
+            'introduction' => 'Einleitung',
+            'content' => 'Inhalt',
+            'seo_content' => 'SEO-Inhalt',
+
+            'faq' => 'FAQ',
+            'add_item' => 'Eintrag hinzufügen',
+            'faq_title' => 'FAQ-Bereichstitel',
+            'question' => 'Frage',
+            'answer' => 'Antwort',
+
+            'charts_language' => 'Charts-Sprache',
+            'charts_language_note' => 'Sprache für Text in Fish-/Limit-Charts.',
+
+            'filter' => 'Filter',
+            'location' => 'Ort',
+            'location_placeholder' => 'Ort suchen',
+
+            'fish_availability' => 'Fischverfügbarkeit',
+            'section_title' => 'Titel',
+            'section_intro' => 'Inhalt',
+            'fish' => 'Fisch',
+
+            'size_limit' => 'Größenlimit',
+            'time_limit' => 'Zeitlimit',
+        ],
+
+        'sidebar' => [
+            'menu' => 'Kategorieseiten',
+            'hub' => 'Hub',
+            'target_fish' => 'Zielfisch',
+            'methods' => 'Methoden',
+            'countries' => 'Länder',
+            'region' => 'Region',
+            'city' => 'Stadt',
+        ],
+
+        'index' => [
+            'intro' => 'Alle Katalog-Arten sind unten aufgelistet. Bereichs-Badges zeigen, ob DE/EN-Texte vorhanden sind — gestrichelte Badges bedeuten fehlende Inhalte.',
+            'languages' => 'Sprachen',
+            'name' => 'Name',
+            'actions' => 'Aktionen',
+        ],
+    ],
+];

@@ -5,7 +5,7 @@ namespace App\Domain\Vacation\ViewModels;
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
-use App\Models\Destination;
+use App\Models\Country;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -22,7 +22,7 @@ final class VacationPillarIndexViewModel
         public readonly int $tripsTotal,
         public readonly int $campsTotal,
         public readonly Collection $faq,
-        public readonly ?Destination $destination = null,
+        public readonly ?Country $destination = null,
         public readonly array $mapMarkers = [],
     ) {}
 

@@ -4,14 +4,14 @@ namespace App\Domain\Vacation\ViewModels;
 
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
-use App\Models\Destination;
+use App\Models\Country;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 final class VacationCountryViewModel
 {
     public function __construct(
-        public readonly Destination $destination,
+        public readonly Country $destination,
         public readonly VacationListingFilter $filter,
         public readonly PillarSectionViewModel $tripsSection,
         public readonly PillarSectionViewModel $campsSection,

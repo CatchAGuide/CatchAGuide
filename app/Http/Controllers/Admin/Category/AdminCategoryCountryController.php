@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Admin\Category;
 
+use App\Domain\CategoryPage\CategoryPageDimension;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Http\Controllers\Admin\Category\Concerns\HandlesScopedCategoryContent;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\CountryTranslation;
@@ -9,18 +13,24 @@ use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
 use App\Models\DestinationFishTimeLimit;
+use App\Services\CategoryPage\CategoryPageContentService;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\TranslationHelper;
+use Illuminate\Validation\Rule;
 
 class AdminCategoryCountryController extends Controller
 {
+    use HandlesScopedCategoryContent;
+
     private $language;
-    public function __construct()
-    {
+
+    public function __construct(
+        private CategoryPageContentService $content,
+    ) {
         $this->language = [
             'en',
             'de'
@@ -213,7 +223,38 @@ class AdminCategoryCountryController extends Controller
             'faq', 'faq_title', 'city', 'filterRegion', 'country'
         );
 
-        return view('admin.pages.category.form', $data);
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::COUNTRY);
+        $scoped = $this->scopedEditorPayload(
+            $this->content,
+            CategoryPageEntityType::GEO_COUNTRY,
+            $country->id,
+            $scopes,
+            CategoryPageScope::GLOBAL,
+        );
+
+        return view('admin.pages.category.form', array_merge($data, $scoped, [
+            'scopedEditorEnabled' => true,
+            'languageDataUrl' => route('admin.category.country.language-data', $country->id),
+        ]));
+    }
+
+    public function getLanguageData($id)
+    {
+        $country = Country::find($id);
+
+        if ($country === null) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::COUNTRY);
+        $scope = request('scope', CategoryPageScope::GLOBAL);
+        if (! in_array($scope, $scopes, true)) {
+            $scope = CategoryPageScope::GLOBAL;
+        }
+
+        return response()->json(
+            $this->scopedLanguageDataResponse($this->content, CategoryPageEntityType::GEO_COUNTRY, $country->id, $scope)
+        );
     }
 
     public function getTranslation(Request $request, $id)
@@ -284,13 +325,25 @@ class AdminCategoryCountryController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::COUNTRY);
+
+        $rules = [
             'name' => 'required|max:255',
-            'title' => 'required|max:255',
-            'sub_title' => 'required|max:255',
             'filters' => 'required',
-            'language' => 'required|max:255'
-        ]);
+            'language' => 'required|max:255',
+        ];
+
+        if ($request->filled('content_scope')) {
+            $rules['content_scope'] = ['required', Rule::in($scopes)];
+            $rules['languageSwitch'] = ['required', Rule::in(config('app.locales'))];
+            $rules['title'] = 'required|max:255';
+            $rules['sub_title'] = 'required|max:255';
+        } else {
+            $rules['title'] = 'required|max:255';
+            $rules['sub_title'] = 'required|max:255';
+        }
+
+        $request->validate($rules);
 
         try {
             DB::beginTransaction();
@@ -313,22 +366,44 @@ class AdminCategoryCountryController extends Controller
             }
 
             // Update or create translation for the submitted language
-            CountryTranslation::updateOrCreate([
-                'country_id' => $country->id,
-                'language' => $request->language,
-            ], [
-                'title' => $request->title,
-                'sub_title' => $request->sub_title,
-                'introduction' => $request->introduction,
-                'content' => $request->body,
-                'fish_avail_title' => $request->fish_avail_title,
-                'fish_avail_intro' => $request->fish_avail_intro,
-                'size_limit_title' => $request->size_limit_title,
-                'size_limit_intro' => $request->size_limit_intro,
-                'time_limit_title' => $request->time_limit_title,
-                'time_limit_intro' => $request->time_limit_intro,
-                'faq_title' => $request->faq_title,
-            ]);
+            if (! $request->filled('content_scope')) {
+                CountryTranslation::updateOrCreate([
+                    'country_id' => $country->id,
+                    'language' => $request->language,
+                ], [
+                    'title' => $request->title,
+                    'sub_title' => $request->sub_title,
+                    'introduction' => $request->introduction,
+                    'content' => $request->body,
+                    'fish_avail_title' => $request->fish_avail_title,
+                    'fish_avail_intro' => $request->fish_avail_intro,
+                    'size_limit_title' => $request->size_limit_title,
+                    'size_limit_intro' => $request->size_limit_intro,
+                    'time_limit_title' => $request->time_limit_title,
+                    'time_limit_intro' => $request->time_limit_intro,
+                    'faq_title' => $request->faq_title,
+                ]);
+            } else {
+                CountryTranslation::updateOrCreate([
+                    'country_id' => $country->id,
+                    'language' => $request->language,
+                ], [
+                    'fish_avail_title' => $request->fish_avail_title,
+                    'fish_avail_intro' => $request->fish_avail_intro,
+                    'size_limit_title' => $request->size_limit_title,
+                    'size_limit_intro' => $request->size_limit_intro,
+                    'time_limit_title' => $request->time_limit_title,
+                    'time_limit_intro' => $request->time_limit_intro,
+                ]);
+            }
+
+            $this->saveScopedContent(
+                $request,
+                $this->content,
+                CategoryPageEntityType::GEO_COUNTRY,
+                $country->id,
+                $scopes,
+            );
 
             $countryId = $country->id;
 
@@ -384,7 +459,7 @@ class AdminCategoryCountryController extends Controller
             }
 
             // Handle FAQ data
-            if ($request->has('faq')) {
+            if ($request->has('faq') && ! $request->filled('content_scope')) {
                 foreach ($request->faq as $key => $value) {
                     $value['language'] = $request->language;
                     if (isset($value['id']) && $value['id'] == 0) {
@@ -643,41 +718,5 @@ class AdminCategoryCountryController extends Controller
                 }
             }
         }
-    }
-
-    public function getLanguageData($id)
-    {
-        // Get country and its translation for requested language
-        $country = Country::find($id);
-        if (!$country) {
-            return response()->json(['error' => 'Country not found'], 404);
-        }
-
-        $requestedLanguage = request('language', 'en');
-        $translation = CountryTranslation::where('country_id', $country->id)
-            ->where('language', $requestedLanguage)
-            ->first();
-
-        if (is_null($country)) {
-            return response()->json(['error' => 'Country not found'], 404);
-        }
-        
-        return response()->json([
-            'title' => $country->title,
-            'sub_title' => $country->sub_title,
-            'introduction' => $country->introduction,
-            'content' => $country->content,
-            'fish_avail_title' => $country->fish_avail_title,
-            'fish_avail_intro' => $country->fish_avail_intro,
-            'size_limit_title' => $country->size_limit_title,
-            'size_limit_intro' => $country->size_limit_intro,
-            'time_limit_title' => $country->time_limit_title,
-            'time_limit_intro' => $country->time_limit_intro,
-            'faq_title' => $country->faq_title,
-            'fish_chart' => $country->fish_chart,
-            'fish_size_limit' => $country->fish_size_limit,
-            'fish_time_limit' => $country->fish_time_limit,
-            'faq' => $country->faq
-        ]);
     }
 }

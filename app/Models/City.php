@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\OverlaysScopedCategoryContent;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class City extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, OverlaysScopedCategoryContent, SoftDeletes;
 
     protected $table = 'c_cities';
 
@@ -187,5 +188,18 @@ class City extends Model
     {
         $translation = $this->getCurrentTranslation();
         return $translation ? $translation->faq_title : null;
+    }
+
+    protected function setCurrentTranslation($translation): void
+    {
+        $this->currentTranslation = $translation;
+    }
+
+    protected function newTranslationForOverlay(string $locale): CityTranslation
+    {
+        return new CityTranslation([
+            'city_id' => $this->id,
+            'language' => $locale,
+        ]);
     }
 }

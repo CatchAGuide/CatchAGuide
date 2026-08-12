@@ -300,6 +300,97 @@ return [
         'accordion_people' => 'Guest, guide & booking',
         'no_comment' => 'No comment provided.',
     ],
-];
 
-?>
+    'category_pages' => [
+        'hub_title' => 'SEO Category Pages',
+        'hub_intro' => 'Manage unique SEO copy per dimension and offering. Global refers to mixed catalog landings (tours + trips + camps) — not the /offers listing page itself.',
+        'manage' => 'Manage',
+        'legacy' => 'Legacy',
+        'scopes_label' => 'Scopes',
+        'global_note' => 'Global = mixed catalog SEO copy (not the /offers page type).',
+
+        'scopes' => [
+            'global' => 'Global',
+            'tours' => 'Tours',
+            'vacations' => 'Vacations',
+            'trips' => 'Trips',
+            'camps' => 'Camps',
+        ],
+
+        'dimensions' => [
+            'target_fish' => 'Target fish',
+            'methods' => 'Methods',
+            'countries' => 'Countries',
+            'region' => 'Regions',
+            'city' => 'Cities',
+            'trip_locations_legacy' => 'Trip locations (legacy)',
+        ],
+
+        'editor' => [
+            'identity' => 'Identity',
+            'content' => 'Content',
+            'scope' => 'Offering scope',
+            'locale' => 'Language',
+            'translate_en' => 'Translate to English',
+            'save' => 'Save scope',
+            'filled' => 'Filled',
+            'empty' => 'Empty',
+            'public_url' => 'Public URL',
+            'favorite' => 'Homepage favorite',
+            'back_to_list' => 'Back to list',
+            'back_to_hub' => 'Category pages hub',
+        ],
+
+        'form' => [
+            'name' => 'Name',
+            'country_code' => 'Country code',
+            'country' => 'Country',
+            'region' => 'Region',
+            'select' => 'Select',
+            'thumbnail' => 'Thumbnail',
+            'title' => 'Title',
+            'sub_title' => 'Sub title',
+            'introduction' => 'Introduction',
+            'content' => 'Content',
+            'seo_content' => 'SEO content',
+
+            'faq' => 'FAQ',
+            'add_item' => 'Add item',
+            'faq_title' => 'FAQ section title',
+            'question' => 'Question',
+            'answer' => 'Answer',
+
+            'charts_language' => 'Charts language',
+            'charts_language_note' => 'Language for fish/limit chart texts.',
+
+            'filter' => 'Filter',
+            'location' => 'Location',
+            'location_placeholder' => 'Search location',
+
+            'fish_availability' => 'Availability of fish',
+            'section_title' => 'Title',
+            'section_intro' => 'Content',
+            'fish' => 'Fish',
+
+            'size_limit' => 'Size limit',
+            'time_limit' => 'Time limit',
+        ],
+
+        'sidebar' => [
+            'menu' => 'Category pages',
+            'hub' => 'Hub',
+            'target_fish' => 'Target fish',
+            'methods' => 'Methods',
+            'countries' => 'Countries',
+            'region' => 'Region',
+            'city' => 'City',
+        ],
+
+        'index' => [
+            'intro' => 'All catalog species are listed below. Scope badges show whether DE/EN copy exists — dashed badges mean content is still missing.',
+            'languages' => 'Languages',
+            'name' => 'Name',
+            'actions' => 'Actions',
+        ],
+    ],
+];

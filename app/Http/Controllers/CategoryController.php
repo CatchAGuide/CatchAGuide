@@ -10,6 +10,9 @@ use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\CategoryPage\CategoryPageContentService;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -17,7 +20,7 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index($type, Request $request)
+    public function index($type, Request $request, CategoryPageContentService $categoryContent)
     {
         // Legacy/home links sometimes passed slug as a query param on the index route.
         // Send those to the method/target detail page instead of the category listing.
@@ -30,28 +33,34 @@ class CategoryController extends Controller
 
         $type = strtolower($type);
         $language = app()->getLocale();
+        $scope = $type === 'targets'
+            ? CategoryPageScope::GLOBAL
+            : CategoryPageScope::TOURS;
+
         $allTargets = CategoryPage::whereRaw('LOWER(type) = ?', [$type])
             ->get()
-            ->map(function($item) use ($language) {
-                $item->language = $item->language($language);
+            ->map(function ($item) use ($language, $scope, $categoryContent) {
+                $item->language = $categoryContent->resolveForDisplay($item, $scope, $language);
+
                 return $item;
             })
-            ->filter(function($item) {
-                return $item->language !== null;
+            ->filter(function ($item) {
+                return $item->language !== null && filled($item->language->title);
             });
 
-        $favories = $allTargets->filter(function($item) {
+        $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
-        
-        $introduction = __('category.' . $type . '.introduction');
-        $title = __('category.' . $type . '.title');
+
+        $introduction = __('category.'.$type.'.introduction');
+        $title = __('category.'.$type.'.title');
 
         $data = compact('favories', 'allTargets', 'introduction', 'title', 'type');
+
         return view('pages.category.category-index', $data);
     }
 
-    public function targets($type, $slug, Request $request, OfferCatalogPageService $offerCatalog)
+    public function targets($type, $slug, Request $request, OfferCatalogPageService $offerCatalog, CategoryPageContentService $categoryContent)
     {
         $type = strtolower($type);
         $language = app()->getLocale();
@@ -64,14 +73,42 @@ class CategoryController extends Controller
             abort(404);
         }
 
-        $row_data->language = $row_data->language($language);
-        $row_data->faq = $row_data->faq($language);
+        if ($type === 'targets') {
+            $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::GLOBAL, $language);
+            $row_data->faq = $categoryContent->faqsFor(
+                $row_data,
+                $this->resolvedTargetFishScope($row_data, $categoryContent, $language),
+                $language
+            );
+        } elseif ($type === 'methods') {
+            $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::TOURS, $language);
+            $row_data->faq = $categoryContent->faqsFor($row_data, CategoryPageScope::TOURS, $language);
+        } else {
+            $row_data->language = $row_data->language($language);
+            $row_data->faq = $row_data->faq($language);
+        }
 
         if ($type === 'targets') {
             return $this->showTargetFishOffers($row_data, $request, $offerCatalog);
         }
 
         return $this->showLegacyGuidingCategory($type, $row_data, $request);
+    }
+
+    private function resolvedTargetFishScope(CategoryPage $page, CategoryPageContentService $categoryContent, string $locale): string
+    {
+        $global = $categoryContent->findForEntity(
+            CategoryPageEntityType::TARGET_FISH,
+            $page->source_id,
+            CategoryPageScope::GLOBAL,
+            $locale,
+        );
+
+        if ($global !== null && filled($global->title)) {
+            return CategoryPageScope::GLOBAL;
+        }
+
+        return CategoryPageScope::TOURS;
     }
 
     private function showTargetFishOffers(

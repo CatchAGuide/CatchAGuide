@@ -57,7 +57,7 @@
     'placeholder' => __('offers.filter_species_placeholder'),
     'searchPlaceholder' => __('offers.filter_species_search'),
     'options' => $speciesOptions,
-    'selectedValues' => $filter->speciesIds ?? [],
+    'selectedValues' => array_merge($filter->speciesIds ?? [], $filter->speciesNames ?? []),
 ])
 
 @if($showTourFacets)

@@ -37,8 +37,7 @@ use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\ConsolidatedListingsController;
-use App\Http\Controllers\Admin\Category\AdminCategoryVacationCountryController;
-use App\Http\Controllers\Admin\Category\AdminCategoryTripLocationController;
+
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
@@ -651,14 +650,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('category')->name('category.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Category\AdminCategoryHubController::class, 'index'])->name('hub');
+
             // Translation routes must come before resource routes
             Route::get('country/{id}/translation', [AdminCategoryCountryController::class, 'getTranslation'])->name('country.translation');
+            Route::get('country/{id}/language-data', [AdminCategoryCountryController::class, 'getLanguageData'])->name('country.language-data');
             Route::get('region/{id}/translation', [AdminCategoryRegionController::class, 'getTranslation'])->name('region.translation');
+            Route::get('region/{id}/language-data', [AdminCategoryRegionController::class, 'getLanguageData'])->name('region.language-data');
             Route::get('city/{id}/translation', [AdminCategoryCityController::class, 'getTranslation'])->name('city.translation');
-            
+            Route::get('city/{id}/language-data', [AdminCategoryCityController::class, 'getLanguageData'])->name('city.language-data');
             Route::resource('country', AdminCategoryCountryController::class);
-            Route::resource('vacation-country', AdminCategoryVacationCountryController::class);
-            Route::resource('trip-location', AdminCategoryTripLocationController::class)->except(['show']);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
             Route::resource('methods', AdminCategoryMethodsController::class);

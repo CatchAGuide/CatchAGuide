@@ -1,32 +1,23 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Methods')
+@section('title', __('admin.category_pages.dimensions.methods'))
+
+@section('custom_style')
+<link rel="stylesheet" href="{{ asset('css/admin-category-pages.css') }}">
+@endsection
 
 @section('content')
-    <style>
-        .frm-btn-delete {
-            display: contents;
-        }
-    </style>
     <div class="side-app">
-
-        <!-- CONTAINER -->
         <div class="main-container container-fluid">
-
-            <!-- PAGE-HEADER -->
             <div class="page-header">
-                <h1 class="page-title">Methods</h1>
+                <h1 class="page-title">{{ __('admin.category_pages.dimensions.methods') }}</h1>
                 <div>
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">System</a></li>
-                        <li class="breadcrumb-item"><a href="#">Categories</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Methods</li>
-                    </ol>
+                    <a href="{{ route('admin.category.hub') }}" class="btn btn-outline-primary btn-sm">{{ __('admin.category_pages.editor.back_to_hub') }}</a>
                 </div>
-
             </div>
-            <!-- PAGE-HEADER END -->
-            <!-- Row -->
+
+            <p class="text-muted">{{ __('admin.category_pages.index.intro') }}</p>
+
             <div class="row row-sm">
                 <div class="col-lg-12">
                     <div class="card">
@@ -34,26 +25,23 @@
                             <table class="table blog-table table-bordered table-striped text-nowrap border-bottom">
                                 <thead>
                                 <tr>
-                                    <th width="10%" class="border-bottom-0 text-center">Language</th>
-                                    <th width="30%" class="border-bottom-0">Name</th>
-                                    <th width="15%" class="border-bottom-0">Aktionen</th>
+                                    <th class="border-bottom-0 text-center">{{ __('admin.category_pages.index.languages') }}</th>
+                                    <th class="border-bottom-0">{{ __('admin.category_pages.index.name') }}</th>
+                                    @foreach($scopes as $scope)
+                                        <th class="border-bottom-0 text-center">{{ \App\Domain\CategoryPage\CategoryPageScope::label($scope) }}</th>
+                                    @endforeach
+                                    <th class="border-bottom-0">{{ __('admin.category_pages.index.actions') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($rows as $row)
-                                        <tr>
-                                            <td class="text-center">
-                                                @if($row->categoryPage && $row->categoryPage->language)
-                                                    @foreach($row->categoryPage->language->unique('language') as $language)
-                                                        @if($language->language == 'de')
-                                                            <label><i class="fi fi-de"></i></label> 
-                                                        @elseif($language->language == 'en')
-                                                            <label><i class="fi fi-gb"></i></label>
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-                                            </td>
+                                        <tr class="{{ empty($row->has_any_content) ? 'category-index__row--empty' : '' }}">
+                                            @include('admin.pages.category.partials.locale-flag-cells', ['locales' => $row->filled_locales ?? []])
                                             <td>{{ $row->name }}</td>
+                                            @include('admin.pages.category.partials.scope-status-cells', [
+                                                'scopes' => $scopes,
+                                                'completeness' => $row->scope_completeness,
+                                            ])
                                             <td>
                                                 <a href="{{ route('admin.category.methods.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>
                                                 @if($row->categoryPage && $row->categoryPage->is_favorite == 1)
@@ -71,10 +59,7 @@
                     </div>
                 </div>
             </div>
-            <!-- End Row -->
         </div>
-        <!-- CONTAINER CLOSED -->
-
     </div>
 @endsection
 
@@ -86,7 +71,7 @@
             const id = button.data('id');
             const currentStatus = button.data('status');
             const newStatus = currentStatus === 1 ? 0 : 1;
-            
+
             $.ajax({
                 url: "{{ route('admin.category.methods.toggle-favorite') }}",
                 type: "POST",
@@ -107,9 +92,6 @@
                         button.data('status', newStatus);
                     }
                 },
-                error: function(xhr) {
-                    console.error('Error updating favorite status');
-                }
             });
         });
     });

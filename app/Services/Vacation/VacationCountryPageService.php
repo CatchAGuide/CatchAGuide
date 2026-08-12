@@ -2,15 +2,17 @@
 
 namespace App\Services\Vacation;
 
-use App\Domain\Destination\DestinationCategoryType;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\Pillar;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\ViewModels\PillarSectionViewModel;
 use App\Domain\Vacation\ViewModels\VacationCountryViewModel;
-use App\Models\Destination;
+use App\Models\Country;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -22,6 +24,7 @@ class VacationCountryPageService
         private CampListingRepository $camps,
         private TripListingRepository $trips,
         private VacationFilterApplicator $filterApplicator,
+        private CategoryPageContentService $categoryContent,
     ) {}
 
     public function build(Request $request, string $countrySlug): VacationCountryViewModel
@@ -40,20 +43,15 @@ class VacationCountryPageService
 
     public function buildAllOffers(Request $request): VacationCountryViewModel
     {
-        $destination = new Destination([
+        $country = new Country([
             'slug' => 'all-offers',
             'name' => __('vacations.all_offers_title'),
-            'sub_title' => __('vacations.all_offers_subtitle'),
-            'type' => DestinationCategoryType::VACATIONS,
-            'language' => app()->getLocale(),
         ]);
-        $destination->setRelation('faq', collect());
-        $destination->setRelation('fish_chart', collect());
 
-        return $this->buildPage($request, null, $destination);
+        return $this->buildPage($request, null, $country);
     }
 
-    private function buildPage(Request $request, ?string $countrySlug, Destination $destination): VacationCountryViewModel
+    private function buildPage(Request $request, ?string $countrySlug, Country $country): VacationCountryViewModel
     {
         $input = $request->all();
         if ($countrySlug === null) {
@@ -62,7 +60,7 @@ class VacationCountryPageService
 
         $filter = VacationListingFilter::fromRequest($input, $countrySlug);
         $perPage = (int) config('vacations.country_page_per_page', 6);
-        $countryLabel = translate($destination->name);
+        $countryLabel = translate($country->name);
 
         $showTripsSection = $filter->pillar !== 'camps';
         $showCampsSection = $filter->pillar !== 'trips';
@@ -99,8 +97,29 @@ class VacationCountryPageService
         };
         $listings = $this->buildListingsPaginator($filter, $trips, $camps, $perPage);
 
+        $locale = app()->getLocale();
+        if ($country->id) {
+            $country = $this->categoryContent->applyScopedContentToModel(
+                $country,
+                CategoryPageEntityType::GEO_COUNTRY,
+                CategoryPageScope::VACATIONS,
+                $locale,
+                fn (string $loc) => $this->categoryContent->legacyCountryLanguage($country, $loc),
+            );
+        }
+
+        $faq = $country->id
+            ? $this->categoryContent->resolveFaqsForEntityDisplay(
+                CategoryPageEntityType::GEO_COUNTRY,
+                $country->id,
+                CategoryPageScope::VACATIONS,
+                $locale,
+                fn (string $loc) => $country->faqs()->where('language', $loc)->get(),
+            )
+            : collect();
+
         return new VacationCountryViewModel(
-            destination: $destination,
+            destination: $country,
             filter: $filter,
             tripsSection: $tripsSection,
             campsSection: $campsSection,
@@ -110,16 +129,13 @@ class VacationCountryPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            faq: $destination->faq ?? collect(),
-            fishChart: $destination->fish_chart ?? collect(),
+            faq: $faq,
+            fishChart: $country->fish_charts ?? collect(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
             mapMarkers: $this->buildMapMarkers($filter),
         );
     }
 
-  /**
-     * @return LengthAwarePaginator<int, array{type: string, model: mixed}>
-     */
     private function buildListingsPaginator(
         VacationListingFilter $filter,
         LengthAwarePaginator $trips,
@@ -167,9 +183,6 @@ class VacationCountryPageService
         );
     }
 
-    /**
-     * @return LengthAwarePaginator<int, array{type: string, model: mixed}>
-     */
     private function wrapPaginatorItems(LengthAwarePaginator $paginator, string $type): LengthAwarePaginator
     {
         $items = collect($paginator->items())->map(fn ($model) => [
@@ -186,10 +199,6 @@ class VacationCountryPageService
         );
     }
 
-    /**
-     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed}>  $items
-     * @return Collection<int, array{type: string, model: mixed}>
-     */
     private function sortListingItems(Collection $items, VacationListingFilter $filter): Collection
     {
         return match ($filter->sortBy) {

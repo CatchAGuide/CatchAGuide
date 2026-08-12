@@ -46,6 +46,8 @@ class TargetFishOffersCatalogTest extends TestCase
 
         Language::query()->create([
             'source_id' => $page->id,
+            'type' => 'category_page',
+            'scope' => 'global',
             'language' => app()->getLocale(),
             'title' => 'Pike fishing',
             'sub_title' => 'Guided pike tours and vacations',

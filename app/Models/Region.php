@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
+use App\Models\Concerns\OverlaysScopedCategoryContent;
 use App\Models\DestinationFishTimeLimit;
 
 class Region extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, OverlaysScopedCategoryContent, SoftDeletes;
 
     protected $table = 'c_regions';
 
@@ -218,5 +219,18 @@ class Region extends Model
     {
         $translation = $this->getCurrentTranslation();
         return $translation ? $translation->faq_title : null;
+    }
+
+    protected function setCurrentTranslation($translation): void
+    {
+        $this->currentTranslation = $translation;
+    }
+
+    protected function newTranslationForOverlay(string $locale): RegionTranslation
+    {
+        return new RegionTranslation([
+            'region_id' => $this->id,
+            'language' => $locale,
+        ]);
     }
 }

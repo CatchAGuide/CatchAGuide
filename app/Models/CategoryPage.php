@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\Target;
 use App\Models\Method;
 
@@ -22,13 +23,24 @@ class CategoryPage extends Model
 
     public function language($languageCode = null)
     {
-        $relation = $this->hasMany(Language::class, 'source_id', 'id');
-        
+        $relation = $this->hasMany(Language::class, 'source_id', 'id')
+            ->where('type', CategoryPageScope::LANGUAGE_TYPE);
+
         if ($languageCode) {
-            return $relation->where('language', $languageCode)->first();
+            return $relation
+                ->where('language', $languageCode)
+                ->where('scope', CategoryPageScope::TOURS)
+                ->first()
+                ?? $relation->where('language', $languageCode)->whereNull('scope')->first();
         }
-        
+
         return $relation;
+    }
+
+    public function scopedLanguages()
+    {
+        return $this->hasMany(Language::class, 'source_id', 'id')
+            ->where('type', CategoryPageScope::LANGUAGE_TYPE);
     }
 
     public function languageEntries($languageCode)
@@ -38,14 +50,18 @@ class CategoryPage extends Model
                     ->get();
     }
 
-    public function faq($languageCode = null)
+    public function faq($languageCode = null, ?string $scope = null)
     {
         $relation = $this->hasMany(Faq::class, 'source_id', 'id');
-        
+
+        if ($scope !== null) {
+            $relation->where('scope', $scope);
+        }
+
         if ($languageCode) {
             return $relation->where('language', $languageCode)->get();
         }
-        
+
         return $relation;
     }   
 

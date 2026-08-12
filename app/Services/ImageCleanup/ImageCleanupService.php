@@ -7,7 +7,7 @@ use App\Models\Camp;
 use App\Models\CategoryPage;
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Destination;
+use App\Models\Country;
 use App\Models\Guiding;
 use App\Models\GuideThread;
 use App\Models\Media;
@@ -78,7 +78,7 @@ class ImageCleanupService
             'gallery_field' => null,
         ],
         'destination' => [
-            'model' => Destination::class,
+            'model' => Country::class,
             'thumbnail_path' => 'thumbnail_path',
             'gallery_field' => null,
         ],

@@ -52,10 +52,21 @@ class OfferFilterMapBuilder
         $nameToId = $this->buildNameLookup($targets);
 
         $map = [
-            'tours' => ['targets' => array_fill_keys($knownIds, [])],
-            'trips' => ['targets' => array_fill_keys($knownIds, [])],
-            'camps' => ['targets' => array_fill_keys($knownIds, [])],
+            'tours' => [
+                'targets' => array_fill_keys($knownIds, []),
+                'custom_targets' => [],
+            ],
+            'trips' => [
+                'targets' => array_fill_keys($knownIds, []),
+                'custom_targets' => [],
+            ],
+            'camps' => [
+                'targets' => array_fill_keys($knownIds, []),
+                'custom_targets' => [],
+            ],
             'targets_by_country' => [],
+            'custom_targets_by_country' => [],
+            'custom_target_labels' => [],
         ];
 
         $tourCount = 0;
@@ -66,15 +77,18 @@ class OfferFilterMapBuilder
             ->chunkById(500, function (Collection $guidings) use (&$map, &$tourCount, $knownIds, $nameToId) {
                 foreach ($guidings as $guiding) {
                     $tourCount++;
-                    $targetIds = $this->resolveTargetIds($guiding->getAttributes()['target_fish'] ?? $guiding->target_fish, $knownIds, $nameToId);
-                    foreach ($targetIds as $targetId) {
-                        $map['tours']['targets'][$targetId][] = (int) $guiding->id;
-                    }
-                    $this->indexCountryTargets(
-                        $map['targets_by_country'],
+                    $resolved = $this->resolveSpecies(
+                        $guiding->getAttributes()['target_fish'] ?? $guiding->target_fish,
+                        $knownIds,
+                        $nameToId
+                    );
+                    $this->indexListingSpecies(
+                        $map,
+                        'tours',
+                        (int) $guiding->id,
+                        $resolved,
                         $guiding->country,
-                        $guiding->country_iso,
-                        $targetIds
+                        $guiding->country_iso
                     );
                 }
             });
@@ -88,11 +102,8 @@ class OfferFilterMapBuilder
                 foreach ($trips as $trip) {
                     $tripCount++;
                     $raw = $trip->getAttributes()['target_species'] ?? $trip->target_species;
-                    $targetIds = $this->resolveTargetIds($raw, $knownIds, $nameToId);
-                    foreach ($targetIds as $targetId) {
-                        $map['trips']['targets'][$targetId][] = (int) $trip->id;
-                    }
-                    $this->indexCountryTargets($map['targets_by_country'], $trip->country, null, $targetIds);
+                    $resolved = $this->resolveSpecies($raw, $knownIds, $nameToId);
+                    $this->indexListingSpecies($map, 'trips', (int) $trip->id, $resolved, $trip->country, null);
                 }
             });
 
@@ -105,11 +116,8 @@ class OfferFilterMapBuilder
                 foreach ($camps as $camp) {
                     $campCount++;
                     $raw = $camp->getAttributes()['target_fish'] ?? $camp->target_fish;
-                    $targetIds = $this->resolveTargetIds($raw, $knownIds, $nameToId);
-                    foreach ($targetIds as $targetId) {
-                        $map['camps']['targets'][$targetId][] = (int) $camp->id;
-                    }
-                    $this->indexCountryTargets($map['targets_by_country'], $camp->country, null, $targetIds);
+                    $resolved = $this->resolveSpecies($raw, $knownIds, $nameToId);
+                    $this->indexListingSpecies($map, 'camps', (int) $camp->id, $resolved, $camp->country, null);
                 }
             });
 
@@ -124,6 +132,10 @@ class OfferFilterMapBuilder
             $map['targets_by_country'][$country] = array_map('intval', array_keys($targetSet));
         }
 
+        foreach ($map['custom_targets_by_country'] as $country => $customSet) {
+            $map['custom_targets_by_country'][$country] = array_keys($customSet);
+        }
+
         $map['metadata'] = [
             'generated_at' => now()->toISOString(),
             'total_tours' => $tourCount,
@@ -133,6 +145,9 @@ class OfferFilterMapBuilder
                 'tours' => array_map('count', $map['tours']['targets']),
                 'trips' => array_map('count', $map['trips']['targets']),
                 'camps' => array_map('count', $map['camps']['targets']),
+                'custom_tours' => array_map('count', $map['tours']['custom_targets']),
+                'custom_trips' => array_map('count', $map['trips']['custom_targets']),
+                'custom_camps' => array_map('count', $map['camps']['custom_targets']),
                 'countries' => count($map['targets_by_country']),
             ],
         ];
@@ -141,29 +156,98 @@ class OfferFilterMapBuilder
     }
 
     /**
+     * @param  array{ids: list<int>, customs: array<string, string>}  $resolved
+     */
+    private function indexListingSpecies(
+        array &$map,
+        string $pillar,
+        int $listingId,
+        array $resolved,
+        ?string $country,
+        ?string $countryIso,
+    ): void {
+        foreach ($resolved['ids'] as $targetId) {
+            $map[$pillar]['targets'][$targetId][] = $listingId;
+        }
+
+        foreach ($resolved['customs'] as $key => $label) {
+            $map[$pillar]['custom_targets'][$key][] = $listingId;
+            if (! isset($map['custom_target_labels'][$key])) {
+                $map['custom_target_labels'][$key] = $label;
+            }
+        }
+
+        $this->indexCountryTargets(
+            $map['targets_by_country'],
+            $country,
+            $countryIso,
+            $resolved['ids']
+        );
+        $this->indexCountryCustomTargets(
+            $map['custom_targets_by_country'],
+            $country,
+            $countryIso,
+            array_keys($resolved['customs'])
+        );
+    }
+
+    /**
      * @param  array<string, array<int, true>>  $targetsByCountry
      * @param  list<int>  $targetIds
      */
     private function indexCountryTargets(array &$targetsByCountry, ?string $country, ?string $countryIso, array $targetIds): void
     {
-        if ($targetIds === [] || ($country === null || trim($country) === '') && ($countryIso === null || trim($countryIso) === '')) {
+        if ($targetIds === []) {
             return;
         }
 
-        $canonical = CountrySlug::canonicalize($country) ?? CountrySlug::canonicalize($countryIso);
-        if ($canonical === null) {
-            return;
-        }
-
-        foreach (CountrySlug::storageVariants($canonical, $countryIso) as $variant) {
-            $key = mb_strtolower(trim($variant), 'UTF-8');
-            if ($key === '') {
-                continue;
-            }
+        foreach ($this->countryIndexKeys($country, $countryIso) as $key) {
             foreach ($targetIds as $targetId) {
                 $targetsByCountry[$key][$targetId] = true;
             }
         }
+    }
+
+    /**
+     * @param  array<string, array<string, true>>  $customByCountry
+     * @param  list<string>  $customKeys
+     */
+    private function indexCountryCustomTargets(array &$customByCountry, ?string $country, ?string $countryIso, array $customKeys): void
+    {
+        if ($customKeys === []) {
+            return;
+        }
+
+        foreach ($this->countryIndexKeys($country, $countryIso) as $countryKey) {
+            foreach ($customKeys as $customKey) {
+                $customByCountry[$countryKey][$customKey] = true;
+            }
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function countryIndexKeys(?string $country, ?string $countryIso): array
+    {
+        if (($country === null || trim($country) === '') && ($countryIso === null || trim($countryIso) === '')) {
+            return [];
+        }
+
+        $canonical = CountrySlug::canonicalize($country) ?? CountrySlug::canonicalize($countryIso);
+        if ($canonical === null) {
+            return [];
+        }
+
+        $keys = [];
+        foreach (CountrySlug::storageVariants($canonical, $countryIso) as $variant) {
+            $key = mb_strtolower(trim($variant), 'UTF-8');
+            if ($key !== '') {
+                $keys[] = $key;
+            }
+        }
+
+        return $keys;
     }
 
     /**
@@ -188,35 +272,46 @@ class OfferFilterMapBuilder
     }
 
     /**
+     * Map known catalog ids/names and keep unmatched free-text as custom labels.
+     * Does not read legacy guidings.target_fish_sonstiges.
+     *
      * @param  array<int, int>  $knownIds
      * @param  array<string, int>  $nameToId
-     * @return list<int>
+     * @return array{ids: list<int>, customs: array<string, string>}
      */
-    private function resolveTargetIds(mixed $raw, array $knownIds, array $nameToId): array
+    private function resolveSpecies(mixed $raw, array $knownIds, array $nameToId): array
     {
         $items = $this->normalizeRawSpecies($raw);
         if ($items === []) {
-            return [];
+            return ['ids' => [], 'customs' => []];
         }
 
         $ids = [];
+        $customs = [];
         $knownLookup = array_fill_keys($knownIds, true);
 
         foreach ($items as $item) {
             if (is_array($item)) {
+                $matched = false;
                 if (isset($item['id']) && is_numeric($item['id'])) {
                     $id = (int) $item['id'];
                     if (isset($knownLookup[$id])) {
                         $ids[$id] = $id;
+                        $matched = true;
                     }
                 }
                 $name = $item['name'] ?? $item['value'] ?? null;
                 if (is_numeric($name) && isset($knownLookup[(int) $name])) {
                     $ids[(int) $name] = (int) $name;
-                } elseif (is_string($name) && $name !== '') {
-                    $key = mb_strtolower(trim($name), 'UTF-8');
+                    $matched = true;
+                } elseif (is_string($name) && trim($name) !== '') {
+                    $label = trim($name);
+                    $key = mb_strtolower($label, 'UTF-8');
                     if (isset($nameToId[$key])) {
                         $ids[$nameToId[$key]] = $nameToId[$key];
+                        $matched = true;
+                    } elseif (! $matched) {
+                        $customs[$key] = $label;
                     }
                 }
                 continue;
@@ -228,14 +323,20 @@ class OfferFilterMapBuilder
             }
 
             if (is_string($item) && trim($item) !== '') {
-                $key = mb_strtolower(trim($item), 'UTF-8');
+                $label = trim($item);
+                $key = mb_strtolower($label, 'UTF-8');
                 if (isset($nameToId[$key])) {
                     $ids[$nameToId[$key]] = $nameToId[$key];
+                } else {
+                    $customs[$key] = $label;
                 }
             }
         }
 
-        return array_values($ids);
+        return [
+            'ids' => array_values($ids),
+            'customs' => $customs,
+        ];
     }
 
     /**

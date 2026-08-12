@@ -8,10 +8,13 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 </style>
+@if(!empty($scopedEditorEnabled))
+<link rel="stylesheet" href="{{ asset('css/admin-category-pages.css') }}">
+@endif
 @endsection
 
 @section('content')
-    <div class="side-app">
+    <div class="side-app @if(!empty($scopedEditorEnabled)) category-editor category-geo-form @endif">
 
         <!-- CONTAINER -->
         <div class="main-container container-fluid">
@@ -135,6 +138,11 @@ input[type=number] {
                                         </div>
                                     </div>
                                 </div>
+                                @if(!empty($scopedEditorEnabled))
+                                    @include('admin.pages.category.partials.scoped-content-editor')
+                                    <hr class="my-4">
+                                @endif
+                                @if(empty($scopedEditorEnabled))
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
@@ -159,6 +167,9 @@ input[type=number] {
                                     <label for="body">Content</label>
                                     <textarea id="body" cols="30" rows="10" class="form-control" name="body">{{ $body }}</textarea>
                                 </div>
+                                @endif
+                                
+
                                 <div class="my-2">
                                     <span><strong>Filter</strong></span>
                                 </div>
@@ -228,6 +239,7 @@ input[type=number] {
                                     </table>
                                 </div>
 
+                                @if(empty($scopedEditorEnabled))
                                 <div class="form-group">
                                     <h4><button class="btn btn-secondary btn-sm mb-1" onclick="add_faq_item()" type="button"><i class="fa fa-plus"></i></button> FAQ</h4>
                                     <input type="text" class="form-control mb-2" placeholder="Title" name="faq_title" id="faq_title" value="{{ $faq_title }}">
@@ -242,13 +254,17 @@ input[type=number] {
                                         <tbody></tbody>
                                     </table>
                                 </div>
+                                @endif
                             </div>
 
-                            <div class="card-footer text-end">
+                            <div class="card-footer text-end category-form__footer">
                                 @if($method != '')
                                     @method('PUT')
                                 @endif
-                                <button type="submit" class="btn btn-success my-1">Submit</button>
+                                @if(!empty($scopedEditorEnabled))
+                                    <button type="submit" class="btn btn-outline-primary my-1" name="translate_to_en" value="1">{{ __('admin.category_pages.editor.translate_en') }}</button>
+                                @endif
+                                <button type="submit" class="btn btn-success my-1">{{ __('admin.category_pages.editor.save') }}</button>
                             </div>
                         </form>
                     </div>
@@ -268,8 +284,16 @@ input[type=number] {
     ({key: "{{ config('services.google_maps.api_key') }}", v: "weekly"});
 </script>
 <script>
-    CKEDITOR.replace( 'body' );
-    CKEDITOR.replace( 'introduction' );
+    @if(empty($scopedEditorEnabled))
+    CKEDITOR.replace('body');
+    @endif
+    @if(empty($scopedEditorEnabled))
+    CKEDITOR.replace('introduction');
+    @endif
+    @if(!empty($scopedEditorEnabled))
+    CKEDITOR.replace('content');
+    document.querySelector('form')?.addEventListener('submit', () => window.syncCategoryEditors?.());
+    @endif
 
     function initialize() {
         var input = document.getElementById('searchPlace');
@@ -356,7 +380,7 @@ input[type=number] {
         @endforeach
     @endif
 
-    @if(isset($faq))
+    @if(isset($faq) && empty($scopedEditorEnabled))
         @foreach($faq as $row)
             add_faq_item({{ $row->id }}, '{{ $row->question }}', '{{ $row->answer }}');
         @endforeach
