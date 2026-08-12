@@ -1822,12 +1822,13 @@ $white: #ffffff;
   font-size: 0.85rem;
 }
 
-// Partner
+// Partner — light band so it reads apart from the dark footer
 .cag-home-partner {
-  background: var(--cag-slate);
-  color: #fff;
-  padding: 3.5rem 0 4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  background:
+    linear-gradient(180deg, rgba(250, 245, 238, 0) 0%, var(--cag-sand) 18%, var(--cag-sand) 100%);
+  color: var(--cag-slate);
+  padding: 3.5rem 0 4.5rem;
+  border-bottom: none;
   margin-bottom: 0;
 }
 
@@ -1852,14 +1853,14 @@ $white: #ffffff;
   font-size: clamp(1.65rem, 3.2vw, 2.6rem);
   font-weight: 700;
   margin: 0 0 0.85rem;
-  color: #fff !important;
+  color: var(--cag-slate) !important;
   line-height: 1.2;
 }
 
 .cag-home-partner__text {
   max-width: 36rem;
   margin: 0 auto 1.5rem;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--cag-gray);
   line-height: 1.55;
   font-size: 0.95rem;
 }
@@ -1878,7 +1879,7 @@ $white: #ffffff;
   text-decoration: none;
 
   &:hover {
-    color: #fff;
+    color: var(--cag-slate);
     text-decoration: underline;
   }
 }
@@ -1895,34 +1896,37 @@ $white: #ffffff;
 }
 
 .cag-home-partner__card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #fff;
+  border: 1px solid var(--cag-border);
   border-radius: 0.85rem;
   padding: 1.35rem 1.25rem 1.5rem;
   text-align: left;
+  box-shadow: 0 1px 0 rgba(49, 48, 65, 0.04);
 }
 
 .cag-home-partner__card-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.25rem;
+  height: 2.25rem;
   margin-bottom: 0.85rem;
-  color: #fff;
-  font-size: 1.15rem;
+  border-radius: 0.55rem;
+  background: rgba(232, 96, 76, 0.1);
+  color: var(--cag-coral);
+  font-size: 1.05rem;
 }
 
 .cag-home-partner__card-title {
   margin: 0 0 0.5rem;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--cag-slate);
 }
 
 .cag-home-partner__card-text {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--cag-gray);
   font-size: 0.9rem;
   line-height: 1.5;
 }
