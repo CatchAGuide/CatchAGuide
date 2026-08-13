@@ -506,7 +506,7 @@ transform: translate3d(0,0,0); width: 100%;">
                     @foreach($other_guidings as $other_guiding)
                 
                         <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$other_guiding->id,$other_guiding->slug]) }}" title="Guide aufmachen">
+                            <a class="popular-tours__img" href="{{ $other_guiding->publicShowUrl() }}" title="Guide aufmachen">
                                 <figure class="popular-tours__img__wrapper">
                                     @if(isset(app('guiding')->getImagesUrl($other_guiding)['image_0']))
                                         <img src="{{app('guiding')->getImagesUrl($other_guiding)['image_0']}}" alt="{{$other_guiding->title}}"/>
@@ -520,7 +520,7 @@ transform: translate3d(0,0,0); width: 100%;">
                             </a>
 
                             <div class="popular-tours__content">
-                                <h3 class="popular-tours__title"><a href="{{ route('guidings.show', [$other_guiding->id,$other_guiding->slug]) }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
+                                <h3 class="popular-tours__title"><a href="{{ $other_guiding->publicShowUrl() }}">{{  $other_guiding->title ?  translate( $other_guiding->title) :  $other_guiding->title }}</a>
                                 </h3>
                                 <span>{{ $other_guiding->location ? translate($other_guiding->location) : $other_guiding->location }}</span>
                                 <p class="popular-tours__rate">

@@ -2,7 +2,27 @@
     $destinationRoute = $destination_route ?? 'destination.country';
     $showGeoCarousels = $show_geo_carousels ?? true;
     $showOffersCatalog = $show_offers_catalog ?? true;
-    $useCategoryHeroHeader = request()->routeIs('destination.country');
+    $useToursHeroSearch = request()->routeIs('guidings.destination');
+    $useCategoryHeroHeader = request()->routeIs('destination.country') || $useToursHeroSearch;
+    $geoFilters = is_array($row_data->filters ?? null) ? $row_data->filters : [];
+    $heroBreadcrumbs = $useToursHeroSearch
+        ? array_values(array_filter([
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            in_array($destination_type, ['region', 'city'], true) && $row_data->country
+                ? ['label' => $row_data->country->name, 'url' => route('guidings.destination', ['country' => $row_data->country->slug])]
+                : null,
+            $destination_type === 'city' && $row_data->region && $row_data->country
+                ? ['label' => $row_data->region->name, 'url' => route('guidings.destination', [
+                    'country' => $row_data->country->slug,
+                    'region' => $row_data->region->slug,
+                ])]
+                : null,
+            ['label' => $row_data->name, 'url' => null],
+        ]))
+        : [
+            ['label' => __('destination.breadcrumb'), 'url' => route('destination')],
+            ['label' => $row_data->name, 'url' => null],
+        ];
 @endphp
 @extends('layouts.app-v2')
 
@@ -31,14 +51,6 @@
     }
     #page-main-intro {
     }
-    #carousel-regions,
-    #carousel-cities {
-        min-height: 301.6px;
-    }
-    #carousel-regions .dimg-fluid,
-    #carousel-cities .dimg-fluid {
-        min-height: 301.6px;
-    }
     .country-listing-item p {
         font-size: 12px;
     }
@@ -50,57 +62,10 @@
         padding-left: 30px;
     }
 
-    @media (max-width: 767px) {
-        #carousel-regions .carousel-inner .carousel-item > div {
-            display: none;
-        }
-        #carousel-regions .carousel-inner .carousel-item > div:first-child {
-            display: block;
-        }
-        .dimg-fluid {
-            width: 100%!important;
-        }
-    }
-
-    #carousel-regions .carousel-inner .carousel-item.active,
-    #carousel-regions .carousel-inner .carousel-item-next,
-    #carousel-regions .carousel-inner .carousel-item-prev,
-    #carousel-cities .carousel-inner .carousel-item.active,
-    #carousel-cities .carousel-inner .carousel-item-next,
-    #carousel-cities .carousel-inner .carousel-item-prev {
-        display: flex;
-    }
-
-    /* medium and up screens */
     @media (min-width: 768px) {
-        #carousel-regions .carousel-inner .carousel-item img,
-        #carousel-cities .carousel-inner .carousel-item img {
-            margin-right: 2px;
-        }
-        
-        #carousel-regions .carousel-inner .carousel-item-end.active,
-        #carousel-regions .carousel-inner .carousel-item-next,
-        #carousel-cities .carousel-inner .carousel-item-end.active,
-        #carousel-cities .carousel-inner .carousel-item-next {
-          transform: translateX(25%);
-        }
-        
-        #carousel-regions .carousel-inner .carousel-item-start.active, 
-        #carousel-regions .carousel-inner .carousel-item-prev,
-        #carousel-cities .carousel-inner .carousel-item-start.active, 
-        #carousel-cities .carousel-inner .carousel-item-prev {
-          transform: translateX(-25%);
-        }
         .country-content-fix {
             margin-top: 15px !important; /* Ensure this margin is applied */
         }
-    }
-
-    #carousel-regions .carousel-inner .carousel-item-end,
-    #carousel-regions .carousel-inner .carousel-item-start,
-    #carousel-cities .carousel-inner .carousel-item-end,
-    #carousel-cities .carousel-inner .carousel-item-start { 
-      transform: translateX(0);
     }
 
     #map-placeholder {
@@ -181,12 +146,6 @@
             min-width: 156px !important;
         }
     }
-    .card-img-overlay h5 {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        color: #fff;
-    }
     .read-more-btn {
         background-color: #E8604C !important;
         color: #fff !important;
@@ -210,10 +169,6 @@
         padding-top: 15px;
         padding-left: 15px;
         padding-right: 15px;
-    }
-    .dimg-fluid {
-        width: 300px;
-        height:300px;
     }
     .filter-select {
         background: url("data:image/svg+xml,<svg height='10px' width='10px' viewBox='0 0 16 16' fill='%23808080' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>") no-repeat;
@@ -560,10 +515,14 @@
         @include('pages.category.partials.hero-header', [
             'listingTitle' => $row_data->title,
             'listingSubtitle' => $row_data->sub_title,
-            'breadcrumbItems' => [
-                ['label' => __('destination.breadcrumb'), 'url' => route('destination')],
-                ['label' => $row_data->name, 'url' => null],
-            ],
+            'searchAction' => listing_search_action(),
+            'placeValue' => $geoFilters['place'] ?? null,
+            'placeLat' => $geoFilters['placeLat'] ?? null,
+            'placeLng' => $geoFilters['placeLng'] ?? null,
+            'placeCity' => $geoFilters['city'] ?? null,
+            'placeCountry' => $geoFilters['country'] ?? null,
+            'placeRegion' => $geoFilters['region'] ?? null,
+            'breadcrumbItems' => $heroBreadcrumbs,
         ])
     @endif
     <div class="country-content-fix">
@@ -611,70 +570,60 @@
             @endunless
             <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
                 <div class="col-12">
-                    <div id="page-main-intro" class="mb-3">
+                    <div id="page-main-intro" class="cag-dest-intro">
                         <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction ?? '')) !!}</div>
                         <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                     </div>
                     @if($showGeoCarousels)
                     @php
-                    $region_count = $regions->count();
-                    $city_count = $cities->count();
-                    $region_counter = 0;
-                    $city_counter = 0;
+                    $regionItems = $regions
+                        ->filter(fn ($region) => $region->country)
+                        ->map(fn ($region) => [
+                            'url' => route($destinationRoute, [
+                                'country' => $region->country->slug,
+                                'region' => $region->slug,
+                            ]),
+                            'name' => $region->name,
+                            'thumbnail' => $region->getThumbnailPath(),
+                        ])
+                        ->values();
+                    $cityItems = $cities
+                        ->filter(fn ($city) => $city->country && $city->region)
+                        ->when($destination_type === 'city', fn ($collection) => $collection->reject(
+                            fn ($city) => (int) $city->id === (int) $row_data->id
+                        ))
+                        ->map(fn ($city) => [
+                            'url' => route($destinationRoute, [
+                                'country' => $city->country->slug,
+                                'region' => $city->region->slug,
+                                'city' => $city->slug,
+                            ]),
+                            'name' => $city->name,
+                            'thumbnail' => $city->getThumbnailPath(),
+                        ])
+                        ->values();
                     @endphp
 
-                    {{-- Only show regions if current destination is country --}}
-                    @if($destination_type == 'country' && $region_count > 0)
-                        <h5 class="mb-2">@lang('destination.all_region')</h5>
-                        <div id="carousel-regions" class="owl-carousel owl-theme mb-4">
-                            @foreach($regions as $region)
-                                @if($region->country)
-                                <div class="item">
-                                    <div class="col-sm-12">
-                                        <a href="{{ route($destinationRoute, ['country' => $region->country->slug, 'region' => $region->slug]) }}">
-                                            <div class="card">
-                                                <div class="card-img">
-                                                    <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
-                                                </div>
-                                                <div class="card-img-overlay">
-                                                    <h5>{{ $region->name }}</h5>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                                @endif
-                            @endforeach
-                        </div>
+                    @if($destination_type === 'country')
+                        @include('pages.category.partials.geo-rail', [
+                            'railKey' => 'regions',
+                            'title' => __('destination.all_region'),
+                            'subtitle' => __('destination.regions_subtitle'),
+                            'items' => $regionItems,
+                        ])
                     @endif
 
-                    {{-- Show cities if current destination is country or region --}}
-                    @if(in_array($destination_type, ['country', 'region']) && $city_count > 0)
-                    <h5 class="mb-2">@lang('destination.all_cities')</h5>
-                    <div id="carousel-cities" class="owl-carousel owl-theme mb-4">
-                        @foreach($cities as $city)
-                            @if($city->country && $city->region)
-                            <div class="item">
-                                <div class="col-sm-12 col-lgs-3">
-                                    <a href="{{ route($destinationRoute, ['country' => $city->country->slug, 'region' => $city->region->slug, 'city' => $city->slug]) }}">
-                                        <div class="card">
-                                            <div class="card-img">
-                                                <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
-                                            </div>
-                                            <div class="card-img-overlay">
-                                                <h5>{{ $city->name }}</h5>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                            @endif
-                        @endforeach
-                    </div>
+                    @if(in_array($destination_type, ['country', 'region', 'city'], true))
+                        @include('pages.category.partials.geo-rail', [
+                            'railKey' => 'cities',
+                            'title' => __('destination.all_cities'),
+                            'subtitle' => __('destination.cities_subtitle'),
+                            'items' => $cityItems,
+                        ])
                     @endif
                     @endif
                     @if($showOffersCatalog)
-                    <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
+                    <h5 class="cag-dest-listings-title">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
                     <div class="offers-catalog-page mb-5">
                         <x-offers.catalog-listing
                             :vm="$vm"
@@ -824,50 +773,10 @@
 @else
 @include('pages.category.partials.destination-offers-script')
 @endif
+@if($showGeoCarousels)
+@include('pages.home.partials.species-spotlight-script')
+@endif
 <script>
-    $(document).ready(function(){
-        $('#carousel-regions').owlCarousel({
-            loop: false,
-            margin: 10,
-            nav: true,
-            navText: ['<', '>'],
-            autoplay: true,
-            responsive: {
-                0: { items: 1 },
-                600: { items: 2 },
-                1000: { items: 4 }
-            }
-        });
-
-        $('#carousel-cities').owlCarousel({
-            loop: false,
-            margin: 10,
-            nav: true,
-            dots: true,
-            autoplay: true,
-            navText: ['<', '>'],
-            responsive: {
-                0: { items: 1 },
-                600: { items: 2 },
-                1000: { items: 4 }
-            }
-        });
-    });
-
-    let itemsCollapseCities = document.querySelectorAll('#carousel-cities .carousel-item');
-    itemsCollapseCities.forEach((el) => {
-        const minPerSlide = (itemsCollapseCities.length >= 4) ? 4 : itemsCollapseCities.length;
-        let next = el.nextElementSibling;
-        for (var i = 1; i < minPerSlide; i++) {
-            if (!next) {
-                next = itemsCollapseCities[0];
-            }
-            let cloneChild = next.cloneNode(true);
-            el.appendChild(cloneChild.children[0]);
-            next = next.nextElementSibling;
-        }
-    });
-
     $(function() {
         var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
         var page_main_intro = $('.page-main-intro-text');

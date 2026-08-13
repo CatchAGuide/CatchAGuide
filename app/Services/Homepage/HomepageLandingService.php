@@ -143,7 +143,7 @@ class HomepageLandingService
                         'date' => $tourDate?->translatedFormat('M Y'),
                         'tour_title' => $tourTitle ? Str::limit($tourTitle, 60) : null,
                         'tour_url' => ($guiding?->id && $guiding?->slug)
-                            ? route('guidings.show', [$guiding->id, $guiding->slug])
+                            ? $guiding->publicShowUrl()
                             : null,
                     ];
                 })

@@ -18,12 +18,6 @@
     id="offers-catalog"
     data-analytics-page="{{ $analyticsPage }}"
 >
-    @if(filled($vm->filter->place))
-        <p class="offers-catalog__context" data-offers-place>
-            {{ $vm->filter->place }}
-        </p>
-    @endif
-
     @if($hasMap)
         @include('pages.offers.partials.map-modal', [
             'markers' => $vm->mapMarkers,

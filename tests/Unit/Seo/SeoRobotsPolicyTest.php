@@ -22,9 +22,15 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertFalse($this->policy->shouldNoindexGuidings($request));
     }
 
+    public function test_clean_guidings_alloffers_url_is_indexable(): void
+    {
+        $request = Request::create('/guidings/alloffers', 'GET');
+        $this->assertFalse($this->policy->shouldNoindexGuidings($request));
+    }
+
     public function test_guidings_filter_params_are_noindexed(): void
     {
-        $request = Request::create('/guidings', 'GET', ['place' => 'Berlin', 'sortby' => 'price']);
+        $request = Request::create('/guidings/alloffers', 'GET', ['place' => 'Berlin', 'sortby' => 'price']);
         $this->assertTrue($this->policy->shouldNoindexGuidings($request));
         $this->assertSame('NOINDEX, NOFOLLOW', $this->policy->robotsContentForGuidings($request));
     }

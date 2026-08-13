@@ -40,7 +40,7 @@
 
         <nav class="cag-site-nav__links d-none d-md-flex" aria-label="Primary">
             <a
-                href="{{ route('guidings.index') }}"
+                href="{{ route('guidings.landing') }}"
                 class="{{ request()->is('guidings*') ? 'is-active' : '' }}"
             >@lang('homepage.filter-fishing-near-me')</a>
             <a

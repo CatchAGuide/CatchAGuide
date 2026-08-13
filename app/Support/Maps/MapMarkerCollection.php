@@ -47,7 +47,7 @@ class MapMarkerCollection
                 'variant' => isset($grayLookup[$id]) ? 'gray' : 'primary',
                 'pillar' => 'guiding',
                 'title' => $title,
-                'url' => route('guidings.show', [$guiding->id, $guiding->slug]),
+                'url' => $guiding->publicShowUrl(),
                 'location' => (string) ($guiding->location ?? ''),
                 'image' => (string) $image,
                 'images' => $images,

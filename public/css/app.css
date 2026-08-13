@@ -2691,6 +2691,59 @@ body .main-menu .main-menu-wrapper__nav {
   --cag-dest-glow: rgba(232, 96, 76, 0.22);
 }
 
+.cag-dest-geo-rail {
+  margin: 0 0 0.85rem;
+  padding: 0;
+}
+.cag-dest-geo-rail .cag-home-species__header {
+  margin-bottom: 0.4rem;
+}
+.cag-dest-geo-rail .cag-home-section__title {
+  font-size: 1.125rem;
+}
+@media (min-width: 768px) {
+  .cag-dest-geo-rail .cag-home-section__title {
+    font-size: 1.25rem;
+  }
+}
+.cag-dest-geo-rail .cag-home-species__subtitle {
+  margin-top: 0.15rem;
+}
+.cag-dest-geo-rail .cag-home-species__viewport {
+  padding-block: 0.35rem;
+  margin-block: -0.35rem;
+}
+.cag-dest-geo-rail.cag-home-species.is-inview .cag-home-species__card.is-spotlight,
+.cag-dest-geo-rail .cag-home-species__card:hover,
+.cag-dest-geo-rail .cag-home-species__card:focus-visible {
+  color: #fff;
+  border-color: #E8604C;
+  box-shadow: 0 10px 22px rgba(232, 96, 76, 0.35), 0 0 0 3px #E8604C;
+  animation: none;
+}
+.cag-dest-geo-rail.cag-home-species.is-inview .cag-home-species__card.is-spotlight .cag-home-species__name,
+.cag-dest-geo-rail.cag-home-species.is-inview .cag-home-species__card.is-spotlight .cag-home-species__cta,
+.cag-dest-geo-rail .cag-home-species__card:hover .cag-home-species__name,
+.cag-dest-geo-rail .cag-home-species__card:hover .cag-home-species__cta,
+.cag-dest-geo-rail .cag-home-species__card:focus-visible .cag-home-species__name,
+.cag-dest-geo-rail .cag-home-species__card:focus-visible .cag-home-species__cta {
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+}
+.cag-dest-geo-rail.cag-home-species.is-inview .cag-home-species__card.is-spotlight .cag-home-species__shine,
+.cag-dest-geo-rail .cag-home-species__card:hover .cag-home-species__shine,
+.cag-dest-geo-rail .cag-home-species__card:focus-visible .cag-home-species__shine {
+  display: none;
+}
+
+.cag-dest-intro {
+  margin-bottom: 0.85rem;
+}
+
+.cag-dest-listings-title {
+  margin: 0.15rem 0 0.75rem;
+}
+
 .cag-dest-offers {
   padding: 0.5rem 0 1.25rem;
 }

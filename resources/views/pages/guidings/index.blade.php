@@ -1,4 +1,4 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @php
     // Generate SEO-friendly title and description
@@ -33,6 +33,10 @@
 
 @section('title', $filteredTitle)
 @section('description', $description)
+
+@section('canonical')
+    <link rel="canonical" href="{{ route('guidings.index') }}" />
+@endsection
 
 @section('header_title', $filteredTitle)
 @section('header_sub_title', '')
@@ -453,7 +457,7 @@
                 "@@type": "TouristAttraction",
                 "name": @json(translate($guiding->title)),
                 "description": @json(translate($guiding->excerpt ?? '')),
-                "url": @json(route('guidings.show', [$guiding->id, $guiding->slug])),
+                "url": @json($guiding->publicShowUrl()),
                 "location": {
                     "@@type": "Place",
                     "name": @json($guiding->location)
@@ -471,10 +475,14 @@
 </script>
 @endsection
 @section('content')
-    @include('pages.guidings.partials.catalog-header', [
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.category.partials.hero-header', [
         'listingTitle' => $filteredTitle,
         'listingSubtitle' => '',
-        'place' => $place ?? null,
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => null],
+        ],
     ])
 
     <!--Tours List Start-->
@@ -642,10 +650,11 @@
     <br>
 
     @include('pages.guidings.includes.filters-mobile', ['formAction' => route('guidings.index')])
+</div>
 @endsection
 
 @section('js_after')
-@include('layouts.partials.tagify-fish-script')
+@include('layouts.partials.category-hero-header-script')
 <script>
     $('#sortby, #sortby-2').on('change', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -796,9 +805,9 @@
                 thumbnail: guiding.thumbnail_path
                     ? resolveListingMediaUrl(guiding.thumbnail_path)
                     : listingMediaPlaceholder,
-                url: guiding.id && guiding.slug
-                    ? `/guidings/${guiding.id}/${guiding.slug}`
-                    : (guiding.url || '#'),
+                url: guiding.url || (guiding.slug
+                    ? `/guidings/offer/${guiding.slug}`
+                    : '#'),
                 lowest_price: price,
                 price: price,
                 priceLabel: price != null ? ('ab ' + price + '€ p.P.') : null,

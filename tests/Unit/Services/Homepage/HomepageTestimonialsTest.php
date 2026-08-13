@@ -94,7 +94,7 @@ class HomepageTestimonialsTest extends TestCase
         $expectedAuthor = $guestReview->booking?->user?->firstname;
         $wrongUserName = User::query()->whereKey($guestReview->user_id)->value('firstname');
         $expectedDate = ($guestReview->booking?->getBookingDate() ?? $guestReview->created_at)?->translatedFormat('M Y');
-        $expectedUrl = route('guidings.show', [$guestReview->guiding->id, $guestReview->guiding->slug]);
+        $expectedUrl = $guestReview->guiding->publicShowUrl();
 
         $matched = $items->first(fn (array $row) => ($row['tour_url'] ?? null) === $expectedUrl
             && ($row['author'] ?? null) === $expectedAuthor);

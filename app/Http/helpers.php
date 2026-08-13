@@ -731,3 +731,27 @@ if (!function_exists('getLocationDetails')) {
         return null;
     }
 }
+
+if (! function_exists('listing_search_action')) {
+    /**
+     * Header location-search catalog: guidings stays on tours, offers stays on offers.
+     */
+    function listing_search_action(?string $override = null): string
+    {
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
+        $request = request();
+
+        if ($request->routeIs('guidings.*') || $request->is('guidings*')) {
+            return route('guidings.index');
+        }
+
+        if ($request->routeIs('vacations.*') || $request->is('vacations*')) {
+            return route('vacations.index');
+        }
+
+        return route('offers.index');
+    }
+}

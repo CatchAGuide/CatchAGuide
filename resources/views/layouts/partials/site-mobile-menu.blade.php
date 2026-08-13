@@ -20,7 +20,7 @@
             </div>
             <div class="modal-body p-0">
                 <div class="cag-site-mobile-menu__items">
-                    <a href="{{ route('guidings.index') }}" class="cag-site-mobile-menu__item">@lang('homepage.filter-fishing-near-me')</a>
+                    <a href="{{ route('guidings.landing') }}" class="cag-site-mobile-menu__item">@lang('homepage.filter-fishing-near-me')</a>
                     <a href="{{ route('offers.index') }}" class="cag-site-mobile-menu__item">@lang('offers.nav_label')</a>
                     <a href="{{ route('vacations.index') }}" class="cag-site-mobile-menu__item">@lang('homepage.header-vacations')</a>
                     <a href="{{ route('destination') }}" class="cag-site-mobile-menu__item">@lang('homepage.footer_destinations')</a>

@@ -31,7 +31,7 @@
       "type": "guiding" | "vacation",
       "title": "Guided pike fishing in Sweden",
       "slug": "guided-pike-fishing-sweden",
-      "url": "https://catchaguide.com/guidings/123/guided-pike-fishing-sweden",
+      "url": "https://catchaguide.com/guidings/offer/guided-pike-fishing-sweden",
       "language": "en",
       "country": "Sweden",
       "region": "Värmland",

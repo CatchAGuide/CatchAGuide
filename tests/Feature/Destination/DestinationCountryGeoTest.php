@@ -55,6 +55,8 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertDontSee('Unique Dest City '.$country->slug, false);
         $response->assertDontSee('id="carousel-regions"', false);
         $response->assertDontSee('id="carousel-cities"', false);
+        $response->assertDontSee('data-geo-rail="regions"', false);
+        $response->assertDontSee('data-geo-rail="cities"', false);
         $response->assertSee('cag-site-nav--overlay', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);

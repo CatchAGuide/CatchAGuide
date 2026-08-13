@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('oauth')->name('oauth.')->group(function () {
     Route::get('/{provider}', [OAuthController::class, 'redirect'])->name('redirect');
     Route::get('/{provider}/callback', [OAuthController::class, 'callback'])->name('callback');
-    Route::post('/{provider}/disconnect', [OAuthController::class, 'disconnect'])->name('disconnect');
-    Route::post('/{provider}/sync', [OAuthController::class, 'sync'])->name('sync');
+    Route::post('/{provider}/disconnect', [OAuthController::class, 'disconnect'])->middleware('auth:web')->name('disconnect');
+    Route::post('/{provider}/sync', [OAuthController::class, 'sync'])->middleware('auth:web')->name('sync');
 });
 
 // iCal Feed Routes (Import) - Protected by auth
@@ -42,8 +42,3 @@ Route::prefix('user-ical-feeds')->name('user-ical-feeds.')->middleware('auth:web
 Route::get('ical/feed/{token}/{otp?}', [UserICalFeedController::class, 'generateFeed'])
     ->middleware('throttle:60,1')
     ->name('ical.feed');
-
-// Webhook Routes
-Route::prefix('webhooks')->name('webhooks.')->group(function () {
-    // Future webhook integrations can be added here
-});

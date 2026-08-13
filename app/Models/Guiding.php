@@ -1152,6 +1152,14 @@ class Guiding extends Model
     }
 
     /**
+     * Canonical public URL for this tour offer.
+     */
+    public function publicShowUrl(array $query = []): string
+    {
+        return route('guidings.show', array_merge(['slug' => $this->slug], $query));
+    }
+
+    /**
      * Helper methods for status checking
      */
     public function isPublished(): bool

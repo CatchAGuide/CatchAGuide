@@ -3,6 +3,10 @@
 @section('title',$guiding->title)
 @section('description',$guiding->desc_course_of_action ?? $guiding->title)
 
+@section('canonical')
+    <link rel="canonical" href="{{ $guiding->publicShowUrl() }}" />
+@endsection
+
 @section('share_tags')
     <meta property="og:title" content="{{$guiding->title}}" />
     <meta property="og:description" content="{{$guiding->desc_course_of_action ?? ""}}" />
@@ -18,7 +22,7 @@
             '@type' => 'TouristTrip',
             'name' => $guiding->title,
             'description' => $guiding->desc_tour_unique ?? $guiding->desc_course_of_action ?? $guiding->description,
-            'url' => url()->current(),
+            'url' => $guiding->publicShowUrl(),
             'image' => $guiding->thumbnail_path ? media_url($guiding->thumbnail_path) : null,
             'touristType' => 'Fishing trip',
             'areaServed' => array_filter([
@@ -1978,7 +1982,7 @@
                             $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
                             $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
                         @endphp
-                        <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
+                        <a href="{{ $other_guiding->publicShowUrl() }}" class="guiding-tile text-decoration-none">
                             <div class="guiding-tile__img-wrap">
                                 @if($tile_img)
                                     <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
@@ -2401,7 +2405,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/${newGuiding.id}/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                        <a href="/guidings/offer/${newGuiding.slug}" class="btn btn-primary">Details</a>
                     </div>
                 </div>
             `;

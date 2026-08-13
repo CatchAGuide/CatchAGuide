@@ -38,6 +38,25 @@ class DestinationHubHeaderTest extends TestCase
         $this->assertStringContainsString(__('destination.breadcrumb'), $html);
     }
 
+    public function test_category_hero_header_can_submit_search_to_guidings_catalog(): void
+    {
+        $html = View::make('pages.category.partials.hero-header', [
+            'listingTitle' => 'All Fishing Tours',
+            'listingSubtitle' => '',
+            'searchAction' => route('guidings.index'),
+            'breadcrumbItems' => [
+                ['label' => 'Fishing Tours', 'url' => null],
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('offers-page-header__hero', $html);
+        $this->assertStringContainsString('categoryHeroSearchPlace', $html);
+        $this->assertStringContainsString('data-offers-persons-stepper', $html);
+        $this->assertStringContainsString(route('guidings.index', [], false), $html);
+        $this->assertStringNotContainsString('guidings-page-header__segment--fish', $html);
+        $this->assertStringNotContainsString('tagify-fish-guidings-destination', $html);
+    }
+
     public function test_app_v2_layout_uses_site_header_for_destination_and_targets(): void
     {
         $source = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
@@ -45,8 +64,9 @@ class DestinationHubHeaderTest extends TestCase
         $this->assertStringContainsString('$useCategorySiteHeader', $source);
         $this->assertStringContainsString("'destination'", $source);
         $this->assertStringContainsString("'destination.country'", $source);
-        $this->assertStringContainsString("'targets.index'", $source);
         $this->assertStringContainsString("'targets.show'", $source);
+        $this->assertStringContainsString("'guidings.index'", $source);
+        $this->assertStringContainsString("'guidings.destination'", $source);
     }
 
     public function test_places_deferred_inputs_include_category_hero_search(): void

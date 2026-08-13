@@ -44,7 +44,7 @@
                 <div class="cag-footer__links footer-widget__column footer-widget__explore">
                     <h3 class="footer-widget__title">@lang('message.miscellaneous')</h3>
                     <ul class="list-unstyled footer-widget__explore-list">
-                        <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
+                        <li><a href="{{ route('guidings.landing') }}">@lang('message.Guiding')</a></li>
                         <li><a href="{{ route('vacations.index') }}">@lang('homepage.footer_vacations')</a></li>
                         <li><a href="{{ route('destination') }}">@lang('homepage.footer_destinations')</a></li>
                         <li><a href="{{ route('profile.settings') }}">@lang('message.myaccount')</a></li>

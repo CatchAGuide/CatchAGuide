@@ -273,6 +273,13 @@
             'destination.country',
             'targets.index',
             'targets.show',
+            'guidings.landing',
+            'guidings.index',
+            'guidings.destination',
+            'guidings.countries',
+            'guidings.methods',
+            'guidings.methods.show',
+            'guidings.targets',
         );
         $useLegacyHeader = ! request()->is('/')
             && ! $useOffersSiteHeader

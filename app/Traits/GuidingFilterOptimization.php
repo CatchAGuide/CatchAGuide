@@ -472,7 +472,7 @@ trait GuidingFilterOptimization
                 'badge' => __('offers.badge_tour'),
                 'cta' => __('vacations.view_details'),
                 'url' => ! empty($guiding->slug)
-                    ? route('guidings.show', [$guiding->id, $guiding->slug])
+                    ? $guiding->publicShowUrl()
                     : '#',
             ], $moduleFields, $listMeta);
         };

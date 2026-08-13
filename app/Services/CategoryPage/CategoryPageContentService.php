@@ -322,6 +322,30 @@ class CategoryPageContentService
     }
 
     /**
+     * Entity source IDs that have filled category-page copy for the given scope.
+     *
+     * @return list<string>
+     */
+    public function sourceIdsWithMeaningfulScope(string $entityType, string $scope): array
+    {
+        return Language::query()
+            ->where('type', $entityType)
+            ->where('scope', $scope)
+            ->where(function ($query) {
+                foreach (['title', 'sub_title', 'introduction', 'content'] as $field) {
+                    $query->orWhere(function ($inner) use ($field) {
+                        $inner->whereNotNull($field)->where($field, '!=', '');
+                    });
+                }
+            })
+            ->pluck('source_id')
+            ->map(fn ($id) => (string) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Overlay scoped SEO fields onto a geo/destination model for frontend display.
      */
     public function applyScopedContentToModel(

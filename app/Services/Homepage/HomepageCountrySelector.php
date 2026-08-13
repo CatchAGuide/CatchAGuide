@@ -2,25 +2,36 @@
 
 namespace App\Services\Homepage;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Models\Country;
 use App\Models\Guiding;
+use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class HomepageCountrySelector
 {
+    public function __construct(
+        private CategoryPageContentService $categoryContent,
+    ) {}
+
     /**
      * Destination-rail countries. Pass $limit only for tests; production rails show every unique ISO.
+     * When $categoryScope is set, only countries with filled category-page copy for that scope are included.
      *
      * @return Collection<int, array{slug: string, name: string, thumbnail: string, countrycode: ?string, from_price: ?int, from_price_label: ?string}>
      */
-    public function featured(?int $limit = null): Collection
+    public function featured(?int $limit = null, ?string $categoryScope = null): Collection
     {
         $locale = app()->getLocale();
-        $cacheKey = 'homepage_featured_countries_v5_'.$locale.'_'.($limit ?? 'all');
+        $cacheKey = 'homepage_featured_countries_v6_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
 
-        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale) {
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale, $categoryScope) {
             $unique = $this->uniqueModels($locale);
+
+            if ($categoryScope !== null) {
+                $unique = $this->filterByCategoryPageScope($unique, $categoryScope);
+            }
 
             $withThumb = $unique->filter(fn (Country $c) => filled($c->thumbnail_path));
             $withoutThumb = $unique->reject(fn (Country $c) => filled($c->thumbnail_path));
@@ -65,6 +76,52 @@ class HomepageCountrySelector
 
             return $withIso->count() + $withoutIso->count();
         });
+    }
+
+    /**
+     * Keep countries that have filled category-page copy for the given scope.
+     * ISO duplicates share eligibility so content on either country row still surfaces the rail tile.
+     *
+     * @param  Collection<int, Country>  $countries
+     * @return Collection<int, Country>
+     */
+    private function filterByCategoryPageScope(Collection $countries, string $scope): Collection
+    {
+        $sourceIds = $this->categoryContent->sourceIdsWithMeaningfulScope(
+            CategoryPageEntityType::GEO_COUNTRY,
+            $scope,
+        );
+
+        if ($sourceIds === []) {
+            return collect();
+        }
+
+        $withScope = Country::query()
+            ->whereIn('id', $sourceIds)
+            ->get(['id', 'countrycode']);
+
+        $isos = $withScope
+            ->pluck('countrycode')
+            ->filter()
+            ->map(fn ($code) => strtoupper((string) $code))
+            ->unique()
+            ->all();
+
+        $idsWithoutIso = $withScope
+            ->reject(fn (Country $country) => filled($country->countrycode))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        return $countries->filter(function (Country $country) use ($isos, $idsWithoutIso) {
+            $iso = strtoupper((string) ($country->countrycode ?? ''));
+
+            if ($iso !== '') {
+                return in_array($iso, $isos, true);
+            }
+
+            return in_array((int) $country->id, $idsWithoutIso, true);
+        })->values();
     }
 
     /**

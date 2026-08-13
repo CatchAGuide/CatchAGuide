@@ -47,7 +47,7 @@ class HomepageLandingTest extends TestCase
                     'type' => 'tour',
                     'id' => 1,
                     'title' => 'Test Day Tour',
-                    'url' => '/guidings/1/test-day-tour',
+                    'url' => '/guidings/offer/test-day-tour',
                     'image' => '/images/placeholder_guide.jpg',
                     'gallery_images' => ['/images/placeholder_guide.jpg'],
                     'badge' => 'Tour',
@@ -86,7 +86,7 @@ class HomepageLandingTest extends TestCase
                         'type' => 'tour',
                         'id' => 1,
                         'title' => 'Test Day Tour',
-                        'url' => '/guidings/1/test-day-tour',
+                        'url' => '/guidings/offer/test-day-tour',
                         'image' => '/images/placeholder_guide.jpg',
                         'gallery_images' => ['/images/placeholder_guide.jpg'],
                         'badge' => 'Tour',
@@ -140,7 +140,7 @@ class HomepageLandingTest extends TestCase
                     'author' => 'Sam',
                     'date' => 'Mar 2026',
                     'tour_title' => 'Pike fishing day tour',
-                    'tour_url' => '/guidings/1/pike-fishing-day-tour',
+                    'tour_url' => '/guidings/offer/pike-fishing-day-tour',
                 ],
             ]),
             'magazineThreads' => collect(),
@@ -262,7 +262,7 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('9.5', false);
         $response->assertSee('/10', false);
         $response->assertSee('Pike fishing day tour', false);
-        $response->assertSee('href="/guidings/1/pike-fishing-day-tour"', false);
+        $response->assertSee('href="/guidings/offer/pike-fishing-day-tour"', false);
         $response->assertSee('cag-home-partner', false);
         $response->assertSee('cag-home-partner__cards', false);
         $response->assertSee('cag-home-partner__card', false);

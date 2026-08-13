@@ -1,5 +1,5 @@
 <nav class="cag-home-bottom-nav d-md-none" aria-label="{{ __('homepage.mobile_nav_label') }}">
-    <a href="{{ route('guidings.index') }}" class="cag-home-bottom-nav__item is-active">
+    <a href="{{ route('guidings.landing') }}" class="cag-home-bottom-nav__item is-active">
         <i class="fas fa-search" aria-hidden="true"></i>
         <span>{{ __('homepage.mobile_nav_explore') }}</span>
     </a>

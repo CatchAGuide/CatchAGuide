@@ -359,7 +359,7 @@
                                                     </div>
                                                     {{-- Buttons - Aligned to bottom --}}
                                                     <div class="d-grid gap-1">
-                                                        <a class="btn btn-primary btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}" style="font-size: 0.85rem;">Details</a>
+                                                        <a class="btn btn-primary btn-sm" href="{{ $guiding->publicShowUrl() }}" style="font-size: 0.85rem;">Details</a>
                                                         <a class="btn btn-outline-secondary btn-sm py-1" href="{{ route('wishlist.add-or-remove', $guiding->id) }}" style="font-size: 0.75rem; line-height: 1.2;">
                                                             Add to Favorites
                                                         </a>
@@ -375,7 +375,7 @@
                                                         </div>
                                                         {{-- Buttons --}}
                                                         <div class="d-flex gap-2">
-                                                            <a class="btn btn-primary btn-sm" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}" style="font-size: 0.85rem;">Details</a>
+                                                            <a class="btn btn-primary btn-sm" href="{{ $guiding->publicShowUrl() }}" style="font-size: 0.85rem;">Details</a>
                                                             <a class="btn btn-outline-secondary btn-sm py-1" href="{{ route('wishlist.add-or-remove', $guiding->id) }}" style="font-size: 0.75rem; line-height: 1.2;">
                                                                 Favorites
                                                             </a>

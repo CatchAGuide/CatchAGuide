@@ -21,42 +21,41 @@ class GuidingsCatalogHeaderTest extends TestCase
         ]);
     }
 
-    public function test_guidings_catalog_header_partial_renders_site_nav_and_search_fields(): void
+    public function test_guidings_listing_uses_offers_style_hero_header_without_target_fish(): void
     {
-        $html = View::make('pages.guidings.partials.catalog-header', [
+        $html = View::make('pages.category.partials.hero-header', [
             'listingTitle' => 'All Fishing Tours',
             'listingSubtitle' => '',
-            'place' => null,
+            'searchAction' => route('guidings.index'),
+            'breadcrumbItems' => [
+                ['label' => __('homepage.filter-fishing-near-me'), 'url' => null],
+            ],
         ])->render();
 
         $this->assertStringContainsString('cag-site-nav', $html);
         $this->assertStringContainsString('cag-site-nav-shell', $html);
         $this->assertStringContainsString('cag-site-nav--overlay', $html);
-        $this->assertStringContainsString('guidings-page-header', $html);
-        $this->assertStringContainsString('guidings-page-header__band', $html);
-        $this->assertStringNotContainsString('guidings-page-header__image', $html);
-        $this->assertStringContainsString('data-guidings-header-search', $html);
-        $this->assertStringContainsString('guidingsCatalogSearchPlace', $html);
+        $this->assertStringContainsString('offers-page-header__hero', $html);
+        $this->assertStringContainsString('data-category-header-search', $html);
+        $this->assertStringContainsString('categoryHeroSearchPlace', $html);
+        $this->assertStringContainsString('data-offers-persons-stepper', $html);
         $this->assertStringContainsString('name="num_guests"', $html);
-        $this->assertStringContainsString('tagify-fish-guidings-catalog', $html);
-        $this->assertStringContainsString('guidings-page-header__segment--fish', $html);
-        $this->assertStringContainsString('name="place"', $html);
         $this->assertStringContainsString(route('guidings.index', [], false), $html);
+        $this->assertStringNotContainsString('guidings-page-header__band', $html);
+        $this->assertStringNotContainsString('tagify-fish-guidings-catalog', $html);
+        $this->assertStringNotContainsString('guidings-page-header__segment--fish', $html);
     }
 
-    public function test_places_deferred_inputs_include_guidings_catalog_search(): void
+    public function test_app_v2_layout_uses_site_header_for_guidings_listings(): void
     {
-        $source = (string) file_get_contents(resource_path('js/maps/places-entry.js'));
+        $source = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
 
-        $this->assertStringContainsString("'guidingsCatalogSearchPlace'", $source);
-    }
-
-    public function test_app_v2_1_layout_uses_site_header_for_guidings_index(): void
-    {
-        $source = (string) file_get_contents(resource_path('views/layouts/app-v2-1.blade.php'));
-
-        $this->assertStringContainsString("routeIs('guidings.index')", $source);
-        $this->assertStringContainsString('layouts.partials.site-mobile-menu', $source);
-        $this->assertStringContainsString('layouts.partials.newheader-short', $source);
+        $this->assertStringContainsString('$useCategorySiteHeader', $source);
+        $this->assertStringContainsString("'guidings.landing'", $source);
+        $this->assertStringContainsString("'guidings.index'", $source);
+        $this->assertStringContainsString("'guidings.destination'", $source);
+        $this->assertStringContainsString("'guidings.countries'", $source);
+        $this->assertStringContainsString("'guidings.methods'", $source);
+        $this->assertStringContainsString("'guidings.targets'", $source);
     }
 }

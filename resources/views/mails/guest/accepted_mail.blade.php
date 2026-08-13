@@ -26,7 +26,7 @@
                     <p><strong>{{__('emails.guest_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone_country_code ?? ''}} {{$guide->phone ?? $guide->information->phone ?? null}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
-                    <p><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="_blank">{{$guiding->title}}</a></p>
+                    <p><strong>{{__('emails.tour')}}:</strong> <a href="{{$guiding->publicShowUrl()}}" target="_blank">{{$guiding->title}}</a></p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
                     <p><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>

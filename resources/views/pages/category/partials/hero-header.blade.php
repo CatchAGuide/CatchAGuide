@@ -4,10 +4,15 @@
     $listingTitle = trim((string) ($listingTitle ?? ''));
     $listingSubtitle = trim((string) ($listingSubtitle ?? ''));
     $breadcrumbItems = $breadcrumbItems ?? [];
+    $searchAction = listing_search_action($searchAction ?? null);
     $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
-    $placeValue = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng)
-        ? request()->place
-        : '';
+    $requestHasPlace = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng);
+    $placeValue = $requestHasPlace ? request()->place : (string) ($placeValue ?? '');
+    $placeLat = $requestHasPlace ? request()->placeLat : ($placeLat ?? '');
+    $placeLng = $requestHasPlace ? request()->placeLng : ($placeLng ?? '');
+    $placeCity = $requestHasPlace ? request()->city : ($placeCity ?? '');
+    $placeCountry = $requestHasPlace ? request()->country : ($placeCountry ?? '');
+    $placeRegion = $requestHasPlace ? request()->region : ($placeRegion ?? '');
     $heroImage = asset('assets/images/homepage/hero-tour.webp');
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell>
@@ -44,7 +49,7 @@
             <form
                 class="offers-page-header__search offers-page-header__anim"
                 style="--offers-anim-i: 2"
-                action="{{ route('offers.index') }}"
+                action="{{ $searchAction }}"
                 method="get"
                 onsubmit="return validateSearch(event, 'categoryHeroSearchPlace')"
                 data-category-header-search
@@ -64,11 +69,11 @@
                                 autocomplete="off"
                             >
                         </span>
-                        <input type="hidden" id="LocationLatCategoryHero" name="placeLat" value="{{ request()->placeLat }}">
-                        <input type="hidden" id="LocationLngCategoryHero" name="placeLng" value="{{ request()->placeLng }}">
-                        <input type="hidden" id="LocationCityCategoryHero" name="city" value="{{ request()->city }}">
-                        <input type="hidden" id="LocationCountryCategoryHero" name="country" value="{{ request()->country }}">
-                        <input type="hidden" id="LocationRegionCategoryHero" name="region" value="{{ request()->region }}">
+                        <input type="hidden" id="LocationLatCategoryHero" name="placeLat" value="{{ $placeLat }}">
+                        <input type="hidden" id="LocationLngCategoryHero" name="placeLng" value="{{ $placeLng }}">
+                        <input type="hidden" id="LocationCityCategoryHero" name="city" value="{{ $placeCity }}">
+                        <input type="hidden" id="LocationCountryCategoryHero" name="country" value="{{ $placeCountry }}">
+                        <input type="hidden" id="LocationRegionCategoryHero" name="region" value="{{ $placeRegion }}">
                         @include('layouts.partials.geosearch-hidden-fields')
                     </label>
 

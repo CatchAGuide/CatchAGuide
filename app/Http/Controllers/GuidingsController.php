@@ -791,11 +791,11 @@ class GuidingsController extends Controller
         }
     }
 
-    public function newShow($id, $slug, Request $request)
+    public function newShow(string $slug, Request $request)
     {
         $locale = Config::get('app.locale');
         
-        $query = Guiding::where('id', $id)->where('slug', $slug);
+        $query = Guiding::where('slug', $slug);
         
         $destination = null;
 
@@ -2085,6 +2085,22 @@ class GuidingsController extends Controller
         ]);
     }
 
+    public function redirectLegacyShow(int $id, string $slug, Request $request)
+    {
+        $guiding = Guiding::query()->where('id', $id)->first()
+            ?? Guiding::query()->where('slug', $slug)->first();
+
+        if (! $guiding || blank($guiding->slug)) {
+            abort(404);
+        }
+
+        return redirect()->route(
+            'guidings.show',
+            array_merge(['slug' => $guiding->slug], $request->query()),
+            301
+        );
+    }
+
     public function redirectToNewFormat($slug)
     {
         $guiding = Guiding::where('slug',$slug)->first();
@@ -2093,7 +2109,7 @@ class GuidingsController extends Controller
             abort(404);
         }
 
-        return redirect(route('guidings.show',[$guiding->id, $slug]), 301);
+        return redirect()->route('guidings.show', ['slug' => $guiding->slug], 301);
     }
 
 

@@ -12,6 +12,61 @@
   --cag-dest-glow: rgba(232, 96, 76, 0.22);
 }
 
+.cag-dest-geo-rail {
+  margin: 0 0 0.85rem;
+  padding: 0;
+
+  .cag-home-species__header {
+    margin-bottom: 0.4rem;
+  }
+
+  .cag-home-section__title {
+    font-size: 1.125rem;
+
+    @media (min-width: 768px) {
+      font-size: 1.25rem;
+    }
+  }
+
+  .cag-home-species__subtitle {
+    margin-top: 0.15rem;
+  }
+
+  .cag-home-species__viewport {
+    padding-block: 0.35rem;
+    margin-block: -0.35rem;
+  }
+
+  &.cag-home-species.is-inview .cag-home-species__card.is-spotlight,
+  .cag-home-species__card:hover,
+  .cag-home-species__card:focus-visible {
+    color: #fff;
+    border-color: #{$coral};
+    box-shadow:
+      0 10px 22px rgba($coral, 0.35),
+      0 0 0 3px #{$coral};
+    animation: none;
+
+    .cag-home-species__name,
+    .cag-home-species__cta {
+      color: #fff;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .cag-home-species__shine {
+      display: none;
+    }
+  }
+}
+
+.cag-dest-intro {
+  margin-bottom: 0.85rem;
+}
+
+.cag-dest-listings-title {
+  margin: 0.15rem 0 0.75rem;
+}
+
 .cag-dest-offers {
   padding: 0.5rem 0 1.25rem;
 

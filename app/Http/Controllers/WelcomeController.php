@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryPage;
 use App\Models\Guiding;
 use App\Services\Homepage\HomepageCountrySelector;
@@ -38,7 +39,7 @@ class WelcomeController extends Controller
         return view('pages.newhome-latest', [
             'CategoryPage' => $allCategoryPages->where('type', 'Targets'),
             'CategoryPageMethods' => $allCategoryPages->where('type', 'Methods'),
-            'featuredCountries' => $this->countries->featured(),
+            'featuredCountries' => $this->countries->featured(null, CategoryPageScope::TOURS),
         ]);
     }
 

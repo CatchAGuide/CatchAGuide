@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -35,29 +36,37 @@ class GuidingsLandingTest extends TestCase
         $response = $this->get(route('guidings.landing'));
 
         $response->assertOk();
-        $response->assertSee('floating-search-container', false);
-        $response->assertSee('id="global-search"', false);
-        $response->assertSee('id="searchPlaceDesktop"', false);
-        $response->assertSee('categories-row', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('data-category-header-search', false);
+        $response->assertSee('categoryHeroSearchPlace', false);
+        $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
+        $response->assertDontSee('action="'.url('/offers').'"', false);
         $response->assertSee(__('homepage.filter-fishing-near-me'), false);
         $response->assertSee(__('homepage.header-vacations'), false);
         $response->assertSee(__('homepage.header-title'), false);
-        $response->assertDontSee('home-compact', false);
-        $response->assertDontSee('no-searchbar', false);
+        $response->assertDontSee('floating-search-container', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
     public function test_guidings_landing_is_not_captured_by_slug_redirect(): void
     {
-        $response = $this->get('/guidings/landing');
+        $response = $this->get('/guidings');
 
         $response->assertOk();
         $response->assertViewIs('pages.newhome-latest');
     }
 
+    public function test_legacy_guidings_landing_paths_redirect_permanently(): void
+    {
+        $this->get('/guidings/l')->assertRedirect('/guidings')->assertStatus(301);
+        $this->get('/guidings/landing')->assertRedirect('/guidings')->assertStatus(301);
+    }
+
     public function test_guidings_landing_country_carousel_uses_guidings_destination_routes(): void
     {
         $countries = Mockery::mock(HomepageCountrySelector::class);
-        $countries->shouldReceive('featured')->once()->andReturn(collect([
+        $countries->shouldReceive('featured')->once()->with(null, CategoryPageScope::TOURS)->andReturn(collect([
             [
                 'slug' => 'deutschland',
                 'name' => 'Germany',

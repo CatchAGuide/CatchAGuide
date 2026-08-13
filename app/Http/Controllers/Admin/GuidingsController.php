@@ -167,7 +167,7 @@ class GuidingsController extends Controller
             $guiding->save();
         }
 
-        return redirect()->route('guidings.show', [$guiding->id, $guiding->slug]);
+        return redirect()->route('guidings.show', $guiding->slug);
     }
 
     /**

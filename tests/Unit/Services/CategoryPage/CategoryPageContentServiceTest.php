@@ -256,4 +256,56 @@ class CategoryPageContentServiceTest extends TestCase
         $this->assertSame('CMS Europe Sub', $fields['sub_title']);
         $this->assertSame('CMS intro', $fields['introduction']);
     }
+
+    public function test_source_ids_with_meaningful_scope_ignore_empty_and_other_scopes(): void
+    {
+        $toursId = (string) random_int(900000, 999999);
+        $globalId = (string) random_int(800000, 899999);
+        $emptyId = (string) random_int(700000, 799999);
+
+        Language::query()->create([
+            'source_id' => $toursId,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => 'en',
+            'title' => 'Tours Spain',
+            'sub_title' => '',
+            'introduction' => '',
+            'content' => '',
+            'faq_title' => '',
+        ]);
+
+        Language::query()->create([
+            'source_id' => $globalId,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'en',
+            'title' => 'Global Spain',
+            'sub_title' => 'Global sub',
+            'introduction' => 'Global intro',
+            'content' => 'Global body',
+            'faq_title' => '',
+        ]);
+
+        Language::query()->create([
+            'source_id' => $emptyId,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => 'de',
+            'title' => '',
+            'sub_title' => '',
+            'introduction' => '',
+            'content' => '',
+            'faq_title' => '',
+        ]);
+
+        $ids = $this->service->sourceIdsWithMeaningfulScope(
+            CategoryPageEntityType::GEO_COUNTRY,
+            CategoryPageScope::TOURS,
+        );
+
+        $this->assertContains($toursId, $ids);
+        $this->assertNotContains($globalId, $ids);
+        $this->assertNotContains($emptyId, $ids);
+    }
 }

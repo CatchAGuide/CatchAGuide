@@ -101,5 +101,10 @@ class MethodsPageRedirectTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Redirect Fly Method Title', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
+        $response->assertDontSee('action="'.url('/offers').'"', false);
+        $response->assertDontSee('guidings-page-header__segment--fish', false);
     }
 }

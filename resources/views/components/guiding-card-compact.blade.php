@@ -100,7 +100,7 @@
                             <small class="text-muted">per person</small>
                         @endif
                     </div>
-                    <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}" 
+                    <a href="{{ $guiding->publicShowUrl() }}" 
                        class="btn btn-sm btn-outline-primary">
                         View Details
                     </a>

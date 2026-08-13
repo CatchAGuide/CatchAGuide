@@ -5,7 +5,7 @@
 
                 <!--Tours List Single-->
                     <div class="tours-list__single" style="color: black; display: flex;" >
-                            <a class="tours-list__img" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">
+                            <a class="tours-list__img" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ $guiding->publicShowUrl() }}">
                                 <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                                     <div class="carousel-inner">
                                         @foreach(app('guiding')->getImagesUrl($guiding) as $limgKey => $limg)
@@ -35,7 +35,7 @@
                                 </a>
                             </div>
 
-                            <a class="tours-list__content" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ route('guidings.show', [$guiding->id,$guiding->slug]) }}" >
+                            <a class="tours-list__content" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ $guiding->publicShowUrl() }}" >
                                 <span>{{ translate($guiding->location) }}</span>
                                 <div class="tours-list__body">
                                     <h3 class="tours-list__title">{{ translate( $guiding->title ) }}</h3>

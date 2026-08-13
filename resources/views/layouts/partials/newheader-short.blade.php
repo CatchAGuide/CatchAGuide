@@ -119,7 +119,7 @@
             @if(!$isCheckout)
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -228,7 +228,7 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -1111,7 +1111,7 @@ input[type=number] {
                         <i class="fas fa-map-marker-alt"></i>
                         <span>@lang('homepage.searchbar-destination')</span>
                     </a> --}}
-                    <a href="{{ route('guidings.index') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
+                    <a href="{{ route('guidings.landing') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>

@@ -1,7 +1,9 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.index');
+    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods');
+    $heroBreadcrumbLabel = __('category.' . $type . '.breadcrumb');
+    $heroSearchAction = listing_search_action();
 @endphp
 
 @section('title', $title)
@@ -296,8 +298,9 @@
         @include('pages.category.partials.hero-header', [
             'listingTitle' => __('category.' . $type . '.title'),
             'listingSubtitle' => __('category.' . $type . '.sub_title'),
+            'searchAction' => $heroSearchAction,
             'breadcrumbItems' => [
-                ['label' => __('category.targets.breadcrumb'), 'url' => null],
+                ['label' => $heroBreadcrumbLabel, 'url' => null],
             ],
         ])
     @endif

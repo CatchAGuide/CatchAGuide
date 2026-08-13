@@ -7,11 +7,11 @@
     $targetsMap = $targetsMap ?? null;
     $fromDestination = $fromDestination ?? false;
     $destinationId = $destinationId ?? null;
-    $showParams = [$guiding->id, $guiding->slug];
-    if ($fromDestination && $destinationId !== null) {
-        $showParams = array_merge($showParams, ['from_destination' => true, 'destination_id' => $destinationId]);
-    }
-    $showUrl = route('guidings.show', $showParams);
+    $showUrl = $guiding->publicShowUrl(
+        ($fromDestination && $destinationId !== null)
+            ? ['from_destination' => true, 'destination_id' => $destinationId]
+            : []
+    );
 
     $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
     $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();

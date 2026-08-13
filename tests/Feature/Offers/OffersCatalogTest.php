@@ -43,7 +43,7 @@ class OffersCatalogTest extends TestCase
                     'variant' => 'tour',
                     'title' => 'Dawn Pike Tour',
                     'badge' => 'Tour',
-                    'url' => '/guidings/1/dawn',
+                    'url' => '/guidings/offer/dawn',
                 ],
             ],
         ));
@@ -57,6 +57,8 @@ class OffersCatalogTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header is-offers', false);
         $response->assertSee('offers-page-header', false);
         $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee('action="'.url('/offers').'"', false);
+        $response->assertDontSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertSee('data-offers-header-search', false);
         $response->assertSee('data-offers-header-shell', false);
         $response->assertSee('offersCatalogSearchPlace', false);
@@ -390,7 +392,7 @@ class OffersCatalogTest extends TestCase
         $legacyTrip->assertSee('Only Trip');
     }
 
-    public function test_offers_index_shows_place_context_without_duplicate_title(): void
+    public function test_offers_index_does_not_show_place_context_above_listings(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(
             type: 'all',
@@ -401,8 +403,8 @@ class OffersCatalogTest extends TestCase
         $response = $this->get(route('offers.index', ['place' => 'Germany']));
 
         $response->assertOk();
-        $response->assertSee('data-offers-place', false);
-        $response->assertSee('Germany', false);
+        $response->assertDontSee('data-offers-place', false);
+        $response->assertDontSee('class="offers-catalog__context', false);
         $response->assertDontSee('class="offers-catalog__title', false);
     }
 

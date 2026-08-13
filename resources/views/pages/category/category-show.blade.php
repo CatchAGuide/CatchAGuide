@@ -1,7 +1,13 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.show');
+    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show');
+    $heroSearchAction = listing_search_action();
+    $heroParentCrumb = match (true) {
+        request()->routeIs('guidings.methods.show') => ['label' => __('category.methods.breadcrumb'), 'url' => route('guidings.methods')],
+        request()->routeIs('guidings.targets') => ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+        default => ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+    };
 @endphp
 
 @section('title', $row_data->language->title)
@@ -552,8 +558,9 @@
         @include('pages.category.partials.hero-header', [
             'listingTitle' => $row_data->language->title,
             'listingSubtitle' => $row_data->language->sub_title,
+            'searchAction' => $heroSearchAction,
             'breadcrumbItems' => [
-                ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+                $heroParentCrumb,
                 ['label' => $row_data->source->name ?? $row_data->name, 'url' => null],
             ],
         ])

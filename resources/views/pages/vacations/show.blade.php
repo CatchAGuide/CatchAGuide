@@ -1065,7 +1065,7 @@
                     @foreach($sameCountries as $same_country)
                 
                         <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$same_country->id,$same_country->slug]) }}" title="{{ translate('Guide aufmachen') }}">
+                            <a class="popular-tours__img" href="{{ $same_country->publicShowUrl() }}" title="{{ translate('Guide aufmachen') }}">
                                 <div class="popular-tours__img__wrapper">
                                     @if($same_country->gallery)
                                         <img src="{{ media_url($same_country->gallery[0]) }}" alt="{{ $same_country->title }}"/>
@@ -1075,7 +1075,7 @@
 
                             <div class="popular-tours__content">
                             <h5 class="crop-text-2 card-title h6">
-                                <a href="{{ route('guidings.show', [$same_country->id, $same_country->slug]) }}">
+                                <a href="{{ $same_country->publicShowUrl() }}">
                                     {{ $same_country->title ? translate(Str::limit($same_country->title, 50)) : translate($same_country->title) }}
                                 </a>
                             </h5>    

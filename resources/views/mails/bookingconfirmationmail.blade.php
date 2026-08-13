@@ -38,7 +38,7 @@
                                     <h3>@lang('mailing.bookingInfo'):</h3>
                                     <ul>
                                         <li>@lang('mailing.date'): {{ $booking->getFormattedBookingDate('d-m-Y') }}</li>
-                                        <li>Guiding: <a href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}">{{$guiding->title}}</a></li>
+                                        <li>Guiding: <a href="{{$guiding->publicShowUrl()}}">{{$guiding->title}}</a></li>
                                         <li>@lang('mailing.GuestNum'): {{$booking->count_of_users}}@lang('mailing.gueast')</li>
                                         <li>@lang('mailing.price'): €{{two($booking->price)}} </li>
                                         <li>

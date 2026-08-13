@@ -16,6 +16,8 @@
 
 @php
     $isDestinationHub = request()->routeIs('destination');
+    $isGuidingsCountries = request()->routeIs('guidings.countries');
+    $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries;
 @endphp
 
 @section('custom_style')
@@ -78,14 +80,20 @@
     </style>
 @endsection
 @section('content')
-<div class="{{ $isDestinationHub ? 'category-hero-page' : '' }}" @if($isDestinationHub) data-category-hero-page @endif>
-@if($isDestinationHub)
+<div class="{{ $useCategoryHeroHeader ? 'category-hero-page' : '' }}" @if($useCategoryHeroHeader) data-category-hero-page @endif>
+@if($useCategoryHeroHeader)
     @include('pages.category.partials.hero-header', [
         'listingTitle' => $title,
         'listingSubtitle' => $sub_title,
-        'breadcrumbItems' => [
-            ['label' => __('destination.breadcrumb'), 'url' => null],
-        ],
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => $isGuidingsCountries
+            ? [
+                ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+                ['label' => __('destination.breadcrumb'), 'url' => null],
+            ]
+            : [
+                ['label' => __('destination.breadcrumb'), 'url' => null],
+            ],
     ])
 @else
 <div class="container">
@@ -102,7 +110,7 @@
         </section>
     </div>
 @endif
-<div class="container {{ $isDestinationHub ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($isDestinationHub) style="--offers-anim-i: 4" @endif>
+<div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
     <section class="toptargetfish">
         <div class="container my-4">
             <div id="page-main-intro" class="section-title my-2">
@@ -292,7 +300,7 @@
 </div>
 @endsection
 @section('js_after')
-@if($isDestinationHub)
+@if($useCategoryHeroHeader)
 @include('layouts.partials.category-hero-header-script')
 @endif
 <script>

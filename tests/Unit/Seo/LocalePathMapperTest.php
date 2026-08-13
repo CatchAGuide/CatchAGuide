@@ -40,6 +40,8 @@ class LocalePathMapperTest extends TestCase
     public function test_same_path_surfaces_are_unchanged(): void
     {
         $this->assertSame('guidings/12/foo', $this->mapper->mapPath('guidings/12/foo', 'en', 'de'));
+        $this->assertSame('guidings/offer/sea-trout', $this->mapper->mapPath('guidings/offer/sea-trout', 'en', 'de'));
+        $this->assertSame('guidings/alloffers', $this->mapper->mapPath('guidings/alloffers', 'de', 'en'));
         $this->assertSame('vacations/trips', $this->mapper->mapPath('vacations/trips', 'de', 'en'));
         $this->assertSame('faq', $this->mapper->mapPath('faq', 'en', 'de'));
     }

@@ -10,7 +10,7 @@
                 @foreach($wishlist_items as $wishlist_item)
                     <!--Tours List Single-->
                     <a
-                            href="{{ route('guidings.show', [$wishlist_item->guiding->id,$wishlist_item->guiding]) }}" style="color: black">
+                            href="{{ $wishlist_item->guiding->publicShowUrl() }}" style="color: black">
                         <div class="tours-list__single" style="{{$agent->ismobile() ? 'background-color:#faf5ee;  border: 1px solid lightgrey; border-radius: 13px;' : ''}}">
                             <div class="tours-list__img">
                                 <img src="{{asset('images/' . $wishlist_item->guiding->thumbnail_path)}}" height="100%" style="width: 100%; height: 350px; object-fit: cover;">

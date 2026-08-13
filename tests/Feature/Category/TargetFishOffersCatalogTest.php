@@ -119,8 +119,12 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="tour"', false);
         $response->assertSee('name="type"', false);
         $response->assertSee('value="tour"', false);
-        $response->assertSee('navbar-custom short-header long-header', false);
-        $response->assertDontSee('data-category-header-shell', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
+        $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
+        $response->assertDontSee('action="'.url('/offers').'"', false);
+        $response->assertDontSee('guidings-page-header__segment--fish', false);
     }
 
     public function test_vacations_target_fish_page_uses_vacations_scope_and_locks_catalog(): void

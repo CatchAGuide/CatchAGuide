@@ -112,17 +112,24 @@ class CategoryIndexTest extends TestCase
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee(__('category.targets.breadcrumb'), false);
+        $response->assertSee('action="'.url('/offers').'"', false);
+        $response->assertDontSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
-    public function test_methods_index_keeps_legacy_header(): void
+    public function test_methods_index_uses_overlay_hero_header(): void
     {
         $response = $this->get(route('guidings.methods'));
 
         $response->assertOk();
-        $response->assertSee('navbar-custom short-header long-header', false);
-        $response->assertDontSee('data-category-header-shell', false);
-        $response->assertDontSee('cag-site-nav--overlay', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee(__('category.methods.breadcrumb'), false);
+        $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
+        $response->assertDontSee('action="'.url('/offers').'"', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('guidings-page-header__segment--fish', false);
     }
 
     public function test_legacy_methods_index_redirects_to_guidings_methods(): void

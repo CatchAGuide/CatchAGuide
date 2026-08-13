@@ -23,7 +23,7 @@ class TourCardPresenter
             'id' => $guiding->id,
             'title' => $title,
             'slug' => $guiding->slug,
-            'url' => route('guidings.show', [$guiding->id, $guiding->slug]),
+            'url' => $guiding->publicShowUrl(),
             'image' => $image,
             'gallery_images' => $gallery,
             'badge' => __('offers.badge_tour'),
