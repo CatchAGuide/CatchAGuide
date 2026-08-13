@@ -2942,13 +2942,34 @@ body .main-menu .main-menu-wrapper__nav {
 }
 .offers-page-header__inner {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .offers-page-header__inner {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .offers-page-header__inner {
+    max-width: 720px;
+  }
 }
 @media (min-width: 992px) {
   .offers-page-header__inner {
-    padding: 0 64px;
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .offers-page-header__inner {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .offers-page-header__inner {
+    max-width: 1320px;
   }
 }
 .offers-page-header__inner--hero {
@@ -3003,7 +3024,7 @@ body .main-menu .main-menu-wrapper__nav {
   align-items: stretch;
   padding: 0;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background: #fff;
   border: 1px solid rgba(49, 48, 65, 0.08);
   box-shadow: 0 14px 36px rgba(49, 48, 65, 0.14);
@@ -3015,7 +3036,6 @@ body .main-menu .main-menu-wrapper__nav {
 @media (min-width: 768px) {
   .offers-page-header__search-box {
     grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.85fr) auto;
-    border-radius: 999px;
   }
 }
 .offers-page-header__segment {
@@ -5027,13 +5047,34 @@ body .main-menu .main-menu-wrapper__nav {
 }
 .guidings-page-header__inner {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .guidings-page-header__inner {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .guidings-page-header__inner {
+    max-width: 720px;
+  }
 }
 @media (min-width: 992px) {
   .guidings-page-header__inner {
-    padding: 0 64px;
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .guidings-page-header__inner {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .guidings-page-header__inner {
+    max-width: 1320px;
   }
 }
 .guidings-page-header__inner--search {
@@ -5073,7 +5114,7 @@ body .main-menu .main-menu-wrapper__nav {
   align-items: stretch;
   padding: 0;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background: #fff;
   border: 1px solid rgba(49, 48, 65, 0.08);
   box-shadow: 0 14px 36px rgba(49, 48, 65, 0.14);
@@ -5081,7 +5122,6 @@ body .main-menu .main-menu-wrapper__nav {
 @media (min-width: 992px) {
   .guidings-page-header__search-box {
     grid-template-columns: minmax(0, 1.15fr) minmax(7.5rem, 0.5fr) minmax(14rem, 1.15fr) auto;
-    border-radius: 999px;
   }
 }
 .guidings-page-header__segment {
@@ -7785,13 +7825,34 @@ div#masonry-grid img {
 }
 .vacations-page-header__inner {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .vacations-page-header__inner {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .vacations-page-header__inner {
+    max-width: 720px;
+  }
 }
 @media (min-width: 992px) {
   .vacations-page-header__inner {
-    padding: 0 64px;
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .vacations-page-header__inner {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .vacations-page-header__inner {
+    max-width: 1320px;
   }
 }
 .vacations-page-header__inner--search {
@@ -7832,7 +7893,7 @@ div#masonry-grid img {
   align-items: stretch;
   padding: 0;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background: #fff;
   border: 1px solid rgba(49, 48, 65, 0.08);
   box-shadow: 0 14px 36px rgba(49, 48, 65, 0.14);
@@ -7840,7 +7901,6 @@ div#masonry-grid img {
 @media (min-width: 768px) {
   .vacations-page-header__search-box {
     grid-template-columns: minmax(0, 1fr) auto;
-    border-radius: 999px;
   }
 }
 .vacations-page-header__segment {
@@ -12009,9 +12069,6 @@ div#masonry-grid img {
   border-color: rgba(12, 138, 127, 0.14);
 }
 
-.vacation-country__listings {
-  padding-left: 0;
-}
 @media (max-width: 991px) {
   .vacation-country__listings {
     margin-top: 0;
@@ -12417,13 +12474,43 @@ div#masonry-grid img {
   }
 }
 .trip-offer-page__top {
-  max-width: 1140px;
-  margin: 0 auto 0;
-  padding: 0 15px 1.5rem;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .trip-offer-page__top {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .trip-offer-page__top {
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .trip-offer-page__top {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .trip-offer-page__top {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .trip-offer-page__top {
+    max-width: 1320px;
+  }
+}
+.trip-offer-page__top {
+  padding-bottom: 1.5rem;
 }
 @media (max-width: 576px) {
   .trip-offer-page__top {
-    padding: 0 0.75rem 1.25rem;
+    padding-bottom: 1.25rem;
   }
 }
 .trip-offer-page__top .trip-offer-page__feature-cards {
@@ -12757,9 +12844,39 @@ div#masonry-grid img {
   }
 }
 .trip-offer-page__layout {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 15px 2rem;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .trip-offer-page__layout {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .trip-offer-page__layout {
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .trip-offer-page__layout {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .trip-offer-page__layout {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .trip-offer-page__layout {
+    max-width: 1320px;
+  }
+}
+.trip-offer-page__layout {
+  padding-bottom: 2rem;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 2rem;
@@ -14570,13 +14687,43 @@ div#masonry-grid img {
   font-weight: 600;
 }
 .trip-offer-page__reviews-band {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 1.5rem 15px 0;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .trip-offer-page__reviews-band {
+    max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .trip-offer-page__reviews-band {
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .trip-offer-page__reviews-band {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .trip-offer-page__reviews-band {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .trip-offer-page__reviews-band {
+    max-width: 1320px;
+  }
+}
+.trip-offer-page__reviews-band {
+  padding-top: 1.5rem;
 }
 @media (max-width: 576px) {
   .trip-offer-page__reviews-band {
-    padding: 1.25rem 0.75rem 0;
+    padding-top: 1.25rem;
   }
 }
 .trip-offer-page__reviews {
@@ -14797,13 +14944,35 @@ div#masonry-grid img {
 }
 
 .camp-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 16px;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+@media (min-width: 576px) {
+  .camp-container {
+    max-width: 540px;
+  }
 }
 @media (min-width: 768px) {
   .camp-container {
-    padding: 0 24px;
+    max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .camp-container {
+    max-width: 960px;
+  }
+}
+@media (min-width: 1200px) {
+  .camp-container {
+    max-width: 1140px;
+  }
+}
+@media (min-width: 1400px) {
+  .camp-container {
+    max-width: 1320px;
   }
 }
 
@@ -18988,6 +19157,8 @@ input:-webkit-autofill:active {
   z-index: 50;
   background: #fff;
   border-bottom: 1px solid var(--cag-border);
+  font-family: var(--thm-font, "DM Sans", sans-serif);
+  -webkit-font-smoothing: antialiased;
 }
 
 .cag-site-nav-shell .cag-site-nav {
@@ -19092,13 +19263,20 @@ input:-webkit-autofill:active {
 }
 
 .cag-site-nav__links {
+  align-items: center;
   gap: 2rem;
 }
 .cag-site-nav__links a {
-  color: var(--cag-gray);
-  font-weight: 700;
+  font-family: var(--thm-font, "DM Sans", sans-serif);
   font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  color: var(--cag-gray);
   text-decoration: none;
+  white-space: nowrap;
 }
 .cag-site-nav__links a:hover, .cag-site-nav__links a.is-active {
   color: var(--cag-coral);
@@ -19200,13 +19378,21 @@ input:-webkit-autofill:active {
 }
 
 .cag-site-nav__login {
+  font-family: var(--thm-font, "DM Sans", sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   display: inline-flex;
   align-items: center;
-  height: 1.5rem;
-  line-height: 1;
+  align-self: center;
+  height: auto;
+  margin: 0;
+  padding: 0;
   color: var(--cag-slate);
-  font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 .cag-site-nav__login:hover {
   color: var(--cag-coral);
@@ -19217,6 +19403,11 @@ input:-webkit-autofill:active {
 }
 
 .cag-site-nav__profile-toggle {
+  font-family: var(--thm-font, "DM Sans", sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -19226,9 +19417,6 @@ input:-webkit-autofill:active {
   border-radius: 999px;
   background: #fff;
   color: var(--cag-slate);
-  font-weight: 700;
-  font-size: 0.85rem;
-  line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
@@ -19309,13 +19497,20 @@ input:-webkit-autofill:active {
 }
 
 .cag-site-nav__cta {
+  font-family: var(--thm-font, "DM Sans", sans-serif);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--cag-slate);
   color: #fff !important;
-  font-weight: 700;
-  font-size: 0.85rem;
   padding: 0.55rem 1rem;
   border-radius: 0.5rem;
   text-decoration: none;
+  white-space: nowrap;
 }
 .cag-site-nav__cta:hover {
   background: var(--cag-coral);

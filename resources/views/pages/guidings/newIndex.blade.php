@@ -1,4 +1,4 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @section('title',$guiding->title)
 @section('description',$guiding->desc_course_of_action ?? $guiding->title)
@@ -795,25 +795,17 @@
 @endsection
 
 @section('content')
-<div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">
-                            {{$guiding->title}}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.category.partials.product-hero-header', [
+        'listingTitle' => __('homepage.filter-fishing-near-me'),
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            ['label' => $guiding->title, 'url' => null],
+        ],
+    ])
 
- <div id="guidings-page" class="container">
+ <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 4">
     <div class="title-container">
         <div class="title-wrapper">
             {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
@@ -2081,9 +2073,11 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
 
 @section('js_after')
+@include('layouts.partials.category-hero-header-script')
 
 <script>
     

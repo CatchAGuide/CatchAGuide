@@ -1,14 +1,43 @@
 @php
+    use App\Domain\Vacation\CountrySlug;
+
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $vacationCountryOptions = $vacationDestinations->countriesForSearch();
+    $isVacationProductPage = request()->routeIs(
+        'vacations.trips.show',
+        'vacations.camps.show',
+        'vacations.show',
+        'trips.show',
+        'vacations.v2',
+    );
     $currentVacationCountry = $currentVacationCountry
         ?? (request()->routeIs('vacations.all-offers')
             ? 'all-offers'
-            : (request()->route('country')
-                ?? request()->route('slug')
-                ?? request('country')));
+            : ($isVacationProductPage
+                ? null
+                : (request()->route('country')
+                    ?? request()->route('slug')
+                    ?? request('country'))));
+    if (is_string($currentVacationCountry) && $currentVacationCountry !== '' && $currentVacationCountry !== 'all-offers') {
+        $canonicalCountry = CountrySlug::canonicalize($currentVacationCountry) ?? $currentVacationCountry;
+        $matchedCountry = $vacationCountryOptions->firstWhere('slug', $canonicalCountry)
+            ?? $vacationCountryOptions->first(function ($country) use ($canonicalCountry) {
+                if (CountrySlug::canonicalize($country->name) === $canonicalCountry) {
+                    return true;
+                }
+                foreach (CountrySlug::storageVariants($country->slug) as $variant) {
+                    if (CountrySlug::canonicalize($variant) === $canonicalCountry) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+        $currentVacationCountry = $matchedCountry->slug ?? $canonicalCountry;
+    }
     $listingTitle = trim((string) ($listingTitle ?? __('vacations.hub_header_title')));
     $listingSubtitle = trim((string) ($listingSubtitle ?? __('vacations.hub_header_subtitle')));
+    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
@@ -23,7 +52,7 @@
         <div class="vacations-page-header__band" data-vacations-header-band>
             <div class="vacations-page-header__inner vacations-page-header__inner--copy">
                 <div class="vacations-page-header__copy">
-                    <h1 class="vacations-page-header__title">{{ $listingTitle }}</h1>
+                    <{{ $titleTag }} class="vacations-page-header__title">{{ $listingTitle }}</{{ $titleTag }}>
                     @if($listingSubtitle !== '')
                         <p class="vacations-page-header__sub">{{ $listingSubtitle }}</p>
                     @endif

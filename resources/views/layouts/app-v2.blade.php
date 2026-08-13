@@ -267,7 +267,8 @@
             || request()->routeIs('vacations.trips.index')
             || request()->routeIs('vacations.camps.index')
             || request()->routeIs('vacations.trips.show')
-            || request()->routeIs('vacations.camps.show');
+            || request()->routeIs('vacations.camps.show')
+            || request()->routeIs('vacations.show');
         $useCategorySiteHeader = request()->routeIs(
             'destination',
             'destination.country',
@@ -280,6 +281,7 @@
             'guidings.methods',
             'guidings.methods.show',
             'guidings.targets',
+            'guidings.show',
         );
         $useLegacyHeader = ! request()->is('/')
             && ! $useOffersSiteHeader

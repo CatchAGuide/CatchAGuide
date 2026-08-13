@@ -79,14 +79,7 @@ $muted: #787780;
   }
 
   &__inner {
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 16px;
-
-    @media (min-width: 992px) {
-      padding: 0 64px;
-    }
+    @include cag-page-container;
 
     &--hero {
       position: relative;
@@ -145,7 +138,7 @@ $muted: #787780;
     align-items: stretch;
     padding: 0;
     overflow: hidden;
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     background: #fff;
     border: 1px solid rgba($slate, 0.08);
     box-shadow: 0 14px 36px rgba(49, 48, 65, 0.14);
@@ -157,7 +150,6 @@ $muted: #787780;
 
     @media (min-width: 768px) {
       grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.85fr) auto;
-      border-radius: 999px;
     }
   }
 

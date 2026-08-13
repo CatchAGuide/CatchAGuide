@@ -61,5 +61,36 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString("'guidings.countries'", $source);
         $this->assertStringContainsString("'guidings.methods'", $source);
         $this->assertStringContainsString("'guidings.targets'", $source);
+        $this->assertStringContainsString("'guidings.show'", $source);
     }
+
+    public function test_guidings_product_page_uses_offers_style_header(): void
+    {
+        $source = (string) file_get_contents(resource_path('views/pages/guidings/newIndex.blade.php'));
+
+        $this->assertStringContainsString("@extends('layouts.app-v2')", $source);
+        $this->assertStringContainsString('pages.category.partials.product-hero-header', $source);
+        $this->assertStringContainsString('data-category-hero-page', $source);
+        $this->assertStringNotContainsString('navbar-custom', $source);
+    }
+
+    public function test_product_hero_header_keeps_page_h1_and_submits_to_guidings_catalog(): void
+    {
+        $html = View::make('pages.category.partials.product-hero-header', [
+            'listingTitle' => 'Fishing Tours',
+            'searchAction' => route('guidings.index'),
+            'breadcrumbItems' => [
+                ['label' => 'Fishing Tours', 'url' => route('guidings.index')],
+                ['label' => 'Brown trout in Spain', 'url' => null],
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('cag-site-nav--overlay', $html);
+        $this->assertStringContainsString('data-category-header-search', $html);
+        $this->assertStringContainsString('<p class="offers-page-header__title', $html);
+        $this->assertStringNotContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString(route('guidings.index', [], false), $html);
+        $this->assertStringContainsString('Brown trout in Spain', $html);
+    }
+
 }

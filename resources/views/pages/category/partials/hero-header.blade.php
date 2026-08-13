@@ -14,6 +14,8 @@
     $placeCountry = $requestHasPlace ? request()->country : ($placeCountry ?? '');
     $placeRegion = $requestHasPlace ? request()->region : ($placeRegion ?? '');
     $heroImage = asset('assets/images/homepage/hero-tour.webp');
+    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
+    $heroFetchPriority = ($heroFetchPriority ?? 'high') === 'high' ? 'high' : 'low';
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell>
     @include('layouts.partials.site-nav', [
@@ -30,14 +32,14 @@
                     alt=""
                     width="1920"
                     height="640"
-                    fetchpriority="high"
+                    @if($heroFetchPriority === 'high') fetchpriority="high" @else loading="lazy" @endif
                 >
                 <div class="offers-page-header__overlay"></div>
             </div>
 
             <div class="offers-page-header__inner offers-page-header__inner--hero">
                 <div class="offers-page-header__copy">
-                    <h1 class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingTitle }}</h1>
+                    <{{ $titleTag }} class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingTitle }}</{{ $titleTag }}>
                     @if($listingSubtitle !== '')
                         <p class="offers-page-header__sub offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingSubtitle }}</p>
                     @endif

@@ -748,7 +748,10 @@ if (! function_exists('listing_search_action')) {
             return route('guidings.index');
         }
 
-        if ($request->routeIs('vacations.*') || $request->is('vacations*')) {
+        if (
+            $request->routeIs('vacations.*', 'trips.show')
+            || $request->is('vacations*', 'trips*', 'vacations-v2*')
+        ) {
             return route('vacations.index');
         }
 

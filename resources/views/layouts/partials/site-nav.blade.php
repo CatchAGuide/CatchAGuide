@@ -106,7 +106,7 @@
                     </div>
                 </div>
             @else
-                <a href="#" class="cag-site-nav__login d-none d-md-inline" data-bs-toggle="modal" data-bs-target="#loginModal">@lang('homepage.header-login')</a>
+                <a href="#" class="cag-site-nav__login d-none d-md-inline-flex" data-bs-toggle="modal" data-bs-target="#loginModal">@lang('homepage.header-login')</a>
             @endauth
 
             @if(config('guide_onboarding.new_onboarding_enabled'))

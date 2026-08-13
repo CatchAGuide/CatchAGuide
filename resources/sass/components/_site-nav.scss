@@ -6,6 +6,18 @@ $cag-site-gray: #787780;
 $cag-site-coral: #E8604C;
 $cag-site-border: #ece8e0;
 $cag-site-sand: #faf5ee;
+$cag-site-font: var(--thm-font, "DM Sans", sans-serif);
+$cag-site-nav-size: 0.9rem;
+$cag-site-nav-weight: 700;
+$cag-site-nav-tracking: -0.02em;
+
+@mixin cag-site-nav-type {
+  font-family: $cag-site-font;
+  font-size: $cag-site-nav-size;
+  font-weight: $cag-site-nav-weight;
+  letter-spacing: $cag-site-nav-tracking;
+  line-height: 1.2;
+}
 
 .cag-site-nav {
   --cag-slate: #{$cag-site-slate};
@@ -18,6 +30,8 @@ $cag-site-sand: #faf5ee;
   z-index: 50;
   background: #fff;
   border-bottom: 1px solid var(--cag-border);
+  font-family: $cag-site-font;
+  -webkit-font-smoothing: antialiased;
 }
 
 .cag-site-nav-shell .cag-site-nav {
@@ -131,13 +145,16 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__links {
+  align-items: center;
   gap: 2rem;
 
   a {
+    @include cag-site-nav-type;
+    display: inline-flex;
+    align-items: center;
     color: var(--cag-gray);
-    font-weight: 700;
-    font-size: 0.9rem;
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover,
     &.is-active {
@@ -251,13 +268,17 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__login {
+  @include cag-site-nav-type;
   display: inline-flex;
   align-items: center;
-  height: 1.5rem;
-  line-height: 1;
+  align-self: center;
+  height: auto;
+  margin: 0;
+  padding: 0;
   color: var(--cag-slate);
-  font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
 
   &:hover {
     color: var(--cag-coral);
@@ -269,6 +290,7 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__profile-toggle {
+  @include cag-site-nav-type;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -278,9 +300,6 @@ $cag-site-sand: #faf5ee;
   border-radius: 999px;
   background: #fff;
   color: var(--cag-slate);
-  font-weight: 700;
-  font-size: 0.85rem;
-  line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
@@ -369,13 +388,16 @@ $cag-site-sand: #faf5ee;
 }
 
 .cag-site-nav__cta {
+  @include cag-site-nav-type;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--cag-slate);
   color: #fff !important;
-  font-weight: 700;
-  font-size: 0.85rem;
   padding: 0.55rem 1rem;
   border-radius: 0.5rem;
   text-decoration: none;
+  white-space: nowrap;
 
   &:hover {
     background: var(--cag-coral);

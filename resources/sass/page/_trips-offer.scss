@@ -2,8 +2,6 @@
 @import "../settings/colors";
 
 // Align with header/search bar: same horizontal padding and max-width as .container (Bootstrap)
-$trip-offer-container-max: 1140px;
-$trip-offer-gutter-x: 15px;
 
 $trip-offer-theme-dark: map-get($colors, "dark");
 $trip-offer-theme-accent: $primary-color; // global primary (orange)
@@ -64,12 +62,11 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__top {
-        max-width: $trip-offer-container-max;
-        margin: 0 auto 0;
-        padding: 0 $trip-offer-gutter-x 1.5rem;
+        @include cag-page-container;
+        padding-bottom: 1.5rem;
 
         @media (max-width: 576px) {
-            padding: 0 .75rem 1.25rem;
+            padding-bottom: 1.25rem;
         }
 
         .trip-offer-page__feature-cards {
@@ -429,9 +426,8 @@ $trip-offer-lh-relaxed: 1.7;
     }
 
     &__layout {
-        max-width: $trip-offer-container-max;
-        margin: 0 auto;
-        padding: 0 $trip-offer-gutter-x 2rem;
+        @include cag-page-container;
+        padding-bottom: 2rem;
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
         gap: 2rem;
@@ -2474,12 +2470,11 @@ $trip-offer-lh-relaxed: 1.7;
 
     // Reviews — full-width band below main/sidebar layout
     &__reviews-band {
-        max-width: $trip-offer-container-max;
-        margin: 0 auto;
-        padding: 1.5rem $trip-offer-gutter-x 0;
+        @include cag-page-container;
+        padding-top: 1.5rem;
 
         @media (max-width: 576px) {
-            padding: 1.25rem .75rem 0;
+            padding-top: 1.25rem;
         }
     }
 

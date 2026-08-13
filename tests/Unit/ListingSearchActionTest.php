@@ -27,6 +27,18 @@ class ListingSearchActionTest extends TestCase
 
         $this->bindNamedRequest('/guidings/niederlande', 'guidings.destination');
         $this->assertSame(route('guidings.index'), listing_search_action());
+
+        $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');
+        $this->assertSame(route('guidings.index'), listing_search_action());
+    }
+
+    public function test_vacation_and_trip_product_routes_use_vacations_catalog(): void
+    {
+        $this->bindNamedRequest('/vacations/trips/sweden', 'vacations.trips.show');
+        $this->assertSame(route('vacations.index'), listing_search_action());
+
+        $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
+        $this->assertSame(route('vacations.index'), listing_search_action());
     }
 
     public function test_offers_and_destination_routes_use_offers_catalog(): void
