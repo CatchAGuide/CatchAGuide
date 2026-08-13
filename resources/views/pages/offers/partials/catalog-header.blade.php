@@ -86,9 +86,8 @@
                     </div>
 
                     <button type="submit" class="offers-page-header__search-btn">
-                        <i class="fas fa-search d-md-none" aria-hidden="true"></i>
-                        <span class="d-none d-md-inline">{{ __('offers.search_submit') }}</span>
-                        <span class="visually-hidden d-md-none">{{ __('offers.search_submit') }}</span>
+                        <span>{{ __('offers.search_submit') }}</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </button>
                 </div>
             </form>

@@ -9,6 +9,7 @@ use App\Models\CategoryPage;
 use App\Models\Country;
 use App\Models\MonthlyHighlight;
 use App\Models\Target;
+use App\Services\Homepage\HomepageLandingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
@@ -100,7 +101,7 @@ class MonthlyHighlightController extends Controller
     private function forgetHomepageSeasonCache(int $month): void
     {
         foreach (['en', 'de'] as $locale) {
-            Cache::forget("homepage_season_v6_{$locale}_{$month}");
+            Cache::forget(HomepageLandingService::SEASON_CACHE_PREFIX."_{$locale}_{$month}");
         }
     }
 

@@ -40,6 +40,10 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('categoryHeroSearchPlace', $html);
         $this->assertStringContainsString('data-offers-persons-stepper', $html);
         $this->assertStringContainsString('name="num_guests"', $html);
+        $this->assertMatchesRegularExpression(
+            '/offers-page-header__search-btn[\s\S]{0,400}fa-arrow-right/',
+            $html
+        );
         $this->assertStringContainsString(route('guidings.index', [], false), $html);
         $this->assertStringNotContainsString('guidings-page-header__band', $html);
         $this->assertStringNotContainsString('tagify-fish-guidings-catalog', $html);

@@ -1,4 +1,7 @@
 @php
+    use App\Domain\Offers\OfferListingFilter;
+
+    $heroGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
     $heroSlides = [
         [
             'src' => asset('assets/images/homepage/hero-tour.webp'),
@@ -80,6 +83,22 @@
                     <input type="hidden" id="LocationLatHomeHero" name="placeLat" value=""/>
                     <input type="hidden" id="LocationLngHomeHero" name="placeLng" value=""/>
                     @include('layouts.partials.geosearch-hidden-fields')
+                </div>
+                <div class="cag-home-hero__who" data-offers-who>
+                    <div
+                        class="offers-persons-stepper offers-persons-stepper--home"
+                        data-offers-persons-stepper
+                        role="group"
+                        aria-label="{{ __('homepage.searchbar-person') }}"
+                    >
+                        <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                        <div class="offers-persons-stepper__value">
+                            <i class="fa fa-user" aria-hidden="true"></i>
+                            <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $heroGuests, ['count' => $heroGuests]) }}</span>
+                        </div>
+                        <input type="hidden" name="num_guests" value="{{ $heroGuests }}" data-offers-persons-input>
+                        <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                    </div>
                 </div>
                 <button type="submit" class="cag-home-hero__search-btn">
                     <span>{{ __('homepage.searchbar-search') }}</span>

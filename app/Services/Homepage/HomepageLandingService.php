@@ -2,6 +2,7 @@
 
 namespace App\Services\Homepage;
 
+use App\Domain\Offers\DestinationOfferScope;
 use App\Models\Booking;
 use App\Models\CategoryPage;
 use App\Models\Country;
@@ -19,6 +20,8 @@ class HomepageLandingService
 {
     /** Marketing floor for catalog size shown on the homepage trust band. */
     public const TRUST_OFFERS_LABEL = '450+';
+
+    public const SEASON_CACHE_PREFIX = 'homepage_season_v7';
 
     public function __construct(
         private HomepageCountrySelector $countries,
@@ -191,7 +194,7 @@ class HomepageLandingService
     {
         $monthNumber = (int) now()->month;
         $month = now()->translatedFormat('F');
-        $cacheKey = "homepage_season_v6_{$locale}_{$monthNumber}";
+        $cacheKey = self::SEASON_CACHE_PREFIX."_{$locale}_{$monthNumber}";
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($locale, $monthNumber, $month) {
             $highlight = MonthlyHighlight::forMonth($monthNumber);
@@ -294,7 +297,7 @@ class HomepageLandingService
                     ]),
                     'slug' => $page->slug,
                     'thumbnail' => $page->getThumbnailPath(),
-                    'url' => route('destination.country', ['country' => $country->slug]),
+                    'url' => $this->offersCatalogUrl($country, $target, $page),
                 ];
             }
 
@@ -312,7 +315,7 @@ class HomepageLandingService
                     'country' => $countryName,
                     'slug' => $country->slug,
                     'thumbnail' => $country->getThumbnailPath(),
-                    'url' => route('destination.country', ['country' => $country->slug]),
+                    'url' => $this->offersCatalogUrl($country),
                 ];
             }
 
@@ -329,9 +332,43 @@ class HomepageLandingService
                 'country' => null,
                 'slug' => $page->slug,
                 'thumbnail' => $page->getThumbnailPath(),
-                'url' => route('targets.show', ['slug' => $page->slug]),
+                'url' => $this->offersCatalogUrl(null, $target, $page),
             ];
         })->filter()->values();
+    }
+
+    /**
+     * Homepage season cards open /offers with location and/or target-fish filters applied.
+     */
+    private function offersCatalogUrl(
+        ?Country $country = null,
+        ?Target $target = null,
+        ?CategoryPage $page = null,
+    ): string {
+        $params = $country
+            ? DestinationOfferScope::mergeIntoRequest([], $country)
+            : [];
+
+        $speciesId = $target?->id ?? (int) ($page?->source_id ?? 0);
+        if ($speciesId > 0) {
+            $params['species'] = [$speciesId];
+        } elseif ($page) {
+            $speciesName = $target?->name ?? $page->name;
+            if (filled($speciesName)) {
+                $params['species'] = [$speciesName];
+            }
+        }
+
+        if (isset($params['place_types']) && is_array($params['place_types'])) {
+            $params['place_types'] = json_encode(array_values($params['place_types']));
+        }
+
+        $params = array_filter(
+            $params,
+            static fn ($value) => $value !== null && $value !== '' && $value !== []
+        );
+
+        return route('offers.index', $params);
     }
 
     /**

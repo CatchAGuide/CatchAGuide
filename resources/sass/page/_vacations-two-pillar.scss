@@ -2778,12 +2778,13 @@ $vac-country-panel: #313041;
 .vacation-country__listing-title {
     font-size: clamp(1.15rem, 2.4vw, 1.35rem);
     font-weight: 800;
-    margin: 0 0 1rem;
+    margin: 0;
+    line-height: 1.25;
     color: $vac-ink;
 
-    @media (max-width: 767px) {
+    @media (max-width: 575.98px) {
         font-size: 1.1rem;
-        margin-bottom: .85rem;
+        margin-bottom: .75rem;
     }
 }
 
@@ -2817,6 +2818,7 @@ $vac-country-panel: #313041;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 8px 20px rgba(49, 48, 65, 0.06);
+    margin-bottom: 0.75rem;
 }
 
 .vacation-country__map-placeholder {
@@ -2859,12 +2861,44 @@ $vac-country-panel: #313041;
 }
 
 .vacation-country__listings {
-    padding-left: 15px;
-
     @media (max-width: 991px) {
-        padding-left: 0;
         margin-top: 0;
     }
+}
+
+.vacation-country__toolbar {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    flex-wrap: nowrap;
+    margin-bottom: 0.85rem;
+}
+
+.vacation-country__sort {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 0.5rem;
+    margin-left: auto;
+    width: auto;
+}
+
+.vacation-country__sort-label {
+    margin: 0;
+    font-size: 0.85rem;
+    color: $vac-muted;
+    white-space: nowrap;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.vacation-country__sort .form-select {
+    min-width: 140px;
+    border-radius: 10px;
+    border-color: $vac-border;
 }
 
 .vacation-country__section {

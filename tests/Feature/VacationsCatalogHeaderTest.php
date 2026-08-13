@@ -26,6 +26,10 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('data-vacations-header-search', $html);
         $this->assertStringContainsString('name="country"', $html);
         $this->assertStringContainsString('vacationsCatalogCountry', $html);
+        $this->assertMatchesRegularExpression(
+            '/vacations-page-header__search-btn[\s\S]{0,400}fa-arrow-right/',
+            $html
+        );
     }
 
     public function test_app_v2_layout_uses_site_header_for_vacations_listings(): void

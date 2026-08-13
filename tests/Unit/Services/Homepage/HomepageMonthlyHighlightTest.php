@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services\Homepage;
 
+use App\Domain\Vacation\CountrySlug;
 use App\Models\CategoryPage;
 use App\Models\Country;
 use App\Models\MonthlyHighlight;
@@ -25,6 +26,15 @@ class HomepageMonthlyHighlightTest extends TestCase
         Cache::flush();
 
         $existing = MonthlyHighlight::query()->where('month', $month)->first();
+        $original = $existing?->only([
+            'month',
+            'title_en',
+            'title_de',
+            'subtitle_en',
+            'subtitle_de',
+            'items',
+            'is_active',
+        ]);
         $payload = [
             'month' => $month,
             'title_en' => 'Highlight title EN',
@@ -48,23 +58,39 @@ class HomepageMonthlyHighlightTest extends TestCase
             $highlight = MonthlyHighlight::query()->create($payload);
         }
 
-        $service = app(HomepageLandingService::class);
-        $method = new ReflectionMethod(HomepageLandingService::class, 'seasonModule');
-        $method->setAccessible(true);
-        $season = $method->invoke($service, 'en');
+        try {
+            $service = app(HomepageLandingService::class);
+            $method = new ReflectionMethod(HomepageLandingService::class, 'seasonModule');
+            $method->setAccessible(true);
+            $season = $method->invoke($service, 'en');
 
-        $target = Target::query()->find($targetPage->source_id);
-        $fishName = $target?->name ?? $targetPage->name;
+            $target = Target::query()->find($targetPage->source_id);
+            $fishName = $target?->name ?? $targetPage->name;
 
-        $this->assertSame('Highlight title EN', $season['title']);
-        $this->assertSame('Highlight sub EN', $season['text']);
-        $this->assertLessThanOrEqual(3, $season['species']->count());
-        $this->assertTrue($season['species']->contains(fn ($card) => ($card['fish'] ?? null) === $fishName));
-        $this->assertTrue($season['species']->contains(fn ($card) => filled($card['country'] ?? null)));
-        $this->assertTrue($season['species']->every(fn ($card) => ! str_contains((string) ($card['name'] ?? ''), 'fishing tours')));
+            $this->assertSame('Highlight title EN', $season['title']);
+            $this->assertSame('Highlight sub EN', $season['text']);
+            $this->assertLessThanOrEqual(3, $season['species']->count());
+            $this->assertTrue($season['species']->contains(fn ($card) => ($card['fish'] ?? null) === $fishName));
+            $this->assertTrue($season['species']->contains(fn ($card) => filled($card['country'] ?? null)));
+            $this->assertTrue($season['species']->every(fn ($card) => ! str_contains((string) ($card['name'] ?? ''), 'fishing tours')));
 
-        if (! $existing) {
-            $highlight->delete();
+            $pair = $season['species']->first(fn ($card) => ($card['fish'] ?? null) === $fishName);
+            $this->assertIsArray($pair);
+            $url = (string) $pair['url'];
+            $this->assertStringContainsString('/offers', $url);
+            parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $query);
+            $this->assertSame(CountrySlug::canonicalize($country->slug), $query['country'] ?? null);
+            $this->assertNotEmpty($query['place'] ?? null);
+            $species = array_map('strval', (array) ($query['species'] ?? []));
+            $expectedSpecies = $target?->id ?? $targetPage->source_id;
+            $this->assertContains((string) $expectedSpecies, $species);
+        } finally {
+            if ($original) {
+                $existing->update($original);
+            } else {
+                $highlight->delete();
+            }
+            Cache::flush();
         }
     }
 }

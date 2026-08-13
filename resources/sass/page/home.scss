@@ -355,8 +355,11 @@ $white: #ffffff;
 }
 
 .cag-home-hero__search-box {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "field field"
+    "who btn";
   align-items: stretch;
   gap: 0.5rem;
   padding: 0.5rem;
@@ -364,10 +367,16 @@ $white: #ffffff;
   background: rgba(49, 48, 65, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+  }
 }
 
 .cag-home-hero__search-field {
   position: relative;
+  grid-area: field;
   flex: 1;
   min-width: 0;
 
@@ -402,7 +411,54 @@ $white: #ffffff;
   }
 }
 
+.cag-home-hero__who {
+  grid-area: who;
+  min-width: 0;
+  flex: 0 0 auto;
+
+  .offers-persons-stepper--home {
+    min-height: 48px;
+    height: 48px;
+    width: 100%;
+    min-width: 10.25rem;
+    padding: 0 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    gap: 0.2rem;
+
+    .offers-persons-stepper__btn {
+      width: 1.65rem;
+      height: 1.65rem;
+      flex-basis: 1.65rem;
+      border-radius: 999px;
+      border-color: rgba(255, 255, 255, 0.28);
+      background: transparent;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        border-color: rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &:disabled {
+        color: rgba(255, 255, 255, 0.45);
+      }
+    }
+
+    .offers-persons-stepper__value {
+      color: #fff;
+      font-size: 0.9rem;
+
+      .fa-user {
+        color: rgba(255, 255, 255, 0.65);
+      }
+    }
+  }
+}
+
 .cag-home-hero__search-btn {
+  grid-area: btn;
   background: var(--cag-coral);
   color: #fff;
   border: 0;

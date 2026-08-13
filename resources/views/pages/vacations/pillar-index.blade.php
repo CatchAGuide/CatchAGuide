@@ -64,72 +64,35 @@
         </div>
     @endif
 
-    <h2 class="vacation-country__listing-title">{{ $vm->pageTitle() }}</h2>
-
     @if($hasMap)
         @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])
     @endif
 
-    <div class="row vacation-country__layout mb-5">
-        <div class="col-12 d-block d-sm-none mobile-selection-sfm mb-3 vacation-country__mobile-toolbar">
-            <x-vacation.filters
-                render-section="mobile"
-                :filter="$vm->filter"
-                :trips-total="$vm->tripsTotal"
-                :camps-total="$vm->campsTotal"
-                :species-options="$vm->speciesOptions"
-                :countries="$vm->filterCountries()"
-                :action="$vm->filterAction()"
-                :pillar-links="$vm->pillarToggleUrls()"
-                :omit-pillar-from-query="true"
-                :show-map-button="$hasMap"
-            />
-        </div>
+    <x-vacation.catalog-layout
+        :has-map="$hasMap"
+        :filter="$vm->filter"
+        :trips-total="$vm->tripsTotal"
+        :camps-total="$vm->campsTotal"
+        :species-options="$vm->speciesOptions"
+        :countries="$vm->filterCountries()"
+        :action="$vm->filterAction()"
+        :pillar-links="$vm->pillarToggleUrls()"
+        :title="$vm->pageTitle()"
+    >
+        @if($vm->listings->total() > 0)
+            @foreach($vm->cards as $card)
+                @if($vm->pillar === \App\Domain\Vacation\VacationPillar::Camps)
+                    <x-vacation.camp-list-row :card="$card" />
+                @else
+                    <x-vacation.trip-list-row :card="$card" />
+                @endif
+            @endforeach
 
-        <aside class="col-12 col-lg-3 vacation-country__sidebar d-none d-sm-block">
-            <div class="vacation-country__sidebar-filters">
-                <x-vacation.filters
-                    render-section="sidebar"
-                    :filter="$vm->filter"
-                    :trips-total="$vm->tripsTotal"
-                    :camps-total="$vm->campsTotal"
-                    :species-options="$vm->speciesOptions"
-                    :countries="$vm->filterCountries()"
-                    :action="$vm->filterAction()"
-                    :pillar-links="$vm->pillarToggleUrls()"
-                    :omit-pillar-from-query="true"
-                    variant="sidebar"
-                    :show-mobile-toolbar="false"
-                    :show-map-button="false"
-                />
-            </div>
-
-            @if($hasMap)
-                <div class="card vacation-country__map-card mt-3">
-                    <x-maps.preview-trigger
-                        target="#vacationCountryMapModal"
-                        :label="__('vacations.show_on_map')"
-                    />
-                </div>
-            @endif
-        </aside>
-
-        <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
-            @if($vm->listings->total() > 0)
-                @foreach($vm->cards as $card)
-                    @if($vm->pillar === \App\Domain\Vacation\VacationPillar::Camps)
-                        <x-vacation.camp-list-row :card="$card" />
-                    @else
-                        <x-vacation.trip-list-row :card="$card" />
-                    @endif
-                @endforeach
-
-                <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
-            @else
-                <p class="vacation-country__section-empty">{{ $vm->emptyStateMessage() }}</p>
-            @endif
-        </div>
-    </div>
+            <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
+        @else
+            <p class="vacation-country__section-empty">{{ $vm->emptyStateMessage() }}</p>
+        @endif
+    </x-vacation.catalog-layout>
 
     @if($vm->isCountryPage() && filled($vm->bodyContentHtml()))
         <div class="mb-4">{!! clean_html(translate($vm->bodyContentHtml())) !!}</div>
@@ -156,17 +119,6 @@
     @endif
 </div>
 
-<x-vacation.filters
-    render-section="offcanvas"
-    :filter="$vm->filter"
-    :trips-total="$vm->tripsTotal"
-    :camps-total="$vm->campsTotal"
-    :species-options="$vm->speciesOptions"
-    :countries="$vm->filterCountries()"
-    :action="$vm->filterAction()"
-    :pillar-links="$vm->pillarToggleUrls()"
-    :omit-pillar-from-query="true"
-/>
 @endsection
 
 @section('js_after')

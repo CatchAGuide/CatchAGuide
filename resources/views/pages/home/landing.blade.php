@@ -324,4 +324,5 @@ function validateSearch(event, inputId) {
 })();
 </script>
 @include('pages.home.partials.species-spotlight-script')
+@include('layouts.partials.offers-persons-stepper-script')
 @endsection

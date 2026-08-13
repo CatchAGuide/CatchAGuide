@@ -100,9 +100,10 @@ $vacations-header-muted: #787780;
   &__search-box {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.55rem;
+    gap: 0;
     align-items: stretch;
-    padding: 0.55rem;
+    padding: 0;
+    overflow: hidden;
     border-radius: 1rem;
     background: #fff;
     border: 1px solid rgba($vacations-header-slate, 0.08);
@@ -110,9 +111,6 @@ $vacations-header-muted: #787780;
 
     @media (min-width: 768px) {
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 0;
-      padding: 0.2rem 0.2rem 0.2rem 0.7rem;
-      align-items: center;
       border-radius: 999px;
     }
   }
@@ -120,16 +118,21 @@ $vacations-header-muted: #787780;
   &__segment {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.1rem;
     min-width: 0;
     margin: 0;
-    padding: 0.25rem 0.55rem;
-    border-radius: 999px;
+    padding: 0.7rem 1rem;
+    border-radius: 0;
     cursor: pointer;
     transition: background 0.15s ease;
 
+    @media (max-width: 767.98px) {
+      border-bottom: 1px solid rgba($vacations-header-slate, 0.1);
+    }
+
     @media (min-width: 768px) {
-      padding: 0.3rem 0.85rem;
+      padding: 0.45rem 1.15rem;
 
       &:hover,
       &:focus-within {
@@ -190,30 +193,32 @@ $vacations-header-muted: #787780;
     background: $vacations-header-coral;
     color: #fff;
     border: 0;
-    border-radius: 0.75rem;
+    border-radius: 0;
     font-weight: 700;
-    min-height: 42px;
-    min-width: 42px;
-    padding: 0 1.15rem;
+    min-height: 52px;
+    min-width: 0;
+    padding: 0 1.45rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     white-space: nowrap;
     flex-shrink: 0;
-    transition: background 0.15s ease, transform 0.15s ease;
+    align-self: stretch;
+    transition: background 0.15s ease;
 
     &:hover {
       background: #E85B40;
       color: #fff;
     }
 
-    &:active {
-      transform: scale(0.97);
+    @media (max-width: 767.98px) {
+      width: 100%;
     }
 
     @media (min-width: 768px) {
-      border-radius: 999px;
+      min-width: 8.5rem;
+      padding: 0 1.65rem;
     }
   }
 

@@ -52,6 +52,10 @@ class DestinationHubHeaderTest extends TestCase
         $this->assertStringContainsString('offers-page-header__hero', $html);
         $this->assertStringContainsString('categoryHeroSearchPlace', $html);
         $this->assertStringContainsString('data-offers-persons-stepper', $html);
+        $this->assertMatchesRegularExpression(
+            '/offers-page-header__search-btn[\s\S]{0,400}fa-arrow-right/',
+            $html
+        );
         $this->assertStringContainsString(route('guidings.index', [], false), $html);
         $this->assertStringNotContainsString('guidings-page-header__segment--fish', $html);
         $this->assertStringNotContainsString('tagify-fish-guidings-destination', $html);

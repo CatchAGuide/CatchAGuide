@@ -57,74 +57,39 @@
         </div>
     @endif
 
-    <h2 class="vacation-country__listing-title">{{ $listingTitle }}</h2>
-
     @if($hasMap)
         @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])
     @endif
 
-    <div class="row vacation-country__layout mb-5">
-        <div class="col-12 d-block d-sm-none mobile-selection-sfm mb-3 vacation-country__mobile-toolbar">
-            <x-vacation.filters
-                render-section="mobile"
-                :filter="$vm->filter"
-                :trips-total="$vm->tripsTotal"
-                :camps-total="$vm->campsTotal"
-                :species-options="$vm->speciesOptions"
-                :pillar-links="$vm->pillarToggleUrls()"
-                :omit-pillar-from-query="true"
-                :show-map-button="$hasMap"
-            />
-        </div>
+    <x-vacation.catalog-layout
+        :has-map="$hasMap"
+        :filter="$vm->filter"
+        :trips-total="$vm->tripsTotal"
+        :camps-total="$vm->campsTotal"
+        :species-options="$vm->speciesOptions"
+        :pillar-links="$vm->pillarToggleUrls()"
+        :title="$listingTitle"
+    >
+        @if($vm->listingsTotal > 0)
+            @foreach($listingRows as $card)
+                @if(($card['type'] ?? '') === 'camp')
+                    <x-vacation.camp-list-row :card="$card" />
+                @else
+                    <x-vacation.trip-list-row :card="$card" />
+                @endif
+            @endforeach
 
-        <aside class="col-12 col-lg-3 vacation-country__sidebar d-none d-sm-block">
-            <div class="vacation-country__sidebar-filters">
-                <x-vacation.filters
-                    render-section="sidebar"
-                    :filter="$vm->filter"
-                    :trips-total="$vm->tripsTotal"
-                    :camps-total="$vm->campsTotal"
-                    :species-options="$vm->speciesOptions"
-                    :pillar-links="$vm->pillarToggleUrls()"
-                    :omit-pillar-from-query="true"
-                    :show-map-button="false"
-                    :show-mobile-toolbar="false"
-                    variant="sidebar"
-                />
-            </div>
-
-            @if($hasMap)
-                <div class="card vacation-country__map-card mt-3">
-                    <x-maps.preview-trigger
-                        target="#vacationCountryMapModal"
-                        :label="__('vacations.show_on_map')"
-                    />
-                </div>
-            @endif
-        </aside>
-
-        <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
-            @if($vm->listingsTotal > 0)
-                @foreach($listingRows as $card)
-                    @if(($card['type'] ?? '') === 'camp')
-                        <x-vacation.camp-list-row :card="$card" />
-                    @else
-                        <x-vacation.trip-list-row :card="$card" />
-                    @endif
-                @endforeach
-
-                <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
-            @else
-                <p class="vacation-country__section-empty">
-                    @if($vm->filter->pillar === 'trips')
-                        {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
-                    @else
-                        {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
-                    @endif
-                </p>
-            @endif
-        </div>
-    </div>
+            <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
+        @else
+            <p class="vacation-country__section-empty">
+                @if($vm->filter->pillar === 'trips')
+                    {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
+                @else
+                    {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
+                @endif
+            </p>
+        @endif
+    </x-vacation.catalog-layout>
 
     @if($destination->fish_avail_title && $destination->fish_avail_intro && $vm->fishChart->count() > 0)
         <section class="vacation-country__seasonality mb-4">
@@ -161,15 +126,6 @@
     @endif
 </div>
 
-<x-vacation.filters
-    render-section="offcanvas"
-    :filter="$vm->filter"
-    :trips-total="$vm->tripsTotal"
-    :camps-total="$vm->campsTotal"
-    :species-options="$vm->speciesOptions"
-    :pillar-links="$vm->pillarToggleUrls()"
-    :omit-pillar-from-query="true"
-/>
 @endsection
 
 @section('js_after')

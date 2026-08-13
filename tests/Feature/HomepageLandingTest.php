@@ -206,6 +206,9 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('assets/images/homepage/hero-trip.webp', false);
         $response->assertSee('assets/images/homepage/hero-vacation.webp', false);
         $response->assertSee('cag-home-hero__search', false);
+        $response->assertSee('cag-home-hero__who', false);
+        $response->assertSee('data-offers-persons-stepper', false);
+        $response->assertSee('name="num_guests"', false);
         $response->assertSee('action="'.url('/offers').'"', false);
         $response->assertSee('cag-site-nav__lang', false);
         $response->assertSee('cag-site-nav__lang-btn', false);

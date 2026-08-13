@@ -36,11 +36,35 @@
         return $action.'?'.http_build_query(array_merge($query, ['pillar' => $pillar]));
     };
     $showPillarFilters = $showPillarToggles && ($tripsTotal ?? 0) > 0 && ($campsTotal ?? 0) > 0;
+    $showToolbar = in_array($renderSection, ['all', 'toolbar'], true);
     $showSidebar = in_array($renderSection, ['all', 'sidebar'], true);
     $showMobile = $showMobileToolbar && in_array($renderSection, ['all', 'mobile'], true);
     $showOffcanvas = $showMobileToolbar && in_array($renderSection, ['all', 'offcanvas'], true);
     $currentSort = $filter->sortBy ?? '';
 @endphp
+
+@if($showToolbar)
+<form method="get" action="{{ $action }}" class="vacation-country__sort d-flex align-items-center ms-auto" data-vacation-sort-form>
+    @foreach($query as $key => $value)
+        @if(is_array($value))
+            @foreach($value as $v)
+                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+            @endforeach
+        @elseif($key !== 'sortby')
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endif
+    @endforeach
+
+    @if($activePillar !== 'all' && ! $omitPillarFromQuery)
+        <input type="hidden" name="pillar" value="{{ $activePillar }}">
+    @endif
+
+    <label for="vacation-sortby" class="vacation-country__sort-label">{{ __('vacations.filter_sort') }}</label>
+    <select id="vacation-sortby" name="sortby" class="form-select form-select-sm" data-vacation-sort-select>
+        @include('components.vacation.partials.sort-options', ['currentSort' => $currentSort])
+    </select>
+</form>
+@endif
 
 @if($showSidebar)
 <form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
@@ -49,7 +73,7 @@
             @foreach($value as $v)
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
             @endforeach
-        @elseif($key !== 'species' && $key !== 'country' && $key !== 'sortby')
+        @elseif($key !== 'species' && $key !== 'country')
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
     @endforeach
@@ -110,15 +134,6 @@
                     </select>
                 </div>
             @endif
-
-            <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
-                <label class="form-label">{{ __('vacations.filter_sort') }}</label>
-                <select name="sortby" class="form-select form-select-sm">
-                    <option value="">{{ __('message.newest') }}</option>
-                    <option value="price-asc" @selected(($filter->sortBy ?? '') === 'price-asc')>@lang('message.lowprice')</option>
-                    <option value="price-desc" @selected(($filter->sortBy ?? '') === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
-                </select>
-            </div>
 
             @if($showMapButton && ! $mapInSidebar)
                 <div class="col-md-auto ms-md-auto">
@@ -209,39 +224,6 @@
             </div>
         @endif
     </div>
-
-    @once
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const filterBtn = document.getElementById('vacationSfmFilterBtn');
-            if (filterBtn) {
-                filterBtn.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                });
-            }
-
-            document.querySelectorAll('.vacation-mobile-sort-option').forEach(function (option) {
-                option.addEventListener('click', function (event) {
-                    event.preventDefault();
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const sortValue = this.dataset.sort;
-
-                    if (sortValue) {
-                        urlParams.set('sortby', sortValue);
-                    } else {
-                        urlParams.delete('sortby');
-                    }
-
-                    const query = urlParams.toString();
-                    window.location.href = query
-                        ? `${window.location.pathname}?${query}`
-                        : window.location.pathname;
-                });
-            });
-        });
-        </script>
-    @endonce
 @endif
 
 @if($showOffcanvas)
@@ -326,9 +308,7 @@
                 <div class="mb-3">
                     <label class="form-label">{{ __('vacations.filter_sort') }}</label>
                     <select name="sortby" class="form-select">
-                        <option value="">{{ __('message.newest') }}</option>
-                        <option value="price-asc" @selected(($filter->sortBy ?? '') === 'price-asc')>@lang('message.lowprice')</option>
-                        <option value="price-desc" @selected(($filter->sortBy ?? '') === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
+                        @include('components.vacation.partials.sort-options', ['currentSort' => $currentSort])
                     </select>
                 </div>
 
@@ -337,3 +317,61 @@
         </div>
     </div>
 @endif
+
+@once
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function showVacationFilterLoader() {
+            var overlay = document.getElementById('vacation-page-loading-overlay');
+            if (!overlay) {
+                return;
+            }
+            overlay.hidden = false;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function bindAutoSubmit(select) {
+            if (!select || select.dataset.vacationLoaderBound) {
+                return;
+            }
+            select.dataset.vacationLoaderBound = '1';
+            select.addEventListener('change', function () {
+                showVacationFilterLoader();
+                if (select.form) {
+                    select.form.submit();
+                }
+            });
+        }
+
+        document.querySelectorAll('.vacation-filters select, [data-vacation-sort-select]').forEach(bindAutoSubmit);
+
+        var filterBtn = document.getElementById('vacationSfmFilterBtn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        }
+
+        document.querySelectorAll('.vacation-mobile-sort-option').forEach(function (option) {
+            option.addEventListener('click', function (event) {
+                event.preventDefault();
+                showVacationFilterLoader();
+
+                var urlParams = new URLSearchParams(window.location.search);
+                var sortValue = this.dataset.sort;
+
+                if (sortValue) {
+                    urlParams.set('sortby', sortValue);
+                } else {
+                    urlParams.delete('sortby');
+                }
+
+                var query = urlParams.toString();
+                window.location.href = query
+                    ? window.location.pathname + '?' + query
+                    : window.location.pathname;
+            });
+        });
+    });
+    </script>
+@endonce

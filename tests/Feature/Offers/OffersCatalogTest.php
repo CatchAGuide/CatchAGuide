@@ -66,6 +66,11 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('offers-page-header__segment--who', false);
         $response->assertSee('data-offers-persons-stepper', false);
         $response->assertSee(__('offers.search_where'), false);
+        $html = $response->getContent();
+        $this->assertMatchesRegularExpression(
+            '/offers-page-header__search-btn[\s\S]{0,400}fa-arrow-right/',
+            $html
+        );
         $response->assertSee(__('offers.nav_label'), false);
         $response->assertSee(__('offers.filter_all'), false);
         $this->assertStringContainsString(
