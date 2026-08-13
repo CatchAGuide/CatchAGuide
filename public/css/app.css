@@ -263,6 +263,32 @@
   }
 }
 
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+  width: 100%;
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
+  max-width: 1440px !important;
+}
+
+.container .container,
+.container .container-sm,
+.container .container-md,
+.container .container-lg,
+.container .container-xl,
+.container .container-xxl {
+  max-width: 100% !important;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .column-reverse-row-normal {
   display: flex;
   flex-wrap: wrap;
@@ -651,14 +677,11 @@ body .main-menu .main-menu-wrapper__nav {
 
 .cag-home-container {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-@media (min-width: 992px) {
-  .cag-home-container {
-    padding: 0 64px;
-  }
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 
 .cag-home-section {
@@ -889,19 +912,24 @@ body .main-menu .main-menu-wrapper__nav {
 }
 
 .cag-home-hero__inner {
+  width: 100%;
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
   position: relative;
   z-index: 3;
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 16px 2.5rem;
+  padding-top: 2rem;
+  padding-bottom: 2.5rem;
   text-align: center;
   color: #fff;
 }
 @media (min-width: 768px) {
   .cag-home-hero__inner {
     text-align: left;
-    padding: 3rem 64px 4rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
   }
 }
 
@@ -957,7 +985,7 @@ body .main-menu .main-menu-wrapper__nav {
   align-items: stretch;
   gap: 0.5rem;
   padding: 0.5rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: rgba(49, 48, 65, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
@@ -2942,35 +2970,11 @@ body .main-menu .main-menu-wrapper__nav {
 }
 .offers-page-header__inner {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .offers-page-header__inner {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .offers-page-header__inner {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .offers-page-header__inner {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .offers-page-header__inner {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .offers-page-header__inner {
-    max-width: 1320px;
-  }
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 .offers-page-header__inner--hero {
   position: relative;
@@ -5047,35 +5051,11 @@ body .main-menu .main-menu-wrapper__nav {
 }
 .guidings-page-header__inner {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .guidings-page-header__inner {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .guidings-page-header__inner {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .guidings-page-header__inner {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .guidings-page-header__inner {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .guidings-page-header__inner {
-    max-width: 1320px;
-  }
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 .guidings-page-header__inner--search {
   position: relative;
@@ -7825,35 +7805,11 @@ div#masonry-grid img {
 }
 .vacations-page-header__inner {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .vacations-page-header__inner {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .vacations-page-header__inner {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .vacations-page-header__inner {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .vacations-page-header__inner {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .vacations-page-header__inner {
-    max-width: 1320px;
-  }
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 .vacations-page-header__inner--search {
   position: relative;
@@ -12475,37 +12431,11 @@ div#masonry-grid img {
 }
 .trip-offer-page__top {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .trip-offer-page__top {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .trip-offer-page__top {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .trip-offer-page__top {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .trip-offer-page__top {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .trip-offer-page__top {
-    max-width: 1320px;
-  }
-}
-.trip-offer-page__top {
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
   padding-bottom: 1.5rem;
 }
 @media (max-width: 576px) {
@@ -12845,37 +12775,11 @@ div#masonry-grid img {
 }
 .trip-offer-page__layout {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .trip-offer-page__layout {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .trip-offer-page__layout {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .trip-offer-page__layout {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .trip-offer-page__layout {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .trip-offer-page__layout {
-    max-width: 1320px;
-  }
-}
-.trip-offer-page__layout {
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
   padding-bottom: 2rem;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
@@ -14688,37 +14592,11 @@ div#masonry-grid img {
 }
 .trip-offer-page__reviews-band {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .trip-offer-page__reviews-band {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .trip-offer-page__reviews-band {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .trip-offer-page__reviews-band {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .trip-offer-page__reviews-band {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .trip-offer-page__reviews-band {
-    max-width: 1320px;
-  }
-}
-.trip-offer-page__reviews-band {
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
   padding-top: 1.5rem;
 }
 @media (max-width: 576px) {
@@ -14945,35 +14823,11 @@ div#masonry-grid img {
 
 .camp-container {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
-}
-@media (min-width: 576px) {
-  .camp-container {
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) {
-  .camp-container {
-    max-width: 720px;
-  }
-}
-@media (min-width: 992px) {
-  .camp-container {
-    max-width: 960px;
-  }
-}
-@media (min-width: 1200px) {
-  .camp-container {
-    max-width: 1140px;
-  }
-}
-@media (min-width: 1400px) {
-  .camp-container {
-    max-width: 1320px;
-  }
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 
 .vacation-offer-breadcrumb .breadcrumb-container {
@@ -14997,7 +14851,6 @@ div#masonry-grid img {
   }
 }
 .camp-topbar__inner {
-  max-width: 1100px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -18341,11 +18194,6 @@ input:-webkit-autofill:active {
   display: block;
   margin: 0 auto;
 }
-@media (min-width: 768px) {
-  .tours-list {
-    padding: 0 15px;
-  }
-}
 .tours-list__rate {
   font-size: 0.7rem;
 }
@@ -19213,9 +19061,12 @@ input:-webkit-autofill:active {
 }
 
 .cag-site-nav__inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
+  width: 100%;
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
   height: 64px;
   display: flex;
   align-items: center;
@@ -19224,7 +19075,6 @@ input:-webkit-autofill:active {
 }
 @media (min-width: 992px) {
   .cag-site-nav__inner {
-    padding: 0 64px;
     height: 80px;
   }
 }

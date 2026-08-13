@@ -54,13 +54,6 @@
 @stack('guidingListingStyles')
 @section('css_after')
 <style>
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-        width: 100%;
-    }
-
     .page-header {
         /*margin-top: -60px;*/
     }

@@ -93,4 +93,12 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('Brown trout in Spain', $html);
     }
 
+    public function test_guidings_listing_does_not_cap_bootstrap_container_at_1200px(): void
+    {
+        $source = (string) file_get_contents(resource_path('views/pages/guidings/index.blade.php'));
+
+        $this->assertStringNotContainsString('max-width: 1200px', $source);
+        $this->assertStringContainsString('class="container"', $source);
+    }
+
 }

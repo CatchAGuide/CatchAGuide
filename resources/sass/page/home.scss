@@ -35,14 +35,7 @@ $white: #ffffff;
 }
 
 .cag-home-container {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
-
-  @media (min-width: 992px) {
-    padding: 0 64px;
-  }
+  @include cag-page-container;
 }
 
 .cag-home-section {
@@ -297,18 +290,18 @@ $white: #ffffff;
 }
 
 .cag-home-hero__inner {
+  @include cag-page-container;
   position: relative;
   z-index: 3;
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 16px 2.5rem;
+  padding-top: 2rem;
+  padding-bottom: 2.5rem;
   text-align: center;
   color: #fff;
 
   @media (min-width: 768px) {
     text-align: left;
-    padding: 3rem 64px 4rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
   }
 }
 
@@ -363,7 +356,7 @@ $white: #ffffff;
   align-items: stretch;
   gap: 0.5rem;
   padding: 0.5rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   background: rgba(49, 48, 65, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);

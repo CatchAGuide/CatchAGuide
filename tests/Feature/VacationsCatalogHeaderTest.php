@@ -92,7 +92,8 @@ class VacationsCatalogHeaderTest extends TestCase
     {
         $helpers = (string) file_get_contents(resource_path('sass/settings/_helpers.scss'));
         $this->assertStringContainsString('@mixin cag-page-container', $helpers);
-        $this->assertStringContainsString('max-width: 1320px', $helpers);
+        $this->assertStringContainsString('max-width: 1440px', $helpers);
+        $this->assertStringContainsString('.container-xxl', $helpers);
 
         foreach ([
             resource_path('sass/page/offers.scss'),
@@ -113,5 +114,20 @@ class VacationsCatalogHeaderTest extends TestCase
                 $source
             );
         }
+
+        $nav = (string) file_get_contents(resource_path('sass/components/_site-nav.scss'));
+        $home = (string) file_get_contents(resource_path('sass/page/home.scss'));
+        $this->assertStringContainsString('@include cag-page-container;', $nav);
+        $this->assertStringContainsString('.cag-home-container {', $home);
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-container \{\s*@include cag-page-container;/',
+            $home
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__inner \{\s*@include cag-page-container;/',
+            $home
+        );
+        $this->assertStringNotContainsString('max-width: 1280px', $nav);
+        $this->assertStringNotContainsString('max-width: 1280px', $home);
     }
 }

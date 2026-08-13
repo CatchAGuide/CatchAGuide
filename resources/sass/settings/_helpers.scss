@@ -1,31 +1,33 @@
-// Matches Bootstrap 5 `.container` (vendors/bootstrap) so catalog search bars
-// line up with listing and product page content.
+// Shared content width: wider than typical travel sites (~1200px), with
+// enough side gutter that content never hugs the viewport.
 @mixin cag-page-container {
   width: 100%;
+  max-width: 1440px;
   margin-right: auto;
   margin-left: auto;
-  padding-right: 0.75rem;
-  padding-left: 0.75rem;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
+}
 
-  @media (min-width: 576px) {
-    max-width: 540px;
-  }
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+  @include cag-page-container;
+  max-width: 1440px !important;
+}
 
-  @media (min-width: 768px) {
-    max-width: 720px;
-  }
-
-  @media (min-width: 992px) {
-    max-width: 960px;
-  }
-
-  @media (min-width: 1200px) {
-    max-width: 1140px;
-  }
-
-  @media (min-width: 1400px) {
-    max-width: 1320px;
-  }
+.container .container,
+.container .container-sm,
+.container .container-md,
+.container .container-lg,
+.container .container-xl,
+.container .container-xxl {
+  max-width: 100% !important;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .column-reverse-row-normal {
