@@ -74,6 +74,16 @@ class CategoryController extends Controller
         return view('pages.category.category-index', $data);
     }
 
+    public function methodsIndex(Request $request, CategoryPageContentService $categoryContent)
+    {
+        return $this->index('methods', $request, $categoryContent);
+    }
+
+    public function methodsShow(Request $request, string $slug, CategoryPageContentService $categoryContent)
+    {
+        return $this->targets('methods', $slug, $request, $categoryContent);
+    }
+
     public function targets($type, $slug, Request $request, CategoryPageContentService $categoryContent)
     {
         $type = strtolower((string) $type);

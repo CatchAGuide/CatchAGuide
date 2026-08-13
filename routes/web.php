@@ -315,12 +315,10 @@ Route::get('guidings/targets/{slug}', [TargetFishPageController::class, 'show'])
     ->defaults('content_scope', CategoryPageScope::TOURS)
     ->name('guidings.targets')
     ->middleware('ddos:search');
-Route::get('guidings/methods', [CategoryController::class, 'index'])
-    ->defaults('type', 'methods')
+Route::get('guidings/methods', [CategoryController::class, 'methodsIndex'])
     ->name('guidings.methods')
     ->middleware('ddos:search');
-Route::get('guidings/methods/{slug}', [CategoryController::class, 'targets'])
-    ->defaults('type', 'methods')
+Route::get('guidings/methods/{slug}', [CategoryController::class, 'methodsShow'])
     ->name('guidings.methods.show')
     ->middleware('ddos:search');
 Route::get('guidings/{country}/{region?}/{city?}', [GuidingDestinationController::class, 'show'])
