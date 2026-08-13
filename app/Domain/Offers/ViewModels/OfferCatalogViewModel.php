@@ -30,6 +30,7 @@ final class OfferCatalogViewModel
         public readonly ?string $catalogUrl = null,
         public readonly bool $lockDestinationScope = false,
         public readonly bool $lockSpeciesScope = false,
+        public readonly bool $lockTourScope = false,
     ) {}
 
     public function pageTitle(): string
@@ -107,6 +108,10 @@ final class OfferCatalogViewModel
                     ? json_encode($this->filter->placeTypes)
                     : null,
             ]);
+        }
+
+        if ($this->lockTourScope) {
+            $params['type'] = 'tour';
         }
 
         return array_filter($params, fn ($v) => $v !== null && $v !== '');

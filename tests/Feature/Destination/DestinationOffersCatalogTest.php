@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Destination;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Models\Country;
 use App\Models\CountryTranslation;
+use App\Models\Language;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\URL;
@@ -142,6 +145,47 @@ class DestinationOffersCatalogTest extends TestCase
         $response->assertSee('offers-filters__vacation-type-btn', false);
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertDontSee('data-offer-type="tour"', false);
+    }
+
+    public function test_destination_page_uses_global_content_not_tours(): void
+    {
+        $country = $this->createCountry('spanien-global-only');
+
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Tours Only Spain Title',
+            'sub_title' => 'Tours subtitle',
+            'introduction' => 'Tours introduction',
+            'content' => 'Tours body',
+            'faq_title' => '',
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => app()->getLocale(),
+            'title' => 'Global Spain Destination Title',
+            'sub_title' => 'Global subtitle',
+            'introduction' => 'Global introduction',
+            'content' => 'Global body',
+            'faq_title' => '',
+        ]);
+
+        $this->bindDestinationCatalog(fn () => $this->viewModel(
+            catalogUrl: route('destination.country', ['country' => $country->slug]),
+            lockDestinationScope: true,
+            country: $country->slug,
+        ));
+
+        $response = $this->get(route('destination.country', ['country' => $country->slug]));
+
+        $response->assertOk();
+        $response->assertSee('Global Spain Destination Title', false);
+        $response->assertDontSee('Tours Only Spain Title', false);
     }
 
     /**

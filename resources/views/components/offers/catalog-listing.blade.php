@@ -10,6 +10,7 @@
     $currentSort = $vm->filter->sortBy ?? '';
     $lockedParams = $vm->lockedScopeParams();
     $sortQuery = array_merge(request()->except(['page', 'sortby']), $lockedParams);
+    $showTypeToggles = ! $vm->lockTourScope;
 @endphp
 
 <div
@@ -49,6 +50,7 @@
                 :vacation-links="$vm->vacationToggleUrls()"
                 :action="$vm->filterAction()"
                 :show-map-button="$hasMap"
+                :show-type-toggles="$showTypeToggles"
                 :locked-params="$lockedParams"
             />
         </div>
@@ -100,6 +102,7 @@
                     :type-links="$vm->typeToggleUrls()"
                     :vacation-links="$vm->vacationToggleUrls()"
                     :action="$vm->filterAction()"
+                    :show-type-toggles="$showTypeToggles"
                     :locked-params="$lockedParams"
                 />
                 <form method="get" action="{{ $vm->filterAction() }}" class="offers-catalog__sort" data-offers-sort-form>

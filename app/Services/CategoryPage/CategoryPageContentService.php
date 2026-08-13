@@ -63,6 +63,7 @@ class CategoryPageContentService
         string $scope,
         string $locale,
         ?callable $legacyResolver = null,
+        bool $allowCrossScopeFallback = true,
     ): ?Language {
         $content = $this->findForEntity($entityType, $sourceId, $scope, $locale);
 
@@ -70,7 +71,7 @@ class CategoryPageContentService
             return $content;
         }
 
-        if ($scope === CategoryPageScope::GLOBAL) {
+        if ($allowCrossScopeFallback && $scope === CategoryPageScope::GLOBAL) {
             $tours = $this->findForEntity($entityType, $sourceId, CategoryPageScope::TOURS, $locale);
             if ($this->hasMeaningfulContent($tours)) {
                 return $tours;
@@ -291,9 +292,17 @@ class CategoryPageContentService
         string $scope,
         ?string $locale = null,
         ?callable $legacyResolver = null,
+        bool $allowCrossScopeFallback = true,
     ): Model {
         $locale = $locale ?? app()->getLocale();
-        $content = $this->resolveEntityForDisplay($entityType, $model->getKey(), $scope, $locale, $legacyResolver);
+        $content = $this->resolveEntityForDisplay(
+            $entityType,
+            $model->getKey(),
+            $scope,
+            $locale,
+            $legacyResolver,
+            $allowCrossScopeFallback,
+        );
 
         if ($content === null) {
             return $model;
@@ -321,6 +330,7 @@ class CategoryPageContentService
         string $scope,
         string $locale,
         ?callable $legacyResolver = null,
+        bool $allowCrossScopeFallback = true,
     ): Collection {
         $faqs = $this->faqsForEntity($entityType, $sourceId, $scope, $locale);
 
@@ -328,7 +338,7 @@ class CategoryPageContentService
             return $faqs;
         }
 
-        if ($scope === CategoryPageScope::GLOBAL) {
+        if ($allowCrossScopeFallback && $scope === CategoryPageScope::GLOBAL) {
             $toursFaqs = $this->faqsForEntity($entityType, $sourceId, CategoryPageScope::TOURS, $locale);
             if ($toursFaqs->isNotEmpty()) {
                 return $toursFaqs;

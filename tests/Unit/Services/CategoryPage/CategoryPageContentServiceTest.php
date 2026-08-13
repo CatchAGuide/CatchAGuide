@@ -184,4 +184,41 @@ class CategoryPageContentServiceTest extends TestCase
         $this->assertNull($trips);
         $this->assertNull($camps);
     }
+
+    public function test_global_strict_mode_does_not_fall_back_to_tours(): void
+    {
+        $countryId = (string) random_int(900000, 999999);
+
+        Language::query()->create([
+            'source_id' => $countryId,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => 'en',
+            'title' => 'Tours Spain Title',
+            'sub_title' => 'Tours sub',
+            'introduction' => 'Tours intro',
+            'content' => 'Tours body',
+            'faq_title' => 'Tours FAQ',
+        ]);
+
+        $withFallback = $this->service->resolveEntityForDisplay(
+            CategoryPageEntityType::GEO_COUNTRY,
+            $countryId,
+            CategoryPageScope::GLOBAL,
+            'en',
+            null,
+            true,
+        );
+        $strict = $this->service->resolveEntityForDisplay(
+            CategoryPageEntityType::GEO_COUNTRY,
+            $countryId,
+            CategoryPageScope::GLOBAL,
+            'en',
+            null,
+            false,
+        );
+
+        $this->assertSame('Tours Spain Title', $withFallback?->title);
+        $this->assertNull($strict);
+    }
 }

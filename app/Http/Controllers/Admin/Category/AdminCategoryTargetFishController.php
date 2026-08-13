@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Category;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageDimension;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Http\Controllers\Admin\Category\Concerns\HandlesScopedCategoryContent;
 use App\Http\Controllers\Controller;
 use App\Models\CategoryPage;
 use App\Models\Target;
@@ -19,6 +20,8 @@ use Intervention\Image\Facades\Image;
 
 class AdminCategoryTargetFishController extends Controller
 {
+    use HandlesScopedCategoryContent;
+
     public function __construct(
         private CategoryPageContentService $content
     ) {}
@@ -154,6 +157,7 @@ class AdminCategoryTargetFishController extends Controller
             'formTitle' => 'Target Fish',
             'route' => route('admin.category.target-fish.update', $id),
             'languageDataUrl' => route('admin.category.target-fish.language-data', $target->id),
+            'autosaveUrl' => route('admin.category.target-fish.autosave', $target->id),
             'backToListRoute' => route('admin.category.target-fish.index'),
             'nameReadonly' => true,
             'language' => $language,
@@ -223,6 +227,23 @@ class AdminCategoryTargetFishController extends Controller
             'faq_title' => $languageData->faq_title ?? '',
             'faq' => $faq,
         ]);
+    }
+
+    public function autosave(Request $request, $id)
+    {
+        $target = Target::find($id);
+
+        if ($target === null) {
+            return response()->json(['error' => 'Target not found'], 404);
+        }
+
+        return $this->autosaveScopedContent(
+            $request,
+            $this->content,
+            CategoryPageEntityType::TARGET_FISH,
+            $target->id,
+            CategoryPageScope::forDimension(CategoryPageDimension::TARGETS),
+        );
     }
 
     private function resolveCategoryPage(int $targetId, string $name): CategoryPage

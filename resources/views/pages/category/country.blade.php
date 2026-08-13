@@ -1,3 +1,6 @@
+@php
+    $destinationRoute = $destination_route ?? 'destination.country';
+@endphp
 @extends('layouts.app-v2')
 
 @section('title', $row_data->title)
@@ -563,7 +566,7 @@
                                     
                                     @elseif($destination_type == 'region')
                                         @if($row_data->country)
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
+                                        <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug]) }}">
                                             {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
@@ -572,13 +575,13 @@
                                     
                                     @elseif($destination_type == 'city')
                                         @if($row_data->country)
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug]) }}">
+                                        <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug]) }}">
                                             {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                         @endif
                                         @if($row_data->region && $row_data->country)
-                                        <li><a href="{{ route('destination.country', ['country' => $row_data->country->slug, 'region' => $row_data->region->slug]) }}">
+                                        <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug, 'region' => $row_data->region->slug]) }}">
                                             {{ translate('Fishing Destinations in ')}} {{ $row_data->region->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
@@ -611,7 +614,7 @@
                                 @if($region->country)
                                 <div class="item">
                                     <div class="col-sm-12">
-                                        <a href="{{ route('destination.country', ['country' => $region->country->slug, 'region' => $region->slug]) }}">
+                                        <a href="{{ route($destinationRoute, ['country' => $region->country->slug, 'region' => $region->slug]) }}">
                                             <div class="card">
                                                 <div class="card-img">
                                                     <img src="{{ $region->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">
@@ -636,7 +639,7 @@
                             @if($city->country && $city->region)
                             <div class="item">
                                 <div class="col-sm-12 col-lgs-3">
-                                    <a href="{{ route('destination.country', ['country' => $city->country->slug, 'region' => $city->region->slug, 'city' => $city->slug]) }}">
+                                    <a href="{{ route($destinationRoute, ['country' => $city->country->slug, 'region' => $city->region->slug, 'city' => $city->slug]) }}">
                                         <div class="card">
                                             <div class="card-img">
                                                 <img src="{{ $city->getThumbnailPath() }}" class="dimg-fluid" alt="Image Not Available">

@@ -76,6 +76,7 @@ use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
+use App\Http\Controllers\Category\GuidingDestinationController;
 use App\Http\Controllers\TestController;
 
 /*
@@ -304,8 +305,16 @@ Route::middleware('auth:web')->group(function () {
 
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
 Route::get('guidings/landing', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing');
-Route::get('guidings/{slug?}', [GuidingsController::class, 'redirectToNewFormat'])->middleware('ddos:search');
-Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])->name('guidings.show');
+Route::get('guidings/{country}/{region?}/{city?}', [GuidingDestinationController::class, 'show'])
+    ->where('country', '^(?!landing$)(?![0-9]+$)[\p{L}0-9\-]+$')
+    ->name('guidings.destination')
+    ->middleware('ddos:search');
+Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])
+    ->whereNumber('id')
+    ->name('guidings.show');
+Route::get('guidings/{slug}', [GuidingsController::class, 'redirectToNewFormat'])
+    ->where('slug', '^(?!landing$)[\p{L}0-9\-]+$')
+    ->middleware('ddos:search');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('guidings.store');
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
 
@@ -655,19 +664,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Translation routes must come before resource routes
             Route::get('country/{id}/translation', [AdminCategoryCountryController::class, 'getTranslation'])->name('country.translation');
             Route::get('country/{id}/language-data', [AdminCategoryCountryController::class, 'getLanguageData'])->name('country.language-data');
+            Route::post('country/{id}/autosave', [AdminCategoryCountryController::class, 'autosave'])->name('country.autosave');
             Route::get('region/{id}/translation', [AdminCategoryRegionController::class, 'getTranslation'])->name('region.translation');
             Route::get('region/{id}/language-data', [AdminCategoryRegionController::class, 'getLanguageData'])->name('region.language-data');
+            Route::post('region/{id}/autosave', [AdminCategoryRegionController::class, 'autosave'])->name('region.autosave');
             Route::get('city/{id}/translation', [AdminCategoryCityController::class, 'getTranslation'])->name('city.translation');
             Route::get('city/{id}/language-data', [AdminCategoryCityController::class, 'getLanguageData'])->name('city.language-data');
+            Route::post('city/{id}/autosave', [AdminCategoryCityController::class, 'autosave'])->name('city.autosave');
             Route::resource('country', AdminCategoryCountryController::class);
             Route::resource('region', AdminCategoryRegionController::class);
             Route::resource('city', AdminCategoryCityController::class);
             Route::resource('methods', AdminCategoryMethodsController::class);
             Route::post('methods/toggle-favorite', [AdminCategoryMethodsController::class, 'toggleFavorite'])->name('methods.toggle-favorite');
             Route::get('methods/{id}/language-data', [AdminCategoryMethodsController::class, 'getLanguageData'])->name('methods.language-data');
+            Route::post('methods/{id}/autosave', [AdminCategoryMethodsController::class, 'autosave'])->name('methods.autosave');
             Route::resource('target-fish', AdminCategoryTargetFishController::class);
             Route::post('target-fish/toggle-favorite', [AdminCategoryTargetFishController::class, 'toggleFavorite'])->name('target-fish.toggle-favorite');
             Route::get('target-fish/{id}/language-data', [AdminCategoryTargetFishController::class, 'getLanguageData'])->name('target-fish.language-data');
+            Route::post('target-fish/{id}/autosave', [AdminCategoryTargetFishController::class, 'autosave'])->name('target-fish.autosave');
         });
 
         Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');

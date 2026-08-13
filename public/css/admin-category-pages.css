@@ -133,8 +133,7 @@
 .category-editor__thumb {
   width: 100%;
   aspect-ratio: 1;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   border-radius: 0.75rem;
   margin-bottom: 1rem;
   background: #f3f4f6;
@@ -281,6 +280,26 @@
   color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.category-editor__autosave {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  min-height: 1.2em;
+}
+
+.category-editor__autosave.is-saving {
+  color: #4f46e5;
+}
+
+.category-editor__autosave.is-saved {
+  color: #15803d;
+}
+
+.category-editor__autosave.is-error {
+  color: #b91c1c;
 }
 
 .category-editor__fields {

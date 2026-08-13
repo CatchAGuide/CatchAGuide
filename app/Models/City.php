@@ -72,6 +72,24 @@ class City extends Model
         return $this->hasMany(DestinationFaq::class, 'destination_id')->where('destination_type', 'city');
     }
 
+    public function fish_charts()
+    {
+        return $this->hasMany(DestinationFishChart::class, 'destination_id')
+            ->where('destination_type', 'city');
+    }
+
+    public function fish_size_limits()
+    {
+        return $this->hasMany(DestinationFishSizeLimit::class, 'destination_id')
+            ->where('destination_type', 'city');
+    }
+
+    public function fish_time_limits()
+    {
+        return $this->hasMany(DestinationFishTimeLimit::class, 'destination_id')
+            ->where('destination_type', 'city');
+    }
+
     /**
      * Get thumbnail path with fallback
      */

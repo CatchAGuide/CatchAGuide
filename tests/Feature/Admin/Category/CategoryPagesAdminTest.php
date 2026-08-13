@@ -234,4 +234,109 @@ class CategoryPagesAdminTest extends TestCase
         $response->assertOk();
         $response->assertSee('fi-de', false);
     }
+
+    public function test_admin_can_autosave_scoped_target_fish_content(): void
+    {
+        $this->actingAsEmployee();
+
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Autosave Pike '.uniqid(),
+            'name_en' => 'Autosave Pike',
+        ])->save();
+
+        $response = $this->postJson(route('admin.category.target-fish.autosave', $target->id), [
+            'title' => 'Tours Pike Autosave',
+            'sub_title' => 'Tours Pike Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => 'FAQ',
+            'languageSwitch' => 'de',
+            'content_scope' => CategoryPageScope::TOURS,
+            'faq' => [
+                ['question' => 'When?', 'answer' => 'Spring'],
+            ],
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('ok', true);
+        $response->assertJsonPath('scope', CategoryPageScope::TOURS);
+        $response->assertJsonPath('language', 'de');
+
+        $this->assertDatabaseHas('languages', [
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => 'de',
+            'title' => 'Tours Pike Autosave',
+        ]);
+    }
+
+    public function test_target_fish_autosave_rejects_invalid_scope(): void
+    {
+        $this->actingAsEmployee();
+
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Invalid Scope Pike '.uniqid(),
+            'name_en' => 'Invalid Scope Pike',
+        ])->save();
+
+        $response = $this->postJson(route('admin.category.target-fish.autosave', $target->id), [
+            'title' => 'Nope',
+            'languageSwitch' => 'de',
+            'content_scope' => 'not-a-scope',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['content_scope']);
+    }
+
+    public function test_admin_can_autosave_country_scope_without_identity_fields(): void
+    {
+        $this->actingAsEmployee();
+
+        $country = Country::query()->first();
+        if (! $country) {
+            $this->markTestSkipped('No country available.');
+        }
+
+        $response = $this->postJson(route('admin.category.country.autosave', $country->id), [
+            'title' => 'Camps Country Autosave',
+            'sub_title' => 'Camps Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'languageSwitch' => 'de',
+            'content_scope' => CategoryPageScope::CAMPS,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('ok', true);
+        $response->assertJsonPath('completeness.camps.de', true);
+
+        $this->assertDatabaseHas('languages', [
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::CAMPS,
+            'language' => 'de',
+            'title' => 'Camps Country Autosave',
+        ]);
+    }
+
+    public function test_target_fish_editor_includes_autosave_endpoint(): void
+    {
+        $this->actingAsEmployee();
+
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Autosave Editor Pike '.uniqid(),
+            'name_en' => 'Autosave Editor Pike',
+        ])->save();
+
+        $response = $this->get(route('admin.category.target-fish.edit', $target->id));
+
+        $response->assertOk();
+        $response->assertSee('category-autosave-status', false);
+        $response->assertSee('target-fish\/'.$target->id.'\/autosave', false);
+    }
 }

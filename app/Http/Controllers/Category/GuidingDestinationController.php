@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Category;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\GuidingsController;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
@@ -12,27 +13,28 @@ use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\View\View;
 
-class DestinationCountryController extends Controller
+class GuidingDestinationController extends Controller
 {
     public function __construct(
         private OfferCatalogPageService $offerCatalog,
         private CategoryPageContentService $categoryContent,
     ) {}
 
-    public function index(): View
-    {
-        $countries = Country::all();
-
-        return view('pages.countries.index', compact('countries'));
-    }
-
-    public function country(Request $request, string $country, ?string $region = null, ?string $city = null): View
+    public function show(Request $request, string $country, ?string $region = null, ?string $city = null)
     {
         $countryRow = Country::with(['translations', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
             ->whereSlug($country)
-            ->firstOrFail();
+            ->first();
+
+        // One-segment unknown slugs are legacy guiding URLs.
+        if ($countryRow === null) {
+            if ($region === null && $city === null) {
+                return app(GuidingsController::class)->redirectToNewFormat($country);
+            }
+
+            abort(404);
+        }
 
         $regionRow = null;
         $cityRow = null;
@@ -67,9 +69,9 @@ class DestinationCountryController extends Controller
         }
 
         $locale = app()->getLocale();
-        $scope = CategoryPageScope::GLOBAL;
+        $scope = CategoryPageScope::TOURS;
 
-        // Global destination pages use Global content only — no Tours/legacy inheritance.
+        // Tours destination pages use Tours content only — no Global inheritance.
         $rowData = $this->categoryContent->applyScopedContentToModel(
             $rowData,
             $entityType,
@@ -101,11 +103,7 @@ class DestinationCountryController extends Controller
             false,
         );
 
-        $fishChart = $this->geoCollection($rowData, 'fish_charts');
-        $fishSizeLimit = $this->geoCollection($rowData, 'fish_size_limits');
-        $fishTimeLimit = $this->geoCollection($rowData, 'fish_time_limits');
-
-        $vm = $this->offerCatalog->buildForDestination(
+        $vm = $this->offerCatalog->buildForToursDestination(
             $request,
             $countryRow,
             $regionRow,
@@ -115,15 +113,15 @@ class DestinationCountryController extends Controller
         return view('pages.category.country', [
             'row_data' => $rowData,
             'destination_type' => $destinationType,
-            'destination_route' => 'destination.country',
+            'destination_route' => 'guidings.destination',
             'regions' => $regions,
             'cities' => $cities,
             'region_count' => $regions->count(),
             'city_count' => $cities->count(),
             'faq' => $faq,
-            'fish_chart' => $fishChart,
-            'fish_size_limit' => $fishSizeLimit,
-            'fish_time_limit' => $fishTimeLimit,
+            'fish_chart' => $this->geoCollection($rowData, 'fish_charts'),
+            'fish_size_limit' => $this->geoCollection($rowData, 'fish_size_limits'),
+            'fish_time_limit' => $this->geoCollection($rowData, 'fish_time_limits'),
             'vm' => $vm,
         ]);
     }

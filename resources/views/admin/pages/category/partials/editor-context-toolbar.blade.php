@@ -44,4 +44,6 @@
     </div>
 
     <input type="hidden" name="languageSwitch" id="languageSwitch" value="{{ $language }}">
+
+    <span class="category-editor__autosave" id="category-autosave-status" aria-live="polite" hidden></span>
 </div>

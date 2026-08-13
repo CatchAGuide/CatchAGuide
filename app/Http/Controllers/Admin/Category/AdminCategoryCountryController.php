@@ -235,6 +235,7 @@ class AdminCategoryCountryController extends Controller
         return view('admin.pages.category.form', array_merge($data, $scoped, [
             'scopedEditorEnabled' => true,
             'languageDataUrl' => route('admin.category.country.language-data', $country->id),
+            'autosaveUrl' => route('admin.category.country.autosave', $country->id),
         ]));
     }
 
@@ -254,6 +255,23 @@ class AdminCategoryCountryController extends Controller
 
         return response()->json(
             $this->scopedLanguageDataResponse($this->content, CategoryPageEntityType::GEO_COUNTRY, $country->id, $scope)
+        );
+    }
+
+    public function autosave(Request $request, $id)
+    {
+        $country = Country::find($id);
+
+        if ($country === null) {
+            return response()->json(['error' => 'Country not found'], 404);
+        }
+
+        return $this->autosaveScopedContent(
+            $request,
+            $this->content,
+            CategoryPageEntityType::GEO_COUNTRY,
+            $country->id,
+            CategoryPageScope::forDimension(CategoryPageDimension::COUNTRY),
         );
     }
 

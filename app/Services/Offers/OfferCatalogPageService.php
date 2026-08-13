@@ -87,6 +87,34 @@ class OfferCatalogPageService
     }
 
     /**
+     * Tours geo pages (/guidings/{country}/...): lock destination + force tour listings.
+     */
+    public function buildForToursDestination(
+        Request $request,
+        Country $country,
+        ?Region $region = null,
+        ?City $city = null,
+    ): OfferCatalogViewModel {
+        $input = DestinationOfferScope::mergeIntoRequest(
+            $request->all(),
+            $country,
+            $region,
+            $city,
+        );
+        $input['type'] = 'tour';
+        unset($input['vacation']);
+
+        return $this->buildFromInput(
+            $input,
+            $request,
+            catalogUrl: $request->url(),
+            lockDestinationScope: true,
+            lockTourScope: true,
+            includeFaq: false,
+        );
+    }
+
+    /**
      * Target-fish category pages: lock species and list tours + vacation offers.
      */
     public function buildForTargetFish(Request $request, int $speciesId): OfferCatalogViewModel
@@ -112,6 +140,7 @@ class OfferCatalogPageService
         ?string $catalogUrl = null,
         bool $lockDestinationScope = false,
         bool $lockSpeciesScope = false,
+        bool $lockTourScope = false,
         bool $includeFaq = true,
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
@@ -211,6 +240,7 @@ class OfferCatalogPageService
             catalogUrl: $catalogUrl,
             lockDestinationScope: $lockDestinationScope,
             lockSpeciesScope: $lockSpeciesScope,
+            lockTourScope: $lockTourScope,
         );
     }
 

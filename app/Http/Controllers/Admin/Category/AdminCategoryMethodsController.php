@@ -142,6 +142,7 @@ class AdminCategoryMethodsController extends Controller
             'formTitle' => 'Methods',
             'route' => route('admin.category.methods.update', $id),
             'languageDataUrl' => route('admin.category.methods.language-data', $method->id),
+            'autosaveUrl' => route('admin.category.methods.autosave', $method->id),
             'backToListRoute' => route('admin.category.methods.index'),
             'nameReadonly' => false,
             'name' => $method->name ?? '',
@@ -191,6 +192,23 @@ class AdminCategoryMethodsController extends Controller
 
         return response()->json(
             $this->scopedLanguageDataResponse($this->content, CategoryPageEntityType::METHOD, $method->id, $scope)
+        );
+    }
+
+    public function autosave(Request $request, $id)
+    {
+        $method = Method::find($id);
+
+        if ($method === null) {
+            return response()->json(['error' => 'Method not found'], 404);
+        }
+
+        return $this->autosaveScopedContent(
+            $request,
+            $this->content,
+            CategoryPageEntityType::METHOD,
+            $method->id,
+            CategoryPageScope::forDimension(CategoryPageDimension::METHODS),
         );
     }
 

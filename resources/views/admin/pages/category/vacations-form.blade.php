@@ -39,7 +39,7 @@ input[type=number] {
                         <div class="card-header">
                             <h3 class="card-title">@yield('title')</h3>
                         </div>
-                        <form action="{{ $route }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ $route }}" method="post" enctype="multipart/form-data" @if(!empty($scopedEditorEnabled)) id="category-scoped-form" @endif>
                             @method('post')
                             @csrf
                             <div class="card-body">

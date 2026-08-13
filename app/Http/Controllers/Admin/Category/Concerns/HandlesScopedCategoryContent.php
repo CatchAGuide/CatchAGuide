@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Category\Concerns;
 
 use App\Services\CategoryPage\CategoryPageContentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -83,6 +84,36 @@ trait HandlesScopedCategoryContent
             'faq_title' => $languageRow->faq_title ?? '',
             'faq' => $faq,
         ];
+    }
+
+    protected function autosaveScopedContent(
+        Request $request,
+        CategoryPageContentService $content,
+        string $entityType,
+        int|string $sourceId,
+        array $scopes,
+    ): JsonResponse {
+        $request->validate([
+            'content_scope' => ['required', Rule::in($scopes)],
+            'languageSwitch' => ['required', Rule::in(config('app.locales'))],
+            'title' => 'nullable|string|max:255',
+            'sub_title' => 'nullable|string|max:255',
+            'introduction' => 'nullable|string',
+            'content' => 'nullable|string',
+            'faq_title' => 'nullable|string|max:255',
+            'faq' => 'nullable|array',
+            'faq.*.question' => 'nullable|string',
+            'faq.*.answer' => 'nullable|string',
+        ]);
+
+        $this->saveScopedContent($request, $content, $entityType, $sourceId, $scopes);
+
+        return response()->json([
+            'ok' => true,
+            'scope' => $request->input('content_scope'),
+            'language' => $request->input('languageSwitch'),
+            'completeness' => $content->completenessForEntity($entityType, $sourceId, $scopes),
+        ]);
     }
 
     protected function scopedLanguageDataResponse(
