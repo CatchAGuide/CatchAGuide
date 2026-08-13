@@ -26,6 +26,18 @@ trait OverlaysScopedCategoryContent
         $this->setCurrentTranslation($translation);
     }
 
+    public function scopedCmsValue(string $field): ?string
+    {
+        $translation = $this->getCurrentTranslation();
+        if ($translation === null) {
+            return null;
+        }
+
+        $value = $translation->{$field} ?? null;
+
+        return filled($value) ? (string) $value : null;
+    }
+
     abstract protected function getCurrentTranslation();
 
     abstract protected function setCurrentTranslation($translation): void;

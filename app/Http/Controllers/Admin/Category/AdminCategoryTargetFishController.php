@@ -184,7 +184,7 @@ class AdminCategoryTargetFishController extends Controller
     private function publicUrlsForSlug(string $slug): array
     {
         return [
-            CategoryPageScope::GLOBAL => route('category.targets', ['type' => 'targets', 'slug' => $slug]),
+            CategoryPageScope::GLOBAL => route('targets.show', ['slug' => $slug]),
             CategoryPageScope::TOURS => route('guidings.targets', ['slug' => $slug]),
             CategoryPageScope::VACATIONS => route('vacations.targets', ['slug' => $slug]),
         ];

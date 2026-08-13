@@ -792,9 +792,9 @@
                 @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
-                        <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                        <a href="{{ route('targets.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
                     @else
-                        <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">See all target fish</a>
+                        <a href="{{ route('targets.index') }}" class="color-primary fw-light">See all target fish</a>
                     @endif
                 </div>
                 @endif
@@ -825,9 +825,9 @@
         </div>
         <div class="p-1 d-flex justify-content-end">
             @if(app()->getLocale() == 'de')
-                <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
+                <a href="{{ route('targets.index') }}" class="color-primary fw-light">Alle Zielfische ansehen</a>
             @else
-                <a href="{{ route('category.types', ['type' => 'targets']) }}" class="color-primary fw-light">See all target fish</a>
+                <a href="{{ route('targets.index') }}" class="color-primary fw-light">See all target fish</a>
             @endif
         </div>
         @else

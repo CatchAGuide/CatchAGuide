@@ -3,6 +3,7 @@ return [
     'title' => 'Angeltouren in ganz Europa',
     'header_title' => 'Angeltouren in ganz Europa',
     'header_sub_title' => 'Alle Reiseziele für deine nächste Angeltour',
+    'breadcrumb' => 'Reiseziele',
     'introduction' => 'Europa bietet Anglern eine beeindruckende Vielfalt an Gewässern und Fischarten. Ob du die Ruhe eines stillen Sees in Schweden bevorzugen oder aktion-reiches Hochseeangeln am Mittelmeer suchst – bei uns findest du garantiert deine persönliche Traumreise.<br><br>
 Deutschland: Die Heimat von Karpfen, Hecht und Zander bietet in großen Seen wie dem Bodensee und Flüssen wie dem Rhein ausgezeichnete Angelmöglichkeiten. Zahlreiche Angelguides bieten geführte Touren an, um Ihnen die besten Spots und Techniken zu zeigen.<br><br>
 Niederlande: Mit seinen zahlreichen Kanälen und dem IJsselmeer sind die Niederlande ein wahres Eldorado für Angler. Zander, Hecht und Barsch sind hier häufig zu finden. Besonders beliebt sind Bootstouren auf dem IJsselmeer, um die großen Raubfische zu beangeln.<br><br>
@@ -47,4 +48,6 @@ Italien: Die Seen Norditaliens und die Küstenregionen sind bei Anglern sehr bel
     'next' => 'Nächste',
     'details' => 'Einzelheiten',
     'add_to_favorites' => 'Zu Favoriten hinzufügen',
+    'popular_title' => 'Beliebt bei Anglern in :place',
+    'popular_empty' => 'In :place gibt es noch keine Angebote. Entdecke in der Zwischenzeit Touren und Urlaube in ganz Europa.',
 ];

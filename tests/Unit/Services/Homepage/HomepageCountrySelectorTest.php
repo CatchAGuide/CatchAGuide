@@ -101,5 +101,26 @@ class HomepageCountrySelectorTest extends TestCase
 
         $this->assertSame($beforeUnique + 1, $afterUnique);
     }
+
+    public function test_featured_without_limit_returns_all_unique_countries(): void
+    {
+        Cache::flush();
+
+        $marker = 'test-all-rail-'.uniqid();
+
+        Country::query()->create([
+            'name' => 'Zedonia',
+            'slug' => $marker,
+            'countrycode' => '',
+            'thumbnail_path' => 'assets/images/'.$marker.'.jpg',
+        ]);
+
+        $selector = new HomepageCountrySelector();
+        $featured = $selector->featured();
+
+        $this->assertSame($selector->totalCount(), $featured->count());
+        $this->assertTrue($featured->contains(fn (array $row) => $row['slug'] === $marker));
+        $this->assertLessThanOrEqual(8, $selector->featured(8)->count());
+    }
 }
 

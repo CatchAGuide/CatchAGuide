@@ -4,6 +4,7 @@ return [
     'targets' => [
         'title' => 'Die beliebtesten Zielfische für Angeltouren in Europa',
         'sub_title' => 'Diese Fischarten solltest du auf deiner nächsten Angeltour in Europa im Visier haben',
+        'breadcrumb' => 'Zielfische',
         'introduction' => 'Europa ist ein wahres Paradies für Angler, das mit seiner unglaublichen Vielfalt an Gewässern und Fischarten begeistert. Von den ruhigen Seen und wilden Flüssen im Landesinneren bis zu den fischreichen Küsten des Atlantiks und der Ostsee – hier findet jeder Angler sein persönliches Traumrevier.
 
         Zielfische, die jedes Anglerherz höherschlagen lassen, sind zahlreich: Der Zander, bekannt für seine blitzschnellen Attacken, fordert selbst erfahrene Angler heraus, während der kampfstarke Barsch spannende Drills bietet und in vielen europäischen Gewässern heimisch ist. Der Hecht, ein aggressiver Raubfisch, sorgt für Adrenalin pur und ist ein Highlight jeder Angeltour.

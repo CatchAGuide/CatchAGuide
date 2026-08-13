@@ -1,5 +1,9 @@
 @extends('layouts.app-v2')
 
+@php
+    $useCategoryHeroHeader = request()->routeIs('targets.index');
+@endphp
+
 @section('title', $title)
 @section('header_title', __('category.' . $type . '.title'))
 @section('header_sub_title', __('category.' . $type . '.sub_title'))
@@ -287,7 +291,18 @@
 @endsection
 
 @section('content')
+    @if($useCategoryHeroHeader)
+        <div class="category-hero-page" data-category-hero-page>
+        @include('pages.category.partials.hero-header', [
+            'listingTitle' => __('category.' . $type . '.title'),
+            'listingSubtitle' => __('category.' . $type . '.sub_title'),
+            'breadcrumbItems' => [
+                ['label' => __('category.targets.breadcrumb'), 'url' => null],
+            ],
+        ])
+    @endif
     <div class="container" id="destination">
+    @unless($useCategoryHeroHeader)
     <div class="container">
         <section class="page-header">
             <div class="page-header__bottom breadcrumb-container guiding">
@@ -301,8 +316,9 @@
             </div>
         </section>
     </div>
+    @endunless
 
-        <div class="container">
+        <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! $introduction !!}</div>
@@ -362,9 +378,15 @@
             </div>
         </div>
     </div>
+    @if($useCategoryHeroHeader)
+        </div>
+    @endif
 @endsection
 
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();

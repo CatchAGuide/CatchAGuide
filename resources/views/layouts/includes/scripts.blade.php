@@ -212,7 +212,8 @@
         { input: 'searchPlaceShortDesktop', lat: 'LocationLatShortDesktop', lng: 'LocationLngShortDesktop', city: 'LocationCityShortDesktop', country: 'LocationCountryShortDesktop', region: 'LocationRegionShortDesktop' },
         { input: 'homeHeroSearchPlace', lat: 'LocationLatHomeHero', lng: 'LocationLngHomeHero', city: 'LocationCityHomeHero', country: 'LocationCountryHomeHero', region: 'LocationRegionHomeHero' },
         { input: 'offersCatalogSearchPlace', lat: 'LocationLatOffersCatalog', lng: 'LocationLngOffersCatalog', city: 'LocationCityOffersCatalog', country: 'LocationCountryOffersCatalog', region: 'LocationRegionOffersCatalog' },
-        { input: 'guidingsCatalogSearchPlace', lat: 'LocationLatGuidingsCatalog', lng: 'LocationLngGuidingsCatalog', city: 'LocationCityGuidingsCatalog', country: 'LocationCountryGuidingsCatalog', region: 'LocationRegionGuidingsCatalog' }
+        { input: 'guidingsCatalogSearchPlace', lat: 'LocationLatGuidingsCatalog', lng: 'LocationLngGuidingsCatalog', city: 'LocationCityGuidingsCatalog', country: 'LocationCountryGuidingsCatalog', region: 'LocationRegionGuidingsCatalog' },
+        { input: 'categoryHeroSearchPlace', lat: 'LocationLatCategoryHero', lng: 'LocationLngCategoryHero', city: 'LocationCityCategoryHero', country: 'LocationCountryCategoryHero', region: 'LocationRegionCategoryHero' }
     ];
 
     function initAutocompleteForConfig(MapsManager, config, callback) {

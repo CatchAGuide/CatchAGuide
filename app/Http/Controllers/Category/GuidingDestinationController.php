@@ -125,6 +125,8 @@ class GuidingDestinationController extends Controller
             'row_data' => $rowData,
             'destination_type' => $destinationType,
             'destination_route' => 'guidings.destination',
+            'show_geo_carousels' => true,
+            'show_offers_catalog' => true,
             'regions' => $regions,
             'cities' => $cities,
             'region_count' => $regions->count(),

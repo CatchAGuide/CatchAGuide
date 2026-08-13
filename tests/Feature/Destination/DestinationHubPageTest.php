@@ -4,6 +4,7 @@ namespace Tests\Feature\Destination;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\Faq;
 use App\Models\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
@@ -38,6 +39,15 @@ class DestinationHubPageTest extends TestCase
         $response->assertOk();
         $response->assertSee(__('destination.title'), false);
         $response->assertSee(__('destination.header_sub_title'), false);
+        $response->assertSee('cag-site-nav', false);
+        $response->assertSee('cag-site-nav-shell', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee('categoryHeroSearchPlace', false);
+        $response->assertSee('data-category-header-search', false);
+        $response->assertSee(__('destination.breadcrumb'), false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
     public function test_destination_index_renders_cms_hub_content(): void
@@ -52,8 +62,17 @@ class DestinationHubPageTest extends TestCase
             'title' => 'CMS Fishing Tours Across Europe',
             'sub_title' => 'CMS destination subtitle',
             'introduction' => 'CMS destination introduction copy.',
-            'content' => '',
-            'faq_title' => '',
+            'content' => '<p>CMS destination body content.</p>',
+            'faq_title' => 'CMS Destination FAQ',
+        ]);
+
+        Faq::query()->create([
+            'source_id' => CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            'page' => CategoryPageEntityType::DESTINATION_HUB,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => $locale,
+            'question' => 'CMS hub FAQ question?',
+            'answer' => 'CMS hub FAQ answer.',
         ]);
 
         $response = $this->get(route('destination'));
@@ -62,6 +81,12 @@ class DestinationHubPageTest extends TestCase
         $response->assertSee('CMS Fishing Tours Across Europe', false);
         $response->assertSee('CMS destination subtitle', false);
         $response->assertSee('CMS destination introduction copy.', false);
+        $response->assertSee('CMS destination body content.', false);
+        $response->assertSee('CMS Destination FAQ', false);
+        $response->assertSee('CMS hub FAQ question?', false);
+        $response->assertSee('CMS hub FAQ answer.', false);
         $response->assertDontSee(__('destination.title'), false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 }

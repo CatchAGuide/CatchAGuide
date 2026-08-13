@@ -57,7 +57,7 @@ class GuidingsLandingTest extends TestCase
     public function test_guidings_landing_country_carousel_uses_guidings_destination_routes(): void
     {
         $countries = Mockery::mock(HomepageCountrySelector::class);
-        $countries->shouldReceive('featured')->once()->with(8)->andReturn(collect([
+        $countries->shouldReceive('featured')->once()->andReturn(collect([
             [
                 'slug' => 'deutschland',
                 'name' => 'Germany',
@@ -101,5 +101,7 @@ class GuidingsLandingTest extends TestCase
         $response->assertDontSee('href="'.route('destination', [], false).'"', false);
         $response->assertSee(route('guidings.methods', [], false), false);
         $response->assertDontSee(route('category.types', ['type' => 'methods'], false), false);
+        $response->assertSee(route('targets.index'), false);
+        $response->assertDontSee(route('category.types', ['type' => 'targets'], false), false);
     }
 }

@@ -57,7 +57,7 @@ class CategoryIndexTest extends TestCase
             'faq_title' => '',
         ]);
 
-        $response = $this->get(route('category.types', ['type' => 'targets']));
+        $response = $this->get(route('targets.index'));
 
         $response->assertOk();
         $response->assertSee('Visible Pike Index Title', false);
@@ -103,11 +103,41 @@ class CategoryIndexTest extends TestCase
         });
     }
 
+    public function test_targets_index_uses_overlay_hero_header(): void
+    {
+        $response = $this->get(route('targets.index'));
+
+        $response->assertOk();
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee(__('category.targets.breadcrumb'), false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
+    }
+
+    public function test_methods_index_keeps_legacy_header(): void
+    {
+        $response = $this->get(route('guidings.methods'));
+
+        $response->assertOk();
+        $response->assertSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('data-category-header-shell', false);
+        $response->assertDontSee('cag-site-nav--overlay', false);
+    }
+
     public function test_legacy_methods_index_redirects_to_guidings_methods(): void
     {
         $response = $this->get(route('category.types', ['type' => 'methods']));
 
         $response->assertRedirect(route('guidings.methods'));
+        $response->assertStatus(301);
+    }
+
+    public function test_legacy_targets_index_redirects_to_targets(): void
+    {
+        $response = $this->get(route('category.types', ['type' => 'targets']));
+
+        $response->assertRedirect(route('targets.index'));
         $response->assertStatus(301);
     }
 }

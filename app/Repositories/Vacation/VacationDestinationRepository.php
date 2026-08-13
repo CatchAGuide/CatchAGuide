@@ -4,6 +4,7 @@ namespace App\Repositories\Vacation;
 
 use App\Domain\Vacation\CountrySlug;
 use App\Models\Country;
+use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -12,6 +13,7 @@ class VacationDestinationRepository
     public function __construct(
         private CampListingRepository $camps,
         private TripListingRepository $trips,
+        private HomepageCountrySelector $homepageCountries,
     ) {}
 
     public function findCountryForLocale(string $slug, ?string $locale = null): ?Country
@@ -125,34 +127,95 @@ class VacationDestinationRepository
         $campCounts = $this->canonicalCountryCounts('camps');
         $tripCounts = $this->canonicalCountryCounts('trips');
 
-        $slugs = $campCounts->keys()->merge($tripCounts->keys())->unique()->values();
+        $allCountries = Country::with('translations')->get();
+        $bySlug = $allCountries->keyBy(
+            fn (Country $c) => CountrySlug::canonicalize($c->slug) ?? strtolower((string) $c->slug)
+        );
+        $uniqueCountries = $this->homepageCountries->uniqueModels($locale, $allCountries);
 
-        $countries = Country::with('translations')->get()
-            ->keyBy(fn (Country $c) => CountrySlug::canonicalize($c->slug) ?? strtolower($c->slug));
+        $seenSlugs = [];
+        $seenIsos = [];
+        $rows = collect();
 
-        return $slugs->map(function (string $slug) use ($countries, $campCounts, $tripCounts, $locale) {
-            $country = $countries->get(CountrySlug::canonicalize($slug) ?? $slug);
-            $thumbnailPath = $country?->thumbnail_path;
+        foreach ($uniqueCountries as $country) {
+            $slug = CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug);
+            $iso = strtoupper((string) ($country->countrycode ?? ''));
+            $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
+            $seenSlugs[$slug] = true;
+            if ($iso !== '') {
+                $seenIsos[$iso] = true;
+            }
+        }
 
-            if (empty($thumbnailPath)) {
-                $thumbnailPath = $this->listingThumbnailForCountry($slug);
+        foreach ($campCounts->keys()->merge($tripCounts->keys())->unique() as $slug) {
+            if (isset($seenSlugs[$slug])) {
+                continue;
             }
 
-            $canonicalSlug = CountrySlug::canonicalize($country?->slug) ?? $slug;
-            $translation = $country?->translations?->firstWhere('language', $locale);
-            $name = $country?->name ?? ucfirst(str_replace('-', ' ', $slug));
+            $country = $bySlug->get($slug);
+            $iso = strtoupper((string) ($country?->countrycode ?? ''));
 
-            return [
-                'destination' => $country,
-                'slug' => $canonicalSlug,
-                'name' => $name,
-                'sub_title' => $translation?->sub_title,
-                'camps' => (int) ($campCounts[$slug] ?? 0),
-                'trips' => (int) ($tripCounts[$slug] ?? 0),
-                'thumbnail_path' => $thumbnailPath,
-                'countrycode' => $country?->countrycode,
-            ];
-        })->sortByDesc(fn ($row) => $row['camps'] + $row['trips'])->values();
+            if ($iso !== '' && isset($seenIsos[$iso])) {
+                $rows = $rows->map(function (array $row) use ($iso, $slug, $campCounts, $tripCounts) {
+                    if (strtoupper((string) ($row['countrycode'] ?? '')) !== $iso) {
+                        return $row;
+                    }
+
+                    $row['camps'] += (int) ($campCounts[$slug] ?? 0);
+                    $row['trips'] += (int) ($tripCounts[$slug] ?? 0);
+
+                    return $row;
+                });
+
+                continue;
+            }
+
+            $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
+            $seenSlugs[$slug] = true;
+            if ($iso !== '') {
+                $seenIsos[$iso] = true;
+            }
+        }
+
+        return $rows
+            ->sortByDesc(fn (array $row) => $row['camps'] + $row['trips'])
+            ->values();
+    }
+
+    /**
+     * @param  Collection<string, int>  $campCounts
+     * @param  Collection<string, int>  $tripCounts
+     * @return array{destination: ?Country, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}
+     */
+    private function hubGridRow(
+        ?Country $country,
+        string $slug,
+        Collection $campCounts,
+        Collection $tripCounts,
+        string $locale,
+    ): array {
+        $camps = (int) ($campCounts[$slug] ?? 0);
+        $trips = (int) ($tripCounts[$slug] ?? 0);
+        $thumbnailPath = $country?->thumbnail_path;
+
+        if (empty($thumbnailPath) && ($camps + $trips) > 0) {
+            $thumbnailPath = $this->listingThumbnailForCountry($slug);
+        }
+
+        $translation = $country?->translations?->firstWhere('language', $locale);
+
+        return [
+            'destination' => $country,
+            'slug' => $slug,
+            'name' => $country
+                ? $this->homepageCountries->labelFor($country, $locale)
+                : ucfirst(str_replace('-', ' ', $slug)),
+            'sub_title' => $translation?->sub_title,
+            'camps' => $camps,
+            'trips' => $trips,
+            'thumbnail_path' => $thumbnailPath,
+            'countrycode' => $country?->countrycode,
+        ];
     }
 
     /**

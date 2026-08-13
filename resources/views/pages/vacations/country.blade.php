@@ -5,14 +5,18 @@
     $destination = $vm->destination;
     $countryName = translate($destination->name);
     $hasMap = count($vm->mapMarkers) > 0;
-    $countrySubtitle = strip_tags(translate($destination->sub_title ?? ''));
-    $countryIntro = strip_tags(translate($destination->introduction ?? ''));
+    $countrySubtitle = strip_tags($destination->scopedCmsValue('sub_title') ?? '');
+    $countryIntro = strip_tags($destination->scopedCmsValue('introduction') ?? '');
+    $cmsTitle = $destination->scopedCmsValue('title');
     $listingTitle = $isAllOffers
         ? __('vacations.all_offers_listing_title')
-        : __('vacations.country_listing_title', ['country' => $countryName]);
+        : (filled($cmsTitle) ? $cmsTitle : __('vacations.country_listing_title', ['country' => $countryName]));
     $breadcrumbLabel = $isAllOffers
         ? __('vacations.all_offers_breadcrumb')
-        : __('vacations.country_listing_title', ['country' => $countryName]);
+        : (filled($cmsTitle) ? $cmsTitle : __('vacations.country_listing_title', ['country' => $countryName]));
+    $faqHeading = filled($destination->scopedCmsValue('faq_title'))
+        ? $destination->scopedCmsValue('faq_title')
+        : __('vacations.hub_faq_title');
 @endphp
 
 @section('title', $listingTitle . ' — ' . __('vacations.hub_breadcrumb'))
@@ -132,13 +136,13 @@
 
     @if($destination->content)
         <section class="vacation-country__seo mb-4 vacation-country__intro">
-            {!! translate($destination->content) !!}
+            {!! clean_html(translate($destination->content)) !!}
         </section>
     @endif
 
     @if($vm->faq->isNotEmpty())
         <section class="vacation-country__faq mb-5">
-            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
+            <x-vacation.section-heading :title="$faqHeading" />
             <div class="accordion" id="vacationCountryFaq">
                 @foreach($vm->faq as $index => $item)
                     <div class="accordion-item">
@@ -148,7 +152,7 @@
                             </button>
                         </h3>
                         <div id="country-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationCountryFaq">
-                            <div class="accordion-body">{!! translate($item->answer ?? $item['answer'] ?? '') !!}</div>
+                            <div class="accordion-body">{!! clean_html(translate($item->answer ?? $item['answer'] ?? '')) !!}</div>
                         </div>
                     </div>
                 @endforeach

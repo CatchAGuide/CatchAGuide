@@ -2,7 +2,12 @@
 
 namespace App\Services\Homepage;
 
+use App\Domain\Offers\DestinationOfferGeoScope;
+use App\Domain\Vacation\VacationListingFilter;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Guiding;
+use App\Models\Region;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
@@ -47,6 +52,42 @@ class HomepageMixedOfferSelector
     }
 
     /**
+     * Popular rails scoped to a destination country (and optional region/city).
+     *
+     * @return array{tour: Collection, camp: Collection, trip: Collection}
+     */
+    public function byModuleForDestination(
+        Country $country,
+        ?Region $region = null,
+        ?City $city = null,
+        ?int $perType = null,
+    ): array {
+        $perType = $perType ?? 8;
+        $cacheKey = implode('_', [
+            'destination_offer_modules_v1',
+            app()->getLocale(),
+            (string) $country->id,
+            (string) ($region?->id ?? '0'),
+            (string) ($city?->id ?? '0'),
+            (string) $perType,
+        ]);
+
+        return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($country, $region, $city, $perType) {
+            return [
+                'tour' => $this->popularGuidingsForDestination($perType, $country, $region, $city)
+                    ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
+                    ->values(),
+                'camp' => $this->campsForDestination($perType, $country, $region, $city)
+                    ->map(fn ($c) => $this->campPresenter->present($c))
+                    ->values(),
+                'trip' => $this->tripsForDestination($perType, $country, $region, $city)
+                    ->map(fn ($t) => $this->tripPresenter->present($t))
+                    ->values(),
+            ];
+        });
+    }
+
+    /**
      * Flat mixed set (tests / legacy). Prefer byModule() for the homepage.
      */
     public function mixed(?int $limit = null): Collection
@@ -70,6 +111,63 @@ class HomepageMixedOfferSelector
             ->orderByDesc('bookings_count')
             ->limit($limit)
             ->get();
+    }
+
+    private function popularGuidingsForDestination(
+        int $limit,
+        Country $country,
+        ?Region $region,
+        ?City $city,
+    ): Collection {
+        $query = Guiding::query()
+            ->withCount('bookings')
+            ->publiclyVisible();
+
+        DestinationOfferGeoScope::apply($query, $country, $region, $city, includeCountryIso: true);
+
+        return $query
+            ->orderByDesc('bookings_count')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function campsForDestination(
+        int $limit,
+        Country $country,
+        ?Region $region,
+        ?City $city,
+    ): Collection {
+        $query = $this->camps->queryForCountry($this->vacationFilter($country));
+        DestinationOfferGeoScope::apply($query, $country, $region, $city);
+
+        return $query
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function tripsForDestination(
+        int $limit,
+        Country $country,
+        ?Region $region,
+        ?City $city,
+    ): Collection {
+        $query = $this->trips->queryForCountry($this->vacationFilter($country));
+        DestinationOfferGeoScope::apply($query, $country, $region, $city);
+
+        return $query
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function vacationFilter(Country $country): VacationListingFilter
+    {
+        return VacationListingFilter::fromRequest([
+            'country' => $country->slug,
+            'country_short' => $country->countrycode,
+        ]);
     }
 
 }

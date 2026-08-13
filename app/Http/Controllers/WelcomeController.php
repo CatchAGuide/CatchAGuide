@@ -38,7 +38,7 @@ class WelcomeController extends Controller
         return view('pages.newhome-latest', [
             'CategoryPage' => $allCategoryPages->where('type', 'Targets'),
             'CategoryPageMethods' => $allCategoryPages->where('type', 'Methods'),
-            'featuredCountries' => $this->countries->featured(8),
+            'featuredCountries' => $this->countries->featured(),
         ]);
     }
 

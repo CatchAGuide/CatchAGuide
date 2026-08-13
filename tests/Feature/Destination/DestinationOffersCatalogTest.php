@@ -4,19 +4,19 @@ namespace Tests\Feature\Destination;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
-use App\Domain\Offers\OfferListingFilter;
-use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Models\Country;
 use App\Models\CountryTranslation;
 use App\Models\Language;
-use App\Services\Offers\OfferCatalogPageService;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Services\Homepage\HomepageMixedOfferSelector;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Mockery;
 use Tests\TestCase;
 
 class DestinationOffersCatalogTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,121 +30,46 @@ class DestinationOffersCatalogTest extends TestCase
         ]);
     }
 
-    private function createCountry(string $slugPrefix, array $filters = []): Country
+    public function test_destination_country_renders_popular_offers_rail_instead_of_catalog(): void
     {
-        $country = Country::query()->create([
-            'name' => 'Spanien',
-            'slug' => $slugPrefix.'-'.uniqid(),
-            'countrycode' => 'ES',
-            'filters' => $filters !== [] ? $filters : [
-                'place' => 'Spain',
-                'placeLat' => '40.4',
-                'placeLng' => '-3.7',
-                'country' => 'Spain',
-            ],
+        $country = $this->createCountry('spanien-offers-rail');
+
+        $this->bindDestinationOffers([
+            'tour' => collect([$this->card('tour', 'Spain Tour Rail')]),
+            'trip' => collect([$this->card('trip', 'Spain Trip Rail')]),
+            'camp' => collect([$this->card('camp', 'Spain Camp Rail')]),
         ]);
-
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
-            'language' => app()->getLocale(),
-            'title' => 'Fishing in Spain',
-            'sub_title' => 'Discover Spanish waters',
-            'introduction' => 'Intro text for Spain.',
-            'content' => 'Body content for Spain.',
-        ]);
-
-        return $country->fresh(['translations']);
-    }
-
-    public function test_destination_country_renders_offers_catalog_chips_and_filters(): void
-    {
-        $country = $this->createCountry('spanien-offers-test');
-
-        $this->bindDestinationCatalog(fn () => $this->viewModel(
-            type: 'all',
-            catalogUrl: route('destination.country', ['country' => $country->slug]),
-            lockDestinationScope: true,
-            country: 'spanien',
-            place: 'Spain',
-            cards: collect([
-                $this->card('tour', 'Spain Tour'),
-                $this->card('trip', 'Spain Trip'),
-                $this->card('camp', 'Spain Camp'),
-            ]),
-        ));
 
         $response = $this->get(route('destination.country', ['country' => $country->slug]));
 
         $response->assertOk();
-        $response->assertSee('data-offers-type-filter', false);
-        $response->assertSee(__('offers.filter_all'), false);
-        $response->assertSee(__('offers.filter_tours'), false);
-        $response->assertSee(__('offers.filter_vacations'), false);
-        $response->assertSee('data-offers-list', false);
-        $response->assertSee('data-offer-type="tour"', false);
-        $response->assertSee('data-offer-type="trip"', false);
-        $response->assertSee('data-offer-type="camp"', false);
-        $response->assertSee(__('offers.sort_recommended'), false);
-        // Destination scope hides the region dropdown (country is locked via hidden fields).
-        $response->assertDontSee('<select name="country"', false);
-        $response->assertSee('name="country"', false);
-        $response->assertSee('name="placeLat"', false);
-        $response->assertSee('value="40.4"', false);
+        $response->assertSee(__('destination.popular_title', ['place' => $country->name]), false);
+        $response->assertSee('data-dest-offers', false);
+        $response->assertSee('data-offer-rail="tour"', false);
+        $response->assertSee('data-offer-rail="trip"', false);
+        $response->assertSee('data-offer-rail="camp"', false);
+        $response->assertSee('Spain Tour Rail', false);
+        $response->assertSee('Spain Trip Rail', false);
+        $response->assertSee('Spain Camp Rail', false);
+        $response->assertSee(route('guidings.destination', ['country' => $country->slug], false), false);
+        $response->assertDontSee('data-offers-type-filter', false);
+        $response->assertDontSee('offers-catalog-page', false);
     }
 
-    public function test_destination_type_toggle_stays_on_destination_url(): void
+    public function test_destination_country_shows_empty_state_when_no_local_offers(): void
     {
-        $base = 'http://localhost/destination/spanien';
-        $vm = $this->viewModel(
-            type: 'all',
-            catalogUrl: $base,
-            lockDestinationScope: true,
-            country: 'spanien',
-            place: 'Spain',
-        );
+        $country = $this->createCountry('spanien-offers-empty');
 
-        $urls = $vm->typeToggleUrls();
-        $this->assertStringStartsWith($base, $urls['tour']);
-        $this->assertStringContainsString('type=tour', $urls['tour']);
-        $this->assertStringContainsString('country=spanien', $urls['tour']);
-        $this->assertStringNotContainsString('/offers?', $urls['tour']);
+        $this->bindDestinationOffers();
 
-        $vacationUrls = $vm->vacationToggleUrls();
-        $this->assertStringStartsWith($base, $vacationUrls['trip']);
-        $this->assertStringContainsString('type=vacation', $vacationUrls['trip']);
-        $this->assertStringContainsString('vacation=trip', $vacationUrls['trip']);
-    }
-
-    public function test_destination_vacation_type_renders_subfilters(): void
-    {
-        $country = $this->createCountry('spanien-vac-test', [
-            'place' => 'Spain',
-            'placeLat' => '40.4',
-            'placeLng' => '-3.7',
-        ]);
-
-        $this->bindDestinationCatalog(fn () => $this->viewModel(
-            type: 'vacation',
-            vacation: 'trip',
-            catalogUrl: route('destination.country', ['country' => $country->slug]),
-            lockDestinationScope: true,
-            country: 'spanien',
-            cards: collect([$this->card('trip', 'Only Trip')]),
-        ));
-
-        $response = $this->get(route('destination.country', [
-            'country' => $country->slug,
-            'type' => 'vacation',
-            'vacation' => 'trip',
-        ]));
+        $response = $this->get(route('destination.country', ['country' => $country->slug]));
 
         $response->assertOk();
-        $response->assertSee('data-offers-vacation-subfilter', false);
-        $response->assertSee('data-offers-vacation-type', false);
-        $response->assertSee('offers-filters__vacation-type-btns', false);
-        $response->assertSee('offers-filters__vacation-type-btn', false);
-        $response->assertSee('data-offer-type="trip"', false);
-        $response->assertDontSee('data-offer-type="tour"', false);
+        $response->assertSee(__('destination.popular_title', ['place' => $country->name]), false);
+        $response->assertSee(__('destination.popular_empty', ['place' => $country->name]), false);
+        $response->assertSee('cag-dest-offers--empty', false);
+        $response->assertDontSee('data-dest-offers', false);
+        $response->assertDontSee('data-offers-type-filter', false);
     }
 
     public function test_destination_page_uses_global_content_not_tours(): void
@@ -175,11 +100,7 @@ class DestinationOffersCatalogTest extends TestCase
             'faq_title' => '',
         ]);
 
-        $this->bindDestinationCatalog(fn () => $this->viewModel(
-            catalogUrl: route('destination.country', ['country' => $country->slug]),
-            lockDestinationScope: true,
-            country: $country->slug,
-        ));
+        $this->bindDestinationOffers();
 
         $response = $this->get(route('destination.country', ['country' => $country->slug]));
 
@@ -188,64 +109,44 @@ class DestinationOffersCatalogTest extends TestCase
         $response->assertDontSee('Tours Only Spain Title', false);
     }
 
-    /**
-     * @param  callable(): OfferCatalogViewModel  $factory
-     */
-    private function bindDestinationCatalog(callable $factory): void
+    private function createCountry(string $slugPrefix, array $filters = []): Country
     {
-        $mock = Mockery::mock(OfferCatalogPageService::class);
-        $mock->shouldReceive('buildForDestination')->andReturnUsing($factory);
-        $this->app->instance(OfferCatalogPageService::class, $mock);
+        $country = Country::query()->create([
+            'name' => 'Spanien',
+            'slug' => $slugPrefix.'-'.uniqid(),
+            'countrycode' => 'ES',
+            'filters' => $filters !== [] ? $filters : [
+                'place' => 'Spain',
+                'placeLat' => '40.4',
+                'placeLng' => '-3.7',
+                'country' => 'Spain',
+            ],
+        ]);
+
+        CountryTranslation::query()->create([
+            'country_id' => $country->id,
+            'language' => app()->getLocale(),
+            'title' => 'Fishing in Spain',
+            'sub_title' => 'Discover Spanish waters',
+            'introduction' => 'Intro text for Spain.',
+            'content' => 'Body content for Spain.',
+        ]);
+
+        return $country->fresh(['translations']);
     }
 
-    private function viewModel(
-        string $type = 'all',
-        string $vacation = 'all',
-        $cards = null,
-        ?string $place = null,
-        ?string $country = null,
-        ?string $catalogUrl = null,
-        bool $lockDestinationScope = false,
-    ): OfferCatalogViewModel {
-        $cards = $cards ?? collect();
-        $filter = OfferListingFilter::fromRequest(array_filter([
-            'type' => $type,
-            'vacation' => $vacation !== 'all' ? $vacation : null,
-            'place' => $place,
-            'country' => $country,
-            'placeLat' => $lockDestinationScope ? '40.4' : null,
-            'placeLng' => $lockDestinationScope ? '-3.7' : null,
-        ], fn ($v) => $v !== null && $v !== ''));
-
-        $paginator = new LengthAwarePaginator(
-            $cards->map(fn ($card) => ['type' => $card['type'], 'model' => null])->all(),
-            $cards->count(),
-            9,
-            1,
-            ['path' => $catalogUrl ?? route('offers.index')],
-        );
-
-        return new OfferCatalogViewModel(
-            filter: $filter,
-            listings: $paginator,
-            cards: $cards,
-            toursTotal: 1,
-            tripsTotal: 1,
-            campsTotal: 1,
-            listingsTotal: $cards->count() ?: 3,
-            speciesOptions: collect([['id' => 1, 'name' => 'Pike']]),
-            countries: $lockDestinationScope ? collect() : collect([['slug' => 'germany', 'name' => 'Germany']]),
-            methodOptions: collect(),
-            waterOptions: collect(),
-            tourDurationOptions: collect(),
-            tripDurationOptions: collect(),
-            accommodationTypeOptions: collect(),
-            faq: collect(),
-            mapMarkers: [],
-            suggestedCards: collect(),
-            catalogUrl: $catalogUrl,
-            lockDestinationScope: $lockDestinationScope,
-        );
+    /**
+     * @param  array{tour?: \Illuminate\Support\Collection, camp?: \Illuminate\Support\Collection, trip?: \Illuminate\Support\Collection}  $modules
+     */
+    private function bindDestinationOffers(array $modules = []): void
+    {
+        $mock = Mockery::mock(HomepageMixedOfferSelector::class);
+        $mock->shouldReceive('byModuleForDestination')->andReturn([
+            'tour' => $modules['tour'] ?? collect(),
+            'camp' => $modules['camp'] ?? collect(),
+            'trip' => $modules['trip'] ?? collect(),
+        ]);
+        $this->app->instance(HomepageMixedOfferSelector::class, $mock);
     }
 
     /**
@@ -261,22 +162,9 @@ class DestinationOffersCatalogTest extends TestCase
             'image' => '/images/placeholder_guide.jpg',
             'gallery_images' => ['/images/placeholder_guide.jpg'],
             'badge' => ucfirst($type === 'tour' ? 'Tour' : $type),
-            'badge_class' => $type,
-            'location' => 'Test Location',
-            'listing_price_display' => '€100',
-            'listing_price_prefix' => 'from',
-            'listing_price_suffix' => '/ person',
-            'listing_cta' => 'View',
-            'cta' => 'View',
-            'target_fish_tags' => ['Pike'],
-            'target_fish_tags_extra' => 0,
-            'listing_included' => ['Rod & reel'],
-            'duration_label' => '8 Hours',
-            'guests_label' => 'Max 4 Personen',
-            'water_label' => 'Lake',
-            'boat_label' => 'Boat',
-            'rating' => 9.5,
-            'review_count' => 2,
+            'location' => 'Spain',
+            'price_amount' => '€100',
+            'price_unit' => 'person',
         ];
     }
 }

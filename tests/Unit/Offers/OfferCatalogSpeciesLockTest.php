@@ -35,7 +35,7 @@ class OfferCatalogSpeciesLockTest extends TestCase
             faq: collect(),
             mapMarkers: [],
             suggestedCards: collect(),
-            catalogUrl: 'http://localhost/category-page/targets/pike',
+            catalogUrl: 'http://localhost/targets/pike',
             lockSpeciesScope: true,
         );
 
@@ -44,7 +44,7 @@ class OfferCatalogSpeciesLockTest extends TestCase
         $this->assertArrayNotHasKey('country', $locked);
 
         $urls = $vm->typeToggleUrls();
-        $this->assertStringStartsWith('http://localhost/category-page/targets/pike', $urls['vacation']);
+        $this->assertStringStartsWith('http://localhost/targets/pike', $urls['vacation']);
         $this->assertStringContainsString('species%5B0%5D=42', $urls['vacation']);
         $this->assertStringContainsString('type=vacation', $urls['vacation']);
         $this->assertStringNotContainsString('/offers?', $urls['vacation']);

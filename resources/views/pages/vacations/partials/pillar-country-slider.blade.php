@@ -5,7 +5,7 @@
 ])
 
 @php
-    $countrySlides = $countries->filter(fn ($row) => ($row[$pillar] ?? 0) > 0);
+    $countrySlides = $countries;
     $countryRoute = $pillar === 'trips' ? 'vacations.trips.show' : 'vacations.camps.show';
 @endphp
 

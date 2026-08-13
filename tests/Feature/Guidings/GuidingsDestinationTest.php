@@ -6,11 +6,13 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
+use App\Models\City;
 use App\Models\Country;
 use App\Models\CountryTranslation;
 use App\Models\Language;
 use App\Models\Region;
 use App\Services\Offers\OfferCatalogPageService;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -18,6 +20,8 @@ use Tests\TestCase;
 
 class GuidingsDestinationTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -96,6 +100,40 @@ class GuidingsDestinationTest extends TestCase
         $response->assertDontSee('Global Spain Title', false);
         $response->assertSee('name="type"', false);
         $response->assertSee('value="tour"', false);
+        $response->assertSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('data-category-header-shell', false);
+    }
+
+    public function test_guidings_country_still_renders_region_and_city_carousels(): void
+    {
+        $country = $this->createCountry('spanien-geo-carousel');
+        $region = Region::query()->create([
+            'country_id' => $country->id,
+            'name' => 'Guidings Region '.$country->slug,
+            'slug' => 'guidings-region-'.$country->slug,
+        ]);
+        City::query()->create([
+            'country_id' => $country->id,
+            'region_id' => $region->id,
+            'name' => 'Guidings City '.$country->slug,
+            'slug' => 'guidings-city-'.$country->slug,
+        ]);
+
+        $this->bindToursCatalog(fn () => $this->viewModel(
+            catalogUrl: route('guidings.destination', ['country' => $country->slug]),
+        ));
+
+        $response = $this->get(route('guidings.destination', ['country' => $country->slug]));
+
+        $response->assertOk();
+        $response->assertSee(__('destination.all_region'), false);
+        $response->assertSee(__('destination.all_cities'), false);
+        $response->assertSee($region->name, false);
+        $response->assertSee('Guidings City '.$country->slug, false);
+        $response->assertSee(route('guidings.destination', [
+            'country' => $country->slug,
+            'region' => $region->slug,
+        ], false), false);
     }
 
     public function test_guidings_destination_region_resolves_under_country(): void
@@ -167,6 +205,9 @@ class GuidingsDestinationTest extends TestCase
         $response->assertViewHas('destination_route', 'guidings.destination');
         $response->assertSee(route('guidings.destination', ['country' => $country->slug], false), false);
         $response->assertDontSee(route('destination.country', ['country' => $country->slug], false), false);
+        $response->assertSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('data-category-header-shell', false);
+        $response->assertDontSee('cag-site-nav--overlay', false);
     }
 
     public function test_guidings_countries_is_not_captured_as_destination_country(): void

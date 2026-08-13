@@ -39,6 +39,11 @@ final class VacationPillarIndexViewModel
     public function pageTitle(): string
     {
         if ($this->isCountryPage()) {
+            $cmsTitle = $this->cmsField('title');
+            if (filled($cmsTitle)) {
+                return strip_tags($cmsTitle);
+            }
+
             return __($this->pillar->countryTitleKey(), ['country' => $this->countryName()]);
         }
 
@@ -48,18 +53,65 @@ final class VacationPillarIndexViewModel
     public function headerSubtitle(): string
     {
         if ($this->isCountryPage()) {
-            $subtitle = $this->destination->sub_title
-                ?? __($this->pillar->descriptionKey());
+            $subtitle = $this->cmsField('sub_title');
+            if (filled($subtitle)) {
+                return strip_tags($subtitle);
+            }
 
-            return strip_tags(translate($subtitle));
+            return __($this->pillar->descriptionKey());
         }
 
         return __($this->pillar->descriptionKey());
     }
 
+    public function introductionHtml(): string
+    {
+        if (! $this->isCountryPage()) {
+            return '';
+        }
+
+        return (string) ($this->cmsField('introduction') ?? '');
+    }
+
+    public function bodyContentHtml(): string
+    {
+        if (! $this->isCountryPage()) {
+            return '';
+        }
+
+        return (string) ($this->cmsField('content') ?? '');
+    }
+
+    public function faqTitle(): string
+    {
+        $cmsFaqTitle = $this->isCountryPage() ? $this->cmsField('faq_title') : null;
+        if (filled($cmsFaqTitle)) {
+            return strip_tags($cmsFaqTitle);
+        }
+
+        return __('vacations.hub_faq_title');
+    }
+
     public function metaDescription(): string
     {
-        return Str::limit($this->headerSubtitle(), 155);
+        $intro = strip_tags($this->introductionHtml());
+
+        return Str::limit($intro !== '' ? $intro : $this->headerSubtitle(), 155);
+    }
+
+    private function cmsField(string $field): ?string
+    {
+        if ($this->destination === null) {
+            return null;
+        }
+
+        if (method_exists($this->destination, 'scopedCmsValue')) {
+            return $this->destination->scopedCmsValue($field);
+        }
+
+        $value = $this->destination->{$field} ?? null;
+
+        return filled($value) ? (string) $value : null;
     }
 
     public function filterAction(): string

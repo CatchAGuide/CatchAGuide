@@ -44,7 +44,7 @@ class HomepageLandingService
         $countryCount = $this->countries->totalCount();
 
         return [
-            'featuredCountries' => $this->countries->featured(8),
+            'featuredCountries' => $this->countries->featured(),
             'countryCount' => $countryCount,
             'mixedOffers' => $this->mixedOffers->mixed(9),
             'offerModules' => $this->mixedOffers->byModule(8),
@@ -93,7 +93,7 @@ class HomepageLandingService
                     'name' => $target?->name ?? $page->name,
                     'slug' => $page->slug,
                     'thumbnail' => $page->getThumbnailPath(),
-                    'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
+                    'url' => route('targets.show', ['slug' => $page->slug]),
                 ];
             });
         });
@@ -329,7 +329,7 @@ class HomepageLandingService
                 'country' => null,
                 'slug' => $page->slug,
                 'thumbnail' => $page->getThumbnailPath(),
-                'url' => route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
+                'url' => route('targets.show', ['slug' => $page->slug]),
             ];
         })->filter()->values();
     }

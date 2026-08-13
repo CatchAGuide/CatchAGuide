@@ -1,5 +1,8 @@
 @php
     $destinationRoute = $destination_route ?? 'destination.country';
+    $showGeoCarousels = $show_geo_carousels ?? true;
+    $showOffersCatalog = $show_offers_catalog ?? true;
+    $useCategoryHeroHeader = request()->routeIs('destination.country');
 @endphp
 @extends('layouts.app-v2')
 
@@ -552,8 +555,20 @@
 @stack('guidingListingStyles')
 
 @section('content')
+    @if($useCategoryHeroHeader)
+        <div class="category-hero-page" data-category-hero-page>
+        @include('pages.category.partials.hero-header', [
+            'listingTitle' => $row_data->title,
+            'listingSubtitle' => $row_data->sub_title,
+            'breadcrumbItems' => [
+                ['label' => __('destination.breadcrumb'), 'url' => route('destination')],
+                ['label' => $row_data->name, 'url' => null],
+            ],
+        ])
+    @endif
     <div class="country-content-fix">
         <div class="container" id="destination">
+            @unless($useCategoryHeroHeader)
             <div class="container">
                 <section class="page-header">
                     <div class="page-header__bottom breadcrumb-container guiding">
@@ -593,12 +608,14 @@
                     </div>
                 </section>
             </div>
-            <div class="container">
+            @endunless
+            <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
                 <div class="col-12">
                     <div id="page-main-intro" class="mb-3">
                         <div class="page-main-intro-text mb-1">{!! translate(nl2br($row_data->introduction ?? '')) !!}</div>
                         <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                     </div>
+                    @if($showGeoCarousels)
                     @php
                     $region_count = $regions->count();
                     $city_count = $cities->count();
@@ -630,7 +647,7 @@
                             @endforeach
                         </div>
                     @endif
-                    
+
                     {{-- Show cities if current destination is country or region --}}
                     @if(in_array($destination_type, ['country', 'region']) && $city_count > 0)
                     <h5 class="mb-2">@lang('destination.all_cities')</h5>
@@ -655,6 +672,8 @@
                         @endforeach
                     </div>
                     @endif
+                    @endif
+                    @if($showOffersCatalog)
                     <h5 class="mb-2">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
                     <div class="offers-catalog-page mb-5">
                         <x-offers.catalog-listing
@@ -663,6 +682,11 @@
                             analytics-page="destination-offers-catalog"
                         />
                     </div>
+                    @else
+                    <div class="cag-home cag-home--embed cag-dest-offers-wrap mb-5">
+                        @include('pages.home.partials.mixed-offers-rail')
+                    </div>
+                    @endif
 
                     <div class="mb-3">{!! clean_html(translate($row_data->content ?? '')) !!}</div>
 
@@ -776,7 +800,7 @@
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
                                     </h2>
                                     <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                        <div class="accordion-body ">{{ translate($row->answer) }}</div>
+                                        <div class="accordion-body ">{!! clean_html(translate($row->answer)) !!}</div>
                                     </div>
                                 </div>
                             @endforeach
@@ -786,10 +810,20 @@
             </div>
         </div>
     </div>
+    @if($useCategoryHeroHeader)
+        </div>
+    @endif
 @endsection
 
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
+@if($showOffersCatalog)
 @include('components.offers.partials.gallery-script')
+@else
+@include('pages.category.partials.destination-offers-script')
+@endif
 <script>
     $(document).ready(function(){
         $('#carousel-regions').owlCarousel({

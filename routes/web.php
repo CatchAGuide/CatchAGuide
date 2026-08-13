@@ -378,8 +378,18 @@ Route::name('additional.')->group(function () {
 
 Route::redirect('destinationen', '/destination', 301)->name('destination_de');
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
-Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
+Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
+Route::get('destination/{country}/{region}/{city?}', [DestinationCountryController::class, 'redirectLegacyGeo'])
+    ->name('destination.legacy-geo')
+    ->middleware('ddos:search');
 
+Route::get('targets', [CategoryController::class, 'targetsIndex'])
+    ->name('targets.index')
+    ->middleware('ddos:search');
+Route::get('targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::GLOBAL)
+    ->name('targets.show')
+    ->middleware('ddos:search');
 Route::get('category-page/{type}/', [CategoryController::class, 'index'])->name('category.types');
 Route::get('category-page/{type}/{slug}', [CategoryController::class, 'targets'])->name('category.targets');
 

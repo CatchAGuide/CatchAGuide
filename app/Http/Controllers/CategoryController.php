@@ -22,24 +22,35 @@ class CategoryController extends Controller
     {
         $type = strtolower((string) $type);
 
-        if ($type === 'methods' && $request->routeIs('category.types')) {
-            if ($request->filled('slug')) {
-                $query = $request->query();
-                unset($query['slug']);
+        if ($request->filled('slug')) {
+            $query = $request->query();
+            $slug = $query['slug'];
+            unset($query['slug']);
 
-                return redirect()->route('guidings.methods.show', ['slug' => $request->query('slug')] + $query, 301);
+            if ($type === 'methods') {
+                return redirect()->route('guidings.methods.show', ['slug' => $slug] + $query, 301);
             }
 
-            return redirect()->route('guidings.methods', $request->query(), 301);
+            if ($type === 'targets') {
+                return redirect()->route('targets.show', ['slug' => $slug] + $query, 301);
+            }
+
+            if ($request->routeIs('category.types')) {
+                return redirect()->route('category.targets', [
+                    'type' => $type,
+                    'slug' => $slug,
+                ], 301);
+            }
         }
 
-        // Legacy/home links sometimes passed slug as a query param on the index route.
-        // Send those to the method/target detail page instead of the category listing.
-        if ($request->filled('slug')) {
-            return redirect()->route('category.targets', [
-                'type' => $type,
-                'slug' => $request->query('slug'),
-            ], 301);
+        if ($request->routeIs('category.types')) {
+            if ($type === 'methods') {
+                return redirect()->route('guidings.methods', $request->query(), 301);
+            }
+
+            if ($type === 'targets') {
+                return redirect()->route('targets.index', $request->query(), 301);
+            }
         }
 
         $language = app()->getLocale();
@@ -65,9 +76,11 @@ class CategoryController extends Controller
         $introduction = __('category.'.$type.'.introduction');
         $title = __('category.'.$type.'.title');
 
-        $categoryItemUrl = fn (string $slug): string => $type === 'methods'
-            ? route('guidings.methods.show', ['slug' => $slug])
-            : route('category.targets', ['type' => $type, 'slug' => $slug]);
+        $categoryItemUrl = fn (string $slug): string => match ($type) {
+            'methods' => route('guidings.methods.show', ['slug' => $slug]),
+            'targets' => route('targets.show', ['slug' => $slug]),
+            default => route('category.targets', ['type' => $type, 'slug' => $slug]),
+        };
 
         $data = compact('favories', 'allTargets', 'introduction', 'title', 'type', 'categoryItemUrl');
 
@@ -84,12 +97,21 @@ class CategoryController extends Controller
         return $this->targets('methods', $slug, $request, $categoryContent);
     }
 
+    public function targetsIndex(Request $request, CategoryPageContentService $categoryContent)
+    {
+        return $this->index('targets', $request, $categoryContent);
+    }
+
     public function targets($type, $slug, Request $request, CategoryPageContentService $categoryContent)
     {
         $type = strtolower((string) $type);
 
         if ($type === 'methods' && $request->routeIs('category.targets')) {
             return redirect()->route('guidings.methods.show', ['slug' => $slug] + $request->query(), 301);
+        }
+
+        if ($type === 'targets' && $request->routeIs('category.targets')) {
+            return redirect()->route('targets.show', ['slug' => $slug] + $request->query(), 301);
         }
 
         if ($type === 'targets') {

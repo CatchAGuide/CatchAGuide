@@ -1,5 +1,9 @@
 @extends('layouts.app-v2')
 
+@php
+    $useCategoryHeroHeader = request()->routeIs('targets.show');
+@endphp
+
 @section('title', $row_data->language->title)
 @section('description', $row_data->language->introduction)
 @section('header_title', $row_data->language->title)
@@ -543,7 +547,19 @@
 @endsection
 
 @section('content')
+    @if($useCategoryHeroHeader)
+        <div class="category-hero-page" data-category-hero-page>
+        @include('pages.category.partials.hero-header', [
+            'listingTitle' => $row_data->language->title,
+            'listingSubtitle' => $row_data->language->sub_title,
+            'breadcrumbItems' => [
+                ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+                ['label' => $row_data->source->name ?? $row_data->name, 'url' => null],
+            ],
+        ])
+    @endif
     <div class="container" id="destination">
+        @unless($useCategoryHeroHeader)
         <div class="container">
             <section class="page-header">
                 <div class="page-header__bottom breadcrumb-container guiding">
@@ -551,7 +567,7 @@
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li><a href="{{ strtolower($row_data->type) === 'methods' ? route('guidings.methods') : route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
+                            <li><a href="{{ match (strtolower($row_data->type)) { 'methods' => route('guidings.methods'), 'targets' => route('targets.index'), default => route('category.types', ['type' => strtolower($row_data->type)]) } }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                             <li class="active">{{ $row_data->source->name ?? $row_data->name }}</li>
                         </ul>
@@ -559,8 +575,9 @@
                 </div>
             </section>
         </div>
+        @endunless
 
-        <div class="container">
+        <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! clean_html($row_data->language->introduction) !!}</div>
@@ -717,7 +734,7 @@
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
                                 </h2>
                                 <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                    <div class="accordion-body ">{{ translate($row->answer) }}</div>
+                                    <div class="accordion-body ">{!! clean_html(translate($row->answer)) !!}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -854,9 +871,15 @@
         </div>
     </div>
     @endunless
+    @if($useCategoryHeroHeader)
+        </div>
+    @endif
 @endsection
 
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
 @isset($vm)
 @include('components.offers.partials.gallery-script')
 <script>

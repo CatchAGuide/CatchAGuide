@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Category;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
-use App\Models\City;
 use App\Models\Country;
-use App\Models\Region;
 use App\Services\CategoryPage\CategoryPageContentService;
-use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Homepage\HomepageMixedOfferSelector;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -17,7 +16,7 @@ use Illuminate\View\View;
 class DestinationCountryController extends Controller
 {
     public function __construct(
-        private OfferCatalogPageService $offerCatalog,
+        private HomepageMixedOfferSelector $mixedOffers,
         private CategoryPageContentService $categoryContent,
     ) {}
 
@@ -25,6 +24,14 @@ class DestinationCountryController extends Controller
     {
         $locale = app()->getLocale();
         $hub = $this->categoryContent->destinationHubFields($locale);
+        $faq = $this->categoryContent->resolveFaqsForEntityDisplay(
+            CategoryPageEntityType::DESTINATION_HUB,
+            CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            CategoryPageScope::GLOBAL,
+            $locale,
+            null,
+            false,
+        );
         $countries = Country::query()->get();
 
         return view('pages.countries.index', [
@@ -33,110 +40,79 @@ class DestinationCountryController extends Controller
             'title' => $hub['title'],
             'sub_title' => $hub['sub_title'],
             'introduction' => $hub['introduction'],
+            'content' => $hub['content'],
+            'faq_title' => $hub['faq_title'],
+            'faq' => $faq,
         ]);
     }
 
-    public function country(Request $request, string $country, ?string $region = null, ?string $city = null): View
+    public function country(Request $request, string $country): View
     {
         $countryRow = Country::with(['translations', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
             ->whereSlug($country)
             ->firstOrFail();
 
-        $regionRow = null;
-        $cityRow = null;
-
-        if ($region) {
-            $regionRow = Region::with(['translations', 'country', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
-                ->whereSlug($region)
-                ->where('country_id', $countryRow->id)
-                ->firstOrFail();
-        }
-
-        if ($city) {
-            $cityRow = City::with(['translations', 'country', 'region', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
-                ->whereSlug($city)
-                ->where('country_id', $countryRow->id)
-                ->where('region_id', $regionRow->id)
-                ->firstOrFail();
-        }
-
-        if ($cityRow) {
-            $rowData = $cityRow;
-            $destinationType = 'city';
-            $entityType = CategoryPageEntityType::GEO_CITY;
-        } elseif ($regionRow) {
-            $rowData = $regionRow;
-            $destinationType = 'region';
-            $entityType = CategoryPageEntityType::GEO_REGION;
-        } else {
-            $rowData = $countryRow;
-            $destinationType = 'country';
-            $entityType = CategoryPageEntityType::GEO_COUNTRY;
-        }
-
         $locale = app()->getLocale();
-        $scope = CategoryPageScope::GLOBAL;
-
-        // Global destination pages use Global content only — no Tours/legacy inheritance.
         $rowData = $this->categoryContent->applyScopedContentToModel(
-            $rowData,
-            $entityType,
-            $scope,
+            $countryRow,
+            CategoryPageEntityType::GEO_COUNTRY,
+            CategoryPageScope::GLOBAL,
             $locale,
             null,
             false,
         );
-
-        $regions = Region::with('country')->where('country_id', $countryRow->id)->get();
-
-        if ($regionRow) {
-            $cities = City::with(['country', 'region'])
-                ->where('country_id', $countryRow->id)
-                ->where('region_id', $regionRow->id)
-                ->get();
-        } else {
-            $cities = City::with(['country', 'region'])
-                ->where('country_id', $countryRow->id)
-                ->get();
-        }
 
         $faq = $this->categoryContent->resolveFaqsForEntityDisplay(
-            $entityType,
+            CategoryPageEntityType::GEO_COUNTRY,
             $rowData->id,
-            $scope,
+            CategoryPageScope::GLOBAL,
             $locale,
             null,
             false,
         );
 
-        $fishChart = $this->geoCollection($rowData, 'fish_charts');
-        $fishSizeLimit = $this->geoCollection($rowData, 'fish_size_limits');
-        $fishTimeLimit = $this->geoCollection($rowData, 'fish_time_limits');
-
-        $vm = $this->offerCatalog->buildForDestination(
-            $request,
-            $countryRow,
-            $regionRow,
-            $cityRow,
-        );
+        $placeName = $rowData->name;
+        $offerModules = $this->mixedOffers->byModuleForDestination($countryRow);
 
         return view('pages.category.country', [
             'row_data' => $rowData,
-            'destination_type' => $destinationType,
+            'destination_type' => 'country',
             'destination_route' => 'destination.country',
-            'regions' => $regions,
-            'cities' => $cities,
-            'region_count' => $regions->count(),
-            'city_count' => $cities->count(),
+            'show_geo_carousels' => false,
+            'show_offers_catalog' => false,
+            'regions' => collect(),
+            'cities' => collect(),
+            'region_count' => 0,
+            'city_count' => 0,
             'faq' => $faq,
-            'fish_chart' => $fishChart,
-            'fish_size_limit' => $fishSizeLimit,
-            'fish_time_limit' => $fishTimeLimit,
-            'vm' => $vm,
+            'fish_chart' => $this->geoCollection($rowData, 'fish_charts'),
+            'fish_size_limit' => $this->geoCollection($rowData, 'fish_size_limits'),
+            'fish_time_limit' => $this->geoCollection($rowData, 'fish_time_limits'),
+            'offerModules' => $offerModules,
+            'offersTitle' => __('destination.popular_title', ['place' => $placeName]),
+            'offersEmptyMessage' => __('destination.popular_empty', ['place' => $placeName]),
+            'offersSectionClass' => 'cag-dest-offers',
+            'offersVariant' => 'destination',
+            'offerBrowseUrls' => [
+                'tour' => route('guidings.destination', ['country' => $countryRow->slug]),
+                'camp' => route('vacations.camps.show', ['slug' => $countryRow->slug]),
+                'trip' => route('vacations.trips.show', ['slug' => $countryRow->slug]),
+            ],
         ]);
     }
 
-    private function geoCollection(Country|Region|City $entity, string $relation): Collection
+    public function redirectLegacyGeo(Request $request, string $country): RedirectResponse
+    {
+        Country::query()->whereSlug($country)->firstOrFail();
+
+        return redirect()->route(
+            'destination.country',
+            array_merge(['country' => $country], $request->query()),
+            301,
+        );
+    }
+
+    private function geoCollection(Country $entity, string $relation): Collection
     {
         if ($entity->relationLoaded($relation)) {
             return $entity->getRelation($relation);

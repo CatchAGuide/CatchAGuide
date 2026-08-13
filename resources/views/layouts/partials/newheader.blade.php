@@ -5,7 +5,7 @@
     $isHomepage = request()->is('/');
     $isGuidingsLanding = request()->routeIs('guidings.landing');
     $isOffers = request()->is('offers*') || request()->routeIs('offers.*');
-    $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*') || request()->is('guidings/methods*');
+    $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*') || request()->is('guidings/methods*') || request()->is('targets*');
     $vacationPillarCountrySlug = request()->route('slug');
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $showVacationHeaderSubtitle = request()->routeIs('vacations.index')

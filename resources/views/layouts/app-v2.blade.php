@@ -268,13 +268,20 @@
             || request()->routeIs('vacations.camps.index')
             || request()->routeIs('vacations.trips.show')
             || request()->routeIs('vacations.camps.show');
+        $useCategorySiteHeader = request()->routeIs(
+            'destination',
+            'destination.country',
+            'targets.index',
+            'targets.show',
+        );
         $useLegacyHeader = ! request()->is('/')
             && ! $useOffersSiteHeader
-            && ! $useVacationsSiteHeader;
+            && ! $useVacationsSiteHeader
+            && ! $useCategorySiteHeader;
     @endphp
 
-    {{-- Homepage / offers / vacations listings include site-nav in page content. --}}
-    @if($useOffersSiteHeader || $useVacationsSiteHeader)
+    {{-- Homepage / offers / vacations / destination / targets include site-nav in page content. --}}
+    @if($useOffersSiteHeader || $useVacationsSiteHeader || $useCategorySiteHeader)
         @include('layouts.modal.loginModal')
         @include('layouts.modal.registerModal')
         @include('layouts.modal.guideApplicationModal')

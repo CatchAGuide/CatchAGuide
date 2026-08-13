@@ -129,7 +129,7 @@ class HomepageLandingTest extends TestCase
                     'name' => 'Pike',
                     'slug' => 'pike',
                     'thumbnail' => '/assets/images/300x300.png',
-                    'url' => '/category-page/targets/pike',
+                    'url' => '/targets/pike',
                 ],
             ]),
             'featuredGuides' => collect(),

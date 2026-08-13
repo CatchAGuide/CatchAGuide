@@ -2679,6 +2679,102 @@ body .main-menu .main-menu-wrapper__nav {
     transform: none !important;
   }
 }
+.category-hero-page {
+  padding-bottom: 2rem;
+}
+
+.category-hero-page__body {
+  padding-top: 0.25rem;
+}
+
+.cag-dest-offers-wrap {
+  --cag-dest-glow: rgba(232, 96, 76, 0.22);
+}
+
+.cag-dest-offers {
+  padding: 0.5rem 0 1.25rem;
+}
+.cag-dest-offers .cag-home-container {
+  padding-left: 0;
+  padding-right: 0;
+}
+.cag-dest-offers .cag-home-section__header {
+  margin-bottom: 1.5rem;
+}
+.cag-dest-offers .cag-home-section__title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.35rem;
+}
+.cag-dest-offers .cag-home-section__title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 2.75rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #E8604C 0%, #313041 100%);
+}
+
+.cag-dest-offers__empty {
+  margin: 0;
+  color: var(--cag-gray, #787780);
+  font-size: 1rem;
+}
+
+.has-reveal-js .cag-dest-offers .cag-reveal__item {
+  transform: translateY(28px) rotateX(8deg) scale(0.94);
+  transform-origin: center bottom;
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(80ms + var(--reveal-i, 0) * 70ms);
+}
+.has-reveal-js .cag-dest-offers.is-inview .cag-reveal__item,
+.has-reveal-js .cag-dest-offers [data-cag-reveal].is-inview .cag-reveal__item {
+  opacity: 1;
+  transform: none;
+}
+
+.cag-dest-offers .cag-home-offer {
+  position: relative;
+  transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease;
+}
+.cag-dest-offers .cag-home-offer .cag-home-offer__media img {
+  transform: scale(1.02);
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cag-dest-offers .cag-home-offer .cag-home-offer__badge {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.cag-dest-offers .cag-home-offer:hover {
+  transform: translateY(-8px);
+}
+.cag-dest-offers .cag-home-offer:hover .cag-home-offer__media img {
+  transform: scale(1.12);
+}
+.cag-dest-offers .cag-home-offer.is-spotlight {
+  z-index: 2;
+  transform: translateY(-10px) scale(1.035);
+  border-color: color-mix(in srgb, var(--category-color, #E8604C) 45%, var(--cag-border, #ece8e0));
+  box-shadow: 0 18px 38px var(--cag-dest-glow), 0 0 0 3px var(--category-soft, rgba(232, 96, 76, 0.16));
+}
+.cag-dest-offers .cag-home-offer.is-spotlight .cag-home-offer__media img {
+  transform: scale(1.1);
+}
+.cag-dest-offers .cag-home-offer.is-spotlight .cag-home-offer__badge {
+  transform: translateY(-2px) scale(1.06);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cag-dest-offers .cag-reveal__item,
+  .cag-dest-offers .cag-home-offer,
+  .cag-dest-offers .cag-home-offer__media img,
+  .cag-dest-offers .cag-home-offer__badge {
+    transition: none !important;
+    transform: none !important;
+  }
+}
 .offers-catalog-page {
   background: #f7f9fb;
   padding-bottom: 2rem;

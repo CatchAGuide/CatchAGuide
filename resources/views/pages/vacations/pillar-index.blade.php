@@ -58,6 +58,12 @@
         ])
     @endunless
 
+    @if($vm->isCountryPage() && filled($vm->introductionHtml()))
+        <div id="page-main-intro" class="mb-3">
+            <div class="page-main-intro-text mb-1">{!! clean_html(translate(nl2br($vm->introductionHtml()))) !!}</div>
+        </div>
+    @endif
+
     <h2 class="vacation-country__listing-title">{{ $vm->pageTitle() }}</h2>
 
     @if($hasMap)
@@ -125,9 +131,13 @@
         </div>
     </div>
 
+    @if($vm->isCountryPage() && filled($vm->bodyContentHtml()))
+        <div class="mb-4">{!! clean_html(translate($vm->bodyContentHtml())) !!}</div>
+    @endif
+
     @if($vm->faq->isNotEmpty())
         <section class="vacation-pillar-index__faq mb-5">
-            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
+            <x-vacation.section-heading :title="$vm->faqTitle()" />
             <div class="accordion" id="vacationPillarFaq">
                 @foreach($vm->faq as $index => $item)
                     <div class="accordion-item">
@@ -137,7 +147,7 @@
                             </button>
                         </h3>
                         <div id="pillar-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationPillarFaq">
-                            <div class="accordion-body">{!! $item->answer ?? $item['answer'] ?? '' !!}</div>
+                            <div class="accordion-body">{!! clean_html(translate($item->answer ?? $item['answer'] ?? '')) !!}</div>
                         </div>
                     </div>
                 @endforeach

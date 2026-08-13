@@ -4,23 +4,28 @@
         'camp' => collect(),
         'trip' => collect(),
     ];
+    $offersTitle = $offersTitle ?? __('homepage.offers_title');
+    $offersSectionClass = trim('cag-home-section cag-home-offers '.($offersSectionClass ?? ''));
+    $offersVariant = $offersVariant ?? 'home';
+    $offersEmptyMessage = $offersEmptyMessage ?? null;
+    $offerBrowseUrls = $offerBrowseUrls ?? [];
     $offerModuleConfig = [
         'tour' => [
             'title' => __('homepage.offers_tours_title'),
             'browse' => __('homepage.mixed_browse_tours'),
-            'url' => route('guidings.index'),
+            'url' => $offerBrowseUrls['tour'] ?? route('guidings.index'),
             'icon' => 'fa-ship',
         ],
         'camp' => [
             'title' => __('homepage.offers_camps_title'),
             'browse' => __('homepage.mixed_browse_camps'),
-            'url' => route('vacations.camps.index'),
+            'url' => $offerBrowseUrls['camp'] ?? route('vacations.camps.index'),
             'icon' => 'fa-campground',
         ],
         'trip' => [
             'title' => __('homepage.offers_trips_title'),
             'browse' => __('homepage.mixed_browse_trips'),
-            'url' => route('vacations.trips.index'),
+            'url' => $offerBrowseUrls['trip'] ?? route('vacations.trips.index'),
             'icon' => 'fa-suitcase-rolling',
         ],
     ];
@@ -28,10 +33,10 @@
 @endphp
 
 @if($hasAnyOffers)
-<section class="cag-home-section cag-home-offers" data-cag-reveal>
+<section class="{{ $offersSectionClass }}" data-cag-reveal @if($offersVariant === 'destination') data-dest-offers @endif>
     <div class="cag-home-container">
         <div class="cag-home-section__header cag-reveal__header">
-            <h2 class="cag-home-section__title">{{ __('homepage.offers_title') }}</h2>
+            <h2 class="cag-home-section__title">{{ $offersTitle }}</h2>
         </div>
 
         @foreach($offerModuleConfig as $type => $module)
@@ -85,6 +90,15 @@
                 </div>
             @endif
         @endforeach
+    </div>
+</section>
+@elseif(filled($offersEmptyMessage))
+<section class="{{ $offersSectionClass }} cag-dest-offers--empty" data-cag-reveal>
+    <div class="cag-home-container">
+        <div class="cag-home-section__header cag-reveal__header">
+            <h2 class="cag-home-section__title">{{ $offersTitle }}</h2>
+        </div>
+        <p class="cag-dest-offers__empty">{{ $offersEmptyMessage }}</p>
     </div>
 </section>
 @endif

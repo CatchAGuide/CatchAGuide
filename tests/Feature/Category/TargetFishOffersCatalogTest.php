@@ -67,7 +67,7 @@ class TargetFishOffersCatalogTest extends TestCase
 
         $this->bindTargetFishCatalog(fn () => $this->viewModel(
             type: 'all',
-            catalogUrl: route('category.targets', ['type' => 'targets', 'slug' => $page->slug]),
+            catalogUrl: route('targets.show', ['slug' => $page->slug]),
             speciesIds: [(int) $page->source_id],
             cards: collect([
                 $this->card('tour', 'Pike Tour'),
@@ -76,8 +76,7 @@ class TargetFishOffersCatalogTest extends TestCase
             ]),
         ));
 
-        $response = $this->get(route('category.targets', [
-            'type' => 'targets',
+        $response = $this->get(route('targets.show', [
             'slug' => $page->slug,
         ]));
 
@@ -95,6 +94,10 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('value="'.$page->source_id.'"', false);
         $response->assertDontSee('offers-filters__species', false);
         $response->assertDontSee('id="guidings-list"', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
     public function test_tours_target_fish_page_uses_tours_scope_and_locks_catalog(): void
@@ -116,6 +119,8 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="tour"', false);
         $response->assertSee('name="type"', false);
         $response->assertSee('value="tour"', false);
+        $response->assertSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('data-category-header-shell', false);
     }
 
     public function test_vacations_target_fish_page_uses_vacations_scope_and_locks_catalog(): void
@@ -166,7 +171,7 @@ class TargetFishOffersCatalogTest extends TestCase
 
     public function test_target_fish_type_toggle_stays_on_category_url_and_keeps_species(): void
     {
-        $base = 'http://localhost/category-page/targets/pike';
+        $base = 'http://localhost/targets/pike';
         $vm = $this->viewModel(
             type: 'all',
             catalogUrl: $base,

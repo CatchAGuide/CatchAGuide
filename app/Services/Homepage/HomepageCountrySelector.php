@@ -9,30 +9,26 @@ use Illuminate\Support\Facades\Cache;
 
 class HomepageCountrySelector
 {
-    public const FEATURED_LIMIT = 12;
-
     /**
-     * Featured countries for the homepage destinations rail.
+     * Destination-rail countries. Pass $limit only for tests; production rails show every unique ISO.
      *
      * @return Collection<int, array{slug: string, name: string, thumbnail: string, countrycode: ?string, from_price: ?int, from_price_label: ?string}>
      */
     public function featured(?int $limit = null): Collection
     {
-        $limit = $limit ?? self::FEATURED_LIMIT;
         $locale = app()->getLocale();
-        $cacheKey = "homepage_featured_countries_v4_{$locale}_{$limit}";
+        $cacheKey = 'homepage_featured_countries_v5_'.$locale.'_'.($limit ?? 'all');
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale) {
-            $countries = Country::query()
-                ->with('translations')
-                ->orderBy('name')
-                ->get();
-
-            $unique = $this->uniqueByCountryCode($countries, $locale);
+            $unique = $this->uniqueModels($locale);
 
             $withThumb = $unique->filter(fn (Country $c) => filled($c->thumbnail_path));
             $withoutThumb = $unique->reject(fn (Country $c) => filled($c->thumbnail_path));
-            $ordered = $withThumb->concat($withoutThumb)->take($limit);
+            $ordered = $withThumb->concat($withoutThumb);
+
+            if ($limit !== null) {
+                $ordered = $ordered->take($limit);
+            }
 
             $minPrices = $this->minPricesByCountryIso($ordered);
 
@@ -69,6 +65,23 @@ class HomepageCountrySelector
 
             return $withIso->count() + $withoutIso->count();
         });
+    }
+
+    /**
+     * Unique country models (one row per ISO) for destination rails.
+     *
+     * @param  Collection<int, Country>|null  $countries
+     * @return Collection<int, Country>
+     */
+    public function uniqueModels(?string $locale = null, ?Collection $countries = null): Collection
+    {
+        $locale = $locale ?? app()->getLocale();
+        $countries ??= Country::query()
+            ->with('translations')
+            ->orderBy('name')
+            ->get();
+
+        return $this->uniqueByCountryCode($countries, $locale);
     }
 
     /**

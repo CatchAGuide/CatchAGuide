@@ -3,6 +3,7 @@ return [
     'title' => 'Fishing tours all over Europe',
     'header_title' => 'Fishing tours all over Europe',
     'header_sub_title' => 'All destinations for your next fishing tour in Europe',
+    'breadcrumb' => 'Destinations',
     'introduction' => 'Europe offers anglers an impressive variety of waters and fish species. Whether you prefer the tranquility of a quiet lake in Sweden or are looking for action-packed deep-sea fishing in the Mediterranean - with us you are guaranteed to find your personal dream trip.<br><br>
 Germany: The home of carp, pike and zander offers excellent fishing opportunities in large lakes such as Lake Constance and rivers such as the Rhine. Numerous fishing guides offer guided tours to show you the best spots and techniques.<br><br>
 Netherlands: With its numerous canals and the IJsselmeer, the Netherlands is a true Eldorado for anglers. Zander, pike and perch are often found here. Boat tours on the IJsselmeer are particularly popular for fishing for the large predatory fish.<br><br>
@@ -47,4 +48,6 @@ Italy: The lakes of northern Italy and the coastal regions are very popular with
     'next' => 'Next',
     'details' => 'Details',
     'add_to_favorites' => 'Add to Favorites',
+    'popular_title' => 'Popular with anglers in :place',
+    'popular_empty' => 'No offers in :place yet. Browse tours and holidays across Europe in the meantime.',
 ];  
