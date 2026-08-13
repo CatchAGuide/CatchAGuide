@@ -339,4 +339,84 @@ class CategoryPagesAdminTest extends TestCase
         $response->assertSee('category-autosave-status', false);
         $response->assertSee('target-fish\/'.$target->id.'\/autosave', false);
     }
+
+    public function test_category_pages_hub_includes_destination_hub_card(): void
+    {
+        $this->actingAsEmployee();
+
+        $response = $this->get(route('admin.category.hub'));
+
+        $response->assertOk();
+        $response->assertSee(__('admin.category_pages.dimensions.destination_hub'), false);
+        $response->assertSee(route('admin.category.destination-hub.edit', [], false), false);
+    }
+
+    public function test_admin_can_save_destination_hub_content(): void
+    {
+        $this->actingAsEmployee();
+
+        $response = $this->put(route('admin.category.destination-hub.update'), [
+            'title' => 'CMS Destination Hub Title',
+            'sub_title' => 'CMS Destination Hub Sub',
+            'introduction' => 'CMS intro',
+            'content' => 'CMS body',
+            'faq_title' => 'FAQ',
+            'languageSwitch' => 'en',
+            'content_scope' => CategoryPageScope::GLOBAL,
+            'faq' => [
+                ['question' => 'Where?', 'answer' => 'Europe'],
+            ],
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('languages', [
+            'source_id' => CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            'type' => CategoryPageEntityType::DESTINATION_HUB,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'en',
+            'title' => 'CMS Destination Hub Title',
+        ]);
+    }
+
+    public function test_destination_hub_editor_renders_and_includes_autosave_endpoint(): void
+    {
+        $this->actingAsEmployee();
+
+        $response = $this->get(route('admin.category.destination-hub.edit', [
+            'language' => 'en',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('category-autosave-status', false);
+        $response->assertSee('destination-hub\/autosave', false);
+    }
+
+    public function test_admin_can_autosave_destination_hub_content(): void
+    {
+        $this->actingAsEmployee();
+
+        $response = $this->postJson(route('admin.category.destination-hub.autosave'), [
+            'title' => 'Autosave Hub Title',
+            'sub_title' => 'Autosave Hub Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => 'FAQ',
+            'languageSwitch' => 'de',
+            'content_scope' => CategoryPageScope::GLOBAL,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('ok', true);
+        $response->assertJsonPath('scope', CategoryPageScope::GLOBAL);
+
+        $this->assertDatabaseHas('languages', [
+            'source_id' => CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            'type' => CategoryPageEntityType::DESTINATION_HUB,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'de',
+            'title' => 'Autosave Hub Title',
+        ]);
+    }
 }

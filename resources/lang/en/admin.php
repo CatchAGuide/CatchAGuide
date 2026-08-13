@@ -308,6 +308,8 @@ return [
         'legacy' => 'Legacy',
         'scopes_label' => 'Scopes',
         'global_note' => 'Global = mixed catalog SEO copy (not the /offers page type).',
+        'destination_hub_saved' => 'Destinations overview saved.',
+        'save_error' => 'Something went wrong. Please try again.',
 
         'scopes' => [
             'global' => 'Global',
@@ -323,6 +325,7 @@ return [
             'countries' => 'Countries',
             'region' => 'Regions',
             'city' => 'Cities',
+            'destination_hub' => 'Destinations overview',
             'trip_locations_legacy' => 'Trip locations (legacy)',
         ],
 
@@ -382,6 +385,7 @@ return [
         'sidebar' => [
             'menu' => 'Category pages',
             'hub' => 'Hub',
+            'destination_hub' => 'Destinations overview',
             'target_fish' => 'Target fish',
             'methods' => 'Methods',
             'countries' => 'Countries',

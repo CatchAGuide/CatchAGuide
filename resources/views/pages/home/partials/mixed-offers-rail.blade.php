@@ -9,16 +9,19 @@
             'title' => __('homepage.offers_tours_title'),
             'browse' => __('homepage.mixed_browse_tours'),
             'url' => route('guidings.index'),
+            'icon' => 'fa-ship',
         ],
         'camp' => [
             'title' => __('homepage.offers_camps_title'),
             'browse' => __('homepage.mixed_browse_camps'),
             'url' => route('vacations.camps.index'),
+            'icon' => 'fa-campground',
         ],
         'trip' => [
             'title' => __('homepage.offers_trips_title'),
             'browse' => __('homepage.mixed_browse_trips'),
             'url' => route('vacations.trips.index'),
+            'icon' => 'fa-suitcase-rolling',
         ],
     ];
     $hasAnyOffers = collect($offerModules)->contains(fn ($items) => $items instanceof \Illuminate\Support\Collection && $items->isNotEmpty());
@@ -37,7 +40,9 @@
                 <div class="cag-home-offers__module cag-home-offers__module--{{ $type }} cag-reveal__block" data-offer-module="{{ $type }}" style="--reveal-i: {{ $loop->index }}">
                     <div class="cag-home-offers__module-header">
                         <h3 class="cag-home-offers__module-title">
-                            <span class="cag-home-offers__module-mark" aria-hidden="true"></span>
+                            <span class="cag-home-offers__module-mark" aria-hidden="true">
+                                <i class="fas {{ $module['icon'] }}"></i>
+                            </span>
                             {{ $module['title'] }}
                         </h3>
                         <div class="cag-home-offers__module-tools">

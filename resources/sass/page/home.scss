@@ -26,6 +26,12 @@ $white: #ffffff;
   @media (min-width: 768px) {
     padding-bottom: 0;
   }
+
+  &--embed {
+    background: transparent;
+    padding-bottom: 0;
+    color: inherit;
+  }
 }
 
 .cag-home-container {
@@ -526,6 +532,14 @@ $white: #ffffff;
 }
 
 // Destinations — single-row auto-scrolling carousel
+.cag-home-destinations {
+  --cag-slate: #{$slate};
+  --cag-gray: #{$gray};
+  --cag-coral: #{$coral};
+  --cag-coral-hover: #{$coral-hover};
+  --cag-border: #{$border};
+}
+
 .cag-home-destinations__viewport {
   width: 100%;
   max-width: 100%;
@@ -1420,9 +1434,15 @@ $white: #ffffff;
 
 .cag-home-offers__module-mark {
   flex: 0 0 auto;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1;
   background: linear-gradient(
     145deg,
     var(--category-color, #{$category-tour}) 0%,

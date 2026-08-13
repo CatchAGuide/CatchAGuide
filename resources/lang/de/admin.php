@@ -308,6 +308,8 @@ return [
         'legacy' => 'Legacy',
         'scopes_label' => 'Bereiche',
         'global_note' => 'Global = SEO-Text für gemischten Katalog (kein /offers-Seitentyp).',
+        'destination_hub_saved' => 'Reiseziele-Übersicht gespeichert.',
+        'save_error' => 'Etwas ist schiefgelaufen. Bitte erneut versuchen.',
 
         'scopes' => [
             'global' => 'Global',
@@ -323,6 +325,7 @@ return [
             'countries' => 'Länder',
             'region' => 'Regionen',
             'city' => 'Städte',
+            'destination_hub' => 'Reiseziele-Übersicht',
             'trip_locations_legacy' => 'Trip-Standorte (Legacy)',
         ],
 
@@ -382,6 +385,7 @@ return [
         'sidebar' => [
             'menu' => 'Kategorieseiten',
             'hub' => 'Hub',
+            'destination_hub' => 'Reiseziele-Übersicht',
             'target_fish' => 'Zielfisch',
             'methods' => 'Methoden',
             'countries' => 'Länder',

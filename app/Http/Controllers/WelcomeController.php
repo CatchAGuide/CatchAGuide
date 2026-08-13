@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CategoryPage;
 use App\Models\Guiding;
+use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Homepage\HomepageLandingService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,6 +15,7 @@ class WelcomeController extends Controller
 
     public function __construct(
         private HomepageLandingService $landing,
+        private HomepageCountrySelector $countries,
     ) {}
 
     public function index(): View
@@ -36,6 +38,7 @@ class WelcomeController extends Controller
         return view('pages.newhome-latest', [
             'CategoryPage' => $allCategoryPages->where('type', 'Targets'),
             'CategoryPageMethods' => $allCategoryPages->where('type', 'Methods'),
+            'featuredCountries' => $this->countries->featured(8),
         ]);
     }
 

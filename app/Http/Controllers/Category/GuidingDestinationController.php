@@ -13,6 +13,7 @@ use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class GuidingDestinationController extends Controller
 {
@@ -20,6 +21,16 @@ class GuidingDestinationController extends Controller
         private OfferCatalogPageService $offerCatalog,
         private CategoryPageContentService $categoryContent,
     ) {}
+
+    public function index(): View
+    {
+        $countries = Country::query()->get();
+
+        return view('pages.countries.index', [
+            'countries' => $countries,
+            'destination_route' => 'guidings.destination',
+        ]);
+    }
 
     public function show(Request $request, string $country, ?string $region = null, ?string $city = null)
     {

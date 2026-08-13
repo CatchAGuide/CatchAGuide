@@ -551,7 +551,7 @@
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li><a href="{{ route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
+                            <li><a href="{{ strtolower($row_data->type) === 'methods' ? route('guidings.methods') : route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                             <li class="active">{{ $row_data->source->name ?? $row_data->name }}</li>
                         </ul>

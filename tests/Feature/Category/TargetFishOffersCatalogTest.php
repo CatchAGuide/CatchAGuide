@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Category;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Models\CategoryPage;
@@ -28,7 +30,7 @@ class TargetFishOffersCatalogTest extends TestCase
         ]);
     }
 
-    private function createTargetFishPage(string $slugPrefix): CategoryPage
+    private function createTargetFishPage(string $slugPrefix, string $scope = CategoryPageScope::GLOBAL): CategoryPage
     {
         $target = new Target();
         $target->forceFill([
@@ -45,14 +47,14 @@ class TargetFishOffersCatalogTest extends TestCase
         ]);
 
         Language::query()->create([
-            'source_id' => $page->id,
-            'type' => 'category_page',
-            'scope' => 'global',
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => $scope,
             'language' => app()->getLocale(),
-            'title' => 'Pike fishing',
-            'sub_title' => 'Guided pike tours and vacations',
-            'introduction' => 'Intro text for pike category.',
-            'content' => 'Body content for pike.',
+            'title' => strtoupper($scope).' Pike fishing',
+            'sub_title' => 'Scoped subtitle '.$scope,
+            'introduction' => 'Intro text for pike category ('.$scope.').',
+            'content' => 'Body content for pike ('.$scope.').',
             'faq_title' => '',
         ]);
 
@@ -80,6 +82,7 @@ class TargetFishOffersCatalogTest extends TestCase
         ]));
 
         $response->assertOk();
+        $response->assertSee('GLOBAL Pike fishing', false);
         $response->assertSee('data-offers-type-filter', false);
         $response->assertSee(__('offers.filter_all'), false);
         $response->assertSee(__('offers.filter_tours'), false);
@@ -92,6 +95,73 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('value="'.$page->source_id.'"', false);
         $response->assertDontSee('offers-filters__species', false);
         $response->assertDontSee('id="guidings-list"', false);
+    }
+
+    public function test_tours_target_fish_page_uses_tours_scope_and_locks_catalog(): void
+    {
+        $page = $this->createTargetFishPage('pike-tours-test', CategoryPageScope::TOURS);
+
+        $this->bindTargetFishCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            catalogUrl: route('guidings.targets', ['slug' => $page->slug]),
+            speciesIds: [(int) $page->source_id],
+            cards: collect([$this->card('tour', 'Pike Tour')]),
+            lockTourScope: true,
+        ));
+
+        $response = $this->get(route('guidings.targets', ['slug' => $page->slug]));
+
+        $response->assertOk();
+        $response->assertSee('TOURS Pike fishing', false);
+        $response->assertSee('data-offer-type="tour"', false);
+        $response->assertSee('name="type"', false);
+        $response->assertSee('value="tour"', false);
+    }
+
+    public function test_vacations_target_fish_page_uses_vacations_scope_and_locks_catalog(): void
+    {
+        $page = $this->createTargetFishPage('pike-vacations-test', CategoryPageScope::VACATIONS);
+
+        $this->bindTargetFishCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            catalogUrl: route('vacations.targets', ['slug' => $page->slug]),
+            speciesIds: [(int) $page->source_id],
+            cards: collect([
+                $this->card('trip', 'Pike Trip'),
+                $this->card('camp', 'Pike Camp'),
+            ]),
+            lockVacationScope: true,
+        ));
+
+        $response = $this->get(route('vacations.targets', ['slug' => $page->slug]));
+
+        $response->assertOk();
+        $response->assertSee('VACATIONS Pike fishing', false);
+        $response->assertSee('data-offer-type="trip"', false);
+        $response->assertSee('name="type"', false);
+        $response->assertSee('value="vacation"', false);
+    }
+
+    public function test_build_for_target_fish_receives_route_scope(): void
+    {
+        $page = $this->createTargetFishPage('pike-scope-arg-test', CategoryPageScope::TOURS);
+
+        $mock = Mockery::mock(OfferCatalogPageService::class);
+        $mock->shouldReceive('buildForTargetFish')
+            ->once()
+            ->withArgs(function ($request, $speciesId, $scope) use ($page) {
+                return (int) $speciesId === (int) $page->source_id
+                    && $scope === CategoryPageScope::TOURS;
+            })
+            ->andReturn($this->viewModel(
+                type: 'tour',
+                catalogUrl: route('guidings.targets', ['slug' => $page->slug]),
+                speciesIds: [(int) $page->source_id],
+                lockTourScope: true,
+            ));
+        $this->app->instance(OfferCatalogPageService::class, $mock);
+
+        $this->get(route('guidings.targets', ['slug' => $page->slug]))->assertOk();
     }
 
     public function test_target_fish_type_toggle_stays_on_category_url_and_keeps_species(): void
@@ -135,6 +205,8 @@ class TargetFishOffersCatalogTest extends TestCase
         $cards = null,
         ?string $catalogUrl = null,
         array $speciesIds = [1],
+        bool $lockTourScope = false,
+        bool $lockVacationScope = false,
     ): OfferCatalogViewModel {
         $cards = $cards ?? collect();
         $filter = OfferListingFilter::fromRequest(array_filter([
@@ -171,6 +243,8 @@ class TargetFishOffersCatalogTest extends TestCase
             suggestedCards: collect(),
             catalogUrl: $catalogUrl,
             lockSpeciesScope: true,
+            lockTourScope: $lockTourScope,
+            lockVacationScope: $lockVacationScope,
         );
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Category\TargetFishPageController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CategoryPage;
@@ -9,29 +10,38 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
-use App\Services\Offers\OfferCatalogPageService;
 use App\Services\CategoryPage\CategoryPageContentService;
-use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
     public function index($type, Request $request, CategoryPageContentService $categoryContent)
     {
+        $type = strtolower((string) $type);
+
+        if ($type === 'methods' && $request->routeIs('category.types')) {
+            if ($request->filled('slug')) {
+                $query = $request->query();
+                unset($query['slug']);
+
+                return redirect()->route('guidings.methods.show', ['slug' => $request->query('slug')] + $query, 301);
+            }
+
+            return redirect()->route('guidings.methods', $request->query(), 301);
+        }
+
         // Legacy/home links sometimes passed slug as a query param on the index route.
         // Send those to the method/target detail page instead of the category listing.
         if ($request->filled('slug')) {
             return redirect()->route('category.targets', [
-                'type' => strtolower($type),
+                'type' => $type,
                 'slug' => $request->query('slug'),
             ], 301);
         }
 
-        $type = strtolower($type);
         $language = app()->getLocale();
         $scope = $type === 'targets'
             ? CategoryPageScope::GLOBAL
@@ -55,14 +65,29 @@ class CategoryController extends Controller
         $introduction = __('category.'.$type.'.introduction');
         $title = __('category.'.$type.'.title');
 
-        $data = compact('favories', 'allTargets', 'introduction', 'title', 'type');
+        $categoryItemUrl = fn (string $slug): string => $type === 'methods'
+            ? route('guidings.methods.show', ['slug' => $slug])
+            : route('category.targets', ['type' => $type, 'slug' => $slug]);
+
+        $data = compact('favories', 'allTargets', 'introduction', 'title', 'type', 'categoryItemUrl');
 
         return view('pages.category.category-index', $data);
     }
 
-    public function targets($type, $slug, Request $request, OfferCatalogPageService $offerCatalog, CategoryPageContentService $categoryContent)
+    public function targets($type, $slug, Request $request, CategoryPageContentService $categoryContent)
     {
-        $type = strtolower($type);
+        $type = strtolower((string) $type);
+
+        if ($type === 'methods' && $request->routeIs('category.targets')) {
+            return redirect()->route('guidings.methods.show', ['slug' => $slug] + $request->query(), 301);
+        }
+
+        if ($type === 'targets') {
+            $request->route()->setParameter('content_scope', CategoryPageScope::GLOBAL);
+
+            return app(TargetFishPageController::class)->show($request, $slug);
+        }
+
         $language = app()->getLocale();
         $row_data = CategoryPage::whereSlug($slug)
             ->whereRaw('LOWER(type) = ?', [$type])
@@ -73,14 +98,7 @@ class CategoryController extends Controller
             abort(404);
         }
 
-        if ($type === 'targets') {
-            $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::GLOBAL, $language);
-            $row_data->faq = $categoryContent->faqsFor(
-                $row_data,
-                $this->resolvedTargetFishScope($row_data, $categoryContent, $language),
-                $language
-            );
-        } elseif ($type === 'methods') {
+        if ($type === 'methods') {
             $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::TOURS, $language);
             $row_data->faq = $categoryContent->faqsFor($row_data, CategoryPageScope::TOURS, $language);
         } else {
@@ -88,46 +106,7 @@ class CategoryController extends Controller
             $row_data->faq = $row_data->faq($language);
         }
 
-        if ($type === 'targets') {
-            return $this->showTargetFishOffers($row_data, $request, $offerCatalog);
-        }
-
         return $this->showLegacyGuidingCategory($type, $row_data, $request);
-    }
-
-    private function resolvedTargetFishScope(CategoryPage $page, CategoryPageContentService $categoryContent, string $locale): string
-    {
-        $global = $categoryContent->findForEntity(
-            CategoryPageEntityType::TARGET_FISH,
-            $page->source_id,
-            CategoryPageScope::GLOBAL,
-            $locale,
-        );
-
-        if ($global !== null && filled($global->title)) {
-            return CategoryPageScope::GLOBAL;
-        }
-
-        return CategoryPageScope::TOURS;
-    }
-
-    private function showTargetFishOffers(
-        CategoryPage $row_data,
-        Request $request,
-        OfferCatalogPageService $offerCatalog,
-    ): View {
-        $speciesId = (int) $row_data->source_id;
-        if ($speciesId <= 0) {
-            abort(404);
-        }
-
-        $vm = $offerCatalog->buildForTargetFish($request, $speciesId);
-
-        return view('pages.category.category-show', [
-            'row_data' => $row_data,
-            'title' => $row_data->language->title ?? $row_data->name,
-            'vm' => $vm,
-        ]);
     }
 
     private function showLegacyGuidingCategory(string $type, CategoryPage $row_data, Request $request)

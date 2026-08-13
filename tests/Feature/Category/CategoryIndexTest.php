@@ -94,12 +94,20 @@ class CategoryIndexTest extends TestCase
             'faq_title' => '',
         ]);
 
-        $response = $this->get(route('category.types', ['type' => 'methods']));
+        $response = $this->get(route('guidings.methods'));
 
         $response->assertOk();
         $response->assertSee('Visible Fly Method Title', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });
+    }
+
+    public function test_legacy_methods_index_redirects_to_guidings_methods(): void
+    {
+        $response = $this->get(route('category.types', ['type' => 'methods']));
+
+        $response->assertRedirect(route('guidings.methods'));
+        $response->assertStatus(301);
     }
 }

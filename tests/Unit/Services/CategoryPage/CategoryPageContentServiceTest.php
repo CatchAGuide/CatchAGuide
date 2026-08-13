@@ -221,4 +221,39 @@ class CategoryPageContentServiceTest extends TestCase
         $this->assertSame('Tours Spain Title', $withFallback?->title);
         $this->assertNull($strict);
     }
+
+    public function test_destination_hub_fields_fall_back_to_lang_files(): void
+    {
+        Language::query()
+            ->where('type', CategoryPageEntityType::DESTINATION_HUB)
+            ->where('source_id', CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID)
+            ->delete();
+
+        $fields = $this->service->destinationHubFields('en');
+
+        $this->assertSame(__('destination.title', [], 'en'), $fields['title']);
+        $this->assertSame(__('destination.header_sub_title', [], 'en'), $fields['sub_title']);
+        $this->assertSame(__('destination.introduction', [], 'en'), $fields['introduction']);
+    }
+
+    public function test_destination_hub_fields_prefer_cms_content(): void
+    {
+        Language::query()->create([
+            'source_id' => CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            'type' => CategoryPageEntityType::DESTINATION_HUB,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'en',
+            'title' => 'CMS Europe Title',
+            'sub_title' => 'CMS Europe Sub',
+            'introduction' => 'CMS intro',
+            'content' => 'CMS body',
+            'faq_title' => '',
+        ]);
+
+        $fields = $this->service->destinationHubFields('en');
+
+        $this->assertSame('CMS Europe Title', $fields['title']);
+        $this->assertSame('CMS Europe Sub', $fields['sub_title']);
+        $this->assertSame('CMS intro', $fields['introduction']);
+    }
 }

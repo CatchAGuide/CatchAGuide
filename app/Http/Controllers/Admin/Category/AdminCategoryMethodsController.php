@@ -147,7 +147,7 @@ class AdminCategoryMethodsController extends Controller
             'nameReadonly' => false,
             'name' => $method->name ?? '',
             'thumbnail' => $categoryPage ? $categoryPage->getThumbnailPath() : asset('assets/images/300x300.png'),
-            'publicUrl' => url('/category-page/methods/'.$slug),
+            'publicUrl' => route('guidings.methods.show', ['slug' => $slug]),
         ]));
     }
 

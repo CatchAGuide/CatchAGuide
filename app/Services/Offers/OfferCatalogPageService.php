@@ -2,6 +2,7 @@
 
 namespace App\Services\Offers;
 
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\DestinationOfferScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
@@ -115,18 +116,36 @@ class OfferCatalogPageService
     }
 
     /**
-     * Target-fish category pages: lock species and list tours + vacation offers.
+     * Target-fish category pages: lock species.
+     * Global lists tours + vacations; Tours/Vacations lock the offer type to that surface.
      */
-    public function buildForTargetFish(Request $request, int $speciesId): OfferCatalogViewModel
-    {
+    public function buildForTargetFish(
+        Request $request,
+        int $speciesId,
+        string $contentScope = CategoryPageScope::GLOBAL,
+    ): OfferCatalogViewModel {
         $input = $request->all();
         $input['species'] = [$speciesId];
+
+        $lockTourScope = false;
+        $lockVacationScope = false;
+
+        if ($contentScope === CategoryPageScope::TOURS) {
+            $input['type'] = 'tour';
+            unset($input['vacation']);
+            $lockTourScope = true;
+        } elseif ($contentScope === CategoryPageScope::VACATIONS) {
+            $input['type'] = 'vacation';
+            $lockVacationScope = true;
+        }
 
         return $this->buildFromInput(
             $input,
             $request,
             catalogUrl: $request->url(),
             lockSpeciesScope: true,
+            lockTourScope: $lockTourScope,
+            lockVacationScope: $lockVacationScope,
             includeFaq: false,
         );
     }
@@ -141,6 +160,7 @@ class OfferCatalogPageService
         bool $lockDestinationScope = false,
         bool $lockSpeciesScope = false,
         bool $lockTourScope = false,
+        bool $lockVacationScope = false,
         bool $includeFaq = true,
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
@@ -241,6 +261,7 @@ class OfferCatalogPageService
             lockDestinationScope: $lockDestinationScope,
             lockSpeciesScope: $lockSpeciesScope,
             lockTourScope: $lockTourScope,
+            lockVacationScope: $lockVacationScope,
         );
     }
 

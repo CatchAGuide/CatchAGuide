@@ -164,67 +164,6 @@
         opacity: .6;
     }
 
-
-    .trending-card{
-        position: relative;
-        height:240px;
-    }
-    .trending-card .trending-card-wrapper {
-        border-radius: 3px;
-        width: 100%;
-        height: 100%;
-        margin:10px 0px;
-        position: relative;
-        background: #000;
-    }
-    .trending-card .trending-card-wrapper:hover {
-        background: #333333;
-    }
-    .trending-card .trending-card-wrapper .trending-card-wrapper-content {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-    }
-    .trending-card .trending-card-wrapper .trending-card-wrapper-content .overlay-wrapper {
-        display: block;
-        height: 100%;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(180deg,rgba(0,0,0,.2) 0,rgba(0,0,0,.4) 100%);
-        z-index: 2;
-    }
-    /* .trending-card .trending-card-wrapper .trending-card-wrapper-content .overlay-wrapper:hover {
-        background: linear-gradient(180deg,rgba(255, 250, 250, 0.2) 0,rgba(253, 253, 253, 0.4) 100%);
-    } */
-    .trending-card .trending-card-wrapper .trending-card-wrapper-content .trending-card-main {
-        width: 100%;
-        position: relative;
-        bottom: 0;
-        left: 0;
-    }
-    .trending-card .trending-card-wrapper .trending-card-wrapper-content .trending-card-main .trending-text-wrapper {
-        display: flex;
-        align-items: center;
-        color:#fff;
-        padding:20px 20px;
-    }
-
-    .trending-card .trending-card-wrapper .trending-card-wrapper-content .trending-card-main .trending-text-wrapper .trending-title {
-        font-weight: bold;
-        color:#fff;
-    }
-    .trending-card .trending-card-wrapper .trending-card-background {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        padding: 0;
-        opacity: .6;
-        transform: translate3d(0px, 0px, 0.1px);
-    }
-
     .fishing-experience .nav-tabs{
         border:none !important;
     }
@@ -457,559 +396,13 @@
 </section> -->
 
 
-<section class="py-1 my-5 trending">
-    <div class="container my-4">
-        <div class="my-0 section-title">
-            <h2 class="h4 text-dark fw-bolder">@lang('homepage.destination-title')</h2> 
-            <div class="see-more d-flex justify-content-between">
-                <div>
-                    <p class="fw-light">@lang('homepage.destination-message')</p>
-                </div>
-                @if(!$agent->ismobile())
-                <div>
-                    @if(app()->getLocale() == 'de')
-                        <a href="{{route('destination')}}" class="color-primary fw-light">Alle Länder ansehen</a>
-                    @else
-                        <a href="{{route('destination')}}" class="color-primary fw-light">Show all countries</a>
-                    @endif
-                </div>
-                @endif
+<div class="cag-home cag-home--embed">
+@include('pages.home.partials.country-grid', [
+    'showAllCountries' => false,
+    'countryRoute' => 'guidings.destination',
+])
+</div>
 
-            </div>
-        </div>
-        @if(app()->getLocale() == 'de')
-            @if($agent->ismobile())
-                <div class="new-custom-owl owl-carousel owl-theme">
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/deutschland"> 
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Deutschland" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Deutschland</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Deutschland" width="20" height="20" src="{{asset('flags/de.svg')}}">
-                                                    </div>
-                                                  
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/schweden"> 
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Schweden</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/se.svg')}}">
-                                                    </div>
-                                                 
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/spanien">
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Spanien</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/es.svg')}}">
-                                                    </div>
-                                                   
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/niederlande">
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Niederlande</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/nl.svg')}}">
-                                                    </div>
-                                                  
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/kroatien">
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Kroatien</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/hr.svg')}}">
-                                                    </div>
-                                            
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/Denmark">
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/denmark/denmark.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Denmark</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/dk.svg')}}">
-                                                    </div>
-                                                  
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <div class="trending-card">
-                                <a href="/destination/portugal">
-                                    <div class="trending-card-wrapper">
-                                        <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/portugal/portugal.webp')}}">
-                                        <div class="trending-card-wrapper-content">
-                                            <div class="overlay-wrapper"></div>
-                                            <div class="trending-card-main">
-                                                <div class="trending-text-wrapper">
-                                                    <h4 class="trending-title">Portugal</h4>
-                                                    <div>
-                                                        <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/pt.svg')}}">
-                                                    </div>
-                                                
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                </div>
-                <div class="p-1 d-flex justify-content-end">
-                    @if(app()->getLocale() == 'de')
-                        <a href="{{route('destination')}}" class="color-primary fw-light">Alle Länder ansehen</a>
-                    @else
-                        <a href="{{route('destination')}}" class="color-primary fw-light">Show all countries</a>
-                    @endif
-                </div>
-            @else
-                <div class="row">
-                    <div class="col-md-6 col-xs-6">
-                        <div class="trending-card">
-                            <a href="/destination/deutschland"> 
-                                <div class="trending-card-wrapper">
-                                    <img alt="Deutschland" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
-                                    <div class="trending-card-wrapper-content">
-                                        <div class="overlay-wrapper"></div>
-                                        <div class="trending-card-main">
-                                            <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">Deutschland</h4>
-                                                <div>
-                                                    <img class="mx-1" alt="Deutschland" width="32" height="32" src="{{asset('flags/de.svg')}}">
-                                                </div>
-                                          
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-xs-6">
-                        <div class="trending-card">
-                            <a href="/destination/schweden"> 
-                                <div class="trending-card-wrapper">
-                                    <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
-                                    <div class="trending-card-wrapper-content">
-                                        <div class="overlay-wrapper"></div>
-                                        <div class="trending-card-main">
-                                            <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">Schweden</h4>
-                                                <div>
-                                                    <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/se.svg')}}">
-                                                </div>
-                                               
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-xs-6">
-                        <div class="trending-card">
-                            <a href="/destination/spanien">
-                                <div class="trending-card-wrapper">
-                                    <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
-                                    <div class="trending-card-wrapper-content">
-                                        <div class="overlay-wrapper"></div>
-                                        <div class="trending-card-main">
-                                            <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">Spanien</h4>
-                                                <div>
-                                                    <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/es.svg')}}">
-                                                </div>
-                                    
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-xs-6">
-                        <div class="trending-card">
-                            <a href="/destination/niederlande">
-                                <div class="trending-card-wrapper">
-                                    <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
-                                    <div class="trending-card-wrapper-content">
-                                        <div class="overlay-wrapper"></div>
-                                        <div class="trending-card-main">
-                                            <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">Niederlande</h4>
-                                                <div>
-                                                    <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/nl.svg')}}">
-                                                </div>
-                                               
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-xs-6">
-                        <div class="trending-card">
-                            <a href="/destination/kroatien">
-                                <div class="trending-card-wrapper">
-                                    <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
-                                    <div class="trending-card-wrapper-content">
-                                        <div class="overlay-wrapper"></div>
-                                        <div class="trending-card-main">
-                                            <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">Kroatien</h4>
-                                                <div>
-                                                    <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/hr.svg')}}">
-                                                </div>
-                                    
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endif
-        @else
-        @if($agent->ismobile())
-        <div class="new-custom-owl owl-carousel owl-theme">
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/niederlande">
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Netherlands</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20"  src="{{asset('flags/nl.svg')}}">
-                                        </div>
-                              
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/schweden"> 
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Sweden</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/se.svg')}}">
-                                        </div>
-                      
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/spanien">
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Spain</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20"  src="{{asset('flags/es.svg')}}">
-                                        </div>
-                  
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/portugal">
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/portugal/portugal.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Portugal</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20" src="{{asset('flags/pt.svg')}}">
-                                        </div>
-    
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/kroatien">
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Croatia</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20"  src="{{asset('flags/hr.svg')}}">
-                                        </div>
-                                       
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/deutschland"> 
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/germany/deutschland4.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Germany</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20"  src="{{asset('flags/de.svg')}}">
-                                        </div>
-                          
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="item">
-                <div class="trending-card">
-                    <a href="/destination/Denmark">
-                        <div class="trending-card-wrapper">
-                            <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/denmark/denmark.webp')}}">
-                            <div class="trending-card-wrapper-content">
-                                <div class="overlay-wrapper"></div>
-                                <div class="trending-card-main">
-                                    <div class="trending-text-wrapper">
-                                        <h4 class="trending-title">Denmark</h4>
-                                        <div>
-                                            <img class="mx-1" alt="Key West" width="20" height="20"  src="{{asset('flags/dk.svg')}}">
-                                        </div>  
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-        @else
-            <div class="row">
-                <div class="col-md-6 col-xs-6">
-                    <div class="trending-card">
-                        <a href="/destination/niederlande">
-                            <div class="trending-card-wrapper">
-                                <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/netherlands/holland1.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Netherlands</h4>
-                                            <div>
-                                                <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/nl.svg')}}">
-                                            </div>
-                                
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xs-6">
-                    <div class="trending-card">
-                        <a href="/destination/schweden"> 
-                            <div class="trending-card-wrapper">
-                                <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/sweden/schweden5.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Sweden</h4>
-                                            <div>
-                                                <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/se.svg')}}">
-                                            </div>
-                 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4 col-xs-6">
-                    <div class="trending-card">
-                        <a href="/destination/spanien">
-                            <div class="trending-card-wrapper">
-                                <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/spain/spain.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Spain</h4>
-                                            <div>
-                                                <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/es.svg')}}">
-                                            </div>
-             
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4 col-xs-6">
-                    <div class="trending-card">
-                        <a href="/destination/portugal">
-                            <div class="trending-card-wrapper">
-                                <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/portugal/portugal.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Portugal</h4>
-                                            <div>
-                                                <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/pt.svg')}}">
-                                            </div>
-                     
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4 col-xs-6">
-                    <div class="trending-card">
-                        <a href="/destination/kroatien">
-                            <div class="trending-card-wrapper">
-                                <img alt="Key West" class="trending-card-background" src="{{asset('assets/2024/croatia/croatia.webp')}}">
-                                <div class="trending-card-wrapper-content">
-                                    <div class="overlay-wrapper"></div>
-                                    <div class="trending-card-main">
-                                        <div class="trending-text-wrapper">
-                                            <h4 class="trending-title">Croatia</h4>
-                                            <div>
-                                                <img class="mx-1" alt="Key West" width="32" height="32" src="{{asset('flags/hr.svg')}}">
-                                            </div>
-                              
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @endif
-        
-
-     
-        @endif
-    </div>
-</section>
 <section class="py-1 my-5 fishing-experience">
     <div class="container">
         <div class="my-3 section-title">
@@ -1250,9 +643,9 @@
                 @if(!$agent->ismobile())
                 <div>
                     @if(app()->getLocale() == 'de')
-                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">@lang('homepage.fishingtype-title')</a>
+                        <a href="{{ route('guidings.methods') }}" class="color-primary fw-light">@lang('homepage.fishingtype-title')</a>
                     @else
-                        <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+                        <a href="{{ route('guidings.methods') }}" class="color-primary fw-light">See all methods</a>
                     @endif
                 </div>
                 @endif
@@ -1264,7 +657,7 @@
         <div class="methods-custom-owl owl-carousel owl-theme">
             @foreach($CategoryPageMethods as $category)
                 <div class="item">
-                    <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                    <a href="{{ route('guidings.methods.show', ['slug' => $category->slug]) }}">
                         <div class="card">
                             <div class="row g-0">
                                 <div class="col-5">
@@ -1283,16 +676,16 @@
         </div>
         <div class="p-1 d-flex justify-content-end">
             @if(app()->getLocale() == 'de')
-                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">Alle Methoden ansehen</a>
+                <a href="{{ route('guidings.methods') }}" class="color-primary fw-light">Alle Methoden ansehen</a>
             @else
-                <a href="{{ route('category.types', ['type' => 'methods']) }}" class="color-primary fw-light">See all methods</a>
+                <a href="{{ route('guidings.methods') }}" class="color-primary fw-light">See all methods</a>
             @endif
         </div>
         @else
             <div class="row">
                 @foreach($CategoryPageMethods as $category)
                     <div class="my-1 col-md-4">
-                        <a href="{{ route('category.targets', ['type' => 'methods', 'slug' => $category->slug]) }}">
+                        <a href="{{ route('guidings.methods.show', ['slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{media_url($category->thumbnail_path)}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1413,7 +806,7 @@
         <div class="methods-custom-owl owl-carousel owl-theme">
             @foreach($CategoryPage as $category)
                 <div class="item">
-                    <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
+                    <a href="{{ route('guidings.targets', ['slug' => $category->slug]) }}">
                         <div class="card">
                             <div class="row g-0">
                                 <div class="col-5">
@@ -1441,7 +834,7 @@
             <div class="row">
                 @foreach($CategoryPage as $category)
                     <div class="my-1 col-md-4">
-                        <a href="{{ route('category.targets', ['type' => 'targets', 'slug' => $category->slug]) }}">
+                        <a href="{{ route('guidings.targets', ['slug' => $category->slug]) }}">
                             <div class="flex-row card align-items-center">
                                 <img class="card-img-left example-card-img-responsive img-top" src="{{media_url($category->thumbnail_path)}}" style="width:150px;height:100px"/>
                                 <div class="card-body">
@@ -1575,6 +968,7 @@
 @endsection
 
 @section('js_after')
+@include('pages.home.partials.dest-rail-script')
 <script>
     const buttons = document.querySelectorAll('.nav-link');
     

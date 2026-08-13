@@ -643,6 +643,11 @@ body .main-menu .main-menu-wrapper__nav {
     padding-bottom: 0;
   }
 }
+.cag-home--embed {
+  background: transparent;
+  padding-bottom: 0;
+  color: inherit;
+}
 
 .cag-home-container {
   width: 100%;
@@ -1118,6 +1123,14 @@ body .main-menu .main-menu-wrapper__nav {
   right: 1.25rem;
   top: 50%;
   margin-top: -0.5rem;
+}
+
+.cag-home-destinations {
+  --cag-slate: #313041;
+  --cag-gray: #787780;
+  --cag-coral: #E8604C;
+  --cag-coral-hover: #E85B40;
+  --cag-border: #ece8e0;
 }
 
 .cag-home-destinations__viewport {
@@ -1987,9 +2000,15 @@ body .main-menu .main-menu-wrapper__nav {
 
 .cag-home-offers__module-mark {
   flex: 0 0 auto;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1;
   background: linear-gradient(145deg, var(--category-color, #313041) 0%, var(--category-color-end, #1f1e2a) 100%);
   box-shadow: 0 0 0 3px var(--category-soft, rgba(49, 48, 65, 0.09));
 }

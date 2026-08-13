@@ -1,9 +1,15 @@
 @extends('layouts.app-v2')
 
-@section('title', __('destination.title'))
-@section('header_title', __('destination.header_title'))
-@section('header_sub_title', __('destination.header_sub_title'))
-@section('description', __('destination.header_sub_title'))
+@php
+    $title = $title ?? __('destination.title');
+    $sub_title = $sub_title ?? __('destination.header_sub_title');
+    $introduction = $introduction ?? __('destination.introduction');
+@endphp
+
+@section('title', $title)
+@section('header_title', $title)
+@section('header_sub_title', $sub_title)
+@section('description', $sub_title)
 
 @section('custom_style')
     <style>
@@ -72,7 +78,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">@lang('destination.title')</li>
+                        <li class="active">{{ $title }}</li>
                     </ul>
                 </div>
             </div>
@@ -83,15 +89,18 @@
         <div class="container my-4">
             <div id="page-main-intro" class="section-title my-2">
                 <div class="page-main-intro-text">
-                    @lang('destination.introduction')
+                    {!! $introduction !!}
                 </div>
                 <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
             </div>
             <div class="row">
+                @php
+                    $destinationRoute = $destination_route ?? 'destination.country';
+                @endphp
                 @foreach($countries as $country)
                     <div class="col-md-4 my-1">
                         <div class="trending-card">
-                            <a href="{{ route('destination.country', ['country' => $country->slug]) }}"> 
+                            <a href="{{ route($destinationRoute, ['country' => $country->slug]) }}"> 
                                 <div class="trending-card-wrapper">
                                     <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 

@@ -186,6 +186,7 @@
                     </a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.category.hub') }}" class="slide-item {{ request()->routeIs('admin.category.hub') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.hub') }}</a></li>
+                        <li><a href="{{ route('admin.category.destination-hub.edit') }}" class="slide-item {{ request()->routeIs('admin.category.destination-hub.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.destination_hub') }}</a></li>
                         <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.target_fish') }}</a></li>
                         <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.methods') }}</a></li>
                         <li><a href="{{ route('admin.category.country.index') }}" class="slide-item {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.countries') }}</a></li>

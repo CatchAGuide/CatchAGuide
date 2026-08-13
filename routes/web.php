@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\MonthlyHighlightController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
+use App\Http\Controllers\Admin\Category\AdminCategoryDestinationHubController;
 use App\Http\Controllers\Admin\Category\AdminCategoryRegionController;
 use App\Http\Controllers\Admin\Category\AdminCategoryMethodsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
@@ -77,6 +78,8 @@ use App\Http\Controllers\CategoryTargetFishController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\Category\GuidingDestinationController;
+use App\Http\Controllers\Category\TargetFishPageController;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\TestController;
 
 /*
@@ -304,16 +307,31 @@ Route::middleware('auth:web')->group(function () {
 });
 
 Route::get('guidings', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
-Route::get('guidings/landing', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing');
+Route::get('guidings/l', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing');
+Route::get('guidings/countries', [GuidingDestinationController::class, 'index'])
+    ->name('guidings.countries')
+    ->middleware('ddos:search');
+Route::get('guidings/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::TOURS)
+    ->name('guidings.targets')
+    ->middleware('ddos:search');
+Route::get('guidings/methods', [CategoryController::class, 'index'])
+    ->defaults('type', 'methods')
+    ->name('guidings.methods')
+    ->middleware('ddos:search');
+Route::get('guidings/methods/{slug}', [CategoryController::class, 'targets'])
+    ->defaults('type', 'methods')
+    ->name('guidings.methods.show')
+    ->middleware('ddos:search');
 Route::get('guidings/{country}/{region?}/{city?}', [GuidingDestinationController::class, 'show'])
-    ->where('country', '^(?!landing$)(?![0-9]+$)[\p{L}0-9\-]+$')
+    ->where('country', '^(?!landing$|countries$|targets$|methods$)(?![0-9]+$)[\p{L}0-9\-]+$')
     ->name('guidings.destination')
     ->middleware('ddos:search');
 Route::get('guidings/{id}/{slug}', [GuidingsController::class, 'newShow'])
     ->whereNumber('id')
     ->name('guidings.show');
 Route::get('guidings/{slug}', [GuidingsController::class, 'redirectToNewFormat'])
-    ->where('slug', '^(?!landing$)[\p{L}0-9\-]+$')
+    ->where('slug', '^(?!landing$|countries$|targets$|methods$)[\p{L}0-9\-]+$')
     ->middleware('ddos:search');
 Route::post('newguidings', [GuidingsController::class, 'guidingsStore'])->middleware('auth:web,employees')->name('guidings.store');
 Route::post('guidings/generate-cards', [GuidingsController::class, 'generateCards'])->name('guidings.generate-cards');
@@ -326,9 +344,13 @@ Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defau
 Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
 Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
 Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');
+Route::get('vacations/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::VACATIONS)
+    ->name('vacations.targets')
+    ->middleware('ddos:search');
 Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
     ->name('vacations.country')
-    ->where('country', '^(?!trips$|camps$|all-offers$)[\p{L}0-9\-]+$')
+    ->where('country', '^(?!trips$|camps$|all-offers$|targets$)[\p{L}0-9\-]+$')
     ->middleware('ddos:search');
 Route::resource('vacations', VacationsController::class)->except(['index', 'show']);
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
@@ -660,6 +682,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('category')->name('category.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\Category\AdminCategoryHubController::class, 'index'])->name('hub');
+            Route::get('destination-hub', [AdminCategoryDestinationHubController::class, 'edit'])->name('destination-hub.edit');
+            Route::put('destination-hub', [AdminCategoryDestinationHubController::class, 'update'])->name('destination-hub.update');
+            Route::get('destination-hub/language-data', [AdminCategoryDestinationHubController::class, 'getLanguageData'])->name('destination-hub.language-data');
+            Route::post('destination-hub/autosave', [AdminCategoryDestinationHubController::class, 'autosave'])->name('destination-hub.autosave');
 
             // Translation routes must come before resource routes
             Route::get('country/{id}/translation', [AdminCategoryCountryController::class, 'getTranslation'])->name('country.translation');

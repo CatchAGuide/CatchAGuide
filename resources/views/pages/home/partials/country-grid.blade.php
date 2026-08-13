@@ -4,11 +4,13 @@
         <div class="cag-home-section__header cag-reveal__header">
             <h2 class="cag-home-section__title">{{ __('homepage.destinations_title') }}</h2>
             <div class="cag-home-section__tools">
-                <a
-                    href="{{ route('destination') }}"
-                    class="cag-home-section__link d-none d-md-inline"
-                    data-home-analytics="homepage_all_countries_click"
-                >{{ __('homepage.countries_all') }}</a>
+                @if($showAllCountries ?? true)
+                    <a
+                        href="{{ route($allCountriesRoute ?? 'destination') }}"
+                        class="cag-home-section__link d-none d-md-inline"
+                        data-home-analytics="homepage_all_countries_click"
+                    >{{ __('homepage.countries_all') }}</a>
+                @endif
                 <div class="cag-home-destinations__nav d-none d-md-flex">
                     <button type="button" class="cag-home-icon-btn" data-dest-prev aria-label="{{ __('vacations.slider_prev') }}">
                         <i class="fas fa-chevron-left" aria-hidden="true"></i>
@@ -25,7 +27,7 @@
                 @foreach([false, true] as $isClone)
                     @foreach($featuredCountries as $country)
                         <a
-                            href="{{ route('destination.country', ['country' => $country['slug']]) }}"
+                            href="{{ route($countryRoute ?? 'destination.country', ['country' => $country['slug']]) }}"
                             class="cag-home-destinations__tile cag-reveal__item"
                             role="listitem"
                             style="--reveal-i: {{ min($loop->index, 8) }}"
@@ -54,11 +56,13 @@
             </div>
         </div>
 
-        <div class="cag-home-destinations__all-mobile d-md-none cag-reveal__header">
-            <a href="{{ route('destination') }}" data-home-analytics="homepage_all_countries_click">
-                {{ __('homepage.countries_all') }}
-            </a>
-        </div>
+        @if($showAllCountries ?? true)
+            <div class="cag-home-destinations__all-mobile d-md-none cag-reveal__header">
+                <a href="{{ route($allCountriesRoute ?? 'destination') }}" data-home-analytics="homepage_all_countries_click">
+                    {{ __('homepage.countries_all') }}
+                </a>
+            </div>
+        @endif
     </div>
 </section>
 @endif

@@ -31,6 +31,7 @@ final class OfferCatalogViewModel
         public readonly bool $lockDestinationScope = false,
         public readonly bool $lockSpeciesScope = false,
         public readonly bool $lockTourScope = false,
+        public readonly bool $lockVacationScope = false,
     ) {}
 
     public function pageTitle(): string
@@ -112,6 +113,10 @@ final class OfferCatalogViewModel
 
         if ($this->lockTourScope) {
             $params['type'] = 'tour';
+        }
+
+        if ($this->lockVacationScope) {
+            $params['type'] = 'vacation';
         }
 
         return array_filter($params, fn ($v) => $v !== null && $v !== '');

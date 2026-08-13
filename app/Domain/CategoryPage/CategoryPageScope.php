@@ -30,6 +30,7 @@ final class CategoryPageScope
     public static function forDimension(string $dimension): array
     {
         return match ($dimension) {
+            CategoryPageDimension::DESTINATION_HUB => [self::GLOBAL],
             CategoryPageDimension::TARGETS => [self::GLOBAL, self::TOURS, self::VACATIONS],
             CategoryPageDimension::METHODS => [self::TOURS],
             CategoryPageDimension::COUNTRY => [self::GLOBAL, self::TOURS, self::VACATIONS, self::TRIPS, self::CAMPS],

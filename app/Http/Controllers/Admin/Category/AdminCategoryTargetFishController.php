@@ -152,6 +152,7 @@ class AdminCategoryTargetFishController extends Controller
         $completeness = $this->content->completenessForTargetFish($target->id, $scopes);
 
         $slug = $categoryPage?->slug ?? $this->slugFormat($target->getRawOriginal('name') ?? $target->name);
+        $publicUrls = $this->publicUrlsForSlug($slug);
 
         return view('admin.pages.category.catalog-editor', [
             'formTitle' => 'Target Fish',
@@ -166,7 +167,8 @@ class AdminCategoryTargetFishController extends Controller
             'completeness' => $completeness,
             'name' => $target->name ?? '',
             'thumbnail' => $categoryPage ? $categoryPage->getThumbnailPath() : asset('assets/images/300x300.png'),
-            'publicUrl' => url('/category-page/targets/'.$slug),
+            'publicUrl' => $publicUrls[$activeScope] ?? $publicUrls[CategoryPageScope::GLOBAL],
+            'publicUrls' => $publicUrls,
             'title' => $title,
             'sub_title' => $sub_title,
             'introduction' => $introduction,
@@ -174,6 +176,18 @@ class AdminCategoryTargetFishController extends Controller
             'faq_title' => $faq_title,
             'faq' => $faq,
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function publicUrlsForSlug(string $slug): array
+    {
+        return [
+            CategoryPageScope::GLOBAL => route('category.targets', ['type' => 'targets', 'slug' => $slug]),
+            CategoryPageScope::TOURS => route('guidings.targets', ['slug' => $slug]),
+            CategoryPageScope::VACATIONS => route('vacations.targets', ['slug' => $slug]),
+        ];
     }
 
     public function toggleFavorite(Request $request)

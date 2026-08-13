@@ -10,7 +10,7 @@
     $currentSort = $vm->filter->sortBy ?? '';
     $lockedParams = $vm->lockedScopeParams();
     $sortQuery = array_merge(request()->except(['page', 'sortby']), $lockedParams);
-    $showTypeToggles = ! $vm->lockTourScope;
+    $showTypeToggles = ! $vm->lockTourScope && ! $vm->lockVacationScope;
 @endphp
 
 <div

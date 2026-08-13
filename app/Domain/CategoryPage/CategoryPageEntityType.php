@@ -18,6 +18,10 @@ final class CategoryPageEntityType
 
     public const DESTINATION_COUNTRY = 'destination_country';
 
+    public const DESTINATION_HUB = 'destination_hub';
+
+    public const DESTINATION_HUB_SOURCE_ID = 'hub';
+
     public static function faqPageKey(string $entityType): string
     {
         return $entityType;

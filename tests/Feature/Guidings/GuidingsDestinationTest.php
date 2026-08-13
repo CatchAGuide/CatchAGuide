@@ -150,6 +150,31 @@ class GuidingsDestinationTest extends TestCase
             'guidings/{country}/{region?}/{city?}',
             app('router')->getRoutes()->getByName('guidings.destination')->uri()
         );
+        $this->assertSame(
+            'guidings/countries',
+            app('router')->getRoutes()->getByName('guidings.countries')->uri()
+        );
+    }
+
+    public function test_guidings_countries_index_links_to_guidings_destination(): void
+    {
+        $country = $this->createCountry('spanien-countries');
+
+        $response = $this->get(route('guidings.countries'));
+
+        $response->assertOk();
+        $response->assertViewIs('pages.countries.index');
+        $response->assertViewHas('destination_route', 'guidings.destination');
+        $response->assertSee(route('guidings.destination', ['country' => $country->slug], false), false);
+        $response->assertDontSee(route('destination.country', ['country' => $country->slug], false), false);
+    }
+
+    public function test_guidings_countries_is_not_captured_as_destination_country(): void
+    {
+        $response = $this->get('/guidings/countries');
+
+        $response->assertOk();
+        $response->assertViewIs('pages.countries.index');
     }
 
     private function bindToursCatalog(callable $factory): void

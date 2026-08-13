@@ -14,10 +14,18 @@ final class CategoryPageDimension
 
     public const CITY = 'city';
 
+    public const DESTINATION_HUB = 'destination_hub';
+
     /** @return list<array{key: string, route: string, label: string, scopes: list<string>, legacy?: bool}> */
     public static function hubCards(): array
     {
         return [
+            [
+                'key' => self::DESTINATION_HUB,
+                'route' => 'admin.category.destination-hub.edit',
+                'label' => __('admin.category_pages.dimensions.destination_hub'),
+                'scopes' => CategoryPageScope::forDimension(self::DESTINATION_HUB),
+            ],
             [
                 'key' => self::TARGETS,
                 'route' => 'admin.category.target-fish.index',

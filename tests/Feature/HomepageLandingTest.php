@@ -298,6 +298,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-offers__module--tour', false);
         $response->assertSee('cag-home-offers__module--camp', false);
         $response->assertSee('cag-home-offers__module--trip', false);
+        $response->assertSee('cag-home-offers__module-mark', false);
+        $response->assertSee('fa-campground', false);
         $response->assertSee('data-offer-rail="tour"', false);
         $response->assertSee('data-offer-rail="trip"', false);
         $response->assertSee('data-offer-rail="camp"', false);
@@ -308,5 +310,9 @@ class HomepageLandingTest extends TestCase
         $this->assertNotFalse($campPos);
         $this->assertNotFalse($tripPos);
         $this->assertLessThan($tripPos, $campPos, 'Camps module should appear before Trips on the homepage.');
+
+        $this->assertMatchesRegularExpression('/data-offer-module="tour"[\s\S]{0,400}fa-ship/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="camp"[\s\S]{0,400}fa-campground/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,400}fa-suitcase-rolling/', $html);
     }
 }

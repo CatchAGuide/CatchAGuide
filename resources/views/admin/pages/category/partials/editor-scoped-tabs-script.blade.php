@@ -60,6 +60,24 @@
         return document.getElementById('languageSwitch')?.value || '';
     }
 
+    function updatePublicUrlForScope(scope) {
+        const wrap = document.getElementById('category-public-url-wrap');
+        const link = document.getElementById('category-public-url');
+        if (!wrap || !link) return;
+
+        let urls = {};
+        try {
+            urls = JSON.parse(wrap.getAttribute('data-public-urls') || '{}');
+        } catch (e) {
+            urls = {};
+        }
+
+        const url = urls[scope];
+        if (!url) return;
+        link.href = url;
+        link.textContent = url;
+    }
+
     function collectFaqs() {
         return Array.from(document.querySelectorAll('#faq_table tbody tr')).map((row) => ({
             question: row.querySelector('[name*="[question]"]')?.value || '',
@@ -262,6 +280,9 @@
             button.classList.add('is-active');
             const input = document.getElementById(inputId);
             if (input) input.value = value;
+            if (kind === 'scope') {
+                updatePublicUrlForScope(value);
+            }
             await window.loadScopedLanguageData();
         } finally {
             switchingTab = false;

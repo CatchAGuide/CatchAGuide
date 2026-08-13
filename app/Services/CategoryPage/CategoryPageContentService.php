@@ -44,8 +44,12 @@ class CategoryPageContentService
         return $query->first();
     }
 
-    public function resolveForDisplay(CategoryPage $page, string $scope, string $locale): ?Language
-    {
+    public function resolveForDisplay(
+        CategoryPage $page,
+        string $scope,
+        string $locale,
+        bool $allowCrossScopeFallback = true,
+    ): ?Language {
         [$entityType, $sourceId] = $this->entityKeyForPage($page);
 
         return $this->resolveEntityForDisplay(
@@ -54,6 +58,7 @@ class CategoryPageContentService
             $scope,
             $locale,
             fn (string $loc) => $this->legacyCategoryPageLanguage($page, $scope, $loc),
+            $allowCrossScopeFallback,
         );
     }
 
@@ -243,6 +248,39 @@ class CategoryPageContentService
     public function completenessForMethod(int $methodId, array $scopes): array
     {
         return $this->completenessForEntity(CategoryPageEntityType::METHOD, $methodId, $scopes);
+    }
+
+    /**
+     * @return array{title: string, sub_title: string, introduction: string, content: string, faq_title: string}
+     */
+    public function destinationHubFields(string $locale, bool $fallbackToLang = true): array
+    {
+        $content = $this->resolveEntityForDisplay(
+            CategoryPageEntityType::DESTINATION_HUB,
+            CategoryPageEntityType::DESTINATION_HUB_SOURCE_ID,
+            CategoryPageScope::GLOBAL,
+            $locale,
+            null,
+            false,
+        );
+
+        $title = $content?->title;
+        $subTitle = $content?->sub_title;
+        $introduction = $content?->introduction;
+
+        if ($fallbackToLang) {
+            $title = filled($title) ? $title : trans('destination.title', [], $locale);
+            $subTitle = filled($subTitle) ? $subTitle : trans('destination.header_sub_title', [], $locale);
+            $introduction = filled($introduction) ? $introduction : trans('destination.introduction', [], $locale);
+        }
+
+        return [
+            'title' => $title ?? '',
+            'sub_title' => $subTitle ?? '',
+            'introduction' => $introduction ?? '',
+            'content' => $content?->content ?? '',
+            'faq_title' => $content?->faq_title ?? '',
+        ];
     }
 
     /**

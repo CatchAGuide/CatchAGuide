@@ -23,9 +23,17 @@ class DestinationCountryController extends Controller
 
     public function index(): View
     {
-        $countries = Country::all();
+        $locale = app()->getLocale();
+        $hub = $this->categoryContent->destinationHubFields($locale);
+        $countries = Country::query()->get();
 
-        return view('pages.countries.index', compact('countries'));
+        return view('pages.countries.index', [
+            'countries' => $countries,
+            'destination_route' => 'destination.country',
+            'title' => $hub['title'],
+            'sub_title' => $hub['sub_title'],
+            'introduction' => $hub['introduction'],
+        ]);
     }
 
     public function country(Request $request, string $country, ?string $region = null, ?string $city = null): View
