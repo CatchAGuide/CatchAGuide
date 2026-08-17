@@ -3,6 +3,7 @@
 namespace App\Services\Vacation;
 
 use App\Domain\Vacation\VacationListingFilter;
+use App\Models\AccommodationType;
 use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Target;
@@ -14,12 +15,51 @@ class VacationFilterApplicator
 {
     public function applyToCampQuery(Builder $query, VacationListingFilter $filter): Builder
     {
-        return $this->applySpeciesColumnFilter($query, 'target_fish', $filter->speciesIds, $filter->speciesNames);
+        $query = $this->applySpeciesColumnFilter($query, 'target_fish', $filter->speciesIds, $filter->speciesNames);
+
+        return $this->applyCampFacets($query, $filter);
+    }
+
+    public function applyCampFacets(Builder $query, VacationListingFilter $filter): Builder
+    {
+        if ($filter->accommodationTypeId !== null) {
+            $typeId = $filter->accommodationTypeId;
+            $query->whereHas('accommodations', function (Builder $q) use ($typeId) {
+                $q->where('accommodations.status', 'active')
+                    ->where('accommodations.accommodation_type', $typeId);
+            });
+        }
+
+        if ($filter->hasGuiding === true) {
+            $query->whereHas('guidings');
+        } elseif ($filter->hasGuiding === false) {
+            $query->whereDoesntHave('guidings');
+        }
+
+        if ($filter->hasRentalBoat === true) {
+            $query->whereHas('rentalBoats');
+        } elseif ($filter->hasRentalBoat === false) {
+            $query->whereDoesntHave('rentalBoats');
+        }
+
+        return $query;
     }
 
     public function applyToTripQuery(Builder $query, VacationListingFilter $filter): Builder
     {
-        return $this->applySpeciesColumnFilter($query, 'target_species', $filter->speciesIds, $filter->speciesNames);
+        $query = $this->applySpeciesColumnFilter($query, 'target_species', $filter->speciesIds, $filter->speciesNames);
+
+        return $this->applyTripDurationFilter($query, $filter->tripDuration);
+    }
+
+    public function applyTripDurationFilter(Builder $query, ?string $tripDuration): Builder
+    {
+        return match ($tripDuration) {
+            '1-3' => $query->whereBetween('duration_days', [1, 3]),
+            '4-7' => $query->whereBetween('duration_days', [4, 7]),
+            '8+' => $query->where('duration_days', '>=', 8),
+            default => $query,
+        };
     }
 
     /**
@@ -154,6 +194,23 @@ class VacationFilterApplicator
         }
 
         return $needles->unique()->values()->all();
+    }
+
+    /**
+     * @return array<int, array{id: int, name: string}>
+     */
+    public function accommodationTypeOptions(): array
+    {
+        return AccommodationType::query()
+            ->active()
+            ->ordered()
+            ->get(['id', 'name', 'name_en'])
+            ->map(fn (AccommodationType $type) => [
+                'id' => (int) $type->id,
+                'name' => (string) $type->name,
+            ])
+            ->values()
+            ->all();
     }
 
     /**

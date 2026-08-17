@@ -1,4 +1,4 @@
-{{-- Overlay hero header motion + solid nav for destination/targets category pages. --}}
+{{-- Overlay gray header motion + solid nav for destination/targets/guidings pages. --}}
 @once
 @include('layouts.partials.offers-persons-stepper-script')
 <script>

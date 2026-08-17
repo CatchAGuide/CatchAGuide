@@ -20,9 +20,13 @@
             </div>
             <div class="modal-body p-0">
                 <div class="cag-site-mobile-menu__items">
-                    <a href="{{ route('guidings.landing') }}" class="cag-site-mobile-menu__item">@lang('homepage.filter-fishing-near-me')</a>
-                    <a href="{{ route('offers.index') }}" class="cag-site-mobile-menu__item">@lang('offers.nav_label')</a>
-                    <a href="{{ route('vacations.index') }}" class="cag-site-mobile-menu__item">@lang('homepage.header-vacations')</a>
+                    @foreach ($sitePrimaryNavLinks as $item)
+                        <a
+                            href="{{ $item['url'] }}"
+                            @class(['cag-site-mobile-menu__item', 'is-active' => $item['active']])
+                            @if ($item['active']) aria-current="page" @endif
+                        >{{ $item['label'] }}</a>
+                    @endforeach
                     <a href="{{ route('destination') }}" class="cag-site-mobile-menu__item">@lang('homepage.footer_destinations')</a>
                     @auth
                         <a href="{{ route('profile.index') }}" class="cag-site-mobile-menu__item">@lang('homepage.header-profile')</a>

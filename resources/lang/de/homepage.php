@@ -145,6 +145,8 @@ return [
     'guides_view_all' => 'Alle Guides treffen',
 
     'reviews_title' => 'Direkt vom Boot',
+    'reviews_slider_prev' => 'Vorherige Bewertungen',
+    'reviews_slider_next' => 'Nächste Bewertungen',
     'testimonial_guest' => 'Angler',
 
     'magazine_section_title' => 'Geschichten, die dich begeistern',

@@ -39,18 +39,13 @@
         </a>
 
         <nav class="cag-site-nav__links d-none d-md-flex" aria-label="Primary">
-            <a
-                href="{{ route('guidings.landing') }}"
-                class="{{ request()->is('guidings*') ? 'is-active' : '' }}"
-            >@lang('homepage.filter-fishing-near-me')</a>
-            <a
-                href="{{ route('offers.index') }}"
-                class="{{ request()->is('offers*') || request()->routeIs('offers.*') ? 'is-active' : '' }}"
-            >@lang('offers.nav_label')</a>
-            <a
-                href="{{ route('vacations.index') }}"
-                class="{{ request()->is('vacations*') ? 'is-active' : '' }}"
-            >@lang('homepage.header-vacations')</a>
+            @foreach ($sitePrimaryNavLinks as $item)
+                <a
+                    href="{{ $item['url'] }}"
+                    @class(['is-active' => $item['active']])
+                    @if ($item['active']) aria-current="page" @endif
+                >{{ $item['label'] }}</a>
+            @endforeach
         </nav>
 
         <div class="cag-site-nav__actions">

@@ -146,6 +146,9 @@
     @if($isVacation && $activeVacation !== 'all')
         <input type="hidden" name="vacation" value="{{ $activeVacation }}">
     @endif
+    @if($filter->numGuests !== null)
+        <input type="hidden" name="num_guests" value="{{ $filter->numGuests }}">
+    @endif
 
     @if($showTypeToggles && $renderSection === 'all')
         <div class="offers-filters__type-stack" data-offers-type-filter>
@@ -500,6 +503,9 @@
                 @endif
                 @if($isVacation && $activeVacation !== 'all')
                     <input type="hidden" name="vacation" value="{{ $activeVacation }}">
+                @endif
+                @if($filter->numGuests !== null)
+                    <input type="hidden" name="num_guests" value="{{ $filter->numGuests }}">
                 @endif
 
                 @if($showTypeToggles)

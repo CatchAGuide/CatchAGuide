@@ -48,9 +48,9 @@
     data-analytics-page="vacation-country"
     data-country="{{ $destination->slug }}"
 >
-    @if(filled($destination->introduction))
+    @if(filled($destination->scopedCmsValue('introduction')))
         <div id="page-main-intro" class="mb-3">
-            <div class="page-main-intro-text mb-1">{!! translate(nl2br($destination->introduction)) !!}</div>
+            <div class="page-main-intro-text mb-1">{!! translate(nl2br($destination->scopedCmsValue('introduction'))) !!}</div>
             <p class="see-more text-center">
                 <a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a>
             </p>
@@ -67,6 +67,7 @@
         :trips-total="$vm->tripsTotal"
         :camps-total="$vm->campsTotal"
         :species-options="$vm->speciesOptions"
+        :accommodation-type-options="$vm->accommodationTypeOptions"
         :pillar-links="$vm->pillarToggleUrls()"
         :title="$listingTitle"
     >
@@ -99,9 +100,9 @@
         </section>
     @endif
 
-    @if($destination->content)
+    @if(filled($destination->scopedCmsValue('content')))
         <section class="vacation-country__seo mb-4 vacation-country__intro">
-            {!! clean_html(translate($destination->content)) !!}
+            {!! clean_html(translate($destination->scopedCmsValue('content'))) !!}
         </section>
     @endif
 

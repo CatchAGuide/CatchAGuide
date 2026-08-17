@@ -95,6 +95,7 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertDontSee('offers-filters__species', false);
         $response->assertDontSee('id="guidings-list"', false);
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
@@ -120,6 +121,7 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('name="type"', false);
         $response->assertSee('value="tour"', false);
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
         $response->assertSee('action="'.url('/guidings/alloffers').'"', false);

@@ -104,7 +104,8 @@ class VacationCountryPageService
                 CategoryPageEntityType::GEO_COUNTRY,
                 CategoryPageScope::VACATIONS,
                 $locale,
-                fn (string $loc) => $this->categoryContent->legacyCountryLanguage($country, $loc),
+                null,
+                false,
             );
         }
 
@@ -114,7 +115,8 @@ class VacationCountryPageService
                 $country->id,
                 CategoryPageScope::VACATIONS,
                 $locale,
-                fn (string $loc) => $country->faqs()->where('language', $loc)->get(),
+                null,
+                false,
             )
             : collect();
 
@@ -132,6 +134,9 @@ class VacationCountryPageService
             faq: $faq,
             fishChart: $country->fish_charts ?? collect(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
+            accommodationTypeOptions: $filter->showsCampFacets()
+                ? collect($this->filterApplicator->accommodationTypeOptions())
+                : collect(),
             mapMarkers: $this->buildMapMarkers($filter),
         );
     }

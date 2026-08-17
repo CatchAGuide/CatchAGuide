@@ -17,7 +17,7 @@ use App\Models\Rating;
 use App\Models\Thread;
 use App\Models\Faq;
 use App\Models\PageAttribute;
-
+use App\Support\SitePrimaryNav;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -58,6 +58,12 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('myCurrentLocale', $mylocale);
         });
 
+        View::composer([
+            'layouts.partials.site-nav',
+            'layouts.partials.site-mobile-menu',
+        ], function ($view) {
+            $view->with('sitePrimaryNavLinks', SitePrimaryNav::links());
+        });
 
         View::composer('*', function ($view) {
             $authUser = web_guide_user();

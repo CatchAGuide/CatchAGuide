@@ -235,5 +235,60 @@ class HomepageCountrySelectorTest extends TestCase
         $this->assertCount(1, $p8Rows);
         $this->assertSame($preferred->slug, $p8Rows->first()['slug']);
     }
+
+    public function test_featured_with_vacations_scope_only_includes_countries_with_vacations_content(): void
+    {
+        Cache::flush();
+
+        $marker = 'test-vac-scope-'.uniqid();
+
+        $withVacations = Country::query()->create([
+            'name' => 'Vacationland',
+            'slug' => $marker.'-vacations',
+            'countrycode' => 'V8',
+            'thumbnail_path' => 'assets/images/'.$marker.'-vacations.jpg',
+        ]);
+
+        $toursOnly = Country::query()->create([
+            'name' => 'Toursonlyland',
+            'slug' => $marker.'-tours',
+            'countrycode' => 'T9',
+            'thumbnail_path' => 'assets/images/'.$marker.'-tours.jpg',
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $withVacations->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::VACATIONS,
+            'language' => 'en',
+            'title' => 'Vacationland Holidays',
+            'sub_title' => 'Vacation subtitle',
+            'introduction' => 'Vacation intro',
+            'content' => 'Vacation body',
+            'faq_title' => '',
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $toursOnly->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => 'en',
+            'title' => 'Toursonlyland Guidings',
+            'sub_title' => 'Tours subtitle',
+            'introduction' => 'Tours intro',
+            'content' => 'Tours body',
+            'faq_title' => '',
+        ]);
+
+        $featured = app(HomepageCountrySelector::class)->featured(categoryScope: CategoryPageScope::VACATIONS);
+        $scoped = app(HomepageCountrySelector::class)->uniqueModelsForScope(CategoryPageScope::VACATIONS);
+        $slugs = $featured->pluck('slug');
+        $modelSlugs = $scoped->pluck('slug');
+
+        $this->assertTrue($slugs->contains($withVacations->slug));
+        $this->assertFalse($slugs->contains($toursOnly->slug));
+        $this->assertTrue($modelSlugs->contains($withVacations->slug));
+        $this->assertFalse($modelSlugs->contains($toursOnly->slug));
+    }
 }
 

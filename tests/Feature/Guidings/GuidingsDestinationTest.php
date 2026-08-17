@@ -101,6 +101,7 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee('name="type"', false);
         $response->assertSee('value="tour"', false);
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee('categoryHeroSearchPlace', false);
@@ -352,6 +353,7 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee(route('guidings.destination', ['country' => $country->slug], false), false);
         $response->assertDontSee(route('destination.country', ['country' => $country->slug], false), false);
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);

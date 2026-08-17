@@ -3,8 +3,10 @@
 namespace App\Domain\Offers\ViewModels;
 
 use App\Domain\Offers\OfferListingFilter;
+use App\Domain\Vacation\CountrySlug;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 final class OfferCatalogViewModel
 {
@@ -36,6 +38,30 @@ final class OfferCatalogViewModel
 
     public function pageTitle(): string
     {
+        $type = $this->typeTitle();
+        $place = $this->locationLabel();
+        $species = $this->speciesLabel();
+
+        return match (true) {
+            $place !== null && $species !== null => __('offers.title_in_for', [
+                'type' => $type,
+                'place' => $place,
+                'species' => $species,
+            ]),
+            $place !== null => __('offers.title_in', [
+                'type' => $type,
+                'place' => $place,
+            ]),
+            $species !== null => __('offers.title_for', [
+                'type' => $type,
+                'species' => $species,
+            ]),
+            default => $type,
+        };
+    }
+
+    private function typeTitle(): string
+    {
         return match (true) {
             $this->filter->type === 'tour' => __('offers.title_tours'),
             $this->filter->type === 'vacation' && $this->filter->vacation === 'trip' => __('offers.title_trips'),
@@ -43,6 +69,99 @@ final class OfferCatalogViewModel
             $this->filter->type === 'vacation' => __('offers.title_vacations'),
             default => __('offers.title'),
         };
+    }
+
+    /**
+     * Place name for the nearby-suggestions heading (country dropdown included).
+     */
+    public function suggestedPlaceLabel(): string
+    {
+        return $this->locationLabel() ?? __('offers.breadcrumb');
+    }
+
+    /**
+     * Most specific location for the H1: search place, then city, region, country.
+     */
+    private function locationLabel(): ?string
+    {
+        foreach ([$this->filter->place, $this->filter->city, $this->filter->region] as $value) {
+            $label = $this->trimmedLabel($value);
+            if ($label !== null) {
+                return $label;
+            }
+        }
+
+        return $this->countryLabel();
+    }
+
+    private function countryLabel(): ?string
+    {
+        $slug = $this->filter->country;
+        if ($slug === null || $slug === '') {
+            return null;
+        }
+
+        $needles = [$slug];
+        foreach (CountrySlug::storageVariants($slug, $this->filter->countryShort) as $variant) {
+            $canonical = CountrySlug::canonicalize($variant);
+            if ($canonical !== null) {
+                $needles[] = $canonical;
+            }
+        }
+        $needles = array_values(array_unique($needles));
+
+        foreach ($this->countries as $row) {
+            $rowSlug = CountrySlug::canonicalize($row['slug'] ?? null);
+            if ($rowSlug !== null && in_array($rowSlug, $needles, true)) {
+                $name = $this->trimmedLabel($row['name'] ?? null);
+                if ($name !== null) {
+                    return $name;
+                }
+            }
+        }
+
+        return Str::title(str_replace('-', ' ', $slug));
+    }
+
+    /**
+     * Include target fish only when a single species is selected.
+     */
+    private function speciesLabel(): ?string
+    {
+        $idCount = count($this->filter->speciesIds);
+        $nameCount = count($this->filter->speciesNames);
+
+        if ($idCount + $nameCount !== 1) {
+            return null;
+        }
+
+        if ($idCount === 1) {
+            $id = $this->filter->speciesIds[0];
+            $option = $this->speciesOptions->first(
+                fn ($row) => is_numeric($row['id'] ?? null) && (int) $row['id'] === $id
+            );
+
+            return $this->trimmedLabel($option['name'] ?? null);
+        }
+
+        $name = $this->filter->speciesNames[0];
+        $option = $this->speciesOptions->first(
+            fn ($row) => (string) ($row['id'] ?? '') === $name
+                || (string) ($row['name'] ?? '') === $name
+        );
+
+        return $this->trimmedLabel($option['name'] ?? $name);
+    }
+
+    private function trimmedLabel(mixed $value): ?string
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return null;
+        }
+
+        $label = trim((string) $value);
+
+        return $label === '' ? null : $label;
     }
 
     public function pageSubtitle(): string

@@ -1704,11 +1704,62 @@ $white: #ffffff;
   background: #fff;
 }
 
+.cag-home-reviews__header-bar {
+  justify-content: center;
+  text-align: center;
+  position: relative;
+
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+}
+
+.cag-home-reviews__header-bar .cag-home-section__title {
+  @media (min-width: 768px) {
+    grid-column: 2;
+  }
+}
+
+.cag-home-reviews__slider {
+  width: 100%;
+  min-width: 0;
+}
+
+.cag-home-reviews__nav {
+  gap: 0.35rem;
+
+  @media (min-width: 768px) {
+    grid-column: 3;
+    justify-self: end;
+  }
+}
+
 .cag-home-reviews__viewport {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  touch-action: pan-x;
+  user-select: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+
+    a {
+      pointer-events: none;
+    }
+  }
 }
 
 .cag-home-reviews__rail {
@@ -1716,12 +1767,6 @@ $white: #ffffff;
   flex-wrap: nowrap;
   gap: 1rem;
   width: max-content;
-  will-change: transform;
-  animation: cag-home-reviews-marquee 140s linear infinite;
-
-  &:hover {
-    animation-play-state: paused;
-  }
 }
 
 .cag-home-reviews__card {
@@ -1740,21 +1785,6 @@ $white: #ffffff;
   @media (min-width: 768px) {
     flex-basis: 340px;
     width: 340px;
-  }
-}
-
-@keyframes cag-home-reviews-marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cag-home-reviews__rail {
-    animation: none;
   }
 }
 

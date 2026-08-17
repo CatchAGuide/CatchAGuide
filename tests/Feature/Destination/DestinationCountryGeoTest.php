@@ -58,6 +58,7 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertDontSee('data-geo-rail="regions"', false);
         $response->assertDontSee('data-geo-rail="cities"', false);
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee('Fishing in Spain', false);

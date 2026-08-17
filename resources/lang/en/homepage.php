@@ -145,6 +145,8 @@ return [
     'guides_view_all' => 'Meet all guides',
 
     'reviews_title' => 'Straight from the boat',
+    'reviews_slider_prev' => 'Previous reviews',
+    'reviews_slider_next' => 'Next reviews',
     'testimonial_guest' => 'Angler',
 
     'magazine_section_title' => 'Stories that get you hooked',

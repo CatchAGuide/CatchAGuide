@@ -36,6 +36,8 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('cag-site-nav-shell', $html);
         $this->assertStringContainsString('cag-site-nav--overlay', $html);
         $this->assertStringContainsString('offers-page-header__hero', $html);
+        $this->assertStringNotContainsString('offers-page-header__image', $html);
+        $this->assertStringNotContainsString('hero-tour.webp', $html);
         $this->assertStringContainsString('data-category-header-search', $html);
         $this->assertStringContainsString('categoryHeroSearchPlace', $html);
         $this->assertStringContainsString('data-offers-persons-stepper', $html);
@@ -48,6 +50,20 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringNotContainsString('guidings-page-header__band', $html);
         $this->assertStringNotContainsString('tagify-fish-guidings-catalog', $html);
         $this->assertStringNotContainsString('guidings-page-header__segment--fish', $html);
+    }
+
+    public function test_shared_catalog_header_uses_gray_background_without_hero_image(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/offers.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/&__hero \{[^}]*background:\s*\$slate;/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/&__hero \{[^}]*background-image:/',
+            $source
+        );
     }
 
     public function test_app_v2_layout_uses_site_header_for_guidings_listings(): void

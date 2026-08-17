@@ -13,9 +13,11 @@
     $placeCity = $requestHasPlace ? request()->city : ($placeCity ?? '');
     $placeCountry = $requestHasPlace ? request()->country : ($placeCountry ?? '');
     $placeRegion = $requestHasPlace ? request()->region : ($placeRegion ?? '');
-    $heroImage = asset('assets/images/homepage/hero-tour.webp');
     $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
-    $heroFetchPriority = ($heroFetchPriority ?? 'high') === 'high' ? 'high' : 'low';
+    $headerCarry = OfferListingFilter::headerCarryParams(
+        request()->query(),
+        isset($lockedParams) && is_array($lockedParams) ? $lockedParams : [],
+    );
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell>
     @include('layouts.partials.site-nav', [
@@ -25,18 +27,6 @@
 
     <section class="offers-page-header" data-category-page-header>
         <div class="offers-page-header__hero" data-category-hero>
-            <div class="offers-page-header__media" aria-hidden="true">
-                <img
-                    class="offers-page-header__image"
-                    src="{{ $heroImage }}"
-                    alt=""
-                    width="1920"
-                    height="640"
-                    @if($heroFetchPriority === 'high') fetchpriority="high" @else loading="lazy" @endif
-                >
-                <div class="offers-page-header__overlay"></div>
-            </div>
-
             <div class="offers-page-header__inner offers-page-header__inner--hero">
                 <div class="offers-page-header__copy">
                     <{{ $titleTag }} class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingTitle }}</{{ $titleTag }}>
@@ -56,6 +46,7 @@
                 onsubmit="return validateSearch(event, 'categoryHeroSearchPlace')"
                 data-category-header-search
             >
+                @include('components.offers.partials.hidden-query-fields', ['query' => $headerCarry])
                 <div class="offers-page-header__search-box">
                     <label class="offers-page-header__segment offers-page-header__segment--where" for="categoryHeroSearchPlace">
                         <span class="offers-page-header__segment-label">{{ __('offers.search_where') }}</span>

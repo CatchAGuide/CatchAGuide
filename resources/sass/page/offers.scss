@@ -31,51 +31,19 @@ $muted: #787780;
   }
 
   &__hero {
-    position: relative;
-    min-height: 220px;
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
+    background: $slate;
     color: #fff;
     margin-top: -64px;
-    padding-top: 64px;
+    padding: calc(64px + 1.15rem) 0 2.5rem;
 
     @media (min-width: 768px) {
-      min-height: 280px;
+      padding: calc(64px + 1.35rem) 0 2.85rem;
     }
 
     @media (min-width: 992px) {
       margin-top: -80px;
-      padding-top: 80px;
-      min-height: 300px;
+      padding: calc(80px + 1.35rem) 0 2.85rem;
     }
-  }
-
-  &__media {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  &__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transform: scale(1.04);
-    transition: transform 7s ease-out, opacity 0.8s ease;
-  }
-
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        to top,
-        rgba(49, 48, 65, 0.9) 0%,
-        rgba(49, 48, 65, 0.64) 45%,
-        rgba(49, 48, 65, 0.52) 100%
-      );
   }
 
   &__inner {
@@ -84,13 +52,6 @@ $muted: #787780;
     &--hero {
       position: relative;
       z-index: 1;
-      padding-top: 1.25rem;
-      padding-bottom: 3.25rem;
-
-      @media (min-width: 768px) {
-        padding-top: 1.75rem;
-        padding-bottom: 3.75rem;
-      }
     }
 
     &--search {
@@ -115,7 +76,6 @@ $muted: #787780;
     font-weight: 700;
     line-height: 1.15;
     color: #fff !important;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
   }
 
   &__sub {
@@ -341,10 +301,6 @@ $muted: #787780;
 
 // Entrance motion (armed only when JS adds .has-offers-motion)
 .has-offers-motion {
-  .offers-page-header__image {
-    opacity: 0.85;
-  }
-
   .offers-page-header__anim {
     opacity: 0;
     transform: translateY(16px);
@@ -355,11 +311,6 @@ $muted: #787780;
   }
 
   &.is-offers-ready {
-    .offers-page-header__image {
-      opacity: 1;
-      transform: scale(1);
-    }
-
     .offers-page-header__anim {
       opacity: 1;
       transform: none;
@@ -369,16 +320,11 @@ $muted: #787780;
 
 @media (prefers-reduced-motion: reduce) {
   .has-offers-motion {
-    .offers-page-header__image,
     .offers-page-header__anim {
       transition: none !important;
       transform: none !important;
       opacity: 1 !important;
     }
-  }
-
-  .offers-page-header__image {
-    transform: none !important;
   }
 }
 

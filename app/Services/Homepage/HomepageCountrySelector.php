@@ -27,11 +27,9 @@ class HomepageCountrySelector
         $cacheKey = 'homepage_featured_countries_v6_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale, $categoryScope) {
-            $unique = $this->uniqueModels($locale);
-
-            if ($categoryScope !== null) {
-                $unique = $this->filterByCategoryPageScope($unique, $categoryScope);
-            }
+            $unique = $categoryScope !== null
+                ? $this->uniqueModelsForScope($categoryScope, $locale)
+                : $this->uniqueModels($locale);
 
             $withThumb = $unique->filter(fn (Country $c) => filled($c->thumbnail_path));
             $withoutThumb = $unique->reject(fn (Country $c) => filled($c->thumbnail_path));
@@ -139,6 +137,17 @@ class HomepageCountrySelector
             ->get();
 
         return $this->uniqueByCountryCode($countries, $locale);
+    }
+
+    /**
+     * Unique countries that have filled category-page copy for the given scope.
+     *
+     * @param  Collection<int, Country>|null  $countries
+     * @return Collection<int, Country>
+     */
+    public function uniqueModelsForScope(string $scope, ?string $locale = null, ?Collection $countries = null): Collection
+    {
+        return $this->filterByCategoryPageScope($this->uniqueModels($locale, $countries), $scope);
     }
 
     /**

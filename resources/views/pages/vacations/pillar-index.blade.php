@@ -74,6 +74,7 @@
         :trips-total="$vm->tripsTotal"
         :camps-total="$vm->campsTotal"
         :species-options="$vm->speciesOptions"
+        :accommodation-type-options="$vm->accommodationTypeOptions"
         :countries="$vm->filterCountries()"
         :action="$vm->filterAction()"
         :pillar-links="$vm->pillarToggleUrls()"

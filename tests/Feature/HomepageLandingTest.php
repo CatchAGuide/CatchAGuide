@@ -318,4 +318,22 @@ class HomepageLandingTest extends TestCase
         $this->assertMatchesRegularExpression('/data-offer-module="camp"[\s\S]{0,400}fa-campground/', $html);
         $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,400}fa-suitcase-rolling/', $html);
     }
+
+    public function test_homepage_reviews_rail_is_interactive(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('data-reviews-rail', false);
+        $response->assertSee('data-reviews-prev', false);
+        $response->assertSee('data-reviews-next', false);
+        $response->assertSee(__('homepage.reviews_slider_prev'), false);
+        $response->assertSee(__('homepage.reviews_slider_next'), false);
+        $response->assertSee("querySelector('[data-reviews-rail]')", false);
+        $response->assertSee('enableDragScroll(reviewsRail', false);
+        $response->assertSee('reviewsRail.scrollLeft +=', false);
+        $response->assertDontSee("querySelector('[data-reviews-rail] .cag-home-reviews__rail')", false);
+        $response->assertDontSee('cag-home-reviews-marquee', false);
+        $response->assertDontSee("reviewsRail.addEventListener('mouseenter'", false);
+    }
 }

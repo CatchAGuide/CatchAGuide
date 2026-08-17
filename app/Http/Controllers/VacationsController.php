@@ -181,7 +181,8 @@ class VacationsController extends Controller
             CategoryPageEntityType::GEO_COUNTRY,
             CategoryPageScope::VACATIONS,
             $locale,
-            fn (string $loc) => $categoryContent->legacyCountryLanguage($row_data, $loc),
+            null,
+            false,
         );
         $faq = $categoryContent->resolveFaqsForEntityDisplay(
             CategoryPageEntityType::GEO_COUNTRY,
@@ -189,6 +190,7 @@ class VacationsController extends Controller
             CategoryPageScope::VACATIONS,
             $locale,
             null,
+            false,
         );
         $fish_chart = $row_data->fish_charts;
         $fish_size_limit = $row_data->fish_size_limits;

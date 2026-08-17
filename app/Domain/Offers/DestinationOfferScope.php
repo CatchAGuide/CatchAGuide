@@ -86,6 +86,23 @@ final class DestinationOfferScope
     }
 
     /**
+     * Centroid stored on a destination country / region / city (admin filters JSON).
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public static function coordinatesFrom(Country|Region|City $row): ?array
+    {
+        $filters = self::normalizeFilters($row->filters ?? null);
+        $lat = self::floatOrNull($filters['placeLat'] ?? $filters['place_lat'] ?? null);
+        $lng = self::floatOrNull($filters['placeLng'] ?? $filters['place_lng'] ?? null);
+        if ($lat === null || $lng === null) {
+            return null;
+        }
+
+        return ['lat' => $lat, 'lng' => $lng];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private static function normalizeFilters(mixed $raw): array

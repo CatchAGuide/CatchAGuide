@@ -57,6 +57,7 @@ class OffersCatalogTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header is-offers', false);
         $response->assertSee('offers-page-header', false);
         $response->assertSee('offers-page-header__hero', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertSee('data-offers-header-search', false);
@@ -126,6 +127,80 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('offers-multi-select__tag', false);
         $response->assertSee(__('offers.filter_species_search'), false);
         $response->assertDontSee('<select name="species"', false);
+    }
+
+    public function test_header_search_preserves_sidebar_filters_when_guests_change(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            speciesIds: [8],
+            speciesOptions: collect([['id' => 8, 'name' => 'Perch']]),
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'tour',
+            'species' => [8],
+            'sortby' => 'newest',
+            'num_guests' => 2,
+        ]));
+
+        $response->assertOk();
+        $this->assertSame(1, preg_match('/<form[^>]*data-offers-header-search[\s\S]*?<\/form>/', $response->getContent(), $match));
+        $form = $match[0];
+        $this->assertStringContainsString('name="type" value="tour"', $form);
+        $this->assertStringContainsString('name="species[]" value="8"', $form);
+        $this->assertStringContainsString('name="sortby" value="newest"', $form);
+        $this->assertSame(1, substr_count($form, 'name="num_guests"'));
+    }
+
+    public function test_sidebar_filters_preserve_guest_count(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            numGuests: 3,
+            speciesOptions: collect([['id' => 8, 'name' => 'Perch']]),
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'tour',
+            'num_guests' => 3,
+        ]));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertSame(1, preg_match('/<form[^>]*id="offers-filters-form"[\s\S]*?<\/form>/', $html, $sidebar));
+        $this->assertStringContainsString('name="num_guests" value="3"', $sidebar[0]);
+        $this->assertSame(1, preg_match('/<form[^>]*vacation-filters-offcanvas__form[\s\S]*?<\/form>/', $html, $offcanvas));
+        $this->assertStringContainsString('name="num_guests" value="3"', $offcanvas[0]);
+        $this->assertStringContainsString('name="num_guests" value="3"', $html);
+    }
+
+    public function test_catalog_header_title_combines_place_and_species(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            place: 'Spain',
+            speciesIds: [1],
+            speciesOptions: collect([['id' => 1, 'name' => 'Albacore']]),
+        ));
+
+        $expected = __('offers.title_in_for', [
+            'type' => __('offers.title_vacations'),
+            'place' => 'Spain',
+            'species' => 'Albacore',
+        ]);
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'place' => 'Spain',
+            'species' => [1],
+        ]));
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/<h1[^>]*offers-page-header__title[^>]*>'.preg_quote($expected, '/').'<\/h1>/',
+            $response->getContent()
+        );
     }
 
     public function test_tour_type_renders_method_water_and_duration_filters(): void
@@ -424,9 +499,9 @@ class OffersCatalogTest extends TestCase
                 $this->card('trip', 'Nearby Suggested Trip'),
                 $this->card('camp', 'Nearby Suggested Camp'),
             ]),
-            toursTotal: 1,
-            tripsTotal: 1,
-            campsTotal: 1,
+            toursTotal: 0,
+            tripsTotal: 0,
+            campsTotal: 0,
         ));
 
         $response = $this->get(route('offers.index', [
@@ -445,9 +520,33 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertSee('data-offer-type="camp"', false);
         $response->assertSee(__('offers.suggested_near', ['place' => 'Nowhere']), false);
-        $response->assertSee(__('offers.filter_all').' (3)', false);
-        $response->assertSee(__('offers.filter_tours').' (1)', false);
-        $response->assertSee(__('offers.filter_vacations').' (2)', false);
+        $response->assertSee(__('offers.filter_all').' (0)', false);
+        $response->assertSee(__('offers.filter_tours').' (0)', false);
+        $response->assertSee(__('offers.filter_vacations').' (0)', false);
+    }
+
+    public function test_suggested_heading_uses_country_when_place_is_missing(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'camp',
+            country: 'germany',
+            suggested: collect([$this->card('tour', 'Baltic Nearby Tour')]),
+            toursTotal: 0,
+            tripsTotal: 0,
+            campsTotal: 0,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'type' => 'vacation',
+            'vacation' => 'camp',
+            'country' => 'germany',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Baltic Nearby Tour', false);
+        $response->assertSee(__('offers.suggested_near', ['place' => 'Germany']), false);
+        $response->assertSee(__('offers.filter_camps').' (0)', false);
     }
 
     public function test_offers_index_shows_merged_suggested_offers_when_sparse_results(): void
@@ -461,9 +560,9 @@ class OffersCatalogTest extends TestCase
                 $this->card('trip', 'Nearby Extra Trip'),
                 $this->card('camp', 'Nearby Extra Camp'),
             ]),
-            toursTotal: 2,
-            tripsTotal: 1,
-            campsTotal: 1,
+            toursTotal: 1,
+            tripsTotal: 0,
+            campsTotal: 0,
         ));
 
         $response = $this->get(route('offers.index', [
@@ -478,9 +577,9 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('Nearby Extra Tour', false);
         $response->assertSee('Nearby Extra Trip', false);
         $response->assertSee('Nearby Extra Camp', false);
-        $response->assertSee(__('offers.filter_all').' (4)', false);
-        $response->assertSee(__('offers.filter_tours').' (2)', false);
-        $response->assertSee(__('offers.filter_vacations').' (2)', false);
+        $response->assertSee(__('offers.filter_all').' (1)', false);
+        $response->assertSee(__('offers.filter_tours').' (1)', false);
+        $response->assertSee(__('offers.filter_vacations').' (0)', false);
     }
 
     public function test_type_toggle_urls_preserve_place_and_omit_vacation_on_primary(): void

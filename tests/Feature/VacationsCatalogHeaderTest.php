@@ -23,6 +23,7 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('vacations-page-header', $html);
         $this->assertStringContainsString('vacations-page-header__band', $html);
         $this->assertStringNotContainsString('vacations-page-header__image', $html);
+        $this->assertStringNotContainsString('hero-tour.webp', $html);
         $this->assertStringContainsString('data-vacations-header-search', $html);
         $this->assertStringContainsString('name="country"', $html);
         $this->assertStringContainsString('vacationsCatalogCountry', $html);
@@ -129,5 +130,19 @@ class VacationsCatalogHeaderTest extends TestCase
         );
         $this->assertStringNotContainsString('max-width: 1280px', $nav);
         $this->assertStringNotContainsString('max-width: 1280px', $home);
+    }
+
+    public function test_vacations_header_band_uses_gray_background_without_hero_image(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/_vacations-header.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/&__band \{[^}]*background:\s*\$vacations-header-slate;/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/&__band \{[^}]*background-image:/',
+            $source
+        );
     }
 }

@@ -48,7 +48,22 @@ $cag-site-nav-tracking: -0.02em;
 }
 
 .cag-site-nav-shell .cag-site-nav:not(.is-solid) {
-  .cag-site-nav__links a,
+  .cag-site-nav__links a {
+    color: rgba(255, 255, 255, 0.88);
+
+    &:hover {
+      color: #fff;
+    }
+
+    &.is-active {
+      color: #fff;
+    }
+
+    &.is-active::after {
+      background: var(--cag-coral);
+    }
+  }
+
   .cag-site-nav__login,
   .cag-site-nav__icon-btn,
   .cag-site-nav__profile-toggle {
@@ -147,15 +162,31 @@ $cag-site-nav-tracking: -0.02em;
 
   a {
     @include cag-site-nav-type;
+    position: relative;
     display: inline-flex;
     align-items: center;
     color: var(--cag-gray);
     text-decoration: none;
     white-space: nowrap;
 
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -0.4rem;
+      height: 2px;
+      border-radius: 1px;
+      background: transparent;
+    }
+
     &:hover,
     &.is-active {
       color: var(--cag-coral);
+    }
+
+    &.is-active::after {
+      background: currentColor;
     }
   }
 }
@@ -428,7 +459,8 @@ $cag-site-nav-tracking: -0.02em;
   text-decoration: none;
   font-weight: 600;
 
-  &:hover {
+  &:hover,
+  &.is-active {
     background: #f2f4f6;
     color: var(--cag-coral, #{$cag-site-coral});
   }

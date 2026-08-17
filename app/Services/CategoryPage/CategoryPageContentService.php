@@ -366,13 +366,13 @@ class CategoryPageContentService
             $allowCrossScopeFallback,
         );
 
-        if ($content === null) {
-            return $model;
-        }
-
         if ($model instanceof Country || $model instanceof Region || $model instanceof City) {
             $model->overlayScopedTranslation($content);
 
+            return $model;
+        }
+
+        if ($content === null) {
             return $model;
         }
 

@@ -4,6 +4,7 @@
     'tripsTotal' => 0,
     'campsTotal' => 0,
     'speciesOptions' => collect(),
+    'accommodationTypeOptions' => collect(),
     'countries' => collect(),
     'action' => null,
     'pillarLinks' => null,
@@ -23,6 +24,7 @@
             :trips-total="$tripsTotal"
             :camps-total="$campsTotal"
             :species-options="$speciesOptions"
+            :accommodation-type-options="$accommodationTypeOptions"
             :countries="$countries"
             :action="$action"
             :pillar-links="$pillarLinks"
@@ -48,6 +50,7 @@
                 :trips-total="$tripsTotal"
                 :camps-total="$campsTotal"
                 :species-options="$speciesOptions"
+                :accommodation-type-options="$accommodationTypeOptions"
                 :countries="$countries"
                 :action="$action"
                 :pillar-links="$pillarLinks"
@@ -84,6 +87,7 @@
     :trips-total="$tripsTotal"
     :camps-total="$campsTotal"
     :species-options="$speciesOptions"
+    :accommodation-type-options="$accommodationTypeOptions"
     :countries="$countries"
     :action="$action"
     :pillar-links="$pillarLinks"

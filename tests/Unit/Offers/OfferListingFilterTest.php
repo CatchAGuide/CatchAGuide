@@ -127,6 +127,34 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame(4, OfferListingFilter::fromRequest(['num_persons' => '4'])->numGuests);
     }
 
+    public function test_header_carry_params_keep_filters_and_drop_geo_and_guests(): void
+    {
+        $carry = OfferListingFilter::headerCarryParams([
+            'type' => 'tour',
+            'species' => ['8', '5'],
+            'sortby' => 'newest',
+            'num_guests' => '4',
+            'country' => 'lettland',
+            'place' => 'Latvia',
+            'placeLat' => '56.8',
+            'page' => '2',
+            'methods' => ['3'],
+        ], [
+            'species' => [8],
+            'country' => 'lettland',
+        ]);
+
+        $this->assertSame([8], $carry['species']);
+        $this->assertSame('tour', $carry['type']);
+        $this->assertSame('newest', $carry['sortby']);
+        $this->assertSame(['3'], $carry['methods']);
+        $this->assertArrayNotHasKey('num_guests', $carry);
+        $this->assertArrayNotHasKey('country', $carry);
+        $this->assertArrayNotHasKey('place', $carry);
+        $this->assertArrayNotHasKey('placeLat', $carry);
+        $this->assertArrayNotHasKey('page', $carry);
+    }
+
     public function test_invalid_type_falls_back_to_all(): void
     {
         $filter = OfferListingFilter::fromRequest(['type' => 'boats']);
@@ -145,6 +173,34 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame('camps', $camp->pillar);
         $this->assertSame('all', $vacationAll->pillar);
         $this->assertSame('all', $all->pillar);
+    }
+
+    public function test_to_vacation_filter_keeps_trip_duration(): void
+    {
+        $filter = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'trip',
+            'duration' => '8+',
+        ])->toVacationFilter();
+
+        $this->assertSame('trips', $filter->pillar);
+        $this->assertSame('8+', $filter->tripDuration);
+    }
+
+    public function test_to_vacation_filter_keeps_camp_facets(): void
+    {
+        $filter = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'vacation' => 'camp',
+            'accommodation_type' => '3',
+            'has_guiding' => '1',
+            'has_rental_boat' => '0',
+        ])->toVacationFilter();
+
+        $this->assertSame('camps', $filter->pillar);
+        $this->assertSame(3, $filter->accommodationTypeId);
+        $this->assertTrue($filter->hasGuiding);
+        $this->assertFalse($filter->hasRentalBoat);
     }
 
     public function test_parses_tour_facets_only_for_tour_type(): void

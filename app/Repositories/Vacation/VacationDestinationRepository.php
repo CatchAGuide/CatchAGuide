@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Vacation;
 
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
 use App\Models\Country;
 use App\Services\Homepage\HomepageCountrySelector;
@@ -104,14 +105,19 @@ class VacationDestinationRepository
     }
 
     /**
+     * Vacation WHERE dropdown: countries with filled vacations category-page copy.
+     * Tour/global destination pages are excluded so the list is not the guidings catalog.
+     *
      * @return Collection<int, object{slug: string, name: string}>
      */
     public function countriesForSearch(?string $locale = null): Collection
     {
-        return $this->countriesForHubGrid($locale)
-            ->map(fn (array $row) => (object) [
-                'slug' => $row['slug'],
-                'name' => $row['name'],
+        $locale = $locale ?? app()->getLocale();
+
+        return $this->homepageCountries->uniqueModelsForScope(CategoryPageScope::VACATIONS, $locale)
+            ->map(fn (Country $country) => (object) [
+                'slug' => CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug),
+                'name' => $this->homepageCountries->labelFor($country, $locale),
             ])
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values();

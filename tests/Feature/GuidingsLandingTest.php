@@ -37,6 +37,7 @@ class GuidingsLandingTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('data-category-header-search', false);
         $response->assertSee('categoryHeroSearchPlace', false);

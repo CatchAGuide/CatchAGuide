@@ -8,7 +8,6 @@ use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
-use App\Models\AccommodationType;
 use App\Models\Camp;
 use App\Models\City;
 use App\Models\Country;
@@ -36,17 +35,6 @@ use Illuminate\Support\Collection;
 
 class OfferCatalogPageService
 {
-    /**
-     * Prior mean (1–10 scale) for Bayesian recommended ranking.
-     * Pulls sparse high averages toward a neutral-good baseline.
-     */
-    private const RECOMMENDED_PRIOR_MEAN = 7.0;
-
-    /**
-     * Prior weight in “virtual reviews” — higher = more reviews needed to outrank the prior.
-     */
-    private const RECOMMENDED_PRIOR_WEIGHT = 5;
-
     public function __construct(
         private TripListingRepository $trips,
         private CampListingRepository $camps,
@@ -195,18 +183,25 @@ class OfferCatalogPageService
         // Same trigger as guidings nearby section: empty or sparse main results.
         $maxMainForNearby = (int) config('location_search.nearby_section_max_main_results', 12);
         $shouldSuggest = $listingsTotal === 0 || $listingsTotal <= $maxMainForNearby;
+        $nearbyOrigin = $this->resolveNearbyOrigin($filter, $hasGeo);
 
         $suggestedItems = collect();
-        if ($shouldSuggest && $hasGeo) {
+        if ($shouldSuggest && $nearbyOrigin !== null) {
             $suggestedItems = $this->buildNearbySuggestedItems(
-                $filter,
-                $filter->placeLat,
-                $filter->placeLng,
-                excludeTourIds: (clone $tourQuery)->pluck('guidings.id')->map(fn ($id) => (int) $id)->all(),
-                excludeTripIds: (clone $tripQuery)->pluck('id')->map(fn ($id) => (int) $id)->all(),
-                excludeCampIds: (clone $campQuery)->pluck('id')->map(fn ($id) => (int) $id)->all(),
+                $nearbyOrigin['lat'],
+                $nearbyOrigin['lng'],
+                $nearbyOrigin['country_scope'],
+                excludeTourIds: $filter->showsTours()
+                    ? (clone $tourQuery)->pluck('guidings.id')->map(fn ($id) => (int) $id)->all()
+                    : [],
+                excludeTripIds: $filter->showsTrips()
+                    ? (clone $tripQuery)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                    : [],
+                excludeCampIds: $filter->showsCamps()
+                    ? (clone $campQuery)->pluck('id')->map(fn ($id) => (int) $id)->all()
+                    : [],
             );
-        } elseif ($shouldSuggest && ! $hasGeo && $listingsTotal === 0) {
+        } elseif ($shouldSuggest && $nearbyOrigin === null && ! filled($filter->country) && $listingsTotal === 0) {
             $suggestedItems = $this->buildRandomSuggestedItems($filter);
         }
 
@@ -223,12 +218,6 @@ class OfferCatalogPageService
                 return $card;
             })
             ->values();
-
-        // Chip / results counts must match what the page actually lists (main + nearby suggestions).
-        $toursTotal += $suggestedItems->where('type', 'tour')->count();
-        $tripsTotal += $suggestedItems->where('type', 'trip')->count();
-        $campsTotal += $suggestedItems->where('type', 'camp')->count();
-        $listingsTotal = $this->resolveListingsTotal($filter, $toursTotal, $tripsTotal, $campsTotal);
 
         $countries = $lockDestinationScope
             ? collect()
@@ -253,7 +242,7 @@ class OfferCatalogPageService
             waterOptions: $this->waterOptions(),
             tourDurationOptions: $this->tourDurationOptions(),
             tripDurationOptions: $this->tripDurationOptions(),
-            accommodationTypeOptions: $this->accommodationTypeOptions(),
+            accommodationTypeOptions: collect($this->filterApplicator->accommodationTypeOptions()),
             faq: $includeFaq ? $this->resolveFaq() : collect(),
             mapMarkers: $this->buildMapMarkers($filter, $tourQuery, $tripQuery, $campQuery, $suggestedItems),
             suggestedCards: $suggestedCards,
@@ -321,21 +310,26 @@ class OfferCatalogPageService
                 $tourColumns[] = 'guidings.lng';
             }
             $tours = (clone $tourQuery)->get($tourColumns);
-            $tourRecommended = $needsRecommended
-                ? $this->recommendedScoresByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
+            $tourRatings = $needsRecommended
+                ? $this->guideRatingStatsByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
                 : [];
-            $keys = $keys->concat($tours->map(fn (Guiding $guiding) => [
-                'type' => 'tour',
-                'id' => (int) $guiding->id,
-                'created_at' => $guiding->created_at,
-                'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
-                'rating' => $needsRecommended
-                    ? ($tourRecommended[(int) $guiding->user_id] ?? null)
-                    : null,
-                'distance' => ($needsNearest && $origin !== null)
-                    ? $this->distanceKm($origin['lat'], $origin['lng'], $guiding->lat, $guiding->lng)
-                    : null,
-            ]));
+            $keys = $keys->concat($tours->map(function (Guiding $guiding) use ($needsPrice, $needsRecommended, $needsNearest, $origin, $tourRatings) {
+                $stats = $needsRecommended
+                    ? ($tourRatings[(int) $guiding->user_id] ?? null)
+                    : null;
+
+                return [
+                    'type' => 'tour',
+                    'id' => (int) $guiding->id,
+                    'created_at' => $guiding->created_at,
+                    'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
+                    'rating' => $stats['rating'] ?? null,
+                    'review_count' => $stats['review_count'] ?? 0,
+                    'distance' => ($needsNearest && $origin !== null)
+                        ? $this->distanceKm($origin['lat'], $origin['lng'], $guiding->lat, $guiding->lng)
+                        : null,
+                ];
+            }));
         }
 
         if ($filter->showsTrips()) {
@@ -351,6 +345,7 @@ class OfferCatalogPageService
                 'created_at' => $trip->created_at,
                 'price' => $needsPrice ? $trip->price_per_person : null,
                 'rating' => null,
+                'review_count' => 0,
                 'distance' => ($needsNearest && $origin !== null)
                     ? $this->distanceKm($origin['lat'], $origin['lng'], $trip->latitude, $trip->longitude)
                     : null,
@@ -372,6 +367,7 @@ class OfferCatalogPageService
                 'created_at' => $camp->created_at,
                 'price' => $needsPrice ? $camp->getLowestAccommodationOrOfferPrice() : null,
                 'rating' => null,
+                'review_count' => 0,
                 'distance' => ($needsNearest && $origin !== null)
                     ? $this->distanceKm($origin['lat'], $origin['lng'], $camp->latitude, $camp->longitude)
                     : null,
@@ -453,7 +449,7 @@ class OfferCatalogPageService
     }
 
     /**
-     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed, rating?: float|null, distance?: float|null}>  $items
+     * @param  Collection<int, array{type: string, model: mixed, created_at: mixed, price: mixed, rating?: float|null, review_count?: int, distance?: float|null}>  $items
      * @return Collection<int, array{type: string, model: mixed}>
      */
     private function sortListingItems(Collection $items, OfferListingFilter $filter, ?string $sortBy = null): Collection
@@ -466,16 +462,29 @@ class OfferCatalogPageService
             'nearest' => $items->sortBy(fn ($item) => $item['distance'] ?? PHP_FLOAT_MAX)->values(),
             'newest' => $items->sortByDesc('created_at')->values(),
             default => $items->sort(function (array $a, array $b) {
-                // `rating` holds the Bayesian recommended score (avg + review count).
+                // Recommended: score descending, then review count descending, then newest.
                 $ratingA = $a['rating'] ?? null;
                 $ratingB = $b['rating'] ?? null;
-                if ($ratingA !== null && $ratingB !== null && abs($ratingA - $ratingB) > 0.0001) {
-                    return $ratingB <=> $ratingA;
+                $hasRatingA = $ratingA !== null;
+                $hasRatingB = $ratingB !== null;
+
+                if ($hasRatingA && $hasRatingB) {
+                    if (abs($ratingA - $ratingB) > 0.0001) {
+                        return $ratingB <=> $ratingA;
+                    }
+
+                    $countA = (int) ($a['review_count'] ?? 0);
+                    $countB = (int) ($b['review_count'] ?? 0);
+                    if ($countA !== $countB) {
+                        return $countB <=> $countA;
+                    }
+
+                    return ($b['created_at'] ?? null) <=> ($a['created_at'] ?? null);
                 }
-                if ($ratingA !== null && $ratingB === null) {
+                if ($hasRatingA) {
                     return -1;
                 }
-                if ($ratingA === null && $ratingB !== null) {
+                if ($hasRatingB) {
                     return 1;
                 }
 
@@ -485,15 +494,12 @@ class OfferCatalogPageService
     }
 
     /**
-     * Bayesian recommended score per guide: blends average score with review volume
-     * so a single perfect review cannot outrank a strong, well-reviewed guide.
-     *
-     * score = (C × m + avg × n) / (C + n)
+     * Average score and review volume per guide, using the same 1-decimal rating shown on cards.
      *
      * @param  array<int, int>  $guideIds
-     * @return array<int, float>
+     * @return array<int, array{rating: float, review_count: int}>
      */
-    private function recommendedScoresByGuideId(array $guideIds): array
+    private function guideRatingStatsByGuideId(array $guideIds): array
     {
         if ($guideIds === []) {
             return [];
@@ -505,26 +511,19 @@ class OfferCatalogPageService
             ->groupBy('guide_id')
             ->get();
 
-        $scores = [];
+        $stats = [];
         foreach ($rows as $row) {
-            $avg = (float) $row->avg_score;
             $count = (int) $row->review_count;
             if ($count < 1) {
                 continue;
             }
-            $scores[(int) $row->guide_id] = $this->bayesianRecommendedScore($avg, $count);
+            $stats[(int) $row->guide_id] = [
+                'rating' => round((float) $row->avg_score, 1),
+                'review_count' => $count,
+            ];
         }
 
-        return $scores;
-    }
-
-    private function bayesianRecommendedScore(float $averageScore, int $reviewCount): float
-    {
-        $priorWeight = self::RECOMMENDED_PRIOR_WEIGHT;
-        $priorMean = self::RECOMMENDED_PRIOR_MEAN;
-
-        return (($priorWeight * $priorMean) + ($averageScore * $reviewCount))
-            / ($priorWeight + $reviewCount);
+        return $stats;
     }
 
     private function distanceKm(float $fromLat, float $fromLng, mixed $toLat, mixed $toLng): ?float
@@ -663,16 +662,11 @@ class OfferCatalogPageService
 
     private function applyTripFacets(Builder $query, OfferListingFilter $filter): void
     {
-        if (! $filter->showsTripFacets() || $filter->tripDuration === null) {
+        if (! $filter->showsTripFacets()) {
             return;
         }
 
-        match ($filter->tripDuration) {
-            '1-3' => $query->whereBetween('duration_days', [1, 3]),
-            '4-7' => $query->whereBetween('duration_days', [4, 7]),
-            '8+' => $query->where('duration_days', '>=', 8),
-            default => null,
-        };
+        $this->filterApplicator->applyTripDurationFilter($query, $filter->tripDuration);
     }
 
     private function applyCampFacets(Builder $query, OfferListingFilter $filter): void
@@ -681,25 +675,7 @@ class OfferCatalogPageService
             return;
         }
 
-        if ($filter->accommodationTypeId !== null) {
-            $typeId = $filter->accommodationTypeId;
-            $query->whereHas('accommodations', function (Builder $q) use ($typeId) {
-                $q->where('accommodations.status', 'active')
-                    ->where('accommodations.accommodation_type', $typeId);
-            });
-        }
-
-        if ($filter->hasGuiding === true) {
-            $query->whereHas('guidings');
-        } elseif ($filter->hasGuiding === false) {
-            $query->whereDoesntHave('guidings');
-        }
-
-        if ($filter->hasRentalBoat === true) {
-            $query->whereHas('rentalBoats');
-        } elseif ($filter->hasRentalBoat === false) {
-            $query->whereDoesntHave('rentalBoats');
-        }
+        $this->filterApplicator->applyCampFacets($query, $filter->toVacationFilter());
     }
 
     /**
@@ -754,22 +730,6 @@ class OfferCatalogPageService
         ]);
     }
 
-    /**
-     * @return Collection<int, array{id: int, name: string}>
-     */
-    private function accommodationTypeOptions(): Collection
-    {
-        return AccommodationType::query()
-            ->active()
-            ->ordered()
-            ->get(['id', 'name', 'name_en'])
-            ->map(fn (AccommodationType $type) => [
-                'id' => (int) $type->id,
-                'name' => (string) $type->name,
-            ])
-            ->values();
-    }
-
     private function vacationFilterWithoutSpecies(VacationListingFilter $filter): VacationListingFilter
     {
         return new VacationListingFilter(
@@ -779,6 +739,10 @@ class OfferCatalogPageService
             country: $filter->country,
             sortBy: $filter->sortBy,
             countryShort: $filter->countryShort,
+            tripDuration: $filter->tripDuration,
+            accommodationTypeId: $filter->accommodationTypeId,
+            hasGuiding: $filter->hasGuiding,
+            hasRentalBoat: $filter->hasRentalBoat,
         );
     }
 
@@ -889,10 +853,7 @@ class OfferCatalogPageService
         $scope = $this->geoSearch->detectScope($placeTypes, $geoParams);
 
         // Country-level place (e.g. Spain): country column filter already applied via repository.
-        $isCountryPlace = $scope === GeospatialSearchService::SCOPE_COUNTRY
-            || (filled($filter->country) && blank($filter->city) && blank($filter->region));
-
-        if ($isCountryPlace && filled($filter->country)) {
+        if ($this->isCountryScope($filter, $scope) && filled($filter->country)) {
             return $query;
         }
 
@@ -920,7 +881,67 @@ class OfferCatalogPageService
     }
 
     /**
+     * Origin for geo nearby: Places coords, else destination-country centroid.
+     *
+     * @return array{lat: float, lng: float, country_scope: bool}|null
+     */
+    private function resolveNearbyOrigin(OfferListingFilter $filter, bool $hasGeo): ?array
+    {
+        if ($hasGeo) {
+            return [
+                'lat' => $filter->placeLat,
+                'lng' => $filter->placeLng,
+                'country_scope' => $this->isCountryScope($filter),
+            ];
+        }
+
+        if (! filled($filter->country)) {
+            return null;
+        }
+
+        $country = $this->destinations->findCountryForLocale($filter->country);
+        $coords = $country !== null ? DestinationOfferScope::coordinatesFrom($country) : null;
+        if ($coords === null) {
+            return null;
+        }
+
+        return [
+            'lat' => $coords['lat'],
+            'lng' => $coords['lng'],
+            'country_scope' => true,
+        ];
+    }
+
+    private function isCountryScope(OfferListingFilter $filter, ?string $detectedScope = null): bool
+    {
+        if (filled($filter->country) && blank($filter->city) && blank($filter->region)) {
+            return true;
+        }
+
+        $scope = $detectedScope;
+        if ($scope === null) {
+            $geoParams = $filter->geoSearchParams();
+            $placeTypes = $this->geoSearch->normalizePlaceTypes($geoParams['place_types'] ?? null);
+            $scope = $this->geoSearch->detectScope($placeTypes, $geoParams);
+        }
+
+        return $scope === GeospatialSearchService::SCOPE_COUNTRY;
+    }
+
+    private function nearbyRadiusMeters(string $type, bool $countryScope): int
+    {
+        if ($countryScope) {
+            return (int) config('location_search.nearby_country_radius_km', 400) * 1000;
+        }
+
+        $km = (int) config("location_search.nearby_radius_km.{$type}", 200);
+
+        return max(1, $km) * 1000;
+    }
+
+    /**
      * Nearby suggestions across tours + trips + camps (merged, nearest first).
+     * Always includes every product type so a camps tab can still surface nearby tours.
      *
      * @param  array<int, int>  $excludeTourIds
      * @param  array<int, int>  $excludeTripIds
@@ -928,51 +949,56 @@ class OfferCatalogPageService
      * @return Collection<int, array{type: string, model: mixed, distance: float|null}>
      */
     private function buildNearbySuggestedItems(
-        OfferListingFilter $filter,
         float $latitude,
         float $longitude,
+        bool $countryScope = false,
         array $excludeTourIds = [],
         array $excludeTripIds = [],
         array $excludeCampIds = [],
     ): Collection {
         $perType = 10;
         $mergedLimit = 12;
-        $items = collect();
 
-        if ($filter->showsTours()) {
-            $items = $items->concat(
-                $this->nearbySuggestedTours($latitude, $longitude, $excludeTourIds, $perType)
-                    ->map(fn (Guiding $guiding) => [
-                        'type' => 'tour',
-                        'model' => $guiding,
-                        'distance' => isset($guiding->distance) ? (float) $guiding->distance : null,
-                    ])
-            );
-        }
-
-        if ($filter->showsTrips()) {
-            $items = $items->concat(
-                $this->nearbySuggestedTrips($latitude, $longitude, $excludeTripIds, $perType)
-                    ->map(fn ($trip) => [
-                        'type' => 'trip',
-                        'model' => $trip,
-                        'distance' => isset($trip->distance) ? (float) $trip->distance : null,
-                    ])
-            );
-        }
-
-        if ($filter->showsCamps()) {
-            $items = $items->concat(
-                $this->nearbySuggestedCamps($latitude, $longitude, $excludeCampIds, $perType)
-                    ->map(fn ($camp) => [
-                        'type' => 'camp',
-                        'model' => $camp,
-                        'distance' => isset($camp->distance) ? (float) $camp->distance : null,
-                    ])
-            );
-        }
-
-        return $items
+        return collect()
+            ->concat(
+                $this->nearbySuggestedTours(
+                    $latitude,
+                    $longitude,
+                    $excludeTourIds,
+                    $perType,
+                    $this->nearbyRadiusMeters('tour', $countryScope),
+                )->map(fn (Guiding $guiding) => [
+                    'type' => 'tour',
+                    'model' => $guiding,
+                    'distance' => isset($guiding->distance) ? (float) $guiding->distance : null,
+                ])
+            )
+            ->concat(
+                $this->nearbySuggestedTrips(
+                    $latitude,
+                    $longitude,
+                    $excludeTripIds,
+                    $perType,
+                    $this->nearbyRadiusMeters('trip', $countryScope),
+                )->map(fn ($trip) => [
+                    'type' => 'trip',
+                    'model' => $trip,
+                    'distance' => isset($trip->distance) ? (float) $trip->distance : null,
+                ])
+            )
+            ->concat(
+                $this->nearbySuggestedCamps(
+                    $latitude,
+                    $longitude,
+                    $excludeCampIds,
+                    $perType,
+                    $this->nearbyRadiusMeters('camp', $countryScope),
+                )->map(fn ($camp) => [
+                    'type' => 'camp',
+                    'model' => $camp,
+                    'distance' => isset($camp->distance) ? (float) $camp->distance : null,
+                ])
+            )
             ->sortBy(fn (array $item) => $item['distance'] ?? PHP_FLOAT_MAX)
             ->take($mergedLimit)
             ->values();
@@ -1027,6 +1053,7 @@ class OfferCatalogPageService
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
+        int $radiusMeters = 200000,
     ): Collection {
         return Guiding::query()
             ->select(['guidings.*'])
@@ -1039,7 +1066,7 @@ class OfferCatalogPageService
             ->whereRaw('ST_Distance_Sphere(point(lng, lat), point(?, ?)) <= ?', [
                 $longitude,
                 $latitude,
-                200 * 1000,
+                $radiusMeters,
             ])
             ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('guidings.id', $excludeIds))
             ->publiclyVisible()
@@ -1059,6 +1086,7 @@ class OfferCatalogPageService
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
+        int $radiusMeters = 200000,
     ): Collection {
         return Trip::query()
             ->select(['trips.*'])
@@ -1072,7 +1100,7 @@ class OfferCatalogPageService
             ->whereRaw('ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?', [
                 $longitude,
                 $latitude,
-                200 * 1000,
+                $radiusMeters,
             ])
             ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds))
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
@@ -1090,6 +1118,7 @@ class OfferCatalogPageService
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
+        int $radiusMeters = 200000,
     ): Collection {
         return Camp::query()
             ->select(['camps.*'])
@@ -1103,7 +1132,7 @@ class OfferCatalogPageService
             ->whereRaw('ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?', [
                 $longitude,
                 $latitude,
-                200 * 1000,
+                $radiusMeters,
             ])
             ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds))
             ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])

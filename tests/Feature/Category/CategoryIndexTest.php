@@ -103,12 +103,13 @@ class CategoryIndexTest extends TestCase
         });
     }
 
-    public function test_targets_index_uses_overlay_hero_header(): void
+    public function test_targets_index_uses_gray_catalog_header(): void
     {
         $response = $this->get(route('targets.index'));
 
         $response->assertOk();
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee(__('category.targets.breadcrumb'), false);
@@ -117,12 +118,13 @@ class CategoryIndexTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
-    public function test_methods_index_uses_overlay_hero_header(): void
+    public function test_methods_index_uses_gray_catalog_header(): void
     {
         $response = $this->get(route('guidings.methods'));
 
         $response->assertOk();
         $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee(__('category.methods.breadcrumb'), false);

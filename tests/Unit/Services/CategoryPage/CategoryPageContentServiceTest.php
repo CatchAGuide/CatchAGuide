@@ -5,6 +5,8 @@ namespace Tests\Unit\Services\CategoryPage;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryPage;
+use App\Models\Country;
+use App\Models\CountryTranslation;
 use App\Models\Language;
 use App\Models\Target;
 use App\Services\CategoryPage\CategoryPageContentService;
@@ -307,5 +309,36 @@ class CategoryPageContentServiceTest extends TestCase
         $this->assertContains($toursId, $ids);
         $this->assertNotContains($globalId, $ids);
         $this->assertNotContains($emptyId, $ids);
+    }
+
+    public function test_vacations_overlay_does_not_expose_tours_country_translation(): void
+    {
+        $country = Country::query()->create([
+            'name' => 'Overlayland',
+            'slug' => 'test-overlay-'.uniqid(),
+            'countrycode' => '',
+        ]);
+
+        CountryTranslation::query()->create([
+            'country_id' => $country->id,
+            'language' => 'en',
+            'title' => 'Fishing in Overlayland – the best tours, waters & seasons',
+            'sub_title' => 'Tours subtitle',
+            'introduction' => 'Tours intro',
+            'content' => 'Tours body',
+            'faq_title' => '',
+        ]);
+
+        $country = $this->service->applyScopedContentToModel(
+            $country,
+            CategoryPageEntityType::GEO_COUNTRY,
+            CategoryPageScope::VACATIONS,
+            'en',
+            null,
+            false,
+        );
+
+        $this->assertNull($country->scopedCmsValue('title'));
+        $this->assertNull($country->scopedCmsValue('sub_title'));
     }
 }

@@ -25,6 +25,7 @@ final class VacationCountryViewModel
         public readonly Collection $faq,
         public readonly Collection $fishChart,
         public readonly Collection $speciesOptions,
+        public readonly Collection $accommodationTypeOptions,
         public readonly array $mapMarkers,
     ) {}
 
@@ -46,16 +47,24 @@ final class VacationCountryViewModel
                 : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null),
             'sortby' => $this->filter->sortBy,
         ], fn ($v) => $v !== null && $v !== '');
+        $tripsQuery = array_filter([
+            ...$query,
+            'duration' => $this->filter->tripDuration,
+        ], fn ($v) => $v !== null && $v !== '');
+        $campsQuery = array_filter([
+            ...$query,
+            ...$this->filter->campFacetQueryParams(),
+        ], fn ($v) => $v !== null && $v !== '');
 
-        $withQuery = fn (string $url) => $query === []
+        $withQuery = fn (string $url, array $params = []) => $params === []
             ? $url
-            : $url.'?'.http_build_query($query);
+            : $url.'?'.http_build_query($params);
 
         if ($this->isAllOffers()) {
             return [
-                'all' => $withQuery(route('vacations.all-offers')),
-                'trips' => $withQuery(route('vacations.trips.index')),
-                'camps' => $withQuery(route('vacations.camps.index')),
+                'all' => $withQuery(route('vacations.all-offers'), $query),
+                'trips' => $withQuery(route('vacations.trips.index'), $tripsQuery),
+                'camps' => $withQuery(route('vacations.camps.index'), $campsQuery),
             ];
         }
 
@@ -63,9 +72,9 @@ final class VacationCountryViewModel
             ?? strtolower((string) $this->destination->slug);
 
         return [
-            'all' => $withQuery(route('vacations.country', $countrySlug)),
-            'trips' => $withQuery(route('vacations.trips.show', $countrySlug)),
-            'camps' => $withQuery(route('vacations.camps.show', $countrySlug)),
+            'all' => $withQuery(route('vacations.country', $countrySlug), $query),
+            'trips' => $withQuery(route('vacations.trips.show', $countrySlug), $tripsQuery),
+            'camps' => $withQuery(route('vacations.camps.show', $countrySlug), $campsQuery),
         ];
     }
 }

@@ -89,4 +89,28 @@ class DestinationOfferScopeTest extends TestCase
         $this->assertSame(['locality'], $cityMerged['place_types']);
         $this->assertSame(36.7, $cityMerged['placeLat']);
     }
+
+    public function test_coordinates_from_destination_filters(): void
+    {
+        $country = new Country([
+            'name' => 'Latvia',
+            'slug' => 'lettland',
+            'filters' => [
+                'placeLat' => '56.88',
+                'placeLng' => '24.60',
+            ],
+        ]);
+
+        $this->assertSame(
+            ['lat' => 56.88, 'lng' => 24.60],
+            DestinationOfferScope::coordinatesFrom($country)
+        );
+
+        $missing = new Country([
+            'name' => 'Latvia',
+            'slug' => 'lettland',
+            'filters' => [],
+        ]);
+        $this->assertNull(DestinationOfferScope::coordinatesFrom($missing));
+    }
 }

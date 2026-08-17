@@ -253,14 +253,66 @@ function validateSearch(event, inputId) {
         revealSections.forEach(activateReveal);
     }
 
-    var reviewsRail = document.querySelector('[data-reviews-rail] .cag-home-reviews__rail');
+    var reviewsRail = document.querySelector('[data-reviews-rail]');
     if (reviewsRail) {
-        reviewsRail.addEventListener('touchstart', function () {
-            reviewsRail.style.animationPlayState = 'paused';
-        }, { passive: true });
-        reviewsRail.addEventListener('touchend', function () {
-            reviewsRail.style.animationPlayState = '';
-        });
+        var reviewsPrev = document.querySelector('[data-reviews-prev]');
+        var reviewsNext = document.querySelector('[data-reviews-next]');
+        var reviewsPaused = false;
+        var reviewsResumeTimer = null;
+        var pauseReviewsTemporarily = function () {
+            reviewsPaused = true;
+            if (reviewsResumeTimer) clearTimeout(reviewsResumeTimer);
+            reviewsResumeTimer = setTimeout(function () { reviewsPaused = false; }, 2500);
+        };
+        var scrollReviewsBy = function (dir) {
+            pauseReviewsTemporarily();
+            var step = Math.min(reviewsRail.clientWidth * 0.75, 356);
+            reviewsRail.scrollBy({ left: dir * step, behavior: 'smooth' });
+        };
+        if (reviewsPrev) reviewsPrev.addEventListener('click', function () { scrollReviewsBy(-1); });
+        if (reviewsNext) reviewsNext.addEventListener('click', function () { scrollReviewsBy(1); });
+
+        enableDragScroll(reviewsRail, { onInteract: pauseReviewsTemporarily });
+
+        var reviewsReduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reviewsReduceMotion) {
+            var reviewsLoopWidth = 0;
+            var syncReviewsLoop = function () {
+                reviewsLoopWidth = Math.floor(reviewsRail.scrollWidth / 2);
+            };
+            var wrapReviewsLoop = function () {
+                if (reviewsLoopWidth <= 0) return;
+                while (reviewsRail.scrollLeft >= reviewsLoopWidth) {
+                    reviewsRail.scrollLeft -= reviewsLoopWidth;
+                }
+                while (reviewsRail.scrollLeft < 0) {
+                    reviewsRail.scrollLeft += reviewsLoopWidth;
+                }
+            };
+            syncReviewsLoop();
+            window.addEventListener('resize', syncReviewsLoop);
+            if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(syncReviewsLoop).observe(reviewsRail);
+            }
+            reviewsRail.addEventListener('touchstart', function () { pauseReviewsTemporarily(); }, { passive: true });
+            reviewsRail.addEventListener('wheel', function () { pauseReviewsTemporarily(); }, { passive: true });
+            reviewsRail.addEventListener('scroll', wrapReviewsLoop, { passive: true });
+
+            var reviewsLast = performance.now();
+            var tickReviews = function (now) {
+                var dt = Math.min(now - reviewsLast, 64);
+                reviewsLast = now;
+                if (!reviewsPaused && reviewsLoopWidth > 0) {
+                    reviewsRail.scrollLeft += (32 * dt) / 1000;
+                    wrapReviewsLoop();
+                }
+                requestAnimationFrame(tickReviews);
+            };
+            requestAnimationFrame(function (t) {
+                reviewsLast = t;
+                requestAnimationFrame(tickReviews);
+            });
+        }
     }
 
     var hero = document.querySelector('[data-hero-carousel]');

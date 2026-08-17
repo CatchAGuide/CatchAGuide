@@ -61,6 +61,31 @@
     if (document.readyState !== 'loading') {
         document.querySelectorAll('[data-offers-persons-stepper]').forEach(syncStepper);
     }
+
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+        if (!form.matches('#offers-filters-form, .vacation-filters-offcanvas__form, [data-offers-sort-form]')) {
+            return;
+        }
+        var stepperInput = document.querySelector('[data-offers-persons-input]');
+        if (!stepperInput) {
+            return;
+        }
+        var guests = String(Math.max(1, Math.min(20, parseInt(stepperInput.value, 10) || 1)));
+        var existing = form.querySelector('input[name="num_guests"]');
+        if (existing) {
+            existing.value = guests;
+            return;
+        }
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'num_guests';
+        input.value = guests;
+        form.appendChild(input);
+    });
 })();
 </script>
 @endonce

@@ -13,7 +13,7 @@ final class OfferListingFilter
 
     public const TOUR_DURATION_TYPES = ['half_day', 'full_day', 'multi_day'];
 
-    public const TRIP_DURATION_BUCKETS = ['1-3', '4-7', '8+'];
+    public const TRIP_DURATION_BUCKETS = VacationListingFilter::TRIP_DURATION_BUCKETS;
 
     public const SORT_OPTIONS = [
         'recommended',
@@ -40,6 +40,34 @@ final class OfferListingFilter
         'accommodation_type',
         'has_guiding',
         'has_rental_boat',
+    ];
+
+    /**
+     * Fields the header Where/Who search owns. Submitting that form must not
+     * drop sidebar filters, but these keys are re-emitted by the header itself.
+     *
+     * @var list<string>
+     */
+    public const HEADER_OWNED_QUERY_KEYS = [
+        'place',
+        'placeLat',
+        'placeLng',
+        'place_lat',
+        'place_lng',
+        'placelat',
+        'placelng',
+        'city',
+        'country',
+        'region',
+        'country_short',
+        'num_guests',
+        'num_persons',
+        'bounds_ne_lat',
+        'bounds_ne_lng',
+        'bounds_sw_lat',
+        'bounds_sw_lng',
+        'place_types',
+        'page',
     ];
 
     /**
@@ -126,10 +154,7 @@ final class OfferListingFilter
             $hasGuiding = self::nullableBool($input['has_guiding'] ?? null);
             $hasRentalBoat = self::nullableBool($input['has_rental_boat'] ?? null);
         } elseif ($rawType === 'vacation' && $vacation === 'trip') {
-            $tripDuration = self::nullableString($input['duration'] ?? null);
-            if ($tripDuration !== null && ! in_array($tripDuration, self::TRIP_DURATION_BUCKETS, true)) {
-                $tripDuration = null;
-            }
+            $tripDuration = VacationListingFilter::normalizeTripDuration($input['duration'] ?? null);
         }
 
         [$speciesIds, $speciesNames] = VacationListingFilter::normalizeSpecies($input['species'] ?? null);
@@ -260,6 +285,10 @@ final class OfferListingFilter
             country: $this->country,
             sortBy: $this->sortBy,
             countryShort: $this->countryShort,
+            tripDuration: $this->tripDuration,
+            accommodationTypeId: $this->accommodationTypeId,
+            hasGuiding: $this->hasGuiding,
+            hasRentalBoat: $this->hasRentalBoat,
         );
     }
 
@@ -281,6 +310,29 @@ final class OfferListingFilter
             'bounds_sw_lng' => $this->boundsSwLng,
             'country_short' => $this->countryShort,
         ], fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * Sidebar / chip filters to keep when the header search is submitted.
+     *
+     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $locked
+     * @return array<string, mixed>
+     */
+    public static function headerCarryParams(array $query, array $locked = []): array
+    {
+        $owned = array_flip(self::HEADER_OWNED_QUERY_KEYS);
+        $carry = [];
+
+        foreach (array_merge($query, $locked) as $key => $value) {
+            if (isset($owned[$key]) || $value === null || $value === '') {
+                continue;
+            }
+
+            $carry[$key] = $value;
+        }
+
+        return $carry;
     }
 
     private static function nullableString(mixed $value): ?string

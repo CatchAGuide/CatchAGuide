@@ -68,24 +68,19 @@ class VacationPillarPageService
         ?string $countrySlug,
         ?Country $destination,
     ): VacationPillarIndexViewModel {
-        $filter = VacationListingFilter::fromRequest($request->all(), $countrySlug);
+        $filter = VacationListingFilter::fromRequest(
+            array_merge($request->all(), ['pillar' => $pillar->value]),
+            $countrySlug,
+        );
         $perPage = (int) config('vacations.pillar_index_per_page', 9);
 
-        $filterAll = new VacationListingFilter(
-            pillar: $pillar->value,
-            speciesIds: $filter->speciesIds,
-            speciesNames: $filter->speciesNames,
-            country: $countrySlug,
-            sortBy: $filter->sortBy,
-        );
-
         [$listings, $cards] = match ($pillar) {
-            VacationPillar::Trips => $this->tripListings($filterAll, $perPage),
-            VacationPillar::Camps => $this->campListings($filterAll, $perPage, $destination?->id),
+            VacationPillar::Trips => $this->tripListings($filter, $perPage),
+            VacationPillar::Camps => $this->campListings($filter, $perPage, $destination?->id),
         };
 
-        $tripsTotal = $this->trips->queryForCountry($filterAll)->count();
-        $campsTotal = $this->camps->queryForCountry($filterAll)->count();
+        $tripsTotal = $this->trips->queryForCountry($filter)->count();
+        $campsTotal = $this->camps->queryForCountry($filter)->count();
 
         $locale = app()->getLocale();
         $scope = match ($pillar) {
@@ -116,16 +111,19 @@ class VacationPillarPageService
 
         return new VacationPillarIndexViewModel(
             pillar: $pillar,
-            filter: $filterAll,
+            filter: $filter,
             listings: $listings,
             cards: $cards,
             countries: $this->destinations->countriesForHubGrid(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
+            accommodationTypeOptions: $filter->showsCampFacets()
+                ? collect($this->filterApplicator->accommodationTypeOptions())
+                : collect(),
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             faq: $destination === null ? $this->resolveFaq($pillar) : $destinationFaq,
             destination: $destination,
-            mapMarkers: $this->buildMapMarkers($filterAll, $pillar),
+            mapMarkers: $this->buildMapMarkers($filter, $pillar),
         );
     }
 

@@ -31,6 +31,8 @@ class DestinationHubHeaderTest extends TestCase
         $this->assertStringContainsString('cag-site-nav--overlay', $html);
         $this->assertStringContainsString('data-category-header-shell', $html);
         $this->assertStringContainsString('offers-page-header__hero', $html);
+        $this->assertStringNotContainsString('offers-page-header__image', $html);
+        $this->assertStringNotContainsString('hero-tour.webp', $html);
         $this->assertStringContainsString('data-category-header-search', $html);
         $this->assertStringContainsString('categoryHeroSearchPlace', $html);
         $this->assertStringContainsString('name="num_guests"', $html);
