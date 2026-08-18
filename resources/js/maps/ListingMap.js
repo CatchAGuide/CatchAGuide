@@ -32,6 +32,7 @@ class ListingMap {
     this._selectionListeners = [];
     this._previewListeners = [];
     this._landmarkLayer = null;
+    this._overlayPadding = { top: 0, bottom: 0 };
     this._canHover = typeof window !== 'undefined' && window.matchMedia
       ? window.matchMedia('(hover: hover) and (pointer: fine)').matches
       : true;
@@ -178,10 +179,12 @@ class ListingMap {
     mapsManager.resizeMap(this.map);
 
     this.map.on('dragend', () => {
+      if (this._programmaticView) return;
       this._userInteracted = true;
     });
     this.map.on('zoomend', () => {
       // fitBounds also fires zoomend; mark interaction only after first paint settle
+      if (this._programmaticView) return;
       if (this._markersReady) {
         this._userInteracted = true;
       }
@@ -522,11 +525,15 @@ class ListingMap {
         }
       });
       marker._cagSticky = true;
-      if (!marker.isPopupOpen()) {
+      if (!this._isMobileSheet() && !marker.isPopupOpen()) {
         marker.openPopup();
       }
       this.selectMarker(marker, { pan: false, source: 'map' });
-      this._panPopupIntoView(marker);
+      if (this._isMobileSheet()) {
+        this._panIntoVisibleArea(marker);
+      } else {
+        this._panPopupIntoView(marker);
+      }
     });
   }
 
@@ -806,6 +813,12 @@ class ListingMap {
     const allowZoom = fromRailZoom || (!fromRail && opts.allowZoom !== false);
 
     const openRailPreview = () => {
+      if (this._isMobileSheet()) {
+        if (fromRailZoom || opts.pan || opts.source === 'map') {
+          this._panIntoVisibleArea(marker);
+        }
+        return;
+      }
       if (!this.options.interactivePreview || (!fromRail && !fromRailZoom)) return;
       this.markers.forEach((m) => {
         if (m !== marker) {
@@ -854,7 +867,7 @@ class ListingMap {
     const item = marker._cagItem || null;
     this._selectionListeners.forEach((fn) => {
       try {
-        fn(item);
+        fn(item, opts);
       } catch (e) {
         /* ignore */
       }
@@ -926,12 +939,16 @@ class ListingMap {
         }
       });
       marker._cagSticky = true;
-      if (!marker.isPopupOpen()) {
+      if (!this._isMobileSheet() && !marker.isPopupOpen()) {
         marker.openPopup();
       }
       setPinActive(true);
       this.selectMarker(marker, { pan: false, source: 'map' });
-      this._panPopupIntoView(marker);
+      if (this._isMobileSheet()) {
+        this._panIntoVisibleArea(marker);
+      } else {
+        this._panPopupIntoView(marker);
+      }
     });
 
     if (!this._canHover) {
@@ -1300,14 +1317,86 @@ class ListingMap {
     }
   }
 
+  _isMobileSheet() {
+    return !!(
+      this.options.viewportRail &&
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(max-width: 991.98px)').matches
+    );
+  }
+
+  setOverlayPadding(pad = {}) {
+    this._overlayPadding = {
+      top: Math.max(0, pad.top || 0),
+      bottom: Math.max(0, pad.bottom || 0),
+    };
+    this.refitIfPristine();
+  }
+
+  refitIfPristine() {
+    if (this._userInteracted || !this.map || !this._initialized) return;
+    const latLngs = this.markers
+      .filter((m) => m.options && m.options.cagVariant !== 'gray' && m.getLatLng)
+      .map((m) => m.getLatLng());
+    if (latLngs.length) {
+      this._fitPrimary(latLngs);
+    }
+  }
+
+  _fitPadding() {
+    const overlay = this._overlayPadding || {};
+    return {
+      paddingTopLeft: [24, 24 + (overlay.top || 0)],
+      paddingBottomRight: [24, 24 + (overlay.bottom || 0)],
+    };
+  }
+
   _fitPrimary(latLngs) {
     const unique = new Set(latLngs.map((ll) => `${ll.lat},${ll.lng}`));
+    const pad = this._fitPadding();
+    this._beginProgrammaticView();
     if (unique.size === 1) {
       this.map.setView(latLngs[0], this.options.singleZoom);
+      const dy = ((this._overlayPadding && this._overlayPadding.bottom) || 0)
+        - ((this._overlayPadding && this._overlayPadding.top) || 0);
+      if (dy) {
+        this.map.panBy([0, dy / 2], { animate: false });
+      }
       return;
     }
     const bounds = L.latLngBounds(latLngs);
-    this.map.fitBounds(bounds, { padding: [40, 40] });
+    this.map.fitBounds(bounds, pad);
+  }
+
+  _beginProgrammaticView() {
+    this._programmaticView = true;
+    if (this._programmaticViewTimer) clearTimeout(this._programmaticViewTimer);
+    this._programmaticViewTimer = setTimeout(() => {
+      this._programmaticView = false;
+    }, 500);
+  }
+
+  _panIntoVisibleArea(marker) {
+    if (!this.map || !marker || typeof marker.getLatLng !== 'function') return;
+    const overlay = this._overlayPadding || {};
+    const size = this.map.getSize();
+    const top = overlay.top || 0;
+    const bottom = overlay.bottom || 0;
+    const visibleH = Math.max(80, size.y - top - bottom);
+    const target = this.map.latLngToContainerPoint(marker.getLatLng());
+    const desiredY = top + visibleH * 0.5;
+    const dx = target.x - size.x / 2;
+    const dy = target.y - desiredY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      this._ignoreMoveClose = true;
+      this._beginProgrammaticView();
+      this.map.panBy([dx, dy], { animate: true });
+      if (this._ignoreMoveCloseTimer) clearTimeout(this._ignoreMoveCloseTimer);
+      this._ignoreMoveCloseTimer = setTimeout(() => {
+        this._ignoreMoveClose = false;
+      }, 400);
+    }
   }
 
   /**

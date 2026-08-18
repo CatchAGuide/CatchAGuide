@@ -21,7 +21,7 @@ $white: #ffffff;
   --cag-category-trip: #{$category-trip};
   background: var(--cag-bg);
   color: var(--cag-slate);
-  padding-bottom: 4.5rem;
+  padding-bottom: 5.25rem;
 
   @media (min-width: 768px) {
     padding-bottom: 0;
@@ -2030,7 +2030,7 @@ $white: #ffffff;
   line-height: 1.5;
 }
 
-// Mobile bottom nav
+// Mobile bottom nav — same catalog items as the burger / desktop header
 .cag-home-bottom-nav {
   position: fixed;
   left: 0;
@@ -2040,8 +2040,10 @@ $white: #ffffff;
   background: #fff;
   border-top: 1px solid var(--cag-border);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 64px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 64px;
+  height: auto;
+  padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom, 0px));
 }
 
 .cag-home-bottom-nav__item {
@@ -2050,13 +2052,25 @@ $white: #ffffff;
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
+  padding: 0.15rem 0.2rem;
   text-decoration: none;
   color: var(--cag-gray);
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 600;
+  text-align: center;
+  line-height: 1.15;
 
   i {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+  }
+
+  span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
   }
 
   &.is-active {

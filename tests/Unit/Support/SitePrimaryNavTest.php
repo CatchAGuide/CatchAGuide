@@ -75,6 +75,105 @@ class SitePrimaryNavTest extends TestCase
         }
     }
 
+    public function test_browse_links_append_destinations_after_catalog(): void
+    {
+        $this->bindNamedRequest('/', 'welcome');
+
+        $keys = array_column(SitePrimaryNav::browseLinks(), 'key');
+
+        $this->assertSame(['offers', 'tours', 'vacations', 'destinations'], $keys);
+        $this->assertSame(__('homepage.footer_destinations'), SitePrimaryNav::browseLinks()[3]['label']);
+        $this->assertSame(route('destination'), SitePrimaryNav::browseLinks()[3]['url']);
+        $this->assertSame('fas fa-map-marker-alt', SitePrimaryNav::browseLinks()[3]['icon']);
+    }
+
+    public function test_destination_pages_highlight_destinations_in_browse_links(): void
+    {
+        $this->bindNamedRequest('/destination', 'destination');
+        $this->assertSame('destinations', SitePrimaryNav::activeSection());
+        $this->assertTrue(SitePrimaryNav::browseLinks()[3]['active']);
+
+        $this->bindNamedRequest('/destination/deutschland', 'destination.country');
+        $this->assertSame('destinations', SitePrimaryNav::activeSection());
+    }
+
+    public function test_bottom_nav_matches_burger_browse_links_plus_login(): void
+    {
+        $this->bindNamedRequest('/', 'welcome');
+
+        $links = SitePrimaryNav::bottomNavLinks();
+        $keys = array_column($links, 'key');
+
+        $this->assertSame(['offers', 'tours', 'vacations', 'destinations', 'account'], $keys);
+        $this->assertSame(__('homepage.header-login'), $links[4]['label']);
+        $this->assertTrue($links[4]['opens_login']);
+        $this->assertSame('fas fa-th-large', $links[0]['icon']);
+        $this->assertSame('fas fa-ship', $links[1]['icon']);
+        $this->assertSame('fas fa-suitcase-rolling', $links[2]['icon']);
+        $this->assertSame('fas fa-map-marker-alt', $links[3]['icon']);
+        $this->assertFalse($links[0]['active']);
+    }
+
+    public function test_catalog_and_homepage_use_overlay_header(): void
+    {
+        $this->bindNamedRequest('/', 'welcome');
+        $this->assertTrue(SitePrimaryNav::isHomepage());
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutNav());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+
+        $this->bindNamedRequest('/offers', 'offers.index');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutNav());
+
+        $this->bindNamedRequest('/guidings', 'guidings.landing');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+
+        $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+
+        $this->bindNamedRequest('/vacations', 'vacations.index');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
+
+        $this->bindNamedRequest('/destination', 'destination');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+
+        $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
+    }
+
+    public function test_profile_and_content_pages_use_solid_layout_header(): void
+    {
+        $this->bindNamedRequest('/profile', 'profile.index');
+        $this->assertFalse(SitePrimaryNav::usesOverlayHeader());
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
+        $this->assertFalse(SitePrimaryNav::usesVacationLoadingOverlay());
+
+        $this->bindNamedRequest('/about-us', 'additional.about_us');
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
+
+        $this->bindNamedRequest('/contact', 'additional.contact');
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+
+        $this->bindNamedRequest('/faq', 'law.faq');
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+
+        $this->bindNamedRequest('/fishing-magazine', 'blog.index');
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+    }
+
+    public function test_checkout_keeps_solid_header_without_mobile_catalog_bar(): void
+    {
+        $this->bindNamedRequest('/checkout', 'checkout.index');
+
+        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+    }
+
     private function bindNamedRequest(string $uri, string $routeName): void
     {
         $request = Request::create($uri, 'GET');

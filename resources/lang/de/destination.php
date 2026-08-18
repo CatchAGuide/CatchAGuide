@@ -30,6 +30,8 @@ Italien: Die Seen Norditaliens und die Küstenregionen sind bei Anglern sehr bel
     'map_in_area_zero' => 'Keine Angebote im Kartenbereich',
     'map_show_list' => 'Liste anzeigen',
     'map_hide_list' => 'Liste ausblenden',
+    'map_show_map' => 'Karte',
+    'map_resize_list' => 'Liste verschieben',
     'map_listings_rail' => 'Angebote im Kartenbereich',
     'map_clear_filters' => 'Zurücksetzen',
     'map_apply_filters' => 'Anwenden',

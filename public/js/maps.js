@@ -261,6 +261,10 @@ var ListingMap = /*#__PURE__*/function () {
     this._selectionListeners = [];
     this._previewListeners = [];
     this._landmarkLayer = null;
+    this._overlayPadding = {
+      top: 0,
+      bottom: 0
+    };
     this._canHover = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : true;
     this.options = _objectSpread(_objectSpread({}, this._parseOptions(el)), overrideOptions);
   }
@@ -398,10 +402,12 @@ var ListingMap = /*#__PURE__*/function () {
       this.setMarkers(this.options.markers);
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(this.map);
       this.map.on('dragend', function () {
+        if (_this2._programmaticView) return;
         _this2._userInteracted = true;
       });
       this.map.on('zoomend', function () {
         // fitBounds also fires zoomend; mark interaction only after first paint settle
+        if (_this2._programmaticView) return;
         if (_this2._markersReady) {
           _this2._userInteracted = true;
         }
@@ -761,14 +767,18 @@ var ListingMap = /*#__PURE__*/function () {
           }
         });
         marker._cagSticky = true;
-        if (!marker.isPopupOpen()) {
+        if (!_this7._isMobileSheet() && !marker.isPopupOpen()) {
           marker.openPopup();
         }
         _this7.selectMarker(marker, {
           pan: false,
           source: 'map'
         });
-        _this7._panPopupIntoView(marker);
+        if (_this7._isMobileSheet()) {
+          _this7._panIntoVisibleArea(marker);
+        } else {
+          _this7._panPopupIntoView(marker);
+        }
       });
     }
   }, {
@@ -1042,6 +1052,12 @@ var ListingMap = /*#__PURE__*/function () {
       // Preview-only rail interactions never zoom; "Show on map" / double-click do
       var allowZoom = fromRailZoom || !fromRail && opts.allowZoom !== false;
       var openRailPreview = function openRailPreview() {
+        if (_this1._isMobileSheet()) {
+          if (fromRailZoom || opts.pan || opts.source === 'map') {
+            _this1._panIntoVisibleArea(marker);
+          }
+          return;
+        }
         if (!_this1.options.interactivePreview || !fromRail && !fromRailZoom) return;
         _this1.markers.forEach(function (m) {
           if (m !== marker) {
@@ -1092,7 +1108,7 @@ var ListingMap = /*#__PURE__*/function () {
       var item = marker._cagItem || null;
       this._selectionListeners.forEach(function (fn) {
         try {
-          fn(item);
+          fn(item, opts);
         } catch (e) {
           /* ignore */
         }
@@ -1164,7 +1180,7 @@ var ListingMap = /*#__PURE__*/function () {
           }
         });
         marker._cagSticky = true;
-        if (!marker.isPopupOpen()) {
+        if (!_this10._isMobileSheet() && !marker.isPopupOpen()) {
           marker.openPopup();
         }
         setPinActive(true);
@@ -1172,7 +1188,11 @@ var ListingMap = /*#__PURE__*/function () {
           pan: false,
           source: 'map'
         });
-        _this10._panPopupIntoView(marker);
+        if (_this10._isMobileSheet()) {
+          _this10._panIntoVisibleArea(marker);
+        } else {
+          _this10._panPopupIntoView(marker);
+        }
       });
       if (!this._canHover) {
         return;
@@ -1526,19 +1546,98 @@ var ListingMap = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "_isMobileSheet",
+    value: function _isMobileSheet() {
+      return !!(this.options.viewportRail && typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches);
+    }
+  }, {
+    key: "setOverlayPadding",
+    value: function setOverlayPadding() {
+      var pad = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      this._overlayPadding = {
+        top: Math.max(0, pad.top || 0),
+        bottom: Math.max(0, pad.bottom || 0)
+      };
+      this.refitIfPristine();
+    }
+  }, {
+    key: "refitIfPristine",
+    value: function refitIfPristine() {
+      if (this._userInteracted || !this.map || !this._initialized) return;
+      var latLngs = this.markers.filter(function (m) {
+        return m.options && m.options.cagVariant !== 'gray' && m.getLatLng;
+      }).map(function (m) {
+        return m.getLatLng();
+      });
+      if (latLngs.length) {
+        this._fitPrimary(latLngs);
+      }
+    }
+  }, {
+    key: "_fitPadding",
+    value: function _fitPadding() {
+      var overlay = this._overlayPadding || {};
+      return {
+        paddingTopLeft: [24, 24 + (overlay.top || 0)],
+        paddingBottomRight: [24, 24 + (overlay.bottom || 0)]
+      };
+    }
+  }, {
     key: "_fitPrimary",
     value: function _fitPrimary(latLngs) {
       var unique = new Set(latLngs.map(function (ll) {
         return "".concat(ll.lat, ",").concat(ll.lng);
       }));
+      var pad = this._fitPadding();
+      this._beginProgrammaticView();
       if (unique.size === 1) {
         this.map.setView(latLngs[0], this.options.singleZoom);
+        var dy = (this._overlayPadding && this._overlayPadding.bottom || 0) - (this._overlayPadding && this._overlayPadding.top || 0);
+        if (dy) {
+          this.map.panBy([0, dy / 2], {
+            animate: false
+          });
+        }
         return;
       }
       var bounds = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.latLngBounds(latLngs);
-      this.map.fitBounds(bounds, {
-        padding: [40, 40]
-      });
+      this.map.fitBounds(bounds, pad);
+    }
+  }, {
+    key: "_beginProgrammaticView",
+    value: function _beginProgrammaticView() {
+      var _this16 = this;
+      this._programmaticView = true;
+      if (this._programmaticViewTimer) clearTimeout(this._programmaticViewTimer);
+      this._programmaticViewTimer = setTimeout(function () {
+        _this16._programmaticView = false;
+      }, 500);
+    }
+  }, {
+    key: "_panIntoVisibleArea",
+    value: function _panIntoVisibleArea(marker) {
+      var _this17 = this;
+      if (!this.map || !marker || typeof marker.getLatLng !== 'function') return;
+      var overlay = this._overlayPadding || {};
+      var size = this.map.getSize();
+      var top = overlay.top || 0;
+      var bottom = overlay.bottom || 0;
+      var visibleH = Math.max(80, size.y - top - bottom);
+      var target = this.map.latLngToContainerPoint(marker.getLatLng());
+      var desiredY = top + visibleH * 0.5;
+      var dx = target.x - size.x / 2;
+      var dy = target.y - desiredY;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        this._ignoreMoveClose = true;
+        this._beginProgrammaticView();
+        this.map.panBy([dx, dy], {
+          animate: true
+        });
+        if (this._ignoreMoveCloseTimer) clearTimeout(this._ignoreMoveCloseTimer);
+        this._ignoreMoveCloseTimer = setTimeout(function () {
+          _this17._ignoreMoveClose = false;
+        }, 400);
+      }
     }
 
     /**
@@ -1602,7 +1701,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "buildInteractivePreviewHtml",
     value: function buildInteractivePreviewHtml() {
-      var _this16 = this;
+      var _this18 = this;
       var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var title = this._escape(item.title || '');
       var location = this._escape(item.location || '');
@@ -1624,7 +1723,7 @@ var ListingMap = /*#__PURE__*/function () {
       var cardWidth = this._previewCardWidth();
       var hasCarousel = images.length > 1;
       var slidesHtml = images.length ? images.map(function (src, i) {
-        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this16._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
+        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this18._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
       }).join('') : '';
       var navHtml = hasCarousel ? "\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--prev\" data-cag-preview-prev aria-label=\"".concat(prevLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8249;</span>\n          </button>\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--next\" data-cag-preview-next aria-label=\"").concat(nextLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8250;</span>\n          </button>\n          <div class=\"cag-map-preview__dots\" role=\"tablist\">\n            ").concat(images.map(function (_, i) {
         return "<button type=\"button\" class=\"cag-map-preview__dot".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-dot aria-label=\"").concat(i + 1, "\" aria-current=\"").concat(i === 0 ? 'true' : 'false', "\" tabindex=\"0\"></button>");
@@ -1980,15 +2079,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapItemIdentity */ "./resources/js/maps/mapItemIdentity.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
 function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
 function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
+var MOBILE_MQ = '(max-width: 991.98px)';
+var SHEET_SNAPS = {
+  peek: 0.2,
+  mid: 0.58,
+  full: 0.88
+};
+var SHEET_PEEK_MIN = 132;
 
 /**
- * MapModalRail — viewport-synced listing rail + docked selection (not map overlay)
+ * MapModalRail — viewport-synced listing rail + docked selection (not map overlay).
+ * On mobile the rail is a draggable bottom sheet over a full-screen map.
  */
 var MapModalRail = /*#__PURE__*/function () {
   /**
@@ -2003,13 +2116,21 @@ var MapModalRail = /*#__PURE__*/function () {
     this.listEl = modal.querySelector('[data-map-rail-list]');
     this.emptyEl = modal.querySelector('[data-map-rail-empty]');
     this.selectionEl = modal.querySelector('[data-map-selection]');
-    this.countEl = modal.querySelector('[data-map-viewport-count]');
+    this.countEls = modal.querySelectorAll('[data-map-viewport-count]');
     this.toggleBtn = modal.querySelector('[data-map-rail-toggle]');
     this.toggleLabel = modal.querySelector('[data-map-rail-toggle-label]');
+    this.handleEl = modal.querySelector('[data-map-rail-handle]');
+    this.headingEl = modal.querySelector('[data-map-rail-heading]');
+    this.fabBtn = modal.querySelector('[data-map-sheet-fab]');
+    this.fabLabel = modal.querySelector('[data-map-sheet-fab-label]');
     this.i18n = this._parseI18n();
     this._itemsById = new Map();
     this._selectedId = null;
     this._railOpen = false;
+    this._snap = 'mid';
+    this._snapBeforeSelection = 'mid';
+    this._drag = null;
+    this._mq = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(MOBILE_MQ) : null;
     if (!this.rail || !this.listEl) {
       return;
     }
@@ -2026,14 +2147,19 @@ var MapModalRail = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "_isMobile",
+    value: function _isMobile() {
+      return !!(this._mq && this._mq.matches);
+    }
+  }, {
     key: "_bind",
     value: function _bind() {
       var _this = this;
       this.listingMap.onViewportChange(function (payload) {
         return _this.renderViewport(payload);
       });
-      this.listingMap.onSelectionChange(function (item) {
-        return _this.renderSelection(item);
+      this.listingMap.onSelectionChange(function (item, opts) {
+        return _this.renderSelection(item, opts);
       });
       this.listingMap.onPreviewChange(function (item) {
         return _this.setHoveredId(item ? (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item) : null);
@@ -2092,13 +2218,37 @@ var MapModalRail = /*#__PURE__*/function () {
           return _this.toggleRail();
         });
       }
-      this.modal.addEventListener('shown.bs.modal', function () {
-        if (window.matchMedia('(min-width: 992px)').matches) {
-          _this.setRailOpen(true);
+      if (this.fabBtn) {
+        this.fabBtn.addEventListener('click', function () {
+          return _this._toggleSheetFromFab();
+        });
+      }
+      if (this.selectionEl) {
+        this.selectionEl.addEventListener('click', function (e) {
+          if (e.target.closest('[data-map-selection-dismiss]')) {
+            e.preventDefault();
+            e.stopPropagation();
+            _this.listingMap.clearSelection();
+          }
+        });
+      }
+      this._bindSheetDrag();
+      if (this._mq) {
+        var onMq = function onMq() {
+          return _this._syncLayoutMode();
+        };
+        if (typeof this._mq.addEventListener === 'function') {
+          this._mq.addEventListener('change', onMq);
+        } else if (typeof this._mq.addListener === 'function') {
+          this._mq.addListener(onMq);
         }
+      }
+      this.modal.addEventListener('shown.bs.modal', function () {
+        _this._syncLayoutMode(true);
         _this.listingMap.emitViewportChange();
       });
       this.modal.addEventListener('hidden.bs.modal', function () {
+        _this._hideSelectionCard();
         _this.setRailOpen(false);
         _this.listingMap.clearSelection();
       });
@@ -2109,9 +2259,46 @@ var MapModalRail = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "_syncLayoutMode",
+    value: function _syncLayoutMode(fromShow) {
+      if (this._isMobile()) {
+        this.setSnap(fromShow ? 'mid' : this._snap || 'mid', {
+          animate: false
+        });
+        return;
+      }
+      this.modal.classList.remove('map-modal--sheet-peek', 'map-modal--sheet-mid', 'map-modal--sheet-full', 'map-modal--has-selection', 'map-modal--sheet-dragging');
+      this.rail.style.height = '';
+      this.modal.style.removeProperty('--map-sheet-h');
+      this.modal.style.removeProperty('--map-header-h');
+      this._hideSelectionCard();
+      this.setRailOpen(true);
+      if (this.listingMap && this.listingMap.setOverlayPadding) {
+        this.listingMap.setOverlayPadding({
+          top: 0,
+          bottom: 0
+        });
+      }
+    }
+  }, {
     key: "toggleRail",
     value: function toggleRail() {
+      if (this._isMobile()) {
+        this.setSnap(this._snap === 'peek' ? 'mid' : 'peek');
+        return;
+      }
       this.setRailOpen(!this._railOpen);
+    }
+  }, {
+    key: "_toggleSheetFromFab",
+    value: function _toggleSheetFromFab() {
+      if (!this._isMobile()) return;
+      if (this.modal.classList.contains('map-modal--has-selection')) {
+        this.listingMap.clearSelection();
+        this.setSnap('mid');
+        return;
+      }
+      this.setSnap(this._snap === 'peek' ? 'mid' : 'peek');
     }
   }, {
     key: "setRailOpen",
@@ -2125,6 +2312,10 @@ var MapModalRail = /*#__PURE__*/function () {
       if (this.toggleLabel) {
         this.toggleLabel.textContent = this._railOpen ? this.i18n.hide_list || 'Hide list' : this.i18n.show_list || 'Show list';
       }
+      if (this._isMobile()) {
+        this._syncFab();
+        return;
+      }
       if (this.listingMap && this.listingMap.invalidate) {
         setTimeout(function () {
           _this2.listingMap.invalidate();
@@ -2133,33 +2324,215 @@ var MapModalRail = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "setSnap",
+    value: function setSnap(snap) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var next = SHEET_SNAPS[snap] ? snap : 'mid';
+      this._snap = next;
+      this._railOpen = next !== 'peek';
+      this.modal.classList.toggle('map-modal--rail-open', this._railOpen);
+      var heights = this._snapHeights();
+      this._applySheetHeight(heights[next], {
+        animate: opts.animate !== false
+      });
+      this._syncSheetClasses();
+      this._syncFab();
+      this._syncOverlayPadding();
+      if (this.toggleBtn) {
+        this.toggleBtn.setAttribute('aria-expanded', this._railOpen ? 'true' : 'false');
+      }
+      if (this.toggleLabel) {
+        this.toggleLabel.textContent = this._railOpen ? this.i18n.hide_list || 'Hide list' : this.i18n.show_list || 'Show list';
+      }
+    }
+  }, {
+    key: "_bodyHeight",
+    value: function _bodyHeight() {
+      var body = this.modal.querySelector('.map-modal__body') || this.modal;
+      return body.getBoundingClientRect().height || window.innerHeight;
+    }
+  }, {
+    key: "_headerHeight",
+    value: function _headerHeight() {
+      var chrome = this.modal.querySelector('.map-modal__chrome');
+      return chrome ? Math.round(chrome.getBoundingClientRect().height) : 0;
+    }
+  }, {
+    key: "_snapHeights",
+    value: function _snapHeights() {
+      var bodyH = this._bodyHeight();
+      return {
+        peek: Math.max(SHEET_PEEK_MIN, Math.round(bodyH * SHEET_SNAPS.peek)),
+        mid: Math.round(bodyH * SHEET_SNAPS.mid),
+        full: Math.round(bodyH * SHEET_SNAPS.full)
+      };
+    }
+  }, {
+    key: "_applySheetHeight",
+    value: function _applySheetHeight(px) {
+      var _this3 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var height = Math.max(SHEET_PEEK_MIN, Math.round(px));
+      this.modal.style.setProperty('--map-sheet-h', "".concat(height, "px"));
+      this.rail.style.height = "".concat(height, "px");
+      if (opts.animate === false) {
+        this.rail.style.transition = 'none';
+        requestAnimationFrame(function () {
+          _this3.rail.style.transition = '';
+        });
+      }
+    }
+  }, {
+    key: "_syncSheetClasses",
+    value: function _syncSheetClasses() {
+      this.modal.classList.toggle('map-modal--sheet-peek', this._isMobile() && this._snap === 'peek');
+      this.modal.classList.toggle('map-modal--sheet-mid', this._isMobile() && this._snap === 'mid');
+      this.modal.classList.toggle('map-modal--sheet-full', this._isMobile() && this._snap === 'full');
+    }
+  }, {
+    key: "_syncFab",
+    value: function _syncFab() {
+      if (!this.fabBtn) return;
+      var showMap = this._snap !== 'peek';
+      this.fabBtn.classList.toggle('is-list', !showMap);
+      this.fabBtn.setAttribute('aria-expanded', showMap ? 'true' : 'false');
+      if (this.fabLabel) {
+        this.fabLabel.textContent = showMap ? this.i18n.show_map || 'Map' : this.i18n.show_list || 'Show list';
+      }
+    }
+  }, {
+    key: "_syncOverlayPadding",
+    value: function _syncOverlayPadding() {
+      if (!this.listingMap || !this.listingMap.setOverlayPadding) return;
+      var headerH = this._headerHeight();
+      this.modal.style.setProperty('--map-header-h', "".concat(headerH, "px"));
+      if (!this._isMobile()) {
+        this.listingMap.setOverlayPadding({
+          top: 0,
+          bottom: 0
+        });
+        return;
+      }
+      if (this.modal.classList.contains('map-modal--has-selection')) {
+        var cardH = this.selectionEl && !this.selectionEl.hidden ? this.selectionEl.getBoundingClientRect().height + 24 : 220;
+        this.listingMap.setOverlayPadding({
+          top: headerH,
+          bottom: cardH
+        });
+        return;
+      }
+      var sheetH = this.rail.getBoundingClientRect().height || this._snapHeights()[this._snap];
+      this.listingMap.setOverlayPadding({
+        top: headerH,
+        bottom: sheetH
+      });
+    }
+  }, {
+    key: "_bindSheetDrag",
+    value: function _bindSheetDrag() {
+      var _this4 = this;
+      var startEls = [this.handleEl, this.headingEl].filter(Boolean);
+      if (!startEls.length) return;
+      var onPointerDown = function onPointerDown(e) {
+        if (!_this4._isMobile() || _this4.modal.classList.contains('map-modal--has-selection')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        _this4._drag = {
+          startY: e.clientY,
+          startH: _this4.rail.getBoundingClientRect().height,
+          pointerId: e.pointerId,
+          lastY: e.clientY,
+          lastT: Date.now(),
+          velocity: 0
+        };
+        _this4.modal.classList.add('map-modal--sheet-dragging');
+        _this4.rail.style.transition = 'none';
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch (err) {
+          /* ignore */
+        }
+        e.preventDefault();
+      };
+      var onPointerMove = function onPointerMove(e) {
+        if (!_this4._drag) return;
+        var now = Date.now();
+        var dy = _this4._drag.startY - e.clientY;
+        var nextH = _this4._drag.startH + dy;
+        var heights = _this4._snapHeights();
+        var clamped = Math.max(heights.peek, Math.min(heights.full, nextH));
+        var dt = Math.max(1, now - _this4._drag.lastT);
+        _this4._drag.velocity = (_this4._drag.lastY - e.clientY) / dt;
+        _this4._drag.lastY = e.clientY;
+        _this4._drag.lastT = now;
+        _this4._applySheetHeight(clamped, {
+          animate: false
+        });
+      };
+      var onPointerUp = function onPointerUp() {
+        if (!_this4._drag) return;
+        _this4.modal.classList.remove('map-modal--sheet-dragging');
+        _this4.rail.style.transition = '';
+        var height = _this4.rail.getBoundingClientRect().height;
+        var velocity = _this4._drag.velocity;
+        _this4._drag = null;
+        _this4.setSnap(_this4._nearestSnap(height, velocity));
+      };
+      startEls.forEach(function (el) {
+        el.addEventListener('pointerdown', onPointerDown);
+        el.addEventListener('pointermove', onPointerMove);
+        el.addEventListener('pointerup', onPointerUp);
+        el.addEventListener('pointercancel', onPointerUp);
+      });
+    }
+  }, {
+    key: "_nearestSnap",
+    value: function _nearestSnap(height) {
+      var velocity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var heights = this._snapHeights();
+      if (Math.abs(velocity) > 0.45) {
+        if (velocity > 0) {
+          return height > heights.mid ? 'full' : 'mid';
+        }
+        return height < heights.mid ? 'peek' : 'mid';
+      }
+      var entries = Object.entries(heights);
+      var best = 'mid';
+      var bestDist = Infinity;
+      entries.forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+          name = _ref2[0],
+          value = _ref2[1];
+        var dist = Math.abs(value - height);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = name;
+        }
+      });
+      return best;
+    }
+  }, {
     key: "setItems",
     value: function setItems(items) {
-      var _this3 = this;
+      var _this5 = this;
       this._itemsById = new Map();
       (items || []).forEach(function (item) {
         var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
         if (key && item.variant !== 'gray') {
-          _this3._itemsById.set(key, item);
+          _this5._itemsById.set(key, item);
         }
       });
     }
   }, {
     key: "renderViewport",
     value: function renderViewport() {
-      var _this4 = this;
+      var _this6 = this;
       var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var items = Array.isArray(payload.items) ? payload.items : [];
       var count = payload.count != null ? payload.count : items.length;
-      if (this.countEl) {
-        if (count === 0) {
-          this.countEl.textContent = this.i18n.in_map_area_zero || 'No listings in map area';
-        } else if (count === 1) {
-          this.countEl.textContent = (this.i18n.in_map_area_one || ':count listing in map area').replace(':count', String(count));
-        } else {
-          this.countEl.textContent = (this.i18n.in_map_area || ':count listings in map area').replace(':count', String(count));
-        }
-      }
+      var label = this._countLabel(count);
+      this.countEls.forEach(function (el) {
+        el.textContent = label;
+      });
       if (!this.listEl) return;
       if (!items.length) {
         this.listEl.innerHTML = '';
@@ -2169,31 +2542,31 @@ var MapModalRail = /*#__PURE__*/function () {
       if (this.emptyEl) this.emptyEl.hidden = true;
       var html = items.map(function (item) {
         var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
-        var id = _this4._escape(String(key || item.id));
-        var selected = key != null && String(key) === String(_this4._selectedId);
-        var title = _this4._escape(item.title || '');
-        var location = _this4._escape(item.location || '');
-        var image = _this4._escape(item.image || '');
-        var url = _this4._escape(item.url || '#');
-        var module = _this4._normalizeModule(item.module || item.pillar || 'tour');
-        var moduleLabel = _this4._escape(item.moduleLabel || item.badge || '');
-        var price = item.priceLabel || (item.price != null ? (_this4.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
-        var duration = _this4._escape(item.durationLabel || '');
-        var guests = _this4._escape(item.guestsLabel || '');
-        var boat = _this4._escape(item.boatLabel || '');
+        var id = _this6._escape(String(key || item.id));
+        var selected = key != null && String(key) === String(_this6._selectedId);
+        var title = _this6._escape(item.title || '');
+        var location = _this6._escape(item.location || '');
+        var image = _this6._escape(item.image || '');
+        var url = _this6._escape(item.url || '#');
+        var module = _this6._normalizeModule(item.module || item.pillar || 'tour');
+        var moduleLabel = _this6._escape(item.moduleLabel || item.badge || '');
+        var price = item.priceLabel || (item.price != null ? (_this6.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+        var duration = _this6._escape(item.durationLabel || '');
+        var guests = _this6._escape(item.guestsLabel || '');
+        var boat = _this6._escape(item.boatLabel || '');
         var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
         var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
-        var cta = _this4._escape(item.cta || _this4.i18n.view_details || 'Details');
-        var showOnMap = _this4._escape(_this4.i18n.show_on_map || 'Show on map');
+        var cta = _this6._escape(item.cta || _this6.i18n.view_details || 'Details');
+        var showOnMap = _this6._escape(_this6.i18n.show_on_map || 'Show on map');
         var metaBits = [duration, guests, boat].filter(Boolean);
         var metaHtml = metaBits.length ? "<ul class=\"map-modal__rail-card-meta\">".concat(metaBits.map(function (bit) {
           return "<li>".concat(bit, "</li>");
         }).join(''), "</ul>") : '';
-        var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n              <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n              ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(_this4._escape((_this4.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n            </span>") : '';
-        return "\n          <article class=\"map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n              <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n                  <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n                </svg>\n              </button>\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <div class=\"map-modal__rail-card-topline\">\n                ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n                ").concat(ratingHtml, "\n              </div>\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              ").concat(metaHtml, "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this4._escape(price), "</span>") : '<span></span>', "\n                <div class=\"map-modal__rail-card-actions\">\n                  <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n                  <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n                </div>\n              </div>\n            </div>\n          </article>");
+        var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n              <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n              ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(_this6._escape((_this6.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n            </span>") : '';
+        return "\n          <article class=\"map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n              <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n                  <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n                </svg>\n              </button>\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <div class=\"map-modal__rail-card-topline\">\n                ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n                ").concat(ratingHtml, "\n              </div>\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              ").concat(metaHtml, "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this6._escape(price), "</span>") : '<span></span>', "\n                <div class=\"map-modal__rail-card-actions\">\n                  <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n                  <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n                </div>\n              </div>\n            </div>\n          </article>");
       }).join('');
       this.listEl.innerHTML = html;
-      if (this._selectedId) {
+      if (this._selectedId && !this._isMobile()) {
         var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
         if (selectedCard) {
           selectedCard.scrollIntoView({
@@ -2204,36 +2577,101 @@ var MapModalRail = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "_countLabel",
+    value: function _countLabel(count) {
+      if (count === 0) {
+        return this.i18n.in_map_area_zero || 'No listings in map area';
+      }
+      if (count === 1) {
+        return (this.i18n.in_map_area_one || ':count listing in map area').replace(':count', String(count));
+      }
+      return (this.i18n.in_map_area || ':count listings in map area').replace(':count', String(count));
+    }
+  }, {
     key: "renderSelection",
     value: function renderSelection(item) {
-      var _this5 = this;
-      // Keep the docked strip hidden — detail lives in the map popup.
-      // Rail only highlights the matching card.
-      if (this.selectionEl) {
-        this.selectionEl.hidden = true;
-        this.selectionEl.innerHTML = '';
-      }
+      var _this7 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       if (!item) {
+        var hadSelectionCard = this.modal.classList.contains('map-modal--has-selection');
         this._selectedId = null;
+        this._hideSelectionCard();
         this.listEl.querySelectorAll('.map-modal__rail-card.is-selected').forEach(function (el) {
           el.classList.remove('is-selected');
         });
+        if (this._isMobile() && hadSelectionCard) {
+          this.setSnap(this._snapBeforeSelection || 'peek');
+        } else if (this._isMobile()) {
+          this._syncOverlayPadding();
+        }
         return;
       }
       this._selectedId = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
       this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
-        el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === _this5._selectedId);
+        el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === _this7._selectedId);
       });
       var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
-      if (selectedCard) {
+      if (selectedCard && !this._isMobile()) {
         selectedCard.scrollIntoView({
           block: 'nearest',
           behavior: 'smooth'
         });
       }
-      if (!window.matchMedia('(min-width: 992px)').matches) {
-        this.setRailOpen(true);
+      var fromMap = opts.source === 'map' || opts.source === 'rail-zoom';
+      if (this._isMobile() && fromMap) {
+        this._snapBeforeSelection = this._snap;
+        this._showSelectionCard(item);
+        return;
       }
+      if (this._isMobile() && this.selectionEl && !this.selectionEl.hidden) {
+        this._showSelectionCard(item);
+      }
+    }
+  }, {
+    key: "_showSelectionCard",
+    value: function _showSelectionCard(item) {
+      var _this8 = this;
+      if (!this.selectionEl) return;
+      this.selectionEl.innerHTML = this._selectionHtml(item);
+      this.selectionEl.hidden = false;
+      this.modal.classList.add('map-modal--has-selection');
+      this._syncOverlayPadding();
+      requestAnimationFrame(function () {
+        return _this8._syncOverlayPadding();
+      });
+    }
+  }, {
+    key: "_hideSelectionCard",
+    value: function _hideSelectionCard() {
+      if (this.selectionEl) {
+        this.selectionEl.hidden = true;
+        this.selectionEl.innerHTML = '';
+      }
+      this.modal.classList.remove('map-modal--has-selection');
+    }
+  }, {
+    key: "_selectionHtml",
+    value: function _selectionHtml(item) {
+      var title = this._escape(item.title || '');
+      var location = this._escape(item.location || '');
+      var image = this._escape(item.image || '');
+      var url = this._escape(item.url || '#');
+      var module = this._normalizeModule(item.module || item.pillar || 'tour');
+      var moduleLabel = this._escape(item.moduleLabel || item.badge || '');
+      var price = item.priceLabel || (item.price != null ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+      var duration = this._escape(item.durationLabel || '');
+      var guests = this._escape(item.guestsLabel || '');
+      var boat = this._escape(item.boatLabel || '');
+      var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+      var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+      var cta = this._escape(item.cta || this.i18n.view_details || 'Details');
+      var closeLabel = this._escape(this.i18n.close_map || 'Close');
+      var metaBits = [duration, guests, boat].filter(Boolean);
+      var metaHtml = metaBits.length ? "<ul class=\"map-modal__selection-meta\">".concat(metaBits.map(function (bit) {
+        return "<li>".concat(bit, "</li>");
+      }).join(''), "</ul>") : '';
+      var ratingHtml = rating ? "<span class=\"map-modal__selection-rating\">\n          <span class=\"map-modal__selection-rating-value\">".concat(rating, "</span>\n          ").concat(reviewCount != null ? "<span class=\"map-modal__selection-rating-count\">".concat(this._escape((this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n        </span>") : '';
+      return "\n      <article class=\"map-modal__selection-card\" data-map-module=\"".concat(module, "\">\n        <button type=\"button\" class=\"map-modal__selection-dismiss\" data-map-selection-dismiss aria-label=\"").concat(closeLabel, "\">&times;</button>\n        <a class=\"map-modal__selection-link\" href=\"").concat(url, "\">\n          <div class=\"map-modal__selection-media").concat(image ? '' : ' is-empty', "\">\n            ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\">") : '', "\n          </div>\n          <div class=\"map-modal__selection-body\">\n            <div class=\"map-modal__selection-topline\">\n              ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n              ").concat(ratingHtml, "\n            </div>\n            <h3 class=\"map-modal__selection-title\">").concat(title, "</h3>\n            ").concat(location ? "<p class=\"map-modal__selection-location\">".concat(location, "</p>") : '', "\n            ").concat(metaHtml, "\n            <div class=\"map-modal__selection-footer\">\n              ").concat(price ? "<span class=\"map-modal__selection-price\">".concat(this._escape(price), "</span>") : '<span></span>', "\n              <span class=\"map-modal__selection-cta\">").concat(cta, "</span>\n            </div>\n          </div>\n        </a>\n      </article>");
     }
   }, {
     key: "setHoveredId",
@@ -2243,7 +2681,7 @@ var MapModalRail = /*#__PURE__*/function () {
         var match = hoverId && el.getAttribute('data-map-rail-id') === hoverId;
         el.classList.toggle('is-hovered', !!match);
       });
-      if (hoverId && hoverId !== String(this._selectedId || '')) {
+      if (hoverId && hoverId !== String(this._selectedId || '') && !this._isMobile()) {
         var card = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(hoverId), "\"]"));
         if (card) {
           card.scrollIntoView({

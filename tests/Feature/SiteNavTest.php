@@ -39,6 +39,9 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString(__('homepage.header-become-guide'), $html);
         $this->assertPrimaryNavOrder($html);
         $this->assertStringNotContainsString('aria-current="page"', $html);
+        $this->assertStringNotContainsString('fa-bars', $html);
+        $this->assertStringContainsString('data-bs-target="#mobileMenuModal"', $html);
+        $this->assertStringContainsString(__('homepage.header-menu'), $html);
     }
 
     public function test_offers_listing_highlights_all_offers(): void
@@ -91,6 +94,81 @@ class SiteNavTest extends TestCase
         $this->assertPrimaryNavOrder($html);
         $this->assertStringContainsString('cag-site-mobile-menu__item is-active', $html);
         $this->assertNavItemIsActive($html, route('offers.index'));
+        $this->assertStringContainsString(__('homepage.footer_destinations'), $html);
+        $this->assertStringContainsString(__('homepage.header-login'), $html);
+    }
+
+    public function test_mobile_menu_restores_legacy_support_items(): void
+    {
+        config(['guide_onboarding.new_onboarding_enabled' => true]);
+
+        $html = View::make('layouts.partials.site-mobile-menu')->render();
+
+        $this->assertStringContainsString(__('homepage.filter-magazine'), $html);
+        $this->assertStringContainsString(__('homepage.header-signup'), $html);
+        $this->assertStringContainsString(__('homepage.header-language'), $html);
+        $this->assertStringContainsString(__('homepage.header-become-guide'), $html);
+        $this->assertStringContainsString('info.catchaguide@gmail.com', $html);
+        $this->assertStringContainsString('facebook.com/CatchAGuide', $html);
+        $this->assertStringContainsString('instagram.com/catchaguide_official', $html);
+        $this->assertStringContainsString('fa-book-open', $html);
+        $this->assertStringContainsString('cag-site-mobile-menu__group', $html);
+        $this->assertStringContainsString('cag-site-mobile-menu__langs', $html);
+        $this->assertStringContainsString('data-bs-target="#registerModal"', $html);
+        $this->assertStringContainsString('data-bs-target="#loginModal"', $html);
+        $this->assertStringNotContainsString('cag-site-mobile-menu__eyebrow', $html);
+    }
+
+    public function test_mobile_cta_is_compact_on_small_screens(): void
+    {
+        $html = View::make('layouts.partials.site-nav', [
+            'overlay' => true,
+            'idPrefix' => 'site',
+        ])->render();
+        $scss = (string) file_get_contents(resource_path('sass/components/_site-nav.scss'));
+
+        $this->assertStringContainsString('cag-site-nav__cta-short', $html);
+        $this->assertStringContainsString(__('homepage.header-become-guide-short'), $html);
+        $this->assertMatchesRegularExpression(
+            '/\.cag-site-nav__cta[\s\S]*@media \(max-width: 767\.98px\)[\s\S]*font-size: 0\.68rem/',
+            $scss
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-site-nav__cta[\s\S]*@media \(max-width: 767\.98px\)[\s\S]*border: 0/',
+            $scss
+        );
+    }
+
+    public function test_mobile_bottom_nav_uses_burger_catalog_links(): void
+    {
+        $this->bindNamedRequest('/', 'welcome');
+
+        $html = View::make('pages.home.partials.mobile-bottom-nav')->render();
+
+        $this->assertPrimaryNavOrder($html);
+        $this->assertStringContainsString(__('homepage.footer_destinations'), $html);
+        $this->assertStringContainsString(__('homepage.header-login'), $html);
+        $this->assertStringContainsString('cag-home-bottom-nav__item', $html);
+        $this->assertStringContainsString('fa-th-large', $html);
+        $this->assertStringContainsString('fa-ship', $html);
+        $this->assertStringContainsString('fa-suitcase-rolling', $html);
+        $this->assertStringContainsString('fa-map-marker-alt', $html);
+        $this->assertStringContainsString('data-bs-target="#loginModal"', $html);
+        $this->assertStringNotContainsString(__('homepage.mobile_nav_explore'), $html);
+        $this->assertStringNotContainsString(__('homepage.mobile_nav_bookings'), $html);
+        $this->assertStringNotContainsString(__('homepage.mobile_nav_saved'), $html);
+        $this->assertStringNotContainsString('aria-current="page"', $html);
+    }
+
+    public function test_mobile_bottom_nav_highlights_active_catalog_section(): void
+    {
+        $this->bindNamedRequest('/guidings', 'guidings.landing');
+
+        $html = View::make('pages.home.partials.mobile-bottom-nav')->render();
+
+        $this->assertNavItemIsActive($html, route('guidings.landing'));
+        $this->assertNavItemIsInactive($html, route('offers.index'));
+        $this->assertNavItemIsInactive($html, route('vacations.index'));
     }
 
     public function test_overlay_nav_styles_keep_active_link_visible(): void
@@ -99,6 +177,9 @@ class SiteNavTest extends TestCase
 
         $this->assertStringContainsString('&.is-active::after', $scss);
         $this->assertStringContainsString('.cag-site-nav-shell .cag-site-nav:not(.is-solid)', $scss);
+        $this->assertStringContainsString('#mobileMenuModal', $scss);
+        $this->assertStringContainsString('.has-cag-bottom-nav', $scss);
+        $this->assertStringContainsString('appearance: none', $scss);
         $this->assertMatchesRegularExpression(
             '/\.cag-site-nav-shell \.cag-site-nav:not\(\.is-solid\)[\s\S]*&\\.is-active::after/',
             $scss

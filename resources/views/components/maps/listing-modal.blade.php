@@ -30,6 +30,7 @@
         'close_map' => __('destination.close_map'),
         'show_list' => __('destination.map_show_list'),
         'hide_list' => __('destination.map_hide_list'),
+        'show_map' => __('destination.map_show_map'),
         'filters' => __('destination.filter_by'),
         'duration' => translate('Duration'),
         'price' => translate('Your budget'),
@@ -135,7 +136,22 @@
             <div class="map-modal__body">
                 @if($showRail)
                     <aside class="map-modal__rail" id="{{ $modalId }}-rail" data-map-modal-rail aria-label="{{ __('destination.map_listings_rail') }}">
-                        <div class="map-modal__selection" data-map-selection hidden></div>
+                        <div
+                            class="map-modal__rail-grabber"
+                            data-map-rail-handle
+                            role="separator"
+                            aria-orientation="horizontal"
+                            aria-label="{{ __('destination.map_resize_list') }}"
+                        >
+                            <span class="map-modal__rail-handle" aria-hidden="true"></span>
+                        </div>
+                        <div class="map-modal__rail-heading" data-map-rail-heading>
+                            <span class="map-modal__rail-heading-text" data-map-viewport-count>
+                                @if($resultCount !== null && (int) $resultCount > 0)
+                                    {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                                @endif
+                            </span>
+                        </div>
                         <div class="map-modal__rail-list" data-map-rail-list></div>
                         <p class="map-modal__rail-empty" data-map-rail-empty hidden>{{ __('destination.map_in_area_zero') }}</p>
                     </aside>
@@ -162,6 +178,22 @@
                         :landmarks="$landmarks"
                         :viewport-rail="$showRail"
                     />
+                    <div class="map-modal__selection" data-map-selection hidden></div>
+                    @if($showRail)
+                        <button type="button" class="map-modal__fab" data-map-sheet-fab>
+                            <span class="map-modal__fab-icon map-modal__fab-icon--map" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
+                            <span class="map-modal__fab-icon map-modal__fab-icon--list" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
+                            <span data-map-sheet-fab-label>{{ __('destination.map_show_map') }}</span>
+                        </button>
+                    @endif
                 </div>
             </div>
 

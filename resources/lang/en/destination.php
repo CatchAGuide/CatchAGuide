@@ -30,6 +30,8 @@ Italy: The lakes of northern Italy and the coastal regions are very popular with
     'map_in_area_zero' => 'No listings in map area',
     'map_show_list' => 'Show list',
     'map_hide_list' => 'Hide list',
+    'map_show_map' => 'Map',
+    'map_resize_list' => 'Resize list',
     'map_listings_rail' => 'Listings in map area',
     'map_clear_filters' => 'Clear',
     'map_apply_filters' => 'Apply',

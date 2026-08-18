@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Support\SitePrimaryNav;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Tests\TestCase;
@@ -68,16 +71,21 @@ class GuidingsCatalogHeaderTest extends TestCase
 
     public function test_app_v2_layout_uses_site_header_for_guidings_listings(): void
     {
-        $source = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
+        $layout = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
+        $chrome = (string) file_get_contents(resource_path('views/layouts/partials/site-chrome.blade.php'));
 
-        $this->assertStringContainsString('$useCategorySiteHeader', $source);
-        $this->assertStringContainsString("'guidings.landing'", $source);
-        $this->assertStringContainsString("'guidings.index'", $source);
-        $this->assertStringContainsString("'guidings.destination'", $source);
-        $this->assertStringContainsString("'guidings.countries'", $source);
-        $this->assertStringContainsString("'guidings.methods'", $source);
-        $this->assertStringContainsString("'guidings.targets'", $source);
-        $this->assertStringContainsString("'guidings.show'", $source);
+        $this->assertStringContainsString('layouts.partials.site-chrome', $layout);
+        $this->assertStringNotContainsString('layouts.partials.newheader', $layout);
+        $this->assertStringContainsString('layouts.partials.site-nav', $chrome);
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader(
+            $this->namedRequest('/guidings', 'guidings.landing')
+        ));
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader(
+            $this->namedRequest('/guidings/alloffers', 'guidings.index')
+        ));
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader(
+            $this->namedRequest('/guidings/offer/sea-trout', 'guidings.show')
+        ));
     }
 
     public function test_guidings_product_page_uses_offers_style_header(): void
@@ -115,6 +123,16 @@ class GuidingsCatalogHeaderTest extends TestCase
 
         $this->assertStringNotContainsString('max-width: 1200px', $source);
         $this->assertStringContainsString('class="container"', $source);
+    }
+
+    private function namedRequest(string $uri, string $routeName): Request
+    {
+        $request = Request::create($uri, 'GET');
+        $route = new Route(['GET'], ltrim($uri, '/'), static fn () => null);
+        $route->name($routeName);
+        $request->setRouteResolver(static fn () => $route);
+
+        return $request;
     }
 
 }

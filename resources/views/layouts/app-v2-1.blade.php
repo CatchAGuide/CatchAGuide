@@ -247,32 +247,18 @@
 
 </head>
 
-<body>
+<body @class(['has-cag-bottom-nav' => \App\Support\SitePrimaryNav::usesLayoutBottomNav()])>
 
   
 <!-- /.preloader -->
 <div class="page-wrapper">
 
-    @php
-        $useGuidingsSiteHeader = request()->routeIs('guidings.index');
-    @endphp
-
-    @if($useGuidingsSiteHeader)
-        @include('layouts.modal.loginModal')
-        @include('layouts.modal.registerModal')
-        @include('layouts.modal.guideApplicationModal')
-        @include('layouts.partials.site-mobile-menu')
-    @else
-        {{-- Legacy short chrome for non-migrated app-v2-1 pages --}}
-        @include('layouts.partials.newheader-short', [
-            'isVacation' => request()->is('vacations*'),
-            'currentVacationCountry' => isset($vacation) ? ($vacation->country ?? null) : null,
-        ])
-    @endif
+    @include('layouts.partials.site-chrome')
 
     @yield('content')
 
     @include('layouts.partials.footer')
+    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 

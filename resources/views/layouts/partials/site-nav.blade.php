@@ -1,8 +1,7 @@
 {{--
-  Generalized site header (homepage layout).
-  Legacy dark chrome remains in layouts.partials.newheader for non-migrated pages.
+  Generalized site header (homepage / catalog overlay, or solid layout chrome).
 
-  @param bool   $overlay   Transparent over a hero shell (homepage). Default false (solid).
+  @param bool   $overlay   Transparent over a hero shell (homepage / catalogs). Default false (solid).
   @param string $idPrefix  Unique prefix for form/toggle ids. Default "site".
 --}}
 @php
@@ -106,24 +105,30 @@
 
             @if(config('guide_onboarding.new_onboarding_enabled'))
                 @auth
-                    <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta">@lang('homepage.header-become-guide')</a>
+                    <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta">
+                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
+                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                    </a>
                 @else
-                    <a href="#" class="cag-site-nav__cta" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">@lang('homepage.header-become-guide')</a>
+                    <a href="#" class="cag-site-nav__cta" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
+                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
+                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                    </a>
                 @endauth
             @else
-                <a href="{{ route('login') }}" class="cag-site-nav__cta">@lang('homepage.header-become-guide')</a>
+                <a href="{{ route('login') }}" class="cag-site-nav__cta">
+                    <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
+                    <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                </a>
             @endif
 
-            <button type="button" class="cag-site-nav__icon-btn d-md-none" data-bs-toggle="modal" data-bs-target="#mobileMenuModal" aria-label="Menu">
-                <i class="fas fa-bars" aria-hidden="true"></i>
-            </button>
             @auth
                 <button
                     type="button"
                     class="cag-site-nav__icon-btn cag-site-nav__avatar-btn d-md-none"
                     data-bs-toggle="modal"
                     data-bs-target="#mobileMenuModal"
-                    aria-label="@lang('homepage.header-profile')"
+                    aria-label="@lang('homepage.header-menu')"
                 >
                     <img
                         src="{{ $siteNavAvatar }}"
@@ -134,9 +139,15 @@
                     >
                 </button>
             @else
-                <a href="#" class="cag-site-nav__icon-btn d-md-none" data-bs-toggle="modal" data-bs-target="#loginModal" aria-label="@lang('homepage.header-login')">
+                <button
+                    type="button"
+                    class="cag-site-nav__icon-btn d-md-none"
+                    data-bs-toggle="modal"
+                    data-bs-target="#mobileMenuModal"
+                    aria-label="@lang('homepage.header-menu')"
+                >
                     <i class="far fa-user-circle" aria-hidden="true"></i>
-                </a>
+                </button>
             @endauth
         </div>
     </div>

@@ -65,14 +65,16 @@ class DestinationHubHeaderTest extends TestCase
 
     public function test_app_v2_layout_uses_site_header_for_destination_and_targets(): void
     {
-        $source = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
+        $layout = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
+        $nav = (string) file_get_contents(app_path('Support/SitePrimaryNav.php'));
 
-        $this->assertStringContainsString('$useCategorySiteHeader', $source);
-        $this->assertStringContainsString("'destination'", $source);
-        $this->assertStringContainsString("'destination.country'", $source);
-        $this->assertStringContainsString("'targets.show'", $source);
-        $this->assertStringContainsString("'guidings.index'", $source);
-        $this->assertStringContainsString("'guidings.destination'", $source);
+        $this->assertStringContainsString('layouts.partials.site-chrome', $layout);
+        $this->assertStringNotContainsString('layouts.partials.newheader', $layout);
+        $this->assertStringContainsString("'destination'", $nav);
+        $this->assertStringContainsString("'destination.country'", $nav);
+        $this->assertStringContainsString("'targets.show'", $nav);
+        $this->assertStringContainsString("'guidings.index'", $nav);
+        $this->assertStringContainsString("'guidings.destination'", $nav);
     }
 
     public function test_places_deferred_inputs_include_category_hero_search(): void

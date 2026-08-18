@@ -36,12 +36,15 @@ class VacationsCatalogHeaderTest extends TestCase
     public function test_app_v2_layout_uses_site_header_for_vacations_listings(): void
     {
         $source = (string) file_get_contents(resource_path('views/layouts/app-v2.blade.php'));
+        $chrome = (string) file_get_contents(resource_path('views/layouts/partials/site-chrome.blade.php'));
+        $nav = (string) file_get_contents(app_path('Support/SitePrimaryNav.php'));
 
-        $this->assertStringContainsString('$useVacationsSiteHeader', $source);
-        $this->assertStringContainsString("routeIs('vacations.index')", $source);
-        $this->assertStringContainsString("routeIs('vacations.trips.show')", $source);
-        $this->assertStringContainsString("routeIs('vacations.camps.show')", $source);
-        $this->assertStringContainsString('vacation-page-loading-overlay', $source);
+        $this->assertStringContainsString('layouts.partials.site-chrome', $source);
+        $this->assertStringNotContainsString('layouts.partials.newheader', $source);
+        $this->assertStringContainsString("'vacations.index'", $nav);
+        $this->assertStringContainsString("'vacations.trips.show'", $nav);
+        $this->assertStringContainsString("'vacations.camps.show'", $nav);
+        $this->assertStringContainsString('vacation-page-loading-overlay', $chrome);
     }
 
     public function test_vacations_product_header_keeps_page_h1_and_uses_country_search(): void
@@ -83,10 +86,11 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringNotContainsString('category-hero-header-script', $trip);
         $this->assertStringNotContainsString('category-hero-header-script', $camp);
         $this->assertStringNotContainsString('category-hero-header-script', $legacy);
-        $this->assertStringContainsString('$useProductSiteHeader', $layout);
-        $this->assertStringContainsString("'vacations.trips.show'", $layout);
-        $this->assertStringContainsString("'vacations.camps.show'", $layout);
-        $this->assertStringContainsString('vacation-page-loading-overlay', $layout);
+        $this->assertStringContainsString('layouts.partials.site-chrome', $layout);
+        $this->assertStringNotContainsString('layouts.partials.newheader-short', $layout);
+        $this->assertStringContainsString("'vacations.trips.show'", (string) file_get_contents(app_path('Support/SitePrimaryNav.php')));
+        $this->assertStringContainsString("'vacations.camps.show'", (string) file_get_contents(app_path('Support/SitePrimaryNav.php')));
+        $this->assertStringContainsString('vacation-page-loading-overlay', (string) file_get_contents(resource_path('views/layouts/partials/site-chrome.blade.php')));
     }
 
     public function test_catalog_search_bars_use_page_container_width_and_squared_corners(): void

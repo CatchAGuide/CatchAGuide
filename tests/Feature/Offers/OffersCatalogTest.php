@@ -103,6 +103,37 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('<select name="country"', false);
     }
 
+    public function test_offers_map_modal_includes_mobile_sheet_controls(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            markers: [
+                [
+                    'id' => 1,
+                    'lat' => 52.5,
+                    'lng' => 13.4,
+                    'pillar' => 'tour',
+                    'variant' => 'tour',
+                    'title' => 'Dawn Pike Tour',
+                    'badge' => 'Tour',
+                    'url' => '/guidings/offer/dawn',
+                ],
+            ],
+        ));
+
+        $response = $this->get(route('offers.index'));
+
+        $response->assertOk();
+        $response->assertSee('map-modal--split', false);
+        $response->assertSee('data-map-rail-handle', false);
+        $response->assertSee('data-map-rail-heading', false);
+        $response->assertSee('data-map-sheet-fab', false);
+        $response->assertSee('data-map-selection', false);
+        $response->assertSee(__('destination.map_show_map'), false);
+        $response->assertSee(__('destination.map_show_list'), false);
+        $response->assertSee(__('destination.map_resize_list'), false);
+    }
+
     public function test_species_filter_renders_tagify_dropdown_control(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

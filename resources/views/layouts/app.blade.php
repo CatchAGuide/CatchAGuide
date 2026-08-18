@@ -170,45 +170,17 @@
 
 </head>
 
-<body>
+<body @class(['has-cag-bottom-nav' => \App\Support\SitePrimaryNav::usesLayoutBottomNav()])>
 
   
 <!-- /.preloader -->
 <div class="page-wrapper">
-    @php
-        $useProductSiteHeader = request()->routeIs(
-            'trips.show',
-            'vacations.v2',
-            'vacations.trips.show',
-            'vacations.camps.show',
-        );
-    @endphp
-
-    @if($useProductSiteHeader)
-        @include('layouts.modal.loginModal')
-        @include('layouts.modal.registerModal')
-        @include('layouts.modal.guideApplicationModal')
-        @include('layouts.partials.site-mobile-menu')
-        <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
-            <div class="vacation-page-loading-overlay__panel" role="status">
-                <div class="spinner-border text-danger" aria-hidden="true"></div>
-                <span>{{ translate('Loading...') }}</span>
-            </div>
-        </div>
-    @else
-        @include('layouts.partials.newheader-short', [
-            'isVacation' => request()->is('vacations*'),
-            'currentVacationCountry' => isset($campData) && is_array($campData) && filled($campData['country'] ?? null)
-                ? strtolower((string) $campData['country'])
-                : (isset($tripView) && is_array($tripView) && filled($tripView['country'] ?? null)
-                    ? strtolower((string) $tripView['country'])
-                    : null),
-        ])
-    @endif
+    @include('layouts.partials.site-chrome')
 
     @yield('content')
 
     @include('layouts.partials.footer')
+    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 
