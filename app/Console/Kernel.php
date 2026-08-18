@@ -53,6 +53,12 @@ class Kernel extends ConsoleKernel
                 ->runInBackground()
                 ->appendOutputTo(storage_path('logs/threat-intelligence-cleanup.log'));
         
+        $schedule->command('media:purge-trash')
+                ->dailyAt('04:15')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/media-trash-purge.log'));
+
         // Process vacation translations for admin changes daily (defaults to EN and DE languages)
         // $schedule->command('vacation:translate --admin-changes --relations')
         //         ->daily()

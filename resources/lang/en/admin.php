@@ -86,6 +86,10 @@ return [
         'js_details_load_failed' => 'Could not load details.',
         'btn_edit' => 'Edit',
         'step' => 'Step :num',
+        'restore_images' => 'Restore images from trash',
+        'restore_images_help' => 'This tour has :count image(s) in the recycle bin (kept for :days days). Restore puts missing files back onto the tour without duplicating every offer daily.',
+        'restore_images_success' => 'Restored :count image(s) from trash.',
+        'restore_images_none' => 'No matching trash files were found to restore. Images deleted before this recycle bin cannot be recovered from here.',
     ],
 
     'employees' => [

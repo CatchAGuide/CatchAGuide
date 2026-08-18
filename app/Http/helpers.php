@@ -5,6 +5,7 @@ use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\ListingMediaStorageRegistry;
 use App\Services\Media\ManagedMediaPathMatcher;
 use App\Services\Media\MediaPathResolver;
+use App\Services\Media\MediaTrashService;
 use App\Services\Media\MediaUrlResolver;
 use App\Services\Media\MediaWriteStorageResolver;
 use Illuminate\Support\Facades\Storage;
@@ -220,6 +221,21 @@ if (!function_exists('media_delete')) {
         app(MediaPathResolver::class)->forgetExistsCache($path);
 
         return $deleted;
+    }
+}
+
+if (!function_exists('media_trash_paths')) {
+    /**
+     * Move listing media into the recycle bin after a successful DB commit.
+     * Paths still referenced by $keepPaths are skipped.
+     *
+     * @param  array<int, mixed>  $paths
+     * @param  array<int, mixed>  $keepPaths
+     * @return array<int, string>
+     */
+    function media_trash_paths(array $paths, array $keepPaths = []): array
+    {
+        return app(MediaTrashService::class)->trashMany($paths, $keepPaths);
     }
 }
 

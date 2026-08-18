@@ -7,9 +7,46 @@ use Illuminate\Support\Facades\Log;
 
 class ListingGalleryImageProcessor
 {
+    /** @var array<int, string> */
+    private array $pendingDeletes = [];
+
     public function __construct(
         private readonly ListingMediaPathBuilder $paths,
+        private readonly ListingGalleryRetention $retention,
     ) {}
+
+    /**
+     * Move queued removals to trash after a successful save.
+     * Files still referenced by the saved gallery/thumbnail are skipped.
+     *
+     * @param  array<int, string>|string|null  $gallery
+     * @return array<int, string>
+     */
+    public function trashPendingDeletesForGallery(array|string|null $gallery, ?string $thumbnail = null): array
+    {
+        $keep = is_array($gallery)
+            ? $gallery
+            : (json_decode((string) ($gallery ?? '[]'), true) ?: []);
+
+        if (is_string($thumbnail) && $thumbnail !== '') {
+            $keep[] = $thumbnail;
+        }
+
+        return media_trash_paths($this->takePendingDeletes(), $keep);
+    }
+
+    /**
+     * Deferred deletes collected during process(). Call after a successful save.
+     *
+     * @return array<int, string>
+     */
+    public function takePendingDeletes(): array
+    {
+        $paths = $this->pendingDeletes;
+        $this->pendingDeletes = [];
+
+        return $paths;
+    }
 
     /**
      * Process gallery uploads for any listing type.
@@ -23,6 +60,7 @@ class ListingGalleryImageProcessor
         ?int $entityId = null,
         string $fileField = 'title_image',
     ): ?array {
+        $this->pendingDeletes = [];
         $options = $this->options($listingKey);
         $galleryImages = [];
         $imageListRaw = $request->input('image_list');
@@ -36,7 +74,7 @@ class ListingGalleryImageProcessor
         $directory = $this->paths->entityDirectory($listingKey, $entityId);
 
         if ($request->input('is_update') == '1' && $entityId) {
-            $galleryImages = $this->retainExistingImages($request, $imageList, $imageListSynced);
+            $galleryImages = $this->retainExistingImages($request);
         }
 
         if ($request->hasFile($fileField)) {
@@ -134,40 +172,17 @@ class ListingGalleryImageProcessor
     }
 
     /**
-     * @param  array<int, mixed>  $imageList
      * @return array<int, string>
      */
-    private function retainExistingImages(Request $request, array $imageList, bool $imageListSynced): array
+    private function retainExistingImages(Request $request): array
     {
         $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
         $existingImages = array_values(array_filter($existingImages, static fn ($path) => is_string($path) && $path !== ''));
 
-        // Client never synced image_list: keep existing images instead of wiping the gallery.
-        if (! $imageListSynced) {
-            return $existingImages;
-        }
+        $result = $this->retention->retain($request->input('image_list'), $existingImages);
+        $this->pendingDeletes = array_merge($this->pendingDeletes, $result['to_delete']);
 
-        $keepImages = array_values(array_filter(array_map(
-            static fn ($path) => is_string($path) ? ltrim($path, '/') : null,
-            $imageList
-        )));
-        $keepBasenames = array_flip(array_map('basename', $keepImages));
-        $galleryImages = [];
-
-        foreach ($existingImages as $existingImage) {
-            $normalizedExisting = ltrim($existingImage, '/');
-
-            if (
-                in_array($normalizedExisting, $keepImages, true)
-                || isset($keepBasenames[basename($normalizedExisting)])
-            ) {
-                $galleryImages[] = $existingImage;
-            } else {
-                media_delete($existingImage);
-            }
-        }
-
-        return $galleryImages;
+        return $result['kept'];
     }
 
     /**

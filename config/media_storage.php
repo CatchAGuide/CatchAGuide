@@ -30,6 +30,15 @@ return [
     'object_visibility' => env('MEDIA_OBJECT_VISIBILITY', 'public'),
 
     /*
+    | Recycle bin for removed listing images. Files are moved here after a
+    | successful DB commit (never during a failed update) and purged later.
+    */
+    'trash' => [
+        'root' => env('MEDIA_TRASH_ROOT', '_trash'),
+        'retention_days' => (int) env('MEDIA_TRASH_RETENTION_DAYS', 14),
+    ],
+
+    /*
     |--------------------------------------------------------------------------
     | Listing folder names inside the bucket (after staging/ or production/)
     |--------------------------------------------------------------------------

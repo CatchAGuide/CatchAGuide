@@ -86,6 +86,10 @@ return [
         'js_details_load_failed' => 'Details konnten nicht geladen werden.',
         'btn_edit' => 'Bearbeiten',
         'step' => 'Schritt :num',
+        'restore_images' => 'Bilder aus dem Papierkorb wiederherstellen',
+        'restore_images_help' => 'Diese Tour hat :count Bild(er) im Papierkorb (Aufbewahrung :days Tage). Die Wiederherstellung legt fehlende Dateien zurück, ohne alle Angebote täglich zu duplizieren.',
+        'restore_images_success' => ':count Bild(er) aus dem Papierkorb wiederhergestellt.',
+        'restore_images_none' => 'Keine passenden Dateien im Papierkorb gefunden. Bilder, die vor diesem Papierkorb gelöscht wurden, können hier nicht wiederhergestellt werden.',
     ],
 
     'employees' => [

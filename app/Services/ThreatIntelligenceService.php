@@ -20,27 +20,16 @@ class ThreatIntelligenceService
     /**
      * Collect comprehensive threat intelligence data
      */
-    public function collectThreatData(Request $request, string $context, array $attackData = []): array
+    public function collectThreatData(Request $request, string $context, array $attackData = [], bool $persist = true): array
     {
         $ip = $request->ip();
-        $userAgent = $request->userAgent();
-        
-        // Basic network information
-        $networkData = $this->analyzeNetworkData($ip, $request);
-        
-        // Browser and device fingerprinting
+
+        $networkData = $this->analyzeNetworkData($ip, $request, $persist);
         $fingerprint = $this->generateFingerprint($request);
-        
-        // Behavioral analysis
         $behavioralData = $this->analyzeBehavior($request, $context);
-        
-        // Geographic and timezone analysis
         $geoData = $this->analyzeGeographicData($ip, $request);
-        
-        // Request pattern analysis
         $patternData = $this->analyzeRequestPatterns($request, $context);
-        
-        // Threat intelligence data
+
         $threatData = [
             'timestamp' => now()->toISOString(),
             'ip' => $ip,
@@ -52,7 +41,7 @@ class ThreatIntelligenceService
             'geographic' => $geoData,
             'patterns' => $patternData,
             'threat_score' => $this->calculateThreatScore($networkData, $behavioralData, $patternData),
-            'session_id' => $request->session()->getId(),
+            'session_id' => $request->hasSession() ? $request->session()->getId() : null,
             'referer' => $request->header('referer'),
             'accept_language' => $request->header('accept-language'),
             'accept_encoding' => $request->header('accept-encoding'),
@@ -64,39 +53,34 @@ class ThreatIntelligenceService
             'cf_country' => $request->header('cf-ipcountry'),
             'cf_visitor' => $request->header('cf-visitor'),
         ];
-        
-        // Store in database for analysis
-        $this->storeThreatData($threatData);
-        
-        // Log high-threat incidents
-        if ($threatData['threat_score'] > 70) {
+
+        if ($persist && config('ddos.threat_intelligence.enabled', true)) {
+            $this->storeThreatData($threatData);
+        }
+
+        if ($persist && $threatData['threat_score'] > 70) {
             $this->logHighThreatIncident($threatData);
         }
-        
+
         return $threatData;
     }
 
     /**
      * Analyze network data and IP reputation
      */
-    private function analyzeNetworkData(string $ip, Request $request): array
+    private function analyzeNetworkData(string $ip, Request $request, bool $resolveDns = false): array
     {
-        // Check if IP is from known VPN/Proxy services
         $isVpn = $this->checkVpnProxy($ip);
-        
-        // Analyze IP range and type
         $ipType = $this->analyzeIpType($ip);
-        
-        // Check for suspicious IP patterns
         $suspiciousPatterns = $this->checkSuspiciousPatterns($ip);
-        
+
         return [
             'ip_type' => $ipType,
             'is_vpn_proxy' => $isVpn,
             'is_private' => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false,
             'is_ipv6' => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false,
             'suspicious_patterns' => $suspiciousPatterns,
-            'reverse_dns' => gethostbyaddr($ip),
+            'reverse_dns' => $resolveDns ? @gethostbyaddr($ip) : null,
             'headers' => [
                 'x_forwarded_for' => $request->header('x-forwarded-for'),
                 'x_real_ip' => $request->header('x-real-ip'),
@@ -138,7 +122,7 @@ class ThreatIntelligenceService
     private function analyzeBehavior(Request $request, string $context): array
     {
         $ip = $request->ip();
-        $sessionId = $request->session()->getId();
+        $sessionId = $request->hasSession() ? $request->session()->getId() : '';
         
         // Get recent activity for this IP
         $recentActivity = $this->getRecentActivity($ip, 3600); // Last hour

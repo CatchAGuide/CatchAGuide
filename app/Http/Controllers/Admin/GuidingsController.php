@@ -19,6 +19,8 @@ use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
 use App\Models\Language;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Media\ListingMediaPathBuilder;
+use App\Services\Media\MediaTrashService;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -280,11 +282,58 @@ class GuidingsController extends Controller
         }
 
         $pageTitle = __('profile.editguiding');
+        $trashedImages = app(MediaTrashService::class)->listForEntity('guidings', (int) $guiding->id);
+        $trashRetentionDays = app(MediaTrashService::class)->retentionDays();
 
         return view('admin.pages.guidings.edit', array_merge(
-            ['formData' => $formData, 'pageTitle' => $pageTitle, 'target_redirect' => route('admin.guidings.index')],
+            [
+                'formData' => $formData,
+                'pageTitle' => $pageTitle,
+                'target_redirect' => route('admin.guidings.index'),
+                'trashedImages' => $trashedImages,
+                'trashRetentionDays' => $trashRetentionDays,
+            ],
             $collections
         ));
+    }
+
+    /**
+     * Restore missing guiding gallery files from the media trash folder.
+     */
+    public function restoreImages(
+        Guiding $guiding,
+        MediaTrashService $trash,
+        ListingMediaPathBuilder $paths,
+    ) {
+        $gallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        if (! is_array($gallery)) {
+            $gallery = [];
+        }
+
+        $result = $trash->restoreMissingGallery(
+            $gallery,
+            'guidings',
+            (int) $guiding->id,
+            $paths->entityDirectory('guiding', (int) $guiding->id)
+        );
+
+        if ($result['gallery'] !== []) {
+            $guiding->gallery_images = json_encode($result['gallery']);
+            $thumbnail = (string) ($guiding->thumbnail_path ?? '');
+            if ($thumbnail === '' || ! media_exists($thumbnail)) {
+                $guiding->thumbnail_path = $result['gallery'][0];
+            }
+            $guiding->save();
+        }
+
+        $count = count($result['restored']);
+        $message = $count > 0
+            ? __('admin.guidings.restore_images_success', ['count' => $count])
+            : __('admin.guidings.restore_images_none');
+
+        return redirect()
+            ->route('admin.guidings.edit', $guiding)
+            ->with($count > 0 ? 'success' : 'warning', $message);
     }
 
     /**

@@ -37,7 +37,9 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Media\ListingGalleryRetention;
 use App\Services\Media\ListingMediaRelocator;
+use App\Services\Media\MediaTrashService;
 
 class GuidingsController extends Controller
 {
@@ -156,13 +158,17 @@ class GuidingsController extends Controller
     }
 
     /**
-     * Delete guiding image files from disk (called only after a successful DB commit).
+     * Move removed guiding images to the media trash after a successful DB commit.
+     * Files still referenced by the saved gallery are never removed.
      */
-    private function deleteGuidingImagePaths(array $paths): void
+    private function deleteGuidingImagePaths(array $paths, Guiding $guiding): void
     {
-        foreach (array_unique(array_filter($paths)) as $path) {
-            media_delete($path);
+        $committed = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        if (is_string($guiding->thumbnail_path) && $guiding->thumbnail_path !== '') {
+            $committed[] = $guiding->thumbnail_path;
         }
+
+        $this->mediaTrash->trashMany($paths, $committed);
     }
     
     /**
@@ -182,6 +188,8 @@ class GuidingsController extends Controller
     public function __construct(
         GuidingTranslationService $guidingTranslationService,
         private ListingMediaRelocator $mediaRelocator,
+        private ListingGalleryRetention $galleryRetention,
+        private MediaTrashService $mediaTrash,
     )
     {
         $this->initializeOptimizationServices();
@@ -1008,25 +1016,7 @@ class GuidingsController extends Controller
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
-            $this->deleteGuidingImagePaths($pathsToDelete);
-
-            try {
-                $this->syncGuidingCalendarSchedule($guiding, $request);
-            } catch (\Exception $calendarException) {
-                Log::warning('Calendar schedule sync failed after guiding save', [
-                    'guiding_id' => $guiding->id,
-                    'error' => $calendarException->getMessage(),
-                ]);
-            }
-
-            try {
-                $this->syncGuidingCalendarSchedule($guiding, $request);
-            } catch (\Exception $calendarException) {
-                Log::warning('Calendar schedule sync failed after guiding save', [
-                    'guiding_id' => $guiding->id,
-                    'error' => $calendarException->getMessage(),
-                ]);
-            }
+            $this->deleteGuidingImagePaths($pathsToDelete, $guiding);
 
             try {
                 $this->syncGuidingCalendarSchedule($guiding, $request);
@@ -1146,7 +1136,7 @@ class GuidingsController extends Controller
             $this->relocateGuidingMediaFromTemp($guiding);
             DB::commit();
 
-            $this->deleteGuidingImagePaths($pathsToDelete);
+            $this->deleteGuidingImagePaths($pathsToDelete, $guiding);
 
             return [
                 'guiding_id' => $guiding->id,
@@ -1510,49 +1500,30 @@ class GuidingsController extends Controller
         // Step 1: Images
         $pathsToDelete = [];
         $galeryImages = [];
-        $imageListRaw = json_decode($request->input('image_list', '[]'), true) ?? [];
-        $processedFilenames = []; // Track processed filenames to prevent duplicates
+        $imageListRawInput = $request->input('image_list');
 
-        $normalizePath = function ($path) {
-            if (is_array($path)) {
-                $path = $path['path'] ?? $path['value'] ?? $path['url'] ?? reset($path);
-            }
+        $normalizePath = fn ($path) => $this->galleryRetention->normalizePath($path);
 
-            if (!is_string($path)) {
-                return null;
-            }
-
-            $parsedPath = parse_url($path, PHP_URL_PATH);
-            if ($parsedPath) {
-                $path = $parsedPath;
-            }
-
-            return ltrim($path, '/');
-        };
-
-        $imageListNormalized = array_values(array_filter(array_map($normalizePath, (array) $imageListRaw)));
-        $imageListLookup = array_flip($imageListNormalized);
-
+        $retention = ['kept' => [], 'to_delete' => [], 'image_list_synced' => false, 'image_list' => []];
         if ($request->input('is_update') == '1') {
-            $existingImagesJson = $request->input('existing_images');
-            $existingImages = json_decode($existingImagesJson, true) ?? [];
+            $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
+            $retention = $this->galleryRetention->retain($imageListRawInput, is_array($existingImages) ? $existingImages : []);
+            $pathsToDelete = $retention['to_delete'];
 
-            foreach ($existingImages as $existingImage) {
-                $normalizedExisting = $normalizePath($existingImage);
-
-                if (!$normalizedExisting) {
-                    continue;
-                }
-
-                if (isset($imageListLookup[$normalizedExisting])) {
-                    $galeryImages[$normalizedExisting] = $normalizedExisting === $existingImage
-                        ? $existingImage
-                        : ltrim($existingImage, '/');
-                    $processedFilenames[] = basename($normalizedExisting);
-                } else {
-                    $pathsToDelete[] = $existingImage;
+            foreach ($retention['kept'] as $keptPath) {
+                $normalizedExisting = $normalizePath($keptPath);
+                if ($normalizedExisting) {
+                    $galeryImages[$normalizedExisting] = $normalizedExisting;
                 }
             }
+        }
+
+        $imageListNormalized = $retention['image_list_synced']
+            ? $retention['image_list']
+            : array_values(array_filter(array_map($normalizePath, (array) (json_decode((string) $imageListRawInput, true) ?? []))));
+        $galeryImagesByBasename = [];
+        foreach ($galeryImages as $normalized => $path) {
+            $galeryImagesByBasename[basename($normalized)] = $path;
         }
 
         $basenameToPath = [];
@@ -1576,13 +1547,14 @@ class GuidingsController extends Controller
 
                 if ($normalizedNew) {
                     $galeryImages[$normalizedNew] = $webpPath;
+                    $galeryImagesByBasename[basename($normalizedNew)] = $webpPath;
                     $basenameToPath[$image->getClientOriginalName()] = $webpPath;
                     $processedUploadKeys[] = $uploadKey;
                 }
             }
         }
 
-        if (empty($galeryImages) && !empty($imageListNormalized)) {
+        if (empty($galeryImages) && !empty($imageListNormalized) && $retention['image_list_synced']) {
             foreach ($imageListNormalized as $normalizedPath) {
                 $galeryImages[$normalizedPath] = $normalizedPath;
             }
@@ -1596,6 +1568,13 @@ class GuidingsController extends Controller
                     if (isset($galeryImages[$normalizedPath])) {
                         $orderedGallery[] = $galeryImages[$normalizedPath];
                         unset($galeryImages[$normalizedPath]);
+                    } elseif (isset($galeryImagesByBasename[basename($normalizedPath)])) {
+                        $keptPath = $galeryImagesByBasename[basename($normalizedPath)];
+                        $orderedGallery[] = $keptPath;
+                        $keptNormalized = $normalizePath($keptPath);
+                        if ($keptNormalized) {
+                            unset($galeryImages[$keptNormalized]);
+                        }
                     } elseif (isset($basenameToPath[$normalizedPath])) {
                         $orderedGallery[] = $basenameToPath[$normalizedPath];
                         $uploadedNormalized = $normalizePath($basenameToPath[$normalizedPath]);
@@ -1632,6 +1611,12 @@ class GuidingsController extends Controller
                 $guiding->gallery_images = json_encode($orderedGallery);
             }
         }
+
+        $committedGallery = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+        if (is_string($guiding->thumbnail_path) && $guiding->thumbnail_path !== '') {
+            $committedGallery[] = $guiding->thumbnail_path;
+        }
+        $pathsToDelete = $this->galleryRetention->filterDeletesAgainstCommitted($pathsToDelete, $committedGallery);
 
         // Step 2: Boat and fishing info
         $guiding->is_boat = $request->has('type_of_fishing') ? ($request->input('type_of_fishing') == 'boat' ? 1 : 0) : 0;

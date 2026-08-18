@@ -109,6 +109,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->middleware('throttle:gemini-translation')
             ->name('guidings.translate');
         Route::post('guidings/{guiding}/language', [AdminGuidingsController::class, 'updateLanguage'])->name('guidings.update-language');
+        Route::post('guidings/{guiding}/restore-images', [AdminGuidingsController::class, 'restoreImages'])->name('guidings.restore-images');
         Route::resource('guidings', AdminGuidingsController::class);
         Route::get('guidings/changeguidingstatus/{id}', [AdminGuidingsController::class, 'changeguidingstatus'])->name('changeGuidingStatus');
 

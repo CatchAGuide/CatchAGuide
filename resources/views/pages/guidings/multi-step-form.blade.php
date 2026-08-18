@@ -53,7 +53,7 @@
             <input type="hidden" name="existing_images" id="existing_images" value="{{ $formData['gallery_images'] ?? "" }}">
             <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? auth()->id() }}">
             <input type="hidden" id="is_admin_guiding_form" value="{{ ($is_admin_guiding_form ?? false) ? '1' : '0' }}">
-            <input type="hidden" id="image_list" name="image_list">
+            <input type="hidden" id="image_list" name="image_list" value="{{ $formData['gallery_images'] ?? '' }}">
 
             <!-- Step 1 -->
             <div class="step active" id="step1">
