@@ -3519,6 +3519,40 @@ body .main-menu .main-menu-wrapper__nav {
   border-color: rgb(35.7309734513, 35.0017699115, 47.3982300885);
 }
 
+.offers-filters__region-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.offers-filters__region-tip {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #787780;
+  line-height: 1;
+  cursor: help;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  font-size: 0.85rem;
+}
+.offers-filters__region.is-locked .offers-filters__region-tip {
+  display: inline-flex;
+}
+
+.offers-filters__region.is-locked .offers-filters__region-control {
+  cursor: not-allowed;
+}
+.offers-filters__region-control select:disabled {
+  pointer-events: none;
+  opacity: 0.65;
+  background-color: rgba(49, 48, 65, 0.04);
+}
+
 .offers-filters__vacation-type,
 .vacation-filters .offers-filters__vacation-type {
   margin-bottom: 0.15rem;

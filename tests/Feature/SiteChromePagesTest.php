@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Tests\TestCase;
 
 class SiteChromePagesTest extends TestCase
@@ -38,22 +39,22 @@ class SiteChromePagesTest extends TestCase
         }
     }
 
-    public function test_about_us_uses_solid_site_nav_instead_of_legacy_header(): void
+    public function test_about_us_uses_page_header_band_instead_of_legacy_header(): void
     {
-        $this->assertSolidSiteChrome($this->get(route('additional.about_us')));
+        $this->assertInnerPageHeader($this->get(route('additional.about_us')));
     }
 
-    public function test_contact_uses_solid_site_nav_instead_of_legacy_header(): void
+    public function test_contact_uses_page_header_band_instead_of_legacy_header(): void
     {
-        $this->assertSolidSiteChrome($this->get(route('additional.contact')));
+        $this->assertInnerPageHeader($this->get(route('additional.contact')));
     }
 
-    public function test_imprint_uses_solid_site_nav_instead_of_legacy_header(): void
+    public function test_imprint_uses_page_header_band_instead_of_legacy_header(): void
     {
-        $this->assertSolidSiteChrome($this->get(route('law.imprint')));
+        $this->assertInnerPageHeader($this->get(route('law.imprint')));
     }
 
-    public function test_profile_uses_solid_site_nav_instead_of_legacy_header(): void
+    public function test_profile_uses_page_header_band_instead_of_legacy_header(): void
     {
         $user = User::factory()->create([
             'is_guide' => false,
@@ -61,9 +62,10 @@ class SiteChromePagesTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('profile.index'));
 
-        $this->assertSolidSiteChrome($response);
+        $this->assertInnerPageHeader($response);
         $response->assertSee('cag-site-nav__profile', false);
         $response->assertSee(route('profile.index'), false);
+        $response->assertSee('offers-page-header__hero--compact', false);
     }
 
     public function test_destination_hub_keeps_a_single_overlay_nav(): void
@@ -77,16 +79,30 @@ class SiteChromePagesTest extends TestCase
         $this->assertStringNotContainsString('navbar-custom short-header', $html);
     }
 
-    private function assertSolidSiteChrome($response): void
+    public function test_inner_page_header_partial_renders_overlay_nav_and_search(): void
+    {
+        $html = View::make('layouts.partials.site-page-header')->render();
+
+        $this->assertStringContainsString('data-site-page-header-shell', $html);
+        $this->assertStringContainsString('cag-site-nav--overlay', $html);
+        $this->assertStringContainsString('sitePageSearchPlace', $html);
+        $this->assertStringContainsString('offers-page-header__hero--compact', $html);
+        $this->assertStringContainsString(listing_search_action(), $html);
+        $this->assertStringNotContainsString('navbar-custom short-header', $html);
+    }
+
+    private function assertInnerPageHeader($response): void
     {
         $response->assertOk();
         $html = $response->getContent();
 
-        $this->assertStringContainsString('cag-site-nav--solid', $html);
-        $this->assertStringNotContainsString('cag-site-nav--overlay', $html);
+        $this->assertStringContainsString('data-site-page-header-shell', $html);
+        $this->assertStringContainsString('cag-site-nav--overlay', $html);
+        $this->assertStringContainsString('sitePageSearchPlace', $html);
+        $this->assertStringNotContainsString('cag-site-nav--solid', $html);
         $this->assertStringNotContainsString('navbar-custom short-header', $html);
         $this->assertStringContainsString('cag-home-bottom-nav', $html);
         $this->assertStringContainsString('has-cag-bottom-nav', $html);
-        $this->assertSame(1, substr_count($html, 'class="cag-site-nav cag-site-nav--solid"'));
+        $this->assertSame(1, substr_count($html, 'cag-site-nav--overlay'));
     }
 }

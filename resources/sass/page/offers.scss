@@ -630,6 +630,44 @@ $muted: #787780;
   }
 }
 
+.offers-filters__region-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.offers-filters__region-tip {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: $muted;
+  line-height: 1;
+  cursor: help;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  font-size: 0.85rem;
+
+  .offers-filters__region.is-locked & {
+    display: inline-flex;
+  }
+}
+
+.offers-filters__region-control {
+  .offers-filters__region.is-locked & {
+    cursor: not-allowed;
+  }
+
+  select:disabled {
+    pointer-events: none;
+    opacity: 0.65;
+    background-color: rgba($slate, 0.04);
+  }
+}
+
 // Shared vacation type toggle — used in offers + destination sidebars / offcanvas.
 .offers-filters__vacation-type,
 .vacation-filters .offers-filters__vacation-type {

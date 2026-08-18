@@ -27,6 +27,7 @@ return [
     'filter_vacation_all' => 'Alle Urlaubsangebote',
     'filter_type' => 'Angebotstyp',
     'filter_country' => 'Region',
+    'filter_country_locked_by_place' => 'Die Region ist gesperrt, solange in der Suche ein Ort ausgewählt ist. Leere das Feld „Wo“, um nach Region zu filtern.',
     'filter_species' => 'Zielfisch',
     'filter_species_placeholder' => 'Zielfisch auswählen...',
     'filter_species_search' => 'Fisch suchen...',

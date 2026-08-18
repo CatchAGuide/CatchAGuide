@@ -196,6 +196,14 @@ final class OfferListingFilter
         return $this->speciesIds !== [] || $this->speciesNames !== [];
     }
 
+    /**
+     * True when the header Where search owns location (coords from Places).
+     */
+    public function hasPlaceSearch(): bool
+    {
+        return $this->placeLat !== null && $this->placeLng !== null;
+    }
+
     public function isVacation(): bool
     {
         return $this->type === 'vacation';

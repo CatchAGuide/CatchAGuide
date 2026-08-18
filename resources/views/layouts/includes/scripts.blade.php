@@ -213,7 +213,8 @@
         { input: 'homeHeroSearchPlace', lat: 'LocationLatHomeHero', lng: 'LocationLngHomeHero', city: 'LocationCityHomeHero', country: 'LocationCountryHomeHero', region: 'LocationRegionHomeHero' },
         { input: 'offersCatalogSearchPlace', lat: 'LocationLatOffersCatalog', lng: 'LocationLngOffersCatalog', city: 'LocationCityOffersCatalog', country: 'LocationCountryOffersCatalog', region: 'LocationRegionOffersCatalog' },
         { input: 'guidingsCatalogSearchPlace', lat: 'LocationLatGuidingsCatalog', lng: 'LocationLngGuidingsCatalog', city: 'LocationCityGuidingsCatalog', country: 'LocationCountryGuidingsCatalog', region: 'LocationRegionGuidingsCatalog' },
-        { input: 'categoryHeroSearchPlace', lat: 'LocationLatCategoryHero', lng: 'LocationLngCategoryHero', city: 'LocationCityCategoryHero', country: 'LocationCountryCategoryHero', region: 'LocationRegionCategoryHero' }
+        { input: 'categoryHeroSearchPlace', lat: 'LocationLatCategoryHero', lng: 'LocationLngCategoryHero', city: 'LocationCityCategoryHero', country: 'LocationCountryCategoryHero', region: 'LocationRegionCategoryHero' },
+        { input: 'sitePageSearchPlace', lat: 'LocationLatSitePage', lng: 'LocationLngSitePage', city: 'LocationCitySitePage', country: 'LocationCountrySitePage', region: 'LocationRegionSitePage' }
     ];
 
     function initAutocompleteForConfig(MapsManager, config, callback) {
@@ -235,6 +236,7 @@
                 if (form && typeof MapsManager.fillGeosearchFormFields === 'function') {
                     MapsManager.fillGeosearchFormFields(form, locationData, place);
                 }
+                document.dispatchEvent(new CustomEvent('cag:place-search-changed'));
                 postGuidingSearchPlaceLog(place, config, MapsManager);
             };
         }

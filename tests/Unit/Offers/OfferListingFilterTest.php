@@ -16,6 +16,7 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame([], $filter->speciesIds);
         $this->assertSame([], $filter->speciesNames);
         $this->assertNull($filter->country);
+        $this->assertFalse($filter->hasPlaceSearch());
         $this->assertTrue($filter->showsTours());
         $this->assertTrue($filter->showsTrips());
         $this->assertTrue($filter->showsCamps());
@@ -52,6 +53,7 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame(52.52, $filter->placeLat);
         $this->assertSame(13.40, $filter->placeLng);
         $this->assertSame(3, $filter->numGuests);
+        $this->assertTrue($filter->hasPlaceSearch());
         $this->assertSame(['country'], $filter->placeTypes);
         $this->assertSame(55.1, $filter->boundsNeLat);
         $this->assertSame('DE', $filter->countryShort);
@@ -153,6 +155,15 @@ class OfferListingFilterTest extends TestCase
         $this->assertArrayNotHasKey('place', $carry);
         $this->assertArrayNotHasKey('placeLat', $carry);
         $this->assertArrayNotHasKey('page', $carry);
+    }
+
+    public function test_has_place_search_requires_coordinates(): void
+    {
+        $this->assertFalse(OfferListingFilter::fromRequest(['place' => 'Berlin'])->hasPlaceSearch());
+        $this->assertTrue(OfferListingFilter::fromRequest([
+            'placeLat' => '51.2',
+            'placeLng' => '6.8',
+        ])->hasPlaceSearch());
     }
 
     public function test_invalid_type_falls_back_to_all(): void

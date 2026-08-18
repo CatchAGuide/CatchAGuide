@@ -568,3 +568,132 @@
         </div>
     </div>
 @endif
+
+@once
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const regionLockMessage = @json(__('offers.filter_country_locked_by_place'));
+        const placeFormSelectors = '[data-offers-header-search], [data-category-header-search]';
+
+        function listingPlaceIsActive() {
+            const forms = document.querySelectorAll(placeFormSelectors);
+            for (let i = 0; i < forms.length; i++) {
+                const form = forms[i];
+                const place = form.querySelector('input[name="place"]');
+                const lat = form.querySelector('input[name="placeLat"]');
+                const lng = form.querySelector('input[name="placeLng"]');
+                const hasText = !!(place && String(place.value || '').trim() !== '');
+                const hasCoords = !!(lat && lng && lat.value && lng.value);
+                if (hasText || hasCoords) {
+                    return true;
+                }
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const urlLat = params.get('placeLat') || params.get('placelat') || params.get('place_lat');
+            const urlLng = params.get('placeLng') || params.get('placelng') || params.get('place_lng');
+            return !!(urlLat && urlLng);
+        }
+
+        function disposeTooltip(el) {
+            if (!el || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) {
+                return;
+            }
+            const instance = bootstrap.Tooltip.getInstance(el);
+            if (instance) {
+                instance.dispose();
+            }
+        }
+
+        function initTooltip(el, container) {
+            if (!el || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) {
+                return;
+            }
+            disposeTooltip(el);
+            new bootstrap.Tooltip(el, {
+                trigger: 'hover focus click',
+                container: container || 'body',
+                placement: 'top',
+            });
+        }
+
+        function tooltipContainerFor(el) {
+            return el.closest('.offcanvas') || 'body';
+        }
+
+        function setRegionLocked(field, locked) {
+            const select = field.querySelector('[data-offers-region-select]');
+            const control = field.querySelector('[data-offers-region-control]');
+            const tip = field.querySelector('[data-offers-region-tip]');
+            if (!select) {
+                return;
+            }
+
+            field.classList.toggle('is-locked', locked);
+            select.disabled = locked;
+            select.setAttribute('aria-disabled', locked ? 'true' : 'false');
+
+            if (locked) {
+                if (control) {
+                    control.setAttribute('data-bs-toggle', 'tooltip');
+                    control.setAttribute('data-bs-placement', 'top');
+                    control.setAttribute('data-bs-trigger', 'hover focus click');
+                    control.setAttribute('title', regionLockMessage);
+                    initTooltip(control, tooltipContainerFor(control));
+                }
+                if (tip) {
+                    tip.hidden = false;
+                    initTooltip(tip, tooltipContainerFor(tip));
+                }
+                return;
+            }
+
+            field.querySelectorAll('[data-offers-region-hidden]').forEach(function (hidden) {
+                hidden.remove();
+            });
+            if (control) {
+                disposeTooltip(control);
+                control.removeAttribute('data-bs-toggle');
+                control.removeAttribute('title');
+            }
+            if (tip) {
+                disposeTooltip(tip);
+                tip.hidden = true;
+            }
+        }
+
+        function syncRegionLock() {
+            const locked = listingPlaceIsActive();
+            document.querySelectorAll('[data-offers-region-field]').forEach(function (field) {
+                setRegionLocked(field, locked);
+            });
+        }
+
+        document.querySelectorAll(placeFormSelectors).forEach(function (form) {
+            ['input', 'change'].forEach(function (eventName) {
+                form.addEventListener(eventName, syncRegionLock);
+            });
+        });
+
+        syncRegionLock();
+
+        document.addEventListener('cag:place-search-changed', syncRegionLock);
+
+        const offcanvas = document.getElementById('offersFiltersOffcanvas');
+        if (offcanvas) {
+            offcanvas.addEventListener('shown.bs.offcanvas', function () {
+                document.querySelectorAll('#offersFiltersOffcanvas [data-offers-region-field].is-locked').forEach(function (field) {
+                    const control = field.querySelector('[data-offers-region-control]');
+                    const tip = field.querySelector('[data-offers-region-tip]');
+                    if (control) {
+                        initTooltip(control, offcanvas);
+                    }
+                    if (tip) {
+                        initTooltip(tip, offcanvas);
+                    }
+                });
+            });
+        }
+    });
+    </script>
+@endonce

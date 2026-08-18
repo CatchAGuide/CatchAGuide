@@ -27,6 +27,7 @@ return [
     'filter_vacation_all' => 'All vacations',
     'filter_type' => 'Offer type',
     'filter_country' => 'Region',
+    'filter_country_locked_by_place' => 'Region is locked while a location is selected in the search bar. Clear the Where field to filter by region.',
     'filter_species' => 'Target fish',
     'filter_species_placeholder' => 'Select target fish...',
     'filter_species_search' => 'Search fish...',

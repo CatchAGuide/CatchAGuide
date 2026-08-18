@@ -1,6 +1,6 @@
 {{--
-  Shared public chrome: auth modals, account sheet, and (unless the page owns an overlay nav) the solid site header.
-  Homepage keeps its own overlay nav + modals + bottom bar.
+  Shared public chrome: auth modals, account sheet, and either the inner-page
+  slate header or a solid bar (checkout). Homepage / catalogs own their overlay nav.
 --}}
 @php
     use App\Support\SitePrimaryNav;
@@ -16,10 +16,14 @@
     @include('layouts.partials.site-mobile-menu')
 
     @if($includeNav)
-        @include('layouts.partials.site-nav', [
-            'overlay' => false,
-            'idPrefix' => $idPrefix ?? 'site',
-        ])
+        @if(SitePrimaryNav::usesLayoutPageHeader())
+            @include('layouts.partials.site-page-header')
+        @else
+            @include('layouts.partials.site-nav', [
+                'overlay' => false,
+                'idPrefix' => $idPrefix ?? 'site',
+            ])
+        @endif
     @endif
 
     @if($includeVacationOverlay)

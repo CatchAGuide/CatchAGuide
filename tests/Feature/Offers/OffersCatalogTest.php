@@ -103,6 +103,53 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('<select name="country"', false);
     }
 
+    public function test_region_filter_is_disabled_when_header_place_search_is_active(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            place: 'Düsseldorf, Deutschland',
+            placeLat: 51.2277,
+            placeLng: 6.7735,
+            country: 'germany',
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => 'Düsseldorf, Deutschland',
+            'placeLat' => '51.2277',
+            'placeLng' => '6.7735',
+            'country' => 'germany',
+        ]));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertStringContainsString('data-offers-region-field', $html);
+        $this->assertStringContainsString('offers-filters__region is-locked', $html);
+        $this->assertStringContainsString('data-offers-region-select', $html);
+        $this->assertMatchesRegularExpression(
+            '/<select name="country"[^>]*data-offers-region-select[^>]*\bdisabled\b/',
+            $html
+        );
+        $this->assertStringContainsString(__('offers.filter_country_locked_by_place'), $html);
+        $this->assertStringContainsString('id="offersFiltersOffcanvas"', $html);
+        $this->assertGreaterThanOrEqual(2, substr_count($html, 'data-offers-region-select'));
+        $this->assertStringContainsString('data-offers-region-hidden', $html);
+    }
+
+    public function test_region_filter_stays_enabled_without_place_search(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel());
+
+        $response = $this->get(route('offers.index'));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertStringContainsString('<select name="country"', $html);
+        $this->assertDoesNotMatchRegularExpression(
+            '/<select name="country"[^>]*data-offers-region-select[^>]*\bdisabled\b/',
+            $html
+        );
+        $this->assertStringNotContainsString('offers-filters__region is-locked', $html);
+    }
+
     public function test_offers_map_modal_includes_mobile_sheet_controls(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(
@@ -776,6 +823,8 @@ class OffersCatalogTest extends TestCase
         array $markers = [],
         ?string $place = null,
         ?string $country = null,
+        ?float $placeLat = null,
+        ?float $placeLng = null,
         ?int $numGuests = null,
         $suggested = null,
         ?int $toursTotal = null,
@@ -795,6 +844,8 @@ class OffersCatalogTest extends TestCase
             'type' => $type,
             'vacation' => $vacation !== 'all' ? $vacation : null,
             'place' => $place,
+            'placeLat' => $placeLat,
+            'placeLng' => $placeLng,
             'country' => $country,
             'num_guests' => $numGuests,
             'species' => $speciesIds !== [] ? $speciesIds : null,

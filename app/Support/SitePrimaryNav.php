@@ -205,6 +205,19 @@ final class SitePrimaryNav
         return ! $request->routeIs('checkout', 'checkout.*') && ! $request->is('checkout*');
     }
 
+    /**
+     * Inner pages keep a slate title/search band under the overlay nav
+     * (the old dark header). Checkout stays a solid bar only.
+     */
+    public static function usesLayoutPageHeader(?Request $request = null): bool
+    {
+        $request ??= request();
+
+        return static::usesLayoutNav($request)
+            && ! $request->routeIs('checkout', 'checkout.*')
+            && ! $request->is('checkout*');
+    }
+
     private static function iconFor(string $key): string
     {
         return match ($key) {

@@ -101,6 +101,36 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
+    public function test_target_fish_catalog_locks_region_when_place_search_is_active(): void
+    {
+        $page = $this->createTargetFishPage('pike-region-lock');
+
+        $this->bindTargetFishCatalog(fn () => $this->viewModel(
+            catalogUrl: route('targets.show', ['slug' => $page->slug]),
+            speciesIds: [(int) $page->source_id],
+            place: 'Düsseldorf, Deutschland',
+            placeLat: 51.2277,
+            placeLng: 6.7735,
+        ));
+
+        $response = $this->get(route('targets.show', [
+            'slug' => $page->slug,
+            'place' => 'Düsseldorf, Deutschland',
+            'placeLat' => '51.2277',
+            'placeLng' => '6.7735',
+        ]));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertStringContainsString('offers-filters__region is-locked', $html);
+        $this->assertMatchesRegularExpression(
+            '/<select name="country"[^>]*data-offers-region-select[^>]*\bdisabled\b/',
+            $html
+        );
+        $this->assertStringContainsString(__('offers.filter_country_locked_by_place'), $html);
+        $this->assertStringContainsString('id="offersFiltersOffcanvas"', $html);
+    }
+
     public function test_tours_target_fish_page_uses_tours_scope_and_locks_catalog(): void
     {
         $page = $this->createTargetFishPage('pike-tours-test', CategoryPageScope::TOURS);
@@ -218,12 +248,18 @@ class TargetFishOffersCatalogTest extends TestCase
         array $speciesIds = [1],
         bool $lockTourScope = false,
         bool $lockVacationScope = false,
+        ?string $place = null,
+        ?float $placeLat = null,
+        ?float $placeLng = null,
     ): OfferCatalogViewModel {
         $cards = $cards ?? collect();
         $filter = OfferListingFilter::fromRequest(array_filter([
             'type' => $type,
             'vacation' => $vacation !== 'all' ? $vacation : null,
             'species' => $speciesIds,
+            'place' => $place,
+            'placeLat' => $placeLat,
+            'placeLng' => $placeLng,
         ], fn ($v) => $v !== null && $v !== ''));
 
         $paginator = new LengthAwarePaginator(

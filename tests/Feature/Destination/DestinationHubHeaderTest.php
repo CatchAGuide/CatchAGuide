@@ -82,5 +82,6 @@ class DestinationHubHeaderTest extends TestCase
         $source = (string) file_get_contents(resource_path('js/maps/places-entry.js'));
 
         $this->assertStringContainsString("'categoryHeroSearchPlace'", $source);
+        $this->assertStringContainsString("'sitePageSearchPlace'", $source);
     }
 }

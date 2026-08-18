@@ -144,33 +144,36 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
     }
 
-    public function test_profile_and_content_pages_use_solid_layout_header(): void
+    public function test_profile_and_content_pages_use_layout_page_header(): void
     {
         $this->bindNamedRequest('/profile', 'profile.index');
         $this->assertFalse(SitePrimaryNav::usesOverlayHeader());
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
         $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
         $this->assertFalse(SitePrimaryNav::usesVacationLoadingOverlay());
 
         $this->bindNamedRequest('/about-us', 'additional.about_us');
-        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
         $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
 
         $this->bindNamedRequest('/contact', 'additional.contact');
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
 
         $this->bindNamedRequest('/faq', 'law.faq');
-        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
 
         $this->bindNamedRequest('/fishing-magazine', 'blog.index');
-        $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
     }
 
-    public function test_checkout_keeps_solid_header_without_mobile_catalog_bar(): void
+    public function test_checkout_keeps_solid_header_without_page_header_or_mobile_catalog_bar(): void
     {
         $this->bindNamedRequest('/checkout', 'checkout.index');
 
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
+        $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
         $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
     }
 

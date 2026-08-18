@@ -50,6 +50,7 @@ function bindHeaderPlacesDeferred() {
     'offersCatalogSearchPlace',
     'guidingsCatalogSearchPlace',
     'categoryHeroSearchPlace',
+    'sitePageSearchPlace',
   ];
   placesAutocompleteService.bindDeferredInputs(inputIds, () => {
     // Header wiring is done in scripts.blade.php via initializeGooglePlaces after ensureLoaded
