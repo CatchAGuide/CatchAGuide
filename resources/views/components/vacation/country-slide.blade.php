@@ -14,6 +14,10 @@
             'camps' => (int) ($row['camps'] ?? 0),
         ])
         : null;
+    $flagIso = strtolower((string) ($row['countrycode'] ?? ''));
+    if ($flagIso === 'uk') {
+        $flagIso = 'gb';
+    }
 @endphp
 
 <a
@@ -40,7 +44,12 @@
 
     <span class="vacation-country-rail__fade"></span>
     <span class="vacation-country-rail__meta">
-        <span class="vacation-country-rail__name">{{ $name }}</span>
+        <span class="vacation-country-rail__name">
+            @if($flagIso !== '')
+                <span class="fi fi-{{ $flagIso }} vacation-country-rail__flag" aria-hidden="true"></span>
+            @endif
+            {{ $name }}
+        </span>
         @if($metaLabel)
             <span class="vacation-country-rail__count">{{ $metaLabel }}</span>
         @endif

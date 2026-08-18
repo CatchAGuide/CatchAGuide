@@ -108,7 +108,6 @@ return [
 
     'destinations_title' => 'Where anglers are heading',
     'countries_all' => 'Explore all countries',
-    'destination_from_price' => 'from :price / Person',
 
     'trust_rating_label' => 'Average rating',
     'trust_bookings_label' => 'Tours booked',

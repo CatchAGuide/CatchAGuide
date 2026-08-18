@@ -77,6 +77,8 @@ class SiteChromePagesTest extends TestCase
         $this->assertSame(1, substr_count($html, 'cag-site-nav--overlay'));
         $this->assertStringNotContainsString('cag-site-nav--solid', $html);
         $this->assertStringNotContainsString('navbar-custom short-header', $html);
+        $this->assertStringContainsString('cag-home-bottom-nav', $html);
+        $this->assertStringContainsString('has-cag-bottom-nav', $html);
     }
 
     public function test_inner_page_header_partial_renders_overlay_nav_and_search(): void
@@ -103,6 +105,7 @@ class SiteChromePagesTest extends TestCase
         $this->assertStringNotContainsString('navbar-custom short-header', $html);
         $this->assertStringContainsString('cag-home-bottom-nav', $html);
         $this->assertStringContainsString('has-cag-bottom-nav', $html);
+        $this->assertSame(1, substr_count($html, 'cag-home-bottom-nav d-md-none'));
         $this->assertSame(1, substr_count($html, 'cag-site-nav--overlay'));
     }
 }

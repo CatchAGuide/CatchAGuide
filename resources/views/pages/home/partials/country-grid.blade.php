@@ -26,6 +26,12 @@
             <div class="cag-home-destinations__rail" role="list">
                 @foreach([false, true] as $isClone)
                     @foreach($featuredCountries as $country)
+                        @php
+                            $flagIso = strtolower((string) ($country['countrycode'] ?? ''));
+                            if ($flagIso === 'uk') {
+                                $flagIso = 'gb';
+                            }
+                        @endphp
                         <a
                             href="{{ route($countryRoute ?? 'destination.country', ['country' => $country['slug']]) }}"
                             class="cag-home-destinations__tile cag-reveal__item"
@@ -45,10 +51,12 @@
                             >
                             <span class="cag-home-destinations__fade"></span>
                             <span class="cag-home-destinations__meta">
-                                <span class="cag-home-destinations__name">{{ $country['name'] }}</span>
-                                @if(!empty($country['from_price_label']))
-                                    <span class="cag-home-destinations__price">{{ $country['from_price_label'] }}</span>
-                                @endif
+                                <span class="cag-home-destinations__name">
+                                    @if($flagIso !== '')
+                                        <span class="fi fi-{{ $flagIso }} cag-home-destinations__flag" aria-hidden="true"></span>
+                                    @endif
+                                    {{ $country['name'] }}
+                                </span>
                             </span>
                         </a>
                     @endforeach

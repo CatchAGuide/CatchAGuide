@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Http\Request;
 
 final class SitePrimaryNav
@@ -191,18 +192,48 @@ final class SitePrimaryNav
     }
 
     /**
-     * Mobile catalog bar for layout-owned (solid) headers. Homepage ships its own.
-     * Checkout keeps a clear booking surface without the catalog tabs.
+     * Mobile catalog bar on public pages. Product detail and checkout stay clear.
      */
     public static function usesLayoutBottomNav(?Request $request = null): bool
     {
         $request ??= request();
 
-        if (! static::usesLayoutNav($request)) {
+        return ! static::isCheckoutPage($request) && ! static::isProductDetailPage($request);
+    }
+
+    public static function isCheckoutPage(?Request $request = null): bool
+    {
+        $request ??= request();
+
+        return $request->routeIs('checkout', 'checkout.*') || $request->is('checkout*');
+    }
+
+    public static function isProductDetailPage(?Request $request = null): bool
+    {
+        $request ??= request();
+
+        if ($request->routeIs(
+            'guidings.show',
+            'guidings.show.legacy',
+            'trips.show',
+            'vacations.v2',
+            'vacations.show',
+        )) {
+            return true;
+        }
+
+        if (! $request->routeIs('vacations.trips.show', 'vacations.camps.show')) {
             return false;
         }
 
-        return ! $request->routeIs('checkout', 'checkout.*') && ! $request->is('checkout*');
+        $slug = strtolower((string) $request->route('slug'));
+        if ($slug === '') {
+            return true;
+        }
+
+        $pillar = $request->routeIs('vacations.camps.show') ? 'camps' : 'trips';
+
+        return ! app(VacationDestinationRepository::class)->isKnownCountrySlug($slug, $pillar);
     }
 
     /**
@@ -214,8 +245,7 @@ final class SitePrimaryNav
         $request ??= request();
 
         return static::usesLayoutNav($request)
-            && ! $request->routeIs('checkout', 'checkout.*')
-            && ! $request->is('checkout*');
+            && ! static::isCheckoutPage($request);
     }
 
     private static function iconFor(string $key): string

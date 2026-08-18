@@ -21,11 +21,6 @@ $white: #ffffff;
   --cag-category-trip: #{$category-trip};
   background: var(--cag-bg);
   color: var(--cag-slate);
-  padding-bottom: 5.25rem;
-
-  @media (min-width: 768px) {
-    padding-bottom: 0;
-  }
 
   &--embed {
     background: transparent;
@@ -662,18 +657,19 @@ $white: #ffffff;
 }
 
 .cag-home-destinations__name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 700;
   font-size: 1.1rem;
   line-height: 1.2;
 }
 
-.cag-home-destinations__price {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  opacity: 0.92;
+.cag-home-destinations__flag {
+  flex-shrink: 0;
+  width: 1.35em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .cag-home-destinations__all-mobile {
@@ -2032,6 +2028,10 @@ $white: #ffffff;
 
 // Mobile bottom nav — same catalog items as the burger / desktop header
 .cag-home-bottom-nav {
+  --cag-slate: #{$slate};
+  --cag-gray: #{$gray};
+  --cag-coral: #{$coral};
+  --cag-border: #{$border};
   position: fixed;
   left: 0;
   right: 0;

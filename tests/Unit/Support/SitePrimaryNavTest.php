@@ -120,17 +120,20 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::isHomepage());
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
         $this->assertFalse(SitePrimaryNav::usesLayoutNav());
-        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
 
         $this->bindNamedRequest('/offers', 'offers.index');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
         $this->assertFalse(SitePrimaryNav::usesLayoutNav());
+        $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
 
         $this->bindNamedRequest('/guidings', 'guidings.landing');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
 
         $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+        $this->assertTrue(SitePrimaryNav::isProductDetailPage());
 
         $this->bindNamedRequest('/vacations', 'vacations.index');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
@@ -142,6 +145,8 @@ class SitePrimaryNavTest extends TestCase
         $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
         $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+        $this->assertTrue(SitePrimaryNav::isProductDetailPage());
     }
 
     public function test_profile_and_content_pages_use_layout_page_header(): void
@@ -174,6 +179,22 @@ class SitePrimaryNavTest extends TestCase
 
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
         $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+        $this->assertTrue(SitePrimaryNav::isCheckoutPage());
+    }
+
+    public function test_tour_camp_and_trip_product_pages_skip_the_mobile_catalog_bar(): void
+    {
+        $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');
+        $this->assertTrue(SitePrimaryNav::isProductDetailPage());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+
+        $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
+        $this->assertTrue(SitePrimaryNav::isProductDetailPage());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+
+        $this->bindNamedRequest('/vacations-v2/12', 'vacations.v2');
+        $this->assertTrue(SitePrimaryNav::isProductDetailPage());
         $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
     }
 

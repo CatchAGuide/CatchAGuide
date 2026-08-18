@@ -31,8 +31,9 @@ class HomepageCountrySelectorTest extends TestCase
         $this->assertTrue($featured->every(fn ($row) => array_key_exists('slug', $row)
             && array_key_exists('name', $row)
             && array_key_exists('thumbnail', $row)
-            && array_key_exists('from_price', $row)
-            && array_key_exists('from_price_label', $row)));
+            && array_key_exists('countrycode', $row)
+            && ! array_key_exists('from_price', $row)
+            && ! array_key_exists('from_price_label', $row)));
         $this->assertTrue($featured->every(fn ($row) => ! str_contains((string) $row['name'], ' – ')));
         $this->assertGreaterThan(0, $selector->totalCount());
     }

@@ -30,7 +30,6 @@
     @include('pages.home.partials.testimonials')
     @include('pages.home.partials.magazine')
     @include('pages.home.partials.become-guide')
-    @include('pages.home.partials.mobile-bottom-nav')
 </div>
 @endsection
 

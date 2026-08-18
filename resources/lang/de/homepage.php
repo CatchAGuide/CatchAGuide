@@ -108,7 +108,6 @@ return [
 
     'destinations_title' => 'Wohin Angler gerade reisen',
     'countries_all' => 'Alle Länder entdecken',
-    'destination_from_price' => 'ab :price / Person',
 
     'trust_rating_label' => 'Durchschnittsbewertung',
     'trust_bookings_label' => 'Gebuchte Touren',

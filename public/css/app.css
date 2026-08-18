@@ -662,12 +662,6 @@ body .main-menu .main-menu-wrapper__nav {
   --cag-category-trip: #1f6fa8;
   background: var(--cag-bg);
   color: var(--cag-slate);
-  padding-bottom: 5.25rem;
-}
-@media (min-width: 768px) {
-  .cag-home {
-    padding-bottom: 0;
-  }
 }
 .cag-home--embed {
   background: transparent;
@@ -1284,18 +1278,19 @@ body .main-menu .main-menu-wrapper__nav {
 }
 
 .cag-home-destinations__name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 700;
   font-size: 1.1rem;
   line-height: 1.2;
 }
 
-.cag-home-destinations__price {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  opacity: 0.92;
+.cag-home-destinations__flag {
+  flex-shrink: 0;
+  width: 1.35em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .cag-home-destinations__all-mobile {
@@ -2748,6 +2743,10 @@ body .main-menu .main-menu-wrapper__nav {
 }
 
 .cag-home-bottom-nav {
+  --cag-slate: #313041;
+  --cag-gray: #787780;
+  --cag-coral: #E8604C;
+  --cag-border: #ece8e0;
   position: fixed;
   left: 0;
   right: 0;
@@ -11920,10 +11919,18 @@ div#masonry-grid img {
   z-index: 1;
 }
 .vacation-country-rail__name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 700;
   font-size: 1.1rem;
   line-height: 1.2;
+}
+.vacation-country-rail__flag {
+  flex-shrink: 0;
+  width: 1.35em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 .vacation-country-rail__count {
   display: block;
@@ -20041,6 +20048,15 @@ input:-webkit-autofill:active {
   background: #fff;
   color: #E8604C;
   box-shadow: 0 1px 4px rgba(49, 48, 65, 0.08);
+}
+
+.offers-page-header__hero--compact {
+  padding: calc(64px + 0.55rem) 0 2.1rem;
+}
+@media (min-width: 992px) {
+  .offers-page-header__hero--compact {
+    padding: calc(80px + 0.55rem) 0 2.1rem;
+  }
 }
 
 .has-cag-bottom-nav {

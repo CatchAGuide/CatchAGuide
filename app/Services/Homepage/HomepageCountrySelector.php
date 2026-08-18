@@ -4,7 +4,6 @@ namespace App\Services\Homepage;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Models\Country;
-use App\Models\Guiding;
 use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -19,12 +18,12 @@ class HomepageCountrySelector
      * Destination-rail countries. Pass $limit only for tests; production rails show every unique ISO.
      * When $categoryScope is set, only countries with filled category-page copy for that scope are included.
      *
-     * @return Collection<int, array{slug: string, name: string, thumbnail: string, countrycode: ?string, from_price: ?int, from_price_label: ?string}>
+     * @return Collection<int, array{slug: string, name: string, thumbnail: string, countrycode: ?string}>
      */
     public function featured(?int $limit = null, ?string $categoryScope = null): Collection
     {
         $locale = app()->getLocale();
-        $cacheKey = 'homepage_featured_countries_v6_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
+        $cacheKey = 'homepage_featured_countries_v7_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale, $categoryScope) {
             $unique = $categoryScope !== null
@@ -39,23 +38,12 @@ class HomepageCountrySelector
                 $ordered = $ordered->take($limit);
             }
 
-            $minPrices = $this->minPricesByCountryIso($ordered);
-
-            return $ordered->map(function (Country $country) use ($minPrices, $locale) {
-                $iso = strtoupper((string) ($country->countrycode ?? ''));
-                $fromPrice = $iso !== '' ? ($minPrices[$iso] ?? null) : null;
-
+            return $ordered->map(function (Country $country) use ($locale) {
                 return [
                     'slug' => $country->slug,
                     'name' => $this->displayName($country, $locale),
                     'thumbnail' => $country->getThumbnailPath(),
                     'countrycode' => $country->countrycode,
-                    'from_price' => $fromPrice,
-                    'from_price_label' => $fromPrice
-                        ? __('homepage.destination_from_price', [
-                            'price' => '€'.number_format($fromPrice, 0),
-                        ])
-                        : null,
                 ];
             })->values();
         });
@@ -230,52 +218,5 @@ class HomepageCountrySelector
         return $country->translations->contains(
             fn ($translation) => $translation->language === $locale && filled($translation->title)
         );
-    }
-
-    /**
-     * @param  Collection<int, Country>  $countries
-     * @return array<string, int>
-     */
-    private function minPricesByCountryIso(Collection $countries): array
-    {
-        $isos = $countries
-            ->pluck('countrycode')
-            ->filter()
-            ->map(fn ($code) => strtoupper((string) $code))
-            ->unique()
-            ->values()
-            ->all();
-
-        if ($isos === []) {
-            return [];
-        }
-
-        $isoVariants = collect($isos)
-            ->flatMap(fn (string $iso) => [$iso, strtolower($iso)])
-            ->unique()
-            ->values()
-            ->all();
-
-        $guidings = Guiding::query()
-            ->publiclyVisible()
-            ->whereIn('country_iso', $isoVariants)
-            ->get(['id', 'country_iso', 'price', 'prices', 'price_type', 'max_guests']);
-
-        $mins = [];
-
-        foreach ($guidings as $guiding) {
-            $iso = strtoupper((string) $guiding->country_iso);
-            $price = $guiding->getLowestPrice();
-
-            if ($price <= 0) {
-                continue;
-            }
-
-            if (! isset($mins[$iso]) || $price < $mins[$iso]) {
-                $mins[$iso] = $price;
-            }
-        }
-
-        return $mins;
     }
 }

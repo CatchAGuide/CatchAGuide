@@ -105,10 +105,12 @@
 
             @if(config('guide_onboarding.new_onboarding_enabled'))
                 @auth
-                    <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta">
-                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
-                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
-                    </a>
+                    @unless($siteNavUser?->isVerifiedGuide())
+                        <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta">
+                            <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
+                            <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                        </a>
+                    @endunless
                 @else
                     <a href="#" class="cag-site-nav__cta" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
                         <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
@@ -116,39 +118,23 @@
                     </a>
                 @endauth
             @else
-                <a href="{{ route('login') }}" class="cag-site-nav__cta">
-                    <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
-                    <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
-                </a>
+                @unless($siteNavUser?->isVerifiedGuide())
+                    <a href="{{ route('login') }}" class="cag-site-nav__cta">
+                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
+                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                    </a>
+                @endunless
             @endif
 
-            @auth
-                <button
-                    type="button"
-                    class="cag-site-nav__icon-btn cag-site-nav__avatar-btn d-md-none"
-                    data-bs-toggle="modal"
-                    data-bs-target="#mobileMenuModal"
-                    aria-label="@lang('homepage.header-menu')"
-                >
-                    <img
-                        src="{{ $siteNavAvatar }}"
-                        alt=""
-                        class="cag-site-nav__avatar"
-                        width="32"
-                        height="32"
-                    >
-                </button>
-            @else
-                <button
-                    type="button"
-                    class="cag-site-nav__icon-btn d-md-none"
-                    data-bs-toggle="modal"
-                    data-bs-target="#mobileMenuModal"
-                    aria-label="@lang('homepage.header-menu')"
-                >
-                    <i class="far fa-user-circle" aria-hidden="true"></i>
-                </button>
-            @endauth
+            <button
+                type="button"
+                class="cag-site-nav__icon-btn d-md-none"
+                data-bs-toggle="modal"
+                data-bs-target="#mobileMenuModal"
+                aria-label="@lang('homepage.header-menu')"
+            >
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
         </div>
     </div>
 </header>

@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\GuideStatus;
+use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\URL;
@@ -10,6 +13,8 @@ use Tests\TestCase;
 
 class SiteNavTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -39,7 +44,8 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString(__('homepage.header-become-guide'), $html);
         $this->assertPrimaryNavOrder($html);
         $this->assertStringNotContainsString('aria-current="page"', $html);
-        $this->assertStringNotContainsString('fa-bars', $html);
+        $this->assertStringContainsString('fa-bars', $html);
+        $this->assertStringNotContainsString('fa-user-circle', $html);
         $this->assertStringContainsString('data-bs-target="#mobileMenuModal"', $html);
         $this->assertStringContainsString(__('homepage.header-menu'), $html);
     }
@@ -139,6 +145,50 @@ class SiteNavTest extends TestCase
         );
     }
 
+    public function test_become_guide_cta_is_hidden_for_verified_guides(): void
+    {
+        config(['guide_onboarding.new_onboarding_enabled' => true]);
+
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $this->actingAs($user);
+        $html = View::make('layouts.partials.site-nav', [
+            'overlay' => true,
+            'idPrefix' => 'site',
+        ])->render();
+
+        $this->assertStringNotContainsString('cag-site-nav__cta', $html);
+        $this->assertStringNotContainsString(__('homepage.header-become-guide'), $html);
+        $this->assertStringNotContainsString(__('homepage.header-become-guide-short'), $html);
+        $this->assertStringContainsString('fa-bars', $html);
+        $this->assertStringNotContainsString('cag-site-nav__avatar-btn', $html);
+        $this->assertStringNotContainsString('fa-user-circle', $html);
+    }
+
+    public function test_become_guide_cta_is_shown_for_customers(): void
+    {
+        config(['guide_onboarding.new_onboarding_enabled' => true]);
+
+        $user = User::factory()->create([
+            'is_guide' => 0,
+            'guide_status' => null,
+        ]);
+
+        $this->actingAs($user);
+        $html = View::make('layouts.partials.site-nav', [
+            'overlay' => true,
+            'idPrefix' => 'site',
+        ])->render();
+
+        $this->assertStringContainsString('cag-site-nav__cta', $html);
+        $this->assertStringContainsString(__('homepage.header-become-guide'), $html);
+        $this->assertStringContainsString('fa-bars', $html);
+        $this->assertStringNotContainsString('cag-site-nav__avatar-btn', $html);
+    }
+
     public function test_mobile_bottom_nav_uses_burger_catalog_links(): void
     {
         $this->bindNamedRequest('/', 'welcome');
@@ -169,6 +219,29 @@ class SiteNavTest extends TestCase
         $this->assertNavItemIsActive($html, route('guidings.landing'));
         $this->assertNavItemIsInactive($html, route('offers.index'));
         $this->assertNavItemIsInactive($html, route('vacations.index'));
+    }
+
+    public function test_layout_bottom_nav_renders_on_catalog_pages_but_not_product_or_checkout(): void
+    {
+        $this->bindNamedRequest('/offers', 'offers.index');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+        $this->assertStringContainsString('cag-home-bottom-nav', $html);
+
+        $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+        $this->assertStringNotContainsString('cag-home-bottom-nav', $html);
+
+        $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+        $this->assertStringNotContainsString('cag-home-bottom-nav', $html);
+
+        $this->bindNamedRequest('/vacations-v2/12', 'vacations.v2');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+        $this->assertStringNotContainsString('cag-home-bottom-nav', $html);
+
+        $this->bindNamedRequest('/checkout', 'checkout.index');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+        $this->assertStringNotContainsString('cag-home-bottom-nav', $html);
     }
 
     public function test_overlay_nav_styles_keep_active_link_visible(): void

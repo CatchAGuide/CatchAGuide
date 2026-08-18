@@ -94,8 +94,9 @@ class VacationHubCountryRailTest extends TestCase
         $response->assertSee(route('vacations.country', 'spain', false), false);
         $response->assertSee(route('vacations.country', 'sweden', false), false);
         $response->assertSee('Spain', false);
+        $response->assertSee('fi fi-es', false);
+        $response->assertSee('fi fi-se', false);
         $response->assertSee(__('vacations.hub_country_trips_camps', ['trips' => 3, 'camps' => 2]), false);
         $response->assertDontSee('vacation-country-slider__swiper', false);
-        $response->assertDontSee('vacation-country-slide__flag', false);
     }
 }

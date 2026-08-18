@@ -73,24 +73,18 @@ class GuidingsLandingTest extends TestCase
                 'name' => 'Germany',
                 'thumbnail' => '/assets/images/300x300.png',
                 'countrycode' => 'DE',
-                'from_price' => 90,
-                'from_price_label' => 'from €90 / Person',
             ],
             [
                 'slug' => 'spanien',
                 'name' => 'Spain',
                 'thumbnail' => '/assets/images/300x300.png',
                 'countrycode' => 'ES',
-                'from_price' => 120,
-                'from_price_label' => 'from €120 / Person',
             ],
             [
                 'slug' => 'dänemark',
                 'name' => 'Denmark',
                 'thumbnail' => '/assets/images/300x300.png',
                 'countrycode' => 'DK',
-                'from_price' => 80,
-                'from_price_label' => 'from €80 / Person',
             ],
         ]));
         $this->app->instance(HomepageCountrySelector::class, $countries);
@@ -104,6 +98,11 @@ class GuidingsLandingTest extends TestCase
         $response->assertSee(route('guidings.destination', ['country' => 'spanien'], false), false);
         $response->assertSee(route('guidings.destination', ['country' => 'dänemark'], false), false);
         $response->assertSee('Germany', false);
+        $response->assertSee('fi fi-de', false);
+        $response->assertSee('fi fi-es', false);
+        $response->assertSee('fi fi-dk', false);
+        $response->assertDontSee('from €90 / Person', false);
+        $response->assertDontSee('cag-home-destinations__price', false);
         $response->assertDontSee(__('homepage.countries_all'), false);
         $response->assertDontSee(route('guidings.countries', [], false), false);
         $response->assertDontSee('/destination/deutschland', false);

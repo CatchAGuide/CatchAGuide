@@ -2492,10 +2492,19 @@ $vac-country-panel: #313041;
     }
 
     &__name {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: .45rem;
         font-weight: 700;
         font-size: 1.1rem;
         line-height: 1.2;
+    }
+
+    &__flag {
+        flex-shrink: 0;
+        width: 1.35em;
+        border-radius: 2px;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, .35);
     }
 
     &__count {

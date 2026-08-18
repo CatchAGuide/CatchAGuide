@@ -29,16 +29,12 @@ class HomepageLandingTest extends TestCase
                     'name' => 'Germany',
                     'thumbnail' => '/assets/images/300x300.png',
                     'countrycode' => 'DE',
-                    'from_price' => 90,
-                    'from_price_label' => 'from €90 / Person',
                 ],
                 [
                     'slug' => 'schweden',
                     'name' => 'Sweden',
                     'thumbnail' => '/assets/images/300x300.png',
                     'countrycode' => 'SE',
-                    'from_price' => 120,
-                    'from_price_label' => 'from €120 / Person',
                 ],
             ]),
             'countryCount' => 12,
@@ -224,7 +220,10 @@ class HomepageLandingTest extends TestCase
         $response->assertSee(route('vacations.index', [], false), false);
         $response->assertSee(route('destination.country', ['country' => 'deutschland'], false), false);
         $response->assertSee('Germany', false);
-        $response->assertSee('from €90 / Person', false);
+        $response->assertSee('fi fi-de', false);
+        $response->assertSee('fi fi-se', false);
+        $response->assertDontSee('from €90 / Person', false);
+        $response->assertDontSee('cag-home-destinations__price', false);
         $response->assertDontSee('Fishing in Germany', false);
         $response->assertSee('cag-home-trust', false);
         $response->assertSee('cag-home-trust__strip', false);
