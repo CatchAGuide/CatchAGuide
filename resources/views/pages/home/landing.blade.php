@@ -47,7 +47,13 @@ function validateSearch(event, inputId) {
     if (!form) return true;
     var lat = form.querySelector('input[name="placeLat"]');
     var lng = form.querySelector('input[name="placeLng"]');
-    if (searchInput.value !== '' && lat && lng && (!lat.value || !lng.value)) {
+    if (String(searchInput.value || '').trim() === '') {
+        if (typeof window.stripEmptyLocationSearchFromForm === 'function') {
+            window.stripEmptyLocationSearchFromForm(form);
+        }
+        return true;
+    }
+    if (lat && lng && (!lat.value || !lng.value)) {
         event.preventDefault();
         searchInput.focus();
         return false;

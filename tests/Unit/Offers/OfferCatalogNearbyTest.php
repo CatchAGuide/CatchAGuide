@@ -82,6 +82,7 @@ class OfferCatalogNearbyTest extends TestCase
             $this->serviceWithDestinations($destinations),
             'resolveNearbyOrigin',
             OfferListingFilter::fromRequest([
+                'place' => 'Latvia',
                 'country' => 'lettland',
                 'placeLat' => '56.95',
                 'placeLng' => '24.10',

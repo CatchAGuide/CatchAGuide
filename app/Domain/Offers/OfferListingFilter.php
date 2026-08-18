@@ -43,12 +43,12 @@ final class OfferListingFilter
     ];
 
     /**
-     * Fields the header Where/Who search owns. Submitting that form must not
-     * drop sidebar filters, but these keys are re-emitted by the header itself.
+     * Geo fields owned by the header Where input. Clearing that input must
+     * drop these so leftover coords cannot keep a location search alive.
      *
      * @var list<string>
      */
-    public const HEADER_OWNED_QUERY_KEYS = [
+    public const LOCATION_SEARCH_QUERY_KEYS = [
         'place',
         'placeLat',
         'placeLng',
@@ -60,13 +60,23 @@ final class OfferListingFilter
         'country',
         'region',
         'country_short',
-        'num_guests',
-        'num_persons',
         'bounds_ne_lat',
         'bounds_ne_lng',
         'bounds_sw_lat',
         'bounds_sw_lng',
         'place_types',
+    ];
+
+    /**
+     * Fields the header Where/Who search owns. Submitting that form must not
+     * drop sidebar filters, but these keys are re-emitted by the header itself.
+     *
+     * @var list<string>
+     */
+    public const HEADER_OWNED_QUERY_KEYS = [
+        ...self::LOCATION_SEARCH_QUERY_KEYS,
+        'num_guests',
+        'num_persons',
         'page',
     ];
 
@@ -132,10 +142,37 @@ final class OfferListingFilter
             $sortBy = null;
         }
 
-        $lat = self::nullableFloat($input['placeLat'] ?? $input['place_lat'] ?? null);
-        $lng = self::nullableFloat($input['placeLng'] ?? $input['place_lng'] ?? null);
+        $place = self::nullableString($input['place'] ?? null);
+        $lat = self::nullableFloat($input['placeLat'] ?? $input['place_lat'] ?? $input['placelat'] ?? null);
+        $lng = self::nullableFloat($input['placeLng'] ?? $input['place_lng'] ?? $input['placelng'] ?? null);
         $userLat = self::nullableFloat($input['user_lat'] ?? $input['userLat'] ?? null);
         $userLng = self::nullableFloat($input['user_lng'] ?? $input['userLng'] ?? null);
+        $country = CountrySlug::canonicalize(self::nullableString($input['country'] ?? null));
+        $city = self::nullableString($input['city'] ?? null);
+        $region = self::nullableString($input['region'] ?? null);
+        $countryShort = self::nullableString($input['country_short'] ?? null);
+        $placeTypes = self::normalizePlaceTypes($input['place_types'] ?? null);
+        $boundsNeLat = self::nullableFloat($input['bounds_ne_lat'] ?? null);
+        $boundsNeLng = self::nullableFloat($input['bounds_ne_lng'] ?? null);
+        $boundsSwLat = self::nullableFloat($input['bounds_sw_lat'] ?? null);
+        $boundsSwLng = self::nullableFloat($input['bounds_sw_lng'] ?? null);
+
+        if ($place === null) {
+            $orphanGeo = $lat !== null || $lng !== null;
+            $lat = null;
+            $lng = null;
+            $city = null;
+            $region = null;
+            $countryShort = null;
+            $placeTypes = [];
+            $boundsNeLat = null;
+            $boundsNeLng = null;
+            $boundsSwLat = null;
+            $boundsSwLng = null;
+            if ($orphanGeo) {
+                $country = null;
+            }
+        }
 
         $methodIds = [];
         $waterIds = [];
@@ -164,21 +201,21 @@ final class OfferListingFilter
             vacation: $vacation,
             speciesIds: $speciesIds,
             speciesNames: $speciesNames,
-            country: CountrySlug::canonicalize(self::nullableString($input['country'] ?? null)),
+            country: $country,
             sortBy: $sortBy,
-            place: self::nullableString($input['place'] ?? null),
+            place: $place,
             placeLat: $lat,
             placeLng: $lng,
-            city: self::nullableString($input['city'] ?? null),
-            region: self::nullableString($input['region'] ?? null),
+            city: $city,
+            region: $region,
             numGuests: self::nullableGuests($input['num_guests'] ?? $input['num_persons'] ?? null)
                 ?? self::DEFAULT_GUESTS,
-            placeTypes: self::normalizePlaceTypes($input['place_types'] ?? null),
-            boundsNeLat: self::nullableFloat($input['bounds_ne_lat'] ?? null),
-            boundsNeLng: self::nullableFloat($input['bounds_ne_lng'] ?? null),
-            boundsSwLat: self::nullableFloat($input['bounds_sw_lat'] ?? null),
-            boundsSwLng: self::nullableFloat($input['bounds_sw_lng'] ?? null),
-            countryShort: self::nullableString($input['country_short'] ?? null),
+            placeTypes: $placeTypes,
+            boundsNeLat: $boundsNeLat,
+            boundsNeLng: $boundsNeLng,
+            boundsSwLat: $boundsSwLat,
+            boundsSwLng: $boundsSwLng,
+            countryShort: $countryShort,
             methodIds: $methodIds,
             waterIds: $waterIds,
             durationTypes: $durationTypes,
@@ -197,11 +234,11 @@ final class OfferListingFilter
     }
 
     /**
-     * True when the header Where search owns location (coords from Places).
+     * True when the header Where search owns location (place text + coords).
      */
     public function hasPlaceSearch(): bool
     {
-        return $this->placeLat !== null && $this->placeLng !== null;
+        return $this->place !== null && $this->placeLat !== null && $this->placeLng !== null;
     }
 
     public function isVacation(): bool

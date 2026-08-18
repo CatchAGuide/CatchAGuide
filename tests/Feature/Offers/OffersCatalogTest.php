@@ -150,6 +150,33 @@ class OffersCatalogTest extends TestCase
         $this->assertStringNotContainsString('offers-filters__region is-locked', $html);
     }
 
+    public function test_region_filter_enabled_when_place_is_empty_with_leftover_coords(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            place: '',
+            placeLat: 40.4,
+            placeLng: -3.7,
+            country: 'spain',
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => '',
+            'placeLat' => '40.4',
+            'placeLng' => '-3.7',
+            'country' => 'spain',
+        ]));
+
+        $response->assertOk();
+        $html = $response->getContent();
+        $this->assertDoesNotMatchRegularExpression(
+            '/<select name="country"[^>]*data-offers-region-select[^>]*\bdisabled\b/',
+            $html
+        );
+        $this->assertStringNotContainsString('offers-filters__region is-locked', $html);
+        $this->assertStringContainsString('stripEmptyLocationSearchFromForm', $html);
+        $this->assertStringContainsString('clearListingLocationFields', $html);
+    }
+
     public function test_offers_map_modal_includes_mobile_sheet_controls(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

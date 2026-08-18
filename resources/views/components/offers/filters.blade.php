@@ -574,25 +574,34 @@
     document.addEventListener('DOMContentLoaded', function () {
         const regionLockMessage = @json(__('offers.filter_country_locked_by_place'));
         const placeFormSelectors = '[data-offers-header-search], [data-category-header-search]';
+        const locationCarrySelectors = [
+            placeFormSelectors,
+            '#offers-filters-form',
+            '.vacation-filters-offcanvas__form',
+            '[data-offers-sort-form]',
+        ].join(', ');
 
-        function listingPlaceIsActive() {
+        function listingPlaceHasText() {
             const forms = document.querySelectorAll(placeFormSelectors);
             for (let i = 0; i < forms.length; i++) {
-                const form = forms[i];
-                const place = form.querySelector('input[name="place"]');
-                const lat = form.querySelector('input[name="placeLat"]');
-                const lng = form.querySelector('input[name="placeLng"]');
-                const hasText = !!(place && String(place.value || '').trim() !== '');
-                const hasCoords = !!(lat && lng && lat.value && lng.value);
-                if (hasText || hasCoords) {
+                const place = forms[i].querySelector('input[name="place"]');
+                if (place && String(place.value || '').trim() !== '') {
                     return true;
                 }
             }
+            return false;
+        }
 
-            const params = new URLSearchParams(window.location.search);
-            const urlLat = params.get('placeLat') || params.get('placelat') || params.get('place_lat');
-            const urlLng = params.get('placeLng') || params.get('placelng') || params.get('place_lng');
-            return !!(urlLat && urlLng);
+        function clearCarriedLocationFields() {
+            if (typeof window.clearListingLocationFields !== 'function') {
+                return;
+            }
+            document.querySelectorAll(locationCarrySelectors).forEach(function (form) {
+                window.clearListingLocationFields(form);
+            });
+            document.querySelectorAll('[data-offers-region-select]').forEach(function (select) {
+                select.value = '';
+            });
         }
 
         function disposeTooltip(el) {
@@ -662,16 +671,34 @@
             }
         }
 
+        function headerHasLeftoverGeo() {
+            const forms = document.querySelectorAll(placeFormSelectors);
+            for (let i = 0; i < forms.length; i++) {
+                const form = forms[i];
+                const lat = form.querySelector('input[name="placeLat"]');
+                const lng = form.querySelector('input[name="placeLng"]');
+                const city = form.querySelector('input[name="city"]');
+                const region = form.querySelector('input[name="region"]');
+                if ((lat && lat.value) || (lng && lng.value) || (city && city.value) || (region && region.value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function syncRegionLock() {
-            const locked = listingPlaceIsActive();
+            const locked = listingPlaceHasText();
+            if (! locked && headerHasLeftoverGeo()) {
+                clearCarriedLocationFields();
+            }
             document.querySelectorAll('[data-offers-region-field]').forEach(function (field) {
                 setRegionLocked(field, locked);
             });
         }
 
-        document.querySelectorAll(placeFormSelectors).forEach(function (form) {
-            ['input', 'change'].forEach(function (eventName) {
-                form.addEventListener(eventName, syncRegionLock);
+        document.querySelectorAll(placeFormSelectors + ' input[name="place"]').forEach(function (input) {
+            ['input', 'change', 'keyup', 'paste'].forEach(function (eventName) {
+                input.addEventListener(eventName, syncRegionLock);
             });
         });
 

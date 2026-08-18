@@ -157,13 +157,57 @@ class OfferListingFilterTest extends TestCase
         $this->assertArrayNotHasKey('page', $carry);
     }
 
-    public function test_has_place_search_requires_coordinates(): void
+    public function test_has_place_search_requires_place_text_and_coordinates(): void
     {
         $this->assertFalse(OfferListingFilter::fromRequest(['place' => 'Berlin'])->hasPlaceSearch());
-        $this->assertTrue(OfferListingFilter::fromRequest([
+        $this->assertFalse(OfferListingFilter::fromRequest([
             'placeLat' => '51.2',
             'placeLng' => '6.8',
         ])->hasPlaceSearch());
+        $this->assertTrue(OfferListingFilter::fromRequest([
+            'place' => 'Düsseldorf',
+            'placeLat' => '51.2',
+            'placeLng' => '6.8',
+        ])->hasPlaceSearch());
+    }
+
+    public function test_empty_place_drops_orphan_geo_params(): void
+    {
+        $filter = OfferListingFilter::fromRequest([
+            'place' => '',
+            'placeLat' => '40.4',
+            'placeLng' => '-3.7',
+            'city' => 'Madrid',
+            'country' => 'spain',
+            'region' => 'Community of Madrid',
+            'country_short' => 'ES',
+            'place_types' => '["country"]',
+            'bounds_ne_lat' => '43.8',
+            'bounds_ne_lng' => '4.3',
+            'bounds_sw_lat' => '36.0',
+            'bounds_sw_lng' => '-9.3',
+            'species' => ['8'],
+        ]);
+
+        $this->assertNull($filter->place);
+        $this->assertNull($filter->placeLat);
+        $this->assertNull($filter->placeLng);
+        $this->assertNull($filter->city);
+        $this->assertNull($filter->country);
+        $this->assertNull($filter->region);
+        $this->assertNull($filter->countryShort);
+        $this->assertSame([], $filter->placeTypes);
+        $this->assertNull($filter->boundsNeLat);
+        $this->assertFalse($filter->hasPlaceSearch());
+        $this->assertSame([8], $filter->speciesIds);
+    }
+
+    public function test_country_filter_kept_when_place_is_absent(): void
+    {
+        $filter = OfferListingFilter::fromRequest(['country' => 'spain']);
+
+        $this->assertSame('spain', $filter->country);
+        $this->assertFalse($filter->hasPlaceSearch());
     }
 
     public function test_invalid_type_falls_back_to_all(): void
@@ -325,6 +369,7 @@ class OfferListingFilterTest extends TestCase
 
         $fromPlace = OfferListingFilter::fromRequest([
             'sortby' => 'nearest',
+            'place' => 'Madrid',
             'placeLat' => '40.4',
             'placeLng' => '-3.7',
         ]);

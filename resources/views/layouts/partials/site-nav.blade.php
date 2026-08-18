@@ -160,15 +160,57 @@ if (typeof window.handleLanguageSwitch !== 'function') {
         if (form) form.submit();
     };
 }
+if (!Array.isArray(window.CAG_LOCATION_SEARCH_FIELD_NAMES)) {
+    window.CAG_LOCATION_SEARCH_FIELD_NAMES = @json(\App\Domain\Offers\OfferListingFilter::LOCATION_SEARCH_QUERY_KEYS);
+}
+if (typeof window.clearListingLocationFields !== 'function') {
+    window.clearListingLocationFields = function (scope) {
+        var root = scope || document;
+        var names = window.CAG_LOCATION_SEARCH_FIELD_NAMES || [];
+        names.forEach(function (name) {
+            root.querySelectorAll('input[name="' + name + '"]').forEach(function (el) {
+                el.value = '';
+            });
+        });
+        root.querySelectorAll('[data-geosearch]').forEach(function (el) {
+            el.value = '';
+        });
+    };
+}
+if (typeof window.stripEmptyLocationSearchFromForm !== 'function') {
+    window.stripEmptyLocationSearchFromForm = function (form) {
+        if (!form) {
+            return;
+        }
+        var place = form.querySelector('input[name="place"]');
+        if (!place || String(place.value || '').trim() !== '') {
+            return;
+        }
+        place.disabled = true;
+        window.clearListingLocationFields(form);
+        (window.CAG_LOCATION_SEARCH_FIELD_NAMES || []).forEach(function (name) {
+            form.querySelectorAll('input[name="' + name + '"]').forEach(function (el) {
+                el.disabled = true;
+            });
+        });
+        form.querySelectorAll('[data-geosearch]').forEach(function (el) {
+            el.disabled = true;
+        });
+    };
+}
 if (typeof window.validateSearch !== 'function') {
     window.validateSearch = function (event, inputId) {
         var searchInput = document.getElementById(inputId);
         if (!searchInput) return true;
         var form = searchInput.closest('form');
         if (!form) return true;
+        if (String(searchInput.value || '').trim() === '') {
+            window.stripEmptyLocationSearchFromForm(form);
+            return true;
+        }
         var lat = form.querySelector('input[name="placeLat"]');
         var lng = form.querySelector('input[name="placeLng"]');
-        if (searchInput.value !== '' && lat && lng && (!lat.value || !lng.value)) {
+        if (lat && lng && (!lat.value || !lng.value)) {
             event.preventDefault();
             searchInput.focus();
             return false;

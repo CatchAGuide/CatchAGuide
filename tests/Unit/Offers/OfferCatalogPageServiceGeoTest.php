@@ -27,6 +27,7 @@ class OfferCatalogPageServiceGeoTest extends TestCase
         $query->shouldReceive('whereBetween')->never();
 
         $result = $this->invokeApplyListingGeo($service, $query, OfferListingFilter::fromRequest([
+            'place' => 'Spain',
             'country' => 'spain',
             'placeLat' => '40.4',
             'placeLng' => '-3.7',
@@ -50,6 +51,7 @@ class OfferCatalogPageServiceGeoTest extends TestCase
         $query->shouldReceive('whereRaw')->once()->andReturnSelf();
 
         $result = $this->invokeApplyListingGeo($service, $query, OfferListingFilter::fromRequest([
+            'place' => 'Madrid',
             'placeLat' => '40.4',
             'placeLng' => '-3.7',
             'city' => 'Madrid',
@@ -80,6 +82,7 @@ class OfferCatalogPageServiceGeoTest extends TestCase
         $query->shouldReceive('whereRaw')->never();
 
         $result = $this->invokeApplyListingGeo($service, $query, OfferListingFilter::fromRequest([
+            'place' => 'Catalonia',
             'placeLat' => '41.0',
             'placeLng' => '2.0',
             'bounds_ne_lat' => '42',
