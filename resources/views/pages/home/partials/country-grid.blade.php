@@ -2,7 +2,16 @@
 <section class="cag-home-section cag-home-destinations" data-cag-reveal>
     <div class="cag-home-container">
         <div class="cag-home-section__header cag-reveal__header">
-            <h2 class="cag-home-section__title">{{ __('homepage.destinations_title') }}</h2>
+            <div class="cag-home-section__heading">
+                <h2 class="cag-home-section__title">{{ __('homepage.destinations_title') }}</h2>
+                @if($showAllCountries ?? true)
+                    <a
+                        href="{{ route($allCountriesRoute ?? 'destination') }}"
+                        class="cag-home-section__link cag-home-section__link--mobile"
+                        data-home-analytics="homepage_all_countries_click"
+                    >{{ __('homepage.countries_all') }}</a>
+                @endif
+            </div>
             <div class="cag-home-section__tools">
                 @if($showAllCountries ?? true)
                     <a
@@ -34,7 +43,7 @@
                         @endphp
                         <a
                             href="{{ route($countryRoute ?? 'destination.country', ['country' => $country['slug']]) }}"
-                            class="cag-home-destinations__tile cag-reveal__item"
+                            class="cag-home-destinations__tile cag-home-ph cag-reveal__item"
                             role="listitem"
                             style="--reveal-i: {{ min($loop->index, 8) }}"
                             @if($isClone) aria-hidden="true" tabindex="-1" @endif
@@ -64,13 +73,6 @@
             </div>
         </div>
 
-        @if($showAllCountries ?? true)
-            <div class="cag-home-destinations__all-mobile d-md-none cag-reveal__header">
-                <a href="{{ route($allCountriesRoute ?? 'destination') }}" data-home-analytics="homepage_all_countries_click">
-                    {{ __('homepage.countries_all') }}
-                </a>
-            </div>
-        @endif
     </div>
 </section>
 @endif

@@ -214,18 +214,32 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('id="guideApplicationModal"', false);
         $response->assertSee('cag-home-hero__doors', false);
         $response->assertSee('cag-home-hero__door-icon', false);
-        $response->assertSee('fa-ship', false);
-        $response->assertSee('fa-suitcase-rolling', false);
+        $response->assertSee('cag-home-hero__eyebrow', false);
+        $response->assertSee('cag-home-hero__rule', false);
+        $response->assertSee('cag-icon--rod', false);
+        $response->assertSee('cag-icon--camp', false);
+        $response->assertSee('cag-home-ph', false);
+        $response->assertSee(__('homepage.hero_eyebrow'), false);
         $response->assertSee(route('guidings.landing', [], false), false);
         $response->assertSee(route('vacations.index', [], false), false);
         $response->assertSee(route('destination.country', ['country' => 'deutschland'], false), false);
         $response->assertSee('Germany', false);
         $response->assertSee('fi fi-de', false);
         $response->assertSee('fi fi-se', false);
+        $response->assertSee('cag-home-destinations__flag', false);
+        $response->assertDontSee('cag-home-destinations__code', false);
+        $response->assertSee(__('homepage.hero_h1'), false);
+        $response->assertSee(__('homepage.hero_sub'), false);
+        $response->assertSee(__('homepage.chooser_tour_sub'), false);
+        $response->assertSee(__('homepage.chooser_vacation_sub'), false);
+        $response->assertSee(__('homepage.species_subtitle'), false);
+        $response->assertSee(__('homepage.reviews_title'), false);
+        $response->assertSee('cag-home-season__arrow', false);
         $response->assertDontSee('from €90 / Person', false);
         $response->assertDontSee('cag-home-destinations__price', false);
         $response->assertDontSee('Fishing in Germany', false);
         $response->assertSee('cag-home-trust', false);
+        $response->assertSee('cag-home-trust__grid', false);
         $response->assertSee('cag-home-trust__strip', false);
         $response->assertSee('cag-home-trust__primary', false);
         $response->assertSee('cag-home-trust__lead', false);
@@ -236,6 +250,9 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('12+', false);
         $response->assertSee(__('homepage.trust_offers_label'), false);
         $response->assertSee(__('homepage.trust_countries_label'), false);
+        $response->assertSee(__('homepage.trust_advice_title'), false);
+        $response->assertSee(__('homepage.trust_partners_title'), false);
+        $response->assertSee('cag-icon--star', false);
         $response->assertSee('cag-home-trust__assurances', false);
         $response->assertSee(__('homepage.trust_reply_title'), false);
         $response->assertSee(__('homepage.trust_cancel_title'), false);
@@ -268,8 +285,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-partner', false);
         $response->assertSee('cag-home-partner__cards', false);
         $response->assertSee('cag-home-partner__card', false);
-        $response->assertSee('Werde Catch A Guide Partner', false);
-        $response->assertSee('Maximiere deine Buchungen', false);
+        $response->assertSee(__('homepage.partner_eyebrow'), false);
+        $response->assertSee(__('homepage.partner_title'), false);
         $response->assertSee('Kein Risiko', false);
         $response->assertSee('Neue Kunden', false);
         $response->assertSee('Volle Kontrolle', false);
@@ -281,6 +298,8 @@ class HomepageLandingTest extends TestCase
             $response->getContent()
         );
         $response->assertSee('cag-footer', false);
+        $response->assertSee('cag-footer__accordion', false);
+        $response->assertSee('cag-footer__group', false);
         $response->assertSee('info.catchaguide@gmail.com', false);
     }
 
@@ -305,7 +324,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-offers__module--camp', false);
         $response->assertSee('cag-home-offers__module--trip', false);
         $response->assertSee('cag-home-offers__module-mark', false);
-        $response->assertSee('fa-campground', false);
+        $response->assertSee('cag-home-offers__module-sub', false);
+        $response->assertSee('cag-icon--globe', false);
         $response->assertSee('data-offer-rail="tour"', false);
         $response->assertSee('data-offer-rail="trip"', false);
         $response->assertSee('data-offer-rail="camp"', false);
@@ -317,9 +337,9 @@ class HomepageLandingTest extends TestCase
         $this->assertNotFalse($tripPos);
         $this->assertLessThan($tripPos, $campPos, 'Camps module should appear before Trips on the homepage.');
 
-        $this->assertMatchesRegularExpression('/data-offer-module="tour"[\s\S]{0,400}fa-ship/', $html);
-        $this->assertMatchesRegularExpression('/data-offer-module="camp"[\s\S]{0,400}fa-campground/', $html);
-        $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,400}fa-suitcase-rolling/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="tour"[\s\S]{0,800}cag-icon--rod/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="camp"[\s\S]{0,800}cag-icon--camp/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,800}cag-icon--globe/', $html);
     }
 
     public function test_homepage_reviews_rail_is_interactive(): void

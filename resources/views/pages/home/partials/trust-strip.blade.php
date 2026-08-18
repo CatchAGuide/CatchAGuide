@@ -1,5 +1,40 @@
 <section class="cag-home-section cag-home-trust" data-cag-reveal>
     <div class="cag-home-container">
+        <div class="cag-home-trust__grid" role="list">
+            <div class="cag-home-trust__cell cag-reveal__item" style="--reveal-i: 0" role="listitem">
+                <div class="cag-home-trust__cell-title">
+                    @include('pages.home.partials.cag-icon', ['name' => 'star', 'size' => 20])
+                    <span>{{ ($trust['rating'] ?? null) ?: '—' }} {{ __('homepage.trust_rating_short') }}</span>
+                </div>
+                @if(!empty($trust['reviews_label']))
+                    <a href="#cag-home-reviews" class="cag-home-trust__cell-sub">{{ $trust['reviews_label'] }}</a>
+                @else
+                    <span class="cag-home-trust__cell-sub">{{ __('homepage.trust_angler_approved') }}</span>
+                @endif
+            </div>
+            <div class="cag-home-trust__cell cag-reveal__item" style="--reveal-i: 1" role="listitem">
+                <div class="cag-home-trust__cell-title">
+                    @include('pages.home.partials.cag-icon', ['name' => 'pin', 'size' => 20])
+                    <span>{{ __('homepage.trust_offers_over', ['count' => ($trust['offers'] ?? null) ?: '450+']) }}</span>
+                </div>
+                <span class="cag-home-trust__cell-sub">{{ __('homepage.trust_offers_countries', ['count' => ($trust['countries'] ?? null) ?: '—']) }}</span>
+            </div>
+            <div class="cag-home-trust__cell cag-reveal__item" style="--reveal-i: 2" role="listitem">
+                <div class="cag-home-trust__cell-title">
+                    @include('pages.home.partials.cag-icon', ['name' => 'headphones', 'size' => 20])
+                    <span>{{ __('homepage.trust_advice_title') }}</span>
+                </div>
+                <span class="cag-home-trust__cell-sub">{{ __('homepage.trust_advice_text') }}</span>
+            </div>
+            <div class="cag-home-trust__cell cag-reveal__item" style="--reveal-i: 3" role="listitem">
+                <div class="cag-home-trust__cell-title">
+                    @include('pages.home.partials.cag-icon', ['name' => 'shield', 'size' => 20])
+                    <span>{{ __('homepage.trust_partners_title') }}</span>
+                </div>
+                <span class="cag-home-trust__cell-sub">{{ __('homepage.trust_partners_text') }}</span>
+            </div>
+        </div>
+
         <div class="cag-home-trust__strip">
             <div class="cag-home-trust__lead cag-reveal__item" style="--reveal-i: 0">
                 <div class="cag-home-trust__score">

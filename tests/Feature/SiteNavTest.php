@@ -199,10 +199,11 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString(__('homepage.footer_destinations'), $html);
         $this->assertStringContainsString(__('homepage.header-login'), $html);
         $this->assertStringContainsString('cag-home-bottom-nav__item', $html);
-        $this->assertStringContainsString('fa-th-large', $html);
-        $this->assertStringContainsString('fa-ship', $html);
-        $this->assertStringContainsString('fa-suitcase-rolling', $html);
-        $this->assertStringContainsString('fa-map-marker-alt', $html);
+        $this->assertStringContainsString('cag-icon--nav-grid', $html);
+        $this->assertStringContainsString('cag-icon--nav-rod', $html);
+        $this->assertStringContainsString('cag-icon--nav-camp', $html);
+        $this->assertStringContainsString('cag-icon--nav-pin', $html);
+        $this->assertStringContainsString('cag-icon--nav-user', $html);
         $this->assertStringContainsString('data-bs-target="#loginModal"', $html);
         $this->assertStringNotContainsString(__('homepage.mobile_nav_explore'), $html);
         $this->assertStringNotContainsString(__('homepage.mobile_nav_bookings'), $html);

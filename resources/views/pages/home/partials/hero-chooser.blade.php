@@ -23,7 +23,7 @@
 @endphp
 
 <section class="cag-home-hero" data-hero-carousel data-cag-reveal>
-    <div class="cag-home-hero__media" aria-hidden="true">
+    <div class="cag-home-hero__media cag-home-ph" aria-hidden="true">
         <div class="cag-home-hero__slides">
             @foreach($heroSlides as $index => $slide)
                 <img
@@ -54,7 +54,9 @@
 
     <div class="cag-home-hero__inner">
         <div class="cag-home-hero__copy cag-reveal__item" style="--reveal-i: 0">
+            <p class="cag-home-hero__eyebrow">{{ __('homepage.hero_eyebrow') }}</p>
             <h1 class="cag-home-hero__title">{{ __('homepage.hero_h1') }}</h1>
+            <div class="cag-home-hero__rule" aria-hidden="true"></div>
             <p class="cag-home-hero__sub">{{ __('homepage.hero_sub') }}</p>
         </div>
 
@@ -68,7 +70,7 @@
         >
             <div class="cag-home-hero__search-box">
                 <div class="cag-home-hero__search-field">
-                    <i class="fas fa-search" aria-hidden="true"></i>
+                    @include('pages.home.partials.cag-icon', ['name' => 'search', 'size' => 17, 'iconClass' => 'cag-home-hero__search-icon'])
                     <input
                         id="homeHeroSearchPlace"
                         name="place"
@@ -93,7 +95,7 @@
                     >
                         <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
                         <div class="offers-persons-stepper__value">
-                            <i class="fa fa-user" aria-hidden="true"></i>
+                            @include('pages.home.partials.cag-icon', ['name' => 'user', 'size' => 14, 'iconClass' => 'cag-home-hero__who-icon'])
                             <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $heroGuests, ['count' => $heroGuests]) }}</span>
                         </div>
                         <input type="hidden" name="num_guests" value="{{ $heroGuests }}" data-offers-persons-input>
@@ -102,7 +104,7 @@
                 </div>
                 <button type="submit" class="cag-home-hero__search-btn">
                     <span>{{ __('homepage.searchbar-search') }}</span>
-                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    @include('pages.home.partials.cag-icon', ['name' => 'arrow', 'size' => 15])
                 </button>
             </div>
         </form>
@@ -115,14 +117,16 @@
                 data-home-analytics="homepage_chooser_guidings_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
-                    <i class="fas fa-ship"></i>
+                    @include('pages.home.partials.cag-icon', ['name' => 'rod', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
                     <span class="cag-home-hero__door-label">{{ __('homepage.chooser_tour_label') }}</span>
                     <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_title') }}</span>
                     <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_tour_sub') }}</span>
                 </span>
-                <span class="cag-home-hero__door-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                <span class="cag-home-hero__door-arrow" aria-hidden="true">
+                    @include('pages.home.partials.cag-icon', ['name' => 'arrow', 'size' => 20])
+                </span>
             </a>
             <a
                 href="{{ route('vacations.index') }}"
@@ -131,14 +135,16 @@
                 data-home-analytics="homepage_chooser_vacations_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
-                    <i class="fas fa-suitcase-rolling"></i>
+                    @include('pages.home.partials.cag-icon', ['name' => 'camp', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
                     <span class="cag-home-hero__door-label">{{ __('homepage.chooser_vacation_label') }}</span>
                     <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_title') }}</span>
                     <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_vacation_sub') }}</span>
                 </span>
-                <span class="cag-home-hero__door-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                <span class="cag-home-hero__door-arrow" aria-hidden="true">
+                    @include('pages.home.partials.cag-icon', ['name' => 'arrow', 'size' => 20])
+                </span>
             </a>
         </div>
     </div>

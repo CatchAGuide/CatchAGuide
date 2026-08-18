@@ -13,7 +13,7 @@
                 @foreach($season['species'] as $species)
                     <a
                         href="{{ $species['url'] }}"
-                        class="cag-home-season__card cag-reveal__item"
+                        class="cag-home-season__card cag-home-ph cag-reveal__item"
                         style="--reveal-i: {{ $loop->index + 1 }}"
                     >
                         <img
@@ -30,6 +30,9 @@
                                 <span class="cag-home-season__badge">{{ $species['country'] }}</span>
                             @endif
                             <span class="cag-home-season__name">{{ $species['name'] }}</span>
+                        </span>
+                        <span class="cag-home-season__arrow" aria-hidden="true">
+                            @include('pages.home.partials.cag-icon', ['name' => 'arrow', 'size' => 16])
                         </span>
                     </a>
                 @endforeach

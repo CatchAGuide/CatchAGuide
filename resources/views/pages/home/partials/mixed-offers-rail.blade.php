@@ -14,19 +14,22 @@
             'title' => __('homepage.offers_tours_title'),
             'browse' => __('homepage.mixed_browse_tours'),
             'url' => $offerBrowseUrls['tour'] ?? route('guidings.index'),
-            'icon' => 'fa-ship',
+            'icon' => 'rod',
+            'sub' => __('homepage.offers_tours_sub'),
         ],
         'camp' => [
             'title' => __('homepage.offers_camps_title'),
             'browse' => __('homepage.mixed_browse_camps'),
             'url' => $offerBrowseUrls['camp'] ?? route('vacations.camps.index'),
-            'icon' => 'fa-campground',
+            'icon' => 'camp',
+            'sub' => __('homepage.offers_camps_sub'),
         ],
         'trip' => [
             'title' => __('homepage.offers_trips_title'),
             'browse' => __('homepage.mixed_browse_trips'),
             'url' => $offerBrowseUrls['trip'] ?? route('vacations.trips.index'),
-            'icon' => 'fa-suitcase-rolling',
+            'icon' => 'globe',
+            'sub' => __('homepage.offers_trips_sub'),
         ],
     ];
     $hasAnyOffers = collect($offerModules)->contains(fn ($items) => $items instanceof \Illuminate\Support\Collection && $items->isNotEmpty());
@@ -44,12 +47,23 @@
             @if($cards->isNotEmpty())
                 <div class="cag-home-offers__module cag-home-offers__module--{{ $type }} cag-reveal__block" data-offer-module="{{ $type }}" style="--reveal-i: {{ $loop->index }}">
                     <div class="cag-home-offers__module-header">
-                        <h3 class="cag-home-offers__module-title">
+                        <div class="cag-home-offers__module-heading">
                             <span class="cag-home-offers__module-mark" aria-hidden="true">
-                                <i class="fas {{ $module['icon'] }}"></i>
+                                @include('pages.home.partials.cag-icon', ['name' => $module['icon'], 'size' => 20])
                             </span>
-                            {{ $module['title'] }}
-                        </h3>
+                            <div class="cag-home-offers__module-copy">
+                                <div class="cag-home-offers__module-title-row">
+                                    <h3 class="cag-home-offers__module-title">{{ $module['title'] }}</h3>
+                                    <a
+                                        href="{{ $module['url'] }}"
+                                        class="cag-home-section__link cag-home-section__link--mobile"
+                                        data-home-analytics="homepage_mixed_browse_click"
+                                        data-product-type="{{ $type }}"
+                                    >{{ __('homepage.mixed_see_all') }}</a>
+                                </div>
+                                <p class="cag-home-offers__module-sub">{{ $module['sub'] }}</p>
+                            </div>
+                        </div>
                         <div class="cag-home-offers__module-tools">
                             <a
                                 href="{{ $module['url'] }}"
@@ -78,14 +92,6 @@
                                 ])
                             @endforeach
                         </div>
-                    </div>
-
-                    <div class="cag-home-offers__module-browse-mobile d-md-none">
-                        <a
-                            href="{{ $module['url'] }}"
-                            data-home-analytics="homepage_mixed_browse_click"
-                            data-product-type="{{ $type }}"
-                        >{{ $module['browse'] }}</a>
                     </div>
                 </div>
             @endif

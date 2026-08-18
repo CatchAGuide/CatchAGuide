@@ -14,7 +14,7 @@
     data-home-analytics="homepage_mixed_offer_click"
     data-product-type="{{ $type }}"
 >
-    <a href="{{ $card['url'] }}" class="cag-home-offer__media">
+    <a href="{{ $card['url'] }}" class="cag-home-offer__media cag-home-ph">
         <img
             src="{{ $image }}"
             alt="{{ $card['title'] }}"
@@ -31,7 +31,7 @@
         </h3>
         @if(!empty($card['location']))
             <p class="cag-home-offer__location">
-                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                @include('pages.home.partials.cag-icon', ['name' => 'pin', 'size' => 12, 'iconClass' => 'cag-home-offer__pin'])
                 {{ $card['location'] }}
             </p>
         @endif
