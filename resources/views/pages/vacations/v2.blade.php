@@ -508,7 +508,7 @@
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
         <section id="special-offers" class="camp-section mb-3">
-            <h2 class="camp-section__title">{{ __('Special Offers') }}</h2>
+            <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
                 <div class="mb-4">
                     <x-special-offer.card :specialOffer="$specialOffer" />

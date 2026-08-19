@@ -31,7 +31,7 @@
                 <div>
                     <button
                         type="button"
-                        aria-label="Previous image"
+                        aria-label="{{ __('vacations.gallery_prev') }}"
                         class="accommodation-gallery__nav-btn accommodation-gallery__nav-btn--prev"
                         data-prev-image
                     >
@@ -39,7 +39,7 @@
                     </button>
                     <button
                         type="button"
-                        aria-label="Next image"
+                        aria-label="{{ __('vacations.gallery_next') }}"
                         class="accommodation-gallery__nav-btn accommodation-gallery__nav-btn--next"
                         data-next-image
                     >
@@ -88,17 +88,17 @@
                     <div class="accommodation-card__distance-group">
                         @if(!empty($accommodation['distances']['to_water_m']))
                             <span class="accommodation-card__distance-chip">
-                                🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
+                                🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
                             </span>
                         @endif
                         @if(!empty($accommodation['distances']['to_berth_m']))
                             <span class="accommodation-card__distance-chip">
-                                ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
+                                ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
                             </span>
                         @endif
                         @if(!empty($accommodation['distances']['to_parking_m']))
                             <span class="accommodation-card__distance-chip">
-                                🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
+                                🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
                             </span>
                         @endif
                     </div>
@@ -108,7 +108,7 @@
             {{-- Details panel appears after gallery (desktop expanded only) --}}
             <div class="accommodation-card__left-panels" data-expanded-only>
                 <div class="accommodation-card__panel">
-                    <div class="accommodation-card__panel-title">Details</div>
+                    <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['accommodation_details'] as $detail)
                             <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
@@ -118,7 +118,7 @@
 
                 @if(!empty($accommodation['policies']))
                     <div class="accommodation-card__panel">
-                        <div class="accommodation-card__panel-title">Policies</div>
+                        <div class="accommodation-card__panel-title">{{ __('accommodations.policies') }}</div>
                         @if(!empty($accommodation['policies']))
                             <ul class="accommodation-card__bullet-list">
                                 @foreach ($accommodation['policies'] as $policy)
@@ -160,7 +160,7 @@
             </div>
 
             <div class="accommodation-card__beds">
-                <span class="accommodation-card__beds-label">Schlafzimmer:</span>
+                <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
                 <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
             </div>
 
@@ -168,17 +168,17 @@
                 <div class="accommodation-card__distance-group">
                     @if(!empty($accommodation['distances']['to_water_m']))
                         <span class="accommodation-card__distance-chip">
-                            🌊 Water: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
+                            🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_berth_m']))
                         <span class="accommodation-card__distance-chip">
-                            ⚓ Jetty: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
+                            ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
                         </span>
                     @endif
                     @if(!empty($accommodation['distances']['to_parking_m']))
                         <span class="accommodation-card__distance-chip">
-                            🚗 Parking: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
+                            🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
                         </span>
                     @endif
                 </div>
@@ -189,7 +189,7 @@
         <div class="accommodation-card__feature-grid" data-expanded-only>
             {{-- Mobile-only Details panel (appears before Amenities on mobile) --}}
             <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-details">
-                <div class="accommodation-card__panel-title">Details</div>
+                <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
                 <ul class="accommodation-card__bullet-list">
                     @foreach($accommodation['accommodation_details'] as $detail)
                         <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
@@ -211,7 +211,7 @@
             {{-- Mobile-only Policies panel (appears after Amenities on mobile) --}}
             @if(!empty($accommodation['policies']))
                 <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-policies">
-                    <div class="accommodation-card__panel-title">Policies</div>
+                    <div class="accommodation-card__panel-title">{{ __('accommodations.policies') }}</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach ($accommodation['policies'] as $policy)
                             <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
@@ -221,7 +221,7 @@
             @endif
 
             <div class="accommodation-card__panel">
-                <div class="accommodation-card__panel-title">Kitchen Equipment</div>
+                <div class="accommodation-card__panel-title">{{ __('vacations.kitchen_equipment') }}</div>
                 @if(!empty($accommodation['kitchen']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['kitchen'] as $kitchen)
@@ -229,12 +229,12 @@
                         @endforeach
                     </ul>
                 @else
-                    <p class="accommodation-card__empty">No kitchen details available</p>
+                    <p class="accommodation-card__empty">{{ __('vacations.no_kitchen_details') }}</p>
                 @endif
             </div>
 
             <div class="accommodation-card__panel">
-                <div class="accommodation-card__panel-title">Bathroom Equipment</div>
+                <div class="accommodation-card__panel-title">{{ __('vacations.bathroom_equipment') }}</div>
                 @if(!empty($accommodation['bathroom_laundry']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['bathroom_laundry'] as $bathroom_laundry)
@@ -242,7 +242,7 @@
                         @endforeach
                     </ul>
                 @else
-                    <p class="accommodation-card__empty">No bathroom details available</p>
+                    <p class="accommodation-card__empty">{{ __('vacations.no_bathroom_details') }}</p>
                 @endif
             </div>
 
@@ -251,7 +251,7 @@
                     <div class="accommodation-card__panel-columns">
                         @if(!empty($accommodation['extras_inclusives']['inclusives']))
                             <div>
-                                <div class="accommodation-card__panel-title">Inclusives</div>
+                                <div class="accommodation-card__panel-title">{{ __('vacations.included_services') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['inclusives'] as $inclusive)
                                         <span class="accommodation-card__inclusive-chip">✅ {{ is_array($inclusive) ? ($inclusive['name'] ?? $inclusive['value'] ?? json_encode($inclusive)) : $inclusive }}</span>
@@ -262,7 +262,7 @@
 
                         @if(!empty($accommodation['extras_inclusives']['extras']))
                             <div>
-                                <div class="accommodation-card__panel-title">Extras</div>
+                                <div class="accommodation-card__panel-title">{{ __('vacations.extras') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['extras'] as $extra)
                                         <span class="accommodation-card__inclusive-chip">✅ {{ is_array($extra) ? ($extra['name'] ?? $extra['value'] ?? json_encode($extra)) : $extra }}</span>
@@ -287,14 +287,14 @@
                         };
                     @endphp
                     {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
-                    <div class="accommodation-card__price-type">Per Day</div>
+                    <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
                     <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
                 </div>
                 {{-- <button class="accommodation-card__select-btn">
                     Select Accommodation
                 </button> --}}
-                <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn>
-                    <span data-toggle-text>Show More</span>
+                <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                     <span data-toggle-icon>▼</span>
                 </button>
             </div>

@@ -32,7 +32,7 @@
                     'url' => $footerListOffer['url'],
                     'modal' => $footerListOffer['modal'],
                 ],
-                ['label' => __('homepage.footer_become_partner'), 'url' => route('additional.contact')],
+                ['label' => __('homepage.footer_become_partner'), 'url' => route('additional.partner')],
                 ['label' => __('message.faq'), 'url' => route('law.faq')],
             ],
         ],
@@ -108,6 +108,7 @@
                         <li><a href="{{ route('destination') }}">@lang('homepage.footer_destinations')</a></li>
                         <li><a href="{{ route('profile.settings') }}">@lang('message.myaccount')</a></li>
                         <li><a id="contact-footer" href="{{ route('additional.contact') }}">@lang('message.contact')</a></li>
+                        <li><a href="{{ route('additional.partner') }}">@lang('homepage.footer_become_partner')</a></li>
                         <li><a href="{{ route('additional.for_agents') }}">@lang('message.for_agents')</a></li>
                     </ul>
                 </div>

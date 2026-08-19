@@ -155,6 +155,7 @@ final class SitePrimaryNav
             'trips.show',
             'category.types',
             'category.targets',
+            'additional.partner',
         );
     }
 

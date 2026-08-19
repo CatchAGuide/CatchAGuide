@@ -23,7 +23,7 @@
                         @include('pages.home.partials.cag-icon', ['name' => 'arrow', 'size' => 15])
                     </a>
                 @endif
-                <a href="{{ route('additional.contact') }}" class="cag-home-partner__learn-more">
+                <a href="{{ route('additional.partner') }}" class="cag-home-partner__learn-more">
                     {{ __('homepage.partner_cta_secondary') }}
                 </a>
             </div>

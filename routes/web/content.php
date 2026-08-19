@@ -49,6 +49,7 @@ Route::get('/hub/cag-ba-preview/{token}', BookingAssistantPreviewController::cla
 Route::name('additional.')->group(function () {
     Route::view('/contact', 'pages.additional.contact')->name('contact');
     Route::view('/about-us', 'pages.additional.about-us')->name('about_us');
+    Route::view('/partner', 'pages.additional.partner')->name('partner');
     Route::view('/for-agents', 'pages.additional.for-agents')->name('for_agents');
 });
 

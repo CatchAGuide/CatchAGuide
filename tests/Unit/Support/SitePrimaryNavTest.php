@@ -166,6 +166,12 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
         $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
 
+        $this->bindNamedRequest('/partner', 'additional.partner');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutNav());
+        $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
+        $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
+
         $this->bindNamedRequest('/faq', 'law.faq');
         $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
 

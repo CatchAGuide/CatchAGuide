@@ -42,16 +42,19 @@
             const modalTotal = modal ? modal.querySelector('.rental-boat-gallery-modal__total') : null;
 
             // Toggle expand/collapse
+            const labelMore = (toggleBtn && toggleBtn.dataset.labelMore) || (toggleText ? toggleText.textContent : 'Show More');
+            const labelLess = (toggleBtn && toggleBtn.dataset.labelLess) || 'Show Less';
+
             function toggleExpanded() {
                 expanded = !expanded;
-                
+
                 if (expanded) {
                     card.classList.add('rental-boat-card--expanded');
-                    if (toggleText) toggleText.textContent = 'Show Less';
+                    if (toggleText) toggleText.textContent = labelLess;
                     if (toggleIcon) toggleIcon.textContent = '▲';
                 } else {
                     card.classList.remove('rental-boat-card--expanded');
-                    if (toggleText) toggleText.textContent = 'Show More';
+                    if (toggleText) toggleText.textContent = labelMore;
                     if (toggleIcon) toggleIcon.textContent = '▼';
                 }
             }
