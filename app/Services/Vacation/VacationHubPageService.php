@@ -10,6 +10,7 @@ use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\Reviews\TestimonialSelector;
 
 class VacationHubPageService
 {
@@ -20,6 +21,8 @@ class VacationHubPageService
         private PopularListingSelector $popular,
         private CampCardPresenter $campPresenter,
         private TripCardPresenter $tripPresenter,
+        private VacationTargetFishSelector $targetFish,
+        private TestimonialSelector $testimonialSelector,
     ) {}
 
     public function build(): VacationHubViewModel
@@ -84,6 +87,8 @@ class VacationHubPageService
             faqItems: $faqItems->all(),
             totalTrips: $totalTrips,
             totalCamps: $totalCamps,
+            targetFishTiles: $this->targetFish->forHub((int) config('vacations.hub_target_fish_limit', 8)),
+            testimonials: $this->testimonialSelector->latest((int) config('vacations.hub_testimonials_limit', 6)),
         );
     }
 }

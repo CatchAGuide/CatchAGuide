@@ -38,6 +38,8 @@
     $listingTitle = trim((string) ($listingTitle ?? __('vacations.hub_header_title')));
     $listingSubtitle = trim((string) ($listingSubtitle ?? __('vacations.hub_header_subtitle')));
     $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
+    $headerEyebrow = trim((string) ($headerEyebrow ?? ''));
+    $headerStatLine = trim((string) ($headerStatLine ?? ''));
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
@@ -52,7 +54,16 @@
         <div class="vacations-page-header__band" data-vacations-header-band>
             <div class="vacations-page-header__inner vacations-page-header__inner--copy">
                 <div class="vacations-page-header__copy">
+                    @if($headerEyebrow !== '')
+                        <p class="vacations-page-header__eyebrow">{{ $headerEyebrow }}</p>
+                    @endif
                     <{{ $titleTag }} class="vacations-page-header__title">{{ $listingTitle }}</{{ $titleTag }}>
+                    @if($headerEyebrow !== '')
+                        <span class="vacations-page-header__divider" aria-hidden="true">
+                            <span class="vacations-page-header__divider-dot"></span>
+                            <span class="vacations-page-header__divider-line"></span>
+                        </span>
+                    @endif
                     @if($listingSubtitle !== '')
                         <p class="vacations-page-header__sub">{{ $listingSubtitle }}</p>
                     @endif
@@ -101,6 +112,10 @@
                     </button>
                 </div>
             </form>
+
+            @if($headerStatLine !== '')
+                <p class="vacations-page-header__stat-line">{{ $headerStatLine }}</p>
+            @endif
 
             <nav class="vacations-page-header__breadcrumbs" aria-label="Breadcrumb">
                 <ol class="vacations-page-header__crumb-list">

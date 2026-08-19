@@ -2,9 +2,11 @@
 
 namespace Tests\Unit\Services\Homepage;
 
+use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Homepage\HomepageLandingService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Reviews\TestimonialSelector;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use ReflectionMethod;
@@ -24,8 +26,10 @@ class HomepageTrustStatsTest extends TestCase
 
         $countries = Mockery::mock(HomepageCountrySelector::class);
         $mixedOffers = Mockery::mock(HomepageMixedOfferSelector::class);
+        $favoriteTargetSpecies = Mockery::mock(FavoriteTargetSpeciesResolver::class);
+        $testimonialSelector = Mockery::mock(TestimonialSelector::class);
 
-        $service = new HomepageLandingService($countries, $mixedOffers);
+        $service = new HomepageLandingService($countries, $mixedOffers, $favoriteTargetSpecies, $testimonialSelector);
 
         $method = new ReflectionMethod(HomepageLandingService::class, 'trustStats');
         $method->setAccessible(true);

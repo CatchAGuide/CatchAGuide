@@ -4,29 +4,30 @@
     'linkUrl' => null,
     'linkLabel' => null,
     'sliderId' => 'countries',
+    'blockClass' => 'vacation-country-rail',
 ])
 
-<div class="vacation-country-rail" data-vacation-country-rail data-slider-id="{{ $sliderId }}">
+<div class="{{ $blockClass }}" data-vacation-country-rail data-block-class="{{ $blockClass }}" data-slider-id="{{ $sliderId }}">
     @if($title)
-        <div class="vacation-country-rail__header">
-            <div class="vacation-country-rail__intro">
-                <h2 class="vacation-country-rail__title">{{ $title }}</h2>
+        <div class="{{ $blockClass }}__header">
+            <div class="{{ $blockClass }}__intro">
+                <h2 class="{{ $blockClass }}__title">{{ $title }}</h2>
                 @if($subtitle)
-                    <p class="vacation-country-rail__subtitle">{{ $subtitle }}</p>
+                    <p class="{{ $blockClass }}__subtitle">{{ $subtitle }}</p>
                 @endif
             </div>
 
-            <div class="vacation-country-rail__tools">
+            <div class="{{ $blockClass }}__tools">
                 @if($linkUrl && $linkLabel)
-                    <a href="{{ $linkUrl }}" class="vacation-country-rail__link d-none d-md-inline">
+                    <a href="{{ $linkUrl }}" class="{{ $blockClass }}__link d-none d-md-inline">
                         {{ $linkLabel }}
                     </a>
                 @endif
 
-                <div class="vacation-country-rail__nav d-none d-md-flex">
+                <div class="{{ $blockClass }}__nav d-none d-md-flex">
                     <button
                         type="button"
-                        class="vacation-country-rail__btn"
+                        class="{{ $blockClass }}__btn"
                         data-vac-dest-prev="{{ $sliderId }}"
                         aria-label="{{ __('vacations.slider_prev') }}"
                     >
@@ -34,7 +35,7 @@
                     </button>
                     <button
                         type="button"
-                        class="vacation-country-rail__btn"
+                        class="{{ $blockClass }}__btn"
                         data-vac-dest-next="{{ $sliderId }}"
                         aria-label="{{ __('vacations.slider_next') }}"
                     >
@@ -45,8 +46,8 @@
         </div>
     @endif
 
-    <div class="vacation-country-rail__viewport" data-vac-dest-rail="{{ $sliderId }}">
-        <div class="vacation-country-rail__track" role="list">
+    <div class="{{ $blockClass }}__viewport" data-vac-dest-rail="{{ $sliderId }}">
+        <div class="{{ $blockClass }}__track" role="list">
             {{ $slot }}
         </div>
     </div>

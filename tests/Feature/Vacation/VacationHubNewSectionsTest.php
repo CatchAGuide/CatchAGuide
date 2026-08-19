@@ -1,0 +1,156 @@
+<?php
+
+namespace Tests\Feature\Vacation;
+
+use App\Domain\Vacation\Pillar;
+use App\Domain\Vacation\ViewModels\PillarTileViewModel;
+use App\Domain\Vacation\ViewModels\VacationHubViewModel;
+use App\Services\Vacation\VacationHubPageService;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+use Mockery;
+use Tests\TestCase;
+
+class VacationHubNewSectionsTest extends TestCase
+{
+    private function makeHub(array $overrides = []): VacationHubViewModel
+    {
+        return new VacationHubViewModel(
+            campTile: new PillarTileViewModel(
+                pillar: Pillar::Camp,
+                title: 'Camps',
+                description: 'Camp desc',
+                listingCount: 2,
+                countryCount: 1,
+                minPrice: 100,
+                currency: 'EUR',
+                url: route('vacations.camps.index'),
+            ),
+            tripTile: new PillarTileViewModel(
+                pillar: Pillar::Trip,
+                title: 'Trips',
+                description: 'Trip desc',
+                listingCount: 3,
+                countryCount: 2,
+                minPrice: 200,
+                currency: 'EUR',
+                url: route('vacations.trips.index'),
+            ),
+            popularListings: collect(),
+            newTrips: collect(),
+            showNewTripsRail: false,
+            newCamps: collect(),
+            showNewCampsRail: false,
+            countryGrid: collect(),
+            faqItems: [['question' => 'Q1?', 'answer' => 'A1']],
+            totalTrips: 3,
+            totalCamps: 2,
+            targetFishTiles: $overrides['targetFishTiles'] ?? collect(),
+            testimonials: $overrides['testimonials'] ?? collect(),
+        );
+    }
+
+    private function mockHubService(VacationHubViewModel $hub): void
+    {
+        $service = Mockery::mock(VacationHubPageService::class);
+        $service->shouldReceive('build')->andReturn($hub);
+        $this->app->instance(VacationHubPageService::class, $service);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['app.url' => 'http://localhost']);
+        URL::forceRootUrl('http://localhost');
+
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+
+        Cache::flush();
+    }
+
+    public function test_hub_renders_consultation_season_picker_seo_and_provider_cta(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('vacation-hub__consultation', false);
+        $response->assertSee(__('vacations.hub_consultation_title'), false);
+        $response->assertSee('vacation-hub__season', false);
+        $response->assertSee(__('vacations.hub_season_title'), false);
+        for ($month = 1; $month <= 12; $month++) {
+            $response->assertSee('data-season-month="'.$month.'"', false);
+        }
+        $response->assertSee('vacation-hub__seo-copy', false);
+        $response->assertSee(__('vacations.hub_seo_title'), false);
+        $response->assertSee('vacation-hub__provider-cta', false);
+        $response->assertSee(__('vacations.provider_cta_title'), false);
+        $response->assertSee('vacation-hub__cross-sell', false);
+        $response->assertSee(__('vacations.hub_cross_sell_title'), false);
+        $response->assertSee('Q1?', false);
+    }
+
+    public function test_hub_renders_target_fish_rail_when_present(): void
+    {
+        $tile = [
+            'name' => 'Pike',
+            'slug' => 'pike-test',
+            'thumbnail' => null,
+            'count' => 5,
+            'url' => route('vacations.targets', ['slug' => 'pike-test']),
+        ];
+
+        $this->mockHubService($this->makeHub(['targetFishTiles' => collect([$tile])]));
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('vacation-fish-rail', false);
+        $response->assertSee('Pike', false);
+        $response->assertSee(__('vacations.hub_target_fish_count', ['count' => 5]), false);
+        $response->assertSee(route('vacations.targets', ['slug' => 'pike-test'], false), false);
+    }
+
+    public function test_hub_hides_target_fish_rail_when_empty(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('vacation-fish-rail__tile', false);
+    }
+
+    public function test_hub_renders_reviews_when_present(): void
+    {
+        $review = [
+            'quote' => 'Amazing trip!',
+            'score' => 9.5,
+            'author' => 'Alex',
+            'date' => 'Jan 2026',
+            'tour_title' => 'Test Tour',
+            'tour_url' => 'https://example.test/tour',
+        ];
+
+        $this->mockHubService($this->makeHub(['testimonials' => collect([$review])]));
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee(__('vacations.hub_reviews_title'), false);
+        $response->assertSee('Amazing trip!', false);
+        $response->assertSee('Alex', false);
+    }
+
+    public function test_hub_hides_reviews_when_empty(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertDontSee(__('vacations.hub_reviews_title'), false);
+    }
+}

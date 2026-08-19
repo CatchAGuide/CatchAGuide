@@ -18,9 +18,17 @@
 @endif
 
 @section('content')
+@php
+    $hubStatLine = __('vacations.hub_stat_line', [
+        'offers' => $hub->totalCamps + $hub->totalTrips,
+        'countries' => $hub->countryGrid->count(),
+    ]);
+@endphp
 @include('pages.vacations.partials.catalog-header', [
-    'listingTitle' => __('vacations.hub_header_title'),
-    'listingSubtitle' => __('vacations.hub_header_subtitle'),
+    'listingTitle' => __('vacations.hub_hero_title'),
+    'listingSubtitle' => __('vacations.hub_hero_lead'),
+    'headerEyebrow' => __('vacations.hub_hero_eyebrow'),
+    'headerStatLine' => $hubStatLine,
     'breadcrumbItems' => [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ],
@@ -49,6 +57,11 @@
     @endif
 
     <section class="vacation-hub__pillar-fork mb-5" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
+        <x-vacation.section-heading
+            :eyebrow="__('vacations.hub_fork_eyebrow')"
+            :title="__('vacations.hub_fork_title')"
+            :subtitle="__('vacations.hub_fork_subtitle')"
+        />
         <div class="vacation-hub__pillar-tiles row g-3 g-md-4">
             <div class="col-md-6">
                 <x-vacation.pillar-tile :tile="$hub->campTile" />
@@ -90,11 +103,9 @@
 
 
 
-    <x-vacation.hub-bridge
-        :total-camps="$hub->totalCamps"
-        :total-trips="$hub->totalTrips"
-        :country-count="$hub->countryGrid->count()"
-    />
+    <div class="mb-5">
+        <x-vacation.consultation />
+    </div>
 
 
 
@@ -155,6 +166,84 @@
     @endif
 
 
+
+    @if($hub->testimonials->isNotEmpty())
+
+        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-analytics-vacation-rail="reviews">
+
+            <x-vacation.card-slider
+                :eyebrow="__('vacations.hub_reviews_eyebrow')"
+                :title="__('vacations.hub_reviews_title')"
+                :subtitle="__('vacations.hub_reviews_caption')"
+                slider-id="reviews"
+            >
+
+                @foreach($hub->testimonials as $review)
+
+                    <div class="swiper-slide">
+
+                        <x-vacation.testimonial-card :review="$review" />
+
+                    </div>
+
+                @endforeach
+
+            </x-vacation.card-slider>
+
+        </section>
+
+    @endif
+
+
+
+    @if($hub->targetFishTiles->isNotEmpty())
+
+        <section class="vacation-hub__fish mb-5" data-analytics-vacation-rail="target-fish">
+
+            <x-vacation.country-slider
+                :title="__('vacations.hub_target_fish_title')"
+                :subtitle="__('vacations.hub_target_fish_subtitle')"
+                slider-id="target-fish"
+                block-class="vacation-fish-rail"
+            >
+                @foreach([false, true] as $isClone)
+                    @foreach($hub->targetFishTiles as $tile)
+                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
+                    @endforeach
+                @endforeach
+            </x-vacation.country-slider>
+
+        </section>
+
+    @endif
+
+
+
+    <x-vacation.season-picker />
+
+
+
+    <x-vacation.hub-bridge
+        :total-camps="$hub->totalCamps"
+        :total-trips="$hub->totalTrips"
+        :country-count="$hub->countryGrid->count()"
+    />
+
+
+
+    <x-vacation.cross-sell-banner />
+
+    <section class="vacation-hub__seo mb-5">
+
+        <div class="vacation-hub__seo-copy">
+            <h2 class="vacation-hub__seo-copy-title">{{ __('vacations.hub_seo_title') }}</h2>
+            <p>{{ __('vacations.hub_seo_p1') }}</p>
+            <p>{{ __('vacations.hub_seo_p2') }}</p>
+        </div>
+
+        <x-vacation.provider-cta-banner />
+
+    </section>
 
     @if(!empty($hub->faqItems))
 

@@ -11,6 +11,10 @@ return [
 
     'new_camps_rail_limit' => 6,
 
+    'hub_target_fish_limit' => 8,
+
+    'hub_testimonials_limit' => 6,
+
     'country_page_per_page' => 6,
 
     'pillar_index_per_page' => 9,
@@ -55,6 +59,21 @@ return [
             'icon' => 'fa-globe-europe',
             'title_key' => 'vacations.hub_usp_europe_title',
             'text_key' => 'vacations.hub_usp_europe_text',
+        ],
+    ],
+
+    'hub_consultation_checklist' => [
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_matches',
+        ],
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_operators',
+        ],
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_groups',
         ],
     ],
 

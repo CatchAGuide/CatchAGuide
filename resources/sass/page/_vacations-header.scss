@@ -70,6 +70,45 @@ $vacations-header-muted: #787780;
     max-width: 48rem;
   }
 
+  &__eyebrow {
+    margin: 0 0 .4rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: map-get($colors, "star");
+  }
+
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin: .75rem 0 1rem;
+
+    &-dot {
+      flex: none;
+      width: 8px;
+      height: 8px;
+      background: $vacations-header-coral;
+    }
+
+    &-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.28);
+    }
+  }
+
+  &__stat-line {
+    margin: .75rem 0 0;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: $vacations-header-muted;
+    text-align: center;
+  }
+
   &__title {
     margin: 0;
     font-size: clamp(1.55rem, 3vw, 2.35rem);

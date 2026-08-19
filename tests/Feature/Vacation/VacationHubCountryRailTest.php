@@ -75,6 +75,8 @@ class VacationHubCountryRailTest extends TestCase
             faqItems: [],
             totalTrips: 3,
             totalCamps: 2,
+            targetFishTiles: collect(),
+            testimonials: collect(),
         );
 
         $service = Mockery::mock(VacationHubPageService::class);

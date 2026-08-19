@@ -18,5 +18,7 @@ final class VacationHubViewModel
         public readonly array $faqItems,
         public readonly int $totalTrips,
         public readonly int $totalCamps,
+        public readonly Collection $targetFishTiles,
+        public readonly Collection $testimonials,
     ) {}
 }

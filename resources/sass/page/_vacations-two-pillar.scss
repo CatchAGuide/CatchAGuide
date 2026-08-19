@@ -715,6 +715,16 @@ $vac-country-panel: #313041;
         flex: 1;
     }
 
+    &__eyebrow {
+        display: block;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: $vac-brand;
+        margin-bottom: .35rem;
+    }
+
     &__title {
         font-size: clamp(1.25rem, 2.5vw, 1.6rem);
         font-weight: 800;
