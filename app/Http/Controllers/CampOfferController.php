@@ -471,10 +471,10 @@ class CampOfferController extends Controller
         $priceType = $boat->price_type ?? 'per_day';
         $priceAmount = (float) ($firstPrice['amount'] ?? 0);
         $priceTypeMap = [
-            'per_day' => __('per day'),
-            'per_hour' => __('per hour'),
-            'per_week' => __('per week'),
-            'per_night' => __('per night'),
+            'per_day' => __('rental_boats.per_day'),
+            'per_hour' => __('rental_boats.per_hour'),
+            'per_week' => __('rental_boats.per_week'),
+            'per_night' => __('accommodations.per_night'),
         ];
 
         // Process gallery images
@@ -499,23 +499,39 @@ class CampOfferController extends Controller
             ->values()
             ->toArray();
 
-        // Process requirements
+        // Process requirements: pair the (locale-aware) label with the
+        // host-entered detail, since the detail alone loses context and the
+        // label alone loses the actual requirement content.
         $requirementsRaw = $boat->requirements ?? [];
         $requirementItems = collect(is_array($requirementsRaw) ? $requirementsRaw : [])
             ->map(function ($item) {
-                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
+                if (!is_array($item)) {
+                    return $item;
+                }
+
+                $label = $item['name'] ?? null;
+                $detail = $item['value'] ?? null;
+
+                if ($label && $detail) {
+                    return "{$label}: {$detail}";
+                }
+
+                return $detail ?? $label;
             })
             ->filter(fn ($value) => filled($value))
             ->values()
             ->toArray();
 
-        // Find license requirement
+        // Find license requirement: match by label (name), but display the
+        // host-entered detail (value) rather than the generic label itself.
         $licenseRequirement = null;
         if (!empty($requirementsRaw) && is_array($requirementsRaw)) {
             foreach ($requirementsRaw as $requirement) {
-                $value = is_array($requirement) ? ($requirement['name'] ?? ($requirement['value'] ?? null)) : $requirement;
-                if ($value && (stripos($value, 'license') !== false || stripos($value, 'führerschein') !== false)) {
-                    $licenseRequirement = $value;
+                $label = is_array($requirement) ? ($requirement['name'] ?? ($requirement['value'] ?? null)) : $requirement;
+                if ($label && (stripos($label, 'license') !== false || stripos($label, 'führerschein') !== false)) {
+                    $licenseRequirement = is_array($requirement)
+                        ? ($requirement['value'] ?? $requirement['name'] ?? null)
+                        : $requirement;
                     break;
                 }
             }
@@ -529,23 +545,23 @@ class CampOfferController extends Controller
                 $capacityValue = $boat->max_persons ?? ($boatIn['value'] ?? '');
                 if ($capacityValue != "") {
                     $specs[] = [
-                        'label' => __('Capacity'),
+                        'label' => __('rental_boats.capacity'),
                         'value' => $capacityValue,
                     ];
                 }
             }
             if ($boatIn['id'] == 6 && $boatIn['value'] != "") {
                 $specs[] = [
-                    'label' => __('Motor'),
+                    'label' => __('rental_boats.engine'),
                     'value' => $boatIn['value'],
                 ];
             }
         }
-        
+
         // License requirement
         if ($licenseRequirement) {
             $specs[] = [
-                'label' => __('License'),
+                'label' => __('rental_boats.license'),
                 'value' => $licenseRequirement,
             ];
         }

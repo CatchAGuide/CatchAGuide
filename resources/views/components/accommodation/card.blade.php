@@ -198,11 +198,11 @@
             </div>
 
             <div class="accommodation-card__panel">
-                <div class="accommodation-card__panel-title">Amenities</div>
+                <div class="accommodation-card__panel-title">{{ __('vacations.amenities') }}</div>
                 <ul class="accommodation-card__chip-list">
                     @if(isset($accommodation['amenities']) && is_array($accommodation['amenities']) && count($accommodation['amenities']) > 0)
                         @foreach($accommodation['amenities'] as $amenity)
-                            <li class="accommodation-card__chip">{{ is_array($amenity) ? ($amenity['value'] ?? $amenity['name'] ?? '') : $amenity }}</li>
+                            <li class="accommodation-card__chip">{{ is_array($amenity) ? ($amenity['name'] ?? $amenity['value'] ?? '') : $amenity }}</li>
                         @endforeach
                     @endif
                 </ul>
@@ -225,7 +225,7 @@
                 @if(!empty($accommodation['kitchen']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['kitchen'] as $kitchen)
-                            <li class="accommodation-card__chip">{{ is_array($kitchen) ? ($kitchen['value'] ?? $kitchen['name'] ?? '') : $kitchen }}</li>
+                            <li class="accommodation-card__chip">{{ is_array($kitchen) ? ($kitchen['name'] ?? $kitchen['value'] ?? '') : $kitchen }}</li>
                         @endforeach
                     </ul>
                 @else
@@ -238,7 +238,7 @@
                 @if(!empty($accommodation['bathroom_laundry']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['bathroom_laundry'] as $bathroom_laundry)
-                            <li class="accommodation-card__chip">{{ is_array($bathroom_laundry) ? ($bathroom_laundry['value'] ?? $bathroom_laundry['name'] ?? '') : $bathroom_laundry }}</li>
+                            <li class="accommodation-card__chip">{{ is_array($bathroom_laundry) ? ($bathroom_laundry['name'] ?? $bathroom_laundry['value'] ?? '') : $bathroom_laundry }}</li>
                         @endforeach
                     </ul>
                 @else
@@ -254,7 +254,7 @@
                                 <div class="accommodation-card__panel-title">{{ __('vacations.included_services') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['inclusives'] as $inclusive)
-                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($inclusive) ? ($inclusive['name'] ?? $inclusive['value'] ?? json_encode($inclusive)) : $inclusive }}</span>
+                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($inclusive) ? ($inclusive['name'] ?? $inclusive['value'] ?? '') : $inclusive }}</span>
                                     @endforeach
                                 </div>
                             </div>
@@ -265,7 +265,7 @@
                                 <div class="accommodation-card__panel-title">{{ __('vacations.extras') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['extras'] as $extra)
-                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($extra) ? ($extra['name'] ?? $extra['value'] ?? json_encode($extra)) : $extra }}</span>
+                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($extra) ? ($extra['name'] ?? $extra['value'] ?? '') : $extra }}</span>
                                     @endforeach
                                 </div>
                             </div>

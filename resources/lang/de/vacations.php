@@ -332,4 +332,5 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'boat_information' => 'Boot-Informationen',
     'no_boat_information' => 'Keine Boot-Informationen verfügbar',
     'no_special_requirements' => 'Keine besonderen Anforderungen',
+    'amenities' => 'Ausstattung',
 ];
