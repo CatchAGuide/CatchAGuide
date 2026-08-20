@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\CategoryPage\CategoryPageScope;
-use App\Models\CategoryPage;
 use App\Models\Guiding;
-use App\Services\Homepage\HomepageCountrySelector;
+use App\Services\Guidings\GuidingsLandingService;
 use App\Services\Homepage\HomepageLandingService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WelcomeController extends Controller
 {
-    const MAX_GUIDINGS = 8;
-
     public function __construct(
         private HomepageLandingService $landing,
-        private HomepageCountrySelector $countries,
+        private GuidingsLandingService $guidingsLandingService,
     ) {}
 
     public function index(): View
@@ -30,17 +26,7 @@ class WelcomeController extends Controller
      */
     public function guidingsLanding(): View
     {
-        $allCategoryPages = CategoryPage::query()
-            ->orderBy('name', 'asc')
-            ->whereIn('type', ['Targets', 'Methods'])
-            ->where('is_favorite', 1)
-            ->get();
-
-        return view('pages.newhome-latest', [
-            'CategoryPage' => $allCategoryPages->where('type', 'Targets'),
-            'CategoryPageMethods' => $allCategoryPages->where('type', 'Methods'),
-            'featuredCountries' => $this->countries->featured(null, CategoryPageScope::TOURS),
-        ]);
+        return view('pages.newhome-latest', $this->guidingsLandingService->build());
     }
 
     public function getUserLocation(Request $request)

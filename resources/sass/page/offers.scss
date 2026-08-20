@@ -70,12 +70,43 @@ $muted: #787780;
     max-width: 48rem;
   }
 
+  &__eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
   &__title {
     margin: 0 0 0.45rem;
     font-size: clamp(1.55rem, 3vw, 2.35rem);
     font-weight: 700;
     line-height: 1.15;
     color: #fff !important;
+  }
+
+  &__title-rule {
+    display: flex;
+    align-items: center;
+    margin: 0.85rem 0 0.75rem;
+
+    &::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      flex: none;
+      background: $coral;
+    }
+
+    &::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      margin-left: 0.5rem;
+      background: rgba(255, 255, 255, 0.35);
+    }
   }
 
   &__sub {

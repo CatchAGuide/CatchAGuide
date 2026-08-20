@@ -197,4 +197,74 @@ return [
     'footer_list_offer' => 'Tour anbieten',
     'footer_become_partner' => 'Partner werden',
     'footer_contact_label' => 'Kontakt',
+
+    // /guidings landing page redesign
+    'landing_hero_eyebrow' => 'Geführte Angeltouren in Europa',
+    'landing_hero_h1' => 'Finde deine nächste Angeltour',
+    'landing_hero_sub' => ':tours geführte Touren von lokalen Guides in :countries Ländern – vom Tagesausflug bis zum Angelurlaub.',
+    'landing_search_placeholder' => 'Land, Region oder Gewässer',
+    'landing_search_submit' => 'Touren anzeigen',
+
+    'landing_steps_title' => "So buchst du bei\nCatch A Guide",
+    'landing_step1_title' => 'Tour anfragen',
+    'landing_step1_text' => 'Kostenlos und unverbindlich.',
+    'landing_step2_title' => 'Guide bestätigt',
+    'landing_step2_text' => 'Antwort in der Regel in 24 Stunden.',
+    'landing_step3_title' => 'Erst danach bezahlen',
+    'landing_step3_text' => 'Direkt beim Guide, keine Vorkasse.',
+
+    'landing_destinations_title' => 'Beliebte Angelziele in Europa',
+    'landing_destinations_subtitle' => 'Von der dänischen Küste bis zum Ebro-Delta – finde dein Revier.',
+    'landing_destinations_see_all' => 'Alle Angelziele ansehen',
+
+    'landing_pills_title' => 'Welche Art von Angeltour suchst du?',
+    'landing_pills_subtitle' => 'Wähle deinen Stil – wir zeigen dir passende Touren.',
+    'landing_pills_see_all' => 'Alle Touren anzeigen',
+    'landing_pill_action' => 'Action pur',
+    'landing_pill_sea' => 'Auf hoher See',
+    'landing_pill_family' => 'Familie',
+    'landing_pill_relaxed' => 'Entspannt',
+    'landing_pill_fly' => 'Fliegenfischen',
+
+    'landing_mostbooked_title' => 'Am häufigsten gebucht',
+    'landing_mostbooked_subtitle' => 'Die gefragtesten Touren der letzten 30 Tage.',
+
+    'landing_methods_title' => 'Nach Angelmethode suchen',
+    'landing_methods_subtitle' => 'Spinnfischen, Ansitzangeln, Fliegenfischen und mehr.',
+    'landing_methods_see_all' => 'Alle Methoden ansehen',
+
+    'landing_new_title' => 'Neu auf Catch A Guide',
+    'landing_new_subtitle' => 'Zuletzt aufgenommene Touren von Guides aus ganz Europa.',
+
+    'landing_species_title' => 'Auf welchen Fisch hast du es abgesehen?',
+    'landing_species_subtitle' => 'Hecht, Lachs, Wels, Thunfisch – finde Touren nach Zielfisch.',
+    'landing_species_see_all' => 'Alle Zielfische ansehen',
+
+    'landing_card_badge' => 'Angeltour',
+    'landing_card_new' => 'Neu',
+    'landing_card_max_guests' => 'Max. :count Angler',
+    'landing_requested_badge' => ':count× angefragt',
+    'landing_tile_count' => '1 Tour|:count Touren',
+
+    'landing_partner_eyebrow' => 'Für Guides, Camps und Reiseanbieter',
+    'landing_partner_title' => 'Zeig deine Touren Anglern aus ganz Europa',
+    'landing_partner_text' => 'Vermarkte deine geführten Angeltouren, Guidings und Angelcamps – ohne Fixkosten und ohne Exklusivität.',
+    'landing_partner_cta_primary' => 'Jetzt loslegen',
+    'landing_partner_cta_secondary' => 'Mehr lesen',
+    'landing_partner_card_risk_title' => 'Kein Risiko',
+    'landing_partner_card_risk_text' => '10 % Provision, nur bei bestätigter Buchung. Keine Grundgebühr, keine Anmeldekosten.',
+    'landing_partner_card_demand_title' => 'Angler, die suchen',
+    'landing_partner_card_demand_text' => 'Anfragen von Anglern aus :countries Ländern, die gezielt nach geführten Angeltouren suchen.',
+    'landing_partner_card_control_title' => 'Volle Kontrolle',
+    'landing_partner_card_control_text' => 'Du bestimmst Termine, Preise und Gruppengröße und bestätigst jede Anfrage selbst.',
+
+    'landing_seo_title' => 'Angeltouren mit Guide buchen',
+    'landing_seo_p1' => 'Geführte Angeltouren in Europa reichen vom Halbtagesausflug auf dem Hausgewässer bis zur mehrtägigen Tour an der Küste. Ein Guide kennt Spots, Saison und Technik – du brauchst nur anzureisen.',
+    'landing_seo_p2' => 'Auf Catch A Guide vergleichst du Touren nach Land, Zielfisch und Methode, fragst kostenlos an und bezahlst erst nach der Bestätigung durch den Guide.',
+    'landing_seo_p3' => 'Ausrüstung, Boot und Lizenzen sind je nach Anbieter unterschiedlich geregelt – die Details stehen in jeder Tourbeschreibung.',
+    'landing_seo_more' => 'Mehr lesen',
+    'landing_seo_less' => 'Weniger lesen',
+
+    'landing_sticky_text' => 'Kostenlos und unverbindlich',
+    'landing_sticky_cta' => 'Angeltour finden',
 ];

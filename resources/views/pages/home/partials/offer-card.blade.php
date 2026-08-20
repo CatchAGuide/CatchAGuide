@@ -24,6 +24,9 @@
             onerror="this.onerror=null;this.src='{{ $placeholder }}';"
         >
         <span class="cag-home-offer__badge cag-home-offer__badge--{{ $type }}">{{ $card['badge'] ?? __('homepage.offer_type_' . $type) }}</span>
+        @if(!empty($card['requested_count']))
+            <span class="cag-home-offer__requested">{{ __('homepage.landing_requested_badge', ['count' => $card['requested_count']]) }}</span>
+        @endif
     </a>
     <div class="cag-home-offer__body">
         <h3 class="cag-home-offer__title">
@@ -34,6 +37,14 @@
                 @include('pages.home.partials.cag-icon', ['name' => 'pin', 'size' => 12, 'iconClass' => 'cag-home-offer__pin'])
                 {{ $card['location'] }}
             </p>
+        @endif
+        @if(!empty($card['meta']))
+            <p class="cag-home-offer__meta">{{ $card['meta'] }}</p>
+        @endif
+        @if(!empty($card['rating']))
+            <p class="cag-home-offer__rating">★ {{ $card['rating'] }} <span>({{ $card['review_count'] }})</span></p>
+        @elseif(!empty($card['is_new']))
+            <p class="cag-home-offer__new">{{ __('homepage.landing_card_new') }}</p>
         @endif
         <div class="cag-home-offer__footer">
             @if(!empty($card['price_amount']))

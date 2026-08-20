@@ -197,4 +197,74 @@ return [
     'footer_list_offer' => 'List a tour',
     'footer_become_partner' => 'Become a partner',
     'footer_contact_label' => 'Contact',
+
+    // /guidings landing page redesign
+    'landing_hero_eyebrow' => 'Guided fishing tours in Europe',
+    'landing_hero_h1' => 'Find your next fishing tour',
+    'landing_hero_sub' => ':tours guided tours from local guides in :countries countries – from a day trip to a full fishing vacation.',
+    'landing_search_placeholder' => 'Country, region or water',
+    'landing_search_submit' => 'Show tours',
+
+    'landing_steps_title' => "How booking with\nCatch A Guide works",
+    'landing_step1_title' => 'Request a tour',
+    'landing_step1_text' => 'Free and non-binding.',
+    'landing_step2_title' => 'Guide confirms',
+    'landing_step2_text' => 'Usually replies within 24 hours.',
+    'landing_step3_title' => 'Pay only afterwards',
+    'landing_step3_text' => 'Directly with the guide, no prepayment.',
+
+    'landing_destinations_title' => 'Popular fishing destinations in Europe',
+    'landing_destinations_subtitle' => 'From the Danish coast to the Ebro Delta – find your waters.',
+    'landing_destinations_see_all' => 'See all destinations',
+
+    'landing_pills_title' => 'What kind of fishing tour are you after?',
+    'landing_pills_subtitle' => 'Pick your style – we\'ll show you matching tours.',
+    'landing_pills_see_all' => 'Show all tours',
+    'landing_pill_action' => 'Pure action',
+    'landing_pill_sea' => 'On the open sea',
+    'landing_pill_family' => 'Family',
+    'landing_pill_relaxed' => 'Relaxed',
+    'landing_pill_fly' => 'Fly fishing',
+
+    'landing_mostbooked_title' => 'Most frequently booked',
+    'landing_mostbooked_subtitle' => 'The most in-demand tours of the last 30 days.',
+
+    'landing_methods_title' => 'Search by fishing method',
+    'landing_methods_subtitle' => 'Spin fishing, bait fishing, fly fishing and more.',
+    'landing_methods_see_all' => 'See all methods',
+
+    'landing_new_title' => 'New on Catch A Guide',
+    'landing_new_subtitle' => 'Recently added tours from guides across Europe.',
+
+    'landing_species_title' => 'Which fish are you after?',
+    'landing_species_subtitle' => 'Pike, salmon, catfish, tuna – find tours by target fish.',
+    'landing_species_see_all' => 'See all target fish',
+
+    'landing_card_badge' => 'Fishing tour',
+    'landing_card_new' => 'New',
+    'landing_card_max_guests' => 'Max :count guests',
+    'landing_requested_badge' => ':count× requested',
+    'landing_tile_count' => '1 tour|:count tours',
+
+    'landing_partner_eyebrow' => 'For guides, camps and travel providers',
+    'landing_partner_title' => 'Show your tours to anglers across Europe',
+    'landing_partner_text' => 'Market your guided fishing tours, guidings and fishing camps – no fixed costs and no exclusivity.',
+    'landing_partner_cta_primary' => 'Get started',
+    'landing_partner_cta_secondary' => 'Learn more',
+    'landing_partner_card_risk_title' => 'No risk',
+    'landing_partner_card_risk_text' => '10% commission, only on confirmed bookings. No base fee, no sign-up costs.',
+    'landing_partner_card_demand_title' => 'Anglers who are searching',
+    'landing_partner_card_demand_text' => 'Requests from anglers in :countries countries actively searching for guided fishing tours.',
+    'landing_partner_card_control_title' => 'Full control',
+    'landing_partner_card_control_text' => 'You decide dates, prices and group size, and confirm every request yourself.',
+
+    'landing_seo_title' => 'Book guided fishing tours',
+    'landing_seo_p1' => 'Guided fishing tours in Europe range from a half-day trip on a local water to a multi-day tour on the coast. A guide knows the spots, the season and the technique – all you have to do is show up.',
+    'landing_seo_p2' => 'On Catch A Guide you compare tours by country, target fish and method, send a free request, and pay only after the guide confirms.',
+    'landing_seo_p3' => 'Equipment, boat and licences are handled differently depending on the provider – the details are listed in every tour description.',
+    'landing_seo_more' => 'Read more',
+    'landing_seo_less' => 'Read less',
+
+    'landing_sticky_text' => 'Free and non-binding',
+    'landing_sticky_cta' => 'Find a fishing tour',
 ];

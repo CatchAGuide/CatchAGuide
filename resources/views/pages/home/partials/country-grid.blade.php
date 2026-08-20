@@ -3,13 +3,16 @@
     <div class="cag-home-container">
         <div class="cag-home-section__header cag-reveal__header">
             <div class="cag-home-section__heading">
-                <h2 class="cag-home-section__title">{{ __('homepage.destinations_title') }}</h2>
+                <h2 class="cag-home-section__title">{{ $title ?? __('homepage.destinations_title') }}</h2>
+                @isset($subtitle)
+                    <p class="cag-home-section__subtitle">{{ $subtitle }}</p>
+                @endisset
                 @if($showAllCountries ?? true)
                     <a
                         href="{{ route($allCountriesRoute ?? 'destination') }}"
                         class="cag-home-section__link cag-home-section__link--mobile"
                         data-home-analytics="homepage_all_countries_click"
-                    >{{ __('homepage.countries_all') }}</a>
+                    >{{ $viewAllLabel ?? __('homepage.countries_all') }}</a>
                 @endif
             </div>
             <div class="cag-home-section__tools">
@@ -18,7 +21,7 @@
                         href="{{ route($allCountriesRoute ?? 'destination') }}"
                         class="cag-home-section__link d-none d-md-inline"
                         data-home-analytics="homepage_all_countries_click"
-                    >{{ __('homepage.countries_all') }}</a>
+                    >{{ $viewAllLabel ?? __('homepage.countries_all') }}</a>
                 @endif
                 <div class="cag-home-destinations__nav d-none d-md-flex">
                     <button type="button" class="cag-home-icon-btn" data-dest-prev aria-label="{{ __('vacations.slider_prev') }}">

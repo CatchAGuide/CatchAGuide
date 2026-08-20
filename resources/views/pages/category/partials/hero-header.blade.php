@@ -1,6 +1,7 @@
 @php
     use App\Domain\Offers\OfferListingFilter;
 
+    $listingEyebrow = trim((string) ($listingEyebrow ?? ''));
     $listingTitle = trim((string) ($listingTitle ?? ''));
     $listingSubtitle = trim((string) ($listingSubtitle ?? ''));
     $breadcrumbItems = $breadcrumbItems ?? [];
@@ -29,7 +30,13 @@
         <div class="offers-page-header__hero" data-category-hero>
             <div class="offers-page-header__inner offers-page-header__inner--hero">
                 <div class="offers-page-header__copy">
+                    @if($listingEyebrow !== '')
+                        <p class="offers-page-header__eyebrow offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingEyebrow }}</p>
+                    @endif
                     <{{ $titleTag }} class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingTitle }}</{{ $titleTag }}>
+                    @if($showTitleRule ?? false)
+                        <div class="offers-page-header__title-rule offers-page-header__anim" style="--offers-anim-i: 1" aria-hidden="true"></div>
+                    @endif
                     @if($listingSubtitle !== '')
                         <p class="offers-page-header__sub offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingSubtitle }}</p>
                     @endif
