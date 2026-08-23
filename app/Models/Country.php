@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
 use App\Models\Concerns\OverlaysScopedCategoryContent;
@@ -49,15 +48,6 @@ class Country extends Model
     {
         $language = $language ?? app()->getLocale();
         return $this->hasOne(CountryTranslation::class)->where('language', $language);
-    }
-
-    /**
-     * Get FAQs for this country
-     */
-    public function faqs()
-    {
-        return $this->hasMany(DestinationFaq::class, 'destination_id')
-            ->where('destination_type', 'country');
     }
 
     /**

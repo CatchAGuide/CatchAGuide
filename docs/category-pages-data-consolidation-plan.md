@@ -1103,8 +1103,13 @@ etc. no longer exist in the live schema — consistent with §9 risk #5's "no FK
   classes are otherwise fully dead in live app code. `Country::regions()`/`::cities()` (the only methods that
   referenced the now-deleted `Region`/`City` classes) were removed since nothing called them.
 - **Also kept**: `DestinationFaq`, `DestinationFishChart`, `DestinationFishSizeLimit`, `DestinationFishTimeLimit`
-  — actively used by the admin controllers' fish-data `edit()`/`update()` flow (§15 §0) and by their own
-  creation migrations' `foreignIdFor(Destination::class)` calls; their tables are not part of this Phase 5 pass.
+  — at the time this paragraph was first written, believed to still be actively used by the admin controllers'
+  fish-data `edit()`/`update()` flow (§15 §0) and by their own creation migrations'
+  `foreignIdFor(Destination::class)` calls. **Correction, same day (§18): `DestinationFaq` specifically turned
+  out to have zero live callers** — only `DestinationFishChart`/`DestinationFishSizeLimit`/
+  `DestinationFishTimeLimit` are genuinely still read/written by the admin controllers. `DestinationFaq`'s
+  table (`destination_faqs`) was dropped in §18; the model class itself is still kept for the same
+  `migrate:fresh` reason as `Country`/`CountryTranslation`/`Destination` above.
 - **One-off commands deleted**: `MigrateDestinationsData`, `FixDestinationRelationships`,
   `FixDestinationsMigration` (confirmed dead since Phase 0 — §12 — and the only remaining callers of
   `Region`/`City`, so deleting them is what made those two models safe to delete). `BackfillCategoryEntitiesCommand`
@@ -1132,15 +1137,42 @@ Public pages (`/destination/deutschland` including its fish-availability chart, 
 `/admin/category/country/516/edit` including fish-chart/size/time-limit sections) reloaded via browser after
 the migration ran: identical content, zero console errors — both paths read fish data via
 `CategoryEntity::legacyId()` through `category_entity_migration_map`, which the drop migration never touched.
-`php artisan test` (full suite) — result pending at time of writing this section; see the session's final
-summary for pass/fail counts once the run completes.
+`php artisan test` (full suite): **10 failed, 1 risky, 2 skipped, 430 passed** — same failure categories as
+the Phase 4 baseline (434 passed); the 4-test delta is exactly `BackfillCategoryEntitiesCommandTest`'s tests,
+removed alongside the command. No regressions. Committed as two commits: `0b1c1f9d` (Phase 1 schema) and
+`7c4b5fc9` (Phases 2–5).
 
 ### What's left after this session
 
-- `destination_fish_charts`/`_size_limits`/`_time_limits` → `regulations`, and the parallel manual
-  re-verification these three tables and `destination_faqs` still need before they too can be dropped — §9
-  risk #10, unchanged, not attempted this session (needs real regulatory source citations, which is a
-  research/content task, not a code task).
+- `destination_fish_charts`/`_size_limits`/`_time_limits` → `regulations`, and the manual re-verification
+  these three tables need before they too can be dropped — §9 risk #10, unchanged, not attempted this session
+  (needs real regulatory source citations, which is a research/content task, not a code task). `destination_faqs`
+  itself no longer blocks on this — see §18, it's already dropped.
 - **The production sequencing warning at the top of this document** — read it before deploying this branch.
-- This branch's work (Phases 1–5) is not yet committed to git as of this session — see the session's final
-  summary for what was committed.
+
+---
+
+## 18. `destination_faqs` drop (2026-08-23, later same day)
+
+§17 above kept `destination_faqs` alongside the three `destination_fish_*` tables under one "still open"
+umbrella, inherited from the pre-existing Phase 5 migration's own scope. That grouping was checked directly
+and found not to hold for this table: unlike the fish tables (still actively read/written by
+`AdminCategoryCountryController`/`RegionController`/`CityController` today), a repo-wide check found **zero**
+remaining references to `DestinationFaq` or `destination_faqs` anywhere in `app/` or `tests/`, apart from the
+model's own file and one unused relation method (`Country::faqs()`). All 498 rows (402 originally typed +
+the 96 orphaned rows resolved in §17) were already fully migrated into `faqs`, and Phase 3 had already
+removed the admin write path to this table (§14).
+
+**Action taken**: backed up `destination_faqs` via `mysqldump`, then ran
+`database/migrations/2026_08_23_170000_drop_destination_faqs_table.php` (`Schema::dropIfExists`, `down()`
+throws per the same "restore from backup, not migration rollback" convention as `2026_08_21_160000`). Removed
+the now-dead `Country::faqs()` relation method and its unused `DestinationFaq` import — `DestinationFaq` the
+*model* stays (same `migrate:fresh` reasoning as `Country`/`CountryTranslation`/`Destination`, §17).
+
+Verified: `Schema::hasTable('destination_faqs')` is `false`. Targeted tests
+(`CategoryPagesAdminTest`, `CategoryPageContentServiceTest` — 33 tests) pass unchanged.
+
+**Remaining legacy tables, and why**: `destination_fish_charts`/`_size_limits`/`_time_limits` only. All three
+are genuinely live (admin fish-data edit/save, public fish-availability charts) and stay until §9 risk #10's
+manual regulatory-source-citation worklist is done — there is no more "was this actually still needed"
+question left to check; what remains is real content work, not a code/data task.
