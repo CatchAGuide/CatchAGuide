@@ -3,7 +3,8 @@
 namespace App\Services\Homepage;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
-use App\Models\Country;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\CategoryEntity;
 use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -23,22 +24,22 @@ class HomepageCountrySelector
     public function featured(?int $limit = null, ?string $categoryScope = null): Collection
     {
         $locale = app()->getLocale();
-        $cacheKey = 'homepage_featured_countries_v7_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
+        $cacheKey = 'homepage_featured_countries_v8_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale, $categoryScope) {
             $unique = $categoryScope !== null
                 ? $this->uniqueModelsForScope($categoryScope, $locale)
                 : $this->uniqueModels($locale);
 
-            $withThumb = $unique->filter(fn (Country $c) => filled($c->thumbnail_path));
-            $withoutThumb = $unique->reject(fn (Country $c) => filled($c->thumbnail_path));
+            $withThumb = $unique->filter(fn (CategoryEntity $c) => filled($c->thumbnail_path));
+            $withoutThumb = $unique->reject(fn (CategoryEntity $c) => filled($c->thumbnail_path));
             $ordered = $withThumb->concat($withoutThumb);
 
             if ($limit !== null) {
                 $ordered = $ordered->take($limit);
             }
 
-            return $ordered->map(function (Country $country) use ($locale) {
+            return $ordered->map(function (CategoryEntity $country) use ($locale) {
                 return [
                     'slug' => $country->slug,
                     'name' => $this->displayName($country, $locale),
@@ -51,14 +52,14 @@ class HomepageCountrySelector
 
     public function totalCount(): int
     {
-        return Cache::remember('homepage_country_total_count_v2', now()->addHour(), function () {
-            $countries = Country::query()->get(['id', 'countrycode']);
+        return Cache::remember('homepage_country_total_count_v3', now()->addHour(), function () {
+            $countries = CategoryEntity::countries()->get(['id', 'countrycode']);
 
             $withIso = $countries
-                ->filter(fn (Country $c) => filled($c->countrycode))
-                ->unique(fn (Country $c) => strtoupper((string) $c->countrycode));
+                ->filter(fn (CategoryEntity $c) => filled($c->countrycode))
+                ->unique(fn (CategoryEntity $c) => strtoupper((string) $c->countrycode));
 
-            $withoutIso = $countries->reject(fn (Country $c) => filled($c->countrycode));
+            $withoutIso = $countries->reject(fn (CategoryEntity $c) => filled($c->countrycode));
 
             return $withIso->count() + $withoutIso->count();
         });
@@ -68,8 +69,8 @@ class HomepageCountrySelector
      * Keep countries that have filled category-page copy for the given scope.
      * ISO duplicates share eligibility so content on either country row still surfaces the rail tile.
      *
-     * @param  Collection<int, Country>  $countries
-     * @return Collection<int, Country>
+     * @param  Collection<int, CategoryEntity>  $countries
+     * @return Collection<int, CategoryEntity>
      */
     private function filterByCategoryPageScope(Collection $countries, string $scope): Collection
     {
@@ -82,7 +83,7 @@ class HomepageCountrySelector
             return collect();
         }
 
-        $withScope = Country::query()
+        $withScope = CategoryEntity::countries()
             ->whereIn('id', $sourceIds)
             ->get(['id', 'countrycode']);
 
@@ -94,12 +95,12 @@ class HomepageCountrySelector
             ->all();
 
         $idsWithoutIso = $withScope
-            ->reject(fn (Country $country) => filled($country->countrycode))
+            ->reject(fn (CategoryEntity $country) => filled($country->countrycode))
             ->pluck('id')
             ->map(fn ($id) => (int) $id)
             ->all();
 
-        return $countries->filter(function (Country $country) use ($isos, $idsWithoutIso) {
+        return $countries->filter(function (CategoryEntity $country) use ($isos, $idsWithoutIso) {
             $iso = strtoupper((string) ($country->countrycode ?? ''));
 
             if ($iso !== '') {
@@ -113,14 +114,13 @@ class HomepageCountrySelector
     /**
      * Unique country models (one row per ISO) for destination rails.
      *
-     * @param  Collection<int, Country>|null  $countries
-     * @return Collection<int, Country>
+     * @param  Collection<int, CategoryEntity>|null  $countries
+     * @return Collection<int, CategoryEntity>
      */
     public function uniqueModels(?string $locale = null, ?Collection $countries = null): Collection
     {
         $locale = $locale ?? app()->getLocale();
-        $countries ??= Country::query()
-            ->with('translations')
+        $countries ??= CategoryEntity::countries()
             ->orderBy('name')
             ->get();
 
@@ -130,8 +130,8 @@ class HomepageCountrySelector
     /**
      * Unique countries that have filled category-page copy for the given scope.
      *
-     * @param  Collection<int, Country>|null  $countries
-     * @return Collection<int, Country>
+     * @param  Collection<int, CategoryEntity>|null  $countries
+     * @return Collection<int, CategoryEntity>
      */
     public function uniqueModelsForScope(string $scope, ?string $locale = null, ?Collection $countries = null): Collection
     {
@@ -141,12 +141,12 @@ class HomepageCountrySelector
     /**
      * Keep one row per ISO so EN/DE migration duplicates (Finland / Finnland) cannot both appear.
      *
-     * @param  Collection<int, Country>  $countries
-     * @return Collection<int, Country>
+     * @param  Collection<int, CategoryEntity>  $countries
+     * @return Collection<int, CategoryEntity>
      */
     private function uniqueByCountryCode(Collection $countries, string $locale): Collection
     {
-        $preferred = $countries->sort(function (Country $a, Country $b) use ($locale) {
+        $preferred = $countries->sort(function (CategoryEntity $a, CategoryEntity $b) use ($locale) {
             $thumbCmp = (filled($a->thumbnail_path) ? 0 : 1) <=> (filled($b->thumbnail_path) ? 0 : 1);
             if ($thumbCmp !== 0) {
                 return $thumbCmp;
@@ -180,15 +180,15 @@ class HomepageCountrySelector
             $unique->push($country);
         }
 
-        return $unique->sortBy(fn (Country $c) => mb_strtolower($this->displayName($c, $locale)))->values();
+        return $unique->sortBy(fn (CategoryEntity $c) => mb_strtolower($this->displayName($c, $locale)))->values();
     }
 
-    public function labelFor(Country $country, ?string $locale = null): string
+    public function labelFor(CategoryEntity $country, ?string $locale = null): string
     {
         return $this->displayName($country, $locale ?? app()->getLocale());
     }
 
-    private function displayName(Country $country, string $locale): string
+    private function displayName(CategoryEntity $country, string $locale): string
     {
         // Prefer short locale labels (e.g. Finnland), not SEO translation titles.
         $iso = strtoupper((string) ($country->countrycode ?? ''));
@@ -209,14 +209,25 @@ class HomepageCountrySelector
         return $country->name;
     }
 
-    private function hasLocaleTranslation(Country $country, string $locale): bool
+    /**
+     * Sort tiebreaker only (which of two same-ISO duplicate rows to prefer) — checks every scope
+     * a Country page can carry content in, since this selector isn't scope-specific itself.
+     */
+    private function hasLocaleTranslation(CategoryEntity $country, string $locale): bool
     {
-        if (! $country->relationLoaded('translations')) {
-            return $country->translation($locale)->exists();
+        foreach ([CategoryPageScope::GLOBAL, CategoryPageScope::TOURS, CategoryPageScope::VACATIONS, CategoryPageScope::TRIPS, CategoryPageScope::CAMPS] as $scope) {
+            $language = $this->categoryContent->findForEntity(
+                CategoryPageEntityType::GEO_COUNTRY,
+                $country->id,
+                $scope,
+                $locale,
+            );
+
+            if ($language !== null && filled($language->title)) {
+                return true;
+            }
         }
 
-        return $country->translations->contains(
-            fn ($translation) => $translation->language === $locale && filled($translation->title)
-        );
+        return false;
     }
 }

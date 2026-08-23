@@ -4,8 +4,8 @@ namespace App\Services\Homepage;
 
 use App\Domain\Offers\DestinationOfferScope;
 use App\Models\Booking;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
 use App\Models\MonthlyHighlight;
 use App\Models\Review;
 use App\Models\Target;
@@ -163,7 +163,7 @@ class HomepageLandingService
             ->values()
             ->all();
 
-        $countries = Country::query()
+        $countries = CategoryEntity::countries()
             ->whereIn('id', $countryIds)
             ->get()
             ->keyBy('id');
@@ -245,7 +245,7 @@ class HomepageLandingService
      * Homepage season cards open /offers with location and/or target-fish filters applied.
      */
     private function offersCatalogUrl(
-        ?Country $country = null,
+        ?CategoryEntity $country = null,
         ?Target $target = null,
         ?CategoryPage $page = null,
     ): string {

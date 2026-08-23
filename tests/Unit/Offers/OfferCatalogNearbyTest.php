@@ -3,7 +3,7 @@
 namespace Tests\Unit\Offers;
 
 use App\Domain\Offers\OfferListingFilter;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\Offers\OfferCatalogPageService;
 use Mockery;
@@ -15,7 +15,8 @@ class OfferCatalogNearbyTest extends TestCase
 {
     public function test_nearby_origin_uses_country_centroid_when_place_coords_missing(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Latvia',
             'slug' => 'lettland',
             'filters' => [
@@ -50,7 +51,8 @@ class OfferCatalogNearbyTest extends TestCase
 
     public function test_nearby_origin_is_null_when_country_has_no_centroid(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Latvia',
             'slug' => 'lettland',
             'filters' => [],

@@ -3,9 +3,7 @@
 namespace App\Domain\Offers;
 
 use App\Domain\Vacation\CountrySlug;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 
 /**
  * Seeds / locks offer-catalog geo params from a destination country → region → city page.
@@ -21,9 +19,9 @@ final class DestinationOfferScope
      */
     public static function mergeIntoRequest(
         array $input,
-        Country $country,
-        ?Region $region = null,
-        ?City $city = null,
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
     ): array {
         $row = $city ?? $region ?? $country;
         $filters = self::normalizeFilters($row->filters ?? null);
@@ -90,7 +88,7 @@ final class DestinationOfferScope
      *
      * @return array{lat: float, lng: float}|null
      */
-    public static function coordinatesFrom(Country|Region|City $row): ?array
+    public static function coordinatesFrom(CategoryEntity $row): ?array
     {
         $filters = self::normalizeFilters($row->filters ?? null);
         $lat = self::floatOrNull($filters['placeLat'] ?? $filters['place_lat'] ?? null);

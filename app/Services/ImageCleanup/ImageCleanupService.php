@@ -4,14 +4,11 @@ namespace App\Services\ImageCleanup;
 
 use App\Models\Accommodation;
 use App\Models\Camp;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Country;
 use App\Models\Guiding;
 use App\Models\GuideThread;
 use App\Models\Media;
-use App\Models\Region;
 use App\Models\RentalBoat;
 use App\Models\SpecialOffer;
 use App\Models\Thread;
@@ -63,22 +60,20 @@ class ImageCleanupService
             'gallery_field' => 'gallery_images',
         ],
         'region' => [
-            'model' => Region::class,
+            'model' => CategoryEntity::class,
+            'type' => 'region',
             'thumbnail_path' => 'thumbnail_path',
             'gallery_field' => null,
         ],
         'country' => [
-            'model' => Country::class,
+            'model' => CategoryEntity::class,
+            'type' => 'country',
             'thumbnail_path' => 'thumbnail_path',
             'gallery_field' => null,
         ],
         'city' => [
-            'model' => City::class,
-            'thumbnail_path' => 'thumbnail_path',
-            'gallery_field' => null,
-        ],
-        'destination' => [
-            'model' => Country::class,
+            'model' => CategoryEntity::class,
+            'type' => 'city',
             'thumbnail_path' => 'thumbnail_path',
             'gallery_field' => null,
         ],
@@ -183,6 +178,10 @@ class ImageCleanupService
                     $q->orWhereNotNull($galleryField);
                 }
             });
+
+            if (isset($config['type'])) {
+                $query->where('type', $config['type']);
+            }
 
             $query->select(['id', ...array_filter([$thumbField, $galleryField])]);
 

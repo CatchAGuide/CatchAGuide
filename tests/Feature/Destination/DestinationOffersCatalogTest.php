@@ -4,8 +4,7 @@ namespace Tests\Feature\Destination;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
-use App\Models\Country;
-use App\Models\CountryTranslation;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -74,7 +73,7 @@ class DestinationOffersCatalogTest extends TestCase
 
     public function test_destination_page_uses_global_content_not_tours(): void
     {
-        $country = $this->createCountry('spanien-global-only');
+        $country = $this->createCountryWithoutGlobalContent('spanien-global-only');
 
         Language::query()->create([
             'source_id' => (string) $country->id,
@@ -109,9 +108,10 @@ class DestinationOffersCatalogTest extends TestCase
         $response->assertDontSee('Tours Only Spain Title', false);
     }
 
-    private function createCountry(string $slugPrefix, array $filters = []): Country
+    private function createCountry(string $slugPrefix, array $filters = []): CategoryEntity
     {
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Spanien',
             'slug' => $slugPrefix.'-'.uniqid(),
             'countrycode' => 'ES',
@@ -123,16 +123,35 @@ class DestinationOffersCatalogTest extends TestCase
             ],
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::GLOBAL,
             'language' => app()->getLocale(),
             'title' => 'Fishing in Spain',
             'sub_title' => 'Discover Spanish waters',
             'introduction' => 'Intro text for Spain.',
             'content' => 'Body content for Spain.',
+            'faq_title' => '',
         ]);
 
-        return $country->fresh(['translations']);
+        return $country;
+    }
+
+    private function createCountryWithoutGlobalContent(string $slugPrefix): CategoryEntity
+    {
+        return CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Spanien',
+            'slug' => $slugPrefix.'-'.uniqid(),
+            'countrycode' => 'ES',
+            'filters' => [
+                'place' => 'Spain',
+                'placeLat' => '40.4',
+                'placeLng' => '-3.7',
+                'country' => 'Spain',
+            ],
+        ]);
     }
 
     /**

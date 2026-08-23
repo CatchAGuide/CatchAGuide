@@ -3,17 +3,16 @@
 namespace Tests\Unit\Offers;
 
 use App\Domain\Offers\DestinationOfferGeoScope;
-use App\Models\City;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Guiding;
-use App\Models\Region;
 use Tests\TestCase;
 
 class DestinationOfferGeoScopeTest extends TestCase
 {
     public function test_country_scope_matches_slug_and_iso_columns(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Spain',
             'slug' => 'spanien',
             'countrycode' => 'ES',
@@ -33,17 +32,20 @@ class DestinationOfferGeoScopeTest extends TestCase
 
     public function test_region_and_city_add_place_column_constraints(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Spain',
             'slug' => 'spanien',
             'countrycode' => 'ES',
         ]);
-        $region = new Region([
+        $region = new CategoryEntity([
+            'type' => 'region',
             'name' => 'Catalonia',
             'slug' => 'catalonia',
             'filters' => ['place' => 'Catalonia'],
         ]);
-        $city = new City([
+        $city = new CategoryEntity([
+            'type' => 'city',
             'name' => 'Barcelona',
             'slug' => 'barcelona',
             'filters' => ['city' => 'Barcelona'],

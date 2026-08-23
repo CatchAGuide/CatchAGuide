@@ -3,9 +3,7 @@
 namespace App\Domain\Offers;
 
 use App\Domain\Vacation\CountrySlug;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -15,9 +13,9 @@ final class DestinationOfferGeoScope
 {
     public static function apply(
         Builder $query,
-        Country $country,
-        ?Region $region = null,
-        ?City $city = null,
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
         bool $includeCountryIso = false,
     ): Builder {
         self::constrainCountry($query, $country, $includeCountryIso);
@@ -39,7 +37,7 @@ final class DestinationOfferGeoScope
         return $query;
     }
 
-    private static function constrainCountry(Builder $query, Country $country, bool $includeCountryIso): void
+    private static function constrainCountry(Builder $query, CategoryEntity $country, bool $includeCountryIso): void
     {
         $variants = CountrySlug::storageVariants($country->slug, $country->countrycode);
 

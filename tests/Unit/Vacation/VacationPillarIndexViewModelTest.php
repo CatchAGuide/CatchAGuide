@@ -5,7 +5,7 @@ namespace Tests\Unit\Vacation;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
 use App\Domain\Vacation\ViewModels\VacationPillarIndexViewModel;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tests\TestCase;
@@ -14,7 +14,8 @@ class VacationPillarIndexViewModelTest extends TestCase
 {
     public function test_country_page_uses_cms_title_intro_content_and_faq_title(): void
     {
-        $destination = new Country([
+        $destination = new CategoryEntity([
+            'type' => 'country',
             'slug' => 'spanien',
             'name' => 'Spain',
         ]);
@@ -50,7 +51,8 @@ class VacationPillarIndexViewModelTest extends TestCase
 
     public function test_country_page_falls_back_when_cms_title_empty(): void
     {
-        $destination = new Country([
+        $destination = new CategoryEntity([
+            'type' => 'country',
             'slug' => 'spanien',
             'name' => 'Spain',
         ]);
@@ -78,7 +80,8 @@ class VacationPillarIndexViewModelTest extends TestCase
 
     public function test_pillar_toggle_urls_keep_camp_facets_only_on_camps(): void
     {
-        $destination = new Country([
+        $destination = new CategoryEntity([
+            'type' => 'country',
             'slug' => 'sweden',
             'name' => 'Sweden',
         ]);
@@ -117,7 +120,8 @@ class VacationPillarIndexViewModelTest extends TestCase
 
     public function test_pillar_toggle_urls_keep_duration_only_on_trips(): void
     {
-        $destination = new Country([
+        $destination = new CategoryEntity([
+            'type' => 'country',
             'slug' => 'sweden',
             'name' => 'Sweden',
         ]);

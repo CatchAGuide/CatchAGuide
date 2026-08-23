@@ -48,7 +48,7 @@ class UpdateMonthlyHighlightRequest extends FormRequest
             'subtitle_en' => ['nullable', 'string', 'max:1000'],
             'subtitle_de' => ['nullable', 'string', 'max:1000'],
             'cards' => ['nullable', 'array', 'max:'.MonthlyHighlight::MAX_ITEMS],
-            'cards.*.country_id' => ['nullable', 'integer', Rule::exists('c_countries', 'id')],
+            'cards.*.country_id' => ['nullable', 'integer', Rule::exists('category_entities', 'id')->where('type', 'country')],
             'cards.*.target_id' => [
                 'nullable',
                 'integer',

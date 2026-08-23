@@ -9,11 +9,9 @@ use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\Camp;
-use App\Models\City;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Guiding;
 use App\Models\Method;
-use App\Models\Region;
 use App\Models\Review;
 use App\Models\Trip;
 use App\Models\Water;
@@ -55,9 +53,9 @@ class OfferCatalogPageService
 
     public function buildForDestination(
         Request $request,
-        Country $country,
-        ?Region $region = null,
-        ?City $city = null,
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
     ): OfferCatalogViewModel {
         $input = DestinationOfferScope::mergeIntoRequest(
             $request->all(),
@@ -80,9 +78,9 @@ class OfferCatalogPageService
      */
     public function buildForToursDestination(
         Request $request,
-        Country $country,
-        ?Region $region = null,
-        ?City $city = null,
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
     ): OfferCatalogViewModel {
         $input = DestinationOfferScope::mergeIntoRequest(
             $request->all(),

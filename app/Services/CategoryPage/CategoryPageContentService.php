@@ -4,15 +4,10 @@ namespace App\Services\CategoryPage;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
-use App\Models\CountryTranslation;
 use App\Models\Faq;
 use App\Models\Language;
-use App\Models\Region;
-use App\Models\RegionTranslation;
-use App\Models\City;
-use App\Models\CityTranslation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -132,7 +127,7 @@ class CategoryPageContentService
     }
 
     /**
-     * @param  array{title?: string, sub_title?: string, introduction?: string, content?: string, faq_title?: string}  $fields
+     * @param  array{title?: string, sub_title?: string, introduction?: string, content?: string, faq_title?: string, fish_avail_title?: string, fish_avail_intro?: string, size_limit_title?: string, size_limit_intro?: string, time_limit_title?: string, time_limit_intro?: string}  $fields
      * @param  list<array{question: string, answer: string}>  $faqs
      */
     public function upsertEntity(
@@ -143,6 +138,26 @@ class CategoryPageContentService
         array $fields,
         array $faqs = [],
     ): Language {
+        $payload = [
+            'title' => $fields['title'] ?? '',
+            'sub_title' => $fields['sub_title'] ?? '',
+            'introduction' => $fields['introduction'] ?? '',
+            'content' => $fields['content'] ?? '',
+            'faq_title' => $fields['faq_title'] ?? '',
+        ];
+
+        // Only set these when the caller actually provided them, so callers that don't know
+        // about the fish-section fields (e.g. translateEntityScope()) don't null out existing
+        // values on update.
+        foreach ([
+            'fish_avail_title', 'fish_avail_intro', 'size_limit_title',
+            'size_limit_intro', 'time_limit_title', 'time_limit_intro',
+        ] as $fishField) {
+            if (array_key_exists($fishField, $fields)) {
+                $payload[$fishField] = $fields[$fishField];
+            }
+        }
+
         $language = Language::query()->updateOrCreate(
             [
                 'source_id' => (string) $sourceId,
@@ -150,15 +165,24 @@ class CategoryPageContentService
                 'scope' => $scope,
                 'language' => $locale,
             ],
-            [
-                'title' => $fields['title'] ?? '',
-                'sub_title' => $fields['sub_title'] ?? '',
-                'introduction' => $fields['introduction'] ?? '',
-                'content' => $fields['content'] ?? '',
-                'faq_title' => $fields['faq_title'] ?? '',
-            ],
+            $payload,
         );
 
+        $this->replaceFaqsForEntity($entityType, $sourceId, $scope, $locale, $faqs);
+
+        return $language;
+    }
+
+    /**
+     * Replace the FAQ rows for one (entity, scope, locale) key, independent of `languages`
+     * content. Needed because a dimension's FAQ scope doesn't always match its content scope —
+     * e.g. Country content defaults to `global` but legacy-migrated FAQs all live at `tours`
+     * (per the 2026-08-12 scope-backfill precedent, applied uniformly across dimensions).
+     *
+     * @param  list<array{question: string, answer: string}>  $faqs
+     */
+    public function replaceFaqsForEntity(string $entityType, int|string $sourceId, string $scope, string $locale, array $faqs): void
+    {
         Faq::query()
             ->where('source_id', $sourceId)
             ->where('page', CategoryPageEntityType::faqPageKey($entityType))
@@ -180,8 +204,6 @@ class CategoryPageContentService
                 'answer' => $faq['answer'] ?? '',
             ]);
         }
-
-        return $language;
     }
 
     public function translateScope(CategoryPage $page, string $scope, string $fromLocale, string $toLocale): void
@@ -366,7 +388,7 @@ class CategoryPageContentService
             $allowCrossScopeFallback,
         );
 
-        if ($model instanceof Country || $model instanceof Region || $model instanceof City) {
+        if ($model instanceof CategoryEntity) {
             $model->overlayScopedTranslation($content);
 
             return $model;
@@ -414,41 +436,6 @@ class CategoryPageContentService
         return collect();
     }
 
-    public function legacyCountryLanguage(Country $country, string $locale): ?Language
-    {
-        $translation = $country->translations()->where('language', $locale)->first();
-
-        return $this->languageFromGeoTranslation($translation);
-    }
-
-    public function legacyRegionLanguage(Region $region, string $locale): ?Language
-    {
-        $translation = $region->translations()->where('language', $locale)->first();
-
-        return $this->languageFromGeoTranslation($translation);
-    }
-
-    public function legacyCityLanguage(City $city, string $locale): ?Language
-    {
-        $translation = $city->translations()->where('language', $locale)->first();
-
-        return $this->languageFromGeoTranslation($translation);
-    }
-
-    private function languageFromGeoTranslation(CountryTranslation|RegionTranslation|CityTranslation|null $translation): ?Language
-    {
-        if ($translation === null) {
-            return null;
-        }
-
-        return new Language([
-            'title' => $translation->title,
-            'sub_title' => $translation->sub_title,
-            'introduction' => $translation->introduction,
-            'content' => $translation->content,
-            'faq_title' => $translation->faq_title,
-        ]);
-    }
 
     private function hasMeaningfulContent(?Language $language): bool
     {

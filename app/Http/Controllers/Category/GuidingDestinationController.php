@@ -6,9 +6,7 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GuidingsController;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Http\Request;
@@ -24,7 +22,7 @@ class GuidingDestinationController extends Controller
 
     public function index(): View
     {
-        $countries = Country::query()->get();
+        $countries = CategoryEntity::countries()->get();
 
         return view('pages.countries.index', [
             'countries' => $countries,
@@ -34,7 +32,7 @@ class GuidingDestinationController extends Controller
 
     public function show(Request $request, string $country, ?string $region = null, ?string $city = null)
     {
-        $countryRow = Country::with(['translations', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
+        $countryRow = CategoryEntity::countries()
             ->whereSlug($country)
             ->first();
 
@@ -51,14 +49,14 @@ class GuidingDestinationController extends Controller
         $cityRow = null;
 
         if ($region) {
-            $regionRow = Region::with(['translations', 'country', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
+            $regionRow = CategoryEntity::regions()->with('country')
                 ->whereSlug($region)
                 ->where('country_id', $countryRow->id)
                 ->firstOrFail();
         }
 
         if ($city) {
-            $cityRow = City::with(['translations', 'country', 'region', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
+            $cityRow = CategoryEntity::cities()->with(['country', 'region'])
                 ->whereSlug($city)
                 ->where('country_id', $countryRow->id)
                 ->where('region_id', $regionRow->id)
@@ -92,15 +90,15 @@ class GuidingDestinationController extends Controller
             false,
         );
 
-        $regions = Region::with('country')->where('country_id', $countryRow->id)->get();
+        $regions = CategoryEntity::regions()->with('country')->where('country_id', $countryRow->id)->get();
 
         if ($regionRow) {
-            $cities = City::with(['country', 'region'])
+            $cities = CategoryEntity::cities()->with(['country', 'region'])
                 ->where('country_id', $countryRow->id)
                 ->where('region_id', $regionRow->id)
                 ->get();
         } else {
-            $cities = City::with(['country', 'region'])
+            $cities = CategoryEntity::cities()->with(['country', 'region'])
                 ->where('country_id', $countryRow->id)
                 ->get();
         }
@@ -139,12 +137,8 @@ class GuidingDestinationController extends Controller
         ]);
     }
 
-    private function geoCollection(Country|Region|City $entity, string $relation): Collection
+    private function geoCollection(CategoryEntity $entity, string $relation): Collection
     {
-        if ($entity->relationLoaded($relation)) {
-            return $entity->getRelation($relation);
-        }
-
-        return $entity->{$relation}()->get();
+        return $entity->{$relation}();
     }
 }

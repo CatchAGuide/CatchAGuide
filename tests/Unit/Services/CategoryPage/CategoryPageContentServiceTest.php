@@ -4,9 +4,8 @@ namespace Tests\Unit\Services\CategoryPage;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
-use App\Models\CountryTranslation;
 use App\Models\Language;
 use App\Models\Target;
 use App\Services\CategoryPage\CategoryPageContentService;
@@ -313,14 +312,17 @@ class CategoryPageContentServiceTest extends TestCase
 
     public function test_vacations_overlay_does_not_expose_tours_country_translation(): void
     {
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Overlayland',
             'slug' => 'test-overlay-'.uniqid(),
             'countrycode' => '',
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
             'language' => 'en',
             'title' => 'Fishing in Overlayland – the best tours, waters & seasons',
             'sub_title' => 'Tours subtitle',

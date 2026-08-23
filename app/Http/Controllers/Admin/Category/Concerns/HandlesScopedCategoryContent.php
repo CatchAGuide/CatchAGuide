@@ -2,13 +2,31 @@
 
 namespace App\Http\Controllers\Admin\Category\Concerns;
 
+use App\Models\Language;
 use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 
 trait HandlesScopedCategoryContent
 {
+    /**
+     * Which locales have any `languages` content for each entity id, for admin index pages that
+     * show language-flag indicators (previously read off a `translations()` Eloquent relation).
+     *
+     * @return Collection<int, Collection<int, string>>
+     */
+    protected function languagesByEntity(Collection $entityIds, string $entityType): Collection
+    {
+        return Language::query()
+            ->where('type', $entityType)
+            ->whereIn('source_id', $entityIds->map(fn ($id) => (string) $id))
+            ->get(['source_id', 'language'])
+            ->groupBy(fn ($row) => (int) $row->source_id)
+            ->map(fn ($rows) => $rows->pluck('language')->unique()->values());
+    }
+
     protected function validateScopedContent(Request $request, array $scopes): void
     {
         $request->validate([
@@ -38,13 +56,26 @@ trait HandlesScopedCategoryContent
         $locale = $request->input('languageSwitch', $request->input('language', 'de'));
         $faqs = collect($request->input('faq', []))->values()->all();
 
-        $content->upsertEntity($entityType, $sourceId, $scope, $locale, [
+        $fields = [
             'title' => $request->input('title', ''),
             'sub_title' => $request->input('sub_title', ''),
             'introduction' => $request->input('introduction', ''),
             'content' => $request->input('content', $request->input('body', '')),
             'faq_title' => $request->input('faq_title', ''),
-        ], $faqs);
+        ];
+
+        // Only present on the main form submit, not the lighter autosave payload — don't null
+        // these out when they're simply absent from the request.
+        foreach ([
+            'fish_avail_title', 'fish_avail_intro', 'size_limit_title',
+            'size_limit_intro', 'time_limit_title', 'time_limit_intro',
+        ] as $fishField) {
+            if ($request->has($fishField)) {
+                $fields[$fishField] = $request->input($fishField);
+            }
+        }
+
+        $content->upsertEntity($entityType, $sourceId, $scope, $locale, $fields, $faqs);
 
         if ($request->boolean('translate_to_en') && $locale === 'de') {
             $content->translateEntityScope($entityType, $sourceId, $scope, 'de', 'en');
@@ -82,6 +113,12 @@ trait HandlesScopedCategoryContent
             'introduction' => $languageRow->introduction ?? '',
             'content' => $languageRow->content ?? '',
             'faq_title' => $languageRow->faq_title ?? '',
+            'fish_avail_title' => $languageRow->fish_avail_title ?? '',
+            'fish_avail_intro' => $languageRow->fish_avail_intro ?? '',
+            'size_limit_title' => $languageRow->size_limit_title ?? '',
+            'size_limit_intro' => $languageRow->size_limit_intro ?? '',
+            'time_limit_title' => $languageRow->time_limit_title ?? '',
+            'time_limit_intro' => $languageRow->time_limit_intro ?? '',
             'faq' => $faq,
         ];
     }
@@ -132,6 +169,12 @@ trait HandlesScopedCategoryContent
             'introduction' => $languageData->introduction ?? '',
             'content' => $languageData->content ?? '',
             'faq_title' => $languageData->faq_title ?? '',
+            'fish_avail_title' => $languageData->fish_avail_title ?? '',
+            'fish_avail_intro' => $languageData->fish_avail_intro ?? '',
+            'size_limit_title' => $languageData->size_limit_title ?? '',
+            'size_limit_intro' => $languageData->size_limit_intro ?? '',
+            'time_limit_title' => $languageData->time_limit_title ?? '',
+            'time_limit_intro' => $languageData->time_limit_intro ?? '',
             'faq' => $faq,
         ];
     }

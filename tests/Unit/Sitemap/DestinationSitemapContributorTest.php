@@ -2,9 +2,7 @@
 
 namespace Tests\Unit\Sitemap;
 
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 use App\Services\Sitemap\Contributors\DestinationSitemapContributor;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
@@ -18,17 +16,20 @@ class DestinationSitemapContributorTest extends TestCase
 
     public function test_destination_sitemap_includes_country_but_not_region_or_city(): void
     {
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Sitemap Spain',
             'slug' => 'sitemap-spain-'.uniqid(),
             'countrycode' => 'ES',
         ]);
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Sitemap Catalonia',
             'slug' => 'sitemap-catalonia-'.$country->slug,
         ]);
-        $city = City::query()->create([
+        $city = CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Sitemap Barcelona',

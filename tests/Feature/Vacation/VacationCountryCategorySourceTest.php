@@ -4,8 +4,7 @@ namespace Tests\Feature\Vacation;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
-use App\Models\Country;
-use App\Models\CountryTranslation;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
@@ -32,14 +31,17 @@ class VacationCountryCategorySourceTest extends TestCase
     public function test_country_page_uses_vacations_category_title_not_tours(): void
     {
         $slug = 'test-vac-cms-'.uniqid();
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Vacationland',
             'slug' => $slug,
             'countrycode' => '',
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
             'language' => 'en',
             'title' => 'Fishing in Vacationland – the best tours, waters & seasons',
             'sub_title' => 'All information about fishing in Vacationland',
@@ -72,14 +74,17 @@ class VacationCountryCategorySourceTest extends TestCase
     public function test_country_page_without_vacations_cms_does_not_fall_back_to_tours_title(): void
     {
         $slug = 'test-vac-legacy-'.uniqid();
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Toursonlyland',
             'slug' => $slug,
             'countrycode' => '',
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::TOURS,
             'language' => 'en',
             'title' => 'Fishing in Toursonlyland – the best tours, waters & seasons',
             'sub_title' => 'All information about fishing in Toursonlyland',

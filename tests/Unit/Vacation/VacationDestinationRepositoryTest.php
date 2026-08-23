@@ -4,7 +4,7 @@ namespace Tests\Unit\Vacation;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -18,7 +18,8 @@ class VacationDestinationRepositoryTest extends TestCase
     {
         $marker = 'test-hub-rail-'.uniqid();
 
-        Country::query()->create([
+        CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Zedonia',
             'slug' => $marker,
             'countrycode' => '',
@@ -38,14 +39,16 @@ class VacationDestinationRepositoryTest extends TestCase
     {
         $marker = 'test-vac-dropdown-'.uniqid();
 
-        $vacationCountry = Country::query()->create([
+        $vacationCountry = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Vacationland',
             'slug' => $marker.'-vacations',
             'countrycode' => 'V7',
             'thumbnail_path' => 'assets/images/'.$marker.'-vacations.jpg',
         ]);
 
-        $toursCountry = Country::query()->create([
+        $toursCountry = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Toursland',
             'slug' => $marker.'-tours',
             'countrycode' => 'T7',

@@ -8,7 +8,7 @@ use App\Domain\Vacation\Pillar;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\ViewModels\PillarSectionViewModel;
 use App\Domain\Vacation\ViewModels\VacationCountryViewModel;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
@@ -43,7 +43,8 @@ class VacationCountryPageService
 
     public function buildAllOffers(Request $request): VacationCountryViewModel
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'slug' => 'all-offers',
             'name' => __('vacations.all_offers_title'),
         ]);
@@ -51,7 +52,7 @@ class VacationCountryPageService
         return $this->buildPage($request, null, $country);
     }
 
-    private function buildPage(Request $request, ?string $countrySlug, Country $country): VacationCountryViewModel
+    private function buildPage(Request $request, ?string $countrySlug, CategoryEntity $country): VacationCountryViewModel
     {
         $input = $request->all();
         if ($countrySlug === null) {
@@ -132,7 +133,7 @@ class VacationCountryPageService
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
             faq: $faq,
-            fishChart: $country->fish_charts ?? collect(),
+            fishChart: $country->id ? $country->fish_charts() : collect(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
             accommodationTypeOptions: $filter->showsCampFacets()
                 ? collect($this->filterApplicator->accommodationTypeOptions())

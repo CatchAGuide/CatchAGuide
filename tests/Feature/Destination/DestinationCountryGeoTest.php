@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Destination;
 
-use App\Models\City;
-use App\Models\Country;
-use App\Models\CountryTranslation;
-use App\Models\Region;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\CategoryEntity;
+use App\Models\Language;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
@@ -32,12 +32,14 @@ class DestinationCountryGeoTest extends TestCase
     public function test_destination_country_hides_region_and_city_carousels(): void
     {
         $country = $this->createCountry('spanien-no-geo');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Unique Dest Region '.$country->slug,
             'slug' => 'dest-region-'.$country->slug,
         ]);
-        City::query()->create([
+        CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Unique Dest City '.$country->slug,
@@ -68,7 +70,8 @@ class DestinationCountryGeoTest extends TestCase
     public function test_destination_region_url_redirects_to_country(): void
     {
         $country = $this->createCountry('spanien-legacy-region');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Catalonia',
             'slug' => 'catalonia-'.$country->slug,
@@ -83,12 +86,14 @@ class DestinationCountryGeoTest extends TestCase
     public function test_destination_city_url_redirects_to_country_and_keeps_query(): void
     {
         $country = $this->createCountry('spanien-legacy-city');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Catalonia',
             'slug' => 'catalonia-'.$country->slug,
         ]);
-        $city = City::query()->create([
+        $city = CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Barcelona',
@@ -116,9 +121,10 @@ class DestinationCountryGeoTest extends TestCase
         );
     }
 
-    private function createCountry(string $slugPrefix): Country
+    private function createCountry(string $slugPrefix): CategoryEntity
     {
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Spanien',
             'slug' => $slugPrefix.'-'.uniqid(),
             'countrycode' => 'ES',
@@ -130,16 +136,19 @@ class DestinationCountryGeoTest extends TestCase
             ],
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
+        Language::query()->create([
+            'source_id' => (string) $country->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::GLOBAL,
             'language' => app()->getLocale(),
             'title' => 'Fishing in Spain',
             'sub_title' => 'Discover Spanish waters',
             'introduction' => 'Intro text for Spain.',
             'content' => 'Body content for Spain.',
+            'faq_title' => '',
         ]);
 
-        return $country->fresh(['translations']);
+        return $country;
     }
 
     private function bindDestinationOffers(): void

@@ -18,6 +18,12 @@ class Language extends Model
         'introduction',
         'content',
         'faq_title',
+        'fish_avail_title',
+        'fish_avail_intro',
+        'size_limit_title',
+        'size_limit_intro',
+        'time_limit_title',
+        'time_limit_intro',
         'json_data',
     ];
 

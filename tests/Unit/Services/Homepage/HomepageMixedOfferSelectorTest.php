@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Services\Homepage;
 
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
@@ -51,7 +51,8 @@ class HomepageMixedOfferSelectorTest extends TestCase
     {
         Cache::flush();
 
-        $country = Country::query()->create([
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Selector Spain',
             'slug' => 'selector-spain-'.uniqid(),
             'countrycode' => 'ES',

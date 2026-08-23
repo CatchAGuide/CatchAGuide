@@ -52,22 +52,6 @@ class Country extends Model
     }
 
     /**
-     * Get all regions in this country
-     */
-    public function regions()
-    {
-        return $this->hasMany(Region::class);
-    }
-
-    /**
-     * Get all cities in this country
-     */
-    public function cities()
-    {
-        return $this->hasMany(City::class);
-    }
-
-    /**
      * Get FAQs for this country
      */
     public function faqs()

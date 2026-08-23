@@ -29,9 +29,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\ExtrasPrice;
 use App\Services\CalendarScheduleService;
 use App\Models\BoatExtras;
-use App\Models\Country;
-use App\Models\Region;
-use App\Models\City;
+use App\Models\CategoryEntity;
 use App\Models\Review;
 use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
@@ -276,18 +274,18 @@ class GuidingsController extends Controller
             $destinationId = $request->input('destination_id');
             
             if ($destinationType === 'country') {
-                $destination = Country::find($destinationId);
+                $destination = CategoryEntity::countries()->find($destinationId);
                 if ($destination) {
                     $baseQuery->where('country', $destination->name);
                 }
             } elseif ($destinationType === 'region') {
-                $destination = Region::with('country')->find($destinationId);
+                $destination = CategoryEntity::regions()->with('country')->find($destinationId);
                 if ($destination) {
                     $baseQuery->where('region', $destination->name)
                           ->where('country', $destination->country->name ?? '');
                 }
             } elseif ($destinationType === 'city') {
-                $destination = City::with(['country', 'region'])->find($destinationId);
+                $destination = CategoryEntity::cities()->with(['country', 'region'])->find($destinationId);
                 if ($destination) {
                     $baseQuery->where('city', $destination->name)
                           ->where('region', $destination->region->name ?? '')
@@ -510,18 +508,18 @@ class GuidingsController extends Controller
                 $destinationId = $request->input('destination_id');
                 
                 if ($destinationType === 'country') {
-                    $destination = Country::find($destinationId);
+                    $destination = CategoryEntity::countries()->find($destinationId);
                     if ($destination) {
                         $baseQuery->where('country', $destination->name);
                     }
                 } elseif ($destinationType === 'region') {
-                    $destination = Region::with('country')->find($destinationId);
+                    $destination = CategoryEntity::regions()->with('country')->find($destinationId);
                     if ($destination) {
                         $baseQuery->where('region', $destination->name)
                               ->where('country', $destination->country->name ?? '');
                     }
                 } elseif ($destinationType === 'city') {
-                    $destination = City::with(['country', 'region'])->find($destinationId);
+                    $destination = CategoryEntity::cities()->with(['country', 'region'])->find($destinationId);
                     if ($destination) {
                         $baseQuery->where('city', $destination->name)
                                   ->where('region', $destination->region->name ?? '')
@@ -813,11 +811,11 @@ class GuidingsController extends Controller
             $destinationId = $request->input('destination_id');
             
             if ($destinationType === 'country') {
-                $destination = Country::find($destinationId);
+                $destination = CategoryEntity::countries()->find($destinationId);
             } elseif ($destinationType === 'region') {
-                $destination = Region::find($destinationId);
+                $destination = CategoryEntity::regions()->find($destinationId);
             } elseif ($destinationType === 'city') {
-                $destination = City::find($destinationId);
+                $destination = CategoryEntity::cities()->find($destinationId);
             }
         }
 

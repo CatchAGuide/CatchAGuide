@@ -5,7 +5,7 @@ namespace App\Services\Sitemap\Contributors;
 use App\Contracts\Sitemap\SitemapContributorInterface;
 use App\Domain\Vacation\CountrySlug;
 use App\Models\Camp;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Trip;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\Sitemap\SitemapContext;
@@ -94,7 +94,7 @@ class VacationSitemapContributor implements SitemapContributorInterface
      */
     private function collectCountrySlugs(string $lang): array
     {
-        $raw = Country::query()->pluck('slug')
+        $raw = CategoryEntity::countries()->pluck('slug')
             ->merge(Camp::query()->where('status', 'active')->whereNotNull('country')->pluck('country'))
             ->merge(Trip::query()->where('status', 'active')->whereNotNull('country')->pluck('country'));
 

@@ -3,8 +3,8 @@
 namespace Tests\Unit\Services\Homepage;
 
 use App\Domain\Vacation\CountrySlug;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
 use App\Models\MonthlyHighlight;
 use App\Models\Target;
 use App\Services\Homepage\HomepageLandingService;
@@ -17,7 +17,7 @@ class HomepageMonthlyHighlightTest extends TestCase
     public function test_season_module_uses_active_monthly_highlight_pairs(): void
     {
         $month = (int) now()->month;
-        $country = Country::query()->first();
+        $country = CategoryEntity::countries()->first();
         $targetPage = CategoryPage::query()->where('type', 'Targets')->first();
         if (! $country || ! $targetPage) {
             $this->markTestSkipped('Need country and target category page.');

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreMonthlyHighlightRequest;
 use App\Http\Requests\Admin\UpdateMonthlyHighlightRequest;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
 use App\Models\MonthlyHighlight;
 use App\Models\Target;
 use App\Services\Homepage\HomepageLandingService;
@@ -138,10 +138,10 @@ class MonthlyHighlightController extends Controller
             ];
         })->values();
 
-        $countryOptions = Country::query()
+        $countryOptions = CategoryEntity::countries()
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn (Country $country) => [
+            ->map(fn (CategoryEntity $country) => [
                 'id' => $country->id,
                 'label' => $country->name,
             ])

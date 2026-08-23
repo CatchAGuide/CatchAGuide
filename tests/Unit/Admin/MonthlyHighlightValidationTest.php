@@ -3,8 +3,8 @@
 namespace Tests\Unit\Admin;
 
 use App\Http\Requests\Admin\StoreMonthlyHighlightRequest;
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
 use App\Models\MonthlyHighlight;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -13,7 +13,7 @@ class MonthlyHighlightValidationTest extends TestCase
 {
     public function test_store_request_rejects_partial_card(): void
     {
-        $country = Country::query()->first();
+        $country = CategoryEntity::countries()->first();
         if (! $country) {
             $this->markTestSkipped('Need at least one country.');
         }
@@ -39,7 +39,7 @@ class MonthlyHighlightValidationTest extends TestCase
 
     public function test_store_request_builds_pair_items_from_cards(): void
     {
-        $country = Country::query()->first();
+        $country = CategoryEntity::countries()->first();
         $targetPage = CategoryPage::query()->where('type', 'Targets')->first();
         if (! $country || ! $targetPage) {
             $this->markTestSkipped('Need at least one country and target category page.');

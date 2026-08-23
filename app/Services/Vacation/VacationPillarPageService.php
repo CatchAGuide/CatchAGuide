@@ -8,7 +8,7 @@ use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
 use App\Domain\Vacation\ViewModels\VacationPillarIndexViewModel;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
@@ -66,7 +66,7 @@ class VacationPillarPageService
         VacationPillar $pillar,
         Request $request,
         ?string $countrySlug,
-        ?Country $destination,
+        ?CategoryEntity $destination,
     ): VacationPillarIndexViewModel {
         $filter = VacationListingFilter::fromRequest(
             array_merge($request->all(), ['pillar' => $pillar->value]),

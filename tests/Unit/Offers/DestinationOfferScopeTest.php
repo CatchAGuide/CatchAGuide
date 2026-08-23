@@ -3,16 +3,15 @@
 namespace Tests\Unit\Offers;
 
 use App\Domain\Offers\DestinationOfferScope;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 use Tests\TestCase;
 
 class DestinationOfferScopeTest extends TestCase
 {
     public function test_merges_country_scope_and_locks_country_slug(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Spanien',
             'slug' => 'spanien',
             'countrycode' => 'ES',
@@ -47,13 +46,15 @@ class DestinationOfferScopeTest extends TestCase
 
     public function test_merges_region_and_city_scopes(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Spanien',
             'slug' => 'spanien',
             'countrycode' => 'ES',
             'filters' => [],
         ]);
-        $region = new Region([
+        $region = new CategoryEntity([
+            'type' => 'region',
             'name' => 'Andalucía',
             'slug' => 'andalucia',
             'filters' => [
@@ -63,7 +64,8 @@ class DestinationOfferScopeTest extends TestCase
                 'region' => 'Andalusia',
             ],
         ]);
-        $city = new City([
+        $city = new CategoryEntity([
+            'type' => 'city',
             'name' => 'Málaga',
             'slug' => 'malaga',
             'filters' => [
@@ -92,7 +94,8 @@ class DestinationOfferScopeTest extends TestCase
 
     public function test_coordinates_from_destination_filters(): void
     {
-        $country = new Country([
+        $country = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Latvia',
             'slug' => 'lettland',
             'filters' => [
@@ -106,7 +109,8 @@ class DestinationOfferScopeTest extends TestCase
             DestinationOfferScope::coordinatesFrom($country)
         );
 
-        $missing = new Country([
+        $missing = new CategoryEntity([
+            'type' => 'country',
             'name' => 'Latvia',
             'slug' => 'lettland',
             'filters' => [],

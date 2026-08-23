@@ -2,7 +2,7 @@
 
 namespace App\Services\Location;
 
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,7 +17,7 @@ class ListingCountryFilter
      * @return array<int, string>
      */
     public function valuesForCountry(
-        Country $country,
+        CategoryEntity $country,
         string $countrySlug,
         array $filterData = []
     ): array {

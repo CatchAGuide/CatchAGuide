@@ -4,8 +4,7 @@ namespace Tests\Unit\Services\Homepage;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
-use App\Models\Country;
-use App\Models\CountryTranslation;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -20,7 +19,7 @@ class HomepageCountrySelectorTest extends TestCase
     {
         Cache::flush();
 
-        if (! Country::query()->exists()) {
+        if (! CategoryEntity::countries()->exists()) {
             $this->markTestSkipped('No countries in test database.');
         }
 
@@ -45,20 +44,25 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-fi-dedupe-'.uniqid();
 
-        $finnland = Country::query()->create([
+        $finnland = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Finnland',
             'slug' => $marker.'-finnland',
             'countrycode' => 'FI',
             'thumbnail_path' => 'assets/images/'.$marker.'-fi.jpg',
         ]);
 
-        CountryTranslation::query()->create([
-            'country_id' => $finnland->id,
+        Language::query()->create([
+            'source_id' => (string) $finnland->id,
+            'type' => CategoryPageEntityType::GEO_COUNTRY,
+            'scope' => CategoryPageScope::GLOBAL,
             'language' => 'de',
             'title' => 'Finnland',
+            'sub_title' => '',
         ]);
 
-        Country::query()->create([
+        CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Finland',
             'slug' => $marker.'-finland',
             'countrycode' => 'FI',
@@ -89,13 +93,15 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-count-'.uniqid();
 
-        Country::query()->create([
+        CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Finnland',
             'slug' => $marker.'-finnland',
             'countrycode' => 'ZZ',
         ]);
 
-        Country::query()->create([
+        CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Finland',
             'slug' => $marker.'-finland',
             'countrycode' => 'ZZ',
@@ -112,7 +118,8 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-all-rail-'.uniqid();
 
-        Country::query()->create([
+        CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Zedonia',
             'slug' => $marker,
             'countrycode' => '',
@@ -133,21 +140,24 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-tours-scope-'.uniqid();
 
-        $withTours = Country::query()->create([
+        $withTours = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Toursland',
             'slug' => $marker.'-tours',
             'countrycode' => 'T8',
             'thumbnail_path' => 'assets/images/'.$marker.'-tours.jpg',
         ]);
 
-        $globalOnly = Country::query()->create([
+        $globalOnly = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Globalland',
             'slug' => $marker.'-global',
             'countrycode' => 'G8',
             'thumbnail_path' => 'assets/images/'.$marker.'-global.jpg',
         ]);
 
-        $emptyTours = Country::query()->create([
+        $emptyTours = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Emptyland',
             'slug' => $marker.'-empty',
             'countrycode' => 'E8',
@@ -204,14 +214,16 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-tours-iso-'.uniqid();
 
-        $preferred = Country::query()->create([
+        $preferred = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Preferredland',
             'slug' => $marker.'-preferred',
             'countrycode' => 'P8',
             'thumbnail_path' => 'assets/images/'.$marker.'-preferred.jpg',
         ]);
 
-        $contentRow = Country::query()->create([
+        $contentRow = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Contentland',
             'slug' => $marker.'-content',
             'countrycode' => 'P8',
@@ -243,14 +255,16 @@ class HomepageCountrySelectorTest extends TestCase
 
         $marker = 'test-vac-scope-'.uniqid();
 
-        $withVacations = Country::query()->create([
+        $withVacations = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Vacationland',
             'slug' => $marker.'-vacations',
             'countrycode' => 'V8',
             'thumbnail_path' => 'assets/images/'.$marker.'-vacations.jpg',
         ]);
 
-        $toursOnly = Country::query()->create([
+        $toursOnly = CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Toursonlyland',
             'slug' => $marker.'-tours',
             'countrycode' => 'T9',

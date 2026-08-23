@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Category;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +32,7 @@ class DestinationCountryController extends Controller
             null,
             false,
         );
-        $countries = Country::query()->get();
+        $countries = CategoryEntity::countries()->get();
 
         return view('pages.countries.index', [
             'countries' => $countries,
@@ -48,7 +48,7 @@ class DestinationCountryController extends Controller
 
     public function country(Request $request, string $country): View
     {
-        $countryRow = Country::with(['translations', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
+        $countryRow = CategoryEntity::countries()
             ->whereSlug($country)
             ->firstOrFail();
 
@@ -103,7 +103,7 @@ class DestinationCountryController extends Controller
 
     public function redirectLegacyGeo(Request $request, string $country): RedirectResponse
     {
-        Country::query()->whereSlug($country)->firstOrFail();
+        CategoryEntity::countries()->whereSlug($country)->firstOrFail();
 
         return redirect()->route(
             'destination.country',
@@ -112,12 +112,8 @@ class DestinationCountryController extends Controller
         );
     }
 
-    private function geoCollection(Country $entity, string $relation): Collection
+    private function geoCollection(CategoryEntity $entity, string $relation): Collection
     {
-        if ($entity->relationLoaded($relation)) {
-            return $entity->getRelation($relation);
-        }
-
-        return $entity->{$relation}()->get();
+        return $entity->{$relation}();
     }
 }

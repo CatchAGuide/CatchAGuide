@@ -6,11 +6,8 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\CountryTranslation;
+use App\Models\CategoryEntity;
 use App\Models\Language;
-use App\Models\Region;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -35,9 +32,10 @@ class GuidingsDestinationTest extends TestCase
         ]);
     }
 
-    private function createCountry(string $slugPrefix): Country
+    private function createCountry(string $slugPrefix): CategoryEntity
     {
-        $country = Country::query()->create([
+        return CategoryEntity::countries()->create([
+            'type' => 'country',
             'name' => 'Spanien',
             'slug' => $slugPrefix.'-'.uniqid(),
             'countrycode' => 'ES',
@@ -48,17 +46,6 @@ class GuidingsDestinationTest extends TestCase
                 'country' => 'Spain',
             ],
         ]);
-
-        CountryTranslation::query()->create([
-            'country_id' => $country->id,
-            'language' => app()->getLocale(),
-            'title' => 'Legacy Spain Title',
-            'sub_title' => 'Legacy subtitle',
-            'introduction' => 'Legacy intro',
-            'content' => 'Legacy body',
-        ]);
-
-        return $country->fresh(['translations']);
     }
 
     public function test_guidings_destination_uses_tours_content_not_global(): void
@@ -115,12 +102,14 @@ class GuidingsDestinationTest extends TestCase
     public function test_guidings_country_still_renders_region_and_city_carousels(): void
     {
         $country = $this->createCountry('spanien-geo-carousel');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Guidings Region '.$country->slug,
             'slug' => 'guidings-region-'.$country->slug,
         ]);
-        City::query()->create([
+        CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Guidings City '.$country->slug,
@@ -158,7 +147,8 @@ class GuidingsDestinationTest extends TestCase
     public function test_guidings_region_renders_compact_city_rail(): void
     {
         $country = $this->createCountry('spanien-region-geo');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Catalonia',
             'slug' => 'catalonia-geo-'.$country->slug,
@@ -168,7 +158,8 @@ class GuidingsDestinationTest extends TestCase
                 'placeLng' => '2.1',
             ],
         ]);
-        $city = City::query()->create([
+        $city = CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Barcelona',
@@ -215,18 +206,21 @@ class GuidingsDestinationTest extends TestCase
     public function test_guidings_city_renders_sibling_city_rail(): void
     {
         $country = $this->createCountry('spanien-city-geo');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Catalonia',
             'slug' => 'catalonia-city-'.$country->slug,
         ]);
-        $city = City::query()->create([
+        $city = CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Barcelona',
             'slug' => 'barcelona-city-'.$country->slug,
         ]);
-        $sibling = City::query()->create([
+        $sibling = CategoryEntity::cities()->create([
+            'type' => 'city',
             'country_id' => $country->id,
             'region_id' => $region->id,
             'name' => 'Girona',
@@ -274,7 +268,8 @@ class GuidingsDestinationTest extends TestCase
     public function test_guidings_destination_region_resolves_under_country(): void
     {
         $country = $this->createCountry('spanien-region');
-        $region = Region::query()->create([
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
             'country_id' => $country->id,
             'name' => 'Catalonia',
             'slug' => 'catalonia-'.uniqid(),

@@ -4,10 +4,8 @@ namespace App\Services\Homepage;
 
 use App\Domain\Offers\DestinationOfferGeoScope;
 use App\Domain\Vacation\VacationListingFilter;
-use App\Models\City;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Guiding;
-use App\Models\Region;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
@@ -57,9 +55,9 @@ class HomepageMixedOfferSelector
      * @return array{tour: Collection, camp: Collection, trip: Collection}
      */
     public function byModuleForDestination(
-        Country $country,
-        ?Region $region = null,
-        ?City $city = null,
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
         ?int $perType = null,
     ): array {
         $perType = $perType ?? 8;
@@ -115,9 +113,9 @@ class HomepageMixedOfferSelector
 
     private function popularGuidingsForDestination(
         int $limit,
-        Country $country,
-        ?Region $region,
-        ?City $city,
+        CategoryEntity $country,
+        ?CategoryEntity $region,
+        ?CategoryEntity $city,
     ): Collection {
         $query = Guiding::query()
             ->withCount('bookings')
@@ -133,9 +131,9 @@ class HomepageMixedOfferSelector
 
     private function campsForDestination(
         int $limit,
-        Country $country,
-        ?Region $region,
-        ?City $city,
+        CategoryEntity $country,
+        ?CategoryEntity $region,
+        ?CategoryEntity $city,
     ): Collection {
         $query = $this->camps->queryForCountry($this->vacationFilter($country));
         DestinationOfferGeoScope::apply($query, $country, $region, $city);
@@ -149,9 +147,9 @@ class HomepageMixedOfferSelector
 
     private function tripsForDestination(
         int $limit,
-        Country $country,
-        ?Region $region,
-        ?City $city,
+        CategoryEntity $country,
+        ?CategoryEntity $region,
+        ?CategoryEntity $city,
     ): Collection {
         $query = $this->trips->queryForCountry($this->vacationFilter($country));
         DestinationOfferGeoScope::apply($query, $country, $region, $city);
@@ -162,7 +160,7 @@ class HomepageMixedOfferSelector
             ->get();
     }
 
-    private function vacationFilter(Country $country): VacationListingFilter
+    private function vacationFilter(CategoryEntity $country): VacationListingFilter
     {
         return VacationListingFilter::fromRequest([
             'country' => $country->slug,

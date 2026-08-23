@@ -5,7 +5,7 @@ namespace App\Services\Trip;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Trip;
 use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -24,14 +24,14 @@ class TripLocationCatalogService
 
     public function listLocationsForLocale(?string $locale = null): Collection
     {
-        return Country::with('translations')
+        return CategoryEntity::countries()
             ->orderBy('name')
             ->get();
     }
 
     /**
      * @return array{
-     *   row_data: Country,
+     *   row_data: CategoryEntity,
      *   faq: \Illuminate\Support\Collection,
      *   fish_chart: \Illuminate\Support\Collection,
      *   fish_size_limit: \Illuminate\Support\Collection,
@@ -44,7 +44,7 @@ class TripLocationCatalogService
     {
         $locale = $locale ?? app()->getLocale();
 
-        $row_data = Country::with(['fish_charts', 'fish_size_limits', 'fish_time_limits', 'translations'])
+        $row_data = CategoryEntity::countries()
             ->where('slug', $locationSlug)
             ->first();
 
@@ -52,13 +52,15 @@ class TripLocationCatalogService
             abort(404);
         }
 
-        $row_data = $this->categoryContent->applyScopedContentToModel(
-            $row_data,
-            CategoryPageEntityType::GEO_COUNTRY,
-            CategoryPageScope::TRIPS,
-            $locale,
-            null,
-        );
+        if ($row_data->id) {
+            $row_data = $this->categoryContent->applyScopedContentToModel(
+                $row_data,
+                CategoryPageEntityType::GEO_COUNTRY,
+                CategoryPageScope::TRIPS,
+                $locale,
+                null,
+            );
+        }
 
         $faq = $this->categoryContent->resolveFaqsForEntityDisplay(
             CategoryPageEntityType::GEO_COUNTRY,
@@ -83,9 +85,9 @@ class TripLocationCatalogService
         return [
             'row_data' => $row_data,
             'faq' => $faq,
-            'fish_chart' => $row_data->fish_charts,
-            'fish_size_limit' => $row_data->fish_size_limits,
-            'fish_time_limit' => $row_data->fish_time_limits,
+            'fish_chart' => $row_data->fish_charts(),
+            'fish_size_limit' => $row_data->fish_size_limits(),
+            'fish_time_limit' => $row_data->fish_time_limits(),
             'trips' => $trips,
             'trips_total' => $trips_total,
         ];

@@ -2,9 +2,11 @@
 
 namespace App\Repositories\Vacation;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
-use App\Models\Country;
+use App\Models\CategoryEntity;
+use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -15,24 +17,25 @@ class VacationDestinationRepository
         private CampListingRepository $camps,
         private TripListingRepository $trips,
         private HomepageCountrySelector $homepageCountries,
+        private CategoryPageContentService $categoryContent,
     ) {}
 
-    public function findCountryForLocale(string $slug, ?string $locale = null): ?Country
+    public function findCountryForLocale(string $slug, ?string $locale = null): ?CategoryEntity
     {
         $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);
 
-        return Country::with(['translations', 'faqs', 'fish_charts', 'fish_size_limits', 'fish_time_limits'])
+        return CategoryEntity::countries()
             ->whereRaw('LOWER(slug) = ?', [$slug])
             ->first();
     }
 
-    public function mergeCountryContent(string $slug, ?string $locale = null): ?Country
+    public function mergeCountryContent(string $slug, ?string $locale = null): ?CategoryEntity
     {
         return $this->findCountryForLocale($slug, $locale);
     }
 
     /**
-     * @return array{destination: Country, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}|null
+     * @return array{destination: CategoryEntity, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}|null
      */
     public function hubGridCountry(string $slug, ?string $locale = null): ?array
     {
@@ -67,7 +70,7 @@ class VacationDestinationRepository
     }
 
     /**
-     * @return array{destination: Country, slug: string}|null
+     * @return array{destination: CategoryEntity, slug: string}|null
      */
     public function resolveCountryPage(string $slug, ?string $pillar = null, ?string $locale = null): ?array
     {
@@ -86,7 +89,8 @@ class VacationDestinationRepository
         $hubRow = $this->hubGridCountry($slug, $locale);
 
         if ($country === null && $hubRow !== null) {
-            $country = new Country([
+            $country = new CategoryEntity([
+                'type' => 'country',
                 'slug' => $hubRow['slug'],
                 'name' => $hubRow['name'],
                 'thumbnail_path' => $hubRow['thumbnail_path'],
@@ -115,7 +119,7 @@ class VacationDestinationRepository
         $locale = $locale ?? app()->getLocale();
 
         return $this->homepageCountries->uniqueModelsForScope(CategoryPageScope::VACATIONS, $locale)
-            ->map(fn (Country $country) => (object) [
+            ->map(fn (CategoryEntity $country) => (object) [
                 'slug' => CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug),
                 'name' => $this->homepageCountries->labelFor($country, $locale),
             ])
@@ -124,7 +128,7 @@ class VacationDestinationRepository
     }
 
     /**
-     * @return Collection<int, array{destination: ?Country, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}>
+     * @return Collection<int, array{destination: ?CategoryEntity, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}>
      */
     public function countriesForHubGrid(?string $locale = null): Collection
     {
@@ -133,9 +137,9 @@ class VacationDestinationRepository
         $campCounts = $this->canonicalCountryCounts('camps');
         $tripCounts = $this->canonicalCountryCounts('trips');
 
-        $allCountries = Country::with('translations')->get();
+        $allCountries = CategoryEntity::countries()->get();
         $bySlug = $allCountries->keyBy(
-            fn (Country $c) => CountrySlug::canonicalize($c->slug) ?? strtolower((string) $c->slug)
+            fn (CategoryEntity $c) => CountrySlug::canonicalize($c->slug) ?? strtolower((string) $c->slug)
         );
         $uniqueCountries = $this->homepageCountries->uniqueModels($locale, $allCountries);
 
@@ -191,10 +195,10 @@ class VacationDestinationRepository
     /**
      * @param  Collection<string, int>  $campCounts
      * @param  Collection<string, int>  $tripCounts
-     * @return array{destination: ?Country, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}
+     * @return array{destination: ?CategoryEntity, slug: string, name: string, sub_title: ?string, camps: int, trips: int, thumbnail_path: ?string, countrycode: ?string}
      */
     private function hubGridRow(
-        ?Country $country,
+        ?CategoryEntity $country,
         string $slug,
         Collection $campCounts,
         Collection $tripCounts,
@@ -208,7 +212,9 @@ class VacationDestinationRepository
             $thumbnailPath = $this->listingThumbnailForCountry($slug);
         }
 
-        $translation = $country?->translations?->firstWhere('language', $locale);
+        $translation = $country !== null
+            ? $this->categoryContent->findForEntity(CategoryPageEntityType::GEO_COUNTRY, $country->id, CategoryPageScope::VACATIONS, $locale)
+            : null;
 
         return [
             'destination' => $country,

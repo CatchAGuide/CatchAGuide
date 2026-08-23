@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin\Category;
 use App\Domain\CategoryPage\CategoryPageDimension;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Http\Controllers\Controller;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Models\Target;
 
@@ -34,9 +34,9 @@ class AdminCategoryHubController extends Controller
                 ->count() > 0 ? 1 : 0,
             CategoryPageDimension::TARGETS => Target::query()->count(),
             CategoryPageDimension::METHODS => \App\Models\Method::query()->count(),
-            CategoryPageDimension::COUNTRY => Country::query()->count(),
-            CategoryPageDimension::REGION => \App\Models\Region::query()->count(),
-            CategoryPageDimension::CITY => \App\Models\City::query()->count(),
+            CategoryPageDimension::COUNTRY => CategoryEntity::countries()->count(),
+            CategoryPageDimension::REGION => CategoryEntity::regions()->count(),
+            CategoryPageDimension::CITY => CategoryEntity::cities()->count(),
             default => 0,
         };
     }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vacation;
 use App\Models\Camp;
-use App\Models\Country;
+use App\Models\CategoryEntity;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Services\CategoryPage\CategoryPageContentService;
@@ -18,7 +18,7 @@ class VacationsController extends Controller
 {
     public function index(Request $request)
     {
-        $countries = Country::with('translations')->get();
+        $countries = CategoryEntity::countries()->get();
         return view('pages.countries.vacations', compact('countries'));
     }
 
@@ -87,7 +87,7 @@ class VacationsController extends Controller
 
 
         $destinationId = session('vacation_destination_id');
-        $destination = $destinationId ? Country::find($destinationId) : null;
+        $destination = $destinationId ? CategoryEntity::countries()->find($destinationId) : null;
         session()->forget('vacation_destination_id');
         $vacationTitle = $translatedVacation->title ?? $vacation->title ?? null;
         $contactModalTitle = trim('Please provide your details for booking the trip' . (!empty($vacationTitle) ? ': ' . $vacationTitle : ''));
@@ -166,7 +166,7 @@ class VacationsController extends Controller
     {
         $place_location = $country;
 
-        $row_data = Country::with(['fish_charts', 'fish_size_limits', 'fish_time_limits', 'translations'])
+        $row_data = CategoryEntity::countries()
             ->where('slug', $country)
             ->first();
 
@@ -192,9 +192,9 @@ class VacationsController extends Controller
             null,
             false,
         );
-        $fish_chart = $row_data->fish_charts;
-        $fish_size_limit = $row_data->fish_size_limits;
-        $fish_time_limit = $row_data->fish_time_limits;
+        $fish_chart = $row_data->fish_charts();
+        $fish_size_limit = $row_data->fish_size_limits();
+        $fish_time_limit = $row_data->fish_time_limits();
 
         $locale = Config::get('app.locale');
 

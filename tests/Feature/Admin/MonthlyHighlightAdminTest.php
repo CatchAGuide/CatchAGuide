@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
-use App\Models\Country;
 use App\Models\Employee;
 use App\Models\MonthlyHighlight;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -29,7 +29,7 @@ class MonthlyHighlightAdminTest extends TestCase
     {
         $this->actingAsEmployee();
 
-        $country = Country::query()->first();
+        $country = CategoryEntity::countries()->first();
         $targetPage = CategoryPage::query()->where('type', 'Targets')->first();
         if (! $country || ! $targetPage) {
             $this->markTestSkipped('Need at least one country and target category page.');
@@ -73,7 +73,7 @@ class MonthlyHighlightAdminTest extends TestCase
     {
         $this->actingAsEmployee();
 
-        $country = Country::query()->first();
+        $country = CategoryEntity::countries()->first();
         if (! $country) {
             $this->markTestSkipped('Need at least one country.');
         }
