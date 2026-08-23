@@ -73,4 +73,4 @@ deploy_prod:
         - ls
         - echo "deploy prod"
         - rsync -a -e ssh ./ $PROD_USER@$PROD_HOST:$PROD_DIR
-        - ssh $PROD_USER@$PROD_HOST "cd $PROD_DIR && php artisan migrate && php artisan view:clear && php artisan config:clear"
+        - ssh $PROD_USER@$PROD_HOST "cd $PROD_DIR && php artisan migrate --force && php artisan view:clear && php artisan config:clear"
