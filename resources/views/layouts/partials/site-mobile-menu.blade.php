@@ -122,7 +122,7 @@
                         </form>
                     @else
                         @if(config('guide_onboarding.new_onboarding_enabled'))
-                            <a href="#" class="cag-site-mobile-menu__item" data-bs-toggle="modal" data-bs-target="#guideApplicationModal" data-bs-dismiss="modal">
+                            <a href="{{ route('additional.partner') }}" class="cag-site-mobile-menu__item">
                                 <i class="fas fa-certificate" aria-hidden="true"></i>
                                 <span>@lang('homepage.header-become-guide')</span>
                             </a>

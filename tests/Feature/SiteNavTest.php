@@ -114,6 +114,8 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString(__('homepage.header-signup'), $html);
         $this->assertStringContainsString(__('homepage.header-language'), $html);
         $this->assertStringContainsString(__('homepage.header-become-guide'), $html);
+        $this->assertStringContainsString('href="'.route('additional.partner').'"', $html);
+        $this->assertStringNotContainsString('data-bs-target="#guideApplicationModal"', $html);
         $this->assertStringContainsString('info.catchaguide@gmail.com', $html);
         $this->assertStringContainsString('facebook.com/CatchAGuide', $html);
         $this->assertStringContainsString('instagram.com/catchaguide_official', $html);
@@ -125,23 +127,20 @@ class SiteNavTest extends TestCase
         $this->assertStringNotContainsString('cag-site-mobile-menu__eyebrow', $html);
     }
 
-    public function test_mobile_cta_is_compact_on_small_screens(): void
+    public function test_become_guide_cta_is_hidden_on_mobile_in_favor_of_language_switch(): void
     {
         $html = View::make('layouts.partials.site-nav', [
             'overlay' => true,
             'idPrefix' => 'site',
         ])->render();
-        $scss = (string) file_get_contents(resource_path('sass/components/_site-nav.scss'));
 
-        $this->assertStringContainsString('cag-site-nav__cta-short', $html);
-        $this->assertStringContainsString(__('homepage.header-become-guide-short'), $html);
         $this->assertMatchesRegularExpression(
-            '/\.cag-site-nav__cta[\s\S]*@media \(max-width: 767\.98px\)[\s\S]*font-size: 0\.68rem/',
-            $scss
+            '/class="cag-site-nav__cta[^"]*d-none d-md-inline-flex/',
+            $html
         );
         $this->assertMatchesRegularExpression(
-            '/\.cag-site-nav__cta[\s\S]*@media \(max-width: 767\.98px\)[\s\S]*border: 0/',
-            $scss
+            '/class="cag-site-nav__lang d-flex"/',
+            $html
         );
     }
 
@@ -162,7 +161,6 @@ class SiteNavTest extends TestCase
 
         $this->assertStringNotContainsString('cag-site-nav__cta', $html);
         $this->assertStringNotContainsString(__('homepage.header-become-guide'), $html);
-        $this->assertStringNotContainsString(__('homepage.header-become-guide-short'), $html);
         $this->assertStringContainsString('fa-bars', $html);
         $this->assertStringNotContainsString('cag-site-nav__avatar-btn', $html);
         $this->assertStringNotContainsString('fa-user-circle', $html);

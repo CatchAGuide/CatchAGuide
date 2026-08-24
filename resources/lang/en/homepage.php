@@ -3,7 +3,6 @@ return [
     'header-title' => 'Find your next guided fishing tour!',
     'header-message' => 'Search deals on fishing trips, vacations and much more',
     'header-become-guide' => 'List fishing tour',
-    'header-become-guide-short' => 'List tour',
     'header-login' => 'Log in',
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
@@ -95,14 +94,14 @@ return [
     'meta_description' => 'Find local fishing guides for day tours, multi-day trips, and camps across Europe. Verified ratings, easy booking, unforgettable days on the water.',
 
     'hero_h1' => 'Find your next fishing adventure',
-    'hero_sub' => '450+ offers from local guides in 12 countries – from day trips and fishing camps to all-inclusive fishing holidays.',
+    'hero_sub' => '450+ offers from local guides in 23 countries – from day trips and fishing camps to all-inclusive fishing holidays.',
     'hero_eyebrow' => 'Day tours · Fishing camps · Fishing trips',
     'chooser_tour_label' => 'Day tours',
     'chooser_tour_title' => 'Go out today',
     'chooser_tour_sub' => 'Experience perfect fishing moments. Half-day or full-day tours with local experts.',
     'chooser_vacation_label' => 'Vacations',
     'chooser_vacation_title' => 'Stay longer',
-    'chooser_vacation_sub' => 'Your perfect fishing holiday. Accommodation, rental boat and a local guide – all organised.',
+    'chooser_vacation_sub' => 'Your perfect fishing holiday. Accommodation, rental boat and a local guide',
     'hero_search_placeholder' => 'Where do you want to fish?',
     'hero_carousel_label' => 'Hero background images',
     'hero_carousel_slide' => 'Show image :n',
@@ -199,7 +198,7 @@ return [
     'footer_contact_label' => 'Contact',
 
     // /guidings landing page redesign
-    'landing_hero_eyebrow' => 'Guided fishing tours in Europe',
+    'landing_hero_eyebrow' => 'Guided fishing tours',
     'landing_hero_h1' => 'Find your next fishing tour',
     'landing_hero_sub' => ':tours guided tours from local guides in :countries countries – from a day trip to a full fishing vacation.',
     'landing_search_placeholder' => 'Country, region or water',

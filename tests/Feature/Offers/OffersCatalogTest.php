@@ -80,7 +80,13 @@ class OffersCatalogTest extends TestCase
         );
         $response->assertSee(__('offers.filter_tours'), false);
         $response->assertSee(__('offers.filter_vacations'), false);
-        $response->assertDontSee('data-offers-vacation-subfilter', false);
+
+        // The desktop toolbar omits the trip/camp subfilter entirely outside vacation
+        // context; the mobile offcanvas keeps it in the DOM (hidden) so tapping the
+        // "Vacations" pillar can reveal it instantly instead of reloading the page.
+        $this->assertSame(1, preg_match('/<div class="offers-catalog__toolbar[\s\S]*?<\/form>/', $html, $toolbar));
+        $this->assertStringNotContainsString('data-offers-vacation-subfilter', $toolbar[0]);
+        $response->assertSee('offers-filters__vacation-extend d-none', false);
         $response->assertSee('offers-catalog__toolbar', false);
         $response->assertSee('data-offers-type-filter', false);
         $response->assertSee('data-offers-list', false);

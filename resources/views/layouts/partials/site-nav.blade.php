@@ -48,7 +48,7 @@
         </nav>
 
         <div class="cag-site-nav__actions">
-            <form action="{{ route('language.switch') }}" method="POST" class="cag-site-nav__lang d-none d-md-flex" id="{{ $langFormId }}">
+            <form action="{{ route('language.switch') }}" method="POST" class="cag-site-nav__lang d-flex" id="{{ $langFormId }}">
                 @csrf
                 <select name="language" class="selectpicker header-language-select" data-width="fit" data-style="btn cag-site-nav__lang-btn" onchange="handleLanguageSwitch(this, '{{ $langFormId }}')">
                     @foreach (config('app.locales') as $key => $locale)
@@ -106,22 +106,19 @@
             @if(config('guide_onboarding.new_onboarding_enabled'))
                 @auth
                     @unless($siteNavUser?->isVerifiedGuide())
-                        <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta">
-                            <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
-                            <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                        <a href="{{ route('guide.onboarding') }}" class="cag-site-nav__cta d-none d-md-inline-flex">
+                            @lang('homepage.header-become-guide')
                         </a>
                     @endunless
                 @else
-                    <a href="#" class="cag-site-nav__cta" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
-                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
-                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                    <a href="#" class="cag-site-nav__cta d-none d-md-inline-flex" data-bs-toggle="modal" data-bs-target="#guideApplicationModal">
+                        @lang('homepage.header-become-guide')
                     </a>
                 @endauth
             @else
                 @unless($siteNavUser?->isVerifiedGuide())
-                    <a href="{{ route('login') }}" class="cag-site-nav__cta">
-                        <span class="cag-site-nav__cta-full">@lang('homepage.header-become-guide')</span>
-                        <span class="cag-site-nav__cta-short">@lang('homepage.header-become-guide-short')</span>
+                    <a href="{{ route('login') }}" class="cag-site-nav__cta d-none d-md-inline-flex">
+                        @lang('homepage.header-become-guide')
                     </a>
                 @endunless
             @endif

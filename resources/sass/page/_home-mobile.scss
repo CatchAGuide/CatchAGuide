@@ -376,6 +376,14 @@
     }
   }
 
+  .cag-home-species__heading {
+    // Desktop sizes this as a row flex-basis (12rem width); in the mobile
+    // column layout that same value reads as a height basis and forces a
+    // ~192px-tall header, leaving a big gap above the fish cards.
+    flex: 0 1 auto;
+    max-width: none;
+  }
+
   .cag-home-species__subtitle {
     margin: 0 0 8px;
     font-size: 14px;

@@ -3,7 +3,6 @@ return [
     'header-title' => 'Finde deine nächste Angeltour!',
     'header-message' => 'Suche Angebote für Angelausflüge, Angelurlaube und vieles mehr',
     'header-become-guide' => 'Angeltouren anbieten',
-    'header-become-guide-short' => 'Anbieten',
     'header-login' => 'Einloggen',
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',
@@ -95,14 +94,14 @@ return [
     'meta_description' => 'Finde lokale Angelguides für Tagestouren, mehrtägige Trips und Camps in ganz Europa. Verifizierte Bewertungen, einfache Buchung, unvergessliche Tage am Wasser.',
 
     'hero_h1' => 'Finde dein nächstes Angelabenteuer',
-    'hero_sub' => '450+ Angebote von lokalen Guides in 12 Ländern – vom Tagesausflug über Angelcamps bis zur All-inclusive Angelreise.',
+    'hero_sub' => '450+ Angebote von lokalen Guides in 23 Ländern – vom Tagesausflug über Angelcamps bis zur All-inclusive Angelreise.',
     'hero_eyebrow' => 'Angeltouren · Angelcamps · Angelreisen',
     'chooser_tour_label' => 'Tagestouren',
     'chooser_tour_title' => 'Heute raus',
     'chooser_tour_sub' => 'Erlebe perfekte Angelmomente. Halbtags- oder Ganztagestouren mit lokalen Experten.',
     'chooser_vacation_label' => 'Angelurlaub',
     'chooser_vacation_title' => 'Länger bleiben',
-    'chooser_vacation_sub' => 'Dein perfekter Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide – alles organisiert.',
+    'chooser_vacation_sub' => 'Dein perfekter Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide',
     'hero_search_placeholder' => 'Wo möchtest du angeln?',
     'hero_carousel_label' => 'Hero-Hintergrundbilder',
     'hero_carousel_slide' => 'Bild :n anzeigen',
@@ -199,7 +198,7 @@ return [
     'footer_contact_label' => 'Kontakt',
 
     // /guidings landing page redesign
-    'landing_hero_eyebrow' => 'Geführte Angeltouren in Europa',
+    'landing_hero_eyebrow' => 'Geführte Angeltouren',
     'landing_hero_h1' => 'Finde deine nächste Angeltour',
     'landing_hero_sub' => ':tours geführte Touren von lokalen Guides in :countries Ländern – vom Tagesausflug bis zum Angelurlaub.',
     'landing_search_placeholder' => 'Land, Region oder Gewässer',

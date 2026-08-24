@@ -654,6 +654,10 @@ $white: #ffffff;
 .cag-home-hero__door-sub {
   font-size: 0.85rem;
   opacity: 0.85;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .cag-home-hero__door-arrow {
