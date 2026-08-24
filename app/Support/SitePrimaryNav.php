@@ -151,6 +151,7 @@ final class SitePrimaryNav
             'guidings.methods',
             'guidings.methods.show',
             'guidings.targets',
+            'guidings.targets.index',
             'guidings.show',
             'trips.show',
             'category.types',

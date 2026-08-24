@@ -2,8 +2,11 @@
 
 namespace Tests\Unit\Vacation;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\Camp;
 use App\Models\CategoryPage;
+use App\Models\Language;
 use App\Models\Target;
 use App\Models\Trip;
 use App\Models\User;
@@ -35,6 +38,18 @@ class VacationTargetFishSelectorTest extends TestCase
             'is_favorite' => true,
         ]);
 
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::VACATIONS,
+            'language' => app()->getLocale(),
+            'title' => 'Vacations '.$marker,
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
         Camp::query()->create([
             'title' => 'Camp '.$marker,
             'description_camp' => 'desc',
@@ -61,6 +76,53 @@ class VacationTargetFishSelectorTest extends TestCase
         $this->assertNotNull($tile);
         $this->assertSame(2, $tile['count']);
         $this->assertSame(route('vacations.targets', ['slug' => $marker]), $tile['url']);
+    }
+
+    public function test_forhub_drops_species_with_active_listings_but_no_vacations_content(): void
+    {
+        Cache::flush();
+
+        $marker = 'test-fish-no-content-'.uniqid();
+        $user = User::factory()->create();
+
+        $target = new Target();
+        $target->name = $marker;
+        $target->save();
+
+        CategoryPage::query()->create([
+            'name' => $marker,
+            'type' => 'Targets',
+            'slug' => $marker,
+            'source_id' => (string) $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Tours only '.$marker,
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        Camp::query()->create([
+            'title' => 'Camp '.$marker,
+            'description_camp' => 'desc',
+            'description_area' => 'desc',
+            'description_fishing' => 'desc',
+            'location' => 'Somewhere',
+            'target_fish' => [$marker],
+            'status' => 'active',
+            'user_id' => $user->id,
+        ]);
+
+        $result = app(VacationTargetFishSelector::class)->forHub(200);
+
+        $this->assertNull($result->first(fn (array $row) => $row['slug'] === $marker));
     }
 
     public function test_forhub_drops_species_with_no_active_listings(): void

@@ -1,7 +1,7 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods');
+    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods', 'guidings.targets.index');
     $heroBreadcrumbLabel = __('category.' . $type . '.breadcrumb');
     $heroSearchAction = listing_search_action();
 @endphp

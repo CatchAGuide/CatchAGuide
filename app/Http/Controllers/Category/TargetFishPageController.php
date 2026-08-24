@@ -47,6 +47,11 @@ class TargetFishPageController extends Controller
             $locale,
             $allowCrossScopeFallback,
         );
+
+        if ($page->language === null) {
+            abort(404);
+        }
+
         $page->faq = $this->categoryContent->resolveFaqsForEntityDisplay(
             CategoryPageEntityType::TARGET_FISH,
             $page->source_id,

@@ -10,6 +10,7 @@ use App\Models\CategoryPage;
 use App\Models\Language;
 use App\Models\Target;
 use App\Services\Offers\OfferCatalogPageService;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -17,6 +18,8 @@ use Tests\TestCase;
 
 class TargetFishOffersCatalogTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -181,6 +184,15 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertSee('name="type"', false);
         $response->assertSee('value="vacation"', false);
+    }
+
+    public function test_vacations_target_fish_page_404s_when_content_missing_for_scope(): void
+    {
+        $page = $this->createTargetFishPage('pike-vacations-missing', CategoryPageScope::TOURS);
+
+        $response = $this->get(route('vacations.targets', ['slug' => $page->slug]));
+
+        $response->assertNotFound();
     }
 
     public function test_build_for_target_fish_receives_route_scope(): void

@@ -77,7 +77,7 @@
             <x-vacation.country-slider
                 :title="__('homepage.landing_species_title')"
                 :subtitle="__('homepage.landing_species_subtitle')"
-                :link-url="route('targets.index')"
+                :link-url="route('guidings.targets.index')"
                 :link-label="__('homepage.landing_species_see_all')"
                 slider-id="guidings-landing-species"
                 block-class="vacation-fish-rail"

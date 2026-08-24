@@ -54,9 +54,11 @@ class CategoryController extends Controller
         }
 
         $language = app()->getLocale();
-        $scope = $type === 'targets'
-            ? CategoryPageScope::GLOBAL
-            : CategoryPageScope::TOURS;
+        $scope = match (true) {
+            $type === 'targets' && $request->routeIs('guidings.targets.index') => CategoryPageScope::TOURS,
+            $type === 'targets' => CategoryPageScope::GLOBAL,
+            default => CategoryPageScope::TOURS,
+        };
 
         $allTargets = CategoryPage::whereRaw('LOWER(type) = ?', [$type])
             ->get()
@@ -66,7 +68,9 @@ class CategoryController extends Controller
                 return $item;
             })
             ->filter(function ($item) {
-                return $item->language !== null && filled($item->language->title);
+                return $item->language !== null
+                    && filled($item->language->title)
+                    && $item->source !== null;
             });
 
         $favories = $allTargets->filter(function ($item) {
@@ -76,9 +80,10 @@ class CategoryController extends Controller
         $introduction = __('category.'.$type.'.introduction');
         $title = __('category.'.$type.'.title');
 
-        $categoryItemUrl = fn (string $slug): string => match ($type) {
-            'methods' => route('guidings.methods.show', ['slug' => $slug]),
-            'targets' => route('targets.show', ['slug' => $slug]),
+        $categoryItemUrl = fn (string $slug): string => match (true) {
+            $type === 'methods' => route('guidings.methods.show', ['slug' => $slug]),
+            $type === 'targets' && $request->routeIs('guidings.targets.index') => route('guidings.targets', ['slug' => $slug]),
+            $type === 'targets' => route('targets.show', ['slug' => $slug]),
             default => route('category.targets', ['type' => $type, 'slug' => $slug]),
         };
 
@@ -98,6 +103,11 @@ class CategoryController extends Controller
     }
 
     public function targetsIndex(Request $request, CategoryPageContentService $categoryContent)
+    {
+        return $this->index('targets', $request, $categoryContent);
+    }
+
+    public function guidingsTargetsIndex(Request $request, CategoryPageContentService $categoryContent)
     {
         return $this->index('targets', $request, $categoryContent);
     }

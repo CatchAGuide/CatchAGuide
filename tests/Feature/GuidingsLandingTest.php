@@ -110,7 +110,8 @@ class GuidingsLandingTest extends TestCase
         $response->assertDontSee('href="'.route('destination', [], false).'"', false);
         $response->assertSee(route('guidings.methods', [], false), false);
         $response->assertDontSee(route('category.types', ['type' => 'methods'], false), false);
-        $response->assertSee(route('targets.index'), false);
+        $response->assertSee(route('guidings.targets.index'), false);
+        $response->assertDontSee(route('targets.index'), false);
         $response->assertDontSee(route('category.types', ['type' => 'targets'], false), false);
     }
 }

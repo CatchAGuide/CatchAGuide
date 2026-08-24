@@ -26,6 +26,9 @@ Route::redirect('guidings/landing', '/guidings', 301);
 Route::get('guidings/countries', [GuidingDestinationController::class, 'index'])
     ->name('guidings.countries')
     ->middleware('ddos:search');
+Route::get('guidings/targets', [CategoryController::class, 'guidingsTargetsIndex'])
+    ->name('guidings.targets.index')
+    ->middleware('ddos:search');
 Route::get('guidings/targets/{slug}', [TargetFishPageController::class, 'show'])
     ->defaults('content_scope', CategoryPageScope::TOURS)
     ->name('guidings.targets')
