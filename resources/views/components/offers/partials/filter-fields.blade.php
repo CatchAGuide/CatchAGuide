@@ -9,49 +9,33 @@
     $interactive = $interactive ?? false;
 @endphp
 
-@if(($interactive || $filter->isVacation()) && is_callable($vacationUrl ?? null))
+{{-- Interactive (mobile offcanvas) mode already shows a trip/camp toggle in the pillar
+     group above; skip this duplicate segmented control there and keep it only for the
+     non-interactive desktop sidebar, which has no pillar group of its own. --}}
+@if(! $interactive && $filter->isVacation() && is_callable($vacationUrl ?? null))
     @php
         $activeVacation = $filter->vacation ?? 'all';
     @endphp
-    <div class="{{ $fieldClass }} offers-filters__vacation-type {{ $interactive && ! $filter->isVacation() ? 'd-none' : '' }}" data-offers-vacation-type>
+    <div class="{{ $fieldClass }} offers-filters__vacation-type" data-offers-vacation-type>
         <div
             class="offers-filters__vacation-type-btns"
             role="group"
             aria-label="{{ __('offers.filter_vacation_type') }}"
         >
-            @if($interactive)
-                <button
-                    type="button"
-                    data-pillar-vacation="trip"
-                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
-                    @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
-                >
-                    {{ __('offers.filter_trips') }}
-                </button>
-                <button
-                    type="button"
-                    data-pillar-vacation="camp"
-                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
-                    @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
-                >
-                    {{ __('offers.filter_camps') }}
-                </button>
-            @else
-                <a
-                    href="{{ $activeVacation === 'trip' ? $vacationUrl('all') : $vacationUrl('trip') }}"
-                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
-                    @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
-                >
-                    {{ __('offers.filter_trips') }}
-                </a>
-                <a
-                    href="{{ $activeVacation === 'camp' ? $vacationUrl('all') : $vacationUrl('camp') }}"
-                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
-                    @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
-                >
-                    {{ __('offers.filter_camps') }}
-                </a>
-            @endif
+            <a
+                href="{{ $activeVacation === 'trip' ? $vacationUrl('all') : $vacationUrl('trip') }}"
+                class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
+                @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
+            >
+                {{ __('offers.filter_trips') }}
+            </a>
+            <a
+                href="{{ $activeVacation === 'camp' ? $vacationUrl('all') : $vacationUrl('camp') }}"
+                class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
+                @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
+            >
+                {{ __('offers.filter_camps') }}
+            </a>
         </div>
     </div>
 @endif

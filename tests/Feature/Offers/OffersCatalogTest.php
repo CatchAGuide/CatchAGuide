@@ -333,8 +333,12 @@ class OffersCatalogTest extends TestCase
         $response->assertDontSee('<select name="methods"', false);
         $response->assertDontSee('<select name="water"', false);
         $response->assertDontSee('<select name="duration_types"', false);
-        $response->assertDontSee('name="accommodation_type"', false);
-        $response->assertDontSee('name="has_guiding"', false);
+
+        // Non-matching facets stay out of the desktop sidebar form entirely; the mobile
+        // offcanvas keeps them in the DOM (hidden) so pillar switches don't need a reload.
+        $this->assertSame(1, preg_match('/<form[^>]*id="offers-filters-form"[\s\S]*?<\/form>/', $response->getContent(), $sidebar));
+        $this->assertStringNotContainsString('name="accommodation_type"', $sidebar[0]);
+        $this->assertStringNotContainsString('name="has_guiding"', $sidebar[0]);
     }
 
     public function test_camp_subfilter_renders_accommodation_guiding_and_boat_filters(): void
@@ -357,8 +361,10 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('name="accommodation_type"', false);
         $response->assertSee('name="has_guiding"', false);
         $response->assertSee('name="has_rental_boat"', false);
-        $response->assertDontSee('name="methods"', false);
-        $response->assertDontSee('name="duration"', false);
+
+        $this->assertSame(1, preg_match('/<form[^>]*id="offers-filters-form"[\s\S]*?<\/form>/', $response->getContent(), $sidebar));
+        $this->assertStringNotContainsString('name="methods"', $sidebar[0]);
+        $this->assertStringNotContainsString('name="duration"', $sidebar[0]);
     }
 
     public function test_trip_subfilter_renders_duration_bucket_filter(): void
@@ -377,8 +383,10 @@ class OffersCatalogTest extends TestCase
         $response->assertOk();
         $response->assertSee(__('offers.filter_duration'), false);
         $response->assertSee('name="duration"', false);
-        $response->assertDontSee('name="methods"', false);
-        $response->assertDontSee('name="has_guiding"', false);
+
+        $this->assertSame(1, preg_match('/<form[^>]*id="offers-filters-form"[\s\S]*?<\/form>/', $response->getContent(), $sidebar));
+        $this->assertStringNotContainsString('name="methods"', $sidebar[0]);
+        $this->assertStringNotContainsString('name="has_guiding"', $sidebar[0]);
     }
 
     public function test_map_teaser_result_count_matches_listings_total(): void
