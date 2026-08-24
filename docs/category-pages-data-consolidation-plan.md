@@ -1176,3 +1176,67 @@ Verified: `Schema::hasTable('destination_faqs')` is `false`. Targeted tests
 are genuinely live (admin fish-data edit/save, public fish-availability charts) and stay until §9 risk #10's
 manual regulatory-source-citation worklist is done — there is no more "was this actually still needed"
 question left to check; what remains is real content work, not a code/data task.
+
+---
+
+## 19. Staging incident and recovery (2026-08-24)
+
+**What happened.** The production sequencing warning at the top of this document was correct about the
+mechanics (deploying this branch runs Phases 1–5 in one release) but the actual failure mode was worse than
+"drops tables before a verification window": `BackfillCategoryEntitiesCommand` (§13), the command that
+populates `category_entities`/`category_entity_migration_map` and the migrated `languages`/`faqs` rows, was
+run once against the local dev DB and then **deleted without ever being committed to git** ("The command and
+its test were deleted after this one-time run completed" — true, but it also means the command never existed
+on any other environment). When this branch was pushed to staging and `php artisan migrate` was run there,
+every pending migration ran in sequence, including `2026_08_21_160000_drop_legacy_category_geo_tables` and
+`2026_08_23_170000_drop_destination_faqs_table` — but there was no committed code path left that could have
+populated `category_entities` first. Staging ended up with the legacy geo tables dropped and an **empty**
+`category_entities`, i.e. no country/region/city data anywhere. Local kept working only because the local dev
+DB still had the 73 `category_entities` rows written by the command before its file was deleted — the data
+lived in the DB, not in git, so it never reached staging.
+
+**Recovery.** Rather than resurrecting `BackfillCategoryEntitiesCommand` (it reads from
+`c_countries`/`c_regions`/`c_cities`/etc., which no longer exist on any environment that already ran Phase
+5), the local dev DB's already-correct output was exported directly and committed as a fixture:
+`database/data/category_entities_backfill_2026_08_24.json` (73 `category_entities` rows, 74
+`category_entity_migration_map` rows, 356 `languages` rows restricted to
+`type IN (geo_country, geo_region, geo_city)`, 541 `faqs` rows restricted to
+`page IN (geo_country, geo_region, geo_city)` — exactly the sets the backfill command itself would have
+produced, per §13's own counts). A new migration,
+`database/migrations/2026_08_24_120000_backfill_category_entities_from_recovered_fixture.php`, replays this
+fixture:
+
+- `category_entities` / `category_entity_migration_map` — fresh tables on every environment this branch
+  reaches, so original ids are preserved exactly (`insertOrIgnore` on the primary key / the table's own
+  `unique(old_table, old_id)`). Id stability matters here because other data (`monthly_highlights.items`, via
+  `RemapMonthlyHighlightCountryIdsCommand`) is documented as referencing specific `category_entities` ids.
+- `languages` / `faqs` — live, shared, actively-written tables with environment-specific auto-increment
+  sequences, so fixture rows are inserted **without** their original ids and deduplicated by natural key
+  instead (`source_id`+`type`+`scope`+`language` for `languages`; `source_id`+`page`+`scope`+`language`+
+  question-hash for `faqs`), so there's no risk of colliding with or overwriting unrelated content already
+  sitting at the same id on a given environment.
+
+`down()` throws, same convention as `2026_08_21_160000` and `2026_08_23_170000` — this data has no other
+surviving source once the legacy tables are gone, so rolling it back would delete live content rather than
+restore a prior state.
+
+**Verified before ship:**
+1. Ran `php artisan migrate` against the existing local dev DB (which already had this data): no-op, counts
+   unchanged (73/74/356/541), migration marked `Ran`.
+2. Called the migration's `up()` twice more directly (bypassing Laravel's own "already ran" tracking): counts
+   still unchanged — the natural-key dedup logic itself is idempotent, not just the migration-ran-once
+   tracking.
+3. Created a throwaway empty database (`cag_repro_test`) and ran the **entire** migration history against it
+   from scratch, simulating exactly what staging will do on next deploy: all migrations passed, including
+   this one, and the fresh DB ended up with 73/74/356/541 rows and zero remaining `c_countries` table —
+   matching local exactly, with no manual step beyond `php artisan migrate`.
+
+**Backups taken before any of this:** a full `mysqldump` of the local `cag` database, plus a focused dump of
+`category_entities`/`category_entity_migration_map`/`regulations`/`languages`/`faqs`/`monthly_highlights`,
+both under `/backup/pre_category_fix/` (gitignored — never commit raw DB dumps).
+
+**What this doesn't fix by itself:** it repairs the *data*, but staging's `php artisan migrate` is still a
+manual step run over SSH (`deploy_staging` in `.gitlab-ci.yml` never calls `php artisan migrate` — only
+`livewire:publish`/`config:clear`/`view:clear`/`cache:clear`). Take a real staging DB backup immediately
+before running `php artisan migrate` there — this incident is exactly the scenario a pre-migration backup on
+a shared environment is for, and none existed for staging when Phase 5 first ran there.
