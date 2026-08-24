@@ -70,7 +70,7 @@ class GuidingsLandingService
                 ->orderByDesc('bookings_count')
                 ->limit(8)
                 ->get()
-                ->map(fn (Guiding $g) => $this->cardPresenter->present($g, (int) $g->bookings_count));
+                ->map(fn (Guiding $g) => $this->cardPresenter->present($g));
         });
     }
 

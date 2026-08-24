@@ -25,7 +25,7 @@
         >
         <span class="cag-home-offer__badge cag-home-offer__badge--{{ $type }}">{{ $card['badge'] ?? __('homepage.offer_type_' . $type) }}</span>
         @if(!empty($card['requested_count']))
-            <span class="cag-home-offer__requested">{{ __('homepage.landing_requested_badge', ['count' => $card['requested_count']]) }}</span>
+            {{-- <span class="cag-home-offer__requested">{{ __('homepage.landing_requested_badge', ['count' => $card['requested_count']]) }}</span> --}}
         @endif
     </a>
     <div class="cag-home-offer__body">
