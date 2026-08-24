@@ -1,8 +1,8 @@
 <div class="offcanvas offcanvas-bottom h-100" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
     <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="offcanvasBottomLabel">Filters</h5>
+        <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ __('message.filter') }}</h5>
         <div>
-            <button type="button" class="btn btn-link" id="clearAllFiltersMobile">Clear</button>
+            <button type="button" class="btn btn-link" id="clearAllFiltersMobile">{{ __('destination.map_clear_filters') }}</button>
             <button type="button" class="btn-close ms-2" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
     </div>
@@ -35,7 +35,7 @@
             
             {{-- Target Fish Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">Target Fish</h6>
+                <h6 class="mb-3">{{ translate('Target Fish') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $visibleCount = 0;
@@ -77,7 +77,7 @@
 
             {{-- Methods Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">Methods</h6>
+                <h6 class="mb-3">{{ translate('Methods') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $totalCountGuidings = count($guiding_methods);
@@ -114,7 +114,7 @@
 
             {{-- Water Types Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">Water Types</h6>
+                <h6 class="mb-3">{{ translate('Water Types') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $totalCountWaters = count($guiding_waters);
@@ -204,9 +204,18 @@
     </div>
 
     {{-- Sticky Bottom Button --}}
+    @php
+        // Split on the count placeholder so the live-updating <span> can sit inside a
+        // fully translated, word-order-correct string (e.g. German puts the count first).
+        [$showResultsPrefix, $showResultsSuffix] = array_pad(
+            explode('__COUNT__', __('guidings.show_results_count', ['count' => '__COUNT__']), 2),
+            2,
+            ''
+        );
+    @endphp
     <div class="offcanvas-footer border-top">
         <button type="submit" class="btn btn-primary w-100 py-3" form="filterContainerOffCanvas" id="mobileShowResultsBtn">
-            Show <span id="mobileResultsCount">{{ $guidings->total() }}</span> results
+            {{ $showResultsPrefix }}<span id="mobileResultsCount">{{ $guidings->total() }}</span>{{ $showResultsSuffix }}
         </button>
     </div>
 </div>

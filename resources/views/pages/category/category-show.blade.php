@@ -591,7 +591,11 @@
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
                 <h5 class="mb-2">{{ $row_data->source->name ?? $row_data->name }}</h5>
-                @isset($vm)
+                @if(isset($offerModules))
+                    <div class="cag-home cag-home--embed cag-dest-offers-wrap mb-5">
+                        @include('pages.home.partials.mixed-offers-rail')
+                    </div>
+                @elseif(isset($vm))
                     <div class="offers-catalog-page mb-5">
                         <x-offers.catalog-listing
                             :vm="$vm"
@@ -627,7 +631,7 @@
                         </div>
                     </div>
                 </div>
-                @endisset
+                @endif
 
                 <div class="mb-3">{!! clean_html($row_data->language->content) !!}</div>
 
@@ -752,7 +756,7 @@
     </div>
     <!--News One End-->
 
-    @unless(isset($vm))
+    @unless(isset($vm) || isset($offerModules))
     @php
         if ($allGuidings->isEmpty()) {
             $mapSource = $otherguidings ?? collect();
@@ -887,8 +891,12 @@
 @if($useCategoryHeroHeader)
 @include('layouts.partials.category-hero-header-script')
 @endif
-@isset($vm)
+@if(isset($vm) || isset($offerModules))
+@if(isset($offerModules))
+@include('pages.category.partials.destination-offers-script')
+@else
 @include('components.offers.partials.gallery-script')
+@endif
 <script>
     $(function() {
         var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
@@ -925,8 +933,8 @@
         }
     });
 </script>
-@endisset
-@unless(isset($vm))
+@endif
+@unless(isset($vm) || isset($offerModules))
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();

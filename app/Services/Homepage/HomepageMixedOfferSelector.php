@@ -11,6 +11,7 @@ use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
+use App\Services\Offers\OfferFilterService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -22,6 +23,7 @@ class HomepageMixedOfferSelector
         private CampCardPresenter $campPresenter,
         private TripCardPresenter $tripPresenter,
         private TourCardPresenter $tourPresenter,
+        private OfferFilterService $offerFilters,
     ) {}
 
     /**
@@ -79,6 +81,36 @@ class HomepageMixedOfferSelector
                     ->map(fn ($c) => $this->campPresenter->present($c))
                     ->values(),
                 'trip' => $this->tripsForDestination($perType, $country, $region, $city)
+                    ->map(fn ($t) => $this->tripPresenter->present($t))
+                    ->values(),
+            ];
+        });
+    }
+
+    /**
+     * Popular rails scoped to a target fish species (global target-fish category page).
+     *
+     * @return array{tour: Collection, camp: Collection, trip: Collection}
+     */
+    public function byModuleForTargetFish(int $speciesId, ?int $perType = null): array
+    {
+        $perType = $perType ?? 8;
+        $cacheKey = implode('_', [
+            'target_fish_offer_modules_v1',
+            app()->getLocale(),
+            (string) $speciesId,
+            (string) $perType,
+        ]);
+
+        return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($speciesId, $perType) {
+            return [
+                'tour' => $this->popularGuidingsForSpecies($perType, $speciesId)
+                    ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
+                    ->values(),
+                'camp' => $this->campsForSpecies($perType, $speciesId)
+                    ->map(fn ($c) => $this->campPresenter->present($c))
+                    ->values(),
+                'trip' => $this->tripsForSpecies($perType, $speciesId)
                     ->map(fn ($t) => $this->tripPresenter->present($t))
                     ->values(),
             ];
@@ -166,6 +198,51 @@ class HomepageMixedOfferSelector
             'country' => $country->slug,
             'country_short' => $country->countrycode,
         ]);
+    }
+
+    private function popularGuidingsForSpecies(int $limit, int $speciesId): Collection
+    {
+        $ids = $this->offerFilters->listingIdsForSpecies('tours', [$speciesId]) ?? [];
+        if ($ids === []) {
+            return collect();
+        }
+
+        return Guiding::query()
+            ->withCount('bookings')
+            ->publiclyVisible()
+            ->whereIn('guidings.id', $ids)
+            ->orderByDesc('bookings_count')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function campsForSpecies(int $limit, int $speciesId): Collection
+    {
+        $ids = $this->offerFilters->listingIdsForSpecies('camps', [$speciesId]) ?? [];
+        if ($ids === []) {
+            return collect();
+        }
+
+        return $this->camps->queryForCountry(VacationListingFilter::fromRequest([]))
+            ->whereIn('camps.id', $ids)
+            ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    private function tripsForSpecies(int $limit, int $speciesId): Collection
+    {
+        $ids = $this->offerFilters->listingIdsForSpecies('trips', [$speciesId]) ?? [];
+        if ($ids === []) {
+            return collect();
+        }
+
+        return $this->trips->queryForCountry(VacationListingFilter::fromRequest([]))
+            ->whereIn('trips.id', $ids)
+            ->orderByDesc('created_at')
+            ->limit($limit)
+            ->get();
     }
 
 }

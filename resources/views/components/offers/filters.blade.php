@@ -572,6 +572,13 @@
 @once
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        var offersFilterBtn = document.getElementById('offersSfmFilterBtn');
+        if (offersFilterBtn) {
+            offersFilterBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        }
+
         const regionLockMessage = @json(__('offers.filter_country_locked_by_place'));
         const placeFormSelectors = '[data-offers-header-search], [data-category-header-search]';
         const locationCarrySelectors = [

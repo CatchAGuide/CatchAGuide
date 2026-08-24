@@ -11,7 +11,9 @@ return [
 
         Für Liebhaber des Großfisch-Angelns ist der Wels, der in den großen Flüssen Europas zu beeindruckender Größe heranwächst, ein begehrtes Ziel, und der Karpfen, der in stillen Gewässern kapitale Ausmaße erreichen kann, verlangt Ausdauer und Geschick. Salmoniden-Fans kommen mit der Forelle und der Meerforelle auf ihre Kosten, zwei herausfordernde und beliebte Arten, die spannende Angelmomente in klaren Flüssen und Seen bieten. Der Lachs, der in den legendären Flüssen Skandinaviens und Schottlands seine Wanderungen unternimmt, zieht Angler aus der ganzen Welt in seinen Bann.
 
-        Auf dieser Seite präsentieren wir dir eine umfassende Übersicht aller Zielfische in Europa. Klicke auf deinen Wunschfisch und entdecke die besten Angeltouren, um genau diesen Fang zu landen. Egal, ob du Süßwasser- oder Salzwasserangler bist – hier findest du dein maßgeschneidertes Angelabenteuer.'
+        Auf dieser Seite präsentieren wir dir eine umfassende Übersicht aller Zielfische in Europa. Klicke auf deinen Wunschfisch und entdecke die besten Angeltouren, um genau diesen Fang zu landen. Egal, ob du Süßwasser- oder Salzwasserangler bist – hier findest du dein maßgeschneidertes Angelabenteuer.',
+        'offers_title' => 'Touren, Camps & Reisen für :fish',
+        'offers_empty' => 'Noch keine Angebote für :fish. Entdecke in der Zwischenzeit Touren und Urlaube in ganz Europa.',
     ],
     'methods' => [
         'title' => 'Die beliebtesten Angelmethoden für Angeltouren in Europa',

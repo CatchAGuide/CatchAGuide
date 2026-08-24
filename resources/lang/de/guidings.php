@@ -121,6 +121,7 @@ return [
     'reset_filters' => 'Filter zurücksetzen',
     'no_results' => 'Keine Ergebnisse gefunden',
     'try_different_filters' => 'Versuchen Sie andere Filter',
+    'show_results_count' => ':count Ergebnisse anzeigen',
 
     'show_on_map' => 'Auf Karte anzeigen',
     'Best_price_guarantee' => 'Best-Preis-Garantie',

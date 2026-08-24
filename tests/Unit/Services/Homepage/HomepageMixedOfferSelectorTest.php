@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services\Homepage;
 
 use App\Models\CategoryEntity;
+use App\Models\Target;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
@@ -60,6 +61,29 @@ class HomepageMixedOfferSelectorTest extends TestCase
 
         $selector = app(HomepageMixedOfferSelector::class);
         $modules = $selector->byModuleForDestination($country, null, null, 2);
+
+        $this->assertArrayHasKey('tour', $modules);
+        $this->assertArrayHasKey('trip', $modules);
+        $this->assertArrayHasKey('camp', $modules);
+
+        foreach (['tour', 'camp', 'trip'] as $type) {
+            $this->assertLessThanOrEqual(2, $modules[$type]->count());
+            $this->assertTrue($modules[$type]->every(fn ($row) => ($row['type'] ?? null) === $type));
+        }
+    }
+
+    public function test_by_module_for_target_fish_returns_separate_rails(): void
+    {
+        Cache::flush();
+
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Selector Pike',
+            'name_en' => 'Selector Pike',
+        ])->save();
+
+        $selector = app(HomepageMixedOfferSelector::class);
+        $modules = $selector->byModuleForTargetFish((int) $target->id, 2);
 
         $this->assertArrayHasKey('tour', $modules);
         $this->assertArrayHasKey('trip', $modules);

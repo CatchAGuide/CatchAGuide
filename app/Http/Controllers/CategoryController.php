@@ -11,6 +11,7 @@ use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
 use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Offers\OfferCatalogPageService;
 use App\Domain\CategoryPage\CategoryPageScope;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -97,9 +98,13 @@ class CategoryController extends Controller
         return $this->index('methods', $request, $categoryContent);
     }
 
-    public function methodsShow(Request $request, string $slug, CategoryPageContentService $categoryContent)
-    {
-        return $this->targets('methods', $slug, $request, $categoryContent);
+    public function methodsShow(
+        Request $request,
+        string $slug,
+        CategoryPageContentService $categoryContent,
+        OfferCatalogPageService $offerCatalog,
+    ) {
+        return $this->targets('methods', $slug, $request, $categoryContent, $offerCatalog);
     }
 
     public function targetsIndex(Request $request, CategoryPageContentService $categoryContent)
@@ -112,8 +117,13 @@ class CategoryController extends Controller
         return $this->index('targets', $request, $categoryContent);
     }
 
-    public function targets($type, $slug, Request $request, CategoryPageContentService $categoryContent)
-    {
+    public function targets(
+        $type,
+        $slug,
+        Request $request,
+        CategoryPageContentService $categoryContent,
+        OfferCatalogPageService $offerCatalog,
+    ) {
         $type = strtolower((string) $type);
 
         if ($type === 'methods' && $request->routeIs('category.targets')) {
@@ -143,10 +153,24 @@ class CategoryController extends Controller
         if ($type === 'methods') {
             $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::TOURS, $language);
             $row_data->faq = $categoryContent->faqsFor($row_data, CategoryPageScope::TOURS, $language);
-        } else {
-            $row_data->language = $row_data->language($language);
-            $row_data->faq = $row_data->faq($language);
+
+            $methodId = (int) $row_data->source_id;
+            if ($methodId <= 0) {
+                abort(404);
+            }
+
+            $vm = $offerCatalog->buildForMethod($request, $methodId);
+
+            return view('pages.category.category-show', [
+                'row_data' => $row_data,
+                'title' => $row_data->language->title ?? $row_data->name,
+                'vm' => $vm,
+                'content_scope' => CategoryPageScope::TOURS,
+            ]);
         }
+
+        $row_data->language = $row_data->language($language);
+        $row_data->faq = $row_data->faq($language);
 
         return $this->showLegacyGuidingCategory($type, $row_data, $request);
     }

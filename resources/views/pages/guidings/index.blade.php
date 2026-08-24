@@ -535,7 +535,7 @@
                         {{-- Map --}}
                         <div class="sfm-bar__item">
                             <a class="sfm-bar__btn sfm-bar__btn--map"
-                               id="openMapModal"
+                               id="openMapModalMobile"
                                data-bs-target="#mapModal"
                                data-bs-toggle="modal"
                                href="javascript:void(0)">

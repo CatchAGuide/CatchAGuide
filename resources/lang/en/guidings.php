@@ -122,6 +122,7 @@ return [
     'reset_filters' => 'Reset Filters',
     'no_results' => 'No results found',
     'try_different_filters' => 'Try different filters',
+    'show_results_count' => 'Show :count results',
 
     'show_on_map' => 'Show on map',
     'Best_price_guarantee' => 'Best price guarantee',

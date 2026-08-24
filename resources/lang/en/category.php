@@ -11,7 +11,9 @@ return [
 
         For those who love big fish, the catfish, growing to impressive sizes in Europe’s major rivers, is a highly sought-after catch. The carp, reaching trophy sizes in calm waters, requires patience and skill. Trout and sea trout are favorites among salmonid enthusiasts, offering exciting fishing moments in crystal-clear rivers and lakes. And for those chasing the ultimate challenge, the salmon, making its legendary migrations in the rivers of Scandinavia and Scotland, attracts anglers from all over the world.
 
-        On this page, you’ll find a complete overview of Europe’s target fish. Click on your preferred species and discover the best fishing tours to land your dream catch. Whether you’re a freshwater or saltwater angler – your next adventure starts here!'
+        On this page, you’ll find a complete overview of Europe’s target fish. Click on your preferred species and discover the best fishing tours to land your dream catch. Whether you’re a freshwater or saltwater angler – your next adventure starts here!',
+        'offers_title' => 'Tours, camps & trips for :fish',
+        'offers_empty' => 'No offers for :fish yet. Browse tours and holidays across Europe in the meantime.',
     ],
     'methods' => [
         'title' => 'The Most Popular Fishing Methods for Fishing Tours in Europe',

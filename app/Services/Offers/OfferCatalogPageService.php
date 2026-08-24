@@ -136,6 +136,23 @@ class OfferCatalogPageService
         );
     }
 
+    public function buildForMethod(Request $request, int $methodId): OfferCatalogViewModel
+    {
+        $input = $request->all();
+        $input['type'] = 'tour';
+        $input['methods'] = [$methodId];
+        unset($input['vacation']);
+
+        return $this->buildFromInput(
+            $input,
+            $request,
+            catalogUrl: $request->url(),
+            lockTourScope: true,
+            lockMethodScope: true,
+            includeFaq: false,
+        );
+    }
+
     /**
      * @param  array<string, mixed>  $input
      */
@@ -147,6 +164,7 @@ class OfferCatalogPageService
         bool $lockSpeciesScope = false,
         bool $lockTourScope = false,
         bool $lockVacationScope = false,
+        bool $lockMethodScope = false,
         bool $includeFaq = true,
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
@@ -236,7 +254,9 @@ class OfferCatalogPageService
                 ? collect()
                 : $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
             countries: $countries,
-            methodOptions: $this->methodOptions(),
+            methodOptions: $lockMethodScope
+                ? collect()
+                : $this->methodOptions(),
             waterOptions: $this->waterOptions(),
             tourDurationOptions: $this->tourDurationOptions(),
             tripDurationOptions: $this->tripDurationOptions(),
@@ -249,6 +269,7 @@ class OfferCatalogPageService
             lockSpeciesScope: $lockSpeciesScope,
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
+            lockMethodScope: $lockMethodScope,
         );
     }
 

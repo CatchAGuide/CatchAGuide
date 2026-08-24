@@ -9,6 +9,7 @@ use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Models\CategoryPage;
 use App\Models\Language;
 use App\Models\Target;
+use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -64,20 +65,20 @@ class TargetFishOffersCatalogTest extends TestCase
         return $page->fresh();
     }
 
-    public function test_target_fish_category_renders_offers_catalog_with_vacations(): void
+    public function test_target_fish_category_renders_offer_modules_for_global_scope(): void
     {
         $page = $this->createTargetFishPage('pike-offers-test');
 
-        $this->bindTargetFishCatalog(fn () => $this->viewModel(
-            type: 'all',
-            catalogUrl: route('targets.show', ['slug' => $page->slug]),
-            speciesIds: [(int) $page->source_id],
-            cards: collect([
-                $this->card('tour', 'Pike Tour'),
-                $this->card('trip', 'Pike Trip'),
-                $this->card('camp', 'Pike Camp'),
-            ]),
-        ));
+        $mock = Mockery::mock(HomepageMixedOfferSelector::class);
+        $mock->shouldReceive('byModuleForTargetFish')
+            ->once()
+            ->withArgs(fn ($speciesId) => (int) $speciesId === (int) $page->source_id)
+            ->andReturn([
+                'tour' => collect([$this->moduleCard('tour', 'Pike Tour')]),
+                'camp' => collect([$this->moduleCard('camp', 'Pike Camp')]),
+                'trip' => collect([$this->moduleCard('trip', 'Pike Trip')]),
+            ]);
+        $this->app->instance(HomepageMixedOfferSelector::class, $mock);
 
         $response = $this->get(route('targets.show', [
             'slug' => $page->slug,
@@ -85,53 +86,18 @@ class TargetFishOffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('GLOBAL Pike fishing', false);
-        $response->assertSee('data-offers-type-filter', false);
-        $response->assertSee(__('offers.filter_all'), false);
-        $response->assertSee(__('offers.filter_tours'), false);
-        $response->assertSee(__('offers.filter_vacations'), false);
-        $response->assertSee('data-offers-list', false);
-        $response->assertSee('data-offer-type="tour"', false);
-        $response->assertSee('data-offer-type="trip"', false);
-        $response->assertSee('data-offer-type="camp"', false);
-        $response->assertSee('name="species[]"', false);
-        $response->assertSee('value="'.$page->source_id.'"', false);
-        $response->assertDontSee('offers-filters__species', false);
+        $response->assertSee('data-offer-module="tour"', false);
+        $response->assertSee('data-offer-module="camp"', false);
+        $response->assertSee('data-offer-module="trip"', false);
+        $response->assertSee('Pike Tour', false);
+        $response->assertSee('Pike Camp', false);
+        $response->assertSee('Pike Trip', false);
+        $response->assertDontSee('data-offers-type-filter', false);
         $response->assertDontSee('id="guidings-list"', false);
         $response->assertSee('cag-site-nav--overlay', false);
-        $response->assertDontSee('hero-tour.webp', false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertSee('offers-page-header__hero', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
-    }
-
-    public function test_target_fish_catalog_locks_region_when_place_search_is_active(): void
-    {
-        $page = $this->createTargetFishPage('pike-region-lock');
-
-        $this->bindTargetFishCatalog(fn () => $this->viewModel(
-            catalogUrl: route('targets.show', ['slug' => $page->slug]),
-            speciesIds: [(int) $page->source_id],
-            place: 'Düsseldorf, Deutschland',
-            placeLat: 51.2277,
-            placeLng: 6.7735,
-        ));
-
-        $response = $this->get(route('targets.show', [
-            'slug' => $page->slug,
-            'place' => 'Düsseldorf, Deutschland',
-            'placeLat' => '51.2277',
-            'placeLng' => '6.7735',
-        ]));
-
-        $response->assertOk();
-        $html = $response->getContent();
-        $this->assertStringContainsString('offers-filters__region is-locked', $html);
-        $this->assertMatchesRegularExpression(
-            '/<select name="country"[^>]*data-offers-region-select[^>]*\bdisabled\b/',
-            $html
-        );
-        $this->assertStringContainsString(__('offers.filter_country_locked_by_place'), $html);
-        $this->assertStringContainsString('id="offersFiltersOffcanvas"', $html);
     }
 
     public function test_tours_target_fish_page_uses_tours_scope_and_locks_catalog(): void
@@ -305,6 +271,29 @@ class TargetFishOffersCatalogTest extends TestCase
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
         );
+    }
+
+    /**
+     * Shape produced by the *CardPresenter::present() methods used for
+     * homepage / destination / target-fish offer module rails.
+     *
+     * @return array<string, mixed>
+     */
+    private function moduleCard(string $type, string $title): array
+    {
+        return [
+            'type' => $type,
+            'id' => crc32($title),
+            'title' => $title,
+            'url' => '/offers/'.$type,
+            'image' => '/images/placeholder_guide.jpg',
+            'gallery_images' => ['/images/placeholder_guide.jpg'],
+            'badge' => ucfirst($type),
+            'badge_class' => $type,
+            'location' => 'Test Location',
+            'price_amount' => '€100',
+            'price_unit' => 'person',
+        ];
     }
 
     /**
