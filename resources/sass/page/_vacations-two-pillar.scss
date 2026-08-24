@@ -2580,7 +2580,14 @@ $vac-country-panel: #313041;
         font-weight: 600;
         text-decoration: none;
         color: $vac-muted;
+        background: transparent;
         border: 1px solid transparent;
+        appearance: none;
+        -webkit-appearance: none;
+        font-family: inherit;
+        line-height: normal;
+        cursor: pointer;
+        margin: 0;
         transition: all .15s ease;
 
         &:hover {

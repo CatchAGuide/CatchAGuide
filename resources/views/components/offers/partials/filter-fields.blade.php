@@ -4,32 +4,54 @@
     $methodsInputPrefix = $methodsInputPrefix ?? 'offers-methods';
     $waterInputPrefix = $waterInputPrefix ?? 'offers-water';
     $durationInputPrefix = $durationInputPrefix ?? 'offers-duration';
+    // Interactive mode (mobile filter modal): facet sections + the trip/camp segmented
+    // toggle just switch visibility client-side instead of reloading the page.
+    $interactive = $interactive ?? false;
 @endphp
 
-@if($filter->isVacation() && is_callable($vacationUrl ?? null))
+@if(($interactive || $filter->isVacation()) && is_callable($vacationUrl ?? null))
     @php
         $activeVacation = $filter->vacation ?? 'all';
     @endphp
-    <div class="{{ $fieldClass }} offers-filters__vacation-type" data-offers-vacation-type>
+    <div class="{{ $fieldClass }} offers-filters__vacation-type {{ $interactive && ! $filter->isVacation() ? 'd-none' : '' }}" data-offers-vacation-type>
         <div
             class="offers-filters__vacation-type-btns"
             role="group"
             aria-label="{{ __('offers.filter_vacation_type') }}"
         >
-            <a
-                href="{{ $activeVacation === 'trip' ? $vacationUrl('all') : $vacationUrl('trip') }}"
-                class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
-                @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
-            >
-                {{ __('offers.filter_trips') }}
-            </a>
-            <a
-                href="{{ $activeVacation === 'camp' ? $vacationUrl('all') : $vacationUrl('camp') }}"
-                class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
-                @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
-            >
-                {{ __('offers.filter_camps') }}
-            </a>
+            @if($interactive)
+                <button
+                    type="button"
+                    data-pillar-vacation="trip"
+                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
+                    @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
+                >
+                    {{ __('offers.filter_trips') }}
+                </button>
+                <button
+                    type="button"
+                    data-pillar-vacation="camp"
+                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
+                    @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
+                >
+                    {{ __('offers.filter_camps') }}
+                </button>
+            @else
+                <a
+                    href="{{ $activeVacation === 'trip' ? $vacationUrl('all') : $vacationUrl('trip') }}"
+                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'trip' ? 'is-active' : '' }}"
+                    @if($activeVacation === 'trip') aria-pressed="true" @else aria-pressed="false" @endif
+                >
+                    {{ __('offers.filter_trips') }}
+                </a>
+                <a
+                    href="{{ $activeVacation === 'camp' ? $vacationUrl('all') : $vacationUrl('camp') }}"
+                    class="offers-filters__vacation-type-btn {{ $activeVacation === 'camp' ? 'is-active' : '' }}"
+                    @if($activeVacation === 'camp') aria-pressed="true" @else aria-pressed="false" @endif
+                >
+                    {{ __('offers.filter_camps') }}
+                </a>
+            @endif
         </div>
     </div>
 @endif
@@ -94,88 +116,94 @@
     'selectedValues' => array_merge($filter->speciesIds ?? [], $filter->speciesNames ?? []),
 ])
 
-@if($showTourFacets)
-    @include('components.offers.partials.multi-select', [
-        'fieldClass' => $fieldClass,
-        'wrapperClass' => 'offers-filters__methods',
-        'inputName' => 'methods[]',
-        'inputPrefix' => $methodsInputPrefix,
-        'label' => __('offers.filter_method'),
-        'placeholder' => __('offers.filter_method_placeholder'),
-        'searchPlaceholder' => __('offers.filter_method_search'),
-        'options' => $methodOptions,
-        'selectedValues' => $filter->methodIds ?? [],
-    ])
+@if($interactive || $showTourFacets)
+    <div data-offers-facet-section="tour" @if($interactive && ! $showTourFacets) class="d-none" @endif>
+        @include('components.offers.partials.multi-select', [
+            'fieldClass' => $fieldClass,
+            'wrapperClass' => 'offers-filters__methods',
+            'inputName' => 'methods[]',
+            'inputPrefix' => $methodsInputPrefix,
+            'label' => __('offers.filter_method'),
+            'placeholder' => __('offers.filter_method_placeholder'),
+            'searchPlaceholder' => __('offers.filter_method_search'),
+            'options' => $methodOptions,
+            'selectedValues' => $filter->methodIds ?? [],
+        ])
 
-    @include('components.offers.partials.multi-select', [
-        'fieldClass' => $fieldClass,
-        'wrapperClass' => 'offers-filters__water',
-        'inputName' => 'water[]',
-        'inputPrefix' => $waterInputPrefix,
-        'label' => __('offers.filter_water_type'),
-        'placeholder' => __('offers.filter_water_placeholder'),
-        'searchPlaceholder' => __('offers.filter_water_search'),
-        'options' => $waterOptions,
-        'selectedValues' => $filter->waterIds ?? [],
-    ])
+        @include('components.offers.partials.multi-select', [
+            'fieldClass' => $fieldClass,
+            'wrapperClass' => 'offers-filters__water',
+            'inputName' => 'water[]',
+            'inputPrefix' => $waterInputPrefix,
+            'label' => __('offers.filter_water_type'),
+            'placeholder' => __('offers.filter_water_placeholder'),
+            'searchPlaceholder' => __('offers.filter_water_search'),
+            'options' => $waterOptions,
+            'selectedValues' => $filter->waterIds ?? [],
+        ])
 
-    @include('components.offers.partials.multi-select', [
-        'fieldClass' => $fieldClass,
-        'wrapperClass' => 'offers-filters__duration',
-        'inputName' => 'duration_types[]',
-        'inputPrefix' => $durationInputPrefix,
-        'label' => __('offers.filter_duration'),
-        'placeholder' => __('offers.filter_duration_placeholder'),
-        'searchPlaceholder' => __('offers.filter_duration_search'),
-        'options' => $tourDurationOptions,
-        'selectedValues' => $filter->durationTypes ?? [],
-    ])
+        @include('components.offers.partials.multi-select', [
+            'fieldClass' => $fieldClass,
+            'wrapperClass' => 'offers-filters__duration',
+            'inputName' => 'duration_types[]',
+            'inputPrefix' => $durationInputPrefix,
+            'label' => __('offers.filter_duration'),
+            'placeholder' => __('offers.filter_duration_placeholder'),
+            'searchPlaceholder' => __('offers.filter_duration_search'),
+            'options' => $tourDurationOptions,
+            'selectedValues' => $filter->durationTypes ?? [],
+        ])
+    </div>
 @endif
 
-@if($showCampFacets)
-    @if($accommodationTypeOptions->isNotEmpty())
+@if($interactive || $showCampFacets)
+    <div data-offers-facet-section="camp" @if($interactive && ! $showCampFacets) class="d-none" @endif>
+        @if($accommodationTypeOptions->isNotEmpty())
+            <div class="{{ $fieldClass }}">
+                <label class="form-label">{{ __('offers.filter_accommodation_type') }}</label>
+                <select name="accommodation_type" class="{{ $selectClass }}">
+                    <option value="">{{ __('offers.filter_show_all') }}</option>
+                    @foreach($accommodationTypeOptions as $type)
+                        <option value="{{ $type['id'] }}" @selected(($filter->accommodationTypeId ?? null) === (int) $type['id'])>
+                            {{ $type['name'] }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
         <div class="{{ $fieldClass }}">
-            <label class="form-label">{{ __('offers.filter_accommodation_type') }}</label>
-            <select name="accommodation_type" class="{{ $selectClass }}">
+            <label class="form-label">{{ __('offers.filter_guiding') }}</label>
+            <select name="has_guiding" class="{{ $selectClass }}">
                 <option value="">{{ __('offers.filter_show_all') }}</option>
-                @foreach($accommodationTypeOptions as $type)
-                    <option value="{{ $type['id'] }}" @selected(($filter->accommodationTypeId ?? null) === (int) $type['id'])>
-                        {{ $type['name'] }}
+                <option value="1" @selected($filter->hasGuiding === true)>{{ __('offers.filter_yes') }}</option>
+                <option value="0" @selected($filter->hasGuiding === false)>{{ __('offers.filter_no') }}</option>
+            </select>
+        </div>
+
+        <div class="{{ $fieldClass }}">
+            <label class="form-label">{{ __('offers.filter_rental_boat') }}</label>
+            <select name="has_rental_boat" class="{{ $selectClass }}">
+                <option value="">{{ __('offers.filter_show_all') }}</option>
+                <option value="1" @selected($filter->hasRentalBoat === true)>{{ __('offers.filter_yes') }}</option>
+                <option value="0" @selected($filter->hasRentalBoat === false)>{{ __('offers.filter_no') }}</option>
+            </select>
+        </div>
+    </div>
+@endif
+
+@if($tripDurationOptions->isNotEmpty() && ($interactive || $showTripFacets))
+    <div data-offers-facet-section="trip" @if($interactive && ! $showTripFacets) class="d-none" @endif>
+        <div class="{{ $fieldClass }}">
+            <label class="form-label">{{ __('offers.filter_duration') }}</label>
+            <select name="duration" class="{{ $selectClass }}">
+                <option value="">{{ __('offers.filter_show_all') }}</option>
+                @foreach($tripDurationOptions as $duration)
+                    <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
+                        {{ $duration['label'] }}
                     </option>
                 @endforeach
             </select>
         </div>
-    @endif
-
-    <div class="{{ $fieldClass }}">
-        <label class="form-label">{{ __('offers.filter_guiding') }}</label>
-        <select name="has_guiding" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.filter_show_all') }}</option>
-            <option value="1" @selected($filter->hasGuiding === true)>{{ __('offers.filter_yes') }}</option>
-            <option value="0" @selected($filter->hasGuiding === false)>{{ __('offers.filter_no') }}</option>
-        </select>
-    </div>
-
-    <div class="{{ $fieldClass }}">
-        <label class="form-label">{{ __('offers.filter_rental_boat') }}</label>
-        <select name="has_rental_boat" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.filter_show_all') }}</option>
-            <option value="1" @selected($filter->hasRentalBoat === true)>{{ __('offers.filter_yes') }}</option>
-            <option value="0" @selected($filter->hasRentalBoat === false)>{{ __('offers.filter_no') }}</option>
-        </select>
-    </div>
-@endif
-
-@if($showTripFacets && $tripDurationOptions->isNotEmpty())
-    <div class="{{ $fieldClass }}">
-        <label class="form-label">{{ __('offers.filter_duration') }}</label>
-        <select name="duration" class="{{ $selectClass }}">
-            <option value="">{{ __('offers.filter_show_all') }}</option>
-            @foreach($tripDurationOptions as $duration)
-                <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
-                    {{ $duration['label'] }}
-                </option>
-            @endforeach
-        </select>
     </div>
 @endif

@@ -498,12 +498,9 @@
                     @endif
                 @endforeach
 
-                @if($activeType !== 'all')
-                    <input type="hidden" name="type" value="{{ $activeType }}">
-                @endif
-                @if($isVacation && $activeVacation !== 'all')
-                    <input type="hidden" name="vacation" value="{{ $activeVacation }}">
-                @endif
+                <input type="hidden" name="type" id="offersOffcanvasTypeInput" value="{{ $activeType !== 'all' ? $activeType : '' }}">
+                <input type="hidden" name="vacation" id="offersOffcanvasVacationInput" value="{{ $isVacation && $activeVacation !== 'all' ? $activeVacation : '' }}">
+                <input type="hidden" name="sortby" value="{{ $currentSort }}">
                 @if($filter->numGuests !== null)
                     <input type="hidden" name="num_guests" value="{{ $filter->numGuests }}">
                 @endif
@@ -524,6 +521,7 @@
                                 'tripsTotal' => $tripsTotal,
                                 'campsTotal' => $campsTotal,
                                 'vacationsTotal' => $vacationsTotal,
+                                'interactive' => true,
                             ])
                         </div>
                     </div>
@@ -548,14 +546,8 @@
                     'showCampFacets' => $showCampFacets,
                     'showTripFacets' => $showTripFacets,
                     'vacationUrl' => $vacationUrl,
+                    'interactive' => true,
                 ])
-
-                <div class="mb-3">
-                    <label class="form-label">{{ __('offers.filter_sort') }}</label>
-                    <select name="sortby" class="form-select" data-offers-sort-select>
-                        @include('components.offers.partials.sort-options', ['filter' => $filter, 'currentSort' => $currentSort])
-                    </select>
-                </div>
 
                 <button type="submit" class="btn btn-orange w-100">{{ __('offers.apply_filters') }}</button>
                 @if($hasSidebarFilters)
@@ -578,6 +570,76 @@
                 event.stopPropagation();
             });
         }
+
+        (function () {
+            var offcanvas = document.getElementById('offersFiltersOffcanvas');
+            var pillarGroup = offcanvas ? offcanvas.querySelector('[data-offers-pillar-group]') : null;
+            if (!offcanvas || !pillarGroup) {
+                return;
+            }
+
+            var typeInput = document.getElementById('offersOffcanvasTypeInput');
+            var vacationInput = document.getElementById('offersOffcanvasVacationInput');
+            var extendGroup = pillarGroup.querySelector('[data-offers-vacation-subfilter]');
+            var vacationTypeBlock = offcanvas.querySelector('[data-offers-vacation-type]');
+            var typeButtons = pillarGroup.querySelectorAll('[data-pillar-type]');
+            var vacationButtons = offcanvas.querySelectorAll('[data-pillar-vacation]');
+            var facetSections = offcanvas.querySelectorAll('[data-offers-facet-section]');
+
+            function setPillarState(type, vacation) {
+                if (typeInput) {
+                    typeInput.value = type === 'all' ? '' : type;
+                }
+                if (vacationInput) {
+                    vacationInput.value = (type === 'vacation' && vacation !== 'all') ? vacation : '';
+                }
+
+                typeButtons.forEach(function (btn) {
+                    var btnType = btn.dataset.pillarType;
+                    var isVacationBtn = btnType === 'vacation';
+                    var isActive = btnType === type && !(isVacationBtn && vacation !== 'all');
+                    btn.classList.toggle('is-active', isActive);
+                    if (isVacationBtn) {
+                        btn.classList.toggle('is-vacation-context', type === 'vacation');
+                    }
+                });
+
+                vacationButtons.forEach(function (btn) {
+                    var isActive = btn.dataset.pillarVacation === vacation;
+                    btn.classList.toggle('is-active', isActive);
+                    if (btn.hasAttribute('aria-pressed')) {
+                        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    }
+                });
+
+                if (extendGroup) {
+                    extendGroup.classList.toggle('d-none', type !== 'vacation');
+                }
+                if (vacationTypeBlock) {
+                    vacationTypeBlock.classList.toggle('d-none', type !== 'vacation');
+                }
+
+                facetSections.forEach(function (section) {
+                    var facetType = section.dataset.offersFacetSection;
+                    var matches = (facetType === 'tour' && type === 'tour')
+                        || (facetType === 'camp' && type === 'vacation' && vacation === 'camp')
+                        || (facetType === 'trip' && type === 'vacation' && vacation === 'trip');
+                    section.classList.toggle('d-none', !matches);
+                });
+            }
+
+            typeButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setPillarState(btn.dataset.pillarType, 'all');
+                });
+            });
+
+            vacationButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setPillarState('vacation', btn.dataset.pillarVacation);
+                });
+            });
+        })();
 
         const regionLockMessage = @json(__('offers.filter_country_locked_by_place'));
         const placeFormSelectors = '[data-offers-header-search], [data-category-header-search]';
