@@ -101,20 +101,20 @@
                     </button>
                 </div>
             </form>
-
-            <nav class="offers-page-header__breadcrumbs offers-page-header__anim" style="--offers-anim-i: 3" aria-label="Breadcrumb">
-                <ol class="offers-page-header__crumb-list">
-                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                    @foreach($breadcrumbItems as $item)
-                        <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
-                        @if(! empty($item['url']))
-                            <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
-                        @else
-                            <li class="is-active" aria-current="page">{{ $item['label'] }}</li>
-                        @endif
-                    @endforeach
-                </ol>
-            </nav>
         </div>
+
+        <nav class="offers-page-header__breadcrumbs offers-page-header__anim" style="--offers-anim-i: 3" aria-label="Breadcrumb">
+            <ol class="offers-page-header__crumb-list">
+                <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                @foreach($breadcrumbItems as $item)
+                    <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
+                    @if(! empty($item['url']))
+                        <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
+                    @else
+                        <li class="is-active" aria-current="page">{{ $item['label'] }}</li>
+                    @endif
+                @endforeach
+            </ol>
+        </nav>
     </section>
 </div>

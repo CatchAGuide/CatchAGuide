@@ -35,11 +35,22 @@ $vacations-header-muted: #787780;
 }
 
 .vacations-page-header {
+  display: flex;
+  flex-direction: column;
+
   &__band {
     background: $vacations-header-slate;
     color: #fff;
     margin-top: -64px;
     padding: calc(64px + 1.15rem) 0 2.5rem;
+
+    @media (max-width: 767.98px) {
+      // Breadcrumbs sit between the nav and the band on mobile (see
+      // &__breadcrumbs order below), so the band no longer needs to pull
+      // itself up under the nav bar.
+      margin-top: 0;
+      padding-top: 1.15rem;
+    }
 
     @media (min-width: 768px) {
       padding: calc(64px + 1.35rem) 0 2.85rem;
@@ -148,9 +159,9 @@ $vacations-header-muted: #787780;
 
   &__segment {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.1rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
     min-width: 0;
     margin: 0;
     padding: 0.7rem 1rem;
@@ -173,6 +184,8 @@ $vacations-header-muted: #787780;
   }
 
   &__segment-label {
+    flex: none;
+    white-space: nowrap;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -182,6 +195,8 @@ $vacations-header-muted: #787780;
   }
 
   &__segment-control {
+    flex: 1 1 auto;
+    min-width: 0;
     position: relative;
     display: block;
 
@@ -254,7 +269,21 @@ $vacations-header-muted: #787780;
   }
 
   &__breadcrumbs {
+    @include cag-page-container;
     margin-top: 1rem;
+
+    @media (max-width: 767.98px) {
+      // Render directly below the nav bar, ahead of the band — desktop
+      // keeps its natural DOM order (after the search box). Slides up
+      // under the (still-transparent) nav the same way the band used to,
+      // so the nav overlays a dark surface here instead of the page's
+      // plain background.
+      order: -1;
+      margin-top: -64px;
+      padding-top: calc(64px + 0.85rem);
+      padding-bottom: 0.65rem;
+      background: $vacations-header-slate;
+    }
   }
 
   &__crumb-list {
@@ -286,6 +315,22 @@ $vacations-header-muted: #787780;
     .fa-chevron-right {
       font-size: 0.65rem;
       opacity: 0.55;
+    }
+
+    @media (max-width: 767.98px) {
+      color: rgba(255, 255, 255, 0.65);
+
+      a {
+        color: rgba(255, 255, 255, 0.85);
+
+        &:hover {
+          color: $vacations-header-coral;
+        }
+      }
+
+      .is-active {
+        color: #fff;
+      }
     }
   }
 }

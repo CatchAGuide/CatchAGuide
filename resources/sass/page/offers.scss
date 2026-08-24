@@ -24,6 +24,8 @@ $muted: #787780;
   --cag-coral-hover: #E85B40;
   --cag-border: #{$border};
   position: relative;
+  display: flex;
+  flex-direction: column;
   margin-bottom: 0.5rem;
 
   @media (min-width: 768px) {
@@ -43,6 +45,18 @@ $muted: #787780;
     @media (min-width: 992px) {
       margin-top: -80px;
       padding: calc(80px + 1.35rem) 0 2.85rem;
+    }
+  }
+
+  // Only headers that actually render a breadcrumb nav need this: the
+  // breadcrumb sits between the nav and the hero on mobile (see
+  // &__breadcrumbs order below), so the hero no longer needs to pull
+  // itself up under the nav bar. Headers with no breadcrumb (e.g. the
+  // generic site-page-header) keep the default nav-overlay hero above.
+  &:has(> .offers-page-header__breadcrumbs) &__hero {
+    @media (max-width: 767.98px) {
+      margin-top: 0;
+      padding-top: 1.15rem;
     }
   }
 
@@ -146,9 +160,9 @@ $muted: #787780;
 
   &__segment {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.15rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
     min-width: 0;
     margin: 0;
     padding: 0.7rem 1rem;
@@ -177,6 +191,8 @@ $muted: #787780;
   }
 
   &__segment-label {
+    flex: none;
+    white-space: nowrap;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -186,6 +202,8 @@ $muted: #787780;
   }
 
   &__segment-control {
+    flex: 1 1 auto;
+    min-width: 0;
     position: relative;
     display: block;
 
@@ -227,6 +245,8 @@ $muted: #787780;
     cursor: default;
 
     .offers-persons-stepper--catalog {
+      flex: 1 1 auto;
+      min-width: 0;
       min-height: 0;
       padding: 0;
       border: 0;
@@ -294,7 +314,21 @@ $muted: #787780;
   }
 
   &__breadcrumbs {
+    @include cag-page-container;
     margin-top: 1rem;
+
+    @media (max-width: 767.98px) {
+      // Render directly below the nav bar, ahead of the hero — desktop
+      // keeps its natural DOM order (after the search box). Slides up
+      // under the (still-transparent) nav the same way the hero used to,
+      // so the nav overlays a dark surface here instead of the page's
+      // plain background.
+      order: -1;
+      margin-top: -64px;
+      padding-top: calc(64px + 0.85rem);
+      padding-bottom: 0.65rem;
+      background: $slate;
+    }
   }
 
   &__crumb-list {
@@ -321,6 +355,22 @@ $muted: #787780;
     .is-active {
       color: $slate;
       font-weight: 700;
+    }
+
+    @media (max-width: 767.98px) {
+      color: rgba(255, 255, 255, 0.65);
+
+      a {
+        color: rgba(255, 255, 255, 0.85);
+
+        &:hover {
+          color: $coral;
+        }
+      }
+
+      .is-active {
+        color: #fff;
+      }
     }
 
     .fa-chevron-right {

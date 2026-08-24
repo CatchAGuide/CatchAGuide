@@ -116,21 +116,21 @@
             @if($headerStatLine !== '')
                 <p class="vacations-page-header__stat-line">{{ $headerStatLine }}</p>
             @endif
-
-            <nav class="vacations-page-header__breadcrumbs" aria-label="Breadcrumb">
-                <ol class="vacations-page-header__crumb-list">
-                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                    @foreach($breadcrumbItems as $crumb)
-                        <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
-                        @if(!empty($crumb['url']))
-                            <li><a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a></li>
-                        @else
-                            <li class="is-active" aria-current="page">{{ $crumb['label'] }}</li>
-                        @endif
-                    @endforeach
-                </ol>
-            </nav>
         </div>
+
+        <nav class="vacations-page-header__breadcrumbs" aria-label="Breadcrumb">
+            <ol class="vacations-page-header__crumb-list">
+                <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                @foreach($breadcrumbItems as $crumb)
+                    <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
+                    @if(!empty($crumb['url']))
+                        <li><a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a></li>
+                    @else
+                        <li class="is-active" aria-current="page">{{ $crumb['label'] }}</li>
+                    @endif
+                @endforeach
+            </ol>
+        </nav>
     </section>
 </div>
 
