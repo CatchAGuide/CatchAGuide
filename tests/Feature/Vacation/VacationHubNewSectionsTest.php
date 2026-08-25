@@ -94,6 +94,29 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertSee('Q1?', false);
     }
 
+    public function test_hub_provider_cta_matches_guiding_partner_layout(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('cag-home cag-home--embed', false);
+        $response->assertSee('vacation-hub__provider-cta cag-home-partner', false);
+        $response->assertSee('cag-home-container cag-home-partner__inner', false);
+        $response->assertSee(__('vacations.provider_cta_eyebrow'), false);
+        $response->assertSee(__('vacations.provider_cta_title'), false);
+        $response->assertSee(__('vacations.provider_cta_secondary'), false);
+        $response->assertSee('cag-home-partner__cards', false);
+        $response->assertSee(__('vacations.provider_cta_card_risk_title'), false);
+        $response->assertSee(__('vacations.provider_cta_card_demand_title'), false);
+        $response->assertSee(__('vacations.provider_cta_card_control_title'), false);
+        $response->assertSee('vacation-hub__seo gl-seo', false);
+        $response->assertSee(__('vacations.hub_seo_title'), false);
+        $response->assertSee('data-gl-seo-toggle', false);
+        $response->assertSee(__('vacations.hub_seo_more'), false);
+    }
+
     public function test_hub_renders_target_fish_rail_when_present(): void
     {
         $tile = [

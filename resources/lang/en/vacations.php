@@ -146,7 +146,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_header_title' => 'Book your next fishing holiday',
     'hub_header_subtitle' => 'Choose between flexible fishing camps and fully organised fishing trips',
     'hub_breadcrumb' => 'Fishing Holidays',
-    'pillar_camps_title' => 'Fishing Camps',
+    'pillar_camps_title' => 'Fishing Lodges & Accommodation',
     'pillar_camps_desc' => 'Your fishing holiday with accommodation. Add a rental boat and guiding whenever you want.',
     'pillar_camps_keywords' => [
         'Accommodations',
@@ -154,7 +154,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
         'Guided tours',
     ],
     'pillar_camps_cta' => 'View fishing camps',
-    'pillar_trips_title' => 'Fishing Trips',
+    'pillar_trips_title' => 'All-incl. Fishing Trips',
     'pillar_trips_desc' => 'Fully organised fishing trips. Accommodation, meals, guide — everything included.',
     'pillar_trips_keywords' => [
         'All-inclusive',
@@ -337,8 +337,8 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
 
     // Hub redesign — hero, product choice, consultation
     'hub_hero_eyebrow' => 'Accommodation, rental boats & fishing trips',
-    'hub_hero_title' => 'Your fishing holiday — camp or all-inclusive package',
-    'hub_hero_lead' => 'Flexible fishing camps to plan yourself, or fully organised fishing trips. Direct with the operator, no booking fee.',
+    'hub_hero_title' => 'YOUR FISHING HOLIDAY - LODGES OR ALL-INCL. TRIPS',
+    'hub_hero_lead' => 'Flexible fishing lodges & accommodation to plan yourself, or fully organised all-icnl. fishing trips.',
     'hub_stat_line' => ':offers offers · :countries countries · free inquiry',
     'hub_fork_title' => 'Plan it yourself, or have it all arranged?',
     'hub_fork_subtitle' => 'Both roads lead to the water — the difference is how much you organise yourself.',
