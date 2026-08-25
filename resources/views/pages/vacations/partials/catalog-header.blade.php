@@ -39,7 +39,6 @@
     $listingSubtitle = trim((string) ($listingSubtitle ?? __('vacations.hub_header_subtitle')));
     $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
     $headerEyebrow = trim((string) ($headerEyebrow ?? ''));
-    $headerStatLine = trim((string) ($headerStatLine ?? ''));
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
@@ -112,10 +111,6 @@
                     </button>
                 </div>
             </form>
-
-            @if($headerStatLine !== '')
-                <p class="vacations-page-header__stat-line">{{ $headerStatLine }}</p>
-            @endif
         </div>
 
         <nav class="vacations-page-header__breadcrumbs" aria-label="Breadcrumb">

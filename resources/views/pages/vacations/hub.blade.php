@@ -18,17 +18,10 @@
 @endif
 
 @section('content')
-@php
-    $hubStatLine = __('vacations.hub_stat_line', [
-        'offers' => $hub->totalCamps + $hub->totalTrips,
-        'countries' => $hub->countryGrid->count(),
-    ]);
-@endphp
 @include('pages.vacations.partials.catalog-header', [
     'listingTitle' => __('vacations.hub_hero_title'),
     'listingSubtitle' => __('vacations.hub_hero_lead'),
     'headerEyebrow' => __('vacations.hub_hero_eyebrow'),
-    'headerStatLine' => $hubStatLine,
     'breadcrumbItems' => [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ],

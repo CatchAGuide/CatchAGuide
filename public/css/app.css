@@ -9713,15 +9713,6 @@ div#masonry-grid img {
   height: 1px;
   background: rgba(255, 255, 255, 0.28);
 }
-.vacations-page-header__stat-line {
-  margin: 0.75rem 0 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #787780;
-  text-align: center;
-}
 .vacations-page-header__title {
   margin: 0;
   font-size: clamp(1.55rem, 3vw, 2.35rem);
@@ -9863,8 +9854,6 @@ div#masonry-grid img {
   .vacations-page-header__search-btn {
     width: auto;
     min-width: 0;
-    min-height: auto;
-    align-self: center;
     padding: 0.55rem 0.9rem;
     font-size: 0.85rem;
   }
