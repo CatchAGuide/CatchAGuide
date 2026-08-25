@@ -101,6 +101,29 @@
 
 
 
+    @if($hub->targetFishTiles->isNotEmpty())
+
+        <section class="vacation-hub__fish mb-5" data-analytics-vacation-rail="target-fish">
+
+            <x-vacation.country-slider
+                :title="__('vacations.hub_target_fish_title')"
+                :subtitle="__('vacations.hub_target_fish_subtitle')"
+                slider-id="target-fish"
+                block-class="vacation-fish-rail"
+            >
+                @foreach([false, true] as $isClone)
+                    @foreach($hub->targetFishTiles as $tile)
+                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
+                    @endforeach
+                @endforeach
+            </x-vacation.country-slider>
+
+        </section>
+
+    @endif
+
+
+
     <div class="mb-5">
         <x-vacation.consultation />
     </div>
@@ -192,34 +215,7 @@
 
     @endif
 
-
-
-    @if($hub->targetFishTiles->isNotEmpty())
-
-        <section class="vacation-hub__fish mb-5" data-analytics-vacation-rail="target-fish">
-
-            <x-vacation.country-slider
-                :title="__('vacations.hub_target_fish_title')"
-                :subtitle="__('vacations.hub_target_fish_subtitle')"
-                slider-id="target-fish"
-                block-class="vacation-fish-rail"
-            >
-                @foreach([false, true] as $isClone)
-                    @foreach($hub->targetFishTiles as $tile)
-                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
-                    @endforeach
-                @endforeach
-            </x-vacation.country-slider>
-
-        </section>
-
-    @endif
-
-
-
-    <x-vacation.season-picker />
-
-
+    {{-- <x-vacation.season-picker /> --}}
 
     <x-vacation.hub-bridge
         :total-camps="$hub->totalCamps"
@@ -231,17 +227,23 @@
 
     <x-vacation.cross-sell-banner />
 
-    <section class="vacation-hub__seo mb-5">
+    {{-- Same layout as /guidings' provider-cta + seo-text (cag-home-partner / gl-seo styles from home.scss). --}}
+    <div class="cag-home cag-home--embed">
 
-        <div class="vacation-hub__seo-copy">
-            <h2 class="vacation-hub__seo-copy-title">{{ __('vacations.hub_seo_title') }}</h2>
-            <p>{{ __('vacations.hub_seo_p1') }}</p>
-            <p>{{ __('vacations.hub_seo_p2') }}</p>
-        </div>
+        <x-vacation.provider-cta-banner :country-count="$hub->countryGrid->count()" />
 
-        <x-vacation.provider-cta-banner />
+        <section class="vacation-hub__seo gl-seo">
+            <div class="cag-home-container">
+                <h2 class="gl-seo__title">{{ __('vacations.hub_seo_title') }}</h2>
+                <div class="gl-seo__body" data-gl-seo-body>
+                    <p>{{ __('vacations.hub_seo_p1') }}</p>
+                    <p>{{ __('vacations.hub_seo_p2') }}</p>
+                </div>
+                <button type="button" class="gl-seo__toggle" data-gl-seo-toggle>{{ __('vacations.hub_seo_more') }}</button>
+            </div>
+        </section>
 
-    </section>
+    </div>
 
     @if(!empty($hub->faqItems))
 
@@ -283,5 +285,22 @@
 
 </div>
 
+@endsection
+
+@section('js_after')
+<script>
+(function () {
+    document.querySelectorAll('[data-gl-seo-toggle]').forEach(function (btn) {
+        var body = btn.parentElement ? btn.parentElement.querySelector('[data-gl-seo-body]') : null;
+        if (!body) return;
+        var moreLabel = @json(__('vacations.hub_seo_more'));
+        var lessLabel = @json(__('vacations.hub_seo_less'));
+        btn.addEventListener('click', function () {
+            var expanded = body.classList.toggle('is-expanded');
+            btn.textContent = expanded ? lessLabel : moreLabel;
+        });
+    });
+})();
+</script>
 @endsection
 

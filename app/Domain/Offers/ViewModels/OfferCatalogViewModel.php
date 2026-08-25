@@ -42,14 +42,15 @@ final class OfferCatalogViewModel
         $type = $this->typeTitle();
         $place = $this->locationLabel();
         $species = $this->speciesLabel();
+        $isTrip = $this->filter->type === 'vacation' && $this->filter->vacation === 'trip';
 
         return match (true) {
-            $place !== null && $species !== null => __('offers.title_in_for', [
+            $place !== null && $species !== null => __($isTrip ? 'offers.title_to_for' : 'offers.title_in_for', [
                 'type' => $type,
                 'place' => $place,
                 'species' => $species,
             ]),
-            $place !== null => __('offers.title_in', [
+            $place !== null => __($isTrip ? 'offers.title_to' : 'offers.title_in', [
                 'type' => $type,
                 'place' => $place,
             ]),

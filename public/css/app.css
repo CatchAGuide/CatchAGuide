@@ -11898,6 +11898,9 @@ div#masonry-grid img {
     padding-bottom: 0.65rem;
     margin-bottom: 0.65rem;
   }
+  .vacation-hub__interlude-head {
+    flex: 0 0 auto;
+  }
   .vacation-hub__interlude-stats {
     justify-content: flex-start;
     width: 100%;
@@ -14888,68 +14891,6 @@ div#masonry-grid img {
 }
 .vacation-hub__cross-sell-link:hover {
   text-decoration: underline;
-}
-
-.vacation-hub__seo-copy {
-  padding: clamp(1.25rem, 3vw, 2rem);
-  border-radius: 14px;
-  background: #f8fafc;
-  margin-bottom: 1.25rem;
-}
-.vacation-hub__seo-copy-title {
-  margin: 0 0 0.85rem;
-  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
-  font-weight: 800;
-  color: #313041;
-}
-.vacation-hub__seo-copy p {
-  margin: 0 0 0.85rem;
-  font-size: 0.9rem;
-  line-height: 1.65;
-  color: #3a4250;
-}
-.vacation-hub__seo-copy p:last-child {
-  margin-bottom: 0;
-}
-
-.vacation-hub__provider-cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem clamp(1.1rem, 3vw, 1.75rem);
-  border-radius: 14px;
-  background: #313041;
-  margin-bottom: 1.25rem;
-}
-.vacation-hub__provider-cta-title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #fff;
-}
-.vacation-hub__provider-cta-text {
-  margin: 0.35rem 0 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.72);
-}
-.vacation-hub__provider-cta-btn {
-  flex-shrink: 0;
-  padding: 0.65rem 1.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: transparent;
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.15s ease;
-}
-.vacation-hub__provider-cta-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
 }
 
 .trip-offer-page {

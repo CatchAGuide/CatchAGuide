@@ -83,10 +83,12 @@ class VacationHubNewSectionsTest extends TestCase
         for ($month = 1; $month <= 12; $month++) {
             $response->assertSee('data-season-month="'.$month.'"', false);
         }
-        $response->assertSee('vacation-hub__seo-copy', false);
+        $response->assertSee('vacation-hub__seo gl-seo', false);
         $response->assertSee(__('vacations.hub_seo_title'), false);
-        $response->assertSee('vacation-hub__provider-cta', false);
+        $response->assertSee('vacation-hub__provider-cta cag-home-partner', false);
         $response->assertSee(__('vacations.provider_cta_title'), false);
+        $response->assertSee('cag-home-partner__cards', false);
+        $response->assertSee(__('vacations.provider_cta_card_risk_title'), false);
         $response->assertSee('vacation-hub__cross-sell', false);
         $response->assertSee(__('vacations.hub_cross_sell_title'), false);
         $response->assertSee('Q1?', false);
@@ -176,5 +178,19 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertDontSee('vacation-pillar-tile__stats', false);
         $response->assertDontSee(__('vacations.pillar_tile_explore'), false);
         $response->assertDontSee(__('vacations.price_from_per_night', ['price' => '€100']), false);
+    }
+
+    public function test_hub_interlude_resets_head_flex_basis_on_mobile(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/_vacations-two-pillar.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-hub__interlude-head \{\s*flex:\s*1 1 16rem;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/@media \(max-width:\s*991px\) \{[\s\S]*?\.vacation-hub__interlude-head \{\s*flex:\s*0 0 auto;/',
+            $source
+        );
     }
 }
