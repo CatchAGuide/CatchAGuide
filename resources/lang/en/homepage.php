@@ -153,7 +153,7 @@ return [
     'mixed_see_all' => 'See all',
     'offer_type_tour' => 'All inclusive fishing trip',
     'offer_type_trip' => 'Vacation',
-    'offer_type_camp' => 'Fishing lodge and accommodation',
+    'offer_type_camp' => 'Fishing lodge',
 
     'guides_title' => 'Guides who know these waters',
     'guides_view_all' => 'Meet all guides',

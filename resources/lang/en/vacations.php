@@ -217,7 +217,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'all_offers_breadcrumb' => 'All experiences',
     'pillar_index_results' => ':count listings available',
     'pillar_tile_explore' => 'Explore',
-    'badge_camp' => 'Fishing Lodge and Accommodation',
+    'badge_camp' => 'Fishing Lodge',
     'badge_trip' => 'All inclusive fishing trip',
     'badge_all_inclusive' => 'All-Inclusive',
     'price_from_per_night' => 'from :price / night',
