@@ -220,45 +220,15 @@
 
     </div>
 
-    @if(!empty($hub->faqItems))
-
-        <section class="vacation-hub__faq mb-5">
-
-            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
-
-            <div class="accordion" id="vacationHubFaq">
-
-                @foreach($hub->faqItems as $index => $item)
-
-                    <div class="accordion-item">
-
-                        <h3 class="accordion-header" id="faq-heading-{{ $index }}">
-
-                            <button class="accordion-button {{ $index > 0 ? 'collapsed' : '' }}" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-{{ $index }}">
-
-                                {{ $item['question'] }}
-
-                            </button>
-
-                        </h3>
-
-                        <div id="faq-collapse-{{ $index }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" data-bs-parent="#vacationHubFaq">
-
-                            <div class="accordion-body">{!! $item['answer'] !!}</div>
-
-                        </div>
-
-                    </div>
-
-                @endforeach
-
-            </div>
-
-        </section>
-
-    @endif
-
 </div>
+
+@if(!empty($hub->faqItems))
+    <x-vacation.faq
+        class="vacation-hub__faq"
+        :title="__('vacations.hub_faq_title')"
+        :items="$hub->faqItems"
+    />
+@endif
 
 @endsection
 

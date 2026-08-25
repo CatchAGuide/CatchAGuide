@@ -14344,25 +14344,91 @@ div#masonry-grid img {
   box-shadow: 0 4px 24px rgba(49, 48, 65, 0.08);
 }
 
-.vacation-hub__faq .accordion-item,
-.vacation-country__faq .accordion-item,
-.vacation-pillar-index__faq .accordion-item {
+.vacation-faq {
+  background: #EEF2F8;
+  padding: 2.5rem 0;
+}
+
+.vacation-faq__inner {
+  width: 100%;
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: clamp(1.25rem, 3vw, 3rem);
+  padding-left: clamp(1.25rem, 3vw, 3rem);
+}
+
+.vacation-faq .vacation-section-heading,
+.vacation-hub__faq .vacation-section-heading,
+.vacation-country__faq .vacation-section-heading,
+.vacation-pillar-index__faq .vacation-section-heading {
+  margin-bottom: 1.1rem;
+}
+
+.vacation-faq__list {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px !important;
-  margin-bottom: 0.5rem;
+  border-radius: 0.9rem;
   overflow: hidden;
+  box-shadow: 0 4px 18px rgba(49, 48, 65, 0.06);
 }
-.vacation-hub__faq .accordion-button,
-.vacation-country__faq .accordion-button,
-.vacation-pillar-index__faq .accordion-button {
-  font-weight: 600;
-  font-size: 0.95rem;
+
+.vacation-faq__item {
+  border-top: 1px solid #e5e7eb;
 }
-.vacation-hub__faq .accordion-button:not(.collapsed),
-.vacation-country__faq .accordion-button:not(.collapsed),
-.vacation-pillar-index__faq .accordion-button:not(.collapsed) {
-  background: #f8fafc;
+.vacation-faq__item:first-child {
+  border-top: 0;
+}
+
+.vacation-faq__q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.2rem;
+  padding: 0.9rem 1rem;
+  background: none;
+  border: 0;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 700;
   color: #313041;
+  cursor: pointer;
+}
+.vacation-faq__q:focus-visible {
+  outline: 2px solid rgba(232, 91, 64, 0.45);
+  outline-offset: -2px;
+}
+
+.vacation-faq__chev {
+  flex: none;
+  color: #666;
+  transition: transform 0.15s ease;
+}
+
+.vacation-faq__item.is-open .vacation-faq__chev {
+  transform: rotate(180deg);
+}
+
+.vacation-faq__a {
+  display: none;
+  padding: 0 1rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #666;
+}
+.vacation-faq__a p {
+  margin: 0 0 0.65rem;
+}
+.vacation-faq__a p:last-child {
+  margin-bottom: 0;
+}
+
+.vacation-faq__item.is-open .vacation-faq__a {
+  display: block;
 }
 
 .vacation-pillar-index__results-meta {

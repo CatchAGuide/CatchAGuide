@@ -3287,26 +3287,93 @@ $vac-country-panel: #313041;
     }
 }
 
-// —— FAQ ——
+// —— FAQ (single-card accordion, matches guidings landing) ——
+.vacation-faq {
+    background: #EEF2F8;
+    padding: 2.5rem 0;
+}
+
+.vacation-faq__inner {
+    @include cag-page-container;
+}
+
+.vacation-faq,
 .vacation-hub__faq,
 .vacation-country__faq,
 .vacation-pillar-index__faq {
-    .accordion-item {
-        border: 1px solid $vac-border;
-        border-radius: 10px !important;
-        margin-bottom: .5rem;
-        overflow: hidden;
+    .vacation-section-heading {
+        margin-bottom: 1.1rem;
     }
+}
 
-    .accordion-button {
-        font-weight: 600;
-        font-size: .95rem;
+.vacation-faq__list {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid $vac-border;
+    border-radius: .9rem;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(49, 48, 65, .06);
+}
 
-        &:not(.collapsed) {
-            background: $vac-surface;
-            color: $vac-ink;
+.vacation-faq__item {
+    border-top: 1px solid $vac-border;
+
+    &:first-child {
+        border-top: 0;
+    }
+}
+
+.vacation-faq__q {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    min-height: 3.2rem;
+    padding: .9rem 1rem;
+    background: none;
+    border: 0;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $vac-ink;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid rgba($vac-brand, .45);
+        outline-offset: -2px;
+    }
+}
+
+.vacation-faq__chev {
+    flex: none;
+    color: $vac-muted;
+    transition: transform .15s ease;
+}
+
+.vacation-faq__item.is-open .vacation-faq__chev {
+    transform: rotate(180deg);
+}
+
+.vacation-faq__a {
+    display: none;
+    padding: 0 1rem 1rem;
+    font-size: .95rem;
+    line-height: 1.55;
+    color: $vac-muted;
+
+    p {
+        margin: 0 0 .65rem;
+
+        &:last-child {
+            margin-bottom: 0;
         }
     }
+}
+
+.vacation-faq__item.is-open .vacation-faq__a {
+    display: block;
 }
 
 // —— Pillar index chrome ——

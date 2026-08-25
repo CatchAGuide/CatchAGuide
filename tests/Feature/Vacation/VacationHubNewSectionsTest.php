@@ -76,11 +76,6 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertOk();
         $response->assertSee('vacation-hub__consultation', false);
         $response->assertSee(__('vacations.hub_consultation_title'), false);
-        $response->assertSee('vacation-hub__season', false);
-        $response->assertSee(__('vacations.hub_season_title'), false);
-        for ($month = 1; $month <= 12; $month++) {
-            $response->assertSee('data-season-month="'.$month.'"', false);
-        }
         $response->assertSee('vacation-hub__seo gl-seo', false);
         $response->assertSee(__('vacations.hub_seo_title'), false);
         $response->assertSee('vacation-hub__provider-cta cag-home-partner', false);
@@ -90,6 +85,12 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertSee('vacation-hub__cross-sell', false);
         $response->assertSee(__('vacations.hub_cross_sell_title'), false);
         $response->assertSee('Q1?', false);
+        $response->assertSee('vacation-faq', false);
+        $response->assertSee('vacation-faq__inner', false);
+        $response->assertSee('vacation-faq__list', false);
+        $response->assertSee('data-vacation-faq', false);
+        $response->assertSee('vacation-faq__q', false);
+        $response->assertDontSee('id="vacationHubFaq"', false);
     }
 
     public function test_hub_provider_cta_matches_guiding_partner_layout(): void

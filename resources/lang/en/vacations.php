@@ -177,7 +177,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'gallery_prev' => 'Previous image',
     'gallery_next' => 'Next image',
     'gallery_close' => 'Close gallery',
-    'hub_new_listings_title' => 'Recently Added Fishing Holidays',
+    'hub_new_listings_title' => 'Recently added fishing holidays',
     'hub_bridge_tagline' => 'Book curated fishing camps and fishing trips worldwide',
     'hub_bridge_title' => 'Why you book here',
     'hub_bridge_eyebrow' => 'Fishing holidays with Catch A Guide',
@@ -376,7 +376,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
 
     // Hub redesign — reviews, cross-sell, provider CTA, SEO copy
     'hub_reviews_eyebrow' => 'Experiences',
-    'hub_reviews_title' => 'What anglers say after the trip',
+    'hub_reviews_title' => 'What other anglers say after the trip',
     'hub_reviews_caption' => 'Real reviews from guided trips booked across the whole platform.',
     'hub_cross_sell_title' => 'Only got one day on the water?',
     'hub_cross_sell_text' => 'Book a guided day tour instead.',

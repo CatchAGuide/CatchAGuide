@@ -105,27 +105,18 @@
             {!! clean_html(translate($destination->scopedCmsValue('content'))) !!}
         </section>
     @endif
-
-    @if($vm->faq->isNotEmpty())
-        <section class="vacation-country__faq mb-5">
-            <x-vacation.section-heading :title="$faqHeading" />
-            <div class="accordion" id="vacationCountryFaq">
-                @foreach($vm->faq as $index => $item)
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#country-faq-{{ $index }}">
-                                {{ translate($item->question ?? $item['question'] ?? '') }}
-                            </button>
-                        </h3>
-                        <div id="country-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationCountryFaq">
-                            <div class="accordion-body">{!! clean_html(translate($item->answer ?? $item['answer'] ?? '')) !!}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-    @endif
 </div>
+
+@if($vm->faq->isNotEmpty())
+    <x-vacation.faq
+        class="vacation-country__faq"
+        :title="$faqHeading"
+        :items="$vm->faq->map(fn ($item) => [
+            'question' => translate($item->question ?? $item['question'] ?? ''),
+            'answer' => translate($item->answer ?? $item['answer'] ?? ''),
+        ])"
+    />
+@endif
 
 @endsection
 

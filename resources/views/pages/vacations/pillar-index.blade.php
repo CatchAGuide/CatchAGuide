@@ -98,27 +98,18 @@
     @if($vm->isCountryPage() && filled($vm->bodyContentHtml()))
         <div class="mb-4">{!! clean_html(translate($vm->bodyContentHtml())) !!}</div>
     @endif
-
-    @if($vm->faq->isNotEmpty())
-        <section class="vacation-pillar-index__faq mb-5">
-            <x-vacation.section-heading :title="$vm->faqTitle()" />
-            <div class="accordion" id="vacationPillarFaq">
-                @foreach($vm->faq as $index => $item)
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pillar-faq-{{ $index }}">
-                                {{ $item->question ?? $item['question'] ?? '' }}
-                            </button>
-                        </h3>
-                        <div id="pillar-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationPillarFaq">
-                            <div class="accordion-body">{!! clean_html(translate($item->answer ?? $item['answer'] ?? '')) !!}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-    @endif
 </div>
+
+@if($vm->faq->isNotEmpty())
+    <x-vacation.faq
+        class="vacation-pillar-index__faq"
+        :title="$vm->faqTitle()"
+        :items="$vm->faq->map(fn ($item) => [
+            'question' => $item->question ?? $item['question'] ?? '',
+            'answer' => translate($item->answer ?? $item['answer'] ?? ''),
+        ])"
+    />
+@endif
 
 @endsection
 
