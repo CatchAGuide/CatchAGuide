@@ -277,7 +277,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'pillar_index_camps_title' => 'Fishing camps across Europe',
     'pillar_country_trips_title' => 'All-Inclusive Fishing Trips to :country',
     'pillar_country_camps_title' => 'Fishing Lodges & Accommodation in :country',
-    'view_all_trips' => 'View all trips',
+    'view_all_trips' => 'View all holidays',
     'view_all_camps' => 'View all camps',
     'view_all_holidays' => 'View all fishing holidays',
     'view_all_countries' => 'View all',

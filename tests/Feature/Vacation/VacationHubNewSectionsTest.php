@@ -201,6 +201,63 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertDontSee(__('vacations.price_from_per_night', ['price' => '€100']), false);
     }
 
+    public function test_hub_renders_recently_added_holidays_rail_with_mixed_trip_and_camp_cards(): void
+    {
+        $tripCard = [
+            'type' => 'trip',
+            'id' => 1,
+            'title' => 'Test Trip',
+            'url' => '/vacations/trips/test-trip',
+            'image' => '/images/placeholder_guide.jpg',
+            'gallery_images' => ['/images/placeholder_guide.jpg'],
+            'badge' => 'Trip',
+            'location' => 'Sweden',
+            'cta' => 'Request trip',
+            'price_amount' => '€450',
+            'price_unit' => 'person',
+        ];
+
+        $campCard = [
+            'type' => 'camp',
+            'id' => 2,
+            'title' => 'Test Camp',
+            'url' => '/vacations/camps/test-camp',
+            'image' => '/images/placeholder_guide.jpg',
+            'gallery_images' => ['/images/placeholder_guide.jpg'],
+            'badge' => 'Camp',
+            'location' => 'Norway',
+            'cta' => 'Book now',
+            'price_amount' => '€300',
+            'price_unit' => 'night',
+        ];
+
+        $this->mockHubService($this->makeHub([
+            'newListings' => collect([$tripCard, $campCard]),
+            'showNewListingsRail' => true,
+        ]));
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-analytics-vacation-rail="new-listings"', false);
+        $response->assertSee(__('vacations.hub_new_listings_title'), false);
+        $response->assertSee('Test Trip', false);
+        $response->assertSee('Test Camp', false);
+        $response->assertSee('vacation-slider-card--trip', false);
+        $response->assertSee('vacation-slider-card--camp', false);
+    }
+
+    public function test_hub_hides_new_listings_rail_when_empty(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('data-analytics-vacation-rail="new-listings"', false);
+        $response->assertDontSee(__('vacations.hub_new_listings_title'), false);
+    }
+
     public function test_hub_interlude_resets_head_flex_basis_on_mobile(): void
     {
         $source = (string) file_get_contents(resource_path('sass/page/_vacations-two-pillar.scss'));

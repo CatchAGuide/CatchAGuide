@@ -74,7 +74,7 @@
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_popular_title')"
-                :link-url="route('vacations.index')"
+                :link-url="route('vacations.all-offers')"
                 :link-label="__('vacations.view_all_trips')"
                 slider-id="popular"
             >
@@ -136,7 +136,7 @@
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_new_listings_title')"
-                :link-url="route('vacations.index')"
+                :link-url="route('vacations.all-offers')"
                 :link-label="__('vacations.view_all_holidays')"
                 slider-id="new-listings"
             >
