@@ -33,7 +33,7 @@ class GuidingsLandingPageTest extends TestCase
         $response->assertViewIs('pages.newhome-latest');
         $response->assertSee('Finde deine nächste Angeltour', false);
         $response->assertSee('So buchst du bei', false);
-        $response->assertSee('Beliebte Angelziele in Europa', false);
+        $response->assertSee('Beliebte Angelziele', false);
         $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
         $response->assertSee('Welche Art von Angeltour suchst du?', false);
         $response->assertSee('Für Guides, Camps und Reiseanbieter', false);

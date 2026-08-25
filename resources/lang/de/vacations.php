@@ -9,9 +9,9 @@ return [
 
     'book_vacation_reserve' => 'Reservieren',
 
-    'title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
-    'header_title' => 'Angelurlaub in Europa – Die besten Reiseziele für unvergessliche Angelerlebnisse',
-    'header_sub_title' => 'Individuelle Angelurlaube an den schönsten Gewässern Europas – Fange deine Traumfische in atemberaubender Natur!',
+    'title' => 'Angelurlaub – Die besten Reiseziele für unvergessliche Angelerlebnisse',
+    'header_title' => 'Angelurlaub – Die besten Reiseziele für unvergessliche Angelerlebnisse',
+    'header_sub_title' => 'Individuelle Angelurlaube an den schönsten Gewässern – Fange deine Traumfische in atemberaubender Natur!',
     'introduction' => 'Europa bietet Reisenden eine unglaubliche Vielfalt an Erlebnissen und Reisezielen. Ob Sie davon träumen, an mediterranen Stränden zu entspannen, historische Städte zu erkunden oder durch unberührte Wildnis zu wandern - wir haben den perfekten Urlaub für Sie.<br><br>
 Deutschland: Ein Land verzaubernder Wälder, märchenhafter Schlösser und lebendiger Städte. Von der Kulturmetropole Berlin bis zum romantischen Rheintal bietet Deutschland endlose Möglichkeiten für unvergessliche Erlebnisse. Weltklasse-Museen, historische Architektur und charmante Dörfer warten darauf, von Ihnen entdeckt zu werden.<br><br>
 Niederlande: Mit seinen malerischen Kanälen, bunten Tulpenfeldern und historischen Windmühlen ist die Niederlande ein Paradies für Fotografen. Die kosmopolitische Atmosphäre Amsterdams verbindet sich mit traditionellem niederländischem Charme in kleineren Städten zu unvergesslichen Urlaubserlebnissen.<br><br>
@@ -142,7 +142,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'limited_avail_badge' => 'BEGRENZT VERFÜGBAR',
 
     // Two-pillar hub & country rebuild
-    'hub_title' => 'Angelurlaub in Europa',
+    'hub_title' => 'Angelurlaub',
     'hub_header_title' => 'Buche deinen nächsten Angelurlaub',
     'hub_header_subtitle' => 'Wähle zwischen flexiblen Angelcamps und komplett organisierten Angelreisen',
     'hub_breadcrumb' => 'Angelurlaub',
@@ -195,7 +195,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'hub_usp_europe_title' => 'In ganz Europa',
     'hub_usp_europe_text' => 'Von Skandinavien bis ans Mittelmeer.',
     'hub_country_grid_title' => 'Nach Land entdecken',
-    'hub_country_slider_title' => 'Beliebte Angelziele in Europa',
+    'hub_country_slider_title' => 'Beliebte Angelziele',
     'hub_country_slider_subtitle' => 'Von der dänischen Küste bis zum Ebro-Delta – finde dein Revier.',
     'hub_country_trips_camps' => ':trips Trips · :camps Camps',
     'hub_inspiration_title' => 'Finde deinen Stil',
@@ -212,7 +212,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'country_listing_title' => 'Angelurlaub in :country',
     'all_offers_nav' => 'Alle',
     'all_offers_title' => 'Alle Angebote',
-    'all_offers_subtitle' => 'Entdecke alle Guided Fishing Trips und Angelcamps in Europa.',
+    'all_offers_subtitle' => 'Entdecke alle Guided Fishing Trips und Angelcamps.',
     'all_offers_listing_title' => 'Alle Angelurlaube',
     'all_offers_breadcrumb' => 'Alle Angebote',
     'pillar_index_results' => ':count Angebote verfügbar',

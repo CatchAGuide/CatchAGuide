@@ -212,7 +212,7 @@ return [
     'landing_step3_title' => 'Erst danach bezahlen',
     'landing_step3_text' => 'Direkt beim Guide, keine Vorkasse.',
 
-    'landing_destinations_title' => 'Beliebte Angelziele in Europa',
+    'landing_destinations_title' => 'Beliebte Angelziele',
     'landing_destinations_subtitle' => 'Von der dänischen Küste bis zum Ebro-Delta – finde dein Revier.',
     'landing_destinations_see_all' => 'Alle Angelziele ansehen',
 
@@ -258,7 +258,7 @@ return [
     'landing_partner_card_control_text' => 'Du bestimmst Termine, Preise und Gruppengröße und bestätigst jede Anfrage selbst.',
 
     'landing_seo_title' => 'Angeltouren mit Guide buchen',
-    'landing_seo_p1' => 'Geführte Angeltouren in Europa reichen vom Halbtagesausflug auf dem Hausgewässer bis zur mehrtägigen Tour an der Küste. Ein Guide kennt Spots, Saison und Technik – du brauchst nur anzureisen.',
+    'landing_seo_p1' => 'Geführte Angeltouren reichen vom Halbtagesausflug auf dem Hausgewässer bis zur mehrtägigen Tour an der Küste. Ein Guide kennt Spots, Saison und Technik – du brauchst nur anzureisen.',
     'landing_seo_p2' => 'Auf Catch A Guide vergleichst du Touren nach Land, Zielfisch und Methode, fragst kostenlos an und bezahlst erst nach der Bestätigung durch den Guide.',
     'landing_seo_p3' => 'Ausrüstung, Boot und Lizenzen sind je nach Anbieter unterschiedlich geregelt – die Details stehen in jeder Tourbeschreibung.',
     'landing_seo_more' => 'Mehr lesen',
