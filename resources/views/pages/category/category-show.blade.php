@@ -1,11 +1,12 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show');
+    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show', 'vacations.targets');
     $heroSearchAction = listing_search_action();
     $heroParentCrumb = match (true) {
         request()->routeIs('guidings.methods.show') => ['label' => __('category.methods.breadcrumb'), 'url' => route('guidings.methods')],
         request()->routeIs('guidings.targets') => ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+        request()->routeIs('vacations.targets') => ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
         default => ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
     };
 @endphp

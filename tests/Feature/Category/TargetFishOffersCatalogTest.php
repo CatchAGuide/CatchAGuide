@@ -150,6 +150,11 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertSee('name="type"', false);
         $response->assertSee('value="vacation"', false);
+        $response->assertSee('cag-site-nav--overlay', false);
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertSee('offers-page-header__hero', false);
+        $response->assertDontSee('navbar-custom short-header long-header', false);
+        $response->assertSee('action="'.url('/vacations').'"', false);
     }
 
     public function test_vacations_target_fish_page_404s_when_content_missing_for_scope(): void
