@@ -1,8 +1,8 @@
 <?php
 return [
     'header-title' => 'Find your next guided fishing tour!',
-    'header-message' => 'Search deals on fishing trips, vacations and much more',
-    'header-become-guide' => 'List fishing tour',
+    'header-message' => 'Search deals on All inclusive fishing trips, vacations and much more',
+    'header-become-guide' => 'Become a partner',
     'header-login' => 'Log in',
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
@@ -26,13 +26,13 @@ return [
     'usps-third' => 'Search request for individual wishes',
     'usps-fourth' => 'Actual verified ratings',
 
-    'nearyou-title' => 'Fishing trips near you',
-    'nearyou-message' => 'Find fishing trips in your area',
+    'nearyou-title' => 'All inclusive fishing trips near you',
+    'nearyou-message' => 'Find All inclusive fishing trips in your area',
 
     'destination-title' => 'Europes most trending fishing destinations',
     'destination-message' => 'Most popular choices for anglers all over Europe',
 
-    'experience-title' => 'Popular choices of fishing trips',
+    'experience-title' => 'Popular choices of All inclusive fishing trips',
     'experience-message' => 'Find the perfect fishing tour for every situation',
 
     'experience-tab-action' => 'Pure action',
@@ -79,7 +79,7 @@ return [
     'targetfish-carp' => 'Carp',
     'targetfish-salmon' => 'Salmon',
 
-    'newoffer-title' => 'Recently added fishing trips',
+    'newoffer-title' => 'Recently added All inclusive fishing trips',
     'newoffer-message' => 'Find the newest offers here',
 
     'magazine-title' => 'Get inspired for your next fishing trip',
@@ -94,8 +94,8 @@ return [
     'meta_description' => 'Find local fishing guides for day tours, multi-day trips, and camps across Europe. Verified ratings, easy booking, unforgettable days on the water.',
 
     'hero_h1' => 'Find your next fishing adventure',
-    'hero_sub' => '450+ offers from local guides in 23 countries – from day trips and fishing camps to all-inclusive fishing holidays.',
-    'hero_eyebrow' => 'Day tours · Fishing camps · Fishing trips',
+    'hero_sub' => '450+ offers from local guides in 23 countries – from day trips and fishing lodges and accommodation to all-inclusive fishing holidays.',
+    'hero_eyebrow' => 'Day tours · Fishing lodges and accommodation · All inclusive fishing trips',
     'chooser_tour_label' => 'Day tours',
     'chooser_tour_title' => 'Go out today',
     'chooser_tour_sub' => 'Experience perfect fishing moments. Half-day or full-day tours with local experts.',
@@ -141,15 +141,15 @@ return [
 
     'offers_title' => 'Popular with anglers',
     'offers_tours_title' => 'Fishing tours',
-    'offers_trips_title' => 'Fishing trips',
-    'offers_camps_title' => 'Fishing camps',
+    'offers_trips_title' => 'All inclusive fishing trips',
+    'offers_camps_title' => 'Fishing lodges and accommodation',
     'offers_tours_sub' => 'Half-day or full-day trips with an experienced guide.',
     'offers_camps_sub' => 'Your fishing stay with accommodation. Add a rental boat and guiding if you want.',
-    'offers_trips_sub' => 'Fully organised fishing trips. Stay, meals, and a guide — all included.',
+    'offers_trips_sub' => 'Fully organised All inclusive fishing trips. Stay, meals, and a guide — all included.',
     'offer_details' => 'View offer',
     'mixed_browse_tours' => 'Browse fishing tours',
-    'mixed_browse_trips' => 'Browse fishing trips',
-    'mixed_browse_camps' => 'Browse fishing camps',
+    'mixed_browse_trips' => 'Browse All inclusive fishing trips',
+    'mixed_browse_camps' => 'Browse fishing lodges and accommodation',
     'mixed_see_all' => 'See all',
     'offer_type_tour' => 'Tour',
     'offer_type_trip' => 'Vacation',
@@ -247,7 +247,7 @@ return [
 
     'landing_partner_eyebrow' => 'For guides, camps and travel providers',
     'landing_partner_title' => 'Show your tours to anglers across Europe',
-    'landing_partner_text' => 'Market your guided fishing tours, guidings and fishing camps – no fixed costs and no exclusivity.',
+    'landing_partner_text' => 'Market your guided fishing tours, guidings and fishing lodges and accommodation – no fixed costs and no exclusivity.',
     'landing_partner_cta_primary' => 'Get started',
     'landing_partner_cta_secondary' => 'Learn more',
     'landing_partner_card_risk_title' => 'No risk',

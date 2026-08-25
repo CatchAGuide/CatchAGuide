@@ -93,6 +93,24 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertDontSee('id="vacationHubFaq"', false);
     }
 
+    public function test_vacation_faq_uses_guidings_blue_band_styles(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/_vacations-two-pillar.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-faq \{\s*background:\s*#EEF2F8;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-faq__inner \{\s*@include cag-page-container;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-faq__list \{[\s\S]*?background:\s*#fff;/',
+            $source
+        );
+    }
+
     public function test_hub_provider_cta_matches_guiding_partner_layout(): void
     {
         $this->mockHubService($this->makeHub());

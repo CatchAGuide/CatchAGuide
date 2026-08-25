@@ -63,7 +63,7 @@ return [
     *
     */
     // hero
-    'hero-title' => 'Fishing Trips',
+    'hero-title' => 'All inclusive fishing trips',
     'FindAGiude' => 'Find your fishing guide',
     'find-your-guide' => 'Find & book with Catch A Guide!',
     'catchYourFish' => 'Catch your favorite fish',

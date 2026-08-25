@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'title' => 'All Offers',
-    'explore_title' => 'Explore All Offers',
+    'title' => 'All Experiences',
+    'explore_title' => 'Explore All Experiences',
     'title_tours' => 'Fishing Tours',
     'title_trips' => 'All-Inclusive Fishing Trips',
     'title_camps' => 'Fishing Lodges & Accommodation',
@@ -12,19 +12,19 @@ return [
     'title_for' => ':type for :species',
     'title_in_for' => ':type in :place for :species',
     'title_to_for' => ':type to :place for :species',
-    'subtitle' => 'Browse guided day tours, multi-day trips, and fishing camps in one place.',
+    'subtitle' => 'Browse guided day tours, multi-day trips, and fishing lodges and accommodation in one place.',
     'subtitle_tours' => 'Local guided day tours with verified Catch A Guide anglers.',
     'subtitle_trips' => 'Multi-day fishing trips with lodging and guiding packages.',
-    'subtitle_camps' => 'Fishing camps and lodges with stay, boats, and guiding options.',
+    'subtitle_camps' => 'Fishing lodges and accommodation with stay, boats, and guiding options.',
     'subtitle_vacations' => 'Multi-day fishing trips and camps with lodging and guiding packages.',
     'breadcrumb' => 'Offers',
-    'nav_label' => 'All Offers',
+    'nav_label' => 'All Experiences',
 
     'filter_all' => 'All',
     'filter_tours' => 'Tours',
     'filter_vacations' => 'Vacations',
     'filter_trips' => 'Trips',
-    'filter_camps' => 'Camps',
+    'filter_camps' => 'Lodges and accommodation',
     'filter_vacation_type' => 'Vacation type',
     'filter_vacation_all' => 'All vacations',
     'filter_type' => 'Offer type',
@@ -99,7 +99,7 @@ return [
 
     'faq_title' => 'Frequently asked questions',
     'faq_q1' => 'What is included in Offers?',
-    'faq_a1' => 'Offers brings together guided day tours, multi-day fishing trips, and fishing camps so you can compare experiences in one catalog.',
+    'faq_a1' => 'Offers brings together guided day tours, multi-day fishing trips, and fishing lodges and accommodation so you can compare experiences in one catalog.',
     'faq_q2' => 'How do Tours differ from Trips and Camps?',
     'faq_a2' => 'Tours are typically guided day trips. Trips are multi-day packages. Camps focus on lodging with optional boats and guiding.',
     'faq_q3' => 'Can I filter by country or species?',
@@ -107,5 +107,5 @@ return [
     'faq_q4' => 'Are guides and lodges verified?',
     'faq_a4' => 'Public listings come from Catch A Guide partners. Always check the offer page for what’s included before booking or requesting.',
 
-    'browse_all' => 'Browse all offers',
+    'browse_all' => 'Browse all experiences',
 ];
