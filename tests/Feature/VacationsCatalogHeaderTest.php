@@ -13,7 +13,7 @@ class VacationsCatalogHeaderTest extends TestCase
             'listingTitle' => 'Book your next fishing holiday',
             'listingSubtitle' => 'Choose between camps and trips',
             'breadcrumbItems' => [
-                ['label' => 'Fishing Vacations', 'url' => null],
+                ['label' => 'Fishing Holidays', 'url' => null],
             ],
         ])->render();
 
@@ -55,7 +55,7 @@ class VacationsCatalogHeaderTest extends TestCase
             'titleTag' => 'p',
             'currentVacationCountry' => 'germany',
             'breadcrumbItems' => [
-                ['label' => 'Fishing Vacations', 'url' => route('vacations.index')],
+                ['label' => 'Fishing Holidays', 'url' => route('vacations.index')],
                 ['label' => 'Hausboot Fürstenberg', 'url' => null],
             ],
         ])->render();

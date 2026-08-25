@@ -10,7 +10,7 @@ return [
     'header-menu' => 'Menu',
     'header-close' => 'Close',
     'header-language' => 'Language',
-    'header-vacations' => 'Fishing Vacations',
+    'header-vacations' => 'Fishing Holidays',
 
     'searchbar-destination' => 'Destination',
     'searchbar-person' => 'Guests',
@@ -90,7 +90,7 @@ return [
 
     'listings-title' => 'All Fishing Tours',
 
-    'meta_title' => 'Book guided fishing tours & fishing vacations | Catch A Guide',
+    'meta_title' => 'Book guided fishing tours & fishing holidays | Catch A Guide',
     'meta_description' => 'Find local fishing guides for day tours, multi-day trips, and camps across Europe. Verified ratings, easy booking, unforgettable days on the water.',
 
     'hero_h1' => 'Find your next fishing adventure',
@@ -184,10 +184,10 @@ return [
     'mobile_nav_saved' => 'Saved',
     'mobile_nav_profile' => 'Profile',
 
-    'footer_vacations' => 'Fishing Vacations',
+    'footer_vacations' => 'Fishing Holidays',
     'footer_destinations' => 'Destinations',
     'footer_group_tours' => 'Fishing tours',
-    'footer_group_vacations' => 'Fishing vacations',
+    'footer_group_vacations' => 'Fishing holidays',
     'footer_group_providers' => 'For providers',
     'footer_group_about' => 'About us',
     'footer_by_country' => 'By country',

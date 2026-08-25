@@ -145,7 +145,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_title' => 'Fishing Holidays in Europe',
     'hub_header_title' => 'Book your next fishing holiday',
     'hub_header_subtitle' => 'Choose between flexible fishing camps and fully organised fishing trips',
-    'hub_breadcrumb' => 'Fishing Vacations',
+    'hub_breadcrumb' => 'Fishing Holidays',
     'pillar_camps_title' => 'Fishing Camps',
     'pillar_camps_desc' => 'Your fishing holiday with accommodation. Add a rental boat and guiding whenever you want.',
     'pillar_camps_keywords' => [
@@ -214,7 +214,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'all_offers_nav' => 'All',
     'all_offers_title' => 'All Offers',
     'all_offers_subtitle' => 'Browse every guided fishing trip and fishing camp across Europe.',
-    'all_offers_listing_title' => 'All fishing vacations',
+    'all_offers_listing_title' => 'All fishing holidays',
     'all_offers_breadcrumb' => 'All offers',
     'pillar_index_results' => ':count listings available',
     'pillar_tile_explore' => 'Explore',
