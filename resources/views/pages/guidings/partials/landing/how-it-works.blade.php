@@ -1,29 +1,32 @@
 <section class="gl-steps" data-cag-reveal>
     <div class="cag-home-container">
-        <h2 class="gl-steps__title cag-reveal__header">{!! nl2br(e(__('homepage.landing_steps_title'))) !!}</h2>
-        <div class="gl-steps__list">
-            <div class="gl-steps__item cag-reveal__item" style="--reveal-i: 0">
-                <div class="gl-steps__num">01</div>
-                <div>
+        <header class="gl-steps__header cag-reveal__header">
+            <p class="gl-steps__eyebrow">{{ __('homepage.landing_steps_eyebrow') }}</p>
+            <h2 class="gl-steps__title">{{ __('homepage.landing_steps_title') }}</h2>
+            <p class="gl-steps__subtitle">{{ __('homepage.landing_steps_subtitle') }}</p>
+        </header>
+        <ol class="gl-steps__list">
+            <li class="gl-steps__item cag-reveal__item" style="--reveal-i: 0">
+                <span class="gl-steps__num" aria-hidden="true">01</span>
+                <div class="gl-steps__body">
                     <p class="gl-steps__step-title">{{ __('homepage.landing_step1_title') }}</p>
                     <p class="gl-steps__step-text">{{ __('homepage.landing_step1_text') }}</p>
                 </div>
-            </div>
-            <div class="gl-steps__item cag-reveal__item" style="--reveal-i: 1">
-                <div class="gl-steps__num">02</div>
-                <div>
+            </li>
+            <li class="gl-steps__item cag-reveal__item" style="--reveal-i: 1">
+                <span class="gl-steps__num" aria-hidden="true">02</span>
+                <div class="gl-steps__body">
                     <p class="gl-steps__step-title">{{ __('homepage.landing_step2_title') }}</p>
                     <p class="gl-steps__step-text">{{ __('homepage.landing_step2_text') }}</p>
                 </div>
-            </div>
-            <div class="gl-steps__item cag-reveal__item" style="--reveal-i: 2">
-                <div class="gl-steps__num">03</div>
-                <div>
+            </li>
+            <li class="gl-steps__item cag-reveal__item" style="--reveal-i: 2">
+                <span class="gl-steps__num" aria-hidden="true">03</span>
+                <div class="gl-steps__body">
                     <p class="gl-steps__step-title">{{ __('homepage.landing_step3_title') }}</p>
                     <p class="gl-steps__step-text">{{ __('homepage.landing_step3_text') }}</p>
                 </div>
-            </div>
-        </div>
+            </li>
+        </ol>
     </div>
 </section>
-<div class="gl-divider"><span class="gl-divider__dot"></span></div>

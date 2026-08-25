@@ -93,7 +93,7 @@ return [
     'meta_title' => 'Book guided fishing tours & fishing holidays | Catch A Guide',
     'meta_description' => 'Find local fishing guides for day tours, multi-day trips, and camps across Europe. Verified ratings, easy booking, unforgettable days on the water.',
 
-    'hero_h1' => 'Find your next fishing adventure',
+    'hero_h1' => 'Find Your Next Fishing Adventure',
     'hero_sub' => '450+ offers from local guides in 23 countries – from day trips and fishing lodges and accommodation to all-inclusive fishing holidays.',
     'hero_eyebrow' => 'Day tours · Fishing lodges and accommodation · All inclusive fishing trips',
     'chooser_tour_label' => 'Day tours',
@@ -199,14 +199,16 @@ return [
 
     // /guidings landing page redesign
     'landing_hero_eyebrow' => 'Guided fishing tours',
-    'landing_hero_h1' => 'Find your next fishing tour',
+    'landing_hero_h1' => 'Find Your Next Fishing Tour',
     'landing_hero_sub' => ':tours guided tours from local guides in :countries countries – from a day trip to a full fishing vacation.',
     'landing_search_placeholder' => 'Country, region or water',
     'landing_search_submit' => 'Show tours',
 
-    'landing_steps_title' => "How booking with\nCatch A Guide works",
+    'landing_steps_eyebrow' => 'How it works',
+    'landing_steps_title' => 'Booking with Catch A Guide',
+    'landing_steps_subtitle' => 'Three steps, no prepayment, no risk.',
     'landing_step1_title' => 'Request a tour',
-    'landing_step1_text' => 'Free and non-binding.',
+    'landing_step1_text' => 'Free and non-binding — tell the guide what you are after.',
     'landing_step2_title' => 'Guide confirms',
     'landing_step2_text' => 'Usually replies within 24 hours.',
     'landing_step3_title' => 'Pay only afterwards',

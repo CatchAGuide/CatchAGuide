@@ -32,7 +32,9 @@ class GuidingsLandingPageTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('pages.newhome-latest');
         $response->assertSee('Finde deine nächste Angeltour', false);
-        $response->assertSee('So buchst du bei', false);
+        $response->assertSee('So funktioniert es', false);
+        $response->assertSee('Buchen bei Catch A Guide', false);
+        $response->assertSee('Drei Schritte, keine Vorkasse, kein Risiko.', false);
         $response->assertSee('Beliebte Angelziele', false);
         $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
         $response->assertSee('Welche Art von Angeltour suchst du?', false);
@@ -48,7 +50,10 @@ class GuidingsLandingPageTest extends TestCase
         $response = $this->get(route('guidings.landing'));
 
         $response->assertOk();
-        $response->assertSee('Find your next fishing tour', false);
+        $response->assertSee('Find Your Next Fishing Tour', false);
+        $response->assertSee('How it works', false);
+        $response->assertSee('Booking with Catch A Guide', false);
+        $response->assertSee('Three steps, no prepayment, no risk.', false);
         $response->assertSee('For guides, camps and travel providers', false);
     }
 

@@ -204,9 +204,11 @@ return [
     'landing_search_placeholder' => 'Land, Region oder Gewässer',
     'landing_search_submit' => 'Touren anzeigen',
 
-    'landing_steps_title' => "So buchst du bei\nCatch A Guide",
+    'landing_steps_eyebrow' => 'So funktioniert es',
+    'landing_steps_title' => 'Buchen bei Catch A Guide',
+    'landing_steps_subtitle' => 'Drei Schritte, keine Vorkasse, kein Risiko.',
     'landing_step1_title' => 'Tour anfragen',
-    'landing_step1_text' => 'Kostenlos und unverbindlich.',
+    'landing_step1_text' => 'Kostenlos und unverbindlich — sag dem Guide, wonach du suchst.',
     'landing_step2_title' => 'Guide bestätigt',
     'landing_step2_text' => 'Antwort in der Regel in 24 Stunden.',
     'landing_step3_title' => 'Erst danach bezahlen',
