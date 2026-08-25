@@ -109,6 +109,20 @@ $cag-site-nav-tracking: -0.02em;
   }
 }
 
+// On mobile the offers/vacations/category catalog headers render their
+// breadcrumb strip directly under the nav instead of the dark hero (see
+// &__breadcrumbs order in offers.scss / _vacations-header.scss). The strip
+// is white, so the usual light tint (rgba(28,27,43,.42)) blends toward
+// gray instead of reading as dark. Keep the nav translucent (still
+// see-through, still the light logo/text) but raise the tint's opacity so
+// it stays visibly dark over a white backdrop too.
+@media (max-width: 767.98px) {
+  .cag-site-nav-shell:has(.offers-page-header__breadcrumbs) .cag-site-nav:not(.is-solid),
+  .cag-site-nav-shell:has(.vacations-page-header__breadcrumbs) .cag-site-nav:not(.is-solid) {
+    background: rgba(28, 27, 43, 0.85);
+  }
+}
+
 .cag-site-nav__inner {
   @include cag-page-container;
   height: 64px;

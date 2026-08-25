@@ -4463,10 +4463,10 @@ body .main-menu .main-menu-wrapper__nav {
 @media (max-width: 767.98px) {
   .offers-page-header__breadcrumbs {
     order: -1;
-    margin-top: -64px;
-    padding-top: calc(64px + 0.85rem);
+    margin-top: 0;
+    padding-top: 0.85rem;
     padding-bottom: 0.65rem;
-    background: #313041;
+    background: #fff;
   }
 }
 .offers-page-header__crumb-list {
@@ -4491,20 +4491,6 @@ body .main-menu .main-menu-wrapper__nav {
 .offers-page-header__crumb-list .is-active {
   color: #313041;
   font-weight: 700;
-}
-@media (max-width: 767.98px) {
-  .offers-page-header__crumb-list {
-    color: rgba(255, 255, 255, 0.65);
-  }
-  .offers-page-header__crumb-list a {
-    color: rgba(255, 255, 255, 0.85);
-  }
-  .offers-page-header__crumb-list a:hover {
-    color: #E8604C;
-  }
-  .offers-page-header__crumb-list .is-active {
-    color: #fff;
-  }
 }
 .offers-page-header__crumb-list .fa-chevron-right {
   font-size: 0.65rem;
@@ -9889,10 +9875,10 @@ div#masonry-grid img {
 @media (max-width: 767.98px) {
   .vacations-page-header__breadcrumbs {
     order: -1;
-    margin-top: -64px;
-    padding-top: calc(64px + 0.85rem);
+    margin-top: 0;
+    padding-top: 0.85rem;
     padding-bottom: 0.65rem;
-    background: #313041;
+    background: #fff;
   }
 }
 .vacations-page-header__crumb-list {
@@ -9921,20 +9907,6 @@ div#masonry-grid img {
 .vacations-page-header__crumb-list .fa-chevron-right {
   font-size: 0.65rem;
   opacity: 0.55;
-}
-@media (max-width: 767.98px) {
-  .vacations-page-header__crumb-list {
-    color: rgba(255, 255, 255, 0.65);
-  }
-  .vacations-page-header__crumb-list a {
-    color: rgba(255, 255, 255, 0.85);
-  }
-  .vacations-page-header__crumb-list a:hover {
-    color: #E8604C;
-  }
-  .vacations-page-header__crumb-list .is-active {
-    color: #fff;
-  }
 }
 
 #vacations-category #map-placeholder button {
@@ -22578,6 +22550,12 @@ input:-webkit-autofill:active {
   display: block;
 }
 
+@media (max-width: 767.98px) {
+  .cag-site-nav-shell:has(.offers-page-header__breadcrumbs) .cag-site-nav:not(.is-solid),
+  .cag-site-nav-shell:has(.vacations-page-header__breadcrumbs) .cag-site-nav:not(.is-solid) {
+    background: rgba(28, 27, 43, 0.85);
+  }
+}
 .cag-site-nav__inner {
   width: 100%;
   max-width: 1440px;

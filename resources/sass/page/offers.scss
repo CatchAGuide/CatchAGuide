@@ -319,15 +319,13 @@ $muted: #787780;
 
     @media (max-width: 767.98px) {
       // Render directly below the nav bar, ahead of the hero — desktop
-      // keeps its natural DOM order (after the search box). Slides up
-      // under the (still-transparent) nav the same way the hero used to,
-      // so the nav overlays a dark surface here instead of the page's
-      // plain background.
+      // keeps its natural DOM order (after the search box). Stays white;
+      // the nav switches to its solid look here instead (see _site-nav.scss).
       order: -1;
-      margin-top: -64px;
-      padding-top: calc(64px + 0.85rem);
+      margin-top: 0;
+      padding-top: 0.85rem;
       padding-bottom: 0.65rem;
-      background: $slate;
+      background: #fff;
     }
   }
 
@@ -355,22 +353,6 @@ $muted: #787780;
     .is-active {
       color: $slate;
       font-weight: 700;
-    }
-
-    @media (max-width: 767.98px) {
-      color: rgba(255, 255, 255, 0.65);
-
-      a {
-        color: rgba(255, 255, 255, 0.85);
-
-        &:hover {
-          color: $coral;
-        }
-      }
-
-      .is-active {
-        color: #fff;
-      }
     }
 
     .fa-chevron-right {
