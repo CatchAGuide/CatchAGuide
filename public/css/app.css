@@ -9694,7 +9694,7 @@ div#masonry-grid img {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #ffce00;
+  color: #fff;
 }
 .vacations-page-header__divider {
   display: flex;
@@ -9751,6 +9751,11 @@ div#masonry-grid img {
   border: 1px solid rgba(49, 48, 65, 0.08);
   box-shadow: 0 14px 36px rgba(49, 48, 65, 0.14);
 }
+@media (max-width: 767.98px) {
+  .vacations-page-header__search-box {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
 @media (min-width: 768px) {
   .vacations-page-header__search-box {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -9770,7 +9775,9 @@ div#masonry-grid img {
 }
 @media (max-width: 767.98px) {
   .vacations-page-header__segment {
-    border-bottom: 1px solid rgba(49, 48, 65, 0.1);
+    border-bottom: 0;
+    border-right: 1px solid rgba(49, 48, 65, 0.1);
+    padding: 0.6rem 0.75rem;
   }
 }
 @media (min-width: 768px) {
@@ -9854,7 +9861,12 @@ div#masonry-grid img {
 }
 @media (max-width: 767.98px) {
   .vacations-page-header__search-btn {
-    width: 100%;
+    width: auto;
+    min-width: 0;
+    min-height: auto;
+    align-self: center;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.85rem;
   }
 }
 @media (min-width: 768px) {
@@ -9891,6 +9903,22 @@ div#masonry-grid img {
   padding: 0;
   font-size: 0.85rem;
   color: #787780;
+}
+@media (max-width: 767.98px) {
+  .vacations-page-header__crumb-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .vacations-page-header__crumb-list::-webkit-scrollbar {
+    display: none;
+  }
+  .vacations-page-header__crumb-list li {
+    flex: none;
+    white-space: nowrap;
+  }
 }
 .vacations-page-header__crumb-list a {
   color: #787780;

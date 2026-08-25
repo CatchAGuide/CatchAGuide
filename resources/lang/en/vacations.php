@@ -335,7 +335,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'amenities' => 'Amenities',
 
     // Hub redesign — hero, product choice, consultation
-    'hub_hero_eyebrow' => 'Fishing holidays across Europe',
+    'hub_hero_eyebrow' => 'Accommodation, rental boats & fishing trips',
     'hub_hero_title' => 'Your fishing holiday — camp or all-inclusive package',
     'hub_hero_lead' => 'Flexible fishing camps to plan yourself, or fully organised fishing trips. Direct with the operator, no booking fee.',
     'hub_stat_line' => ':offers offers · :countries countries · free inquiry',

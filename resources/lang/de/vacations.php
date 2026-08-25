@@ -335,7 +335,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'amenities' => 'Ausstattung',
 
     // Hub-Redesign — Hero, Produktwahl, Beratung
-    'hub_hero_eyebrow' => 'Angelurlaub in ganz Europa',
+    'hub_hero_eyebrow' => 'Unterkünfte, Mietboote & Angelreisen',
     'hub_hero_title' => 'Dein Angelurlaub — Camp oder Komplettpaket',
     'hub_hero_lead' => 'Flexible Angelcamps zum Selbstplanen oder komplett organisierte Angelreisen. Direkt beim Anbieter, ohne Buchungsgebühr.',
     'hub_stat_line' => ':offers Angebote · :countries Länder · Anfrage kostenlos',
