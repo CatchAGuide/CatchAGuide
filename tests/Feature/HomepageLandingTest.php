@@ -219,6 +219,9 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-icon--rod', false);
         $response->assertSee('cag-icon--camp', false);
         $response->assertSee('cag-home-ph', false);
+        $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
+        $response->assertDontSee('cag-home-species__card cag-home-ph', false);
+        $response->assertDontSee('cag-home-season__card cag-home-ph', false);
         $response->assertSee(__('homepage.hero_eyebrow'), false);
         $response->assertSee(route('guidings.landing', [], false), false);
         $response->assertSee(route('vacations.index', [], false), false);

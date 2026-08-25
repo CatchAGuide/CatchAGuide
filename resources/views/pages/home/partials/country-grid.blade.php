@@ -46,7 +46,7 @@
                         @endphp
                         <a
                             href="{{ route($countryRoute ?? 'destination.country', ['country' => $country['slug']]) }}"
-                            class="cag-home-destinations__tile cag-home-ph cag-reveal__item"
+                            class="cag-home-destinations__tile cag-reveal__item"
                             role="listitem"
                             style="--reveal-i: {{ min($loop->index, 8) }}"
                             @if($isClone) aria-hidden="true" tabindex="-1" @endif

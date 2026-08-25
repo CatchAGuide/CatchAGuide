@@ -13,7 +13,7 @@
                 @foreach($season['species'] as $species)
                     <a
                         href="{{ $species['url'] }}"
-                        class="cag-home-season__card cag-home-ph cag-reveal__item"
+                        class="cag-home-season__card cag-reveal__item"
                         style="--reveal-i: {{ $loop->index + 1 }}"
                     >
                         <img

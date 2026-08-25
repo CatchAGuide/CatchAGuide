@@ -14487,19 +14487,6 @@ div#masonry-grid img {
   opacity: 0.85 !important;
 }
 
-.vacation-country-rail__tile,
-.vacation-fish-rail__tile {
-  position: relative;
-}
-.vacation-country-rail__tile::after,
-.vacation-fish-rail__tile::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0 8px, rgba(255, 255, 255, 0) 8px 18px);
-}
-
 .vacation-hub__pillar-fork .vacation-section-heading {
   margin-bottom: 1rem;
 }

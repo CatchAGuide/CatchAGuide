@@ -1,20 +1,6 @@
 // Vacation hub redesign — new sections added alongside the existing two-pillar hub
 // Reuses $vac-* tokens declared in _vacations-two-pillar.scss (loaded first via vacations.scss)
 
-// —— Subtle diagonal texture on placeholder tiles (country rail + fish rail) ——
-.vacation-country-rail__tile,
-.vacation-fish-rail__tile {
-    position: relative;
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        background: repeating-linear-gradient(115deg, rgba(#fff, .05) 0 8px, rgba(#fff, 0) 8px 18px);
-    }
-}
-
 // —— Pillar fork heading spacing ——
 .vacation-hub__pillar-fork {
     .vacation-section-heading {

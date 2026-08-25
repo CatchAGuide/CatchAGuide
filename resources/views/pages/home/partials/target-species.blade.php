@@ -19,7 +19,7 @@
                 @foreach($targetSpecies as $species)
                     <a
                         href="{{ $species['url'] }}"
-                        class="cag-home-species__card cag-home-ph"
+                        class="cag-home-species__card"
                         role="listitem"
                         style="--species-i: {{ $loop->index }}"
                     >

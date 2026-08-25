@@ -139,7 +139,7 @@ class VacationHubNewSectionsTest extends TestCase
         $tile = [
             'name' => 'Pike',
             'slug' => 'pike-test',
-            'thumbnail' => null,
+            'thumbnail' => 'fish/pike.jpg',
             'count' => 5,
             'url' => route('vacations.targets', ['slug' => 'pike-test']),
         ];
@@ -150,6 +150,8 @@ class VacationHubNewSectionsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('vacation-fish-rail', false);
+        $response->assertSee('vacation-fish-rail__img', false);
+        $response->assertDontSee('vacation-fish-rail__placeholder', false);
         $response->assertSee('Pike', false);
         $response->assertSee(__('vacations.hub_target_fish_count', ['count' => 5]), false);
         $response->assertSee(route('vacations.targets', ['slug' => 'pike-test'], false), false);
