@@ -376,7 +376,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
 
     // Hub-Redesign — Bewertungen, Cross-Sell, Anbieter-CTA, SEO-Text
     'hub_reviews_eyebrow' => 'Erfahrungen',
-    'hub_reviews_title' => 'Was Angler nach der Reise sagen',
+    'hub_reviews_title' => 'Was andere Angler sagen',
     'hub_reviews_caption' => 'Echte Bewertungen von geführten Touren, gebucht über die gesamte Plattform.',
     'hub_cross_sell_title' => 'Nur einen Tag am Wasser?',
     'hub_cross_sell_text' => 'Buch stattdessen eine geführte Angeltour mit Guide.',
@@ -392,8 +392,8 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'provider_cta_card_demand_text' => 'Anfragen von Anglern aus :countries Ländern, die gezielt nach Angelcamps und Angelreisen suchen.',
     'provider_cta_card_control_title' => 'Volle Kontrolle',
     'provider_cta_card_control_text' => 'Du legst Termine, Preise und Kapazitäten fest und bestätigst jede Buchungsanfrage selbst.',
-    'hub_seo_title' => 'Angelurlaub in Europa buchen',
-    'hub_seo_p1' => 'Ein Angelurlaub in Europa fängt selten am Flughafen an, sondern bei der Frage nach dem Zielfisch. Wer im Frühjahr auf Hecht will, findet in den niederländischen Poldern und im irischen Shannon-System ab März verlässliche Bedingungen. Ab Mai verlagert sich das Raubfischangeln auf Zander in den großen Flüssen Deutschlands und Ungarns, während in Schweden die Barschzeit an den Schären beginnt.',
+    'hub_seo_title' => 'Angelurlaub buchen',
+    'hub_seo_p1' => 'Ein Angelurlaub fängt selten am Flughafen an, sondern bei der Frage nach dem Zielfisch. Wer im Frühjahr auf Hecht will, findet in den niederländischen Poldern und im irischen Shannon-System ab März verlässliche Bedingungen. Ab Mai verlagert sich das Raubfischangeln auf Zander in den großen Flüssen Deutschlands und Ungarns, während in Schweden die Barschzeit an den Schären beginnt.',
     'hub_seo_p2' => 'Im Sommer sind die norwegischen Fjorde für Meeresangeln auf Köhler und Heilbutt die erste Wahl, im Juli und August laufen die Lachse in Nordschweden und Lettland auf. Der Herbst gehört den großen Hechten in Irland und den Waller-Strecken am Ebro in Spanien, bevor ab Oktober das Meerforellenangeln an der dänischen Küste startet. Für jede dieser Saisons findest du hier Angelcamps zum Selbstplanen und Angelreisen mit Guide vor Ort.',
     'hub_seo_more' => 'Mehr lesen',
     'hub_seo_less' => 'Weniger anzeigen',
