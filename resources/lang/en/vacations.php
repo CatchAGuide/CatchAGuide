@@ -195,7 +195,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_usp_europe_title' => 'Across Europe',
     'hub_usp_europe_text' => 'From Scandinavia to the Mediterranean.',
     'hub_country_grid_title' => 'Browse by country',
-    'hub_country_slider_title' => 'Popular fishing destinations in Europe',
+    'hub_country_slider_title' => 'Popular fishing destinations',
     'hub_country_slider_subtitle' => 'From the Danish coast to the Ebro Delta – find your water.',
     'hub_country_trips_camps' => ':trips trips · :camps camps',
     'hub_inspiration_title' => 'Find your style',
@@ -217,8 +217,8 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'all_offers_breadcrumb' => 'All experiences',
     'pillar_index_results' => ':count listings available',
     'pillar_tile_explore' => 'Explore',
-    'badge_camp' => 'Fishing Camp',
-    'badge_trip' => 'Fishing Trip',
+    'badge_camp' => 'Fishing Lodge and Accommodation',
+    'badge_trip' => 'All inclusive fishing trip',
     'badge_all_inclusive' => 'All-Inclusive',
     'price_from_per_night' => 'from :price / night',
     'price_from_per_person' => 'from :price / person',
@@ -376,7 +376,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
 
     // Hub redesign — reviews, cross-sell, provider CTA, SEO copy
     'hub_reviews_eyebrow' => 'Experiences',
-    'hub_reviews_title' => 'What other anglers say after the trip',
+    'hub_reviews_title' => 'What other anglers say',
     'hub_reviews_caption' => 'Real reviews from guided trips booked across the whole platform.',
     'hub_cross_sell_title' => 'Only got one day on the water?',
     'hub_cross_sell_text' => 'Book a guided day tour instead.',

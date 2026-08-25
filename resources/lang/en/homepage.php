@@ -151,9 +151,9 @@ return [
     'mixed_browse_trips' => 'Browse All inclusive fishing trips',
     'mixed_browse_camps' => 'Browse fishing lodges and accommodation',
     'mixed_see_all' => 'See all',
-    'offer_type_tour' => 'Tour',
+    'offer_type_tour' => 'All inclusive fishing trip',
     'offer_type_trip' => 'Vacation',
-    'offer_type_camp' => 'Camp',
+    'offer_type_camp' => 'Fishing lodge and accommodation',
 
     'guides_title' => 'Guides who know these waters',
     'guides_view_all' => 'Meet all guides',
@@ -212,7 +212,7 @@ return [
     'landing_step3_title' => 'Pay only afterwards',
     'landing_step3_text' => 'Directly with the guide, no prepayment.',
 
-    'landing_destinations_title' => 'Popular fishing destinations in Europe',
+    'landing_destinations_title' => 'Popular fishing destinations',
     'landing_destinations_subtitle' => 'From the Danish coast to the Ebro Delta – find your waters.',
     'landing_destinations_see_all' => 'See all destinations',
 
