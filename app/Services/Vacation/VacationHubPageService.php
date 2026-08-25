@@ -5,6 +5,7 @@ namespace App\Services\Vacation;
 use App\Domain\Vacation\Pillar;
 use App\Domain\Vacation\ViewModels\PillarTileViewModel;
 use App\Domain\Vacation\ViewModels\VacationHubViewModel;
+use App\Models\Trip;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
@@ -54,13 +55,15 @@ class VacationHubPageService
             url: route('vacations.trips.index'),
         );
 
-        $newTripsLimit = (int) config('vacations.new_trips_rail_limit', 6);
-        $newTrips = $this->trips->listNewest($newTripsLimit)
-            ->map(fn ($t) => $this->tripPresenter->present($t));
-
-        $newCampsLimit = (int) config('vacations.new_camps_rail_limit', 6);
-        $newCamps = $this->camps->listNewest($newCampsLimit)
-            ->map(fn ($c) => $this->campPresenter->present($c));
+        $newListingsLimit = (int) config('vacations.new_listings_rail_limit', 8);
+        $newListings = $this->trips->listNewest($newListingsLimit)
+            ->concat($this->camps->listNewest($newListingsLimit))
+            ->sortByDesc('created_at')
+            ->take($newListingsLimit)
+            ->values()
+            ->map(fn ($listing) => $listing instanceof Trip
+                ? $this->tripPresenter->present($listing)
+                : $this->campPresenter->present($listing));
 
         $faqItems = get_faqs_by_page('vacations')
             ->map(fn ($item) => [
@@ -79,10 +82,9 @@ class VacationHubPageService
             campTile: $campTile,
             tripTile: $tripTile,
             popularListings: $this->popular->mixedForHub(),
-            newTrips: $newTrips,
-            showNewTripsRail: $totalTrips > 0 && $totalTrips <= (int) config('vacations.new_trips_rail_max_catalog', 30),
-            newCamps: $newCamps,
-            showNewCampsRail: $totalCamps > 0 && $totalCamps <= (int) config('vacations.new_camps_rail_max_catalog', 30),
+            newListings: $newListings,
+            showNewListingsRail: $newListings->isNotEmpty()
+                && ($totalTrips + $totalCamps) <= (int) config('vacations.new_listings_rail_max_catalog', 60),
             countryGrid: $this->destinations->countriesForHubGrid(),
             faqItems: $faqItems->all(),
             totalTrips: $totalTrips,

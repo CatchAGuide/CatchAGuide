@@ -153,7 +153,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
         'Rental boats',
         'Guided tours',
     ],
-    'pillar_camps_cta' => 'View fishing camps',
+    'pillar_camps_cta' => 'View fishing lodges',
     'pillar_trips_title' => 'All-incl. Fishing Trips',
     'pillar_trips_desc' => 'Fully organised fishing trips. Accommodation, meals, guide — everything included.',
     'pillar_trips_keywords' => [
@@ -177,8 +177,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'gallery_prev' => 'Previous image',
     'gallery_next' => 'Next image',
     'gallery_close' => 'Close gallery',
-    'hub_new_trips_title' => 'Recently added fishing trips',
-    'hub_new_camps_title' => 'Recently added fishing camps',
+    'hub_new_listings_title' => 'Recently Added Fishing Holidays',
     'hub_bridge_tagline' => 'Book curated fishing camps and fishing trips worldwide',
     'hub_bridge_title' => 'Why you book here',
     'hub_bridge_eyebrow' => 'Fishing holidays with Catch A Guide',
@@ -280,6 +279,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'pillar_country_camps_title' => 'Fishing Lodges & Accommodation in :country',
     'view_all_trips' => 'View all trips',
     'view_all_camps' => 'View all camps',
+    'view_all_holidays' => 'View all fishing holidays',
     'view_all_countries' => 'View all',
     'inspiration_family' => 'Family fishing holidays',
     'inspiration_carp' => 'Carp fishing trips',
@@ -337,7 +337,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
 
     // Hub redesign — hero, product choice, consultation
     'hub_hero_eyebrow' => 'Accommodation, rental boats & fishing trips',
-    'hub_hero_title' => 'YOUR FISHING HOLIDAY - LODGES OR ALL-INCL. TRIPS',
+    'hub_hero_title' => 'Your Fishing Holiday - Lodges or All-Incl. Trips',
     'hub_hero_lead' => 'Flexible fishing lodges & accommodation to plan yourself, or fully organised all-icnl. fishing trips.',
     'hub_stat_line' => ':offers offers · :countries countries · free inquiry',
     'hub_fork_title' => 'Plan it yourself, or have it all arranged?',

@@ -1,15 +1,11 @@
 <?php
 
 return [
-    'new_trips_rail_max_catalog' => 30,
-
-    'new_camps_rail_max_catalog' => 30,
+    'new_listings_rail_max_catalog' => 60,
 
     'popular_listing_limit' => 6,
 
-    'new_trips_rail_limit' => 6,
-
-    'new_camps_rail_limit' => 6,
+    'new_listings_rail_limit' => 8,
 
     'hub_target_fish_limit' => 8,
 

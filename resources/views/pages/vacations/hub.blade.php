@@ -130,51 +130,26 @@
 
 
 
-    @if($hub->showNewCampsRail && $hub->newCamps->isNotEmpty())
+    @if($hub->showNewListingsRail)
 
-        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--camps mb-5" data-analytics-vacation-rail="new-camps">
+        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--new mb-5" data-analytics-vacation-rail="new-listings">
 
             <x-vacation.card-slider
-                :title="__('vacations.hub_new_camps_title')"
-                :link-url="route('vacations.camps.index')"
-                :link-label="__('vacations.view_all_camps')"
-                slider-id="new-camps"
+                :title="__('vacations.hub_new_listings_title')"
+                :link-url="route('vacations.index')"
+                :link-label="__('vacations.view_all_holidays')"
+                slider-id="new-listings"
             >
 
-                @foreach($hub->newCamps as $card)
+                @foreach($hub->newListings as $card)
 
                     <div class="swiper-slide">
 
-                        <x-vacation.camp-card :card="$card" variant="slider" />
-
-                    </div>
-
-                @endforeach
-
-            </x-vacation.card-slider>
-
-        </section>
-
-    @endif
-
-
-
-    @if($hub->showNewTripsRail && $hub->newTrips->isNotEmpty())
-
-        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--trips mb-5" data-analytics-vacation-rail="new-trips">
-
-            <x-vacation.card-slider
-                :title="__('vacations.hub_new_trips_title')"
-                :link-url="route('vacations.trips.index')"
-                :link-label="__('vacations.view_all_trips')"
-                slider-id="new-trips"
-            >
-
-                @foreach($hub->newTrips as $card)
-
-                    <div class="swiper-slide">
-
-                        <x-vacation.trip-card :card="$card" variant="slider" />
+                        @if(($card['type'] ?? 'trip') === 'camp')
+                            <x-vacation.camp-card :card="$card" variant="slider" />
+                        @else
+                            <x-vacation.trip-card :card="$card" variant="slider" />
+                        @endif
 
                     </div>
 

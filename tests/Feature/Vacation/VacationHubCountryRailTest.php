@@ -46,10 +46,8 @@ class VacationHubCountryRailTest extends TestCase
                 url: route('vacations.trips.index'),
             ),
             popularListings: collect(),
-            newTrips: collect(),
-            showNewTripsRail: false,
-            newCamps: collect(),
-            showNewCampsRail: false,
+            newListings: collect(),
+            showNewListingsRail: false,
             countryGrid: collect([
                 [
                     'destination' => null,
