@@ -262,16 +262,16 @@ $vac-country-panel: #313041;
         }
 
         .vacation-pillar-tile__badge {
-            background: rgba(#fff, .12);
-            color: rgba(#fff, .92);
+            background: rgba(#fff, .14);
+            color: rgba(#fff, .95);
         }
 
         .vacation-pillar-tile__desc {
-            color: rgba(#fff, .72);
+            color: rgba(#fff, .88);
         }
 
-        .vacation-pillar-tile__stats {
-            color: rgba(#fff, .58);
+        .vacation-pillar-tile__footer {
+            border-top-color: rgba(#fff, .22);
         }
     }
 
@@ -289,7 +289,7 @@ $vac-country-panel: #313041;
         }
 
         .vacation-pillar-tile__badge {
-            background: rgba(#000, .14);
+            background: rgba(#fff, .14);
             color: #fff;
         }
 
@@ -297,8 +297,8 @@ $vac-country-panel: #313041;
             color: rgba(#fff, .9);
         }
 
-        .vacation-pillar-tile__stats {
-            color: rgba(#fff, .78);
+        .vacation-pillar-tile__footer {
+            border-top-color: rgba(#fff, .22);
         }
     }
 
@@ -312,26 +312,32 @@ $vac-country-panel: #313041;
         pointer-events: none;
     }
 
-    &__icon {
+    &__header {
         position: relative;
         z-index: 1;
-        width: 2rem;
-        height: 2rem;
-        margin-bottom: .85rem;
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        margin-bottom: .75rem;
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 1.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         color: #fff;
         opacity: .95;
+        line-height: 1;
     }
 
     &__title {
-        position: relative;
-        z-index: 1;
+        margin: 0;
         font-size: clamp(1.2rem, 2.4vw, 1.45rem);
         font-weight: 800;
-        margin: 0 0 .55rem;
         line-height: 1.15;
         letter-spacing: -.01em;
         color: #fff;
@@ -340,11 +346,11 @@ $vac-country-panel: #313041;
     &__desc {
         position: relative;
         z-index: 1;
-        margin: 0 0 1rem;
-        font-size: clamp(.82rem, 1.6vw, .9rem);
-        line-height: 1.45;
+        margin: 0 0 1.1rem;
+        font-size: clamp(.85rem, 1.6vw, .95rem);
+        line-height: 1.5;
         font-weight: 500;
-        max-width: 34ch;
+        max-width: 40ch;
     }
 
     &__badges {
@@ -354,7 +360,7 @@ $vac-country-panel: #313041;
         flex-wrap: wrap;
         gap: .45rem;
         margin-bottom: auto;
-        padding-bottom: 1.25rem;
+        padding-bottom: 1.15rem;
     }
 
     &__badge {
@@ -362,7 +368,7 @@ $vac-country-panel: #313041;
         align-items: center;
         font-size: .72rem;
         font-weight: 700;
-        padding: .32rem .72rem;
+        padding: .38rem .85rem;
         border-radius: 999px;
         white-space: nowrap;
     }
@@ -372,25 +378,17 @@ $vac-country-panel: #313041;
         z-index: 1;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: .75rem;
         margin-top: auto;
-        padding-top: .25rem;
-    }
-
-    &__stats {
-        font-size: .78rem;
-        font-weight: 600;
-        line-height: 1.3;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(#fff, .22);
     }
 
     &__cta {
-        flex-shrink: 0;
-        font-size: .82rem;
+        font-size: .88rem;
         font-weight: 800;
         display: inline-flex;
         align-items: center;
-        gap: .35rem;
+        gap: .4rem;
         color: #fff;
         white-space: nowrap;
 
@@ -409,15 +407,10 @@ $vac-country-panel: #313041;
 
     @media (max-width: 575px) {
         min-height: 0;
-        padding: 1.2rem;
+        padding: 1.35rem 1.25rem;
 
         &__desc {
             max-width: none;
-        }
-
-        &__footer {
-            flex-wrap: wrap;
-            gap: .5rem;
         }
     }
 }
@@ -435,10 +428,6 @@ $vac-country-panel: #313041;
     border-radius: $vac-radius;
     background: $vac-surface;
     border: 1px solid $vac-border;
-
-    &--trips {
-        border-left: 4px solid $vac-trip;
-    }
 
     &--camps {
         border-left: 4px solid $vac-camp;

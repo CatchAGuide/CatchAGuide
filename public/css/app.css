@@ -11572,14 +11572,14 @@ div#masonry-grid img {
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, transparent 68%);
 }
 .vacation-pillar-tile--camp .vacation-pillar-tile__badge {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
 }
 .vacation-pillar-tile--camp .vacation-pillar-tile__desc {
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.88);
 }
-.vacation-pillar-tile--camp .vacation-pillar-tile__stats {
-  color: rgba(255, 255, 255, 0.58);
+.vacation-pillar-tile--camp .vacation-pillar-tile__footer {
+  border-top-color: rgba(255, 255, 255, 0.22);
 }
 .vacation-pillar-tile--trip {
   background: linear-gradient(155deg, rgb(35.7668341709, 128.0683417085, 193.8331658291) 0%, #1f6fa8 45%, #165887 100%);
@@ -11592,14 +11592,14 @@ div#masonry-grid img {
   background: radial-gradient(circle at center, rgba(255, 255, 255, 0.16) 0%, transparent 68%);
 }
 .vacation-pillar-tile--trip .vacation-pillar-tile__badge {
-  background: rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }
 .vacation-pillar-tile--trip .vacation-pillar-tile__desc {
   color: rgba(255, 255, 255, 0.9);
 }
-.vacation-pillar-tile--trip .vacation-pillar-tile__stats {
-  color: rgba(255, 255, 255, 0.78);
+.vacation-pillar-tile--trip .vacation-pillar-tile__footer {
+  border-top-color: rgba(255, 255, 255, 0.22);
 }
 .vacation-pillar-tile__decor {
   position: absolute;
@@ -11610,25 +11610,30 @@ div#masonry-grid img {
   border-radius: 50%;
   pointer-events: none;
 }
-.vacation-pillar-tile__icon {
+.vacation-pillar-tile__header {
   position: relative;
   z-index: 1;
-  width: 2rem;
-  height: 2rem;
-  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+.vacation-pillar-tile__icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   color: #fff;
   opacity: 0.95;
+  line-height: 1;
 }
 .vacation-pillar-tile__title {
-  position: relative;
-  z-index: 1;
+  margin: 0;
   font-size: clamp(1.2rem, 2.4vw, 1.45rem);
   font-weight: 800;
-  margin: 0 0 0.55rem;
   line-height: 1.15;
   letter-spacing: -0.01em;
   color: #fff;
@@ -11636,11 +11641,11 @@ div#masonry-grid img {
 .vacation-pillar-tile__desc {
   position: relative;
   z-index: 1;
-  margin: 0 0 1rem;
-  font-size: clamp(0.82rem, 1.6vw, 0.9rem);
-  line-height: 1.45;
+  margin: 0 0 1.1rem;
+  font-size: clamp(0.85rem, 1.6vw, 0.95rem);
+  line-height: 1.5;
   font-weight: 500;
-  max-width: 34ch;
+  max-width: 40ch;
 }
 .vacation-pillar-tile__badges {
   position: relative;
@@ -11649,14 +11654,14 @@ div#masonry-grid img {
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-bottom: auto;
-  padding-bottom: 1.25rem;
+  padding-bottom: 1.15rem;
 }
 .vacation-pillar-tile__badge {
   display: inline-flex;
   align-items: center;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.32rem 0.72rem;
+  padding: 0.38rem 0.85rem;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -11665,23 +11670,16 @@ div#masonry-grid img {
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
   margin-top: auto;
-  padding-top: 0.25rem;
-}
-.vacation-pillar-tile__stats {
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1.3;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
 }
 .vacation-pillar-tile__cta {
-  flex-shrink: 0;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   color: #fff;
   white-space: nowrap;
 }
@@ -11697,14 +11695,10 @@ div#masonry-grid img {
 @media (max-width: 575px) {
   .vacation-pillar-tile {
     min-height: 0;
-    padding: 1.2rem;
+    padding: 1.35rem 1.25rem;
   }
   .vacation-pillar-tile__desc {
     max-width: none;
-  }
-  .vacation-pillar-tile__footer {
-    flex-wrap: wrap;
-    gap: 0.5rem;
   }
 }
 
@@ -11720,9 +11714,6 @@ div#masonry-grid img {
   border-radius: 14px;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
-}
-.vacation-hub__rail--trips {
-  border-left: 4px solid #1f6fa8;
 }
 .vacation-hub__rail--camps {
   border-left: 4px solid #0c8a7f;

@@ -51,7 +51,7 @@
             {{ $name }}
         </span>
         @if($metaLabel)
-            <span class="vacation-country-rail__count">{{ $metaLabel }}</span>
+            {{-- <span class="vacation-country-rail__count">{{ $metaLabel }}</span> --}}
         @endif
     </span>
 </a>

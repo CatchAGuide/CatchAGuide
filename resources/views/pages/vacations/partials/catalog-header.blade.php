@@ -89,7 +89,7 @@
                                 name="country"
                                 data-vacations-country-select
                             >
-                                <option value="">{{ translate('Select Country') }}</option>
+                                <option value="">{{ __('vacations.catalog_header_country_select_placeholder') }}</option>
                                 <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                     {{ __('vacations.all_offers_nav') }}
                                 </option>

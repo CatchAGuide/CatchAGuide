@@ -153,4 +153,28 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertOk();
         $response->assertDontSee(__('vacations.hub_reviews_title'), false);
     }
+
+    public function test_hub_pillar_tiles_use_header_keywords_and_cta_layout(): void
+    {
+        $this->mockHubService($this->makeHub());
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('vacation-hub__pillar-fork', false);
+        $response->assertSee(__('vacations.hub_fork_eyebrow'), false);
+        $response->assertSee(__('vacations.hub_fork_title'), false);
+        $response->assertSee('vacation-pillar-tile__header', false);
+        $response->assertSee('vacation-pillar-tile--camp', false);
+        $response->assertSee('vacation-pillar-tile--trip', false);
+        $response->assertSee('fa-campground', false);
+        $response->assertSee('fa-compass', false);
+        $response->assertSee(__('vacations.pillar_camps_cta'), false);
+        $response->assertSee(__('vacations.pillar_trips_cta'), false);
+        $response->assertSee(__('vacations.pillar_camps_keywords.0'), false);
+        $response->assertSee(__('vacations.pillar_trips_keywords.0'), false);
+        $response->assertDontSee('vacation-pillar-tile__stats', false);
+        $response->assertDontSee(__('vacations.pillar_tile_explore'), false);
+        $response->assertDontSee(__('vacations.price_from_per_night', ['price' => '€100']), false);
+    }
 }

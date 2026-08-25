@@ -89,15 +89,24 @@
                         if (next) next.addEventListener('click', function () { scrollBy(1); });
 
                         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                        if (reduceMotion) {
+                        var loopWidth = Math.floor(rail.scrollWidth / 2);
+                        var loopNeeded = !reduceMotion && loopWidth > 0 && loopWidth > rail.clientWidth;
+
+                        if (!loopNeeded) {
+                            // Not enough tiles to fill the viewport twice over — the cloned
+                            // set for the seamless loop would just sit visible as duplicates.
+                            rail.querySelectorAll('[aria-hidden="true"]').forEach(function (clone) {
+                                clone.remove();
+                            });
+                        }
+
+                        if (reduceMotion || !loopNeeded) {
                             return;
                         }
 
-                        var loopWidth = 0;
                         var syncLoop = function () {
                             loopWidth = Math.floor(rail.scrollWidth / 2);
                         };
-                        syncLoop();
                         window.addEventListener('resize', syncLoop);
                         if (typeof ResizeObserver !== 'undefined') {
                             new ResizeObserver(syncLoop).observe(rail);

@@ -72,7 +72,12 @@
 
         <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-analytics-vacation-rail="popular">
 
-            <x-vacation.card-slider :title="__('vacations.hub_popular_title')" slider-id="popular">
+            <x-vacation.card-slider
+                :title="__('vacations.hub_popular_title')"
+                :link-url="route('vacations.index')"
+                :link-label="__('vacations.view_all_trips')"
+                slider-id="popular"
+            >
 
                 @foreach($hub->popularListings as $card)
 
