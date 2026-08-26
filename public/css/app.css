@@ -7066,6 +7066,11 @@ body .main-menu .main-menu-wrapper__nav {
   overflow: hidden;
   transition: height 0.28s ease;
 }
+@media (max-width: 991.98px) {
+  .map-modal__rail {
+    display: none !important;
+  }
+}
 @media (min-width: 992px) {
   .map-modal__rail {
     position: relative;
@@ -7158,11 +7163,6 @@ body .main-menu .main-menu-wrapper__nav {
 .map-modal__fab svg {
   width: 16px;
   height: 16px;
-}
-@media (max-width: 991.98px) {
-  .map-modal__fab {
-    display: inline-flex;
-  }
 }
 .map-modal__fab .map-modal__fab-icon--list {
   display: none;

@@ -156,7 +156,13 @@ class VacationListingLayoutTest extends TestCase
             strpos($html, 'vacation-country__sidebar-filters'),
             strpos($html, 'vacation-country__map-card'),
         );
-        $this->assertStringNotContainsString('name="duration"', $html);
+        // Desktop sidebar only renders the facets relevant to the active pillar; the
+        // mobile offcanvas keeps every facet section in the DOM (hidden) so switching
+        // pillars there is instant, client-side, and doesn't reload the page.
+        $sidebarStart = strpos($html, 'vacation-country__sidebar');
+        $listingsStart = strpos($html, 'vacation-country__listings');
+        $sidebar = substr($html, $sidebarStart, $listingsStart - $sidebarStart);
+        $this->assertStringNotContainsString('name="duration"', $sidebar);
         $this->assertStringContainsString('name="accommodation_type"', $html);
         $this->assertStringContainsString('name="has_guiding"', $html);
         $this->assertStringContainsString('name="has_rental_boat"', $html);
@@ -196,9 +202,17 @@ class VacationListingLayoutTest extends TestCase
         $response->assertSee(__('vacations.filter_duration_1-3'), false);
         $response->assertSee(__('vacations.filter_duration_4-7'), false);
         $response->assertSee(__('vacations.filter_duration_8+'), false);
-        $response->assertDontSee('name="accommodation_type"', false);
-        $response->assertDontSee('name="has_guiding"', false);
-        $response->assertDontSee('name="has_rental_boat"', false);
+
+        // Desktop sidebar only renders the facets relevant to the active pillar; the
+        // mobile offcanvas keeps every facet section in the DOM (hidden) so switching
+        // pillars there is instant, client-side, and doesn't reload the page.
+        $html = $response->getContent();
+        $sidebarStart = strpos($html, 'vacation-country__sidebar');
+        $listingsStart = strpos($html, 'vacation-country__listings');
+        $sidebar = substr($html, $sidebarStart, $listingsStart - $sidebarStart);
+        $this->assertStringNotContainsString('name="accommodation_type"', $sidebar);
+        $this->assertStringNotContainsString('name="has_guiding"', $sidebar);
+        $this->assertStringNotContainsString('name="has_rental_boat"', $sidebar);
     }
 
     public function test_camp_facet_toggles_render_as_checked_checkboxes(): void

@@ -2421,10 +2421,10 @@ var MapModalRail = /*#__PURE__*/function () {
         });
         return;
       }
-      var sheetH = this.rail.getBoundingClientRect().height || this._snapHeights()[this._snap];
+      // Mobile listings sheet is removed — nothing docked at the bottom until a pin is selected.
       this.listingMap.setOverlayPadding({
         top: headerH,
-        bottom: sheetH
+        bottom: 0
       });
     }
   }, {

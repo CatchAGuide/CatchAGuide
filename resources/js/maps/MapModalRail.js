@@ -312,8 +312,8 @@ export default class MapModalRail {
       this.listingMap.setOverlayPadding({ top: headerH, bottom: cardH });
       return;
     }
-    const sheetH = this.rail.getBoundingClientRect().height || this._snapHeights()[this._snap];
-    this.listingMap.setOverlayPadding({ top: headerH, bottom: sheetH });
+    // Mobile listings sheet is removed — nothing docked at the bottom until a pin is selected.
+    this.listingMap.setOverlayPadding({ top: headerH, bottom: 0 });
   }
 
   _bindSheetDrag() {

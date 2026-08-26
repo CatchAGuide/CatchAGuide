@@ -803,6 +803,12 @@ $guidings-header-bg: #f7f9fb;
         overflow: hidden;
         transition: height 0.28s ease;
 
+        // Mobile: the full listings sheet is dropped — map + tap-driven popup/selection
+        // card only. Desktop keeps the sidebar rail below.
+        @media (max-width: 991.98px) {
+            display: none !important;
+        }
+
         @media (min-width: 992px) {
             position: relative;
             display: flex;
@@ -901,9 +907,7 @@ $guidings-header-bg: #f7f9fb;
             height: 16px;
         }
 
-        @media (max-width: 991.98px) {
-            display: inline-flex;
-        }
+        // Mobile: no listings sheet left to toggle, so the FAB stays hidden there too.
 
         .map-modal__fab-icon--list {
             display: none;
