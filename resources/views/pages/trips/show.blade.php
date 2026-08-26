@@ -433,7 +433,7 @@
                                 @foreach($tripScheduleItems as $index => $item)
                                     @php
                                         $time = $item['time'] ?? null;
-                                        $title = $item['day_label'] ?? __('trips.day') . ' ' . ($index + 1);
+                                        $scheduleTitle = $item['day_label'] ?? __('trips.day') . ' ' . ($index + 1);
                                         $description = $item['description'] ?? '';
                                     @endphp
                                     <li class="trip-offer-page__schedule-item">
@@ -444,7 +444,7 @@
                                                     <span class="trip-offer-page__schedule-time">{{ $time }}</span>
                                                     <span class="trip-offer-page__schedule-sep">—</span>
                                                 @endif
-                                                <span class="trip-offer-page__schedule-title">{{ $title }}</span>
+                                                <span class="trip-offer-page__schedule-title">{{ $scheduleTitle }}</span>
                                             </p>
                                             @if($description !== '')
                                                 <p class="trip-offer-page__schedule-description">{{ $description }}</p>

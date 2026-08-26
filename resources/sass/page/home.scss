@@ -1782,6 +1782,43 @@ $white: #ffffff;
   }
 }
 
+// Mobile-only: rating floats on the image instead of showing inline in the body
+.cag-home-offer__rating-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  pointer-events: none;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    color: #ffce00;
+    fill: #ffce00;
+    flex-shrink: 0;
+  }
+
+  &-count {
+    font-size: 0.7rem;
+    font-weight: 400;
+    opacity: 0.85;
+  }
+}
+
+@media (max-width: 767px) {
+  .cag-home-offer__rating {
+    display: none;
+  }
+}
+
 .cag-home-offer__new {
   align-self: flex-start;
   margin: 0;

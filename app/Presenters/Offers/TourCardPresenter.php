@@ -47,6 +47,8 @@ class TourCardPresenter
             'cta' => __('offers.cta_tour'),
             'cta_class' => 'tour',
             'trust' => [],
+            'rating' => ($rating = $this->averageRating($guiding)) ? number_format($rating, 1) : null,
+            'review_count' => $this->reviewCount($guiding),
             'target_fish_tags' => $species,
             'target_fish_tags_extra' => max(0, count($species) - 3),
         ];

@@ -2833,6 +2833,39 @@ body .main-menu .main-menu-wrapper__nav {
   color: var(--cag-gray);
 }
 
+.cag-home-offer__rating-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+.cag-home-offer__rating-badge svg {
+  width: 13px;
+  height: 13px;
+  color: #ffce00;
+  fill: #ffce00;
+  flex-shrink: 0;
+}
+.cag-home-offer__rating-badge-count {
+  font-size: 0.7rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+@media (max-width: 767px) {
+  .cag-home-offer__rating {
+    display: none;
+  }
+}
 .cag-home-offer__new {
   align-self: flex-start;
   margin: 0;
@@ -5805,9 +5838,19 @@ body .main-menu .main-menu-wrapper__nav {
     text-align: left;
   }
   .offers-card__price--guest-total {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.12rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15rem 0.35rem;
+  }
+  .offers-card__price--guest-total .offers-card__price-prefix {
+    flex-basis: 100%;
+  }
+  .offers-card__price--guest-total .offers-card__price-note {
+    margin-top: 0;
+  }
+  .offers-card__price--guest-total .offers-card__price-note::before {
+    content: "/ ";
   }
   .offers-card__price-amount {
     font-size: 1.15rem;
@@ -5842,8 +5885,13 @@ body .main-menu .main-menu-wrapper__nav {
     display: none;
   }
   .offers-card__specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.25rem 0.55rem;
     padding: 0.35rem 0.45rem;
+  }
+  .offers-card__spec {
+    min-width: 0;
   }
   .offers-card__aside {
     padding: 0.55rem 0.85rem 0.7rem;
@@ -30525,7 +30573,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   .gc-mob-rating-badge {
     position: absolute;
     top: 10px;
-    left: 10px;
+    right: 10px;
     z-index: 5;
     background: rgba(0, 0, 0, 0.72);
     color: #fff;

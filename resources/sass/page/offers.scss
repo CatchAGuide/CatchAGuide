@@ -1658,9 +1658,22 @@ $muted: #787780;
     }
 
     &__price--guest-total {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.12rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.15rem 0.35rem;
+    }
+
+    &__price--guest-total &__price-prefix {
+      flex-basis: 100%;
+    }
+
+    &__price--guest-total &__price-note {
+      margin-top: 0;
+    }
+
+    &__price--guest-total &__price-note::before {
+      content: "/ ";
     }
 
     &__price-amount {
@@ -1705,8 +1718,14 @@ $muted: #787780;
     }
 
     &__specs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.25rem 0.55rem;
       padding: 0.35rem 0.45rem;
+    }
+
+    &__spec {
+      min-width: 0;
     }
 
     &__aside {
