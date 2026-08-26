@@ -92,10 +92,10 @@
                                    name="agb"
                                    required>
                             <label class="form-check-label" for="agb">
-                                {{ translate('Ich akzeptiere die') }}
-                                <a href="{{ route('law.agb') }}" target="_blank">{{ translate('AGB') }}</a>
-                                {{ translate('und') }}
-                                <a href="{{ route('law.data-protection') }}" target="_blank">{{ translate('Datenschutzbestimmungen') }}</a>
+                                {{ __('message.accept_the') }}
+                                <a href="{{ route('law.agb') }}" target="_blank">{{ __('message.conditions') }}</a>
+                                {{ __('message.and') }}
+                                <a href="{{ route('law.data-protection') }}" target="_blank">{{ __('message.accept-policy') }}</a>
                             </label>
                             @error('agb')
                                 <span class="invalid-feedback" role="alert">

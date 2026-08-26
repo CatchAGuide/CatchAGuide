@@ -23,5 +23,22 @@ return [
         Angelkurs auf dem Trockenen bietet dir die Möglichkeit, die wichtigsten Grundlagen und Techniken auch abseits des Wassers zu erlernen. Grundangeln ist die klassische Methode für Friedfische wie Karpfen, Brassen oder Schleie. Mit Livescope-Technik kannst du Fische in Echtzeit orten und so deinen Erfolg steigern. Watangeln ist ideal, um in flachen Küstengewässern auf Plattfische oder Meerforelle zu angeln.
         Klopfen ist eine Spezialtechnik für das Angeln auf große Raubfische wie Zander oder Wels. Pelagisch angeln ist die Methode der Wahl, um Fische in mittleren Wasserschichten zu fangen, besonders beim Hochseeangeln. Mit dieser Übersicht findest du auf unserer Webseite gezielt die Angeltour, die zu deiner Lieblingsmethode oder deinem neuen Wunschziel passt.
         Stöbere durch unsere Angebote und buche deine nächste Angeltour mit der passenden Angelmethode – egal ob Fliegenfischen in Schweden, Hochseefischen in Norwegen oder Eisangeln in Finnland!'
-    ]
+    ],
+    'month_jan' => 'Jan',
+    'month_feb' => 'Feb',
+    'month_mar' => 'Mär',
+    'month_apr' => 'Apr',
+    'month_may' => 'Mai',
+    'month_jun' => 'Jun',
+    'month_jul' => 'Jul',
+    'month_aug' => 'Aug',
+    'month_sep' => 'Sep',
+    'month_oct' => 'Okt',
+    'month_nov' => 'Nov',
+    'month_dec' => 'Dez',
+    'fishing_type_label' => 'Angelart',
+    'size_limit' => 'Größenbeschränkung',
+    'time_limit' => 'Zeitbeschränkung',
+    'all_categories' => 'Alle Kategorien',
+    'fishing_destinations_in' => 'Angeldestinationen in ',
 ];

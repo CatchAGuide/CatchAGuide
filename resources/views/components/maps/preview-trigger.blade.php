@@ -45,7 +45,7 @@
                 <span class="cag-map-teaser__cta-label">{{ $label }}</span>
                 @if($resultCount !== null && (int) $resultCount > 0)
                     <span class="cag-map-teaser__cta-meta">
-                        {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                        {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                     </span>
                 @endif
             </span>
@@ -67,7 +67,7 @@
                 <span class="cag-map-teaser__cta-label">{{ $label }}</span>
                 @if($resultCount !== null && (int) $resultCount > 0)
                     <span class="cag-map-teaser__cta-meta">
-                        {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                        {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                     </span>
                 @endif
             </span>

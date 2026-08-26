@@ -13798,6 +13798,15 @@ div#masonry-grid img {
   border-radius: 8px;
   border-color: #e5e7eb;
 }
+.vacation-filters .btn-primary {
+  border-radius: 10px;
+  background: #313041;
+  border-color: #313041;
+}
+.vacation-filters .btn-primary:hover {
+  background: rgb(35.7309734513, 35.0017699115, 47.3982300885);
+  border-color: rgb(35.7309734513, 35.0017699115, 47.3982300885);
+}
 .vacation-filters__toggles {
   display: flex;
   flex-direction: column;

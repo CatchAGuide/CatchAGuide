@@ -158,4 +158,14 @@ return [
     'person' => 'Person',
     'View_all_from' => 'View all from',
     
+    'less' => 'Less',
+    'similar_guidings' => 'Similar Guidings',
+    'about_this_guiding' => 'About this Guiding',
+    'meta_description_suffix' => '. Book professional fishing guides and tours online.',
+    'additional_fishing_tour_close_to' => 'Additional Fishing Tour close to',
+    'all_guidings_at' => 'All Guidings at ',
+    'meta_description' => 'Find and book guided fishing trips online. Browse through our selection of professional fishing guides and tours.',
+    'find_guided_trips_in' => 'Find guided fishing trips in ',
+    'confirm_activate_guiding' => 'Do you really want to activate the guiding? It will then be available for bookings.',
+    'confirm_deactivate_guiding' => 'Do you really want to deactivate the guiding? It will no longer appear in search results...',
 ];  

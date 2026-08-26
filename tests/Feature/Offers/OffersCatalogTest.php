@@ -425,8 +425,8 @@ class OffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(__('offers.filter_trips').' (26)', false);
-        $response->assertSee('26 '.translate('results'), false);
-        $response->assertDontSee('1 '.translate('result'), false);
+        $response->assertSee('26 '.__('global.results'), false);
+        $response->assertDontSee('1 '.__('global.result'), false);
     }
 
     public function test_vacation_pillar_renders_subtle_vacation_type_toggle(): void

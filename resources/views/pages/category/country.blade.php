@@ -536,31 +536,31 @@
                                 <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                                 <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                 @if($destination_type == 'country')
-                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                        <li class="active">{{ __('category.fishing_destinations_in')}} {{ $row_data->name }}</li>
                                     
                                     @elseif($destination_type == 'region')
                                         @if($row_data->country)
                                         <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
+                                            {{ __('category.fishing_destinations_in')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                         @endif
-                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                        <li class="active">{{ __('category.fishing_destinations_in')}} {{ $row_data->name }}</li>
                                     
                                     @elseif($destination_type == 'city')
                                         @if($row_data->country)
                                         <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->country->name }}
+                                            {{ __('category.fishing_destinations_in')}} {{ $row_data->country->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                         @endif
                                         @if($row_data->region && $row_data->country)
                                         <li><a href="{{ route($destinationRoute, ['country' => $row_data->country->slug, 'region' => $row_data->region->slug]) }}">
-                                            {{ translate('Fishing Destinations in ')}} {{ $row_data->region->name }}
+                                            {{ __('category.fishing_destinations_in')}} {{ $row_data->region->name }}
                                         </a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                         @endif
-                                        <li class="active">{{ translate('Fishing Destinations in ')}} {{ $row_data->name }}</li>
+                                        <li class="active">{{ __('category.fishing_destinations_in')}} {{ $row_data->name }}</li>
                                     @endif
                             </ul>
                         </div>
@@ -648,18 +648,18 @@
                                 <thead>
                                     <tr>
                                         <th width="28%">@lang('destination.fish')</th>
-                                        <th width="6%" class="text-center">{{ translate('Jan') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Feb') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Mar') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Apr') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('May') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Jun') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Jul') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Aug') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Sep') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Oct') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Nov') }}</th>
-                                        <th width="6%" class="text-center">{{ translate('Dec') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_jan') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_feb') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_mar') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_apr') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_may') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_jun') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_jul') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_aug') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_sep') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_oct') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_nov') }}</th>
+                                        <th width="6%" class="text-center">{{ __('category.month_dec') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -696,7 +696,7 @@
                                 <thead>
                                     <tr>
                                         <th width="20%">@lang('destination.fish')</th>
-                                        <th width="80%">{{ translate('Size Limit') }}</th>
+                                        <th width="80%">{{ __('category.size_limit') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -722,7 +722,7 @@
                                 <thead>
                                     <tr>
                                         <th width="20%">@lang('destination.fish')</th>
-                                        <th width="80%">{{ translate('Time Limit') }}</th>
+                                        <th width="80%">{{ __('category.time_limit') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>

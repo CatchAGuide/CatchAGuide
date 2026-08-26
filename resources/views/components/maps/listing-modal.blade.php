@@ -32,11 +32,11 @@
         'hide_list' => __('destination.map_hide_list'),
         'show_map' => __('destination.map_show_map'),
         'filters' => __('destination.filter_by'),
-        'duration' => translate('Duration'),
-        'price' => translate('Your budget'),
-        'target_fish' => translate('Target Fish'),
-        'methods' => translate('Methods'),
-        'people' => translate('Number of People'),
+        'duration' => __('checkout.duration'),
+        'price' => __('checkout.budget'),
+        'target_fish' => __('camps.target_fish_title'),
+        'methods' => __('checkout.methods'),
+        'people' => __('checkout.number_of_people'),
         'clear_filters' => __('destination.map_clear_filters'),
         'apply' => __('destination.map_apply_filters'),
         'price_from' => __('destination.map_price_from', ['price' => ':price']),
@@ -79,7 +79,7 @@
                             <h6 class="map-modal__title" id="{{ $modalId }}Label">{{ $title }}</h6>
                             <span class="map-modal__subtitle" data-map-viewport-count>
                                 @if($resultCount !== null && (int) $resultCount > 0)
-                                    {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                                    {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                                 @endif
                             </span>
                         </div>
@@ -94,19 +94,19 @@
                                 <span>{{ __('destination.filter_by') }}</span>
                             </button>
                             <button type="button" class="map-modal__chip" data-map-chip="duration" aria-expanded="false">
-                                <span>{{ translate('Duration') }}</span>
+                                <span>{{ __('checkout.duration') }}</span>
                             </button>
                             <button type="button" class="map-modal__chip" data-map-chip="price" aria-expanded="false">
-                                <span>{{ translate('Your budget') }}</span>
+                                <span>{{ __('checkout.budget') }}</span>
                             </button>
                             <button type="button" class="map-modal__chip" data-map-chip="target_fish" aria-expanded="false">
-                                <span>{{ translate('Target Fish') }}</span>
+                                <span>{{ __('camps.target_fish_title') }}</span>
                             </button>
                             <button type="button" class="map-modal__chip" data-map-chip="methods" aria-expanded="false">
-                                <span>{{ translate('Methods') }}</span>
+                                <span>{{ __('checkout.methods') }}</span>
                             </button>
                             <button type="button" class="map-modal__chip" data-map-chip="people" aria-expanded="false">
-                                <span>{{ translate('Number of People') }}</span>
+                                <span>{{ __('checkout.number_of_people') }}</span>
                             </button>
                         </div>
                     @endif
@@ -148,7 +148,7 @@
                         <div class="map-modal__rail-heading" data-map-rail-heading>
                             <span class="map-modal__rail-heading-text" data-map-viewport-count>
                                 @if($resultCount !== null && (int) $resultCount > 0)
-                                    {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                                    {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                                 @endif
                             </span>
                         </div>

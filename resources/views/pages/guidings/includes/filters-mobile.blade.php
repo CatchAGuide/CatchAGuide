@@ -21,7 +21,7 @@
             
             {{-- Price Range Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">{{translate('Your budget')}}</h6>
+                <h6 class="mb-3">{{__('checkout.budget')}}</h6>
                 <div class="price-range-slider px-3">
                     {{-- <div class="chart-container mb-2">
                         <canvas id="price-histogram-mobile"></canvas>
@@ -35,7 +35,7 @@
             
             {{-- Target Fish Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">{{ translate('Target Fish') }}</h6>
+                <h6 class="mb-3">{{ __('camps.target_fish_title') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $visibleCount = 0;
@@ -77,7 +77,7 @@
 
             {{-- Methods Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">{{ translate('Methods') }}</h6>
+                <h6 class="mb-3">{{ __('checkout.methods') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $totalCountGuidings = count($guiding_methods);
@@ -114,7 +114,7 @@
 
             {{-- Water Types Section --}}
             <div class="filter-section mb-4">
-                <h6 class="mb-3">{{ translate('Water Types') }}</h6>
+                <h6 class="mb-3">{{ __('newguidings.water_types') }}</h6>
                 <div class="checkbox-group">
                     @php
                         $totalCountWaters = count($guiding_waters);
@@ -152,13 +152,13 @@
             
             <hr>
             <div class="filter-section mb-4">
-                <h6 class="mb-3">{{translate('Duration')}}</h6>
+                <h6 class="mb-3">{{__('checkout.duration')}}</h6>
                 <div class="checkbox-group">
                     @php
                         $durationLabels = [
-                            'half_day' => translate('Half Day'),
-                            'full_day' => translate('Full Day'),
-                            'multi_day' => translate('Multi Day')
+                            'half_day' => __('guidings.half_day'),
+                            'full_day' => __('guidings.full_day'),
+                            'multi_day' => __('guidings.multi_day')
                         ];
                     @endphp
                     @foreach($durationLabels as $durationType => $label)
@@ -181,7 +181,7 @@
             {{-- Number of People Section --}}
             <div class="filter-section mb-3">
                 <div class="form-group mb-3">
-                    <h5 class="mb-2">{{translate('Number of People')}}</h5>
+                    <h5 class="mb-2">{{__('checkout.number_of_people')}}</h5>
                     <div class="checkbox-group" id="mobile-person-checkbox-group">
                         @foreach($personCounts as $persons => $count)
                             <div class="form-check">
@@ -192,7 +192,7 @@
                                        value="{{ $persons }}"
                                        {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
                                 <label class="form-check-label d-flex justify-content-between" for="mobile_persons_{{ $persons }}">
-                                    {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
+                                    {{ __('emails.up_to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
                                     <span class="count">({{ $count }})</span>
                                 </label>
                             </div>

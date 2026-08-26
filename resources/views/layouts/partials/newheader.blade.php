@@ -165,7 +165,7 @@
                     <div class="vacation-mobile-select-wrap">
                         <i class="fa fa-map-marker-alt vacation-mobile-select-icon"></i>
                         <select class="vacation-mobile-select" name="country">
-                            <option value="">{{ translate('Select Country') }}</option>
+                            <option value="">{{ __('checkout.select_country') }}</option>
                             <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                 {{ __('vacations.all_offers_nav') }}
                             </option>
@@ -269,7 +269,7 @@
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -342,7 +342,7 @@
 <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
     <div class="vacation-page-loading-overlay__panel" role="status">
         <div class="spinner-border text-danger" aria-hidden="true"></div>
-        <span>{{ translate('Loading...') }}</span>
+        <span>{{ __('checkout.loading') }}</span>
     </div>
 </div>
 @endif
@@ -1140,11 +1140,11 @@ input[type=number] {
                 <form id="mobile-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
                     @if ($isVacation)
                         <div class="mb-3">
-                            <label class="form-label">{{translate('Country')}}</label>
+                            <label class="form-label">{{__('global.Country')}}</label>
                             <div class="position-relative">
                                 <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <select class="form-select ps-5" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -1608,7 +1608,7 @@ function validateSearch(event, inputId) {
     if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
-            title: "{{translate('Please select a location from the suggestions')}}",
+            title: "{{__('checkout.location_suggestion_hint')}}",
             placement: "bottom",
             trigger: "manual"
         });

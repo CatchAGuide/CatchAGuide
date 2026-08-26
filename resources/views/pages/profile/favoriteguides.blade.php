@@ -1,6 +1,6 @@
 @extends('pages.profile.layouts.profile')
 
-@section('title', ucwords(translate('Lieblingsguidings')))
+@section('title', ucwords(__('message.favorite-guidings')))
 
 @section('profile-content')
     <div class="tours-list__right">
@@ -40,9 +40,9 @@
                 @endforeach
             @else
                 <div class="text-center">
-                    <h4>{{translate('Noch hast du keine Lieblingsguidings!')}} 💔</h4>
-                    <b>{{translate('Lass uns das schleunigst ändern')}}</b><br/><br/>
-                    <a href="{{ route('guidings.index') }}" class="thm-btn">{{translate('zu den Guidings')}}</a>
+                    <h4>{{__('profile.noFavoriteGuidingsYet')}} 💔</h4>
+                    <b>{{__('profile.lets-change')}}</b><br/><br/>
+                    <a href="{{ route('guidings.index') }}" class="thm-btn">{{__('profile.toGuidings')}}</a>
                 </div>
             @endif
         </div>

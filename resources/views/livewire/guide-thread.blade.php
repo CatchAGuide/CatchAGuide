@@ -13,7 +13,7 @@
                         <div class="card-body">
                             {{-- Target Fish --}}
                             <div class="filter-group mb-4">
-                                <h6 class="fw-bold mb-3">{{translate('Target Fish')}}</h6>
+                                <h6 class="fw-bold mb-3">{{__('camps.target_fish_title')}}</h6>
                                 <div class="filter-scroll">
                                     @foreach($this->filterOptions['targets'] as $target)
                                         <div class="form-check mb-2">
@@ -32,7 +32,7 @@
 
                             {{-- Methods --}}
                             <div class="filter-group mb-4">
-                                <h6 class="fw-bold mb-3">{{translate('Methods')}}</h6>
+                                <h6 class="fw-bold mb-3">{{__('checkout.methods')}}</h6>
                                 <div class="filter-scroll">
                                     @foreach($this->filterOptions['methods'] as $method)
                                         <div class="form-check mb-2">
@@ -51,7 +51,7 @@
 
                             {{-- Water Types --}}
                             <div class="filter-group mb-4">
-                                <h6 class="fw-bold mb-3">{{translate('Water Types')}}</h6>
+                                <h6 class="fw-bold mb-3">{{__('newguidings.water_types')}}</h6>
                                 <div class="filter-scroll">
                                     @foreach($this->filterOptions['waters'] as $water)
                                         <div class="form-check mb-2">
@@ -70,7 +70,7 @@
 
                             {{-- Duration --}}
                             <div class="filter-group mb-4">
-                                <h6 class="fw-bold mb-3">{{translate('Duration')}}</h6>
+                                <h6 class="fw-bold mb-3">{{__('checkout.duration')}}</h6>
                                 <div class="form-check mb-2">
                                     <input wire:model="durationTypes" type="checkbox" class="form-check-input" value="half_day" id="duration_half">
                                     <label class="form-check-label" for="duration_half">
@@ -93,7 +93,7 @@
                             
                             {{-- Number of People --}}
                             <div class="filter-group mb-4">
-                                <h6 class="fw-bold mb-3">{{translate('Number of People')}}</h6>
+                                <h6 class="fw-bold mb-3">{{__('checkout.number_of_people')}}</h6>
                                 @for($i = 1; $i <= 8; $i++)
                                     <div class="form-check mb-2">
                                         <input wire:model="numPersons" 
@@ -290,7 +290,7 @@
                                                             <div class="col-6">
                                                                 <small class="text-dark d-flex align-items-center" style="font-size: 0.8rem;">
                                                                     <i class="fas fa-user me-1" style="color: #666;"></i>
-                                                                    {{ $guiding->max_guests }} {{ translate('Personen') }}
+                                                                    {{ $guiding->max_guests }} {{ __('booking.people') }}
                                                                 </small>
                                                             </div>
                                                         </div>

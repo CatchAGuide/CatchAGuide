@@ -2630,6 +2630,17 @@ $vac-country-panel: #313041;
         border-color: $vac-border;
     }
 
+    .btn-primary {
+        border-radius: 10px;
+        background: $vac-ink;
+        border-color: $vac-ink;
+
+        &:hover {
+            background: darken($vac-ink, 6%);
+            border-color: darken($vac-ink, 6%);
+        }
+    }
+
     &__toggles {
         display: flex;
         flex-direction: column;

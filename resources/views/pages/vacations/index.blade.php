@@ -189,7 +189,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                        <li><a href="{{ route('vacations.index') }}">{{ __('vacations.fishing_vacations_label')}}</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">{{ translate('Vacations in ' . $row_data->name) }}</li>
                     </ul>
@@ -205,7 +205,7 @@
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                             <li><span>&#183;</span></li>
-                            <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                            <li><a href="{{ route('vacations.index') }}">{{ __('vacations.fishing_vacations_label')}}</a></li>
                             <li><span>&#183;</span></li>
                             <li class="active">
                                 {{ translate('Vacations in ' . $row_data->name) }}
@@ -638,7 +638,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('vacations.fish')</th>
-                                    <th width="80%">{{ translate('Size Limit') }}</th>
+                                    <th width="80%">{{ __('category.size_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -664,7 +664,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('vacations.fish')</th>
-                                    <th width="80%">{{ translate('Time Limit') }}</th>
+                                    <th width="80%">{{ __('category.time_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

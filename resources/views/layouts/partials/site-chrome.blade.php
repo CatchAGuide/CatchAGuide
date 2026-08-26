@@ -30,7 +30,7 @@
         <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
             <div class="vacation-page-loading-overlay__panel" role="status">
                 <div class="spinner-border text-danger" aria-hidden="true"></div>
-                <span>{{ translate('Loading...') }}</span>
+                <span>{{ __('checkout.loading') }}</span>
             </div>
         </div>
     @endif

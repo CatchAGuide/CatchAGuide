@@ -29,5 +29,22 @@ A fishing course on dry land gives you the opportunity to learn the most importa
 
 With this overview, you can find the fishing tour on our website that matches your favorite method or your new dream destination.
 Browse through our offers and book your next fishing tour with the right fishing method—whether it’s fly fishing in Sweden, big game fishing in Norway, or ice fishing in Finland!'
-    ]
+    ],
+    'month_jan' => 'Jan',
+    'month_feb' => 'Feb',
+    'month_mar' => 'Mar',
+    'month_apr' => 'Apr',
+    'month_may' => 'May',
+    'month_jun' => 'Jun',
+    'month_jul' => 'Jul',
+    'month_aug' => 'Aug',
+    'month_sep' => 'Sep',
+    'month_oct' => 'Oct',
+    'month_nov' => 'Nov',
+    'month_dec' => 'Dec',
+    'fishing_type_label' => 'Fishing type',
+    'size_limit' => 'Size Limit',
+    'time_limit' => 'Time Limit',
+    'all_categories' => 'All Categories',
+    'fishing_destinations_in' => 'Fishing Destinations in ',
 ];

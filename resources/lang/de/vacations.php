@@ -399,4 +399,12 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'hub_seo_less' => 'Weniger anzeigen',
 
     'catalog_header_country_select_placeholder' => 'Reiseziel auswählen',
+    'open_guide' => 'Guide aufmachen',
+    'vacations_in' => 'Urlaub in',
+    'view_all_vacations' => 'Alle Urlaube ansehen',
+    'fishing_vacations_label' => 'Angelurlaube',
+    'pets_label' => 'Haustiere:',
+    'boat_available_colon' => 'Boot verfügbar:',
+    'boat_available' => 'Boot verfügbar',
+    'distance_to_water' => 'Entfernung zum Wasser',
 ];

@@ -131,10 +131,10 @@
                   <ul class="thm-breadcrumb list-unstyled">
                       <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                       <li><span>&#183;</span></li>
-                      <li><a href="{{ route('profile.index') }}">{{ translate('Profile') }}</a></li>
+                      <li><a href="{{ route('profile.index') }}">{{ __('global.Profile') }}</a></li>
                       <li><span>&#183;</span></li>
                       <li class="active">
-                          {{ translate('Neues Führungsangebot') }}
+                          {{ __('newguidings.new_guiding_offer_title') }}
                       </li>
                   </ul>
               </div>

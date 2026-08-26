@@ -206,7 +206,7 @@ class TourCardPresenter
         }
 
         $max = (int) $guiding->max_guests;
-        $person = $max === 1 ? translate('Person') : translate('Personen');
+        $person = $max === 1 ? __('booking.person') : __('booking.people');
 
         return 'Max '.$max.' '.$person;
     }

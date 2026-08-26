@@ -74,6 +74,24 @@ class OfferCatalogPageService
     }
 
     /**
+     * Global tours listing (/guidings/alloffers): same facets as /offers?type=tour, but no
+     * destination lock so the sidebar country filter stays selectable.
+     */
+    public function buildForTours(Request $request): OfferCatalogViewModel
+    {
+        $input = $request->all();
+        $input['type'] = 'tour';
+        unset($input['vacation']);
+
+        return $this->buildFromInput(
+            $input,
+            $request,
+            catalogUrl: $request->url(),
+            lockTourScope: true,
+        );
+    }
+
+    /**
      * Tours geo pages (/guidings/{country}/...): lock destination + force tour listings.
      */
     public function buildForToursDestination(

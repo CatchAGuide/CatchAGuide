@@ -227,7 +227,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                     <div class="tours-list__content__trait">
                                         <img src="{{asset('assets/images/icons/clock.svg')}}" height="25" width="25" alt="" />
                                         <div class="tours-list__content__trait__text">{{ $guiding->duration }} 
-                                            @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif</div>
+                                            @if($guiding->duration != 1) {{__('checkout.hours')}} @else {{__('guidings.hour')}} @endif</div>
                                     </div>
 
                             </div>
@@ -275,7 +275,7 @@ transform: translate3d(0,0,0); width: 100%;">
                 <div class="col-xl-8 col-lg-7 order-1 order-md-0">
                     <div class="tour-details-two__left">
                         <div class="tour-details-two__overview">
-                            <h3 class="tour-details-two__title">{{translate('Über dieses Guiding')}}</h3>
+                            <h3 class="tour-details-two__title">{{__('guidings.about_this_guiding')}}</h3>
                             <p class="tour-details-two__overview-text">{!! $guiding->description ? translate(nl2br(e($guiding->description))) : null !!}</p>
 
                             @if($guiding->boat_information)
@@ -290,7 +290,7 @@ transform: translate3d(0,0,0); width: 100%;">
                             @endif
 
                             <div class="tour-details-two__overview-bottom pt-5">
-                                <h3 class="tour-details-two__title">{{translate('Zusätzliche Informationen') }}</h3>
+                                <h3 class="tour-details-two__title">{{__('camps.tooltip_extras') }}</h3>
                                 <div class="tour-details-two__overview-bottom-inner">
                                     <div class="tour-details-two__overview-bottom-left">
                                         <ul class="list-unstyled tour-details-two__overview-bottom-list">
@@ -300,7 +300,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                                         <i class="fa fa-check"></i>
                                                     </div>
                                                     <div class="text">
-                                                        <p><b>{{ translate('Verpflegung') }}: </b> {{ translate($guiding->catering)}}</p>
+                                                        <p><b>{{ __('profile.meals') }}: </b> {{ translate($guiding->catering)}}</p>
                                                     </div>
                                                 </li>
                                             @endif --}}
@@ -310,7 +310,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                                         <i class="fa fa-check"></i>
                                                     </div>
                                                     <div class="text">
-                                                        <p><b>{{ translate('Treffpunkt') }}: </b>{{ translate($guiding->meeting_point) }}</p>
+                                                        <p><b>{{ __('guidings.Meeting_Point') }}: </b>{{ translate($guiding->meeting_point) }}</p>
                                                     </div>
                                                 </li>
                                             @endif
@@ -320,7 +320,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                                         <i class="fa fa-check"></i>
                                                     </div>
                                                     <div class="text">
-                                                        <p><b>{{ translate('Sonstiges') }}: </b>{{translate($guiding->additional_information) }}</p>
+                                                        <p><b>{{ __('mailing.other') }}: </b>{{translate($guiding->additional_information) }}</p>
                                                     </div>
                                                 </li>
                                             @endif
@@ -331,7 +331,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                                 </div>
                                                 <div class="text">
                                                     <p>
-                                                        <b>{{ translate('Gast-/Gewässerkarte') }}: </b>{{$guiding->required_special_license ? " & " . translate($guiding->required_special_license) : translate('Nein') }}
+                                                        <b>{{ __('profile.guestAndWater') }}: </b>{{$guiding->required_special_license ? " & " . translate($guiding->required_special_license) : __('checkout.no') }}
                                                     </p>
                                                 </div>
                                             </li>
@@ -363,7 +363,7 @@ transform: translate3d(0,0,0); width: 100%;">
         </div>
         <div class="row">
             <div class="tour-details-two__location {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Karte') }}</h3>
+                <h3 class="tour-details-two__title">{{ __('destination.map_show_map') }}</h3>
                 @if(!empty($guiding->lat) && !empty($guiding->lng))
                     <div class="tour-details-two__location-map">
                         <x-maps.product
@@ -412,7 +412,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                             <i class="fa fa-check"></i>
                                         </div>
                                         <div class="text">
-                                            <p><b>{{ translate('Lieblingsfisch') }}:</b>{{ translate($guiding->user->information['favorite_fish']) }}
+                                            <p><b>{{ __('guidings.Favorite_fish') }}:</b>{{ translate($guiding->user->information['favorite_fish']) }}
                                             </p>
                                         </div>
                                     </li>
@@ -422,7 +422,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                         </div>
                                         <div class="text">
                                             <p>
-                                                <b>{{ translate('Sprachen') }}:</b> {{ translate($guiding->user->information['languages']) }}
+                                                <b>{{ __('guidings.Languages') }}:</b> {{ translate($guiding->user->information['languages']) }}
                                             </p>
                                         </div>
                                     </li>
@@ -432,17 +432,17 @@ transform: translate3d(0,0,0); width: 100%;">
                                         </div>
                                         <div class="text">
                                             <p>
-                                                <b>{{ translate('Angelt seit') }}:</b> {{ $guiding->user->information['fishing_start_year'] }}
+                                                <b>{{ __('guidings.Fishing_since') }}:</b> {{ $guiding->user->information['fishing_start_year'] }}
                                             </p>
                                         </div>
                                     </li>
                                 </ul>
 
-                                <p class="js-trigger-more-text"><b>{{ translate('Über mich') }}:</b>
+                                <p class="js-trigger-more-text"><b>{{ __('guidings.About_me') }}:</b>
                                     {!! translate($guiding->aboutme()[0]) !!}
                                     {!! translate($guiding->aboutme()[1]) !!}
                                 </p>
-                                <button class="thm-btn js-btn-more-text" onclick="moreOrLessFunction(this)">{{ translate('Mehr') }} </button>
+                                <button class="thm-btn js-btn-more-text" onclick="moreOrLessFunction(this)">{{ __('guidings.More') }} </button>
                             </div>
 
 
@@ -501,7 +501,7 @@ transform: translate3d(0,0,0); width: 100%;">
  
 
             <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">{{ translate('Ähnliche Guidings') }}</h3>
+                <h3 class="tour-details-two__title">{{ __('guidings.similar_guidings') }}</h3>
                 <div class="popular-tours__carousel owl-theme owl-carousel">
                     @foreach($other_guidings as $other_guiding)
                 
@@ -526,7 +526,7 @@ transform: translate3d(0,0,0); width: 100%;">
                                 <p class="popular-tours__rate">
                                     <span>@lang('message.from') {{ two($other_guiding->getLowestPrice()) }}€</span>
                                 </p>
-                                <span><i class="far fa-hourglass"></i>{{ translate('Dauer') }}: {{ two($other_guiding->duration) }} {{ translate('Stunden') }}</span>
+                                <span><i class="far fa-hourglass"></i>{{ __('checkout.duration') }}: {{ two($other_guiding->duration) }} {{ __('checkout.hours') }}</span>
                             </div>
                         </div>
                     @endforeach
@@ -556,11 +556,11 @@ transform: translate3d(0,0,0); width: 100%;">
                 // alert(e);
                 expanded = true;
                 moreText.classList.add('expand-text');
-                e.innerHTML = '{{translate("Weniger")}}';
+                e.innerHTML = '{{__('guidings.less')}}';
             } else {
                 expanded = false;
                 moreText.classList.remove('expand-text');
-                e.innerHTML = '{{translate("Mehr")}}';
+                e.innerHTML = '{{__('guidings.More')}}';
             }
         }
 

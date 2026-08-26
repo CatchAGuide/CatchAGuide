@@ -645,18 +645,18 @@
                             <thead>
                                 <tr>
                                     <th width="28%">@lang('destination.fish')</th>
-                                    <th width="6%" class="text-center">{{ translate('Jan') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Feb') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Mar') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Apr') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('May') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jun') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jul') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Aug') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Sep') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Oct') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Nov') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Dec') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jan') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_feb') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_mar') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_apr') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_may') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jun') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jul') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_aug') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_sep') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_oct') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_nov') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_dec') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -693,7 +693,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Size Limit') }}</th>
+                                    <th width="80%">{{ __('category.size_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -719,7 +719,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Time Limit') }}</th>
+                                    <th width="80%">{{ __('category.time_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -803,7 +803,7 @@
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ translate('Filter') }}</h5>
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ __('message.filter') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body small">
@@ -864,7 +864,7 @@
                                 </span>
                             </div>
                             <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>{{ translate('Price per Person') }}</option>
+                                <option selected disabled hidden>{{ __('trips.price_per_person_short') }}</option>
                                 <option value="" >@lang('message.choose')...</option>
                                 <option value="1-50">1 - 50 p.P.</option>
                                 <option value="51-100">51 - 100 p.P.</option>
@@ -1213,7 +1213,7 @@ function initializeSelect2() {
 
     selectMethod.select2({
         multiple: true,
-        placeholder: '{{translate('fishing type')}}',
+        placeholder: '{{__('category.fishing_type_label')}}',
         width: 'resolve'
     });
 

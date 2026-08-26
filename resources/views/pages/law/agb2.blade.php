@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', ucwords(translate('Allgemeine Geschäftsbedingungen')))
+@section('title', ucwords(__('terms.title')))
 
 @section('content')
     <!--Page Header Start-->

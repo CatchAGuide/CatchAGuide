@@ -399,4 +399,12 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_seo_less' => 'Read less',
 
     'catalog_header_country_select_placeholder' => 'Select destination',
+    'open_guide' => 'View Guide',
+    'vacations_in' => 'Vacations in',
+    'view_all_vacations' => 'View all vacations',
+    'fishing_vacations_label' => 'Fishing Vacations',
+    'pets_label' => 'Pets:',
+    'boat_available_colon' => 'Boat Available:',
+    'boat_available' => 'Boat Available',
+    'distance_to_water' => 'Distance to the water',
 ];

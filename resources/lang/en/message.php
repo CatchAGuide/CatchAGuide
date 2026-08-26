@@ -252,6 +252,7 @@ return [
 
     //sort
     'sortby' => 'Sort by',
+    'recommended' => 'Recommended',
     'newest' => 'Newest',
     'lowprice' => 'Low to High Price',
     'shortduration' => 'Short to Long Duration',
@@ -313,4 +314,6 @@ Important note: If you provide personal contact details such as your email addre
     'reject-form-step-done' => 'Done',
     'reject-form-step-pending' => 'Next',
 
+    'faq-page-title' => 'Frequently Asked Questions for Catch A Guide',
+    'accept_the' => 'I accept the',
 ];

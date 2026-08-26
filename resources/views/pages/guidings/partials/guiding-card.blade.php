@@ -133,7 +133,7 @@
                         <div class="guidings-icon-container">
                             <img src="{{asset('assets/images/icons/user-new.svg')}}" height="20" width="20" alt="" />
                             <div class="">
-                                Max {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                Max {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{__('booking.people')}} @else {{__('booking.person')}} @endif
                             </div>
                         </div>
                         <div class="guidings-icon-container">

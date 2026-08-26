@@ -1,8 +1,10 @@
 @php
     $inputPrefix = $inputPrefix ?? 'vacation-camp';
+    $interactive = $interactive ?? false;
 @endphp
 
-@if($showCampFacets)
+@if($interactive || $showCampFacets)
+<div @if($interactive) data-vacation-facet-section="camp" @endif @if($interactive && ! $showCampFacets) class="d-none" @endif>
     @if($accommodationTypeOptions->isNotEmpty())
         <div class="{{ $fieldClass }}">
             <label class="form-label">{{ __('vacations.filter_accommodation_type') }}</label>
@@ -48,4 +50,5 @@
             </label>
         </div>
     </div>
+</div>
 @endif

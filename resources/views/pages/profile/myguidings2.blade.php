@@ -392,7 +392,7 @@
                                                                     <span class="icon-user"></span>
                                                                 </div>
                                                                 <div class="mx-2" style="font-size:0.75rem">
-                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{__('booking.people')}} @else {{__('booking.person')}} @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -402,7 +402,7 @@
                                                                     <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
                                                                 </div>
                                                                 <div class="mx-2" style="font-size:0.75rem">
-                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{__('checkout.hours')}} @else {{__('guidings.hour')}} @endif
                                                                 </div>
                                                             </div>
                                                         </div>

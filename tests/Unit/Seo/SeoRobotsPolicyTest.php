@@ -35,9 +35,15 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertSame('NOINDEX, NOFOLLOW', $this->policy->robotsContentForGuidings($request));
     }
 
-    public function test_guidings_legacy_checkbox_filters_still_noindex(): void
+    public function test_guidings_species_filter_noindexes(): void
     {
-        $request = Request::create('/guidings', 'GET', ['target_fish' => '1']);
+        $request = Request::create('/guidings/alloffers', 'GET', ['species' => '1']);
+        $this->assertTrue($this->policy->shouldNoindexGuidings($request));
+    }
+
+    public function test_guidings_num_guests_filter_noindexes(): void
+    {
+        $request = Request::create('/guidings/alloffers', 'GET', ['num_guests' => '4']);
         $this->assertTrue($this->policy->shouldNoindexGuidings($request));
     }
 

@@ -68,6 +68,7 @@
 
         return $action.'?'.http_build_query(array_merge($params, ['pillar' => $pillar]));
     };
+    $pillarBaseUrl = fn (string $pillar) => explode('?', $pillarUrl($pillar), 2)[0];
     $showPillarFilters = $showPillarToggles && ($tripsTotal ?? 0) > 0 && ($campsTotal ?? 0) > 0;
     $showToolbar = in_array($renderSection, ['all', 'toolbar'], true);
     $showSidebar = in_array($renderSection, ['all', 'sidebar'], true);
@@ -313,19 +314,19 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_show_all') }}</label>
                         @if(is_array($pillarLinks))
-                            <div class="vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
-                                <a href="{{ $pillarUrl('all') }}"
+                            <div class="vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group" data-vacation-pillar-group>
+                                <button type="button" data-pillar-vacation="all" data-pillar-base-url="{{ $pillarBaseUrl('all') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--all {{ $activePillar === 'all' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_show_all') }} ({{ $total }})
-                                </a>
-                                <a href="{{ $pillarUrl('trips') }}"
+                                </button>
+                                <button type="button" data-pillar-vacation="trips" data-pillar-base-url="{{ $pillarBaseUrl('trips') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--trips {{ $activePillar === 'trips' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})
-                                </a>
-                                <a href="{{ $pillarUrl('camps') }}"
+                                </button>
+                                <button type="button" data-pillar-vacation="camps" data-pillar-base-url="{{ $pillarBaseUrl('camps') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--camps {{ $activePillar === 'camps' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})
-                                </a>
+                                </button>
                             </div>
                         @else
                             <select name="pillar" class="form-select">
@@ -363,17 +364,19 @@
                     'selectedValues' => array_merge($filter->speciesIds ?? [], $filter->speciesNames ?? []),
                 ])
 
-                @if($showTripDurationFilter)
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('vacations.filter_duration') }}</label>
-                        <select name="duration" class="form-select">
-                            <option value="">{{ __('vacations.filter_show_all') }}</option>
-                            @foreach($tripDurationOptions as $duration)
-                                <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
-                                    {{ $duration['label'] }}
-                                </option>
-                            @endforeach
-                        </select>
+                @if($tripDurationOptions->isNotEmpty())
+                    <div data-vacation-facet-section="trip" @if(! $showTripDurationFilter) class="d-none" @endif>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('vacations.filter_duration') }}</label>
+                            <select name="duration" class="form-select">
+                                <option value="">{{ __('vacations.filter_show_all') }}</option>
+                                @foreach($tripDurationOptions as $duration)
+                                    <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
+                                        {{ $duration['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 @endif
 
@@ -384,6 +387,7 @@
                     'filter' => $filter,
                     'accommodationTypeOptions' => $accommodationTypeOptions,
                     'showCampFacets' => $showCampFacets,
+                    'interactive' => true,
                 ])
 
                 <div class="mb-3">
@@ -438,6 +442,41 @@
                 event.stopPropagation();
             });
         }
+
+        (function () {
+            var offcanvas = document.getElementById('vacationFiltersOffcanvas');
+            var form = offcanvas ? offcanvas.querySelector('.vacation-filters-offcanvas__form') : null;
+            var pillarGroup = offcanvas ? offcanvas.querySelector('[data-vacation-pillar-group]') : null;
+            if (!offcanvas || !form || !pillarGroup) {
+                return;
+            }
+
+            var pillarButtons = pillarGroup.querySelectorAll('[data-pillar-vacation]');
+            var facetSections = offcanvas.querySelectorAll('[data-vacation-facet-section]');
+
+            function setPillarState(pillar, baseUrl) {
+                if (baseUrl) {
+                    form.action = baseUrl;
+                }
+
+                pillarButtons.forEach(function (btn) {
+                    btn.classList.toggle('is-active', btn.dataset.pillarVacation === pillar);
+                });
+
+                facetSections.forEach(function (section) {
+                    var sectionType = section.dataset.vacationFacetSection;
+                    var matches = (sectionType === 'trip' && pillar === 'trips')
+                        || (sectionType === 'camp' && pillar === 'camps');
+                    section.classList.toggle('d-none', !matches);
+                });
+            }
+
+            pillarButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setPillarState(btn.dataset.pillarVacation, btn.dataset.pillarBaseUrl);
+                });
+            });
+        })();
 
         document.querySelectorAll('.vacation-mobile-sort-option').forEach(function (option) {
             option.addEventListener('click', function (event) {

@@ -133,6 +133,11 @@ trait GuidingFilterOptimization
         } else {
             if ($request->has('sortby') && !empty($request->get('sortby'))) {
                 switch ($request->get('sortby')) {
+                    case 'recommended':
+                        $query->orderByRaw('(SELECT AVG(grandtotal_score) FROM reviews WHERE reviews.guide_id = guidings.user_id) DESC')
+                            ->orderByRaw('(SELECT COUNT(*) FROM reviews WHERE reviews.guide_id = guidings.user_id) DESC')
+                            ->orderBy('created_at', 'desc');
+                        break;
                     case 'newest':
                         $query->orderBy('created_at', 'desc');
                         break;

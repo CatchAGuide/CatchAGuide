@@ -116,13 +116,13 @@
                                 <span class="icon-user"></span>
                             </div>
                             <div class="tours-list__content__trait__text">
-                                {{ translate( 'Gästeanzahl:' )  }} {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                {{ translate( 'Gästeanzahl:' )  }} {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{__('booking.people')}} @else {{__('booking.person')}} @endif
                             </div>
                         </div>
 
                         <div class="tours-list__content__trait">
                             <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
-                            <div class="tours-list__content__trait__text">Dauer: {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif</div>
+                            <div class="tours-list__content__trait__text">Dauer: {{ $guiding->duration }} @if($guiding->duration != 1) {{__('checkout.hours')}} @else {{__('guidings.hour')}} @endif</div>
                         </div>
 
                     </div>
