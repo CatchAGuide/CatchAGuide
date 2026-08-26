@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\GuidingsController;
 use App\Models\CategoryEntity;
 use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -18,6 +19,7 @@ class GuidingDestinationController extends Controller
     public function __construct(
         private OfferCatalogPageService $offerCatalog,
         private CategoryPageContentService $categoryContent,
+        private HomepageCountrySelector $homepageCountries,
     ) {}
 
     public function index(): View
@@ -129,6 +131,11 @@ class GuidingDestinationController extends Controller
             'cities' => $cities,
             'region_count' => $regions->count(),
             'city_count' => $cities->count(),
+            'countryOptions' => $this->homepageCountries->featured()->map(fn (array $option) => [
+                'slug' => $option['slug'],
+                'name' => $option['name'],
+                'url' => route('guidings.destination', ['country' => $option['slug']]),
+            ]),
             'faq' => $faq,
             'fish_chart' => $this->geoCollection($rowData, 'fish_charts'),
             'fish_size_limit' => $this->geoCollection($rowData, 'fish_size_limits'),

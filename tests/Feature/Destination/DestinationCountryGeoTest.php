@@ -65,6 +65,7 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertSee('offers-page-header__hero', false);
         $response->assertSee('Fishing in Spain', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
+        $response->assertDontSee('data-offers-region-redirect', false);
     }
 
     public function test_destination_region_url_redirects_to_country(): void

@@ -20,6 +20,9 @@
     'renderSection' => 'all',
     'mapModalId' => 'offersCatalogMapModal',
     'lockedParams' => [],
+    'regionRedirectOptions' => null,
+    'regionRedirectCurrent' => null,
+    'regionRedirectAllUrl' => null,
 ])
 
 @php
@@ -41,6 +44,7 @@
     $tourDurationOptions = $tourDurationOptions instanceof Collection ? $tourDurationOptions : collect($tourDurationOptions ?? []);
     $tripDurationOptions = $tripDurationOptions instanceof Collection ? $tripDurationOptions : collect($tripDurationOptions ?? []);
     $accommodationTypeOptions = $accommodationTypeOptions instanceof Collection ? $accommodationTypeOptions : collect($accommodationTypeOptions ?? []);
+    $regionRedirectOptions = $regionRedirectOptions instanceof Collection ? $regionRedirectOptions : collect($regionRedirectOptions ?? []);
     $activeType = $filter->type ?? 'all';
     $activeVacation = $filter->vacation ?? 'all';
     $isVacation = $activeType === 'vacation';
@@ -190,6 +194,9 @@
                 'showCampFacets' => $showCampFacets,
                 'showTripFacets' => $showTripFacets,
                 'vacationUrl' => $vacationUrl,
+                'regionRedirectOptions' => $regionRedirectOptions,
+                'regionRedirectCurrent' => $regionRedirectCurrent,
+                'regionRedirectAllUrl' => $regionRedirectAllUrl,
             ])
 
             <div class="vacation-filters__actions mt-2">
@@ -547,6 +554,9 @@
                     'showTripFacets' => $showTripFacets,
                     'vacationUrl' => $vacationUrl,
                     'interactive' => true,
+                    'regionRedirectOptions' => $regionRedirectOptions,
+                    'regionRedirectCurrent' => $regionRedirectCurrent,
+                    'regionRedirectAllUrl' => $regionRedirectAllUrl,
                 ])
 
                 <button type="submit" class="btn btn-orange w-100">{{ __('offers.apply_filters') }}</button>
@@ -570,6 +580,20 @@
                 event.stopPropagation();
             });
         }
+
+        document.querySelectorAll('[data-offers-region-redirect]').forEach(function (select) {
+            select.dataset.initialValue = select.value;
+        });
+
+        document.querySelectorAll('#offers-filters-form, .vacation-filters-offcanvas__form').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                var select = form.querySelector('[data-offers-region-redirect]');
+                if (select && select.value && select.value !== select.dataset.initialValue) {
+                    event.preventDefault();
+                    window.location.href = select.value;
+                }
+            });
+        });
 
         (function () {
             var offcanvas = document.getElementById('offersFiltersOffcanvas');

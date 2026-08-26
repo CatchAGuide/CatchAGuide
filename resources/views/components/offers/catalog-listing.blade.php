@@ -3,14 +3,20 @@
     'showFaq' => true,
     'analyticsPage' => 'offers-catalog',
     'wrapperClass' => 'offers-catalog',
+    'regionRedirectOptions' => null,
+    'regionRedirectCurrent' => null,
+    'regionRedirectAllUrl' => null,
 ])
 
 @php
+    use Illuminate\Support\Collection;
+
     $hasMap = count($vm->mapMarkers) > 0;
     $currentSort = $vm->filter->sortBy ?? '';
     $lockedParams = $vm->lockedScopeParams();
     $sortQuery = array_merge(request()->except(['page', 'sortby']), $lockedParams);
     $showTypeToggles = ! $vm->lockTourScope && ! $vm->lockVacationScope;
+    $regionRedirectOptions = $regionRedirectOptions instanceof Collection ? $regionRedirectOptions : collect($regionRedirectOptions ?? []);
 @endphp
 
 <div
@@ -81,6 +87,9 @@
                     :show-mobile-toolbar="false"
                     :show-type-toggles="false"
                     :locked-params="$lockedParams"
+                    :region-redirect-options="$regionRedirectOptions"
+                    :region-redirect-current="$regionRedirectCurrent"
+                    :region-redirect-all-url="$regionRedirectAllUrl"
                 />
             </div>
         </aside>
@@ -184,4 +193,7 @@
     :action="$vm->filterAction()"
     :show-map-button="$hasMap"
     :locked-params="$lockedParams"
+    :region-redirect-options="$regionRedirectOptions"
+    :region-redirect-current="$regionRedirectCurrent"
+    :region-redirect-all-url="$regionRedirectAllUrl"
 />

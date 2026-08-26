@@ -1270,6 +1270,39 @@ $muted: #787780;
     }
   }
 
+  // Floating rating badge on the image, opposite the type badge — mobile only (see 767.98 breakpoint)
+  &__rating-badge {
+    display: none;
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    z-index: 2;
+    align-items: center;
+    gap: 0.22rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: $slate;
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 999px;
+    padding: 0.22rem 0.5rem;
+    box-shadow: 0 2px 8px rgba($slate, 0.22);
+
+    i {
+      color: #ffb400;
+      font-size: 0.62rem;
+    }
+  }
+
+  &__rating-badge-value {
+    font-weight: 800;
+  }
+
+  &__rating-badge-count {
+    font-weight: 600;
+    color: $muted;
+    font-size: 0.64rem;
+  }
+
   &__main {
     min-width: 0;
     padding: 0.7rem 1rem;
@@ -1709,8 +1742,13 @@ $muted: #787780;
       font-size: 0.94rem;
     }
 
-    &__score-meta {
+    // Rating moves onto the image (top-right, beside the type badge) on mobile
+    &__headline-row &__score {
       display: none;
+    }
+
+    &__rating-badge {
+      display: inline-flex;
     }
 
     &__section-label {

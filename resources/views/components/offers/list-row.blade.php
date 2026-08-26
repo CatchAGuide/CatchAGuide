@@ -120,6 +120,20 @@
                     {{ __('vacations.limited_avail_badge') }}
                 </span>
             @endif
+
+            @if($rating)
+                <div
+                    class="offers-card__rating-badge"
+                    title="{{ trans_choice('offers.reviews_count', $reviewCount, ['count' => $reviewCount]) }}"
+                    aria-label="{{ number_format($rating, 1) }}{{ $reviewCount > 0 ? ', '.trans_choice('offers.reviews_count', $reviewCount, ['count' => $reviewCount]) : '' }}"
+                >
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                    <span class="offers-card__rating-badge-value">{{ number_format($rating, 1) }}</span>
+                    @if($reviewCount > 0)
+                        <span class="offers-card__rating-badge-count">({{ $reviewCount }})</span>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
 

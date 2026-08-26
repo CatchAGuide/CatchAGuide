@@ -5,6 +5,7 @@
     $useToursHeroSearch = request()->routeIs('guidings.destination');
     $useCategoryHeroHeader = request()->routeIs('destination.country') || $useToursHeroSearch;
     $geoFilters = is_array($row_data->filters ?? null) ? $row_data->filters : [];
+    $currentCountrySlug = $destination_type === 'country' ? $row_data->slug : ($row_data->country->slug ?? null);
     $heroBreadcrumbs = $useToursHeroSearch
         ? array_values(array_filter([
             ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
@@ -629,6 +630,9 @@
                             :vm="$vm"
                             :show-faq="false"
                             analytics-page="destination-offers-catalog"
+                            :region-redirect-options="$useToursHeroSearch ? ($countryOptions ?? collect()) : collect()"
+                            :region-redirect-current="$currentCountrySlug"
+                            :region-redirect-all-url="$useToursHeroSearch ? route('guidings.index') : null"
                         />
                     </div>
                     @else

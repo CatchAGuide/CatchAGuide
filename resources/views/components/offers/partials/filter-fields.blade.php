@@ -40,15 +40,20 @@
     </div>
 @endif
 
-@if($countries->isNotEmpty())
+@php
+    $regionRedirectOptions = $regionRedirectOptions ?? collect();
+    $isRegionRedirect = $regionRedirectOptions->isNotEmpty();
+@endphp
+@if($isRegionRedirect || $countries->isNotEmpty())
     @php
-        $regionLockedByPlace = $filter->hasPlaceSearch();
+        $regionLockedByPlace = ! $isRegionRedirect && $filter->hasPlaceSearch();
         $regionLockMessage = __('offers.filter_country_locked_by_place');
         $regionSelectId = ($speciesInputPrefix ?? 'offers-species').'-country';
     @endphp
-    <div class="{{ $fieldClass }} offers-filters__region{{ $regionLockedByPlace ? ' is-locked' : '' }}" data-offers-region-field>
+    <div class="{{ $fieldClass }} offers-filters__region{{ $regionLockedByPlace ? ' is-locked' : '' }}" @unless($isRegionRedirect) data-offers-region-field @endunless>
         <label class="form-label offers-filters__region-label" for="{{ $regionSelectId }}">
             <span>{{ __('offers.filter_country') }}</span>
+            @unless($isRegionRedirect)
             <button
                 type="button"
                 class="offers-filters__region-tip"
@@ -62,10 +67,11 @@
             >
                 <i class="fas fa-info-circle" aria-hidden="true"></i>
             </button>
+            @endunless
         </label>
         <div
             class="offers-filters__region-control"
-            data-offers-region-control
+            @unless($isRegionRedirect) data-offers-region-control @endunless
             @if($regionLockedByPlace)
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
@@ -73,17 +79,30 @@
                 title="{{ $regionLockMessage }}"
             @endif
         >
-            @if($regionLockedByPlace && filled($filter->country))
-                <input type="hidden" name="country" value="{{ $filter->country }}" data-offers-region-hidden>
+            @if($isRegionRedirect)
+                <select id="{{ $regionSelectId }}" class="{{ $selectClass }}" data-offers-region-redirect>
+                    @if(filled($regionRedirectAllUrl ?? null))
+                        <option value="{{ $regionRedirectAllUrl }}">{{ __('offers.filter_show_all') }}</option>
+                    @endif
+                    @foreach($regionRedirectOptions as $row)
+                        <option value="{{ $row['url'] }}" @selected(($regionRedirectCurrent ?? null) === $row['slug'])>
+                            {{ $row['name'] }}
+                        </option>
+                    @endforeach
+                </select>
+            @else
+                @if($regionLockedByPlace && filled($filter->country))
+                    <input type="hidden" name="country" value="{{ $filter->country }}" data-offers-region-hidden>
+                @endif
+                <select name="country" id="{{ $regionSelectId }}" class="{{ $selectClass }}" data-offers-region-select @disabled($regionLockedByPlace) @if($regionLockedByPlace) aria-disabled="true" @endif>
+                    <option value="">{{ __('offers.filter_show_all') }}</option>
+                    @foreach($countries as $row)
+                        <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
+                            {{ translate($row['name']) }}
+                        </option>
+                    @endforeach
+                </select>
             @endif
-            <select name="country" id="{{ $regionSelectId }}" class="{{ $selectClass }}" data-offers-region-select @disabled($regionLockedByPlace) @if($regionLockedByPlace) aria-disabled="true" @endif>
-                <option value="">{{ __('offers.filter_show_all') }}</option>
-                @foreach($countries as $row)
-                    <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
-                        {{ translate($row['name']) }}
-                    </option>
-                @endforeach
-            </select>
         </div>
     </div>
 @endif

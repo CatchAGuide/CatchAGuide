@@ -99,6 +99,25 @@ class GuidingsDestinationTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
+    public function test_guidings_destination_country_shows_country_switch_dropdown_targeting_guidings_pages(): void
+    {
+        $country = $this->createCountry('spanien-country-switch');
+
+        $this->bindToursCatalog(fn () => $this->viewModel(
+            catalogUrl: route('guidings.destination', ['country' => $country->slug]),
+        ));
+
+        $response = $this->get(route('guidings.destination', ['country' => $country->slug]));
+
+        $response->assertOk();
+        $response->assertSee('data-offers-region-redirect', false);
+        $response->assertSee(
+            'value="'.route('guidings.destination', ['country' => $country->slug]).'"',
+            false
+        );
+        $response->assertSee('value="'.route('guidings.index').'"', false);
+    }
+
     public function test_guidings_country_still_renders_region_and_city_carousels(): void
     {
         $country = $this->createCountry('spanien-geo-carousel');
