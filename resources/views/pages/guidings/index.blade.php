@@ -3,6 +3,21 @@
 @php
     $listingTitle = $vm->pageTitle();
     $listingSubtitle = $vm->pageSubtitle();
+    $hasGuidingsSearchFilter = filled($vm->filter->place)
+        || filled($vm->filter->city)
+        || filled($vm->filter->region)
+        || filled($vm->filter->country)
+        || $vm->filter->speciesIds !== []
+        || $vm->filter->speciesNames !== [];
+    $guidingsBreadcrumbItems = [
+        [
+            'label' => __('homepage.filter-fishing-near-me'),
+            'url' => $hasGuidingsSearchFilter ? route('guidings.index') : null,
+        ],
+    ];
+    if ($hasGuidingsSearchFilter) {
+        $guidingsBreadcrumbItems[] = ['label' => $listingTitle, 'url' => null];
+    }
 @endphp
 
 @section('title', $listingTitle)
@@ -83,9 +98,7 @@
         'listingTitle' => $listingTitle,
         'listingSubtitle' => '',
         'searchAction' => listing_search_action(),
-        'breadcrumbItems' => [
-            ['label' => __('homepage.filter-fishing-near-me'), 'url' => null],
-        ],
+        'breadcrumbItems' => $guidingsBreadcrumbItems,
     ])
 
     <section class="tours-list">
