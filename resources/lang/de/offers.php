@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'title' => 'Alle Angebote',
-    'explore_title' => 'Alle Angebote entdecken',
+    'title' => 'Alle Erlebnisse',
+    'explore_title' => 'Alle Erlebnisse entdecken',
     'title_tours' => 'Angeltouren',
     'title_trips' => 'Angelreisen',
     'title_camps' => 'Angelcamps & Unterkünfte',
@@ -17,8 +17,8 @@ return [
     'subtitle_trips' => 'Mehrtägige Angeltrips mit Unterkunft und Guide-Paketen.',
     'subtitle_camps' => 'Angelcamps und Lodges mit Übernachtung, Booten und Guide-Optionen.',
     'subtitle_vacations' => 'Mehrtägige Angeltrips und Camps mit Unterkunft und Guide-Paketen.',
-    'breadcrumb' => 'Angebote',
-    'nav_label' => 'Alle Angebote',
+    'breadcrumb' => 'Erlebnisse',
+    'nav_label' => 'Alle Erlebnisse',
 
     'filter_all' => 'Alle',
     'filter_tours' => 'Touren',
@@ -107,5 +107,5 @@ return [
     'faq_q4' => 'Sind Guides und Lodges verifiziert?',
     'faq_a4' => 'Öffentliche Angebote stammen von Catch A Guide Partnern. Prüfe auf der Angebotsseite immer, was enthalten ist, bevor du buchst oder anfragst.',
 
-    'browse_all' => 'Alle Angebote entdecken',
+    'browse_all' => 'Alle Erlebnisse entdecken',
 ];

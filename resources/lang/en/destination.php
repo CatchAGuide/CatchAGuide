@@ -1,8 +1,8 @@
 <?php 
 return [
-    'title' => 'All country offers',
-    'header_title' => 'All country offers',
-    'header_sub_title' => 'All destinations for your next fishing tour in all countries',
+    'title' => 'Fishing Worldwide – All Destinations',
+    'header_title' => 'Fishing Worldwide – All Destinations',
+    'header_sub_title' => 'Fishing tours, fishing trips, accommodation & boat hire – with local guides',
     'breadcrumb' => 'Destinations',
     'introduction' => 'Europe offers anglers an impressive variety of waters and fish species. Whether you prefer the tranquility of a quiet lake in Sweden or are looking for action-packed deep-sea fishing in the Mediterranean - with us you are guaranteed to find your personal dream trip.<br><br>
 Germany: The home of carp, pike and zander offers excellent fishing opportunities in large lakes such as Lake Constance and rivers such as the Rhine. Numerous fishing guides offer guided tours to show you the best spots and techniques.<br><br>

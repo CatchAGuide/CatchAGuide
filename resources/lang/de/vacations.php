@@ -164,7 +164,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'pillar_trips_curated' => 'Kuratierte Pakete',
     'pillar_camps_tagline' => 'Dein Tempo — pro Nacht buchen.',
     'pillar_trips_tagline' => 'All-inclusive — pro Person.',
-    'pillar_tile_listings' => ':count Angebote',
+    'pillar_tile_listings' => ':count Erlebnisse',
     'pillar_tile_countries' => ':count Länder',
     'pillar_tile_from' => 'ab :price',
     'pillar_tile_stats_camps' => ':count Camps in :countries Ländern',
@@ -211,10 +211,10 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'fishing_vacation_in_country' => 'Angelurlaub in :country',
     'country_listing_title' => 'Angelurlaub in :country',
     'all_offers_nav' => 'Alle',
-    'all_offers_title' => 'Alle Angebote',
+    'all_offers_title' => 'Alle Erlebnisse',
     'all_offers_subtitle' => 'Entdecke alle Guided Fishing Trips und Angelcamps.',
     'all_offers_listing_title' => 'Alle Angelurlaube',
-    'all_offers_breadcrumb' => 'Alle Angebote',
+    'all_offers_breadcrumb' => 'Alle Erlebnisse',
     'pillar_index_results' => ':count Angebote verfügbar',
     'pillar_tile_explore' => 'Entdecken',
     'badge_camp' => 'Angelcamp',
@@ -355,7 +355,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     // Hub-Redesign — Zielfisch-Leiste
     'hub_target_fish_title' => 'Auf welchen Fisch hast du es abgesehen?',
     'hub_target_fish_subtitle' => 'Hecht, Lachs, Wels, Thunfisch – finde deinen Angelurlaub nach Zielfisch.',
-    'hub_target_fish_count' => ':count Angebote',
+    'hub_target_fish_count' => ':count Erlebnisse',
     'hub_target_fish_view_all' => 'Alle Zielfische ansehen →',
 
     // Hub-Redesign — Beste Reisezeit (Monatswahl)

@@ -1,8 +1,8 @@
 <?php 
 return [
-    'title' => 'Alle Länder Angebote',
-    'header_title' => 'Alle Länder Angebote',
-    'header_sub_title' => 'Alle Länder Angebote für deine nächste Angeltour',
+    'title' => 'Angeln weltweit – alle Reiseziele',
+    'header_title' => 'Angeln weltweit – alle Reiseziele',
+    'header_sub_title' => 'Angeltouren, Angelreisen, Unterkünfte & Mietboote – geführt von lokalen Guides ',
     'breadcrumb' => 'Reiseziele',
     'introduction' => 'Europa bietet Anglern eine beeindruckende Vielfalt an Gewässern und Fischarten. Ob du die Ruhe eines stillen Sees in Schweden bevorzugen oder aktion-reiches Hochseeangeln am Mittelmeer suchst – bei uns findest du garantiert deine persönliche Traumreise.<br><br>
 Deutschland: Die Heimat von Karpfen, Hecht und Zander bietet in großen Seen wie dem Bodensee und Flüssen wie dem Rhein ausgezeichnete Angelmöglichkeiten. Zahlreiche Angelguides bieten geführte Touren an, um Ihnen die besten Spots und Techniken zu zeigen.<br><br>

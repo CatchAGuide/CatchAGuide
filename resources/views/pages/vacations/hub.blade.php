@@ -113,7 +113,7 @@
             >
                 @foreach([false, true] as $isClone)
                     @foreach($hub->targetFishTiles as $tile)
-                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
+                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" :show-count="false" />
                     @endforeach
                 @endforeach
             </x-vacation.country-slider>

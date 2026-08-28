@@ -13,7 +13,7 @@ return [
     'stat_anglers' => '25.000',
     'stat_anglers_label' => 'Angler pro Monat',
     'stat_offers' => '450',
-    'stat_offers_label' => 'Angebote',
+    'stat_offers_label' => 'Erlebnisse',
     'stat_partners' => '150+',
     'stat_partners_label' => 'Aktive Partner',
     'stat_countries' => '12',

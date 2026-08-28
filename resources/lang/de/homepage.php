@@ -2,7 +2,7 @@
 return [
     'header-title' => 'Finde deine nächste Angeltour!',
     'header-message' => 'Suche Angebote für Angelausflüge, Angelurlaube und vieles mehr',
-    'header-become-guide' => 'Angeltouren anbieten',
+    'header-become-guide' => 'Partner werden',
     'header-login' => 'Einloggen',
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',
@@ -112,7 +112,7 @@ return [
     'trust_rating_label' => 'Durchschnittsbewertung',
     'trust_rating_short' => 'Bewertung',
     'trust_bookings_label' => 'Gebuchte Touren',
-    'trust_offers_label' => 'Angebote',
+    'trust_offers_label' => 'Erlebnisse',
     'trust_countries_label' => 'Länder',
     'trust_offers_over' => 'über :count Angebote',
     'trust_offers_countries' => 'in :count Ländern',
