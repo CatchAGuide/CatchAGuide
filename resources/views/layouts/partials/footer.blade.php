@@ -12,8 +12,8 @@
         [
             'title' => __('homepage.footer_group_tours'),
             'items' => [
-                ['label' => __('homepage.footer_by_country'), 'url' => route('destination')],
-                ['label' => __('homepage.footer_by_fish'), 'url' => route('targets.index')],
+                ['label' => __('homepage.footer_by_country'), 'url' => route('guidings.countries')],
+                ['label' => __('homepage.footer_by_fish'), 'url' => route('guidings.targets.index')],
                 ['label' => __('homepage.footer_by_method'), 'url' => route('guidings.methods')],
             ],
         ],

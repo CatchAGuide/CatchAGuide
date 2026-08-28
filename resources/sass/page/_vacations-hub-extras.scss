@@ -172,6 +172,7 @@
         margin: 0;
         line-height: 1.2;
         color: $vac-ink;
+        @include cag-desktop-nowrap;
 
         @media (min-width: 768px) {
             font-size: 1.5rem;
@@ -184,6 +185,7 @@
         color: $vac-muted;
         line-height: 1.45;
         max-width: 36rem;
+        @include cag-desktop-nowrap;
     }
 
     &__tools {

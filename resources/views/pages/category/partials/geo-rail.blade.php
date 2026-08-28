@@ -10,6 +10,7 @@
         <div class="cag-home-species__heading">
             <h2 class="cag-home-section__title">{{ $title }}</h2>
             @if($subtitle !== '')
+                <x-title-rule />
                 <p class="cag-home-species__subtitle">{{ $subtitle }}</p>
             @endif
         </div>

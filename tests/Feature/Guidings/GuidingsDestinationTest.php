@@ -6,11 +6,16 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
+use App\Enums\GuideStatus;
 use App\Models\CategoryEntity;
+use App\Models\FishingType;
+use App\Models\Guiding;
 use App\Models\Language;
+use App\Models\User;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Mockery;
 use Tests\TestCase;
@@ -25,11 +30,34 @@ class GuidingsDestinationTest extends TestCase
 
         config(['app.url' => 'http://localhost']);
         URL::forceRootUrl('http://localhost');
+        Cache::forget('guiding_category_availability_v1');
 
         $this->withoutMiddleware([
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+    }
+
+    private function createTour(array $overrides = []): Guiding
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $guiding = new Guiding();
+        $guiding->forceFill(array_merge([
+            'title' => 'Destination Tour '.uniqid(),
+            'slug' => 'destination-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $guiding;
     }
 
     private function createCountry(string $slugPrefix): CategoryEntity
@@ -384,6 +412,41 @@ class GuidingsDestinationTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('pages.countries.index');
+    }
+
+    public function test_guidings_countries_index_excludes_country_without_any_tours(): void
+    {
+        $marker = 'zedonia-'.uniqid();
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Zedonia',
+            'slug' => $marker,
+            'countrycode' => '',
+        ]);
+
+        $response = $this->get(route('guidings.countries'));
+
+        $response->assertOk();
+        $response->assertDontSee(route('guidings.destination', ['country' => $country->slug], false), false);
+    }
+
+    public function test_guidings_countries_index_includes_country_with_a_tour(): void
+    {
+        $marker = 'yedonia-'.uniqid();
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Yedonia',
+            'slug' => $marker,
+            'countrycode' => '',
+        ]);
+
+        $this->createTour(['country' => $marker]);
+        Cache::forget('guiding_category_availability_v1');
+
+        $response = $this->get(route('guidings.countries'));
+
+        $response->assertOk();
+        $response->assertSee(route('guidings.destination', ['country' => $country->slug], false), false);
     }
 
     private function bindToursCatalog(callable $factory): void

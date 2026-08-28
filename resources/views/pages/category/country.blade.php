@@ -624,7 +624,7 @@
                     @endif
                     @endif
                     @if($showOffersCatalog)
-                    <h5 class="cag-dest-listings-title">{{ translate('Fishing tours in ' . $row_data->name) }}</h5>
+                    {{-- <h5 class="cag-dest-listings-title">{{ translate('Fishing tours in ' . $row_data->name) }}</h5> --}}
                     <div class="offers-catalog-page mb-5">
                         <x-offers.catalog-listing
                             :vm="$vm"

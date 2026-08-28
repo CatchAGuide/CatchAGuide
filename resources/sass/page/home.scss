@@ -80,6 +80,7 @@ $white: #ffffff;
   font-weight: 700;
   margin: 0;
   color: var(--cag-slate);
+  @include cag-desktop-nowrap;
 
   @media (min-width: 768px) {
     font-size: 1.5rem;
@@ -97,6 +98,7 @@ $white: #ffffff;
   font-size: 0.9rem;
   line-height: 1.5;
   max-width: 42rem;
+  @include cag-desktop-nowrap;
 }
 
 .cag-home-section__link {
@@ -1072,6 +1074,7 @@ $white: #ffffff;
   color: var(--cag-gray);
   font-size: 0.875rem;
   line-height: 1.4;
+  @include cag-desktop-nowrap;
 
   @media (min-width: 768px) {
     font-size: 0.95rem;

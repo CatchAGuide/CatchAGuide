@@ -20,6 +20,7 @@
                 @endif
                 <h2 class="vacation-card-slider__title">{{ $title }}</h2>
                 @if($subtitle)
+                    <x-title-rule />
                     <p class="vacation-card-slider__subtitle">{{ $subtitle }}</p>
                 @endif
             </div>

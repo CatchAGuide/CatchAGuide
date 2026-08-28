@@ -509,6 +509,28 @@ class OffersCatalogTest extends TestCase
         $response->assertDontSee('data-offers-clear-filters', false);
     }
 
+    public function test_clear_filters_link_hidden_for_place_search_alone(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            place: 'Spain',
+            placeLat: 40.4,
+            placeLng: -3.7,
+            country: 'spain',
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => 'Spain',
+            'placeLat' => '40.4',
+            'placeLng' => '-3.7',
+            'country' => 'Spain',
+            'country_short' => 'ES',
+            'num_guests' => 2,
+        ]));
+
+        $response->assertOk();
+        $response->assertDontSee('data-offers-clear-filters', false);
+    }
+
     public function test_vacation_chip_extends_trips_camps_inline_and_shows_consolidated_cards(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

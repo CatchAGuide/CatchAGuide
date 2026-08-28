@@ -2,8 +2,8 @@
 
 return [
     'targets' => [
-        'title' => 'Die beliebtesten Zielfische für Angeltouren',
-        'sub_title' => 'Diese Fischarten solltest du auf deiner nächsten Angeltour im Visier haben',
+        'title' => 'Zielfische im Überblick',
+        'sub_title' => 'Angeltouren, Angelreisen, Unterkünfte & Mietboote – nach Fischart gefiltert',
         'breadcrumb' => 'Zielfische',
         'introduction' => 'Europa ist ein wahres Paradies für Angler, das mit seiner unglaublichen Vielfalt an Gewässern und Fischarten begeistert. Von den ruhigen Seen und wilden Flüssen im Landesinneren bis zu den fischreichen Küsten des Atlantiks und der Ostsee – hier findet jeder Angler sein persönliches Traumrevier.
 

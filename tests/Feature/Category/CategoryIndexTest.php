@@ -4,11 +4,16 @@ namespace Tests\Feature\Category;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Enums\GuideStatus;
 use App\Models\CategoryPage;
+use App\Models\FishingType;
+use App\Models\Guiding;
 use App\Models\Language;
 use App\Models\Method;
 use App\Models\Target;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -22,11 +27,34 @@ class CategoryIndexTest extends TestCase
 
         config(['app.url' => 'http://localhost']);
         URL::forceRootUrl('http://localhost');
+        Cache::forget('guiding_category_availability_v1');
 
         $this->withoutMiddleware([
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+    }
+
+    private function createTour(array $overrides = []): Guiding
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $guiding = new Guiding();
+        $guiding->forceFill(array_merge([
+            'title' => 'Test Tour '.uniqid(),
+            'slug' => 'test-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $guiding;
     }
 
     public function test_targets_index_shows_rekeyed_target_fish_content(): void
@@ -125,6 +153,9 @@ class CategoryIndexTest extends TestCase
             'faq_title' => '',
         ]);
 
+        $this->createTour(['target_fish' => json_encode([$target->id])]);
+        Cache::forget('guiding_category_availability_v1');
+
         $response = $this->get(route('guidings.targets.index'));
 
         $response->assertOk();
@@ -135,6 +166,43 @@ class CategoryIndexTest extends TestCase
         $response->assertDontSee('data-site-page-header-shell', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_guidings_targets_index_excludes_target_fish_with_no_tours(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Tourless Pike '.uniqid(),
+            'name_en' => 'Tourless Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Tourless Pike',
+            'type' => 'Targets',
+            'slug' => 'tourless-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Hidden Tourless Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $response = $this->get(route('guidings.targets.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('Hidden Tourless Pike Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });
     }
 
@@ -166,12 +234,52 @@ class CategoryIndexTest extends TestCase
             'faq_title' => '',
         ]);
 
+        $this->createTour(['fishing_methods' => json_encode([$method->id])]);
+        Cache::forget('guiding_category_availability_v1');
+
         $response = $this->get(route('guidings.methods'));
 
         $response->assertOk();
         $response->assertSee('Visible Fly Method Title', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_methods_index_excludes_method_with_no_tours(): void
+    {
+        $method = new Method();
+        $method->forceFill([
+            'name' => 'Tourless Fly '.uniqid(),
+            'name_en' => 'Tourless Fly',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Tourless Fly',
+            'type' => 'Methods',
+            'slug' => 'tourless-fly-'.uniqid(),
+            'source_id' => $method->id,
+            'is_favorite' => false,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $method->id,
+            'type' => CategoryPageEntityType::METHOD,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Hidden Tourless Fly Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $response = $this->get(route('guidings.methods'));
+
+        $response->assertOk();
+        $response->assertDontSee('Hidden Tourless Fly Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });
     }
 

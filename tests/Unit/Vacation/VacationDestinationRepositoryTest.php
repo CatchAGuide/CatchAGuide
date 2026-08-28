@@ -6,6 +6,8 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
 use App\Models\Language;
+use App\Models\Trip;
+use App\Models\User;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -14,7 +16,7 @@ class VacationDestinationRepositoryTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_hub_grid_includes_countries_without_vacation_listings(): void
+    public function test_hub_grid_excludes_countries_without_vacation_listings(): void
     {
         $marker = 'test-hub-rail-'.uniqid();
 
@@ -30,9 +32,38 @@ class VacationDestinationRepositoryTest extends TestCase
 
         $row = $grid->first(fn (array $item) => $item['slug'] === $marker);
 
+        $this->assertNull($row);
+    }
+
+    public function test_hub_grid_includes_countries_with_at_least_one_vacation_listing(): void
+    {
+        $marker = 'test-hub-rail-'.uniqid();
+        $user = User::factory()->create();
+
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Yedonia',
+            'slug' => $marker,
+            'countrycode' => '',
+            'thumbnail_path' => 'assets/images/'.$marker.'.jpg',
+        ]);
+
+        Trip::query()->create([
+            'title' => 'Trip '.$marker,
+            'slug' => $marker,
+            'location' => 'Somewhere',
+            'country' => $country->slug,
+            'status' => 'active',
+            'user_id' => $user->id,
+        ]);
+
+        $grid = app(VacationDestinationRepository::class)->countriesForHubGrid();
+
+        $row = $grid->first(fn (array $item) => $item['slug'] === $marker);
+
         $this->assertNotNull($row);
         $this->assertSame(0, $row['camps']);
-        $this->assertSame(0, $row['trips']);
+        $this->assertSame(1, $row['trips']);
     }
 
     public function test_search_dropdown_uses_vacations_category_pages_not_tours(): void

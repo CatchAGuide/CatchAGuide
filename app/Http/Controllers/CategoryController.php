@@ -10,6 +10,7 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
 use App\Domain\CategoryPage\CategoryPageScope;
@@ -19,8 +20,12 @@ use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
-    public function index($type, Request $request, CategoryPageContentService $categoryContent)
-    {
+    public function index(
+        $type,
+        Request $request,
+        CategoryPageContentService $categoryContent,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
+    ) {
         $type = strtolower((string) $type);
 
         if ($request->filled('slug')) {
@@ -74,6 +79,18 @@ class CategoryController extends Controller
                     && $item->source !== null;
             });
 
+        // Tours (guidings.targets.index / guidings.methods) must not list a target
+        // fish or method with zero publicly visible tours, even if it has vacation listings.
+        if ($scope === CategoryPageScope::TOURS) {
+            $allTargets = $allTargets->filter(function ($item) use ($type, $guidingAvailability) {
+                $sourceId = (int) $item->source_id;
+
+                return $type === 'methods'
+                    ? $guidingAvailability->hasGuidingsForMethod($sourceId)
+                    : $guidingAvailability->hasGuidingsForTarget($sourceId);
+            });
+        }
+
         $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
@@ -93,9 +110,9 @@ class CategoryController extends Controller
         return view('pages.category.category-index', $data);
     }
 
-    public function methodsIndex(Request $request, CategoryPageContentService $categoryContent)
+    public function methodsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
     {
-        return $this->index('methods', $request, $categoryContent);
+        return $this->index('methods', $request, $categoryContent, $guidingAvailability);
     }
 
     public function methodsShow(
@@ -107,14 +124,14 @@ class CategoryController extends Controller
         return $this->targets('methods', $slug, $request, $categoryContent, $offerCatalog);
     }
 
-    public function targetsIndex(Request $request, CategoryPageContentService $categoryContent)
+    public function targetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
     {
-        return $this->index('targets', $request, $categoryContent);
+        return $this->index('targets', $request, $categoryContent, $guidingAvailability);
     }
 
-    public function guidingsTargetsIndex(Request $request, CategoryPageContentService $categoryContent)
+    public function guidingsTargetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
     {
-        return $this->index('targets', $request, $categoryContent);
+        return $this->index('targets', $request, $categoryContent, $guidingAvailability);
     }
 
     public function targets(

@@ -9,6 +9,76 @@
   padding-left: clamp(1.25rem, 3vw, 3rem);
 }
 
+// Desktop: title/subtitle stay on one line and ignore copy max-width caps.
+@mixin cag-desktop-nowrap {
+  @media (min-width: 768px) {
+    white-space: nowrap;
+    max-width: none;
+  }
+}
+
+// Coral square + rule between a header title and subtitle. Mobile only —
+// desktop headers drop the divider so the copy can sit on one line.
+.cag-title-rule {
+  display: flex;
+  align-items: center;
+  margin: 0.55rem 0 0.5rem;
+
+  &::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    flex: none;
+    background: #e8604c;
+  }
+
+  &::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    margin-left: 0.5rem;
+    background: rgba(49, 48, 65, 0.18);
+  }
+
+  &--dark {
+    margin: 0.85rem 0 0.75rem;
+
+    &::after {
+      background: rgba(255, 255, 255, 0.35);
+    }
+  }
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .offers-page-header__copy,
+  .vacations-page-header__copy {
+    max-width: none;
+  }
+
+  .offers-page-header__title,
+  .offers-page-header__sub,
+  .vacations-page-header__title,
+  .vacations-page-header__sub,
+  .vacation-section-heading__title,
+  .vacation-section-heading__subtitle,
+  .vacation-country-rail__title,
+  .vacation-country-rail__subtitle,
+  .vacation-fish-rail__title,
+  .vacation-fish-rail__subtitle,
+  .vacation-card-slider__title,
+  .vacation-card-slider__subtitle,
+  .cag-home-section__title,
+  .cag-home-section__subtitle,
+  .cag-home-species__subtitle {
+    white-space: nowrap;
+    max-width: none;
+  }
+}
+
 .container,
 .container-sm,
 .container-md,

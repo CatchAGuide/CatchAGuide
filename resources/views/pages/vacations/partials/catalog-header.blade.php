@@ -57,13 +57,8 @@
                         <p class="vacations-page-header__eyebrow">{{ $headerEyebrow }}</p>
                     @endif
                     <{{ $titleTag }} class="vacations-page-header__title">{{ $listingTitle }}</{{ $titleTag }}>
-                    @if($headerEyebrow !== '')
-                        <span class="vacations-page-header__divider" aria-hidden="true">
-                            <span class="vacations-page-header__divider-dot"></span>
-                            <span class="vacations-page-header__divider-line"></span>
-                        </span>
-                    @endif
                     @if($listingSubtitle !== '')
+                        <x-title-rule theme="dark" />
                         <p class="vacations-page-header__sub">{{ $listingSubtitle }}</p>
                     @endif
                 </div>

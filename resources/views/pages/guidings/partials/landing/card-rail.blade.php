@@ -12,6 +12,7 @@
             <div class="cag-home-section__heading">
                 <h2 class="cag-home-section__title">{{ $title }}</h2>
                 @if(!empty($subtitle))
+                    <x-title-rule />
                     <p class="cag-home-section__subtitle">{{ $subtitle }}</p>
                 @endif
             </div>

@@ -81,7 +81,9 @@ $muted: #787780;
   }
 
   &__copy {
-    max-width: 48rem;
+    @media (max-width: 767.98px) {
+      max-width: 48rem;
+    }
   }
 
   &__eyebrow {
@@ -99,6 +101,7 @@ $muted: #787780;
     font-weight: 700;
     line-height: 1.15;
     color: #fff !important;
+    @include cag-desktop-nowrap;
   }
 
   &__title-rule {
@@ -121,6 +124,10 @@ $muted: #787780;
       margin-left: 0.5rem;
       background: rgba(255, 255, 255, 0.35);
     }
+
+    @media (min-width: 768px) {
+      display: none;
+    }
   }
 
   &__sub {
@@ -129,6 +136,7 @@ $muted: #787780;
     font-size: 0.98rem;
     line-height: 1.45;
     max-width: 42rem;
+    @include cag-desktop-nowrap;
   }
 
   &__search {

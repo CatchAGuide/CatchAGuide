@@ -82,6 +82,7 @@ $vac-country-panel: #313041;
         margin: 0;
         line-height: 1.2;
         color: $vac-ink;
+        @include cag-desktop-nowrap;
     }
 
     &__subtitle {
@@ -89,6 +90,7 @@ $vac-country-panel: #313041;
         font-size: .95rem;
         color: $vac-muted;
         max-width: 42rem;
+        @include cag-desktop-nowrap;
     }
 
     &__link {
@@ -724,6 +726,7 @@ $vac-country-panel: #313041;
         margin: 0;
         line-height: 1.2;
         color: $vac-ink;
+        @include cag-desktop-nowrap;
     }
 
     &__subtitle {
@@ -731,6 +734,7 @@ $vac-country-panel: #313041;
         font-size: .88rem;
         color: $vac-muted;
         line-height: 1.4;
+        @include cag-desktop-nowrap;
     }
 
     &__actions {
@@ -2355,6 +2359,7 @@ $vac-country-panel: #313041;
         margin: 0;
         line-height: 1.2;
         color: $vac-ink;
+        @include cag-desktop-nowrap;
 
         @media (min-width: 768px) {
             font-size: 1.5rem;
@@ -2367,6 +2372,7 @@ $vac-country-panel: #313041;
         color: $vac-muted;
         line-height: 1.45;
         max-width: 36rem;
+        @include cag-desktop-nowrap;
     }
 
     &__tools {

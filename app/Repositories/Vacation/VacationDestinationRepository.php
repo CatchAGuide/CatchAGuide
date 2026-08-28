@@ -188,6 +188,7 @@ class VacationDestinationRepository
         }
 
         return $rows
+            ->reject(fn (array $row) => ($row['camps'] + $row['trips']) === 0)
             ->sortByDesc(fn (array $row) => $row['camps'] + $row['trips'])
             ->values();
     }

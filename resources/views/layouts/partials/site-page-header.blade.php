@@ -21,6 +21,7 @@
                     <div class="offers-page-header__copy">
                         <h1 class="offers-page-header__title">@yield('header_title')</h1>
                         @hasSection('header_sub_title')
+                            <x-title-rule theme="dark" />
                             <p class="offers-page-header__sub">@yield('header_sub_title')</p>
                         @endif
                     </div>

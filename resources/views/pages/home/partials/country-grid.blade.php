@@ -5,6 +5,7 @@
             <div class="cag-home-section__heading">
                 <h2 class="cag-home-section__title">{{ $title ?? __('homepage.destinations_title') }}</h2>
                 @isset($subtitle)
+                    <x-title-rule />
                     <p class="cag-home-section__subtitle">{{ $subtitle }}</p>
                 @endisset
                 @if($showAllCountries ?? true)

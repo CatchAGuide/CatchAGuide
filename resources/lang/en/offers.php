@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'All Experiences',
+    'title' => 'All Fishing Experiences',
     'explore_title' => 'Explore All Experiences',
     'title_tours' => 'Fishing Tours',
     'title_trips' => 'All-Inclusive Fishing Trips',
@@ -17,7 +17,7 @@ return [
     'subtitle_trips' => 'Multi-day fishing trips with lodging and guiding packages.',
     'subtitle_camps' => 'Fishing lodges and accommodation with stay, boats, and guiding options.',
     'subtitle_vacations' => 'Multi-day fishing trips and camps with lodging and guiding packages.',
-    'breadcrumb' => 'Offers',
+    'breadcrumb' => 'Experiences',
     'nav_label' => 'All Experiences',
 
     'filter_all' => 'All',
@@ -76,12 +76,12 @@ return [
     'apply_filters' => 'Apply filters',
     'clear_filters' => 'Clear filters',
     'show_on_map' => 'Show on map',
-    'map_modal_title' => 'Offers on the map',
-    'results_count' => ':count offers',
+    'map_modal_title' => 'Experiences on the map',
+    'results_count' => ':count Experiences',
     'results_found' => ':count results found for your selection',
-    'searching_near' => 'Showing offers near :place',
-    'suggested_near' => 'Additional offers close to :place',
-    'suggested_count' => ':count nearby offers',
+    'searching_near' => 'Showing Experiences near :place',
+    'suggested_near' => 'Additional Experiences close to :place',
+    'suggested_count' => ':count nearby Experiences',
     'see_details' => 'Details',
     'included_heading' => 'Included',
     'reviews_count' => ':count review|:count reviews',
@@ -98,7 +98,7 @@ return [
     'empty_vacations' => 'No vacations match your filters yet.',
 
     'faq_title' => 'Frequently asked questions',
-    'faq_q1' => 'What is included in Offers?',
+    'faq_q1' => 'What is included in Experience?',
     'faq_a1' => 'Offers brings together guided day tours, multi-day fishing trips, and fishing lodges and accommodation so you can compare experiences in one catalog.',
     'faq_q2' => 'How do Tours differ from Trips and Camps?',
     'faq_a2' => 'Tours are typically guided day trips. Trips are multi-day packages. Camps focus on lodging with optional boats and guiding.',

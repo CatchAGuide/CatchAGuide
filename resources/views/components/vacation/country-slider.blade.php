@@ -13,6 +13,7 @@
             <div class="{{ $blockClass }}__intro">
                 <h2 class="{{ $blockClass }}__title">{{ $title }}</h2>
                 @if($subtitle)
+                    <x-title-rule />
                     <p class="{{ $blockClass }}__subtitle">{{ $subtitle }}</p>
                 @endif
             </div>

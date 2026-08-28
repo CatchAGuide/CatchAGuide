@@ -2,7 +2,7 @@
 return [
     'header-title' => 'Find your next guided fishing tour!',
     'header-message' => 'Search deals on All inclusive fishing trips, vacations and much more',
-    'header-become-guide' => 'Become a partner',
+    'header-become-guide' => 'Become Catch A Guide partner',
     'header-login' => 'Log in',
     'header-signup' => 'Sign up',
     'header-profile' => 'Profile',
@@ -112,9 +112,9 @@ return [
     'trust_rating_label' => 'Average rating',
     'trust_rating_short' => 'rating',
     'trust_bookings_label' => 'Tours booked',
-    'trust_offers_label' => 'Offers',
+    'trust_offers_label' => 'Experiences',
     'trust_countries_label' => 'Countries',
-    'trust_offers_over' => 'Over :count offers',
+    'trust_offers_over' => 'Over :count Experiences',
     'trust_offers_countries' => 'in :count countries',
     'trust_reply_title' => 'Fast replies',
     'trust_reply_text' => 'Guides usually answer within 48h',
@@ -195,7 +195,7 @@ return [
     'footer_by_fish' => 'By target fish',
     'footer_by_method' => 'By method',
     'footer_list_offer' => 'List a tour',
-    'footer_become_partner' => 'Become a partner',
+    'footer_become_partner' => 'Become Catch A Guide partner',
     'footer_contact_label' => 'Contact',
 
     // /guidings landing page redesign

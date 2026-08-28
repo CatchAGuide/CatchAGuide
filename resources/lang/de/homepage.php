@@ -2,7 +2,7 @@
 return [
     'header-title' => 'Finde deine nächste Angeltour!',
     'header-message' => 'Suche Angebote für Angelausflüge, Angelurlaube und vieles mehr',
-    'header-become-guide' => 'Partner werden',
+    'header-become-guide' => 'Catch A Guide Partner werden',
     'header-login' => 'Einloggen',
     'header-signup' => 'Registrieren',
     'header-profile' => 'Profil',

@@ -591,7 +591,7 @@
                     <div class="page-main-intro-text mb-1">{!! clean_html($row_data->language->introduction) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ $row_data->source->name ?? $row_data->name }}</h5>
+                {{-- <h5 class="mb-2">{{ $row_data->source->name ?? $row_data->name }}</h5> --}}
                 @if(isset($offerModules))
                     <div class="cag-home cag-home--embed cag-dest-offers-wrap mb-5">
                         @include('pages.home.partials.mixed-offers-rail')

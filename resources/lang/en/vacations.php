@@ -211,7 +211,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'fishing_vacation_in_country' => 'Fishing Holidays in :country',
     'country_listing_title' => 'Fishing Holidays in :country',
     'all_offers_nav' => 'All',
-    'all_offers_title' => 'All Experiences',
+    'all_offers_title' => 'All Fishing Experiences',
     'all_offers_subtitle' => 'Browse every guided fishing trip and fishing camp across Europe.',
     'all_offers_listing_title' => 'All fishing holidays',
     'all_offers_breadcrumb' => 'All experiences',
@@ -339,7 +339,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_hero_eyebrow' => 'Accommodation, rental boats & fishing trips',
     'hub_hero_title' => 'Your Fishing Holiday - Lodges or All-Incl. Trips',
     'hub_hero_lead' => 'Flexible fishing lodges & accommodation to plan yourself, or fully organised all-icnl. fishing trips.',
-    'hub_stat_line' => ':offers offers · :countries countries · free inquiry',
+    'hub_stat_line' => ':offers Experiences · :countries countries · free inquiry',
     'hub_fork_title' => 'Plan it yourself, or have it all arranged?',
     'hub_fork_subtitle' => 'Both roads lead to the water — the difference is how much you organise yourself.',
     'hub_consultation_eyebrow' => 'Personal advice',
@@ -355,7 +355,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     // Hub redesign — target fish rail
     'hub_target_fish_title' => 'Which fish are you after?',
     'hub_target_fish_subtitle' => 'Pike, salmon, catfish, tuna — find your fishing holiday by target species.',
-    'hub_target_fish_count' => ':count offers',
+    'hub_target_fish_count' => ':count Experiences',
     'hub_target_fish_view_all' => 'View all target fish →',
 
     // Hub redesign — best travel time (month picker)

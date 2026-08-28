@@ -13,7 +13,7 @@ return [
     'stat_anglers' => '25,000',
     'stat_anglers_label' => 'Anglers per month',
     'stat_offers' => '450',
-    'stat_offers_label' => 'Offers',
+    'stat_offers_label' => 'Experiences',
     'stat_partners' => '150+',
     'stat_partners_label' => 'Active partners',
     'stat_countries' => '12',

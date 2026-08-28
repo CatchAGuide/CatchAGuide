@@ -7,6 +7,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GuidingsController;
 use App\Models\CategoryEntity;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Offers\OfferCatalogPageService;
@@ -20,11 +21,14 @@ class GuidingDestinationController extends Controller
         private OfferCatalogPageService $offerCatalog,
         private CategoryPageContentService $categoryContent,
         private HomepageCountrySelector $homepageCountries,
+        private GuidingCategoryAvailabilityRepository $guidingAvailability,
     ) {}
 
     public function index(): View
     {
-        $countries = CategoryEntity::countries()->get();
+        $countries = CategoryEntity::countries()->get()
+            ->filter(fn (CategoryEntity $country) => $this->guidingAvailability->hasGuidingsForCountry($country->slug, $country->countrycode))
+            ->values();
 
         return view('pages.countries.index', [
             'countries' => $countries,
@@ -131,11 +135,14 @@ class GuidingDestinationController extends Controller
             'cities' => $cities,
             'region_count' => $regions->count(),
             'city_count' => $cities->count(),
-            'countryOptions' => $this->homepageCountries->featured()->map(fn (array $option) => [
-                'slug' => $option['slug'],
-                'name' => $option['name'],
-                'url' => route('guidings.destination', ['country' => $option['slug']]),
-            ]),
+            'countryOptions' => $this->homepageCountries->featured()
+                ->filter(fn (array $option) => $this->guidingAvailability->hasGuidingsForCountry($option['slug'], $option['countrycode'] ?? null))
+                ->map(fn (array $option) => [
+                    'slug' => $option['slug'],
+                    'name' => $option['name'],
+                    'url' => route('guidings.destination', ['country' => $option['slug']]),
+                ])
+                ->values(),
             'faq' => $faq,
             'fish_chart' => $this->geoCollection($rowData, 'fish_charts'),
             'fish_size_limit' => $this->geoCollection($rowData, 'fish_size_limits'),

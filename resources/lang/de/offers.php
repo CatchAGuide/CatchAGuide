@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Alle Erlebnisse',
+    'title' => 'Alle Angelerlebnisse',
     'explore_title' => 'Alle Erlebnisse entdecken',
     'title_tours' => 'Angeltouren',
     'title_trips' => 'Angelreisen',
@@ -18,7 +18,7 @@ return [
     'subtitle_camps' => 'Angelcamps und Lodges mit Übernachtung, Booten und Guide-Optionen.',
     'subtitle_vacations' => 'Mehrtägige Angeltrips und Camps mit Unterkunft und Guide-Paketen.',
     'breadcrumb' => 'Erlebnisse',
-    'nav_label' => 'Alle Erlebnisse',
+    'nav_label' => 'Alle Angelerlebnisse',
 
     'filter_all' => 'Alle',
     'filter_tours' => 'Touren',

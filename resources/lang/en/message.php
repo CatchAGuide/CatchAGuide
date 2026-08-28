@@ -117,7 +117,7 @@ return [
     'successfulMsg' => 'Are you on a fishing vacation, going on a fishing trip, or just want to fish successfully in a new body of water? Our platform enables you to book the right fishing guide online, who is extremely familiar with the local waters and will go out with you.',
 
     // recently added
-    'newOffers' => 'New offers',
+    'newOffers' => 'New Experiences',
     'recentlyAddedGuides' => 'Recently added guidings',
 
     // become a guide

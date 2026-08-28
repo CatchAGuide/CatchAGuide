@@ -51,11 +51,19 @@
     $showTourFacets = $filter->showsTourFacets();
     $showCampFacets = $filter->showsCampFacets();
     $showTripFacets = $filter->showsTripFacets();
+    // The country field is auto-filled and locked whenever the header place
+    // search is active (see filter-fields.blade.php's $regionLockedByPlace),
+    // so it must not count as a user-chosen filter in that case — otherwise
+    // every place search would show a "clear filters" control that clears
+    // nothing visible.
+    $countryLockedByPlace = $filter->hasPlaceSearch();
     $activeFilterCount = collect(array_merge(['species', 'country', 'sortby', 'type', 'vacation', 'num_guests'], $facetKeys))
+        ->reject(fn ($key) => $key === 'country' && $countryLockedByPlace)
         ->filter(fn ($key) => filled(request()->get($key)))
         ->count();
     $sidebarFilterKeys = array_merge(['species', 'country', 'sortby', 'vacation'], $facetKeys);
     $hasSidebarFilters = collect($sidebarFilterKeys)
+        ->reject(fn ($key) => $key === 'country' && $countryLockedByPlace)
         ->filter(fn ($key) => filled(request()->get($key)) && ! in_array($key, $lockedKeys, true))
         ->isNotEmpty();
     $clearFiltersUrl = (function () use ($action, $query, $lockedParams, $activeType, $sidebarFilterKeys) {

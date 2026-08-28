@@ -21,7 +21,10 @@
             <div class="offers-page-header__inner offers-page-header__inner--hero">
                 <div class="offers-page-header__copy">
                     <h1 class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $vm->pageTitle() }}</h1>
-                    <p class="offers-page-header__sub offers-page-header__anim" style="--offers-anim-i: 1">{{ $vm->pageSubtitle() }}</p>
+                    @if($vm->pageSubtitle() !== '')
+                        <x-title-rule theme="dark" class="offers-page-header__anim" style="--offers-anim-i: 1" />
+                        <p class="offers-page-header__sub offers-page-header__anim" style="--offers-anim-i: 1">{{ $vm->pageSubtitle() }}</p>
+                    @endif
                 </div>
             </div>
         </div>

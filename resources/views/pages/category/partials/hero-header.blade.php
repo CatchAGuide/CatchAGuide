@@ -34,10 +34,8 @@
                         <p class="offers-page-header__eyebrow offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingEyebrow }}</p>
                     @endif
                     <{{ $titleTag }} class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 0">{{ $listingTitle }}</{{ $titleTag }}>
-                    @if($showTitleRule ?? false)
-                        <div class="offers-page-header__title-rule offers-page-header__anim" style="--offers-anim-i: 1" aria-hidden="true"></div>
-                    @endif
                     @if($listingSubtitle !== '')
+                        <x-title-rule theme="dark" class="offers-page-header__anim" style="--offers-anim-i: 1" />
                         <p class="offers-page-header__sub offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingSubtitle }}</p>
                     @endif
                 </div>
