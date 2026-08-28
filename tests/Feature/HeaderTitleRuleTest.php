@@ -88,6 +88,23 @@ class HeaderTitleRuleTest extends TestCase
         $this->assertStringContainsString('.offers-page-header__title', $helpers);
         $this->assertStringContainsString('.vacation-country-rail__title', $helpers);
         $this->assertStringContainsString('.cag-home-section__title', $helpers);
+        $this->assertStringContainsString('.cag-home-hero__title', $helpers);
+        $this->assertStringContainsString('.cag-home-hero__sub', $helpers);
+        $this->assertStringContainsString('.cag-home-hero__rule', $helpers);
+
+        $home = (string) file_get_contents(resource_path('sass/page/home.scss'));
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__title \{[\s\S]*@include cag-desktop-nowrap;/',
+            $home
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__sub \{[\s\S]*@include cag-desktop-nowrap;/',
+            $home
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__rule \{[\s\S]*@media \(min-width: 768px\) \{\s*display: none;/',
+            $home
+        );
 
         $vacations = (string) file_get_contents(resource_path('sass/page/_vacations-header.scss'));
         $this->assertMatchesRegularExpression(

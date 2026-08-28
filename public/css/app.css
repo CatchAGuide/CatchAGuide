@@ -311,11 +311,16 @@
   .vacation-fish-rail__subtitle,
   .vacation-card-slider__title,
   .vacation-card-slider__subtitle,
+  .cag-home-hero__title,
+  .cag-home-hero__sub,
   .cag-home-section__title,
   .cag-home-section__subtitle,
   .cag-home-species__subtitle {
     white-space: nowrap;
     max-width: none;
+  }
+  .cag-home-hero__rule {
+    display: none;
   }
 }
 .container,
@@ -1387,6 +1392,12 @@ body .main-menu .main-menu-wrapper__nav {
 }
 @media (min-width: 768px) {
   .cag-home-hero__title {
+    white-space: nowrap;
+    max-width: none;
+  }
+}
+@media (min-width: 768px) {
+  .cag-home-hero__title {
     margin-left: 0;
   }
 }
@@ -1413,7 +1424,7 @@ body .main-menu .main-menu-wrapper__nav {
 }
 @media (min-width: 768px) {
   .cag-home-hero__rule {
-    margin-left: 0;
+    display: none;
   }
 }
 
@@ -1423,6 +1434,12 @@ body .main-menu .main-menu-wrapper__nav {
   margin: 0 auto 0;
   color: rgba(255, 255, 255, 0.95) !important;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+@media (min-width: 768px) {
+  .cag-home-hero__sub {
+    white-space: nowrap;
+    max-width: none;
+  }
 }
 @media (min-width: 768px) {
   .cag-home-hero__sub {
@@ -2439,8 +2456,8 @@ body .main-menu .main-menu-wrapper__nav {
   display: block;
   border-radius: 0.85rem;
   overflow: hidden;
-  aspect-ratio: 4/3;
-  min-height: 200px;
+  aspect-ratio: 16/9;
+  min-height: 160px;
   text-decoration: none;
   color: #fff;
   background: var(--cag-slate);
@@ -2449,7 +2466,7 @@ body .main-menu .main-menu-wrapper__nav {
 }
 @media (min-width: 992px) {
   .cag-home-season__card {
-    min-height: 240px;
+    min-height: 180px;
   }
 }
 .cag-home-season__card:hover, .cag-home-season__card:focus-visible {
@@ -3602,7 +3619,7 @@ body .main-menu .main-menu-wrapper__nav {
     margin: 0;
   }
   .cag-home-hero__door {
-    align-items: flex-start;
+    align-items: center;
     gap: 14px;
     padding: 18px 44px 18px 18px;
     border-radius: 14px;
@@ -3615,39 +3632,21 @@ body .main-menu .main-menu-wrapper__nav {
     background: rgba(19, 23, 33, 0.85);
     transform: none;
   }
-  .cag-home-hero__door:hover .cag-home-hero__door-title,
-  .cag-home-hero__door:hover .cag-home-hero__door-label {
-    color: #fff;
-  }
-  .cag-home-hero__door:hover .cag-home-hero__door-icon {
-    color: #fff;
-  }
   .cag-home-hero__door-icon {
     width: 40px;
     height: 40px;
-    margin-top: 2px;
-  }
-  .cag-home-hero__door-label {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: 0;
-    text-transform: none;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 5px;
   }
   .cag-home-hero__door-title {
-    display: none;
+    font-size: 1.05rem;
   }
   .cag-home-hero__door-sub {
     font-size: 13.5px;
     line-height: 1.45;
-    opacity: 0.72;
   }
   .cag-home-hero__door-arrow {
     right: 18px;
-    top: 18px;
-    margin-top: 16px;
+    top: 50%;
+    margin-top: -0.5rem;
     transform: none;
   }
   .cag-home-destinations {
@@ -14887,8 +14886,46 @@ div#masonry-grid img {
 @media (min-width: 768px) {
   .vacation-hub__consultation {
     grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-rows: auto auto;
     align-items: start;
+    -moz-column-gap: 2rem;
+         column-gap: 2rem;
+    row-gap: 1.25rem;
   }
+  .vacation-hub__consultation .vacation-hub__consultation-main,
+  .vacation-hub__consultation .vacation-hub__consultation-aside {
+    display: contents;
+  }
+  .vacation-hub__consultation .vacation-hub__consultation-copy {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .vacation-hub__consultation .vacation-hub__consultation-checklist {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: center;
+  }
+  .vacation-hub__consultation .vacation-hub__consultation-card {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .vacation-hub__consultation .vacation-hub__consultation-cta {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    justify-self: stretch;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+.vacation-hub__consultation-main {
+  min-width: 0;
+}
+.vacation-hub__consultation-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
 }
 .vacation-hub__consultation-eyebrow {
   margin: 0 0 0.35rem;
@@ -14910,6 +14947,11 @@ div#masonry-grid img {
   color: #666;
   line-height: 1.55;
   max-width: 42rem;
+}
+@media (min-width: 768px) {
+  .vacation-hub__consultation-lead {
+    margin-bottom: 0;
+  }
 }
 .vacation-hub__consultation-checklist {
   list-style: none;
@@ -14940,12 +14982,6 @@ div#masonry-grid img {
   border: 1px solid #e5e7eb;
   border-radius: calc(14px - 2px);
   background: #fff;
-}
-@media (min-width: 768px) {
-  .vacation-hub__consultation-card {
-    grid-column: 2;
-    grid-row: 1;
-  }
 }
 .vacation-hub__consultation-avatar {
   flex-shrink: 0;
@@ -14995,11 +15031,6 @@ div#masonry-grid img {
   text-decoration: none;
   transition: background 0.15s ease;
   align-self: start;
-}
-@media (min-width: 768px) {
-  .vacation-hub__consultation-cta {
-    grid-column: 2;
-  }
 }
 .vacation-hub__consultation-cta:hover {
   background: rgb(228.7112149533, 67.5495327103, 36.6887850467);

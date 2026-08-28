@@ -75,6 +75,10 @@ class VacationHubNewSectionsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('vacation-hub__consultation', false);
+        $response->assertSee('vacation-hub__consultation-main', false);
+        $response->assertSee('vacation-hub__consultation-aside', false);
+        $response->assertSee('vacation-hub__consultation-checklist', false);
+        $response->assertSee('vacation-hub__consultation-cta', false);
         $response->assertSee(__('vacations.hub_consultation_title'), false);
         $response->assertSee('vacation-hub__seo gl-seo', false);
         $response->assertSee(__('vacations.hub_seo_title'), false);
@@ -132,6 +136,32 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertSee(__('vacations.hub_seo_title'), false);
         $response->assertSee('data-gl-seo-toggle', false);
         $response->assertSee(__('vacations.hub_seo_more'), false);
+    }
+
+    public function test_consultation_desktop_grid_places_cta_beside_checklist(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/_vacations-hub-extras.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-hub__consultation \{[\s\S]*?@media \(min-width:\s*768px\) \{[\s\S]*?grid-template-rows:\s*auto auto;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-hub__consultation-main,[\s\S]*?\.vacation-hub__consultation-aside \{[\s\S]*?display:\s*contents;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-hub__consultation-checklist \{[\s\S]*?grid-column:\s*1;[\s\S]*?grid-row:\s*2;[\s\S]*?align-self:\s*center;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacation-hub__consultation-cta \{[\s\S]*?grid-column:\s*2;[\s\S]*?grid-row:\s*2;[\s\S]*?align-self:\s*center;[\s\S]*?width:\s*100%;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/&-aside \{[\s\S]*?display:\s*flex;[\s\S]*?flex-direction:\s*column;[\s\S]*?gap:\s*1\.5rem;/',
+            $source
+        );
     }
 
     public function test_hub_renders_target_fish_rail_when_present(): void

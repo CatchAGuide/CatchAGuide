@@ -22,7 +22,7 @@
                             alt="{{ $species['name'] }}"
                             loading="lazy"
                             width="480"
-                            height="360"
+                            height="270"
                         >
                         <span class="cag-home-season__fade" aria-hidden="true"></span>
                         <span class="cag-home-season__meta">

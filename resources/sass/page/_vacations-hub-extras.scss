@@ -20,7 +20,51 @@
 
     @media (min-width: 768px) {
         grid-template-columns: minmax(0, 1fr) 320px;
+        grid-template-rows: auto auto;
         align-items: start;
+        column-gap: 2rem;
+        row-gap: 1.25rem;
+
+        .vacation-hub__consultation-main,
+        .vacation-hub__consultation-aside {
+            display: contents;
+        }
+
+        .vacation-hub__consultation-copy {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .vacation-hub__consultation-checklist {
+            grid-column: 1;
+            grid-row: 2;
+            align-self: center;
+        }
+
+        .vacation-hub__consultation-card {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .vacation-hub__consultation-cta {
+            grid-column: 2;
+            grid-row: 2;
+            align-self: center;
+            justify-self: stretch;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+
+    &-main {
+        min-width: 0;
+    }
+
+    &-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        min-width: 0;
     }
 
     &-eyebrow {
@@ -45,6 +89,10 @@
         color: $vac-muted;
         line-height: 1.55;
         max-width: 42rem;
+
+        @media (min-width: 768px) {
+            margin-bottom: 0;
+        }
     }
 
     &-checklist {
@@ -79,11 +127,6 @@
         border: 1px solid $vac-border;
         border-radius: calc(#{$vac-radius} - 2px);
         background: #fff;
-
-        @media (min-width: 768px) {
-            grid-column: 2;
-            grid-row: 1;
-        }
     }
 
     &-avatar {
@@ -139,10 +182,6 @@
         text-decoration: none;
         transition: background .15s ease;
         align-self: start;
-
-        @media (min-width: 768px) {
-            grid-column: 2;
-        }
 
         &:hover {
             background: darken($primary-color, 6%);

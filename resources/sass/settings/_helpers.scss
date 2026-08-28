@@ -71,11 +71,17 @@
   .vacation-fish-rail__subtitle,
   .vacation-card-slider__title,
   .vacation-card-slider__subtitle,
+  .cag-home-hero__title,
+  .cag-home-hero__sub,
   .cag-home-section__title,
   .cag-home-section__subtitle,
   .cag-home-species__subtitle {
     white-space: nowrap;
     max-width: none;
+  }
+
+  .cag-home-hero__rule {
+    display: none;
   }
 }
 

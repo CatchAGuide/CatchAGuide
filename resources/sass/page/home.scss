@@ -363,6 +363,7 @@ $white: #ffffff;
   margin: 0 auto 0.75rem;
   color: #fff !important;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+  @include cag-desktop-nowrap;
 
   @media (min-width: 768px) {
     margin-left: 0;
@@ -392,7 +393,7 @@ $white: #ffffff;
   }
 
   @media (min-width: 768px) {
-    margin-left: 0;
+    display: none;
   }
 }
 
@@ -402,6 +403,7 @@ $white: #ffffff;
   margin: 0 auto 0;
   color: rgba(255, 255, 255, 0.95) !important;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+  @include cag-desktop-nowrap;
 
   @media (min-width: 768px) {
     margin-left: 0;
@@ -1452,8 +1454,8 @@ $white: #ffffff;
   display: block;
   border-radius: 0.85rem;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
-  min-height: 200px;
+  aspect-ratio: 16 / 9;
+  min-height: 160px;
   text-decoration: none;
   color: #fff;
   background: var(--cag-slate);
@@ -1461,7 +1463,7 @@ $white: #ffffff;
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
 
   @media (min-width: 992px) {
-    min-height: 240px;
+    min-height: 180px;
   }
 
   &:hover,

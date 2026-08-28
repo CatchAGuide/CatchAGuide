@@ -233,7 +233,14 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee('cag-home-destinations__code', false);
         $response->assertSee(__('homepage.hero_h1'), false);
         $response->assertSee(__('homepage.hero_sub'), false);
+        $response->assertSee('cag-home-hero__door-label', false);
+        $response->assertSee('cag-home-hero__door-title', false);
+        $response->assertSee('cag-home-hero__door-sub', false);
+        $response->assertSee(__('homepage.chooser_tour_label'), false);
+        $response->assertSee(__('homepage.chooser_tour_title'), false);
         $response->assertSee(__('homepage.chooser_tour_sub'), false);
+        $response->assertSee(__('homepage.chooser_vacation_label'), false);
+        $response->assertSee(__('homepage.chooser_vacation_title'), false);
         $response->assertSee(__('homepage.chooser_vacation_sub'), false);
         $response->assertSee(__('homepage.species_subtitle'), false);
         $response->assertSee(__('homepage.reviews_title'), false);
@@ -361,5 +368,27 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee("querySelector('[data-reviews-rail] .cag-home-reviews__rail')", false);
         $response->assertDontSee('cag-home-reviews-marquee', false);
         $response->assertDontSee("reviewsRail.addEventListener('mouseenter'", false);
+    }
+
+    public function test_mobile_hero_doors_keep_desktop_copy_hierarchy(): void
+    {
+        $mobile = (string) file_get_contents(resource_path('sass/page/_home-mobile.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[\s\S]*flex-direction:\s*column/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__door-title\s*\{\s*display:\s*none/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__door-label\s*\{[\s\S]*?text-transform:\s*none/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__door-label\s*\{[\s\S]*?color:\s*#fff/',
+            $mobile
+        );
     }
 }

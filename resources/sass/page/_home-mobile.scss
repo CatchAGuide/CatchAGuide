@@ -204,7 +204,7 @@
   }
 
   .cag-home-hero__door {
-    align-items: flex-start;
+    align-items: center;
     gap: 14px;
     padding: 18px 44px 18px 18px;
     border-radius: 14px;
@@ -216,48 +216,27 @@
     &:hover {
       background: rgba(19, 23, 33, 0.85);
       transform: none;
-
-      .cag-home-hero__door-title,
-      .cag-home-hero__door-label {
-        color: #fff;
-      }
-
-      .cag-home-hero__door-icon {
-        color: #fff;
-      }
     }
   }
 
   .cag-home-hero__door-icon {
     width: 40px;
     height: 40px;
-    margin-top: 2px;
-  }
-
-  .cag-home-hero__door-label {
-    font-size: 19px;
-    font-weight: 700;
-    letter-spacing: 0;
-    text-transform: none;
-    color: #fff;
-    line-height: 1.2;
-    margin-bottom: 5px;
   }
 
   .cag-home-hero__door-title {
-    display: none;
+    font-size: 1.05rem;
   }
 
   .cag-home-hero__door-sub {
     font-size: 13.5px;
     line-height: 1.45;
-    opacity: 0.72;
   }
 
   .cag-home-hero__door-arrow {
     right: 18px;
-    top: 18px;
-    margin-top: 16px;
+    top: 50%;
+    margin-top: -0.5rem;
     transform: none;
   }
 
