@@ -13,7 +13,7 @@
 }
 
 .cag-dest-geo-rail {
-  margin: 0 0 0.85rem;
+  margin: 1.15rem 0 0.35rem;
   padding: 0;
 
   .cag-home-species__header {
@@ -37,14 +37,40 @@
     margin-block: -0.35rem;
   }
 
+  .cag-home-species__rail {
+    @media (max-width: 767.98px) {
+      gap: 0.9rem;
+    }
+  }
+
+  .cag-home-species__card {
+    @media (max-width: 767.98px) {
+      flex: 0 0 152px;
+      min-width: 152px;
+      height: auto;
+      max-height: 114px;
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  .cag-home-species__name {
+    @media (max-width: 767.98px) {
+      font-size: 0.9rem;
+    }
+  }
+
+  .cag-home-species__meta {
+    @media (max-width: 767.98px) {
+      padding: 0.5rem 0.6rem 0.55rem;
+    }
+  }
+
+  // No coral ring on dest region/city cards (spotlight or hover).
   &.cag-home-species.is-inview .cag-home-species__card.is-spotlight,
   .cag-home-species__card:hover,
   .cag-home-species__card:focus-visible {
     color: #fff;
-    border-color: #{$coral};
-    box-shadow:
-      0 10px 22px rgba($coral, 0.35),
-      0 0 0 3px #{$coral};
+    border-color: rgba(49, 48, 65, 0.06);
     animation: none;
 
     .cag-home-species__name,
@@ -57,14 +83,40 @@
       display: none;
     }
   }
+
+  &.cag-home-species.is-inview .cag-home-species__card.is-spotlight {
+    transform: none;
+    box-shadow: 0 4px 14px rgba(49, 48, 65, 0.06);
+  }
+
+  .cag-home-species__card:hover,
+  .cag-home-species__card:focus-visible {
+    box-shadow: 0 8px 18px rgba(49, 48, 65, 0.12);
+  }
 }
 
 .cag-dest-intro {
   margin-bottom: 0.85rem;
+
+  .see-more {
+    margin-bottom: 0;
+  }
+
+  &:has(+ .cag-dest-geo-rail) {
+    margin-bottom: 0;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba($slate, 0.12);
+  }
 }
 
 .cag-dest-listings-title {
   margin: 0.15rem 0 0.75rem;
+}
+
+.cag-dest-geo-rail + .cag-dest-listings-title {
+  margin-top: 1.15rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgba($slate, 0.12);
 }
 
 .cag-dest-offers {

@@ -327,6 +327,19 @@
         text-transform: uppercase;
         color: rgba(#fff, .78);
     }
+
+    // Name-only tiles (no offer count) only need a small gradient behind the
+    // single line of text, not the taller fade sized for two lines.
+    &__tile--compact {
+        .vacation-fish-rail__fade {
+            height: 42%;
+            background: linear-gradient(to bottom, rgba(#0c2027, 0), rgba(#0c2027, .85));
+        }
+
+        .vacation-fish-rail__meta {
+            padding-bottom: .6rem;
+        }
+    }
 }
 
 // —— Best travel time (month picker) ——

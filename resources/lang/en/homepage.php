@@ -147,6 +147,7 @@ return [
     'offers_camps_sub' => 'Your fishing stay with accommodation. Add a rental boat and guiding if you want.',
     'offers_trips_sub' => 'Fully organised All inclusive fishing trips. Stay, meals, and a guide — all included.',
     'offer_details' => 'View offer',
+    'offer_details_short' => 'View',
     'mixed_browse_tours' => 'Browse fishing tours',
     'mixed_browse_trips' => 'Browse All inclusive fishing trips',
     'mixed_browse_camps' => 'Browse fishing lodges and accommodation',

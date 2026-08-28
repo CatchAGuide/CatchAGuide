@@ -29,7 +29,7 @@
     ])
 
 <div class="cag-home cag-home--embed gl-page" data-analytics-page="guidings-landing">
-    @include('pages.guidings.partials.landing.how-it-works')
+
     @include('pages.home.partials.country-grid', [
         'showAllCountries' => true,
         'allCountriesRoute' => 'guidings.countries',
@@ -38,14 +38,8 @@
         'subtitle' => __('homepage.landing_destinations_subtitle'),
         'viewAllLabel' => __('homepage.landing_destinations_see_all'),
     ])
+    @include('pages.guidings.partials.landing.how-it-works')
     @include('pages.guidings.partials.landing.tour-type-pills')
-    @include('pages.guidings.partials.landing.card-rail', [
-        'title' => __('homepage.landing_mostbooked_title'),
-        'subtitle' => __('homepage.landing_mostbooked_subtitle'),
-        'cards' => $mostBooked,
-        'railKey' => 'most-booked',
-    ])
-
     <section class="cag-home-section vacation-hub__fish" data-analytics-vacation-rail="guidings-landing-methods">
         <div class="cag-home-container">
             <x-vacation.country-slider
@@ -58,12 +52,18 @@
             >
                 @foreach([false, true] as $isClone)
                     @foreach($methods as $tile)
-                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
+                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" :show-count="false" />
                     @endforeach
                 @endforeach
             </x-vacation.country-slider>
         </div>
     </section>
+    @include('pages.guidings.partials.landing.card-rail', [
+        'title' => __('homepage.landing_mostbooked_title'),
+        'subtitle' => __('homepage.landing_mostbooked_subtitle'),
+        'cards' => $mostBooked,
+        'railKey' => 'most-booked',
+    ])
 
     @include('pages.guidings.partials.landing.card-rail', [
         'title' => __('homepage.landing_new_title'),
@@ -84,7 +84,7 @@
             >
                 @foreach([false, true] as $isClone)
                     @foreach($targetSpecies as $tile)
-                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" />
+                        <x-vacation.fish-slide :tile="$tile" :clone="$isClone" :show-count="false" />
                     @endforeach
                 @endforeach
             </x-vacation.country-slider>

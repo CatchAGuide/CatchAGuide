@@ -1819,15 +1819,21 @@ $white: #ffffff;
   }
 }
 
-.cag-home-offer__new {
-  align-self: flex-start;
-  margin: 0;
-  padding: 0.15rem 0.5rem;
+.cag-home-offer__new-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  background: var(--cag-coral);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
   border-radius: 0.35rem;
-  background: var(--cag-bg);
-  color: var(--cag-gray);
-  font-size: 0.72rem;
-  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.18);
 }
 
 .cag-home-offer__title {
@@ -1877,11 +1883,15 @@ $white: #ffffff;
 }
 
 .cag-home-offer__price {
-  span,
+  .cag-home-offer__price-from,
   small {
     display: block;
     color: var(--cag-gray);
     font-size: 0.75rem;
+  }
+
+  .cag-home-offer__price-line {
+    display: block;
   }
 
   strong {

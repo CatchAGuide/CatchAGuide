@@ -27,6 +27,9 @@
         @if(!empty($card['requested_count']))
             {{-- <span class="cag-home-offer__requested">{{ __('homepage.landing_requested_badge', ['count' => $card['requested_count']]) }}</span> --}}
         @endif
+        @if(!empty($card['is_new']) && empty($card['rating']))
+            <span class="cag-home-offer__new-badge">{{ __('homepage.landing_card_new') }}</span>
+        @endif
         @if(!empty($card['rating']))
             <span class="cag-home-offer__rating-badge d-flex d-md-none">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -54,21 +57,22 @@
         @endif
         @if(!empty($card['rating']))
             <p class="cag-home-offer__rating">★ {{ $card['rating'] }} <span>({{ $card['review_count'] }})</span></p>
-        @elseif(!empty($card['is_new']))
-            <p class="cag-home-offer__new">{{ __('homepage.landing_card_new') }}</p>
         @endif
         <div class="cag-home-offer__footer">
             @if(!empty($card['price_amount']))
                 <div class="cag-home-offer__price">
-                    <span>{{ __('vacations.from_label') }}</span>
-                    <strong>{{ $card['price_amount'] }}</strong>
-                    @if(!empty($card['price_unit']))
-                        <small>/ {{ $card['price_unit'] }}</small>
-                    @endif
+                    <span class="cag-home-offer__price-from">{{ __('vacations.from_label') }}</span>
+                    <span class="cag-home-offer__price-line">
+                        <strong>{{ $card['price_amount'] }}</strong>
+                        @if(!empty($card['price_unit']))
+                            <small>/ {{ $card['price_unit'] }}</small>
+                        @endif
+                    </span>
                 </div>
             @endif
             <a href="{{ $card['url'] }}" class="cag-home-btn cag-home-btn--coral cag-home-btn--sm">
-                {{ __('homepage.offer_details') }}
+                <span class="d-none d-md-inline">{{ __('homepage.offer_details') }}</span>
+                <span class="d-md-none">{{ __('homepage.offer_details_short') }}</span>
             </a>
         </div>
     </div>

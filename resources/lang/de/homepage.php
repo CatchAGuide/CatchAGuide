@@ -147,6 +147,7 @@ return [
     'offers_camps_sub' => 'Dein Angelurlaub mit Unterkunft. Ergänze dein Abenteuer mit Mietboot und Guiding – ganz nach deinem Wunsch.',
     'offers_trips_sub' => 'Vollständig organisierte Angelreisen. Unterkunft, Verpflegung, Guide – alles inklusive.',
     'offer_details' => 'Angebot ansehen',
+    'offer_details_short' => 'Ansehen',
     'mixed_browse_tours' => 'Angeltouren entdecken',
     'mixed_browse_trips' => 'Angelreisen entdecken',
     'mixed_browse_camps' => 'Angelcamps entdecken',

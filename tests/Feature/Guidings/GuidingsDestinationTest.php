@@ -151,8 +151,12 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee('cag-home-species__card', false);
         $response->assertSee('cag-dest-geo-rail', false);
         $response->assertSee('data-species-spotlight', false);
-        $response->assertSee('data-geo-rail="regions"', false);
-        $response->assertSee('data-geo-rail="cities"', false);
+        $response->assertSeeInOrder([
+            'cag-dest-intro',
+            'data-geo-rail="regions"',
+            'data-geo-rail="cities"',
+            'cag-dest-listings-title',
+        ], false);
         $response->assertDontSee('id="carousel-regions"', false);
         $response->assertDontSee('id="carousel-cities"', false);
         $response->assertDontSee('data-offers-place', false);

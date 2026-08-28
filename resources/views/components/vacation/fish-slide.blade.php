@@ -1,11 +1,12 @@
 @props([
     'tile',
     'clone' => false,
+    'showCount' => true,
 ])
 
 <a
     href="{{ $tile['url'] }}"
-    class="vacation-fish-rail__tile"
+    class="vacation-fish-rail__tile {{ $showCount ? '' : 'vacation-fish-rail__tile--compact' }}"
     role="listitem"
     @if($clone) aria-hidden="true" tabindex="-1" @endif
     data-analytics-vacation-target-fish="{{ $tile['slug'] }}"
@@ -28,6 +29,8 @@
     <span class="vacation-fish-rail__fade"></span>
     <span class="vacation-fish-rail__meta">
         <span class="vacation-fish-rail__name">{{ $tile['name'] }}</span>
-        <span class="vacation-fish-rail__count">{{ __('vacations.hub_target_fish_count', ['count' => $tile['count']]) }}</span>
+        @if($showCount)
+            <span class="vacation-fish-rail__count">{{ __('vacations.hub_target_fish_count', ['count' => $tile['count']]) }}</span>
+        @endif
     </span>
 </a>
