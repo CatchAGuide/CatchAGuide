@@ -8,6 +8,7 @@
             $footerListOffer = ['url' => '#', 'modal' => true];
         }
     }
+    $footerTopLink = ['label' => __('homepage.footer_all_experiences'), 'url' => route('offers.index')];
     $footerGroups = [
         [
             'title' => __('homepage.footer_group_tours'),
@@ -89,31 +90,8 @@
                     </ul>
                 </div>
 
-                <div class="cag-footer__links footer-widget__column footer-widget__company">
-                    <h3 class="footer-widget__title">@lang('message.legal')</h3>
-                    <ul class="footer-widget__company-list list-unstyled">
-                        <li><a href="{{ route('law.imprint') }}">@lang('message.imprint')</a></li>
-                        <li><a href="{{ route('law.data-protection') }}">@lang('message.data-protection')</a></li>
-                        <li><a href="{{ route('law.agb') }}">@lang('message.conditions')</a></li>
-                        <li><a href="{{ route('law.notice-and-takedown') }}">@lang('message.notice-takedown')</a></li>
-                        <li><a href="{{ route('law.faq') }}">@lang('message.faq')</a></li>
-                    </ul>
-                </div>
-
-                <div class="cag-footer__links footer-widget__column footer-widget__explore">
-                    <h3 class="footer-widget__title">@lang('message.miscellaneous')</h3>
-                    <ul class="list-unstyled footer-widget__explore-list">
-                        <li><a href="{{ route('guidings.landing') }}">@lang('message.Guiding')</a></li>
-                        <li><a href="{{ route('vacations.index') }}">@lang('homepage.footer_vacations')</a></li>
-                        <li><a href="{{ route('destination') }}">@lang('homepage.footer_destinations')</a></li>
-                        <li><a href="{{ route('profile.settings') }}">@lang('message.myaccount')</a></li>
-                        <li><a id="contact-footer" href="{{ route('additional.contact') }}">@lang('message.contact')</a></li>
-                        <li><a href="{{ route('additional.partner') }}">@lang('homepage.footer_become_partner')</a></li>
-                        <li><a href="{{ route('additional.for_agents') }}">@lang('message.for_agents')</a></li>
-                    </ul>
-                </div>
-
                 <nav class="cag-footer__accordion" data-cag-footer-accordion aria-label="{{ __('message.miscellaneous') }}">
+                    <a class="cag-footer__top-link" href="{{ $footerTopLink['url'] }}">{{ $footerTopLink['label'] }}</a>
                     @foreach($footerGroups as $group)
                         <div class="cag-footer__group">
                             <button

@@ -187,8 +187,9 @@ return [
 
     'footer_vacations' => 'Angelurlaub',
     'footer_destinations' => 'Reiseziele',
+    'footer_all_experiences' => 'Alle Angelerlebnisse',
     'footer_group_tours' => 'Angeltouren',
-    'footer_group_vacations' => 'Angelurlaub',
+    'footer_group_vacations' => 'Angelurlaube',
     'footer_group_providers' => 'Für Anbieter',
     'footer_group_about' => 'Über uns',
     'footer_by_country' => 'Nach Land',

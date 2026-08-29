@@ -88,7 +88,7 @@
         'searchAction' => listing_search_action(),
         'breadcrumbItems' => $isGuidingsCountries
             ? [
-                ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+                ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
                 ['label' => __('destination.breadcrumb'), 'url' => null],
             ]
             : [

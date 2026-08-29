@@ -31,8 +31,9 @@ class FooterAccordionTest extends TestCase
         $this->assertStringContainsString('cag-footer__group', $html);
         $this->assertStringContainsString('cag-footer__group-title', $html);
         $this->assertStringContainsString('cag-footer__group-panel', $html);
-        $this->assertStringContainsString('footer-widget__company', $html);
-        $this->assertStringContainsString('footer-widget__explore', $html);
+        $this->assertStringContainsString('cag-footer__top-link', $html);
+        $this->assertStringContainsString(__('homepage.footer_all_experiences'), $html);
+        $this->assertStringContainsString(route('offers.index', [], false), $html);
         $this->assertStringContainsString(__('homepage.footer_group_tours'), $html);
         $this->assertStringContainsString(__('homepage.footer_group_vacations'), $html);
         $this->assertStringContainsString(__('homepage.footer_group_providers'), $html);
@@ -42,7 +43,6 @@ class FooterAccordionTest extends TestCase
         $this->assertStringContainsString(__('homepage.footer_by_country'), $html);
         $this->assertStringContainsString(__('homepage.offers_camps_title'), $html);
         $this->assertStringContainsString(__('homepage.offers_trips_title'), $html);
-        $this->assertStringContainsString(route('destination', [], false), $html);
         $this->assertStringContainsString(route('targets.index', [], false), $html);
         $this->assertStringContainsString(route('guidings.methods', [], false), $html);
         $this->assertStringContainsString(route('vacations.camps.index', [], false), $html);
@@ -86,13 +86,16 @@ class FooterAccordionTest extends TestCase
         $this->assertStringContainsString('display: none !important', $scss);
         $this->assertStringContainsString('a.scroll-to-top', $scss);
         $this->assertMatchesRegularExpression(
-            '/\.cag-footer__accordion,\s*\.cag-footer__contact--mobile,\s*\.cag-footer__langs\s*\{\s*display:\s*none/',
+            '/\.cag-footer__contact--mobile,\s*\.cag-footer__langs\s*\{\s*display:\s*none/',
             $scss
         );
         $this->assertStringContainsString('grid-template-rows: 0fr', $scss);
         $this->assertStringContainsString('.cag-footer__group.is-open .cag-footer__group-panel', $scss);
         $this->assertStringContainsString('display: flex !important', $scss);
-        $this->assertStringContainsString('.cag-footer__links', $scss);
+        $this->assertMatchesRegularExpression(
+            '/@include media\(">=tablet"\)\s*\{\s*\.cag-footer__accordion\s*\{\s*display:\s*grid/',
+            $scss
+        );
     }
 
     public function test_destination_tiles_keep_flag_styles_on_mobile(): void

@@ -4,6 +4,14 @@
     $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods', 'guidings.targets.index');
     $heroBreadcrumbLabel = __('category.' . $type . '.breadcrumb');
     $heroSearchAction = listing_search_action();
+    $heroBreadcrumbItems = request()->routeIs('guidings.methods', 'guidings.targets.index')
+        ? [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
+            ['label' => $heroBreadcrumbLabel, 'url' => null],
+        ]
+        : [
+            ['label' => $heroBreadcrumbLabel, 'url' => null],
+        ];
 @endphp
 
 @section('title', $title)
@@ -299,9 +307,7 @@
             'listingTitle' => __('category.' . $type . '.title'),
             'listingSubtitle' => __('category.' . $type . '.sub_title'),
             'searchAction' => $heroSearchAction,
-            'breadcrumbItems' => [
-                ['label' => $heroBreadcrumbLabel, 'url' => null],
-            ],
+            'breadcrumbItems' => $heroBreadcrumbItems,
         ])
     @endif
     <div class="container" id="destination">
@@ -312,6 +318,10 @@
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        @if(request()->routeIs('guidings.methods', 'guidings.targets.index'))
+                            <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                            <li><a href="{{ route('guidings.landing') }}">{{ __('homepage.filter-fishing-near-me') }}</a></li>
+                        @endif
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">{{ $title }}</li>
                     </ul>

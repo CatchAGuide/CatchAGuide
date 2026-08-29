@@ -8,7 +8,7 @@
     $currentCountrySlug = $destination_type === 'country' ? $row_data->slug : ($row_data->country->slug ?? null);
     $heroBreadcrumbs = $useToursHeroSearch
         ? array_values(array_filter([
-            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
             in_array($destination_type, ['region', 'city'], true) && $row_data->country
                 ? ['label' => $row_data->country->name, 'url' => route('guidings.destination', ['country' => $row_data->country->slug])]
                 : null,
@@ -623,8 +623,10 @@
                         ])
                     @endif
                     @endif
+                    @if($showGeoCarousels)
+                    <div class="cag-dest-catalog-break" aria-hidden="true"><span></span></div>
+                    @endif
                     @if($showOffersCatalog)
-                    {{-- <h5 class="cag-dest-listings-title">{{ translate('Fishing tours in ' . $row_data->name) }}</h5> --}}
                     <div class="offers-catalog-page mb-5">
                         <x-offers.catalog-listing
                             :vm="$vm"

@@ -3,11 +3,22 @@
 @php
     $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show', 'vacations.targets');
     $heroSearchAction = listing_search_action();
-    $heroParentCrumb = match (true) {
-        request()->routeIs('guidings.methods.show') => ['label' => __('category.methods.breadcrumb'), 'url' => route('guidings.methods')],
-        request()->routeIs('guidings.targets') => ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
-        request()->routeIs('vacations.targets') => ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
-        default => ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+    $guidingsLandingCrumb = ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')];
+    $heroParentCrumbs = match (true) {
+        request()->routeIs('guidings.methods.show') => [
+            $guidingsLandingCrumb,
+            ['label' => __('category.methods.breadcrumb'), 'url' => route('guidings.methods')],
+        ],
+        request()->routeIs('guidings.targets') => [
+            $guidingsLandingCrumb,
+            ['label' => __('category.targets.breadcrumb'), 'url' => route('guidings.targets.index')],
+        ],
+        request()->routeIs('vacations.targets') => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+        ],
+        default => [
+            ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+        ],
     };
 @endphp
 
@@ -560,10 +571,9 @@
             'listingTitle' => $row_data->language->title,
             'listingSubtitle' => $row_data->language->sub_title,
             'searchAction' => $heroSearchAction,
-            'breadcrumbItems' => [
-                $heroParentCrumb,
+            'breadcrumbItems' => array_merge($heroParentCrumbs, [
                 ['label' => $row_data->source->name ?? $row_data->name, 'url' => null],
-            ],
+            ]),
         ])
     @endif
     <div class="container" id="destination">
@@ -574,8 +584,18 @@
                     <div class="page-header__bottom-inner">
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            @if(request()->routeIs('guidings.methods.show', 'guidings.targets'))
+                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                <li><a href="{{ route('guidings.landing') }}">{{ __('homepage.filter-fishing-near-me') }}</a></li>
+                            @endif
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li><a href="{{ match (strtolower($row_data->type)) { 'methods' => route('guidings.methods'), 'targets' => route('targets.index'), default => route('category.types', ['type' => strtolower($row_data->type)]) } }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
+                            <li><a href="{{ match (true) {
+                                request()->routeIs('guidings.methods.show') => route('guidings.methods'),
+                                request()->routeIs('guidings.targets') => route('guidings.targets.index'),
+                                strtolower($row_data->type) === 'methods' => route('guidings.methods'),
+                                strtolower($row_data->type) === 'targets' => route('targets.index'),
+                                default => route('category.types', ['type' => strtolower($row_data->type)]),
+                            } }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                             <li class="active">{{ $row_data->source->name ?? $row_data->name }}</li>
                         </ul>

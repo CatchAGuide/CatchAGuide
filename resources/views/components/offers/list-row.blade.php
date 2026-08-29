@@ -65,7 +65,7 @@
     $priceNote = $card['listing_price_note'] ?? null;
     $rating = isset($card['rating']) ? (float) $card['rating'] : null;
     $reviewCount = (int) ($card['review_count'] ?? 0);
-    $verified = ! empty($card['verified']) || in_array($type, ['trip', 'camp'], true);
+    $verified = ! empty($card['verified']) && ! in_array($type, ['trip', 'camp'], true);
 @endphp
 
 <article

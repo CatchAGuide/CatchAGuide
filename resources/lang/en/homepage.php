@@ -187,6 +187,7 @@ return [
 
     'footer_vacations' => 'Fishing Holidays',
     'footer_destinations' => 'Destinations',
+    'footer_all_experiences' => 'All fishing experiences',
     'footer_group_tours' => 'Fishing tours',
     'footer_group_vacations' => 'Fishing holidays',
     'footer_group_providers' => 'For providers',

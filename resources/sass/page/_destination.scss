@@ -73,8 +73,7 @@
     border-color: rgba(49, 48, 65, 0.06);
     animation: none;
 
-    .cag-home-species__name,
-    .cag-home-species__cta {
+    .cag-home-species__name {
       color: #fff;
       text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
     }
@@ -111,6 +110,45 @@
 
 .cag-dest-listings-title {
   margin: 0.15rem 0 0.75rem;
+}
+
+.cag-dest-catalog-break {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0 1.35rem;
+
+  @media (min-width: 768px) {
+    margin: 2.25rem 0 1.85rem;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+  }
+
+  &::before {
+    background: linear-gradient(90deg, transparent, rgba($slate, 0.16));
+  }
+
+  &::after {
+    background: linear-gradient(90deg, rgba($slate, 0.16), transparent);
+  }
+
+  span {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin: 0 0.75rem;
+    background: $coral;
+    transform: rotate(45deg);
+  }
+}
+
+// No rails rendered — skip the break so intro sits closer to the catalog.
+.cag-dest-intro + .cag-dest-catalog-break {
+  display: none;
 }
 
 .cag-dest-geo-rail + .cag-dest-listings-title {

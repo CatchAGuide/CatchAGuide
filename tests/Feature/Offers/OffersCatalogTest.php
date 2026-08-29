@@ -662,8 +662,8 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="camp"', false);
         $response->assertSee(__('offers.suggested_near', ['place' => 'Nowhere']), false);
         $response->assertSee(__('offers.filter_all').' (0)', false);
-        $response->assertSee(__('offers.filter_tours').' (0)', false);
-        $response->assertSee(__('offers.filter_vacations').' (0)', false);
+        $response->assertDontSee('offers-filters__type-btn--tour', false);
+        $response->assertDontSee('offers-filters__type-btn--vacation', false);
     }
 
     public function test_suggested_heading_uses_country_when_place_is_missing(): void
@@ -720,7 +720,32 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('Nearby Extra Camp', false);
         $response->assertSee(__('offers.filter_all').' (1)', false);
         $response->assertSee(__('offers.filter_tours').' (1)', false);
-        $response->assertSee(__('offers.filter_vacations').' (0)', false);
+        $response->assertSee('offers-filters__type-btn--tour', false);
+        $response->assertDontSee('offers-filters__type-btn--vacation', false);
+    }
+
+    public function test_type_pillars_omit_empty_tours_when_location_has_only_vacations(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([$this->card('trip', 'Only Vacation')]),
+            place: 'Sweden',
+            toursTotal: 0,
+            tripsTotal: 2,
+            campsTotal: 1,
+        ));
+
+        $response = $this->get(route('offers.index', [
+            'place' => 'Sweden',
+            'placeLat' => '59.3',
+            'placeLng' => '18.0',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('offers.filter_all').' (3)', false);
+        $response->assertSee(__('offers.filter_vacations').' (3)', false);
+        $response->assertSee('offers-filters__type-btn--vacation', false);
+        $response->assertDontSee('offers-filters__type-btn--tour', false);
     }
 
     public function test_type_toggle_urls_preserve_place_and_omit_vacation_on_primary(): void

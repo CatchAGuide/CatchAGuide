@@ -126,6 +126,22 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertDontSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('guidings-page-header__segment--fish', false);
+
+        $this->assertTrue(
+            (bool) preg_match('/<nav[^>]*aria-label="Breadcrumb"[^>]*>(.*?)<\/nav>/s', $response->getContent(), $matches),
+            'Expected a breadcrumb nav on the guidings target fish page'
+        );
+        $crumbs = $matches[1];
+        $homePos = strpos($crumbs, 'href="'.route('welcome').'"');
+        $landingPos = strpos($crumbs, 'href="'.route('guidings.landing').'"');
+        $targetsPos = strpos($crumbs, 'href="'.route('guidings.targets.index').'"');
+        $this->assertNotFalse($homePos);
+        $this->assertNotFalse($landingPos);
+        $this->assertNotFalse($targetsPos);
+        $this->assertLessThan($landingPos, $homePos);
+        $this->assertLessThan($targetsPos, $landingPos);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $crumbs);
+        $this->assertStringContainsString(__('category.targets.breadcrumb'), $crumbs);
     }
 
     public function test_vacations_target_fish_page_uses_vacations_scope_and_locks_catalog(): void

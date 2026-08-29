@@ -38,10 +38,6 @@
                     <span class="cag-home-species__shine" aria-hidden="true"></span>
                     <span class="cag-home-species__meta">
                         <span class="cag-home-species__name">{{ $item['name'] }}</span>
-                        <span class="cag-home-species__cta">
-                            {{ __('destination.geo_explore') }}
-                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                        </span>
                     </span>
                 </a>
             @endforeach

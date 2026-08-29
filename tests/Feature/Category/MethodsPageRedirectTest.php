@@ -107,5 +107,22 @@ class MethodsPageRedirectTest extends TestCase
         $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertDontSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('guidings-page-header__segment--fish', false);
+
+        $this->assertTrue(
+            (bool) preg_match('/<nav[^>]*aria-label="Breadcrumb"[^>]*>(.*?)<\/nav>/s', $response->getContent(), $matches),
+            'Expected a breadcrumb nav on the methods show page'
+        );
+        $crumbs = $matches[1];
+        $homePos = strpos($crumbs, 'href="'.route('welcome').'"');
+        $landingPos = strpos($crumbs, 'href="'.route('guidings.landing').'"');
+        $methodsPos = strpos($crumbs, 'href="'.route('guidings.methods').'"');
+        $this->assertNotFalse($homePos);
+        $this->assertNotFalse($landingPos);
+        $this->assertNotFalse($methodsPos);
+        $this->assertLessThan($landingPos, $homePos);
+        $this->assertLessThan($methodsPos, $landingPos);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $crumbs);
+        $this->assertStringContainsString(__('category.methods.breadcrumb'), $crumbs);
+        $this->assertStringContainsString($page->name, $crumbs);
     }
 }

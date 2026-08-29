@@ -125,6 +125,14 @@ class GuidingsDestinationTest extends TestCase
         $response->assertDontSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('guidings-page-header__segment--fish', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
+        $this->assertBreadcrumbLinksInOrder($response->getContent(), [
+            route('welcome'),
+            route('guidings.landing'),
+        ]);
+        $this->assertStringContainsString(
+            __('homepage.filter-fishing-near-me'),
+            $this->breadcrumbHtml($response->getContent())
+        );
     }
 
     public function test_guidings_destination_country_shows_country_switch_dropdown_targeting_guidings_pages(): void
@@ -177,13 +185,16 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee($region->name, false);
         $response->assertSee('Guidings City '.$country->slug, false);
         $response->assertSee('cag-home-species__card', false);
+        $response->assertDontSee(__('destination.geo_explore'), false);
+        $response->assertDontSee('cag-home-species__cta', false);
         $response->assertSee('cag-dest-geo-rail', false);
         $response->assertSee('data-species-spotlight', false);
         $response->assertSeeInOrder([
             'cag-dest-intro',
             'data-geo-rail="regions"',
             'data-geo-rail="cities"',
-            'cag-dest-listings-title',
+            'cag-dest-catalog-break',
+            'offers-catalog-page',
         ], false);
         $response->assertDontSee('id="carousel-regions"', false);
         $response->assertDontSee('id="carousel-cities"', false);
@@ -246,6 +257,11 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee(__('destination.all_cities'), false);
         $response->assertSee($city->name, false);
         $response->assertSee('data-geo-rail="cities"', false);
+        $response->assertSeeInOrder([
+            'data-geo-rail="cities"',
+            'cag-dest-catalog-break',
+            'offers-catalog-page',
+        ], false);
         $response->assertDontSee('data-geo-rail="regions"', false);
         $response->assertSee(route('guidings.destination', [
             'country' => $country->slug,
@@ -309,6 +325,10 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee(__('destination.all_cities'), false);
         $response->assertSee($sibling->name, false);
         $response->assertSee('data-geo-rail="cities"', false);
+        $response->assertSeeInOrder([
+            'data-geo-rail="cities"',
+            'cag-dest-catalog-break',
+        ], false);
         $response->assertSee(route('guidings.destination', [
             'country' => $country->slug,
             'region' => $region->slug,
@@ -404,6 +424,14 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee('offers-page-header__hero', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
         $response->assertDontSee('guidings-page-header__segment--fish', false);
+        $this->assertBreadcrumbLinksInOrder($response->getContent(), [
+            route('welcome'),
+            route('guidings.landing'),
+        ]);
+        $this->assertStringContainsString(
+            __('homepage.filter-fishing-near-me'),
+            $this->breadcrumbHtml($response->getContent())
+        );
     }
 
     public function test_guidings_countries_is_not_captured_as_destination_country(): void
@@ -492,5 +520,32 @@ class GuidingsDestinationTest extends TestCase
             lockDestinationScope: true,
             lockTourScope: true,
         );
+    }
+
+    private function breadcrumbHtml(string $html): string
+    {
+        $this->assertTrue(
+            (bool) preg_match('/<nav[^>]*aria-label="Breadcrumb"[^>]*>(.*?)<\/nav>/s', $html, $matches),
+            'Expected a breadcrumb nav on the page'
+        );
+
+        return $matches[1];
+    }
+
+    /**
+     * @param  list<string>  $hrefs
+     */
+    private function assertBreadcrumbLinksInOrder(string $html, array $hrefs): void
+    {
+        $crumbs = $this->breadcrumbHtml($html);
+        $lastPos = -1;
+
+        foreach ($hrefs as $href) {
+            $needle = 'href="'.$href.'"';
+            $pos = strpos($crumbs, $needle);
+            $this->assertNotFalse($pos, 'Expected breadcrumb link '.$href);
+            $this->assertGreaterThan($lastPos, $pos, 'Breadcrumb order is wrong for '.$href);
+            $lastPos = $pos;
+        }
     }
 }

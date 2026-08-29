@@ -162,6 +162,12 @@ class CategoryIndexTest extends TestCase
         $response->assertSee('Visible Guidings Pike Title', false);
         $response->assertSee('href="'.route('guidings.targets', ['slug' => $page->slug]).'"', false);
         $response->assertDontSee('href="'.route('targets.show', ['slug' => $page->slug]).'"', false);
+        $this->assertBreadcrumbLinksInOrder($response->getContent(), [
+            route('welcome'),
+            route('guidings.landing'),
+        ]);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $this->breadcrumbHtml($response->getContent()));
+        $this->assertStringContainsString(__('category.targets.breadcrumb'), $this->breadcrumbHtml($response->getContent()));
         $response->assertSee('data-category-header-shell', false);
         $response->assertDontSee('data-site-page-header-shell', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
@@ -296,6 +302,10 @@ class CategoryIndexTest extends TestCase
         $response->assertSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
+        $this->assertStringNotContainsString(
+            'href="'.route('guidings.landing').'"',
+            $this->breadcrumbHtml($response->getContent())
+        );
     }
 
     public function test_methods_index_uses_gray_catalog_header(): void
@@ -312,6 +322,12 @@ class CategoryIndexTest extends TestCase
         $response->assertDontSee('action="'.url('/offers').'"', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
         $response->assertDontSee('guidings-page-header__segment--fish', false);
+        $this->assertBreadcrumbLinksInOrder($response->getContent(), [
+            route('welcome'),
+            route('guidings.landing'),
+        ]);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $this->breadcrumbHtml($response->getContent()));
+        $this->assertStringContainsString(__('category.methods.breadcrumb'), $this->breadcrumbHtml($response->getContent()));
     }
 
     public function test_legacy_methods_index_redirects_to_guidings_methods(): void
@@ -328,5 +344,32 @@ class CategoryIndexTest extends TestCase
 
         $response->assertRedirect(route('targets.index'));
         $response->assertStatus(301);
+    }
+
+    private function breadcrumbHtml(string $html): string
+    {
+        $this->assertTrue(
+            (bool) preg_match('/<nav[^>]*aria-label="Breadcrumb"[^>]*>(.*?)<\/nav>/s', $html, $matches),
+            'Expected a breadcrumb nav on the page'
+        );
+
+        return $matches[1];
+    }
+
+    /**
+     * @param  list<string>  $hrefs
+     */
+    private function assertBreadcrumbLinksInOrder(string $html, array $hrefs): void
+    {
+        $crumbs = $this->breadcrumbHtml($html);
+        $lastPos = -1;
+
+        foreach ($hrefs as $href) {
+            $needle = 'href="'.$href.'"';
+            $pos = strpos($crumbs, $needle);
+            $this->assertNotFalse($pos, 'Expected breadcrumb link '.$href);
+            $this->assertGreaterThan($lastPos, $pos, 'Breadcrumb order is wrong for '.$href);
+            $lastPos = $pos;
+        }
     }
 }

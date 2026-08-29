@@ -123,3 +123,14 @@
     display: none;
   }
 }
+
+// Listing catalogs sit on a plain white canvas — no grey page fill
+// behind cards, filters, or empty sidebar/list gutters.
+.offers-catalog-page,
+.category-hero-page,
+.vacation-country,
+.vacation-pillar-index,
+.tours-list,
+#trips-category {
+  background: #fff;
+}
