@@ -6,12 +6,18 @@ import markerFactory from './MarkerFactory';
 import ProductMap from './ProductMap';
 import ListingMap from './ListingMap';
 import placesAutocompleteService from './PlacesAutocompleteService';
+import MapModalRail from './MapModalRail';
+import MapModalFilters from './MapModalFilters';
+import LandmarkLayer from './LandmarkLayer';
 
 window.CAGMaps = {
   MapsManager: mapsManager,
   MarkerFactory: markerFactory,
   ProductMap,
   ListingMap,
+  MapModalRail,
+  MapModalFilters,
+  LandmarkLayer,
   Places: placesAutocompleteService,
 };
 
@@ -109,6 +115,9 @@ export {
   markerFactory,
   ProductMap,
   ListingMap,
+  MapModalRail,
+  MapModalFilters,
+  LandmarkLayer,
   placesAutocompleteService,
   bootAll,
 };

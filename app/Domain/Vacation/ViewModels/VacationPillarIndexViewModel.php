@@ -5,7 +5,7 @@ namespace App\Domain\Vacation\ViewModels;
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
-use App\Models\Destination;
+use App\Models\CategoryEntity;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -19,10 +19,11 @@ final class VacationPillarIndexViewModel
         public readonly Collection $cards,
         public readonly Collection $countries,
         public readonly Collection $speciesOptions,
+        public readonly Collection $accommodationTypeOptions,
         public readonly int $tripsTotal,
         public readonly int $campsTotal,
         public readonly Collection $faq,
-        public readonly ?Destination $destination = null,
+        public readonly ?CategoryEntity $destination = null,
         public readonly array $mapMarkers = [],
     ) {}
 
@@ -39,6 +40,11 @@ final class VacationPillarIndexViewModel
     public function pageTitle(): string
     {
         if ($this->isCountryPage()) {
+            $cmsTitle = $this->cmsField('title');
+            if (filled($cmsTitle)) {
+                return strip_tags($cmsTitle);
+            }
+
             return __($this->pillar->countryTitleKey(), ['country' => $this->countryName()]);
         }
 
@@ -48,18 +54,65 @@ final class VacationPillarIndexViewModel
     public function headerSubtitle(): string
     {
         if ($this->isCountryPage()) {
-            $subtitle = $this->destination->sub_title
-                ?? __($this->pillar->descriptionKey());
+            $subtitle = $this->cmsField('sub_title');
+            if (filled($subtitle)) {
+                return strip_tags($subtitle);
+            }
 
-            return strip_tags(translate($subtitle));
+            return __($this->pillar->descriptionKey());
         }
 
         return __($this->pillar->descriptionKey());
     }
 
+    public function introductionHtml(): string
+    {
+        if (! $this->isCountryPage()) {
+            return '';
+        }
+
+        return (string) ($this->cmsField('introduction') ?? '');
+    }
+
+    public function bodyContentHtml(): string
+    {
+        if (! $this->isCountryPage()) {
+            return '';
+        }
+
+        return (string) ($this->cmsField('content') ?? '');
+    }
+
+    public function faqTitle(): string
+    {
+        $cmsFaqTitle = $this->isCountryPage() ? $this->cmsField('faq_title') : null;
+        if (filled($cmsFaqTitle)) {
+            return strip_tags($cmsFaqTitle);
+        }
+
+        return __('vacations.hub_faq_title');
+    }
+
     public function metaDescription(): string
     {
-        return Str::limit($this->headerSubtitle(), 155);
+        $intro = strip_tags($this->introductionHtml());
+
+        return Str::limit($intro !== '' ? $intro : $this->headerSubtitle(), 155);
+    }
+
+    private function cmsField(string $field): ?string
+    {
+        if ($this->destination === null) {
+            return null;
+        }
+
+        if (method_exists($this->destination, 'scopedCmsValue')) {
+            return $this->destination->scopedCmsValue($field);
+        }
+
+        $value = $this->destination->{$field} ?? null;
+
+        return filled($value) ? (string) $value : null;
     }
 
     public function filterAction(): string
@@ -89,29 +142,39 @@ final class VacationPillarIndexViewModel
     public function pillarToggleUrls(): array
     {
         $query = array_filter([
-            'species' => $this->filter->species,
+            'species' => $this->filter->speciesIds !== []
+                ? $this->filter->speciesIds
+                : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null),
             'sortby' => $this->filter->sortBy,
-        ]);
+        ], fn ($v) => $v !== null && $v !== '');
+        $tripsQuery = array_filter([
+            ...$query,
+            'duration' => $this->filter->tripDuration,
+        ], fn ($v) => $v !== null && $v !== '');
+        $campsQuery = array_filter([
+            ...$query,
+            ...$this->filter->campFacetQueryParams(),
+        ], fn ($v) => $v !== null && $v !== '');
 
-        $withQuery = fn (string $url) => $query === []
+        $withQuery = fn (string $url, array $params = []) => $params === []
             ? $url
-            : $url.'?'.http_build_query($query);
+            : $url.'?'.http_build_query($params);
 
         if ($this->isCountryPage()) {
             $countrySlug = CountrySlug::canonicalize($this->destination->slug)
                 ?? strtolower((string) $this->destination->slug);
 
             return [
-                'all' => $withQuery(route('vacations.country', $countrySlug)),
-                'trips' => $withQuery(route('vacations.trips.show', $countrySlug)),
-                'camps' => $withQuery(route('vacations.camps.show', $countrySlug)),
+                'all' => $withQuery(route('vacations.country', $countrySlug), $query),
+                'trips' => $withQuery(route('vacations.trips.show', $countrySlug), $tripsQuery),
+                'camps' => $withQuery(route('vacations.camps.show', $countrySlug), $campsQuery),
             ];
         }
 
         return [
-            'all' => $withQuery(route('vacations.all-offers')),
-            'trips' => $withQuery(route('vacations.trips.index')),
-            'camps' => $withQuery(route('vacations.camps.index')),
+            'all' => $withQuery(route('vacations.all-offers'), $query),
+            'trips' => $withQuery(route('vacations.trips.index'), $tripsQuery),
+            'camps' => $withQuery(route('vacations.camps.index'), $campsQuery),
         ];
     }
 }

@@ -1,7 +1,11 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @section('title',$guiding->title)
 @section('description',$guiding->desc_course_of_action ?? $guiding->title)
+
+@section('canonical')
+    <link rel="canonical" href="{{ $guiding->publicShowUrl() }}" />
+@endsection
 
 @section('share_tags')
     <meta property="og:title" content="{{$guiding->title}}" />
@@ -18,7 +22,7 @@
             '@type' => 'TouristTrip',
             'name' => $guiding->title,
             'description' => $guiding->desc_tour_unique ?? $guiding->desc_course_of_action ?? $guiding->description,
-            'url' => url()->current(),
+            'url' => $guiding->publicShowUrl(),
             'image' => $guiding->thumbnail_path ? media_url($guiding->thumbnail_path) : null,
             'touristType' => 'Fishing trip',
             'areaServed' => array_filter([
@@ -791,25 +795,17 @@
 @endsection
 
 @section('content')
-<div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">
-                            {{$guiding->title}}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.category.partials.product-hero-header', [
+        'listingTitle' => __('homepage.filter-fishing-near-me'),
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            ['label' => $guiding->title, 'url' => null],
+        ],
+    ])
 
- <div id="guidings-page" class="container">
+ <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 4">
     <div class="title-container">
         <div class="title-wrapper">
             {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
@@ -1978,7 +1974,7 @@
                             $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
                             $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
                         @endphp
-                        <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
+                        <a href="{{ $other_guiding->publicShowUrl() }}" class="guiding-tile text-decoration-none">
                             <div class="guiding-tile__img-wrap">
                                 @if($tile_img)
                                     <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
@@ -2077,9 +2073,11 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
 
 @section('js_after')
+@include('layouts.partials.category-hero-header-script')
 
 <script>
     
@@ -2401,7 +2399,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/${newGuiding.id}/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                        <a href="/guidings/offer/${newGuiding.slug}" class="btn btn-primary">Details</a>
                     </div>
                 </div>
             `;

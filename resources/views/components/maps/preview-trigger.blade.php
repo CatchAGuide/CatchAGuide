@@ -1,5 +1,6 @@
 @props([
-    'target' => '#mapModal',
+    'target' => null,
+    'modalId' => null,
     'label' => null,
     'resultCount' => null,
     'tag' => 'button',
@@ -9,6 +10,11 @@
 @php
     $label = $label ?? __('destination.show_on_map');
     $isButton = $tag === 'button';
+    if ($target === null || $target === '') {
+        $target = $modalId
+            ? (str_starts_with((string) $modalId, '#') ? (string) $modalId : '#'.$modalId)
+            : '#mapModal';
+    }
 @endphp
 
 <x-maps.assets />
@@ -39,7 +45,7 @@
                 <span class="cag-map-teaser__cta-label">{{ $label }}</span>
                 @if($resultCount !== null && (int) $resultCount > 0)
                     <span class="cag-map-teaser__cta-meta">
-                        {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                        {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                     </span>
                 @endif
             </span>
@@ -61,7 +67,7 @@
                 <span class="cag-map-teaser__cta-label">{{ $label }}</span>
                 @if($resultCount !== null && (int) $resultCount > 0)
                     <span class="cag-map-teaser__cta-meta">
-                        {{ $resultCount }} {{ (int) $resultCount === 1 ? translate('result') : translate('results') }}
+                        {{ $resultCount }} {{ (int) $resultCount === 1 ? __('global.result') : __('global.results') }}
                     </span>
                 @endif
             </span>

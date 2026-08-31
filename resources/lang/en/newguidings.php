@@ -322,5 +322,6 @@ return [
             <li>3% of the total price for bookings over €1,500</li>
         </ul>',
 
-    'pricing_extra_info_text' => 'You can add the extras to your booking during the reservation process'
+    'pricing_extra_info_text' => 'You can add the extras to your booking during the reservation process',
+    'new_guiding_offer_title' => 'New Guiding Offer',
 ];

@@ -10,7 +10,7 @@
             <div class="col-lg-10">
                 <h1 class="mb-3 h3">Data for AI agents &amp; developers</h1>
                 <p class="mb-4">
-                    Catch a Guide is a marketplace for guided fishing trips, fishing holidays and fishing camps.
+                    Catch a Guide is a marketplace for guided fishing trips, fishing holidays and fishing lodges and accommodation.
                     This page documents public, read-only endpoints that expose our catalog in a
                     machine-readable JSON format for AI assistants, tools and integrations.
                 </p>
@@ -31,7 +31,7 @@
       "type": "guiding" | "vacation",
       "title": "Guided pike fishing in Sweden",
       "slug": "guided-pike-fishing-sweden",
-      "url": "https://catchaguide.com/guidings/123/guided-pike-fishing-sweden",
+      "url": "https://catchaguide.com/guidings/offer/guided-pike-fishing-sweden",
       "language": "en",
       "country": "Sweden",
       "region": "Värmland",

@@ -218,6 +218,8 @@ return [
         'high_threat_threshold' => 85,   // Lower threshold for high threat detection
         'bot_detection' => true,         // Enable bot detection
         'retention_days' => 7,           // Auto-purge rows older than this via threat-intelligence:cleanup
+        'persist_on_allow' => false,     // Skip DB writes for normal users and crawlers
+        'persist_minimum_score' => 50,
         'suspicious_patterns' => [
             'rapid_requests' => true,    // Detect rapid request patterns
             'missing_headers' => true,   // Detect missing common headers
@@ -265,6 +267,9 @@ return [
         'send_on_block' => true,
         'send_on_stubborn_attacker' => true,
         'send_on_high_threat' => true,
+        'send_on_crawler' => false,
+        'send_on_exploit' => true,
+        'min_rate_limit_violations_for_alert' => 5,
     ],
 
     /*
@@ -374,6 +379,128 @@ return [
         // Reduce alert frequency to prevent spam
         'alert_cooldown_minutes' => 60, // Send max 1 alert per hour per IP
         'threat_score_blocking_threshold' => 95, // Only block very high threat scores
+        'min_rate_limit_violations_for_alert' => 5,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Crawler Lanes
+    |--------------------------------------------------------------------------
+    |
+    | Known-good bots get their own rate limits so indexing and link previews
+    | keep working. Limits are per IP. Search engines use many IPs, so these
+    | caps protect the origin without starving a crawl.
+    |
+    */
+    'crawlers' => [
+        'enabled' => true,
+        'verify_dns' => env('DDOS_CRAWLER_VERIFY_DNS', true),
+        'dns_cache_seconds' => 86400,
+        'search_engines' => [
+            'Googlebot' => [
+                'ua' => ['Googlebot', 'Google-InspectionTool', 'Google-Read-Aloud', 'AdsBot-Google', 'Mediapartners-Google'],
+                'rdns_suffixes' => ['.googlebot.com', '.google.com', '.googleusercontent.com'],
+            ],
+            'Bingbot' => [
+                'ua' => ['bingbot', 'BingPreview', 'msnbot'],
+                'rdns_suffixes' => ['.search.msn.com'],
+            ],
+            'Applebot' => [
+                'ua' => ['Applebot'],
+                'rdns_suffixes' => ['.applebot.apple.com'],
+            ],
+            'DuckDuckBot' => [
+                'ua' => ['DuckDuckBot', 'DuckAssistBot'],
+                'rdns_suffixes' => [],
+            ],
+            'Facebook' => [
+                'ua' => ['facebookexternalhit', 'Facebot', 'meta-externalagent'],
+                'rdns_suffixes' => ['.facebook.com', '.fbsv.net'],
+            ],
+            'WhatsApp' => [
+                'ua' => ['WhatsApp'],
+                'rdns_suffixes' => [],
+            ],
+            'LinkedInBot' => [
+                'ua' => ['LinkedInBot'],
+                'rdns_suffixes' => [],
+            ],
+            'Twitterbot' => [
+                'ua' => ['Twitterbot'],
+                'rdns_suffixes' => [],
+            ],
+            'Slackbot' => [
+                'ua' => ['Slackbot'],
+                'rdns_suffixes' => [],
+            ],
+        ],
+        'seo' => [
+            'Ahrefs' => ['ua' => ['AhrefsBot']],
+            'Semrush' => ['ua' => ['SemrushBot', 'Semrush']],
+            'DataForSEO' => ['ua' => ['DataForSEO', 'dataforseo']],
+            'PetalBot' => ['ua' => ['PetalBot']],
+            'Baiduspider' => ['ua' => ['Baiduspider']],
+            'Yandex' => ['ua' => ['YandexBot', 'Yandex']],
+            'Amazonbot' => ['ua' => ['Amazonbot']],
+            'ChatGPT' => ['ua' => ['ChatGPT-User', 'OAI-SearchBot', 'GPTBot']],
+            'Claude' => ['ua' => ['ClaudeBot', 'Claude-User', 'Anthropic-AI']],
+            'Perplexity' => ['ua' => ['PerplexityBot']],
+            'Seznam' => ['ua' => ['SeznamBot']],
+        ],
+        'lanes' => [
+            'search_engine' => [
+                'minute' => 180,
+                'hour' => 4000,
+                'day' => 20000,
+            ],
+            'seo_crawler' => [
+                'minute' => 40,
+                'hour' => 800,
+                'day' => 5000,
+            ],
+            'spoofed_crawler' => [
+                'minute' => 15,
+                'hour' => 150,
+                'day' => 400,
+            ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exploit Signatures
+    |--------------------------------------------------------------------------
+    |
+    | Precise payload checks applied to query strings and input. These must
+    | stay narrow so normal searches and sort filters are never blocked.
+    |
+    */
+    'exploit_signatures' => [
+        'sqli' => [
+            '/union\s+(all\s+)?select\b/i',
+            '/information_schema\b/i',
+            '/sleep\s*\(/i',
+            '/benchmark\s*\(/i',
+            '/waitfor\s+delay\b/i',
+            '/into\s+(out|dump)file\b/i',
+            '/load_file\s*\(/i',
+            '/extractvalue\s*\(/i',
+            '/updatexml\s*\(/i',
+            '/;\s*(select|insert|update|delete|drop|sleep)\b/i',
+            '/\'\s*(and|or)\s+\'[^\']+\'\s*=\s*\'/i',
+            '/\'\s*\)\s*(and|or)\s*\(/i',
+            '/\b(and|or)\s+\d+\s*=\s*\d+/i',
+        ],
+        'xss' => [
+            '/<\s*script\b/i',
+            '/javascript\s*:/i',
+            '/on(error|load|mouseover)\s*=/i',
+        ],
+        'path_traversal' => [
+            '/(\.\.\/|\.\.\\\\)/',
+            '/etc\/passwd/i',
+            '/php:\/\//i',
+        ],
     ],
 
     /*

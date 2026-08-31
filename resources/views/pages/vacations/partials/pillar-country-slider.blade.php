@@ -5,7 +5,7 @@
 ])
 
 @php
-    $countrySlides = $countries->filter(fn ($row) => ($row[$pillar] ?? 0) > 0);
+    $countrySlides = $countries;
     $countryRoute = $pillar === 'trips' ? 'vacations.trips.show' : 'vacations.camps.show';
 @endphp
 
@@ -16,13 +16,14 @@
             :subtitle="__('vacations.hub_country_slider_subtitle')"
             :slider-id="$sliderId"
         >
-            @foreach($countrySlides as $row)
-                <div class="swiper-slide">
+            @foreach([false, true] as $isClone)
+                @foreach($countrySlides as $row)
                     <x-vacation.country-slide
                         :row="$row"
                         :href="route($countryRoute, $row['slug'])"
+                        :clone="$isClone"
                     />
-                </div>
+                @endforeach
             @endforeach
         </x-vacation.country-slider>
     </section>

@@ -247,20 +247,18 @@
 
 </head>
 
-<body>
+<body @class(['has-cag-bottom-nav' => \App\Support\SitePrimaryNav::usesLayoutBottomNav()])>
 
   
 <!-- /.preloader -->
 <div class="page-wrapper">
-  
-    @include('layouts.partials.newheader-short', [
-        'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($vacation) ? ($vacation->country ?? null) : null,
-    ])
+
+    @include('layouts.partials.site-chrome')
 
     @yield('content')
 
     @include('layouts.partials.footer')
+    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 

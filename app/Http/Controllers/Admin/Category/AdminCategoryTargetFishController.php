@@ -2,181 +2,297 @@
 
 namespace App\Http\Controllers\Admin\Category;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageDimension;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Http\Controllers\Admin\Category\Concerns\HandlesScopedCategoryContent;
 use App\Http\Controllers\Controller;
-use App\Models\Faq;
-use App\Models\Target;
-use App\Models\Language;
 use App\Models\CategoryPage;
+use App\Models\Target;
+use App\Services\CategoryPage\CategoryPageContentService;
 use DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Intervention\Image\Facades\Image;
 
 class AdminCategoryTargetFishController extends Controller
 {
-    protected $language;
+    use HandlesScopedCategoryContent;
 
-    public function __construct()
-    {
-        $this->language = [
-            'en',
-            'de'
-        ];
-    }
+    public function __construct(
+        private CategoryPageContentService $content
+    ) {}
 
     public function index()
     {
-        $rows = Target::with(['categoryPage' => function($query) {
-                $query->where('type', 'Targets')
-                    ->with(['language' => function($q) {
-                        $q->select('source_id', 'language')
-                          ->orderBy('language');
-                    }]);
-            }])
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::TARGETS);
+
+        $rows = Target::query()
+            ->orderBy('name')
+            ->with(['categoryPage' => fn ($query) => $query->where('type', 'Targets')])
             ->paginate(25);
 
-        $rows->getCollection()->transform(function($target) {
-            $target->languages = $target->categoryPage 
-                ? $target->categoryPage->language->pluck('language')->sort()->values()->toArray()
-                : [];
+        $rows->getCollection()->transform(function ($target) use ($scopes) {
+            $target->scope_completeness = $this->content->completenessForTargetFish($target->id, $scopes);
+            $target->filled_locales = $this->content->filledLocalesFromCompleteness($target->scope_completeness);
+            $target->has_any_content = $target->filled_locales !== [];
+
             return $target;
         });
-        $data = compact('rows');
-        return view('admin.pages.category.target-fish', $data);
+
+        return view('admin.pages.category.target-fish', compact('rows', 'scopes'));
     }
 
     public function update(Request $request, $id)
     {
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::TARGETS);
+
         $request->validate([
-            'name' => 'required|max:255|unique:destinations,name,null,null,type,Targets,deleted_at,null',
+            'name' => 'required|max:255',
             'title' => 'required|max:255',
             'sub_title' => 'required|max:255',
-            'languageSwitch' => 'required|max:255'
+            'languageSwitch' => ['required', Rule::in(config('app.locales'))],
+            'content_scope' => ['required', Rule::in($scopes)],
         ]);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['languageSwitch', 'name', 'title', 'sub_title', 'introduction', 'faq_title']);
-            $data['name'] = $request->name;
 
-            if($request->has('thumbnailImage') && ($request->thumbnailImage != null && $request->thumbnailImage != '')) {
-                $webp_path = $this->upload_thumbnail($request->thumbnailImage);
-                $data['thumbnail_path'] = $webp_path;
+            $categoryPage = $this->resolveCategoryPage((int) $id, $request->name);
+
+            if ($request->hasFile('thumbnailImage')) {
+                $categoryPage->thumbnail_path = $this->uploadThumbnail($request->file('thumbnailImage'));
+                $categoryPage->save();
             }
 
-            $categoryPage = CategoryPage::where('source_id', $id)->where('type', 'Targets')->first();
-            $isCreate = false;
+            $scope = $request->input('content_scope');
+            $locale = $request->input('languageSwitch');
+            $faqs = collect($request->input('faq', []))->values()->all();
 
-            if ($categoryPage) {
-                $categoryPage->update($data);
-                Language::where('source_id', $categoryPage->id)->where('language', $request->languageSwitch)->delete();
-            } else {
-                $data['type'] = 'Targets';
-                $data['source_id'] = $id;
-                $data['slug'] = $this->slug_format($request->name);
-                $categoryPage = CategoryPage::create($data);
-                $isCreate = true;
-            }
-            
-            $language = Language::create(
-                [
-                    'source_id' => $categoryPage->id,
-                    'language' => $request->languageSwitch,
-                    'title' => $request->title ?? '',
-                    'sub_title' => $request->sub_title ?? '',
-                    'introduction' => $request->introduction ?? '',
-                    'content' => $request->content ?? '',
-                    'faq_title' => $request->faq_title ?? '',
-                    'faq' => $request->faq ?? []
-                ]
-            );
-            
-            if ($request->has('faq')) {
-                Faq::where('page', 'Targets')->where('source_id', $categoryPage->id)->delete();
-                foreach ($request->faq as $key => $value) {
-                    $valueSave['page'] = 'Targets';
-                    $valueSave['language'] = $request->languageSwitch;
-                    $valueSave['question'] = $value['question'];
-                    $valueSave['answer'] = $value['answer'];
-                    $valueSave['source_id'] = $categoryPage->id;
-                    Faq::create($valueSave);
-                }
-                $language->faq = $request->faq;
-            }
+            $this->content->upsert($categoryPage, $scope, $locale, [
+                'title' => $request->title ?? '',
+                'sub_title' => $request->sub_title ?? '',
+                'introduction' => $request->introduction ?? '',
+                'content' => $request->content ?? '',
+                'faq_title' => $request->faq_title ?? '',
+            ], $faqs);
 
-            if($isCreate){
-                $this->translate($language);
+            if ($request->boolean('translate_to_en') && $locale === 'de') {
+                $this->content->translateScope($categoryPage, $scope, 'de', 'en');
             }
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Target Successfully Added!');
+            return redirect()
+                ->route('admin.category.target-fish.edit', [
+                    'target_fish' => $id,
+                    'scope' => $scope,
+                    'language' => $locale,
+                ])
+                ->with('success', 'Target fish category page saved.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Exception', ['message' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
-        } catch (\Illuminate\Database\QueryException $e) {
-            DB::rollBack();
-            Log::error('Query Exception', ['message' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
+            Log::error('Target fish category save failed', ['message' => $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['message' => 'Something went wrong. Please try again.']);
         }
     }
 
     public function edit($id)
     {
-        $targets = Target::with('categoryPage', 'categoryPage.faq')->find($id);
+        $target = Target::with('categoryPage')->find($id);
 
-        if (is_null($targets)) {
+        if ($target === null) {
             return redirect()->back();
         }
 
-        $row = $targets->categoryPage;
-        
-        $form = 'Target Fish';
-        $route = route('admin.category.target-fish.update', $id);
-        $method = 'PUT';
-        $language = 'de';
-        $name = $targets->name ?? '';
-        $thumbnail = $row ? $row->getThumbnailPath() : asset('assets/images/300x300.png');
+        $categoryPage = $target->categoryPage;
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::TARGETS);
+        $activeScope = request('scope', CategoryPageScope::TOURS);
+        if (! in_array($activeScope, $scopes, true)) {
+            $activeScope = CategoryPageScope::TOURS;
+        }
+
+        $language = request('language', 'de');
+        if (! in_array($language, config('app.locales'), true)) {
+            $language = 'de';
+        }
+
         $title = '';
         $sub_title = '';
         $introduction = '';
         $content = '';
         $faq_title = '';
-        $faq = [];
-        
-        if ($row) {
-            $languageData = $row->language($language);
-            if ($languageData) {
-                $title = $languageData->title ?? '';
-                $sub_title = $languageData->sub_title ?? '';
-                $introduction = $languageData->introduction ?? '';
-                $content = $languageData->content ?? '';
-                $faq_title = $languageData->faq_title ?? '';
-                $faq = $row->faq($language) ?? [];
-            }
+        $faq = collect();
+
+        $languageRow = $this->content->findForEntity(
+            CategoryPageEntityType::TARGET_FISH,
+            $target->id,
+            $activeScope,
+            $language,
+        );
+
+        if ($languageRow) {
+            $title = $languageRow->title ?? '';
+            $sub_title = $languageRow->sub_title ?? '';
+            $introduction = $languageRow->introduction ?? '';
+            $content = $languageRow->content ?? '';
+            $faq_title = $languageRow->faq_title ?? '';
         }
-        $allowed_fields = false;
 
-        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'content', 'faq_title', 'allowed_fields', 'faq');
+        $faq = $this->content->faqsForEntity(
+            CategoryPageEntityType::TARGET_FISH,
+            $target->id,
+            $activeScope,
+            $language,
+        );
+        $completeness = $this->content->completenessForTargetFish($target->id, $scopes);
 
-        return view('admin.pages.category.dynamic-form', $data);
+        $slug = $categoryPage?->slug ?? $this->slugFormat($target->getRawOriginal('name') ?? $target->name);
+        $publicUrls = $this->publicUrlsForSlug($slug);
+
+        return view('admin.pages.category.catalog-editor', [
+            'formTitle' => 'Target Fish',
+            'route' => route('admin.category.target-fish.update', $id),
+            'languageDataUrl' => route('admin.category.target-fish.language-data', $target->id),
+            'autosaveUrl' => route('admin.category.target-fish.autosave', $target->id),
+            'backToListRoute' => route('admin.category.target-fish.index'),
+            'nameReadonly' => true,
+            'language' => $language,
+            'activeScope' => $activeScope,
+            'scopes' => $scopes,
+            'completeness' => $completeness,
+            'name' => $target->name ?? '',
+            'thumbnail' => $categoryPage ? $categoryPage->getThumbnailPath() : asset('assets/images/300x300.png'),
+            'publicUrl' => $publicUrls[$activeScope] ?? $publicUrls[CategoryPageScope::GLOBAL],
+            'publicUrls' => $publicUrls,
+            'title' => $title,
+            'sub_title' => $sub_title,
+            'introduction' => $introduction,
+            'content' => $content,
+            'faq_title' => $faq_title,
+            'faq' => $faq,
+        ]);
     }
 
-    private function upload_thumbnail($thumbnailImage)
+    /**
+     * @return array<string, string>
+     */
+    private function publicUrlsForSlug(string $slug): array
+    {
+        return [
+            CategoryPageScope::GLOBAL => route('targets.show', ['slug' => $slug]),
+            CategoryPageScope::TOURS => route('guidings.targets', ['slug' => $slug]),
+            CategoryPageScope::VACATIONS => route('vacations.targets', ['slug' => $slug]),
+        ];
+    }
+
+    public function toggleFavorite(Request $request)
+    {
+        try {
+            $target = Target::findOrFail($request->id);
+
+            if ($target->categoryPage) {
+                $categoryPage = $target->categoryPage;
+                $categoryPage->is_favorite = (int) $request->status;
+                $categoryPage->save();
+            } else {
+                $categoryPage = CategoryPage::query()->create([
+                    'name' => $target->name,
+                    'is_favorite' => (int) $request->status,
+                    'type' => 'Targets',
+                    'source_id' => $target->id,
+                    'slug' => $this->slugFormat($target->name),
+                ]);
+            }
+
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getLanguageData($id)
+    {
+        $target = Target::find($id);
+
+        if ($target === null) {
+            return response()->json(['error' => 'Target not found'], 404);
+        }
+
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::TARGETS);
+        $scope = request('scope', CategoryPageScope::TOURS);
+        if (! in_array($scope, $scopes, true)) {
+            $scope = CategoryPageScope::TOURS;
+        }
+
+        $language = request('language', 'de');
+        $languageData = $this->content->findForEntity(CategoryPageEntityType::TARGET_FISH, $target->id, $scope, $language);
+        $faq = $this->content->faqsForEntity(CategoryPageEntityType::TARGET_FISH, $target->id, $scope, $language);
+
+        return response()->json([
+            'title' => $languageData->title ?? '',
+            'sub_title' => $languageData->sub_title ?? '',
+            'introduction' => $languageData->introduction ?? '',
+            'content' => $languageData->content ?? '',
+            'faq_title' => $languageData->faq_title ?? '',
+            'faq' => $faq,
+        ]);
+    }
+
+    public function autosave(Request $request, $id)
+    {
+        $target = Target::find($id);
+
+        if ($target === null) {
+            return response()->json(['error' => 'Target not found'], 404);
+        }
+
+        return $this->autosaveScopedContent(
+            $request,
+            $this->content,
+            CategoryPageEntityType::TARGET_FISH,
+            $target->id,
+            CategoryPageScope::forDimension(CategoryPageDimension::TARGETS),
+        );
+    }
+
+    private function resolveCategoryPage(int $targetId, string $name): CategoryPage
+    {
+        $categoryPage = CategoryPage::query()
+            ->where('source_id', $targetId)
+            ->where('type', 'Targets')
+            ->first();
+
+        if ($categoryPage) {
+            $categoryPage->update(['name' => $name]);
+
+            return $categoryPage;
+        }
+
+        return CategoryPage::query()->create([
+            'type' => 'Targets',
+            'source_id' => $targetId,
+            'name' => $name,
+            'slug' => $this->slugFormat($name),
+        ]);
+    }
+
+    private function uploadThumbnail($thumbnailImage): string
     {
         $thumbnail_path = $thumbnailImage->store('public');
         $imagePath = Storage::disk()->path($thumbnail_path);
 
         $image = Image::make($imagePath);
-        $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME) . '.webp';
+        $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME).'.webp';
         $webpImage = $image->encode('webp', 75);
 
         $webp_path = 'category/targets/';
 
-        if (!Storage::disk('public_path')->exists($webp_path)) {
+        if (! Storage::disk('public_path')->exists($webp_path)) {
             Storage::disk('public_path')->makeDirectory($webp_path);
         }
 
@@ -188,117 +304,8 @@ class AdminCategoryTargetFishController extends Controller
         return $webp_path;
     }
 
-    private function slug_format($value)
+    private function slugFormat(string $value): string
     {
         return str_replace(' ', '-', strtolower($value));
-    }
-
-    private function translate($data)
-    {
-        foreach ($this->language as $language) {
-            if ($language !== $data->language) {
-                $title = ($data->title && $data->title != '') ? translate($data->title, $language) : '';
-                $sub_title = ($data->sub_title && $data->sub_title != '') ? translate($data->sub_title, $language) : '';
-                $introduction = ($data->introduction && $data->introduction != '') ? translate($data->introduction, $language) : '';
-                $content = ($data->content && $data->content != '') ? translate($data->content, $language) : '';
-                $faq_title = ($data->faq_title && $data->faq_title != '') ? translate($data->faq_title, $language) : '';
-                
-                $languageData = Language::where('source_id', $data->source_id)->where('language', $language)->first();
-                if ($languageData) {
-                    $languageData->update([
-                        'title' => $title,
-                        'sub_title' => $sub_title,
-                        'introduction' => $introduction,
-                        'content' => $content,
-                        'faq_title' => $faq_title
-                    ]);
-                } else {
-                    Language::create([
-                        'source_id' => $data->source_id,
-                        'language' => $language,
-                        'title' => $title,
-                        'sub_title' => $sub_title,
-                        'introduction' => $introduction,
-                        'content' => $content,
-                        'faq_title' => $faq_title
-                    ]);
-                }
-                
-                if ($data->faq) {
-                    foreach ($data->faq as $key => $value) {
-                        $valueData['language'] = $language;
-                        $valueData['page'] = 'Targets';
-                        $valueData['source_id'] = $data->source_id;
-                        $valueData['question'] = translate($value['question'], $language);
-                        $valueData['answer'] = translate($value['answer'], $language);
-                        Faq::create($valueData);
-                    }
-                }
-            }
-        }
-    }
-
-    public function toggleFavorite(Request $request)
-    {
-        try {
-            $target = Target::findOrFail($request->id);
-            
-            if ($target->categoryPage) {
-                $categoryPage = $target->categoryPage;
-                $categoryPage->is_favorite = (int)$request->status;
-                $categoryPage->save();
-            } else {
-                $categoryPage = new CategoryPage();
-                $categoryPage->name = $target->name;
-                $categoryPage->is_favorite = (int)$request->status; 
-                $categoryPage->type = 'Targets';
-                $categoryPage->target_id = $target->id;
-                $categoryPage->save();
-            }
-            
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    public function getLanguageData($id)
-    {
-        $targets = Target::with('categoryPage', 'categoryPage.language', 'categoryPage.faq')->find($id);
-
-        if (is_null($targets)) {
-            return response()->json(['error' => 'Target not found'], 404);
-        }
-
-        $row = $targets->categoryPage;
-        $language = request('language', 'de');
-        
-        $title = '';
-        $sub_title = '';
-        $introduction = '';
-        $content = '';
-        $faq_title = '';
-        $faq = [];
-        
-        if ($row) {
-            $languageData = $row->language($language);
-            if ($languageData) {
-                $title = $languageData->title ?? '';
-                $sub_title = $languageData->sub_title ?? '';
-                $introduction = $languageData->introduction ?? '';
-                $content = $languageData->content ?? '';
-                $faq_title = $languageData->faq_title ?? '';
-                $faq = $row->faq($language) ?? [];
-            }
-        }
-        
-        return response()->json([
-            'title' => $title,
-            'sub_title' => $sub_title,
-            'introduction' => $introduction,
-            'content' => $content,
-            'faq_title' => $faq_title,
-            'faq' => $faq
-        ]);
     }
 }

@@ -1,5 +1,19 @@
 @extends('layouts.app-v2')
 
+@php
+    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods', 'guidings.targets.index');
+    $heroBreadcrumbLabel = __('category.' . $type . '.breadcrumb');
+    $heroSearchAction = listing_search_action();
+    $heroBreadcrumbItems = request()->routeIs('guidings.methods', 'guidings.targets.index')
+        ? [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
+            ['label' => $heroBreadcrumbLabel, 'url' => null],
+        ]
+        : [
+            ['label' => $heroBreadcrumbLabel, 'url' => null],
+        ];
+@endphp
+
 @section('title', $title)
 @section('header_title', __('category.' . $type . '.title'))
 @section('header_sub_title', __('category.' . $type . '.sub_title'))
@@ -287,13 +301,27 @@
 @endsection
 
 @section('content')
+    @if($useCategoryHeroHeader)
+        <div class="category-hero-page" data-category-hero-page>
+        @include('pages.category.partials.hero-header', [
+            'listingTitle' => __('category.' . $type . '.title'),
+            'listingSubtitle' => __('category.' . $type . '.sub_title'),
+            'searchAction' => $heroSearchAction,
+            'breadcrumbItems' => $heroBreadcrumbItems,
+        ])
+    @endif
     <div class="container" id="destination">
+    @unless($useCategoryHeroHeader)
     <div class="container">
         <section class="page-header">
             <div class="page-header__bottom breadcrumb-container guiding">
                 <div class="page-header__bottom-inner">
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                        @if(request()->routeIs('guidings.methods', 'guidings.targets.index'))
+                            <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                            <li><a href="{{ route('guidings.landing') }}">{{ __('homepage.filter-fishing-near-me') }}</a></li>
+                        @endif
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">{{ $title }}</li>
                     </ul>
@@ -301,8 +329,9 @@
             </div>
         </section>
     </div>
+    @endunless
 
-        <div class="container">
+        <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! $introduction !!}</div>
@@ -315,7 +344,7 @@
                         @foreach($favories as $fav)
                             <div class="item">
                                 <div class="col-sm-12">
-                                    <a href="{{ route('category.targets', ['type' => $type, 'slug' => $fav->slug]) }}">
+                                    <a href="{{ $categoryItemUrl($fav->slug) }}">
                                         <div class="card">
                                             <div class="card-img">
                                                 <img src="{{ $fav->getThumbnailPath() }}" class="dimg-fluid" alt="{{ $fav->language->title }}">
@@ -338,7 +367,7 @@
                         @foreach($allTargets as $targets)
                             <div class="col-md-4 my-1">
                                 <div class="trending-card">
-                                    <a href="{{ route('category.targets', ['type' => $type, 'slug' => $targets->slug]) }}"> 
+                                    <a href="{{ $categoryItemUrl($targets->slug) }}"> 
                                         <div class="trending-card-wrapper">
                                             <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{ media_url($targets->thumbnail_path) }}">
 
@@ -362,9 +391,15 @@
             </div>
         </div>
     </div>
+    @if($useCategoryHeroHeader)
+        </div>
+    @endif
 @endsection
 
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();

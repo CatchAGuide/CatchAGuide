@@ -119,7 +119,7 @@
             @if(!$isCheckout)
             <div class="col-12 d-md-none mt-2">
                 <div class="d-flex categories-mobile">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -168,13 +168,13 @@
 
                                     // Human‑readable labels for known filters
                                     $filterLabels = [
-                                        'radius'         => translate('Radius'),
-                                        'methods'        => translate('Methods'),
-                                        'water'          => translate('Water Types'),
-                                        'duration_types' => translate('Duration'),
-                                        'num_persons'    => translate('Number of People'),
-                                        'price_min'      => translate('Min Price'),
-                                        'price_max'      => translate('Max Price'),
+                                        'radius'         => __('guidings.Radius'),
+                                        'methods'        => __('checkout.methods'),
+                                        'water'          => __('newguidings.water_types'),
+                                        'duration_types' => __('checkout.duration'),
+                                        'num_persons'    => __('checkout.number_of_people'),
+                                        'price_min'      => __('checkout.min_price'),
+                                        'price_max'      => __('checkout.max_price'),
                                     ];
 
                                     // Determine which extra filters are active
@@ -206,7 +206,7 @@
                         <div class="vacation-mobile-select-wrap">
                             <i class="fas fa-map-marker-alt vacation-mobile-select-icon"></i>
                             <select class="vacation-mobile-select" name="country">
-                                <option value="">{{ translate('Select Country') }}</option>
+                                <option value="">{{ __('checkout.select_country') }}</option>
                                 <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                     {{ __('vacations.all_offers_nav') }}
                                 </option>
@@ -228,7 +228,7 @@
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -257,7 +257,7 @@
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -1016,11 +1016,11 @@ input[type=number] {
                 <form id="mobile-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlace')">
                     @if($isVacation)
                         <div class="mb-3">
-                            <label class="form-label">{{ translate('Country') }}</label>
+                            <label class="form-label">{{ __('global.Country') }}</label>
                             <div class="position-relative">
                                 <i class="fa fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <select class="form-select ps-5" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -1035,7 +1035,7 @@ input[type=number] {
                         </div>
                     @else
                         <div class="mb-3">
-                            <label class="form-label">{{ translate('Location') }}</label>
+                            <label class="form-label">{{ __('camps.location') }}</label>
                             <div class="position-relative">
                                 <i class="fas fa-search position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <input type="text" 
@@ -1055,7 +1055,7 @@ input[type=number] {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">{{ translate('Number of Persons') }}</label>
+                            <label class="form-label">{{ __('checkout.number_of_persons') }}</label>
                             <div class="position-relative">
                                 <i class="fas fa-user position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <input type="number" 
@@ -1111,7 +1111,7 @@ input[type=number] {
                         <i class="fas fa-map-marker-alt"></i>
                         <span>@lang('homepage.searchbar-destination')</span>
                     </a> --}}
-                    <a href="{{ route('guidings.index') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
+                    <a href="{{ route('guidings.landing') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
@@ -1305,33 +1305,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bindVacationCountrySelect(select, formId);
     }
     
-    document.querySelectorAll('.logout-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'  // This explicitly marks it as an AJAX request
-                },
-                body: JSON.stringify({
-                    _token: document.querySelector('meta[name="csrf-token"]').content
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
+    // Logout is handled in layouts.modal.loginModal (refresh + open login modal)
 
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -1382,7 +1356,7 @@ function validateSearch(event, inputId) {
     if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
-            title: "{{translate('Please select a location from the suggestions')}}",
+            title: "{{__('checkout.location_suggestion_hint')}}",
             placement: "bottom",
             trigger: "manual"
         });

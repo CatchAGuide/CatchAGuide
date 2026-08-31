@@ -67,7 +67,7 @@
                                     <a href="{{ route('welcome') }}">@lang('message.home')</a>
                                 </li>
                                 <li class="dropdown {{ request()->routeIs('guidings.*') ? 'current' : '' }}">
-                                    <a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a>
+                                    <a href="{{ route('guidings.landing') }}">@lang('message.Guiding')</a>
                                 </li>
                                 <li class="dropdown {{ request()->routeIs('blog.*') ? 'current' : '' }}">
                                     <a href="{{ route($blogPrefix.'.index') }}">@lang('message.Magazine')</a>

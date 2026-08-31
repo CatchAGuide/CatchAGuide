@@ -397,32 +397,32 @@
                            placeholder="@lang('profile.totalPrice')" name="price">
                 </div>
                 <div class="form-group col-md-4" id="two-person" {{$guiding->price_two_persons > 0 ? '' : 'hidden'}}>
-                    <label for="price_two_persons">{{ translate('Gesamtpreis für zwei Personen') }}</label>
+                    <label for="price_two_persons">{{ __('profile.2person') }}</label>
                     <input type="number" class="form-control" id="price_two_persons"
-                           placeholder="{{ translate('Gesamtpreis für zwei Personen') }}"
+                           placeholder="{{ __('profile.2person') }}"
                            value="{{$guiding->price_two_persons > 0 ? $guiding->price_two_persons : ''}}"
                            name="price_two_persons">
                 </div>
 
                 <div class="form-group col-md-4"
                      id="three-person" {{$guiding->price_three_persons > 0 ? '' : 'hidden'}}>
-                    <label for="price_three_persons">{{ translate('Gesamtpreis für drei Personen') }}</label>
+                    <label for="price_three_persons">{{ __('profile.3person') }}</label>
                     <input type="number" class="form-control" id="price_three_persons"
-                           placeholder="{{ translate('Gesamtpreis für drei Personen') }}"
+                           placeholder="{{ __('profile.3person') }}"
                            value="{{$guiding->price_three_persons > 0 ? $guiding->price_three_persons : ''}}"
                            name="price_three_persons">
                 </div>
                 <div class="form-group col-md-4" id="four-person" {{$guiding->price_four_persons > 0 ? '' : 'hidden'}}>
-                    <label for="price_four_persons">{{ translate('Gesamtpreis für vier Personen') }}</label>
+                    <label for="price_four_persons">{{ __('profile.4person') }}</label>
                     <input type="number" class="form-control" id="price_four_persons"
-                           placeholder="{{ translate('Gesamtpreis für vier Personen') }}"
+                           placeholder="{{ __('profile.4person') }}"
                            value="{{$guiding->price_four_persons > 0 ? $guiding->price_four_persons : ''}}"
                            name="price_four_persons">
                 </div>
                 <div class="form-group col-md-4" id="five-person" {{$guiding->price_five_persons > 0 ? '' : 'hidden'}}>
-                    <label for="price_five_persons">{{ translate('Gesamtpreis für fünf Personen') }}</label>
+                    <label for="price_five_persons">{{ __('profile.5person') }}</label>
                     <input type="number" class="form-control" id="price_five_persons"
-                           placeholder="{{ translate('Gesamtpreis für fünf Personen') }}"
+                           placeholder="{{ __('profile.5person') }}"
                            value="{{$guiding->price_five_persons > 0 ? $guiding->price_five_persons : ''}}"
                            name="price_five_persons">
                 </div>
@@ -463,13 +463,13 @@
                 </div>
                 <div class="modal-body">
                     @if($guiding->status == 1)
-                        {{ translate('Willst Du das Guiding wirklich deaktivieren? Es erscheint dann nicht mehr im Suchverlauf...') }}
+                        {{ __('guidings.confirm_deactivate_guiding') }}
                     @else
-                        {{ translate('Willst Du das Guiding wirklich aktivieren? Es steht dann für Buchungen zur Verfügung.') }}
+                        {{ __('guidings.confirm_activate_guiding') }}
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ translate('Zurück') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('accommodations.previous') }}</button>
                     <a href="{{route('deleteguiding', $guiding->id)}}">
                         @if($guiding->status == 1)
                             <button type="button" class="btn btn-danger">@lang('profile.deactivateGuide')</button>

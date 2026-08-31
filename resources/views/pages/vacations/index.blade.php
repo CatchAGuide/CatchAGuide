@@ -189,7 +189,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                        <li><a href="{{ route('vacations.index') }}">{{ __('vacations.fishing_vacations_label')}}</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                         <li class="active">{{ translate('Vacations in ' . $row_data->name) }}</li>
                     </ul>
@@ -205,7 +205,7 @@
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                             <li><span>&#183;</span></li>
-                            <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                            <li><a href="{{ route('vacations.index') }}">{{ __('vacations.fishing_vacations_label')}}</a></li>
                             <li><span>&#183;</span></li>
                             <li class="active">
                                 {{ translate('Vacations in ' . $row_data->name) }}
@@ -392,18 +392,6 @@
                                 {{-- Image on top (mobile) / left (desktop) --}}
                                 <div class="vacation-list-card__media">
                                     <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
-                                        {{-- Image badge - desktop only --}}
-                                        @if($has_guide)
-                                            <span class="vacation-list-card__badge vacation-list-card__badge--top">
-                                                <i class="fas fa-star" aria-hidden="true"></i>
-                                                @lang('vacations.top_rated_badge')
-                                            </span>
-                                        @elseif($has_boat)
-                                            <span class="vacation-list-card__badge vacation-list-card__badge--limited">
-                                                <i class="fas fa-bolt" aria-hidden="true"></i>
-                                                @lang('vacations.limited_avail_badge')
-                                            </span>
-                                        @endif
                                         @if($gallery_count > 0)
                                             <img
                                                 src="{{ $gallery_images[0] }}"
@@ -638,7 +626,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('vacations.fish')</th>
-                                    <th width="80%">{{ translate('Size Limit') }}</th>
+                                    <th width="80%">{{ __('category.size_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -664,7 +652,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('vacations.fish')</th>
-                                    <th width="80%">{{ translate('Time Limit') }}</th>
+                                    <th width="80%">{{ __('category.time_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -725,6 +713,10 @@
         :lazy-modal="true"
         :updatable="true"
         :interactive-preview="true"
+        :show-rail="true"
+        :show-filter-chips="false"
+        :price-chips="true"
+        :landmarks="false"
     />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">

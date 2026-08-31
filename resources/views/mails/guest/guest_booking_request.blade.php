@@ -27,7 +27,7 @@
         </div>
         <div>
             <p style="font-size:14px;"><strong>{{__('emails.guide_name')}}:</strong> {{$guide->firstname}}</p>
-            <p style="font-size:14px;"><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="__blank">{{$guiding->title}}</a></p>
+            <p style="font-size:14px;"><strong>{{__('emails.tour')}}:</strong> <a href="{{$guiding->publicShowUrl()}}" target="__blank">{{$guiding->title}}</a></p>
             <p style="font-size:14px;"><strong>{{__('emails.location')}}:</strong> {{$guiding->location}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}} </p>
             <p style="font-size:14px;"><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>

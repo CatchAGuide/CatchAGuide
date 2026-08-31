@@ -711,11 +711,71 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	line-height: 30px;
 	}
 @charset "UTF-8";
+@keyframes cag-badge-glare {
+  0% {
+    transform: translateX(-70%) skewX(-16deg);
+  }
+  42% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+.cag-badge-glare {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+}
+.cag-badge-glare::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: 0;
+  width: 48%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 32%, rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.18) 58%, transparent 78%);
+  transform: translateX(-70%) skewX(-16deg);
+  animation: cag-badge-glare 3.8s ease-in-out infinite;
+  animation-delay: 0s;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-badge-glare::after {
+    animation: none;
+    display: none;
+  }
+}
+
 /* Leaflet map components — teaser, pins, popups, clusters, frames, modal heights */
+.leaflet-container .leaflet-attribution-flag {
+  display: none;
+}
+
 .cag-map {
   width: 100%;
   position: relative;
   z-index: 1;
+  /* Map-only marker palette (spec: "Marker colour scheme & cluster logic").
+     Kept separate from $category-tour/camp/trip (used sitewide for badges/
+     gradients) even though the tours/camps steps happen to match — holidays
+     and "other" use their own AA-compliant shades tuned for the basemap. */
+  --map-tours: #313041;
+  --map-tours-hover: #3e3d50;
+  --map-tours-press: #262533;
+  --map-camps: #0f6f63;
+  --map-camps-hover: #0c5f55;
+  --map-camps-press: #0b4c44;
+  --map-holidays: #2f72b8;
+  --map-holidays-hover: #3780cc;
+  --map-holidays-press: #2a66a4;
+  --map-other: #aeb8c4;
+  --map-other-hover: #bec6d0;
+  --map-other-press: #a0abb9;
 }
 .cag-map--product {
   min-height: 200px;
@@ -730,6 +790,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
   z-index: 1;
   font-family: inherit;
   background: #e8ecef;
+}
+.cag-map {
+  /* Fully gray, low-contrast basemap: fades thin OSM detail baked into the tile
+     images (one-way arrows, admin-border dashes) toward the background instead of
+     removing it outright — these come from the raster tiles themselves, not a layer
+     we control, and this project intentionally stays on unauthenticated OSM tiles
+     (see tests/Feature/Maps/MapBasemapConfigTest.php) rather than a styled provider.
+     Scoped to the tile pane only so pins/clusters/popups keep full color. */
+}
+.cag-map .leaflet-tile-pane {
+  filter: saturate(0.62) brightness(1.09) contrast(0.92);
 }
 
 /* Product / detail map chrome */
@@ -772,6 +843,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-radius: 8px 0 0 0;
   padding: 3px 8px;
   box-shadow: none;
+}
+.cag-map-frame .leaflet-control-attribution .leaflet-attribution-flag {
+  display: none;
 }
 
 /* Listing sidebar map teaser */
@@ -1029,8 +1103,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   height: 22px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  border: 2px solid #b91c1c;
-  background: #ea4335;
+  border: 2px solid #c94a32;
+  background: #e85d3b;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.35);
   position: relative;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
@@ -1062,26 +1136,319 @@ svg.leaflet-image-layer.leaflet-interactive path {
   margin: -3px 0 0 -3px;
   background: #fff;
 }
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Tours / guidings — ink slate */
+}
+.leaflet-div-icon.cag-map-pin--tour .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary .cag-map-pin__glyph,
+.cag-map-pin--tour .cag-map-pin__glyph,
+.cag-map-pin--primary .cag-map-pin__glyph {
+  border-color: #1f1e2a;
+  background: #313041;
+  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Trips — fjord blue */
+}
 .leaflet-div-icon.cag-map-pin--trip .cag-map-pin__glyph,
 .cag-map-pin--trip .cag-map-pin__glyph {
-  border-color: #c94a32;
-  background: #e85d3b;
-  box-shadow: 0 2px 8px rgba(232, 93, 59, 0.45), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #165887;
+  background: #1f6fa8;
+  box-shadow: 0 2px 8px rgba(31, 111, 168, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.leaflet-div-icon.cag-map-pin,
+.cag-map-pin {
+  /* Camps — lagoon teal */
 }
 .leaflet-div-icon.cag-map-pin--camp .cag-map-pin__glyph,
 .cag-map-pin--camp .cag-map-pin__glyph {
-  border-color: #1f1e2c;
-  background: #313041;
-  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.4), 0 0 0 2px rgba(255, 255, 255, 0.35);
+  border-color: #086b63;
+  background: #0c8a7f;
+  box-shadow: 0 2px 8px rgba(12, 138, 127, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
-.leaflet-div-icon.cag-map-pin--active,
-.cag-map-pin--active {
+.leaflet-div-icon.cag-map-pin--active, .leaflet-div-icon.cag-map-pin--selected,
+.cag-map-pin--active,
+.cag-map-pin--selected {
   transform: scale(1.18) translateY(-2px);
   z-index: 600 !important;
 }
-.leaflet-div-icon.cag-map-pin--active .cag-map-pin__glyph,
-.cag-map-pin--active .cag-map-pin__glyph {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(255, 255, 255, 0.55);
+.leaflet-div-icon.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--tour.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--tour.cag-map-pin--selected .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--primary.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--tour.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--tour.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--primary.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--primary.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(49, 48, 65, 0.28), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--trip.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--trip.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(31, 111, 168, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+.leaflet-div-icon.cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph, .leaflet-div-icon.cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph,
+.cag-map-pin--camp.cag-map-pin--active .cag-map-pin__glyph,
+.cag-map-pin--camp.cag-map-pin--selected .cag-map-pin__glyph {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(12, 138, 127, 0.32), 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+/* Price pills — one offer = one pill (spec: "Marker colour scheme & cluster logic").
+   Solid fill in the offer-type colour, white text; the outer element only carries
+   Leaflet's own position transform, all visual styling lives on __inner so our own
+   hover/selected transform never fights Leaflet's translate3d placement. */
+.leaflet-div-icon.cag-map-chip,
+.cag-map-chip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.leaflet-div-icon.cag-map-chip__inner,
+.cag-map-chip__inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Price is the only content in a pill — sized up from the spec's 12px so it
+     stays legible over the basemap instead of reading as a tiny colour blob. */
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  white-space: nowrap;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease, opacity 0.14s ease;
+}
+.leaflet-div-icon.cag-map-chip__price,
+.cag-map-chip__price {
+  font: inherit;
+  color: inherit;
+  letter-spacing: 0.01em;
+}
+.leaflet-div-icon.cag-map-chip--tour .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary .cag-map-chip__inner,
+.cag-map-chip--tour .cag-map-chip__inner,
+.cag-map-chip--primary .cag-map-chip__inner {
+  background: var(--map-tours);
+}
+.leaflet-div-icon.cag-map-chip--trip .cag-map-chip__inner,
+.cag-map-chip--trip .cag-map-chip__inner {
+  background: var(--map-holidays);
+}
+.leaflet-div-icon.cag-map-chip--camp .cag-map-chip__inner,
+.cag-map-chip--camp .cag-map-chip__inner {
+  background: var(--map-camps);
+}
+.leaflet-div-icon.cag-map-chip--gray .cag-map-chip__inner,
+.cag-map-chip--gray .cag-map-chip__inner {
+  background: var(--map-other);
+}
+.leaflet-div-icon.cag-map-chip,
+.cag-map-chip {
+  /* "Other offers" pill — smaller geometry, thinner border, no glow (geometry table) */
+}
+.leaflet-div-icon.cag-map-chip--other .cag-map-chip__inner,
+.cag-map-chip--other .cag-map-chip__inner {
+  padding: 3px 8px;
+  font-size: 12px;
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+}
+.leaflet-div-icon.cag-map-chip:hover .cag-map-chip__inner,
+.cag-map-chip:hover .cag-map-chip__inner {
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(20, 25, 30, 0.45);
+}
+.leaflet-div-icon.cag-map-chip--tour:hover .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary:hover .cag-map-chip__inner,
+.cag-map-chip--tour:hover .cag-map-chip__inner,
+.cag-map-chip--primary:hover .cag-map-chip__inner {
+  background: var(--map-tours-hover);
+}
+.leaflet-div-icon.cag-map-chip--trip:hover .cag-map-chip__inner,
+.cag-map-chip--trip:hover .cag-map-chip__inner {
+  background: var(--map-holidays-hover);
+}
+.leaflet-div-icon.cag-map-chip--camp:hover .cag-map-chip__inner,
+.cag-map-chip--camp:hover .cag-map-chip__inner {
+  background: var(--map-camps-hover);
+}
+.leaflet-div-icon.cag-map-chip--gray:hover .cag-map-chip__inner,
+.cag-map-chip--gray:hover .cag-map-chip__inner {
+  background: var(--map-other-hover);
+}
+.leaflet-div-icon.cag-map-chip,
+.cag-map-chip {
+  /* Selected / synced from the results list — outer ring, always drawn on top */
+}
+.leaflet-div-icon.cag-map-chip--selected, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected,
+.cag-map-chip--selected,
+.cag-map-chip.cag-map-chip--selected {
+  z-index: 1000 !important;
+}
+.leaflet-div-icon.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip.cag-map-chip--selected .cag-map-chip__inner {
+  box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
+}
+.leaflet-div-icon.cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner, .leaflet-div-icon.cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--tour.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--primary.cag-map-chip--selected .cag-map-chip__inner {
+  background: var(--map-tours-press);
+}
+.leaflet-div-icon.cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--trip.cag-map-chip--selected .cag-map-chip__inner {
+  background: var(--map-holidays-press);
+}
+.leaflet-div-icon.cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--camp.cag-map-chip--selected .cag-map-chip__inner {
+  background: var(--map-camps-press);
+}
+.leaflet-div-icon.cag-map-chip--gray.cag-map-chip--selected .cag-map-chip__inner,
+.cag-map-chip--gray.cag-map-chip--selected .cag-map-chip__inner {
+  background: var(--map-other-press);
+}
+.leaflet-div-icon.cag-map-chip,
+.cag-map-chip {
+  /* Already viewed — fill unchanged, just fades slightly */
+}
+.leaflet-div-icon.cag-map-chip--viewed .cag-map-chip__inner,
+.cag-map-chip--viewed .cag-map-chip__inner {
+  opacity: 0.75;
+}
+.leaflet-div-icon.cag-map-chip:focus-visible,
+.cag-map-chip:focus-visible {
+  outline: 2px solid #1d1f20;
+  outline-offset: 2px;
+}
+
+/* No-price fallback — a plain colour dot instead of an empty-looking pill.
+   Shape still carries meaning: pill = priced offer, circle = cluster, dot = unpriced. */
+.leaflet-div-icon.cag-map-dot,
+.cag-map-dot {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.leaflet-div-icon.cag-map-dot__inner,
+.cag-map-dot__inner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
+}
+.leaflet-div-icon.cag-map-dot--tour .cag-map-dot__inner, .leaflet-div-icon.cag-map-dot--primary .cag-map-dot__inner,
+.cag-map-dot--tour .cag-map-dot__inner,
+.cag-map-dot--primary .cag-map-dot__inner {
+  background: var(--map-tours);
+}
+.leaflet-div-icon.cag-map-dot--trip .cag-map-dot__inner,
+.cag-map-dot--trip .cag-map-dot__inner {
+  background: var(--map-holidays);
+}
+.leaflet-div-icon.cag-map-dot--camp .cag-map-dot__inner,
+.cag-map-dot--camp .cag-map-dot__inner {
+  background: var(--map-camps);
+}
+.leaflet-div-icon.cag-map-dot--gray .cag-map-dot__inner,
+.cag-map-dot--gray .cag-map-dot__inner {
+  background: var(--map-other);
+}
+.leaflet-div-icon.cag-map-dot--other .cag-map-dot__inner,
+.cag-map-dot--other .cag-map-dot__inner {
+  width: 11px;
+  height: 11px;
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+}
+.leaflet-div-icon.cag-map-dot:hover .cag-map-dot__inner,
+.cag-map-dot:hover .cag-map-dot__inner {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(20, 25, 30, 0.45);
+}
+.leaflet-div-icon.cag-map-dot--selected,
+.cag-map-dot--selected {
+  z-index: 1000 !important;
+}
+.leaflet-div-icon.cag-map-dot--selected .cag-map-dot__inner,
+.cag-map-dot--selected .cag-map-dot__inner {
+  box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
+}
+.leaflet-div-icon.cag-map-dot:focus-visible,
+.cag-map-dot:focus-visible {
+  outline: 2px solid #1d1f20;
+  outline-offset: 2px;
+}
+
+/* Sparse OSM landmarks — low contrast vs charter chips */
+.leaflet-div-icon.cag-map-landmark,
+.cag-map-landmark {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+.leaflet-div-icon.cag-map-landmark__dot,
+.cag-map-landmark__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: #94a3b8;
+  box-shadow: 0 1px 4px rgba(49, 48, 65, 0.25);
+  flex: 0 0 auto;
+}
+.leaflet-div-icon.cag-map-landmark__label,
+.cag-map-landmark__label {
+  max-width: 110px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 1px 3px rgba(49, 48, 65, 0.12);
+}
+.leaflet-div-icon.cag-map-landmark--airport .cag-map-landmark__dot,
+.cag-map-landmark--airport .cag-map-landmark__dot {
+  background: #64748b;
+}
+.leaflet-div-icon.cag-map-landmark--harbour .cag-map-landmark__dot,
+.cag-map-landmark--harbour .cag-map-landmark__dot {
+  background: #0ea5e9;
+}
+.leaflet-div-icon.cag-map-landmark--park .cag-map-landmark__dot,
+.cag-map-landmark--park .cag-map-landmark__dot {
+  background: #22c55e;
+}
+.leaflet-div-icon.cag-map-landmark--attraction .cag-map-landmark__dot,
+.cag-map-landmark--attraction .cag-map-landmark__dot {
+  background: #a855f7;
+}
+.leaflet-div-icon.cag-map-landmark--town .cag-map-landmark__dot,
+.cag-map-landmark--town .cag-map-landmark__dot {
+  background: #475569;
 }
 
 .cag-map-popup .leaflet-popup-content-wrapper {
@@ -1144,6 +1511,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-popup--interactive .leaflet-popup-tip, .cag-map-popup--vacation .leaflet-popup-tip {
   box-shadow: none;
 }
+.cag-map-popup {
+  /* Popup opens under the pin when there isn't enough room above */
+}
+.cag-map-popup--below .leaflet-popup-content-wrapper {
+  /* tip sits above the card */
+}
+.cag-map-popup--below .leaflet-popup-tip-container {
+  top: 0;
+  bottom: auto;
+  margin-top: -20px;
+  margin-bottom: 0;
+  order: -1;
+}
+.cag-map-popup--below .leaflet-popup-tip {
+  margin: 0 auto;
+  transform: translateY(11px) rotate(225deg);
+  box-shadow: none;
+}
 
 .cag-map-preview {
   position: relative;
@@ -1167,14 +1552,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-preview__link:hover .cag-map-preview__cta, .cag-map-preview__link:focus-visible .cag-map-preview__cta {
   transform: translateX(2px);
 }
-.cag-map-preview__link:hover .cag-map-preview__image.is-loaded, .cag-map-preview__link:focus-visible .cag-map-preview__image.is-loaded {
-  transform: scale(1.04);
-}
 .cag-map-preview__dismiss {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 3;
+  z-index: 5;
   width: 28px;
   height: 28px;
   border: 0;
@@ -1211,6 +1593,105 @@ svg.leaflet-image-layer.leaflet-interactive path {
   height: 42%;
   background: linear-gradient(to top, rgba(20, 18, 28, 0.45), transparent);
   pointer-events: none;
+  z-index: 1;
+}
+.cag-map-preview__carousel {
+  position: absolute;
+  inset: 0;
+}
+.cag-map-preview__media-link {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.cag-map-preview__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.cag-map-preview__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+.cag-map-preview__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #313041;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.cag-map-preview__nav:hover, .cag-map-preview__nav:focus-visible {
+  background: #fff;
+  outline: none;
+  opacity: 1;
+}
+.cag-map-preview__nav--prev {
+  left: 8px;
+}
+.cag-map-preview__nav--next {
+  right: 8px;
+}
+.cag-map-preview__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+.cag-map-preview__dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.cag-map-preview__dot.is-active {
+  background: #fff;
+  transform: scale(1.2);
+}
+.cag-map-preview__counter {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  z-index: 4;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: rgba(20, 18, 28, 0.45);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.cag-map-preview:hover .cag-map-preview__nav, .cag-map-preview:focus-within .cag-map-preview__nav {
+  opacity: 1;
 }
 .cag-map-preview__image {
   width: 100%;
@@ -1242,14 +1723,41 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #fff;
   border-radius: 6px;
   line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+}
+.cag-map-preview__badge::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: 0;
+  width: 48%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 32%, rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.18) 58%, transparent 78%);
+  transform: translateX(-70%) skewX(-16deg);
+  animation: cag-badge-glare 3.8s ease-in-out infinite;
+  animation-delay: 0.2s;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-map-preview__badge::after {
+    animation: none;
+    display: none;
+  }
+}
+.cag-map-preview__badge--tour {
+  background: linear-gradient(145deg, #313041 0%, #1f1e2a 100%);
 }
 .cag-map-preview__badge--trip {
-  background: #e85d3b;
+  background: linear-gradient(145deg, #1f6fa8 0%, #165887 100%);
 }
 .cag-map-preview__badge--camp {
-  background: #313041;
+  background: linear-gradient(145deg, #0c8a7f 0%, #086b63 100%);
 }
 .cag-map-preview__badge--primary {
   background: #ea4335;
@@ -1389,24 +1897,37 @@ svg.leaflet-image-layer.leaflet-interactive path {
   width: 100%;
 }
 
-/* Modal map controls */
+/* Modal map controls — override Leaflet/Bootstrap link blue */
+.map-modal .leaflet-bar,
 .map-modal .leaflet-control-zoom {
   border: 0 !important;
   border-radius: 12px !important;
   overflow: hidden;
   box-shadow: 0 6px 18px rgba(49, 48, 65, 0.16) !important;
 }
-.map-modal .leaflet-control-zoom a {
+.map-modal .leaflet-bar a,
+.map-modal .leaflet-control-zoom a,
+.map-modal .leaflet-control-zoom-in,
+.map-modal .leaflet-control-zoom-out {
   width: 38px !important;
   height: 38px !important;
   line-height: 38px !important;
   color: #313041 !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  border-bottom-color: rgba(49, 48, 65, 0.08) !important;
+  background: #fff !important;
+  background-color: #fff !important;
+  border-bottom: 1px solid rgba(49, 48, 65, 0.08) !important;
+  text-decoration: none !important;
 }
-.map-modal .leaflet-control-zoom a:hover, .map-modal .leaflet-control-zoom a:focus {
+.map-modal .leaflet-bar a:hover, .map-modal .leaflet-bar a:focus,
+.map-modal .leaflet-control-zoom a:hover,
+.map-modal .leaflet-control-zoom a:focus,
+.map-modal .leaflet-control-zoom-in:hover,
+.map-modal .leaflet-control-zoom-in:focus,
+.map-modal .leaflet-control-zoom-out:hover,
+.map-modal .leaflet-control-zoom-out:focus {
   color: #e85d3b !important;
   background: #fff !important;
+  background-color: #fff !important;
 }
 .map-modal .leaflet-control-attribution {
   background: rgba(255, 255, 255, 0.9) !important;
@@ -1414,18 +1935,123 @@ svg.leaflet-image-layer.leaflet-interactive path {
   color: #64748b;
   font-size: 10px;
 }
+.map-modal .leaflet-control-attribution .leaflet-attribution-flag {
+  display: none;
+}
 
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
-  background-color: rgba(232, 93, 59, 0.28) !important;
+  background-color: transparent !important;
 }
 
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
-  background-color: #e85d3b !important;
+  background-color: transparent !important;
   color: #fff !important;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(232, 93, 59, 0.35);
+  box-shadow: none;
+}
+
+/* Clusters — fixed-size circle (n offers). When several offer types are stacked at
+   one location, up to 2 further types render as equally-sized plain circles behind
+   the front (dominant-type) circle — offsets/z-order per the cluster spec. */
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  background: transparent !important;
+  border: none !important;
+  position: relative;
+}
+.leaflet-div-icon.cag-map-cluster__core, .leaflet-div-icon.cag-map-cluster__edge,
+.cag-map-cluster__core,
+.cag-map-cluster__edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster__core {
+  z-index: 3;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  transition: transform 0.14s ease;
+}
+.leaflet-div-icon.cag-map-cluster__count,
+.cag-map-cluster__count {
+  font: inherit;
+  color: inherit;
+}
+.leaflet-div-icon.cag-map-cluster__edge,
+.cag-map-cluster__edge {
+  z-index: 2;
+  pointer-events: none;
+}
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  /* 1st contained type behind the front circle */
+}
+.leaflet-div-icon.cag-map-cluster__edge--1,
+.cag-map-cluster__edge--1 {
+  transform: translate(9px, -4px);
+}
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  /* 2nd contained type, further back */
+}
+.leaflet-div-icon.cag-map-cluster__edge--2,
+.cag-map-cluster__edge--2 {
+  z-index: 1;
+  transform: translate(18px, -9px);
+}
+.leaflet-div-icon.cag-map-cluster:hover .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster:hover .cag-map-cluster__core,
+.cag-map-cluster:hover .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster:hover .cag-map-cluster__core {
+  transform: scale(1.06);
+}
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  /* Recommended / nearby-but-unmatched cluster layer — always the "other" colour,
+     never stacks edges (it is always its own single-type layer). */
+}
+.leaflet-div-icon.cag-map-cluster--muted .leaflet-div-icon.cag-map-cluster__core,
+.leaflet-div-icon.cag-map-cluster--muted .cag-map-cluster__core,
+.cag-map-cluster--muted .leaflet-div-icon.cag-map-cluster__core,
+.cag-map-cluster--muted .cag-map-cluster__core {
+  width: 26px;
+  height: 26px;
+  font-size: 11px;
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow: none;
+  background: var(--map-other);
+}
+.leaflet-div-icon.cag-map-cluster,
+.cag-map-cluster {
+  /* Rail hover/selection sync — outer ring, drawn topmost */
+}
+.leaflet-div-icon.cag-map-cluster--preview,
+.cag-map-cluster--preview {
+  z-index: 1000 !important;
+}
+.leaflet-div-icon.cag-map-cluster--preview .cag-map-cluster__core,
+.cag-map-cluster--preview .cag-map-cluster__core {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
+}
+.leaflet-div-icon.cag-map-cluster:focus-visible,
+.cag-map-cluster:focus-visible {
+  outline: 2px solid #1d1f20;
+  outline-offset: 2px;
 }

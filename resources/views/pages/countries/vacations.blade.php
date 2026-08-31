@@ -74,7 +74,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">{{ translate('Fishing Vacations')}}</li>
+                        <li class="active">{{ __('vacations.fishing_vacations_label')}}</li>
                     </ul>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
-                        <li class="active">{{ translate('Fishing Vacations')}}
+                        <li class="active">{{ __('vacations.fishing_vacations_label')}}
                         </li>
                         
                     </ul>

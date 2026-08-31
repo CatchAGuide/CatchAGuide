@@ -6,6 +6,11 @@ class MediaEnvironmentResolver
 {
     public function bucketPrefix(): string
     {
+        $override = strtolower(trim((string) config('media_storage.bucket_prefix', '')));
+        if (in_array($override, ['production', 'staging'], true)) {
+            return $override;
+        }
+
         return match (app()->environment()) {
             'production' => 'production',
             'staging' => 'staging',

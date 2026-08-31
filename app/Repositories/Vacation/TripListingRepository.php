@@ -43,14 +43,20 @@ class TripListingRepository implements ListingRepositoryInterface
 
     public function paginateForCountry(VacationListingFilter $filter, int $perPage): LengthAwarePaginator
     {
-        $query = $this->filterApplicator->applyToTripQuery($this->baseQuery($filter->country), $filter);
+        $query = $this->filterApplicator->applyToTripQuery(
+            $this->baseQuery($filter->country, $filter->countryShort),
+            $filter
+        );
 
         return $this->filterApplicator->applyTripSort($query, $filter)->paginate($perPage)->appends(request()->except('page'));
     }
 
     public function queryForCountry(VacationListingFilter $filter): Builder
     {
-        return $this->filterApplicator->applyToTripQuery($this->baseQuery($filter->country), $filter);
+        return $this->filterApplicator->applyToTripQuery(
+            $this->baseQuery($filter->country, $filter->countryShort),
+            $filter
+        );
     }
 
     public function listNewest(int $limit, ?string $country = null): Collection
@@ -69,12 +75,12 @@ class TripListingRepository implements ListingRepositoryInterface
             ->get();
     }
 
-    private function baseQuery(?string $country): Builder
+    private function baseQuery(?string $country, ?string $countryShort = null): Builder
     {
         $query = Trip::query()->where('status', $this->policy->activeStatus());
 
         if ($country !== null && $country !== '') {
-            $variants = CountrySlug::storageVariants($country);
+            $variants = CountrySlug::storageVariants($country, $countryShort);
             $query->where(function (Builder $q) use ($variants) {
                 foreach ($variants as $variant) {
                     $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);

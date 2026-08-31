@@ -5,7 +5,7 @@
                 <button type="button" class="btn-close" style="padding-right: 40px; padding-bottom: 20px"
                         data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <a href="{{ route('guidings.show', [$guiding->id,$guiding->slug]) }}" >
+            <a href="{{ $guiding->publicShowUrl() }}" >
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12 text-center">

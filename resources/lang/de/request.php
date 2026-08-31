@@ -1,7 +1,7 @@
 <?php
 return [
     // button
-    'title' => 'Angelurlaub und Angelreisen in Europa',
+    'title' => 'Angelurlaub und Angelreisen',
     'btnsearch' => 'Mehr finden! Angelurlaub & Touren',
     'country' => 'Land',
     'city' => 'Stadt/ Region',

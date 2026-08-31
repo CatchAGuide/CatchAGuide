@@ -252,24 +252,19 @@
 
 </head>
 
-<body>
+<body @class(['has-cag-bottom-nav' => \App\Support\SitePrimaryNav::usesLayoutBottomNav()])>
 
   
 <!-- /.preloader -->
 <div class="page-wrapper">
 
-    @include('layouts.partials.newheader', [
-        'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($row_data)
-            ? ($row_data->slug ?? $row_data->name ?? null)
-            : (request()->routeIs('vacations.all-offers')
-                ? 'all-offers'
-                : (isset($vm) ? ($vm->destination->slug ?? null) : null)),
-    ])
+    {{-- Overlay catalog pages include site-nav in content; everything else gets the solid layout header. --}}
+    @include('layouts.partials.site-chrome')
 
     @yield('content')
 
     @include('layouts.partials.footer')
+    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 

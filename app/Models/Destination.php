@@ -64,15 +64,9 @@ class Destination extends Model
         $this->attributes['slug'] = str_replace(' ', '-', strtolower($value));
     }*/
 
-    public function getThumbnailPath()
+    public function getThumbnailPath(): string
     {
-        if (empty($this->thumbnail_path)) {
-            return asset('assets/images/300x300.png');
-        }
-
-        $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
-
-        return '/' . $thumbnail_path;
+        return media_url($this->thumbnail_path, 'assets/images/300x300.png');
     }
 
     public function getCountryNameAttribute()

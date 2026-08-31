@@ -2,7 +2,10 @@
 @include('layouts.modal.registerModal')
 @include('layouts.modal.guideApplicationModal')
 @php
-    $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*');
+    $isHomepage = request()->is('/');
+    $isGuidingsLanding = request()->routeIs('guidings.landing');
+    $isOffers = request()->is('offers*') || request()->routeIs('offers.*');
+    $isDestinationOrCategoryPage = request()->is('destination*') || request()->is('category-page*') || request()->is('guidings/methods*') || request()->is('targets*');
     $vacationPillarCountrySlug = request()->route('slug');
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $showVacationHeaderSubtitle = request()->routeIs('vacations.index')
@@ -19,8 +22,14 @@
     $vacationCountryOptions = ($isVacation ?? false)
         ? $vacationDestinations->countriesForSearch()
         : collect();
+    $globalSearchAction = ($isVacation ?? false)
+        ? route('vacations.index')
+        : ($isOffers ? route('offers.index') : route('guidings.index'));
+    // Guidings listing hides search; the former homepage (now guidings.landing) keeps it.
+    $showFloatingSearch = $isGuidingsLanding
+        || (! $isHomepage && request()->segment(1) !== 'guidings');
 @endphp
-<nav class="navbar-custom short-header long-header {{ request()->is('/') ? 'with-bg' : '' }} {{ request()->is('guidings*') ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }}">
+<nav class="navbar-custom short-header long-header {{ $isHomepage ? 'no-searchbar home-compact' : '' }} {{ request()->is('guidings*') && ! $isGuidingsLanding ? 'no-search' : '' }} {{ $isVacation ? 'is-vacation' : '' }} {{ $isOffers ? 'is-offers' : '' }}">
     <div class="container">
         <!-- Top Row -->
         <div class="row align-items-center">
@@ -118,15 +127,17 @@
                 </div>
             </div>
             
+            @unless($isHomepage)
             <div class="header-contents container">
                 <h1 class="h2 mt-5">@yield('header_title')</h1>
                 <p class="{{ $hideHeaderSubtitle ? 'visually-hidden' : '' }}">@yield('header_sub_title')</p>
             </div>
+            @endunless
             
             <!-- Categories Row - Mobile -->
             <div class="col-12 d-md-none mt-1">
                 <div class="d-flex categories-mobile">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') || $isDestinationOrCategoryPage ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -134,14 +145,11 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" 
-                       class="text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
-                    </a>
                 </div>
             </div>
 
             <!-- Mobile Search Summary (search-summary for destinations/category-page) -->
+            @unless($isHomepage)
             @if($isDestinationOrCategoryPage)
                 <div class="col-12 d-md-none mt-2">
                     <div class="search-summary" role="button" id="headerSearchTrigger">
@@ -157,7 +165,7 @@
                     <div class="vacation-mobile-select-wrap">
                         <i class="fa fa-map-marker-alt vacation-mobile-select-icon"></i>
                         <select class="vacation-mobile-select" name="country">
-                            <option value="">{{ translate('Select Country') }}</option>
+                            <option value="">{{ __('checkout.select_country') }}</option>
                             <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                 {{ __('vacations.all_offers_nav') }}
                             </option>
@@ -173,10 +181,10 @@
             </div>
             @else
             <div id="filterContainer" class="col-12 d-md-none mt-3">
-            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
+            <form class="search-form row gx-2 pe-0" id="global-search1" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceMobile')">                
                 <div id="mobileherofilter" class="shadow-lg bg-white p-2 rounded">
                     <div class="row">
-                            <div class="col-md-4 column-input my-2">
+                            <div class="{{ $isOffers ? 'col-md-8' : 'col-md-4' }} column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
                                         <i class="fa fa-search fa-fw text-muted position-absolute ps-2"></i>
@@ -190,6 +198,20 @@
                                     </div>
                                 </div>
                             </div>
+                            @if($isOffers)
+                            @php $offersGuestsMobile = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                            <div class="col-md-2 column-input my-2">
+                                <div class="offers-persons-stepper offers-persons-stepper--mobile" data-offers-persons-stepper>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                    <div class="offers-persons-stepper__value">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsMobile, ['count' => $offersGuestsMobile]) }}</span>
+                                    </div>
+                                    <input type="hidden" name="num_guests" value="{{ $offersGuestsMobile }}" data-offers-persons-input>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                                </div>
+                            </div>
+                            @else
                             <div class="col-md-2 column-input my-2">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center small">
@@ -206,6 +228,7 @@
                                            placeholder="@lang('homepage.searchbar-targetfish')...">
                                 </div>
                             </div>
+                            @endif
                             <div class="col-md-2 col-12 column-button my-2">
                                         <button type="submit" class="form-control new-filter-btn">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -215,13 +238,14 @@
             </div>
             @endif
             @endif
+            @endunless
         </div>
 
         <!-- Categories Row - Desktop -->
         <div class="row categories-row d-none d-md-block">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="{{ route('guidings.index') }}" 
+                    <a href="{{ route('guidings.landing') }}" 
                        class="me-4 text-white text-decoration-none {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish me-2"></i>@lang('homepage.filter-fishing-near-me')
                     </a>
@@ -229,27 +253,23 @@
                        class="me-4 text-white text-decoration-none {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs me-2"></i>@lang('homepage.header-vacations')
                     </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" 
-                       class="me-4 text-white text-decoration-none {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open me-2"></i>@lang('homepage.filter-magazine')
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Search Row - Floating (Desktop Only) -->
-    @if(request()->segment(1) != 'guidings')
+    @if($showFloatingSearch)
     <div class="floating-search-container d-none d-md-block">
         <div class="container">
-            <form id="global-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
+            <form id="global-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceDesktop')">
                 <div class="search-box">
                     <div class="search-row">
                         @if ($isVacation)
                             <div class="search-input flex-grow-1">
                                 <i class="fa fa-globe input-icon"></i>
                                 <select class="form-select" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -277,6 +297,20 @@
                                 <input type="hidden" id="LocationRegionDesktop" name="region" value="{{ request()->region }}"/>
                                 @include('layouts.partials.geosearch-hidden-fields')
                             </div>
+                            @if($isOffers)
+                            @php $offersGuestsDesktop = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                            <div class="search-input offers-persons-stepper-wrap" style="width: 220px;">
+                                <div class="offers-persons-stepper" data-offers-persons-stepper>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                    <div class="offers-persons-stepper__value">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsDesktop, ['count' => $offersGuestsDesktop]) }}</span>
+                                    </div>
+                                    <input type="hidden" name="num_guests" value="{{ $offersGuestsDesktop }}" data-offers-persons-input>
+                                    <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                                </div>
+                            </div>
+                            @else
                             <div class="search-input" style="width: 200px;">
                                 <i class="fa fa-user input-icon"></i>
                                 <input type="number" 
@@ -291,6 +325,7 @@
                                        id="tagify-fish-desktop"
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
+                            @endif
                             <div class="my-1 px-0">
                                 <button type="submit" class="search-button">@lang('homepage.searchbar-search')</button>
                             </div>
@@ -307,7 +342,7 @@
 <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
     <div class="vacation-page-loading-overlay__panel" role="status">
         <div class="spinner-border text-danger" aria-hidden="true"></div>
-        <span>{{ translate('Loading...') }}</span>
+        <span>{{ __('checkout.loading') }}</span>
     </div>
 </div>
 @endif
@@ -1102,14 +1137,14 @@ input[type=number] {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="mobile-search" action="{{ $isVacation ? route('vacations.index') : route('guidings.index') }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
+                <form id="mobile-search" action="{{ $globalSearchAction }}" method="get" onsubmit="return validateSearch(event, 'searchPlaceHeaderDesktop')">
                     @if ($isVacation)
                         <div class="mb-3">
-                            <label class="form-label">{{translate('Country')}}</label>
+                            <label class="form-label">{{__('global.Country')}}</label>
                             <div class="position-relative">
                                 <i class="fas fa-globe position-absolute top-50 translate-middle-y" style="left: 15px;"></i>
                                 <select class="form-select ps-5" name="country">
-                                    <option value="">{{ translate('Select Country') }}</option>
+                                    <option value="">{{ __('checkout.select_country') }}</option>
                                     <option value="all-offers" {{ ($currentVacationCountry ?? '') === 'all-offers' ? 'selected' : '' }}>
                                         {{ __('vacations.all_offers_nav') }}
                                     </option>
@@ -1143,6 +1178,21 @@ input[type=number] {
                             </div>
                         </div>
 
+                        @if($isOffers)
+                        @php $offersGuestsModal = max(1, min(20, (int) (request()->num_guests ?: 2))); @endphp
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('homepage.searchbar-person') }}</label>
+                            <div class="offers-persons-stepper offers-persons-stepper--modal" data-offers-persons-stepper>
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                <div class="offers-persons-stepper__value">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuestsModal, ['count' => $offersGuestsModal]) }}</span>
+                                </div>
+                                <input type="hidden" name="num_guests" value="{{ $offersGuestsModal }}" data-offers-persons-input>
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                            </div>
+                        </div>
+                        @else
                         <div class="mb-3">
                             <label class="form-label">Number of Persons</label>
                             <div class="position-relative">
@@ -1164,6 +1214,7 @@ input[type=number] {
                                        placeholder="@lang('homepage.searchbar-targetfish')...">
                             </div>
                         </div>
+                        @endif
                     @endif
 
                     <button type="submit" class="btn btn-primary w-100">Search</button>
@@ -1196,17 +1247,13 @@ input[type=number] {
             <!-- Rest of the modal content remains the same -->
             <div class="modal-body p-0">
                 <div class="mobile-menu-items">
-                    <a href="{{ route('guidings.index') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
+                    <a href="{{ route('guidings.landing') }}" class="menu-item {{ request()->is('guidings*') ? 'active' : '' }}">
                         <i class="fas fa-fish"></i>
                         <span>@lang('homepage.filter-fishing-near-me')</span>
                     </a>
                     <a href="{{ route('vacations.index') }}" class="menu-item {{ request()->is('vacations*') ? 'active' : '' }}">
                         <i class="fas fa-map-signs"></i>
                         <span>@lang('homepage.header-vacations')</span>
-                    </a>
-                    <a href="{{ route($blogPrefix.'.index') }}" class="menu-item {{ request()->is('angelmagazin*') ? 'active' : '' }}">
-                        <i class="fas fa-book-open"></i>
-                        <span>@lang('homepage.filter-magazine')</span>
                     </a>
                     
                     <div class="menu-divider"></div>
@@ -1472,38 +1519,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update logout form handling: stay on current page, clear session, then refresh in place
-    document.querySelectorAll('.logout-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-            if (!csrfToken) return;
-
-            fetch(this.action, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ _token: csrfToken })
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return null;
-                }
-                return response.ok ? response.json() : null;
-            })
-            .then(data => {
-                if (data?.success) {
-                    window.location.reload();
-                }
-            })
-            .catch(() => {});
-        });
-    });
+    // Logout is handled in layouts.modal.loginModal (refresh + open login modal)
 
     // Add input event listeners to place search inputs
     ['searchPlaceDesktop', 'searchPlaceMobile'].forEach(inputId => {
@@ -1592,7 +1608,7 @@ function validateSearch(event, inputId) {
     if ( searchInput.value != "" && (!lat || !lng)) {
         // Create and show tooltip only when validation fails
         const tooltip = new bootstrap.Tooltip(searchInput, {
-            title: "{{translate('Please select a location from the suggestions')}}",
+            title: "{{__('checkout.location_suggestion_hint')}}",
             placement: "bottom",
             trigger: "manual"
         });
@@ -1743,3 +1759,4 @@ function handleMobileLanguageSwitch(language) {
     });
 })();
 </script>
+@include('layouts.partials.offers-persons-stepper-script')

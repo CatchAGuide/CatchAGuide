@@ -9,7 +9,6 @@ use App\Services\Translation\ListingViewTranslationService;
 class CampCardPresenter
 {
     public function __construct(
-        private CampTrustSignalResolver $trust,
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
@@ -56,7 +55,10 @@ class CampCardPresenter
             'slider_cta' => __('vacations.book_now'),
             'cta' => __('vacations.book_now'),
             'cta_class' => 'camp',
-            'trust' => $this->trust->resolve($camp),
+            // Camps have no guest review flow; do not borrow guiding Review scores onto cards.
+            'trust' => null,
+            'rating' => null,
+            'review_count' => 0,
         ];
     }
 
@@ -79,8 +81,26 @@ class CampCardPresenter
         $card['listing_included'] = $facilities;
         $card['target_fish_tags_extra'] = max(0, count($card['target_fish_tags']) - 3);
         $card['duration_pill'] = $this->minimumStayPill($camp);
+        $card['duration_label'] = $card['duration_pill'];
+        $card['guests_label'] = $this->guestsLabel($camp);
+        $card['methods_label'] = ($methods = $this->methodLabels($camp)) !== []
+            ? implode(', ', $methods)
+            : null;
+        $card['listing_cta'] = __('vacations.see_more');
+        $card['verified'] = true;
+        $card['whats_included_title'] = __('offers.included_heading');
 
         return $card;
+    }
+
+    private function guestsLabel(Camp $camp): ?string
+    {
+        $capacity = (int) ($camp->accommodations->first()?->max_occupancy ?? 0);
+        if ($capacity < 1) {
+            return null;
+        }
+
+        return 'Max '.$capacity.' '.($capacity === 1 ? __('vacations.person') : __('vacations.persons'));
     }
 
     /**
@@ -275,10 +295,7 @@ class CampCardPresenter
 
     private function imageBadge(Camp $camp): ?string
     {
-        if ($camp->guidings->isNotEmpty()) {
-            return 'top';
-        }
-
+        // "TOP RATED" must not be shown for linked guidings — camps are not reviewable.
         if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
             return 'limited';
         }

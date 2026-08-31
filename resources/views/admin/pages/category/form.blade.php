@@ -8,10 +8,13 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 </style>
+@if(!empty($scopedEditorEnabled))
+<link rel="stylesheet" href="{{ asset('css/admin-category-pages.css') }}">
+@endif
 @endsection
 
 @section('content')
-    <div class="side-app">
+    <div class="side-app @if(!empty($scopedEditorEnabled)) category-editor category-geo-form @endif">
 
         <!-- CONTAINER -->
         <div class="main-container container-fluid">
@@ -36,7 +39,7 @@ input[type=number] {
                         <div class="card-header">
                             <h3 class="card-title">@yield('title')</h3>
                         </div>
-                        <form action="{{ $route }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ $route }}" method="post" enctype="multipart/form-data" @if(!empty($scopedEditorEnabled)) id="category-scoped-form" @endif>
                             @method('post')
                             @csrf
                             <div class="card-body">
@@ -48,6 +51,17 @@ input[type=number] {
                                     </div>
                                 @endif
 
+                                @if(!empty($scopedEditorEnabled))
+                                    <div class="category-editor__layout category-geo-form__layout">
+                                        @include('admin.pages.category.partials.geo-form-identity-rail')
+
+                                        <div class="category-editor__main">
+                                            @include('admin.pages.category.partials.scoped-content-editor', ['hideScopedActions' => true])
+                                            @include('admin.pages.category.partials.geo-form-charts-language')
+                                            @include('admin.pages.category.partials.geo-form-charts-sections')
+                                        </div>
+                                    </div>
+                                @else
                                 @if($method != '')
                                 <div class="row mb-3">
                                     <div class="col-12">
@@ -55,8 +69,7 @@ input[type=number] {
                                     </div>
                                 </div>
                                 @endif
-                                
-                                
+
                                 @if(!isset($countries))
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -73,23 +86,18 @@ input[type=number] {
                                         <div class="form-group">
                                             <label for="title">Language</label>
                                             @php
-                                                $lang = 'de';
-                                                if($language == 'en'){
-                                                    $lang = 'gb';
-                                                }else{
-                                                    $lang = 'de';
-                                                }
+                                                $lang = $language === 'en' ? 'gb' : 'de';
                                             @endphp
                                             <span class="fi fi-{{ $lang }}" id="language-flag"></span>
                                             <select class="form-control" name="language" id="language">
-                                                @foreach(config('app.locales') as $key => $locale)
-                                                    <option value="{{$locale}}" @if($locale == $language) selected @endif>@if($locale == 'de') Deutsch @elseif($locale == 'en') English @endif</option>
+                                                @foreach(config('app.locales') as $locale)
+                                                    <option value="{{ $locale }}" @if($locale == $language) selected @endif>@if($locale === 'de') Deutsch @elseif($locale === 'en') English @endif</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 @if(isset($countries))
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -105,7 +113,7 @@ input[type=number] {
                                     </div>
                                 </div>
                                 @endif
-                                
+
                                 @if(isset($regions))
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -135,6 +143,7 @@ input[type=number] {
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
                                         <div class="form-group">
@@ -159,6 +168,7 @@ input[type=number] {
                                     <label for="body">Content</label>
                                     <textarea id="body" cols="30" rows="10" class="form-control" name="body">{{ $body }}</textarea>
                                 </div>
+
                                 <div class="my-2">
                                     <span><strong>Filter</strong></span>
                                 </div>
@@ -174,7 +184,6 @@ input[type=number] {
                                             <input type="hidden" id="city" value="{{ $city }}"  name="filters[city]"/>
                                             <input type="hidden" id="region" value="{{ $filterRegion ?? $region ?? '' }}"  name="filters[region]"/>
                                         </div>
-
                                     </div>
                                 </div>
 
@@ -242,13 +251,17 @@ input[type=number] {
                                         <tbody></tbody>
                                     </table>
                                 </div>
+                                @endif
                             </div>
 
-                            <div class="card-footer text-end">
+                            <div class="card-footer text-end category-form__footer">
                                 @if($method != '')
                                     @method('PUT')
                                 @endif
-                                <button type="submit" class="btn btn-success my-1">Submit</button>
+                                @if(!empty($scopedEditorEnabled))
+                                    <button type="submit" class="btn btn-outline-primary my-1" name="translate_to_en" value="1">{{ __('admin.category_pages.editor.translate_en') }}</button>
+                                @endif
+                                <button type="submit" class="btn btn-success my-1">{{ __('admin.category_pages.editor.save') }}</button>
                             </div>
                         </form>
                     </div>
@@ -268,8 +281,13 @@ input[type=number] {
     ({key: "{{ config('services.google_maps.api_key') }}", v: "weekly"});
 </script>
 <script>
-    CKEDITOR.replace( 'body' );
-    CKEDITOR.replace( 'introduction' );
+    @if(empty($scopedEditorEnabled))
+    CKEDITOR.replace('body');
+  @endif
+    CKEDITOR.replace('introduction');
+    @if(!empty($scopedEditorEnabled))
+    CKEDITOR.replace('content');
+    @endif
 
     function initialize() {
         var input = document.getElementById('searchPlace');
@@ -369,7 +387,6 @@ input[type=number] {
                     $('#title').val(data.title || '');
                     $('#sub_title').val(data.sub_title || '');
                     
-                    // Update CKEditor instances
                     if (CKEDITOR.instances['introduction']) {
                         CKEDITOR.instances['introduction'].setData(data.introduction || '');
                     }
@@ -477,7 +494,7 @@ input[type=number] {
         @endforeach
     @endif
 
-    @if(isset($faq))
+    @if(isset($faq) && empty($scopedEditorEnabled))
         @foreach($faq as $row)
             add_faq_item({{ $row['id'] }}, '{{ $row['question'] }}', '{{ $row['answer'] }}');
         @endforeach

@@ -247,8 +247,8 @@
 @section('content')
     <div class="container my-5">
         <div class="page-header">
-            <h1>{{ translate('Booking Reschedule') }}</h1>
-            <p class="text-muted">{{ translate('Update your booking details below') }}</p>
+            <h1>{{ __('checkout.booking_reschedule') }}</h1>
+            <p class="text-muted">{{ __('checkout.update_booking_details_below') }}</p>
         </div>
         
         <form id="rescheduleForm" method="POST" action="{{ route('booking.reschedule.store') }}">
@@ -262,12 +262,12 @@
                 <div class="col-lg-7">
                     <!-- Fishing License Warning -->
                     <div class="info-box mb-4">
-                        <p class="mb-0">{{ translate('Please ensure yourself that you have the valid fishing license for the country, area or body of water where you intend to fish. Catch A Guide assumes no liability for possible personal injury and/or property damage during a guiding.') }}</p>
+                        <p class="mb-0">{{ __('forms.guidTitleMsg') }}</p>
                     </div>
                     
                     <!-- Guiding Information -->
                     <div class="info-section">
-                        <h3>{{ translate('Guiding Information') }}</h3>
+                        <h3>{{ __('message.guiding-information') }}</h3>
                         <div class="row mb-3">
                             <div class="col-12">
                                 <h5>{{ $guiding->title }}</h5>
@@ -286,7 +286,7 @@
                             @if($guiding->is_boat)
                                 <div class="flex-column border-bottom">
                                     <div class="my-2">
-                                        <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
+                                        <span class="text-dark fw-bold">{{ __('checkout.fishing_from')}}:</span>
                                     </div>
                                     <div class="px-2 text-dark">
                                         {{$guiding->is_boat ? $guiding->boat_type : ''}}
@@ -295,7 +295,7 @@
                             @else
                                 <div class="flex-column border-bottom">
                                     <div class="my-2">
-                                        <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
+                                        <span class="text-dark fw-bold">{{ __('guidings.shore') }}</span>
                                     </div>
                                 </div>
                             @endif
@@ -303,7 +303,7 @@
 
                         <div class="flex-column border-bottom">
                             <div class="my-2">
-                                <span class="text-dark fw-bold">{{ translate('Location')}}:</span>
+                                <span class="text-dark fw-bold">{{ __('camps.location')}}:</span>
                             </div>
                             <div class="px-2 text-dark">
                                 {{$guiding->location ? $guiding->location : ''}}
@@ -365,41 +365,41 @@
                     
                     <!-- Personal Information -->
                     <div class="info-section">
-                        <h3>{{ translate('Personal Information') }}</h3>
+                        <h3>{{ __('checkout.personal_information') }}</h3>
                         
                         <div class="row g-3">
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('First Name') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.first_name') }}</label>
                                 <div>{{ $user->firstname }}</div>
                                 <input type="hidden" name="first_name" value="{{ $user->firstname }}">
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('Last Name') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.last_name') }}</label>
                                 <div>{{ $user->lastname }}</div>
                                 <input type="hidden" name="last_name" value="{{ $user->lastname }}">
                             </div>
                         </div>
                         
                         <div class="mt-3">
-                            <label class="fw-bold d-block">{{ translate('E-mail Address') }}</label>
+                            <label class="fw-bold d-block">{{ __('checkout.email_address') }}</label>
                             <div>{{ $booking->email }}</div>
                             <input type="hidden" name="email" value="{{ $booking->email }}">
                         </div>
 
                         <div class="row g-3 mt-1">
-                            <label class="fw-bold d-block">{{ translate('Address') }}</label>
+                            <label class="fw-bold d-block">{{ __('checkout.address') }}</label>
                             <div>{{ getUserField($user, $booking, 'address', 'address') }}</div>
                             <input type="hidden" name="address" value="{{ getUserField($user, $booking, 'address', 'address') }}">
                         </div>
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('City') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.city') }}</label>
                                 <div>{{ getUserField($user, $booking, 'city', 'city') }}</div>
                                 <input type="hidden" name="city" value="{{ getUserField($user, $booking, 'city', 'city') }}">
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('Country / Region') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.country_region') }}</label>
                                 <div>{{ getUserField($user, $booking, 'country', 'country') }}</div>
                                 <input type="hidden" name="country" value="{{ getUserField($user, $booking, 'country', 'country') }}">
                             </div>
@@ -407,12 +407,12 @@
                         
                         <div class="row g-3 mt-1">
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('Postal code') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.postal_code_label') }}</label>
                                 <div>{{ getUserField($user, $booking, 'postal', 'postal') }}</div>
                                 <input type="hidden" name="postal_code" value="{{ getUserField($user, $booking, 'postal', 'postal') }}">
                             </div>
                             <div class="col-6">
-                                <label class="fw-bold d-block">{{ translate('Phone Number') }}</label>
+                                <label class="fw-bold d-block">{{ __('checkout.phone_number') }}</label>
                                 <div>{{ $booking->phone }}</div>
                                 <input type="hidden" name="phone" value="{{ $booking->phone }}">
                             </div>
@@ -610,10 +610,10 @@
                 </div>
                 <div class="modal-body text-center px-4 py-5">
                     <i class="fas fa-check-circle text-success mb-4" style="font-size: 4rem;"></i>
-                    <h3 class="mb-4">{{ translate('Reschedule Confirmed') }}</h3>
-                    <p class="mb-4">{{ translate('Your booking has been successfully rescheduled. You will receive a confirmation email shortly.') }}</p>
+                    <h3 class="mb-4">{{ __('checkout.reschedule_confirmed') }}</h3>
+                    <p class="mb-4">{{ __('checkout.booking_rescheduled_success') }}</p>
                     <a href="{{ route('profile.bookings') }}" class="btn btn-orange">
-                        {{ translate('Go to My Bookings') }}
+                        {{ __('checkout.go_to_my_bookings') }}
                     </a>
                 </div>
             </div>
@@ -629,11 +629,11 @@
                 </div>
                 <div class="modal-body text-center px-4 py-5">
                     <i class="fas fa-exclamation-triangle text-danger mb-4" style="font-size: 4rem;"></i>
-                    <h3 class="mb-4">{{ translate('Error') }}</h3>
-                    <p class="mb-4" id="error-message">{{ translate('There was an error processing your reschedule request. Please try again.') }}</p>
+                    <h3 class="mb-4">{{ __('checkout.error') }}</h3>
+                    <p class="mb-4" id="error-message">{{ __('checkout.there_was_error_reschedule') }}</p>
                     <div class="d-flex justify-content-center">
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Close') }}</button>
-                        <button type="button" class="btn btn-orange" id="retry-button">{{ translate('Try Again') }}</button>
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ __('booking-assistant.widget_close') }}</button>
+                        <button type="button" class="btn btn-orange" id="retry-button">{{ __('checkout.try_again') }}</button>
                     </div>
                 </div>
             </div>

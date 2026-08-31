@@ -2,304 +2,259 @@
 
 namespace App\Http\Controllers\Admin\Category;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageDimension;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Http\Controllers\Admin\Category\Concerns\HandlesScopedCategoryContent;
 use App\Http\Controllers\Controller;
-use App\Models\Faq;
-use App\Models\Method;
-use App\Models\Language;
 use App\Models\CategoryPage;
+use App\Models\Method;
+use App\Services\CategoryPage\CategoryPageContentService;
 use DB;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Intervention\Image\Facades\Image;
 
 class AdminCategoryMethodsController extends Controller
 {
-    protected $language;
+    use HandlesScopedCategoryContent;
 
-    public function __construct()
-    {
-        $this->language = [
-            'en',
-            'de'
-        ];
-    }
+    public function __construct(
+        private CategoryPageContentService $content
+    ) {}
 
     public function index()
     {
-        $rows = Method::with(['categoryPage' => function($query) {
-                $query->where('type', 'Methods')
-                    ->with(['language' => function($q) {
-                        $q->select('source_id', 'language')
-                          ->distinct()
-                          ->orderBy('language');
-                    }]);
-            }])
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::METHODS);
+
+        $rows = Method::query()
+            ->orderBy('name')
+            ->with(['categoryPage' => fn ($query) => $query->where('type', 'Methods')])
             ->paginate(25);
 
-        $rows->getCollection()->transform(function($method) {
-            $method->languages = $method->categoryPage 
-                ? $method->categoryPage->language->pluck('language')->sort()->values()->toArray()
-                : [];
+        $rows->getCollection()->transform(function ($method) use ($scopes) {
+            $method->scope_completeness = $this->content->completenessForMethod($method->id, $scopes);
+            $method->filled_locales = $this->content->filledLocalesFromCompleteness($method->scope_completeness);
+            $method->has_any_content = $method->filled_locales !== [];
+
             return $method;
         });
-        $data = compact('rows');
-        return view('admin.pages.category.methods', $data);
+
+        return view('admin.pages.category.methods', compact('rows', 'scopes'));
     }
 
     public function update(Request $request, $id)
     {
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::METHODS);
+
         $request->validate([
-            'name' => 'required|max:255|unique:destinations,name,null,null,type,Methods,deleted_at,null',
+            'name' => 'required|max:255',
             'title' => 'required|max:255',
             'sub_title' => 'required|max:255',
-            'languageSwitch' => 'required|max:255'
+            'languageSwitch' => ['required', Rule::in(config('app.locales'))],
+            'content_scope' => ['required', Rule::in($scopes)],
         ]);
 
         try {
             DB::beginTransaction();
-            $data = $request->only(['languageSwitch', 'name', 'title', 'sub_title', 'introduction', 'faq_title']);
-            $data['name'] = $request->name;
 
-            if($request->has('thumbnailImage') && ($request->thumbnailImage != null && $request->thumbnailImage != '')) {
-                $webp_path = $this->upload_thumbnail($request->thumbnailImage);
-                $data['thumbnail_path'] = $webp_path;
+            $categoryPage = $this->resolveCategoryPage((int) $id, $request->name);
+
+            if ($request->hasFile('thumbnailImage')) {
+                $categoryPage->thumbnail_path = $this->uploadThumbnail($request->file('thumbnailImage'));
+                $categoryPage->save();
             }
 
-            $categoryPage = CategoryPage::where('source_id', $id)->where('type', 'Methods')->first();
-            $isCreate = false;
+            $scope = $request->input('content_scope');
+            $locale = $request->input('languageSwitch');
+            $faqs = collect($request->input('faq', []))->values()->all();
 
-            if ($categoryPage) {
-                $categoryPage->update($data);
-                Language::where('source_id', $categoryPage->id)->where('language', $request->languageSwitch)->delete();
-            } else {
-                $data['type'] = 'Methods';
-                $data['source_id'] = $id;
-                $data['slug'] = $this->slug_format($request->name);
-                $categoryPage = CategoryPage::create($data);
-                $isCreate = true;
-            }
-            
-            $language = Language::create(
-                [
-                    'source_id' => $categoryPage->id,
-                    'language' => $request->languageSwitch,
-                    'title' => $request->title ?? '',
-                    'sub_title' => $request->sub_title ?? '',
-                    'introduction' => $request->introduction ?? '',
-                    'content' => $request->content ?? '',
-                    'faq_title' => $request->faq_title ?? '',
-                    'faq' => $request->faq ?? []
-                ]
-            );
-            
-            if ($request->has('faq')) {
-                Faq::where('page', 'Methods')->where('source_id', $categoryPage->id)->delete();
-                foreach ($request->faq as $key => $value) {
-                    $valueSave['page'] = 'Methods';
-                    $valueSave['language'] = $request->languageSwitch;
-                    $valueSave['question'] = $value['question'];
-                    $valueSave['answer'] = $value['answer'];
-                    $valueSave['source_id'] = $categoryPage->id;
-                    Faq::create($valueSave);
-                }
-                $language->faq = $request->faq;
-            }
+            $this->content->upsert($categoryPage, $scope, $locale, [
+                'title' => $request->title ?? '',
+                'sub_title' => $request->sub_title ?? '',
+                'introduction' => $request->introduction ?? '',
+                'content' => $request->content ?? '',
+                'faq_title' => $request->faq_title ?? '',
+            ], $faqs);
 
-            if($isCreate){
-                $this->translate($language);
+            if ($request->boolean('translate_to_en') && $locale === 'de') {
+                $this->content->translateScope($categoryPage, $scope, 'de', 'en');
             }
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Method Successfully Added!');
+            return redirect()
+                ->route('admin.category.methods.edit', [
+                    'method' => $id,
+                    'scope' => $scope,
+                    'language' => $locale,
+                ])
+                ->with('success', 'Method category page saved.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Exception', ['message' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
-        } catch (\Illuminate\Database\QueryException $e) {
-            DB::rollBack();
-            Log::error('Query Exception', ['message' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['message' => 'Ooops Something went wrong. Please reload the page.']);
+            Log::error('Method category save failed', ['message' => $e->getMessage()]);
+
+            return redirect()->back()->withErrors(['message' => 'Something went wrong. Please try again.']);
         }
     }
 
     public function edit($id)
     {
-        $methods = Method::with('categoryPage', 'categoryPage.faq')->find($id);
+        $method = Method::with('categoryPage')->find($id);
 
-        if (is_null($methods)) {
+        if ($method === null) {
             return redirect()->back();
         }
 
-        $row = $methods->categoryPage;
-        
-        $form = 'Methods';
-        $route = route('admin.category.methods.update', $id);
-        $method = 'PUT';
-        $language = 'de';
-        $name = $methods->name ?? '';
-        $thumbnail = $row ? $row->getThumbnailPath() : asset('assets/images/300x300.png');
-        $title = '';
-        $sub_title = '';
-        $introduction = '';
-        $content = '';
-        $faq_title = '';
-        $faq = [];
-        
-        if ($row) {
-            $languageData = $row->language($language);
-            if ($languageData) {
-                $title = $languageData->title ?? '';
-                $sub_title = $languageData->sub_title ?? '';
-                $introduction = $languageData->introduction ?? '';
-                $content = $languageData->content ?? '';
-                $faq_title = $languageData->faq_title ?? '';
-                $faq = $row->faq($language) ?? [];
-            }
-        }
-        $allowed_fields = false;
+        $categoryPage = $method->categoryPage;
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::METHODS);
+        $activeScope = CategoryPageScope::TOURS;
 
-        $data = compact('form', 'route', 'method', 'language', 'name', 'thumbnail', 'title', 'sub_title', 'introduction', 'content', 'faq_title', 'allowed_fields', 'faq');
-
-        return view('admin.pages.category.dynamic-form', $data);
-    }
-
-    private function upload_thumbnail($thumbnailImage)
-    {
-        $thumbnail_path = $thumbnailImage->store('public');
-        $imagePath = Storage::disk()->path($thumbnail_path);
-
-        $image = Image::make($imagePath);
-        $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME) . '.webp';
-        $webpImage = $image->encode('webp', 75);
-
-        $webp_path = 'category/methods/';
-
-        if (!Storage::disk('public_path')->exists($webp_path)) {
-            Storage::disk('public_path')->makeDirectory($webp_path);
+        if ($categoryPage) {
+            $scoped = $this->scopedEditorPayload(
+                $this->content,
+                CategoryPageEntityType::METHOD,
+                $method->id,
+                $scopes,
+                $activeScope,
+            );
+        } else {
+            $scoped = [
+                'scopes' => $scopes,
+                'activeScope' => $activeScope,
+                'language' => 'de',
+                'completeness' => $this->content->completenessForMethod($method->id, $scopes),
+                'title' => '',
+                'sub_title' => '',
+                'introduction' => '',
+                'content' => '',
+                'faq_title' => '',
+                'faq' => collect(),
+            ];
         }
 
-        $webp_path .= $webpImageName;
+        $slug = $categoryPage?->slug ?? $this->slugFormat($method->name);
 
-        Storage::disk('public_path')->put($webp_path, $webpImage->encoded);
-        $webpImage->save(public_path($webp_path));
-
-        return $webp_path;
-    }
-
-    private function slug_format($value)
-    {
-        return str_replace(' ', '-', strtolower($value));
-    }
-
-    private function translate($data)
-    {
-        foreach ($this->language as $language) {
-            if ($language !== $data->language) {
-                $title = ($data->title && $data->title != '') ? translate($data->title, $language) : '';
-                $sub_title = ($data->sub_title && $data->sub_title != '') ? translate($data->sub_title, $language) : '';
-                $introduction = ($data->introduction && $data->introduction != '') ? translate($data->introduction, $language) : '';
-                $content = ($data->content && $data->content != '') ? translate($data->content, $language) : '';
-                $faq_title = ($data->faq_title && $data->faq_title != '') ? translate($data->faq_title, $language) : '';
-                
-                $languageData = Language::where('source_id', $data->source_id)->where('language', $language)->first();
-                if ($languageData) {
-                    $languageData->update([
-                        'title' => $title,
-                        'sub_title' => $sub_title,
-                        'introduction' => $introduction,
-                        'content' => $content,
-                        'faq_title' => $faq_title
-                    ]);
-                } else {
-                    Language::create([
-                        'source_id' => $data->source_id,
-                        'language' => $language,
-                        'title' => $title,
-                        'sub_title' => $sub_title,
-                        'introduction' => $introduction,
-                        'content' => $content,
-                        'faq_title' => $faq_title
-                    ]);
-                }
-                
-                if ($data->faq) {
-                    foreach ($data->faq as $key => $value) {
-                        $valueData['language'] = $language;
-                        $valueData['page'] = 'Methods';
-                        $valueData['source_id'] = $data->source_id;
-                        $valueData['question'] = translate($value['question'], $language);
-                        $valueData['answer'] = translate($value['answer'], $language);
-                        Faq::create($valueData);
-                    }
-                }
-            }
-        }
+        return view('admin.pages.category.catalog-editor', array_merge($scoped, [
+            'formTitle' => 'Methods',
+            'route' => route('admin.category.methods.update', $id),
+            'languageDataUrl' => route('admin.category.methods.language-data', $method->id),
+            'autosaveUrl' => route('admin.category.methods.autosave', $method->id),
+            'backToListRoute' => route('admin.category.methods.index'),
+            'nameReadonly' => false,
+            'name' => $method->name ?? '',
+            'thumbnail' => $categoryPage ? $categoryPage->getThumbnailPath() : asset('assets/images/300x300.png'),
+            'publicUrl' => route('guidings.methods.show', ['slug' => $slug]),
+        ]));
     }
 
     public function toggleFavorite(Request $request)
     {
         try {
             $method = Method::findOrFail($request->id);
-            
+
             if ($method->categoryPage) {
                 $categoryPage = $method->categoryPage;
-                $categoryPage->is_favorite = (int)$request->status;
+                $categoryPage->is_favorite = (int) $request->status;
                 $categoryPage->save();
             } else {
-                $categoryPage = new CategoryPage();
-                $categoryPage->name = $method->name;
-                $categoryPage->is_favorite = (int)$request->status; 
-                $categoryPage->type = 'Methods';
-                $categoryPage->method_id = $method->id;
-                $categoryPage->save();
+                CategoryPage::query()->create([
+                    'name' => $method->name,
+                    'is_favorite' => (int) $request->status,
+                    'type' => 'Methods',
+                    'source_id' => $method->id,
+                    'slug' => $this->slugFormat($method->name),
+                ]);
             }
-            
+
             return response()->json(['success' => true]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     public function getLanguageData($id)
     {
-        $methods = Method::with('categoryPage', 'categoryPage.language', 'categoryPage.faq')->find($id);
+        $method = Method::find($id);
 
-        if (is_null($methods)) {
+        if ($method === null) {
             return response()->json(['error' => 'Method not found'], 404);
         }
 
-        $row = $methods->categoryPage;
-        $language = request('language', 'de');
-        
-        $title = '';
-        $sub_title = '';
-        $introduction = '';
-        $content = '';
-        $faq_title = '';
-        $faq = [];
-        
-        if ($row) {
-            $languageData = $row->language($language);
-            if ($languageData) {
-                $title = $languageData->title ?? '';
-                $sub_title = $languageData->sub_title ?? '';
-                $introduction = $languageData->introduction ?? '';
-                $content = $languageData->content ?? '';
-                $faq_title = $languageData->faq_title ?? '';
-                $faq = $row->faq($language) ?? [];
-            }
+        $scopes = CategoryPageScope::forDimension(CategoryPageDimension::METHODS);
+        $scope = request('scope', CategoryPageScope::TOURS);
+        if (! in_array($scope, $scopes, true)) {
+            $scope = CategoryPageScope::TOURS;
         }
-        
-        return response()->json([
-            'title' => $title,
-            'sub_title' => $sub_title,
-            'introduction' => $introduction,
-            'content' => $content,
-            'faq_title' => $faq_title,
-            'faq' => $faq
+
+        return response()->json(
+            $this->scopedLanguageDataResponse($this->content, CategoryPageEntityType::METHOD, $method->id, $scope)
+        );
+    }
+
+    public function autosave(Request $request, $id)
+    {
+        $method = Method::find($id);
+
+        if ($method === null) {
+            return response()->json(['error' => 'Method not found'], 404);
+        }
+
+        return $this->autosaveScopedContent(
+            $request,
+            $this->content,
+            CategoryPageEntityType::METHOD,
+            $method->id,
+            CategoryPageScope::forDimension(CategoryPageDimension::METHODS),
+        );
+    }
+
+    private function resolveCategoryPage(int $methodId, string $name): CategoryPage
+    {
+        $categoryPage = CategoryPage::query()
+            ->where('source_id', $methodId)
+            ->where('type', 'Methods')
+            ->first();
+
+        if ($categoryPage) {
+            $categoryPage->update(['name' => $name]);
+
+            return $categoryPage;
+        }
+
+        return CategoryPage::query()->create([
+            'type' => 'Methods',
+            'source_id' => $methodId,
+            'name' => $name,
+            'slug' => $this->slugFormat($name),
         ]);
+    }
+
+    private function uploadThumbnail($thumbnailImage): string
+    {
+        $thumbnail_path = $thumbnailImage->store('public');
+        $imagePath = Storage::disk()->path($thumbnail_path);
+        $image = Image::make($imagePath);
+        $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME).'.webp';
+        $webpImage = $image->encode('webp', 75);
+        $webp_path = 'category/methods/';
+
+        if (! Storage::disk('public_path')->exists($webp_path)) {
+            Storage::disk('public_path')->makeDirectory($webp_path);
+        }
+
+        $webp_path .= $webpImageName;
+        Storage::disk('public_path')->put($webp_path, $webpImage->encoded);
+        $webpImage->save(public_path($webp_path));
+
+        return $webp_path;
+    }
+
+    private function slugFormat(string $value): string
+    {
+        return str_replace(' ', '-', strtolower($value));
     }
 }

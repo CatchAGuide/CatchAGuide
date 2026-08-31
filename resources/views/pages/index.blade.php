@@ -136,7 +136,7 @@
                     <div class="popular-tours__carousel owl-theme owl-carousel">
                         @foreach($most_booked_guidings as $most_booked_guiding)
                         <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show', [$most_booked_guiding->id,$most_booked_guiding->slug]) }}" title="Guide aufmachen">
+                            <a class="popular-tours__img" href="{{ $most_booked_guiding->publicShowUrl() }}" title="Guide aufmachen">
                                 <figure class="popular-tours__img__wrapper">
                                     @if(get_featured_image_link($most_booked_guiding))
                                     <img src="{{get_featured_image_link($most_booked_guiding)}}" alt="" style="object-fit: contain"/>
@@ -145,7 +145,7 @@
                             </a>
                             <div class="popular-tours__content {{$agent->isMobile() ? 'text-center' : ''}}">
                                 <h3 class="popular-tours__title">
-                                    <a href="{{ route('guidings.show', [$most_booked_guiding->id,$most_booked_guiding->slug]) }}" title="Guide aufmachen">{{translate($most_booked_guiding->title)}}</a>
+                                    <a href="{{ $most_booked_guiding->publicShowUrl() }}" title="Guide aufmachen">{{translate($most_booked_guiding->title)}}</a>
                                 </h3>
                                 <span>{{translate($most_booked_guiding->location)}}</span>
                                 <p class="popular-tours__rate"><span>@lang('message.from') {{ two($most_booked_guiding->price) }}€</span></p>
@@ -294,7 +294,7 @@
                     <div class="popular-tours__carousel owl-theme owl-carousel">
                         @foreach($recent_guidings as $recent_guiding)
                             <div class="popular-tours__single">
-                                <a class="popular-tours__img" title="Guide aufmachen" href="{{ route('guidings.show', [$recent_guiding->id,$recent_guiding->slug]) }}">
+                                <a class="popular-tours__img" title="Guide aufmachen" href="{{ $recent_guiding->publicShowUrl() }}">
                                     <figure class="popular-tours__img__wrapper">
                                         @if(get_featured_image_link($recent_guiding))
                                         <img src="{{get_featured_image_link($recent_guiding)}}" alt="{{translate($recent_guiding->title)}}" style="object-fit: contain"/>
@@ -303,7 +303,7 @@
                                 </a>
                                 <div class="popular-tours__content {{$agent->isMobile() ? 'text-center' : ''}}">
                                     <h3 class="popular-tours__title">
-                                        <a href="{{ route('guidings.show', [$recent_guiding->id,$recent_guiding->slug]) }}" title="Guide aufmachen">{{translate($recent_guiding->title)}}</a>
+                                        <a href="{{ $recent_guiding->publicShowUrl() }}" title="Guide aufmachen">{{translate($recent_guiding->title)}}</a>
                                     </h3>
                                     <span>{{translate($recent_guiding->location)}}</span>
                                     <p class="popular-tours__rate"><span>@lang('message.from') {{ two($recent_guiding->price) }}€</span></p>

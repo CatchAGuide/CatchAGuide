@@ -14,7 +14,8 @@ class Faq extends Model
         'answer',
         'page',
         'language',
-        'source_id'
+        'scope',
+        'source_id',
     ];
     public function limitanswer()
     {

@@ -9,7 +9,7 @@
         <div class="page-header-bg-overly"></div>
         <div class="container">
             <div class="page-header__top-inner">
-                <h1 class="h2">{{ucwords(isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings') )}}</h1>
+                <h1 class="h2">{{ucwords(isset($place) ? __('guidings.all_guidings_at') . $place : __('profile.all_guidings') )}}</h1>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
                     <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                     <li><span>&#183;</span></li>
                     <li class="active">
-                        {{ucwords( isset($place) ? translate('Alle Guidings bei ') . $place : translate('Alle Guidings'))}}
+                        {{ucwords( isset($place) ? __('guidings.all_guidings_at') . $place : __('profile.all_guidings'))}}
                     </li>
                 </ul>
             </div>

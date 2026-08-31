@@ -761,7 +761,7 @@
 
                 <div class="gp-body">
                     <h2 class="gp-title">
-                        <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}">{{ $guiding->title }}</a>
+                        <a href="{{ $guiding->publicShowUrl() }}">{{ $guiding->title }}</a>
                     </h2>
 
                     <p class="gp-location">
@@ -818,7 +818,7 @@
                         <i class="fas {{ $isDraft ? 'fa-pencil-ruler' : 'fa-edit' }}"></i>{{ $isDraft ? __('profile.finalize_tour') : __('profile.edit') }}
                     </a>
 
-                    <a class="gp-btn gp-btn-ghost" href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}">
+                    <a class="gp-btn gp-btn-ghost" href="{{ $guiding->publicShowUrl() }}">
                         <i class="fas fa-eye"></i>@lang('profile.view')
                     </a>
 

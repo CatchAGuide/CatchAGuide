@@ -17,7 +17,7 @@ final class BookingAssistantToolDefinitionRegistry
                 'type' => 'function',
                 'function' => [
                     'name' => 'search_catalog',
-                    'description' => 'Search published guidings, vacation packages, and fishing camps by keywords (fish species, region, country, city, method). Text matching does not understand prices—when the user gives a budget, you must pass max_price (and usually max_price_strict) or results will not be price-filtered. Returns titles, URLs, min_price, currency, and short snippets.',
+                    'description' => 'Search published guidings, vacation packages, and fishing lodges and accommodation by keywords (fish species, region, country, city, method). Text matching does not understand prices—when the user gives a budget, you must pass max_price (and usually max_price_strict) or results will not be price-filtered. Returns titles, URLs, min_price, currency, and short snippets.',
                     'parameters' => [
                         'type' => 'object',
                         'properties' => [
@@ -31,7 +31,7 @@ final class BookingAssistantToolDefinitionRegistry
                                     'type' => 'string',
                                     'enum' => ['guiding', 'vacation', 'camp'],
                                 ],
-                                'description' => 'Optional. Omit or leave empty to search guidings, vacation packages, and fishing camps together (default). Pass one or more values only if the user clearly asked for that product type only (e.g. only camps).',
+                                'description' => 'Optional. Omit or leave empty to search guidings, vacation packages, and fishing lodges and accommodation together (default). Pass one or more values only if the user clearly asked for that product type only (e.g. only camps).',
                             ],
                             'limit' => ['type' => 'integer', 'description' => 'Max results (default 8, capped server-side)'],
                             'max_price' => [

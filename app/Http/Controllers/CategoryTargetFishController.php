@@ -12,45 +12,49 @@ use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
 use Illuminate\Support\Facades\Cache;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Services\CategoryPage\CategoryPageContentService;
 
 class CategoryTargetFishController extends Controller
 {
-    public function index()
+    public function index(CategoryPageContentService $categoryContent)
     {
         $language = app()->getLocale();
         $allTargets = CategoryPage::where('type', 'Targets')
             ->get()
-            ->map(function($item) use ($language) {
-                $item->language = $item->language($language);
+            ->map(function ($item) use ($language, $categoryContent) {
+                $item->language = $categoryContent->resolveForDisplay($item, CategoryPageScope::GLOBAL, $language);
+
                 return $item;
             })
-            ->filter(function($item) {
-                return $item->language !== null;
+            ->filter(function ($item) {
+                return $item->language !== null && filled($item->language->title);
             });
 
-        $favories = $allTargets->filter(function($item) {
+        $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
-        
+
         $introduction = __('category.introduction');
         $title = __('category.title');
         $route = 'target-fish.targets';
 
         $data = compact('favories', 'allTargets', 'introduction', 'title', 'route');
+
         return view('pages.category.category-index', $data);
     }
 
-    public function targets($slug, Request $request)
+    public function targets($slug, Request $request, CategoryPageContentService $categoryContent)
     {
         $language = app()->getLocale();
-        $row_data = CategoryPage::whereSlug($slug)->whereType('Targets')->with('language', 'faq')->first();
+        $row_data = CategoryPage::whereSlug($slug)->whereType('Targets')->first();
 
-        if (!$row_data) {
+        if (! $row_data) {
             abort(404);
         }
 
-        $row_data->language = $row_data->language($language);
-        $row_data->faq = $row_data->faq($language);
+        $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::GLOBAL, $language);
+        $row_data->faq = $categoryContent->faqsFor($row_data, CategoryPageScope::TOURS, $language);
 
         $title = 'Target Fish';
         $filter_title = '';

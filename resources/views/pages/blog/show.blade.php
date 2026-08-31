@@ -71,7 +71,7 @@
                             </div>
                         </div>
                         <div class="sidebar__single sidebar__category {{$agent->ismobile() ? 'text-center' : ''}}">
-                            <h3 class="sidebar__title">{{translate('Alle Kategorien')}}</h3>
+                            <h3 class="sidebar__title">{{__('category.all_categories')}}</h3>
                             <ul class="sidebar__category-list list-unstyled">
                                 @foreach($categories as $category)
                                     <li>

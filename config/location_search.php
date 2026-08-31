@@ -25,9 +25,21 @@ return [
     'map_markers_max' => (int) env('LOCATION_SEARCH_MAP_MARKERS_MAX', 2000),
 
     /*
-    | Show "Additional Fishing Tour close to…" when main location results are at or below this count.
+    | Show "Additional offers close to…" when main location results are at or below this count.
     */
     'nearby_section_max_main_results' => (int) env('LOCATION_SEARCH_NEARBY_MAX_MAIN_RESULTS', 12),
+
+    /*
+    | Geo radius for the nearby-suggestions block (not the main filtered list).
+    | Same default for every product type; country-centroid searches use a wider
+    | radius so neighbouring countries can appear without worldwide random filler.
+    */
+    'nearby_radius_km' => [
+        'tour' => (int) env('LOCATION_SEARCH_NEARBY_TOUR_RADIUS_KM', 200),
+        'trip' => (int) env('LOCATION_SEARCH_NEARBY_TRIP_RADIUS_KM', 200),
+        'camp' => (int) env('LOCATION_SEARCH_NEARBY_CAMP_RADIUS_KM', 200),
+    ],
+    'nearby_country_radius_km' => (int) env('LOCATION_SEARCH_NEARBY_COUNTRY_RADIUS_KM', 400),
 
     /*
     | When the user picks a place with a known country (country_short / country name),

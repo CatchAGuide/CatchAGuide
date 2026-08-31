@@ -12,6 +12,9 @@
     'lazyModal' => true,
     'updatable' => true,
     'interactivePreview' => false,
+    'priceChips' => false,
+    'landmarks' => false,
+    'viewportRail' => false,
     'instanceKey' => 'listing',
     'mapId' => 'map',
     'class' => '',
@@ -53,5 +56,8 @@
     data-lazy-modal="{{ $lazyModal ? 'true' : 'false' }}"
     data-updatable="{{ $updatable ? 'true' : 'false' }}"
     data-interactive-preview="{{ $interactivePreview ? 'true' : 'false' }}"
+    data-price-chips="{{ $priceChips ? 'true' : 'false' }}"
+    data-landmarks="{{ $landmarks ? 'true' : 'false' }}"
+    data-viewport-rail="{{ $viewportRail ? 'true' : 'false' }}"
     data-instance-key="{{ $instanceKey }}"
 ></div>

@@ -158,9 +158,9 @@ class TripCatalogService
     protected function buildGuidingUrl(Guiding $guiding): string
     {
         try {
-            return route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug]);
+            return $guiding->publicShowUrl();
         } catch (\Throwable $e) {
-            return url('/guidings/' . $guiding->id . '/' . $guiding->slug);
+            return url('/guidings/offer/' . $guiding->slug);
         }
     }
 

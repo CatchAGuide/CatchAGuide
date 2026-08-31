@@ -35,7 +35,7 @@ final class ListingSitemapContributor implements SitemapContributorInterface
 
         return $guidings->map(function (Guiding $guiding) use ($context) {
             return SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['guidings', (string) $guiding->id, $guiding->slug]),
+                $this->encoder->join($context->baseUrl, ['guidings', 'offer', $guiding->slug]),
                 'monthly',
                 0.7,
             );

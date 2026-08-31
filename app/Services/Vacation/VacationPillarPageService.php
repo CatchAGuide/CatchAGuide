@@ -2,15 +2,19 @@
 
 namespace App\Services\Vacation;
 
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Domain\Vacation\VacationPillar;
 use App\Domain\Vacation\ViewModels\VacationPillarIndexViewModel;
+use App\Models\CategoryEntity;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Http\Request;
@@ -26,6 +30,7 @@ class VacationPillarPageService
         private CampCardPresenter $campPresenter,
         private VacationFilterApplicator $filterApplicator,
         private ListingViewTranslationService $viewTranslation,
+        private CategoryPageContentService $categoryContent,
     ) {}
 
     public function buildIndex(Request $request, VacationPillar $pillar): VacationPillarIndexViewModel
@@ -61,38 +66,64 @@ class VacationPillarPageService
         VacationPillar $pillar,
         Request $request,
         ?string $countrySlug,
-        ?\App\Models\Destination $destination,
+        ?CategoryEntity $destination,
     ): VacationPillarIndexViewModel {
-        $filter = VacationListingFilter::fromRequest($request->all(), $countrySlug);
+        $filter = VacationListingFilter::fromRequest(
+            array_merge($request->all(), ['pillar' => $pillar->value]),
+            $countrySlug,
+        );
         $perPage = (int) config('vacations.pillar_index_per_page', 9);
 
-        $filterAll = new VacationListingFilter(
-            pillar: $pillar->value,
-            species: $filter->species,
-            country: $countrySlug,
-            sortBy: $filter->sortBy,
-        );
-
         [$listings, $cards] = match ($pillar) {
-            VacationPillar::Trips => $this->tripListings($filterAll, $perPage),
-            VacationPillar::Camps => $this->campListings($filterAll, $perPage, $destination?->id),
+            VacationPillar::Trips => $this->tripListings($filter, $perPage),
+            VacationPillar::Camps => $this->campListings($filter, $perPage, $destination?->id),
         };
 
-        $tripsTotal = $this->trips->queryForCountry($filterAll)->count();
-        $campsTotal = $this->camps->queryForCountry($filterAll)->count();
+        $tripsTotal = $this->trips->queryForCountry($filter)->count();
+        $campsTotal = $this->camps->queryForCountry($filter)->count();
+
+        $locale = app()->getLocale();
+        $scope = match ($pillar) {
+            VacationPillar::Trips => CategoryPageScope::TRIPS,
+            VacationPillar::Camps => CategoryPageScope::CAMPS,
+        };
+
+        // Trips/camps must not inherit vacations content via shared country translations.
+        if ($destination !== null && $destination->id) {
+            $destination = $this->categoryContent->applyScopedContentToModel(
+                $destination,
+                CategoryPageEntityType::GEO_COUNTRY,
+                $scope,
+                $locale,
+                null,
+            );
+        }
+
+        $destinationFaq = ($destination !== null && $destination->id)
+            ? $this->categoryContent->resolveFaqsForEntityDisplay(
+                CategoryPageEntityType::GEO_COUNTRY,
+                $destination->id,
+                $scope,
+                $locale,
+                null,
+            )
+            : collect();
 
         return new VacationPillarIndexViewModel(
             pillar: $pillar,
-            filter: $filterAll,
+            filter: $filter,
             listings: $listings,
             cards: $cards,
             countries: $this->destinations->countriesForHubGrid(),
             speciesOptions: collect($this->filterApplicator->speciesOptionsForCountry($countrySlug)),
+            accommodationTypeOptions: $filter->showsCampFacets()
+                ? collect($this->filterApplicator->accommodationTypeOptions())
+                : collect(),
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
-            faq: $destination === null ? $this->resolveFaq($pillar) : collect(),
+            faq: $destination === null ? $this->resolveFaq($pillar) : $destinationFaq,
             destination: $destination,
-            mapMarkers: $this->buildMapMarkers($filterAll, $pillar),
+            mapMarkers: $this->buildMapMarkers($filter, $pillar),
         );
     }
 

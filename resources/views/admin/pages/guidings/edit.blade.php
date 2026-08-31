@@ -113,6 +113,26 @@
       </div>
 
       <div class="container shadow-lg p-4 my-5">
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if (session('warning'))
+            <div class="alert alert-warning">{{ session('warning') }}</div>
+        @endif
+        @if (!empty($trashedImages))
+            <div class="alert alert-warning d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                    {{ __('admin.guidings.restore_images_help', [
+                        'count' => count($trashedImages),
+                        'days' => $trashRetentionDays ?? 14,
+                    ]) }}
+                </div>
+                <form method="POST" action="{{ route('admin.guidings.restore-images', $formData['id']) }}" class="mb-0">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">{{ __('admin.guidings.restore_images') }}</button>
+                </form>
+            </div>
+        @endif
         @include('pages.guidings.multi-step-form', ['is_admin_guiding_form' => true])
         {{-- @livewire('admin-edit-guiding',['guiding' => $guiding]) --}}
       </div>

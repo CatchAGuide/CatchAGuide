@@ -1,23 +1,26 @@
 <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content cag-auth-modal">
+            <div class="cag-auth-modal__accent" aria-hidden="true"></div>
             <div class="modal-header border-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body px-4 py-2">
-                <div class="text-center mb-4">
-                    <h3 class="fw-bold">Login</h3>
+            <div class="modal-body">
+                <div class="cag-auth-modal__intro">
+                    <p class="cag-auth-modal__eyebrow">{{ __('homepage.header-login') }}</p>
+                    <h3 id="loginModalLabel" class="cag-auth-modal__title">{{ __('forms.login_title') }}</h3>
+                    <p class="cag-auth-modal__sub">{{ __('forms.login_sub') }}</p>
                 </div>
 
-                <form method="POST" action="{{ route('login') }}" class="mb-3">
+                <form method="POST" action="{{ route('login') }}" class="mb-0">
                     @csrf
                     <div class="mb-3">
-                        <input type="email" 
-                               class="form-control @error('email') is-invalid @enderror" 
-                               name="email" 
+                        <input type="email"
+                               class="form-control @error('email') is-invalid @enderror"
+                               name="email"
                                value="{{ old('email') }}"
                                placeholder="@lang('forms.user')"
-                               required 
+                               required
                                autocomplete="email">
                         @error('email')
                             <span class="invalid-feedback" role="alert">
@@ -27,11 +30,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <input type="password" 
-                               class="form-control @error('password') is-invalid @enderror" 
-                               name="password" 
+                        <input type="password"
+                               class="form-control @error('password') is-invalid @enderror"
+                               name="password"
                                placeholder="@lang('forms.pass')"
-                               required 
+                               required
                                autocomplete="current-password">
                         @error('password')
                             <span class="invalid-feedback" role="alert">
@@ -40,37 +43,37 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input class="form-check-input" 
-                               type="checkbox" 
-                               name="remember" 
-                               id="remember" 
-                               {{ old('remember') ? 'checked' : '' }}> &nbsp;
-                        <label class="form-check-label" for="remember">
-                            {{ __('Remember Me') }}
-                        </label>
+                    <div class="cag-auth-modal__meta">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="remember"
+                                   id="remember"
+                                   {{ old('remember') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="remember">
+                                {{ __('forms.remember_me') }}
+                            </label>
+                        </div>
+                        <a href="{{ route('password.request') }}" class="small">
+                            @lang('forms.forgotPass')
+                        </a>
                     </div>
 
                     <div class="d-grid">
                         <button type="submit" class="btn theme-primary">
-                            <span class="normal-state">{{ __('Login') }}</span>
+                            <span class="normal-state">{{ __('forms.login') }}</span>
                             <span class="loading-state d-none">
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                Loading...
+                                {{ __('forms.loading') }}
                             </span>
                         </button>
                     </div>
                 </form>
 
-                <div class="text-center mb-3">
-                    <a href="{{ route('password.request') }}" class="text-decoration-none">
-                        @lang('forms.forgotPass')
-                    </a>
-                </div>
-
-                <div class="text-center">
-                    <p>{{ translate('Not a member?')}}
-                        <a href="#" id="signup-header" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
+                <div class="cag-auth-modal__footer">
+                    <p>
+                        {{ __('forms.not_a_member') }}
+                        <a href="#" id="signup-header" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
                             @lang('homepage.header-signup')
                         </a>
                     </p>
@@ -80,82 +83,97 @@
     </div>
 </div>
 
-<style>
-#loginModal {
-    z-index: 1060 !important;
-}
-
-#loginModal .modal-backdrop {
-    z-index: 1059 !important;
-}
-
-#loginModal .modal-content {
-    border-radius: 8px;
-    border: none;
-}
-
-#loginModal .form-control {
-    height: 48px;
-    border: 1px solid #E8604C;
-    border-radius: 4px;
-}
-
-#loginModal .form-control:focus {
-    box-shadow: none;
-    border-color: #E8604C;
-}
-
-#loginModal .btn-close {
-    opacity: 0.5;
-}
-
-#loginModal .btn-close:hover {
-    opacity: 0.75;
-}
-
-#loginModal .theme-primary {
-    background-color: #E8604C;
-    color: white;
-    height: 48px;
-    font-weight: 500;
-}
-
-#loginModal .theme-primary:hover {
-    background-color: #313041;
-}
-
-#loginModal .theme-primary:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-#loginModal a {
-    color: #E8604C;
-}
-
-#loginModal a:hover {
-    color: #313041;
-}
-</style>
-
 <script>
+window.__SHOW_LOGIN_MODAL__ = @json((bool) session('show_login_modal'));
+
+window.openLoginModal = function openLoginModal() {
+    const el = document.getElementById('loginModal');
+    // Bootstrap 5.0 (site bundle) has getInstance / new Modal, not getOrCreateInstance.
+    if (!el || !window.bootstrap || !bootstrap.Modal) {
+        return false;
+    }
+
+    const instance = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+    instance.show();
+    return true;
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.querySelector('#loginModal form');
-    
+    if (!loginForm) {
+        return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const shouldOpenLogin = params.get('login') === '1' || window.__SHOW_LOGIN_MODAL__;
+
+    if (shouldOpenLogin) {
+        let attempts = 0;
+        const openWhenBootstrapReady = function () {
+            if (window.openLoginModal()) {
+                if (params.has('login')) {
+                    params.delete('login');
+                    const query = params.toString();
+                    const nextUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+                    window.history.replaceState({}, '', nextUrl);
+                }
+                return;
+            }
+
+            attempts += 1;
+            if (attempts < 40) {
+                // Header modal script can run before vendors/bootstrap is parsed.
+                window.setTimeout(openWhenBootstrapReady, 50);
+            }
+        };
+
+        openWhenBootstrapReady();
+    }
+
+    document.querySelectorAll('.logout-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                return;
+            }
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ _token: csrfToken })
+            })
+            .then(function (response) {
+                return response.ok ? response.json() : null;
+            })
+            .then(function (data) {
+                if (data?.success) {
+                    window.location.href = data.redirect || (window.location.pathname + '?login=1');
+                }
+            })
+            .catch(function () {});
+        });
+    });
+
     loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
+
         // Clear previous errors
         clearErrors(this);
-        
+
         // Show loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.querySelector('.normal-state').classList.add('d-none');
         submitBtn.querySelector('.loading-state').classList.remove('d-none');
-        
+
         const formData = new FormData(this);
-        
+
         fetch(this.action, {
             method: 'POST',
             body: formData,
@@ -166,7 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (response.status === 419) {
-                window.location.reload();
+                const url = new URL(window.location.href);
+                url.searchParams.set('login', '1');
+                window.location.href = url.toString();
                 return null;
             }
 
@@ -197,13 +217,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = result.data;
 
             if (data.success) {
-                // Close the modal
                 const modal = bootstrap.Modal.getInstance(document.querySelector('#loginModal'));
                 if (modal) {
                     modal.hide();
                 }
 
-                // Refresh the current page
+                // Always stay on the current page after login.
                 window.location.reload();
                 return;
             }
@@ -314,4 +333,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script> 
+</script>

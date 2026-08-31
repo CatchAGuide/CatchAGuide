@@ -170,24 +170,17 @@
 
 </head>
 
-<body>
+<body @class(['has-cag-bottom-nav' => \App\Support\SitePrimaryNav::usesLayoutBottomNav()])>
 
   
 <!-- /.preloader -->
 <div class="page-wrapper">
-  
-    @include('layouts.partials.newheader-short', [
-        'isVacation' => request()->is('vacations*'),
-        'currentVacationCountry' => isset($campData) && is_array($campData) && filled($campData['country'] ?? null)
-            ? strtolower((string) $campData['country'])
-            : (isset($tripView) && is_array($tripView) && filled($tripView['country'] ?? null)
-                ? strtolower((string) $tripView['country'])
-                : null),
-    ])
+    @include('layouts.partials.site-chrome')
 
     @yield('content')
 
     @include('layouts.partials.footer')
+    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 

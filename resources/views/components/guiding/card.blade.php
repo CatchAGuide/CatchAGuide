@@ -11,7 +11,7 @@
         $maxPersons = $guiding['max_persons'] ?? null;
         $tourType = $guiding['type'] ?? null;
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
-        $displayPriceType = $guiding['price']['display_type'] ?? __('per tour');
+        $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
     @endphp
 
     <div class="guiding-card__grid">
@@ -31,7 +31,7 @@
                 <div>
                     <button
                         type="button"
-                        aria-label="{{ __('Previous image') }}"
+                        aria-label="{{ __('vacations.gallery_prev') }}"
                         class="guiding-gallery__nav-btn guiding-gallery__nav-btn--prev"
                         data-prev-image
                     >
@@ -39,7 +39,7 @@
                     </button>
                     <button
                         type="button"
-                        aria-label="{{ __('Next image') }}"
+                        aria-label="{{ __('vacations.gallery_next') }}"
                         class="guiding-gallery__nav-btn guiding-gallery__nav-btn--next"
                         data-next-image
                     >
@@ -73,7 +73,7 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        <span>{{ $maxPersons }} {{ __('Pers') }}</span>
+                        <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
                     </span>
                     @endif
                     @if($tourType)
@@ -90,7 +90,7 @@
             {{-- Inclusives panel appears after gallery (expanded only) --}}
             <div class="guiding-card__left-panels" data-expanded-only>
                 <div class="guiding-card__panel">
-                    <div class="guiding-card__panel-title">{{ __('Included in the price') }}</div>
+                    <div class="guiding-card__panel-title">{{ __('vacations.included_in_price') }}</div>
                     <div class="guiding-card__chip-row">
                         @if(!empty($guiding['inclusives']) && is_array($guiding['inclusives']))
                             @foreach($guiding['inclusives'] as $inclusive)
@@ -102,7 +102,7 @@
                                 </span>
                             @endforeach
                         @else
-                            <p class="guiding-card__empty">{{ __('No inclusives listed') }}</p>
+                            <p class="guiding-card__empty">{{ __('vacations.no_inclusives_listed') }}</p>
                         @endif
                     </div>
                 </div>
@@ -132,7 +132,7 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    <span>{{ $maxPersons }} {{ __('Pers') }}</span>
+                    <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
                 </span>
                 @endif
                 @if($tourType)
@@ -155,8 +155,8 @@
                 {{-- <button class="guiding-card__select-btn">
                     {{ __('Select This Guiding') }}
                 </button> --}}
-                <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn>
-                    <span data-toggle-text>{{ __('Show More') }}</span>
+                <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                     <span data-toggle-icon>▼</span>
                 </button>
             </div>
@@ -164,31 +164,31 @@
 
         <div class="guiding-card__info-matrix" data-expanded-only>
             <div class="guiding-card__info-box">
-                <div class="guiding-card__info-box-title">{{ __('Guiding Information') }}</div>
+                <div class="guiding-card__info-box-title">{{ __('vacations.guiding_information') }}</div>
                 <div class="guiding-card__info-box-content">
                     @if(!empty($guiding['guiding_info']))
                         <ul class="guiding-card__info-list">
                             @if(!empty($guiding['guiding_info']['art']))
-                                <li><span>{{ __('Type') }}:</span> <strong>{{ translate($guiding['guiding_info']['art']) }}</strong></li>
+                                <li><span>{{ __('vacations.type_label') }}:</span> <strong>{{ translate($guiding['guiding_info']['art']) }}</strong></li>
                             @endif
                             @if(!empty($guiding['guiding_info']['dauer']))
-                                <li><span>{{ __('Duration') }}:</span> <strong>{{ translate($guiding['guiding_info']['dauer']) }}</strong></li>
+                                <li><span>{{ __('guidings.Duration') }}:</span> <strong>{{ translate($guiding['guiding_info']['dauer']) }}</strong></li>
                             @endif
                             @if(!empty($guiding['guiding_info']['max_personen']))
-                                <li><span>{{ __('Max Persons') }}:</span> <strong>{{ $guiding['guiding_info']['max_personen'] }}</strong></li>
+                                <li><span>{{ __('vacations.max_persons') }}:</span> <strong>{{ $guiding['guiding_info']['max_personen'] }}</strong></li>
                             @endif
                             @if(!empty($guiding['guiding_info']['gewaesser']))
-                                <li><span>{{ __('Water') }}:</span> <strong>{{ translate($guiding['guiding_info']['gewaesser']) }}</strong></li>
+                                <li><span>{{ __('guidings.Water') }}:</span> <strong>{{ translate($guiding['guiding_info']['gewaesser']) }}</strong></li>
                             @endif
                         </ul>
                     @else
-                        <p class="guiding-card__empty">{{ __('No guiding details available') }}</p>
+                        <p class="guiding-card__empty">{{ __('vacations.no_guiding_details') }}</p>
                     @endif
                 </div>
             </div>
 
             <div class="guiding-card__info-box">
-                <div class="guiding-card__info-box-title">{{ __('Target Fish') }}</div>
+                <div class="guiding-card__info-box-title">{{ __('guidings.Target_Fish') }}</div>
                 <div class="guiding-card__info-box-content">
                     @if(!empty($guiding['target_fish']) && is_array($guiding['target_fish']))
                         <div class="guiding-card__chip-row">
@@ -203,12 +203,12 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="guiding-card__empty">{{ __('No target fish specified') }}</p>
+                        <p class="guiding-card__empty">{{ __('vacations.no_target_fish') }}</p>
                     @endif
                 </div>
 
                 @if(!empty($guiding['methods']) && is_array($guiding['methods']) && count($guiding['methods']) > 0)
-                    <div class="guiding-card__info-box-title">{{ __('Fishing Methods') }}</div>
+                    <div class="guiding-card__info-box-title">{{ __('vacations.fishing_methods') }}</div>
                     <div class="guiding-card__info-box-content">
                         <div class="guiding-card__chip-row">
                             @foreach($guiding['methods'] as $method)
@@ -220,11 +220,11 @@
             </div>
 
             <div class="guiding-card__info-box">
-                <div class="guiding-card__info-box-title">{{ __('Location & Schedule') }}</div>
+                <div class="guiding-card__info-box-title">{{ __('vacations.location_schedule') }}</div>
                 <div class="guiding-card__info-box-content">
                     @if(!empty($guiding['meeting_point']))
                         <ul class="guiding-card__info-list">
-                            <li><span>{{ __('Meeting Point') }}:</span> <strong>{{ $guiding['meeting_point'] }}</strong></li>
+                            <li><span>{{ __('guidings.Meeting_Point') }}:</span> <strong>{{ $guiding['meeting_point'] }}</strong></li>
                         </ul>
                     @endif
 
@@ -261,7 +261,7 @@
                     @endif
 
                     @if(empty($guiding['meeting_point']) && empty($guiding['start_times']))
-                        <p class="guiding-card__empty">{{ __('No schedule details available') }}</p>
+                        <p class="guiding-card__empty">{{ __('vacations.no_schedule_details') }}</p>
                     @endif
                 </div>
             </div>
