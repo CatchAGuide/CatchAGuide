@@ -100,6 +100,19 @@ return [
     'next' => 'Weiter',
     'submit_publish' => 'Absenden & Veröffentlichen',
 
+    // Upload / loading feedback
+    'upload_timeout' => 'Upload nach :seconds Sekunden abgebrochen. Bitte weniger oder kleinere Bilder versuchen.',
+    'upload_watchdog' => 'Das dauert zu lange. Bitte weniger oder kleinere Bilder versuchen und erneut speichern.',
+    'upload_prepare_failed' => 'Bilder konnten nicht für den Upload vorbereitet werden. Bitte entfernen, erneut hinzufügen und nochmal versuchen.',
+    'uploading_images' => ':count Bild wird hochgeladen|:count Bilder werden hochgeladen',
+    'uploading_images_hint' => 'Bei langsamer Verbindung kann das eine Minute dauern',
+    'preparing_images' => ':count Bild wird vorbereitet|:count Bilder werden vorbereitet',
+    'preparing_images_hint' => 'Komprimierung vor dem Upload',
+    'saving_progress' => 'Fortschritt wird gespeichert...',
+    'saving_draft' => 'Entwurf wird gespeichert...',
+    'uploading_guiding' => 'Dein Guiding wird hochgeladen...',
+    'keep_tab_open' => 'Bitte diesen Tab geöffnet lassen',
+
     // Additional text
     'extra_input_placeholder' => 'Füge einen Kommentar oder zusätzliche Informationen für deine Gäste hinzu.',
     'error_message' => 'Bitte fülle alle erforderlichen Felder aus.',
