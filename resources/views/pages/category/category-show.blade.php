@@ -823,7 +823,7 @@
         :show-rail="true"
         :show-filter-chips="true"
         :price-chips="true"
-        :landmarks="true"
+        :landmarks="false"
         filter-form-id="filterContainer"
     />
 

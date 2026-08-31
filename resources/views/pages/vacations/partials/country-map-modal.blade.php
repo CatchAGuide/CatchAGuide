@@ -47,7 +47,7 @@
             :show-rail="true"
             :show-filter-chips="false"
             :price-chips="true"
-            :landmarks="true"
+            :landmarks="false"
         />
     @endif
 @endif

@@ -170,7 +170,7 @@ class HomepageLandingTest extends TestCase
                 'rating' => '9.8/10',
                 'bookings' => '10,000+',
                 'offers' => '450+',
-                'countries' => '12+',
+                'countries' => '24',
                 'reviews_count' => 2480,
                 'reviews_label' => 'View 2,480+ reviews',
                 'rating_label' => 'Average rating',
@@ -250,24 +250,21 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee('Fishing in Germany', false);
         $response->assertSee('cag-home-trust', false);
         $response->assertSee('cag-home-trust__grid', false);
-        $response->assertSee('cag-home-trust__strip', false);
-        $response->assertSee('cag-home-trust__primary', false);
-        $response->assertSee('cag-home-trust__lead', false);
-        $response->assertSee(__('homepage.trust_angler_approved'), false);
+        $response->assertSee('cag-home-trust__cell-heading', false);
+        $response->assertSee('cag-home-trust__cell-line', false);
+        $response->assertDontSee('cag-home-trust__strip', false);
         $response->assertDontSee('Shopper Approved', false);
-        $response->assertSee('View 2,480+ reviews', false);
         $response->assertSee('450+', false);
-        $response->assertSee('12+', false);
-        $response->assertSee(__('homepage.trust_offers_label'), false);
-        $response->assertSee(__('homepage.trust_countries_label'), false);
-        $response->assertSee(__('homepage.trust_advice_title'), false);
-        $response->assertSee(__('homepage.trust_partners_title'), false);
+        $response->assertSee(__('homepage.trust_rating_sub'), false);
+        $response->assertSee(__('homepage.trust_offers_heading'), false);
+        $response->assertSee(__('homepage.trust_offers_countries', ['count' => '24']), false);
+        $response->assertSee(__('homepage.trust_advice_line1'), false);
+        $response->assertSee(__('homepage.trust_advice_line2'), false);
+        $response->assertSee(__('homepage.trust_advice_text'), false);
+        $response->assertSee(__('homepage.trust_partners_line1'), false);
+        $response->assertSee(__('homepage.trust_partners_line2'), false);
+        $response->assertSee(__('homepage.trust_partners_text'), false);
         $response->assertSee('cag-icon--star', false);
-        $response->assertSee('cag-home-trust__assurances', false);
-        $response->assertSee(__('homepage.trust_reply_title'), false);
-        $response->assertSee(__('homepage.trust_cancel_title'), false);
-        $response->assertSee(__('homepage.trust_reply_text'), false);
-        $response->assertSee(__('homepage.trust_cancel_text'), false);
         $response->assertSee('cag-home-season', false);
         $response->assertSee('cag-home-season__grid', false);
         $response->assertSee('cag-home-season__card', false);
@@ -370,7 +367,7 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee("reviewsRail.addEventListener('mouseenter'", false);
     }
 
-    public function test_homepage_pillar_doors_use_stacked_screenshot_layout(): void
+    public function test_homepage_pillar_doors_are_side_by_side_on_desktop(): void
     {
         $desktop = (string) file_get_contents(resource_path('sass/page/home.scss'));
         $mobile = (string) file_get_contents(resource_path('sass/page/_home-mobile.scss'));
@@ -380,12 +377,16 @@ class HomepageLandingTest extends TestCase
             $desktop
         );
         $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*grid-template-columns:\s*1fr 1fr/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
             '/\.cag-home-hero__doors\s*\{[^}]*flex-direction:\s*column/',
             $mobile
         );
         $this->assertDoesNotMatchRegularExpression(
             '/\.cag-home-hero__doors\s*\{[^}]*grid-template-columns/',
-            $desktop
+            $mobile
         );
         $this->assertDoesNotMatchRegularExpression(
             '/\.cag-home-hero__door-title\s*\{\s*display:\s*none/',
@@ -395,9 +396,39 @@ class HomepageLandingTest extends TestCase
             '/\.cag-home-hero__door-title\s*\{[^}]*color:\s*#fff/',
             $desktop
         );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__grid\s*\{[^}]*grid-template-columns:\s*repeat\(4/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__cell-heading\s*\{[^}]*flex-direction:\s*column/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__cell-heading\s*\{[^}]*flex-direction:\s*row/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__grid\s*\{[^}]*grid-template-columns:\s*1fr 1fr/',
+            $mobile
+        );
         $this->assertSame(
             'Dein nächster Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide.',
             trans('homepage.chooser_vacation_sub', [], 'de')
         );
+        $this->assertSame('Bewertet von Anglern, die gebucht haben', trans('homepage.trust_rating_sub', [], 'de'));
+        $this->assertSame('450+ Angelerlebnisse', trans('homepage.trust_offers_over', ['count' => '450+'], 'de'));
+        $this->assertSame(
+            'Geführte Touren und Camps in 24 Ländern',
+            trans('homepage.trust_offers_countries', ['count' => '24'], 'de')
+        );
+        $this->assertSame('Persönlicher Support', trans('homepage.trust_advice_title', [], 'de'));
+        $this->assertSame('Persönlicher', trans('homepage.trust_advice_line1', [], 'de'));
+        $this->assertSame('Support', trans('homepage.trust_advice_line2', [], 'de'));
+        $this->assertSame('Geprüfte', trans('homepage.trust_partners_line1', [], 'de'));
+        $this->assertSame('Partner', trans('homepage.trust_partners_line2', [], 'de'));
+        $this->assertSame('Angelerlebnisse', trans('homepage.trust_offers_heading', [], 'de'));
+        $this->assertSame('Echte Angler, rund um die Uhr für dich', trans('homepage.trust_advice_text', [], 'de'));
+        $this->assertSame('Handverlesene Guides, selbst getestet', trans('homepage.trust_partners_text', [], 'de'));
     }
 }

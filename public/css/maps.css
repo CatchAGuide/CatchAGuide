@@ -776,7 +776,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   background: #e8ecef;
 }
 .cag-map {
-  /* Calmer, Google-style basemap: fewer saturated greens/blues, softer road contrast.
+  /* Fully gray, low-contrast basemap: fades thin OSM detail baked into the tile
+     images (one-way arrows, admin-border dashes) toward the background instead of
+     removing it outright — these come from the raster tiles themselves, not a layer
+     we control, and this project intentionally stays on unauthenticated OSM tiles
+     (see tests/Feature/Maps/MapBasemapConfigTest.php) rather than a styled provider.
      Scoped to the tile pane only so pins/clusters/popups keep full color. */
 }
 .cag-map .leaflet-tile-pane {

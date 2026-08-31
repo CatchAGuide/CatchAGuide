@@ -315,6 +315,13 @@
     gap: 7px;
     padding: 18px 15px 19px;
     background: var(--cag-slate);
+    border-left: 0;
+
+    &:first-child,
+    &:last-child {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
   }
 
   .cag-home-trust__cell-title {
@@ -333,11 +340,16 @@
     }
   }
 
+  .cag-home-trust__cell-heading {
+    min-height: 2.6em;
+  }
+
   .cag-home-trust__cell-sub {
     font-size: 11.5px;
     line-height: 1.45;
     color: rgba(255, 255, 255, 0.55);
     text-decoration: none;
+    min-height: calc(1.45em * 2);
 
     &:is(a):hover {
       color: #fff;

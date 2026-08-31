@@ -20,6 +20,9 @@ class HomepageLandingService
     /** Marketing floor for catalog size shown on the homepage trust band. */
     public const TRUST_OFFERS_LABEL = '450+';
 
+    /** Marketing floor for countries shown on the homepage trust band. */
+    public const TRUST_COUNTRIES_FLOOR = 24;
+
     public const SEASON_CACHE_PREFIX = 'homepage_season_v7';
 
     public function __construct(
@@ -280,7 +283,7 @@ class HomepageLandingService
      *     rating: ?string,
      *     bookings: ?string,
      *     offers: string,
-     *     countries: ?string,
+     *     countries: string,
      *     reviews_count: int,
      *     reviews_label: ?string,
      *     rating_label: string,
@@ -293,7 +296,7 @@ class HomepageLandingService
     {
         $locale = app()->getLocale();
 
-        return Cache::remember("homepage_trust_stats_v4_{$locale}_{$countryCount}", now()->addHour(), function () use ($countryCount) {
+        return Cache::remember("homepage_trust_stats_v6_{$locale}_{$countryCount}", now()->addHour(), function () use ($countryCount, $locale) {
             $realReviews = Review::query()
                 ->where(function ($q) {
                     $q->where('is_automatic', false)->orWhereNull('is_automatic');
@@ -319,12 +322,10 @@ class HomepageLandingService
                 $reviewsLabel = __('homepage.trust_view_reviews', ['count' => $rounded]);
             }
 
-            $countriesLabel = $countryCount > 0
-                ? $countryCount.'+'
-                : null;
+            $countriesLabel = (string) max($countryCount, self::TRUST_COUNTRIES_FLOOR);
 
             return [
-                'rating' => $avg ? number_format((float) $avg, 1).'/10' : null,
+                'rating' => $avg ? number_format((float) $avg, 1, $locale === 'de' ? ',' : '.', '').'/10' : null,
                 'bookings' => $bookingsLabel,
                 'offers' => self::TRUST_OFFERS_LABEL,
                 'countries' => $countriesLabel,
