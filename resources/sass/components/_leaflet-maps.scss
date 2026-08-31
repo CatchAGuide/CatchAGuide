@@ -1312,7 +1312,12 @@
 .cag-map-cluster {
   background: transparent !important;
   border: none !important;
-  position: relative;
+  // Leaflet positions marker icons with `position: absolute` + a translate3d
+  // transform. This selector's specificity beats `.leaflet-marker-icon`, so
+  // overriding to `relative` here left the icon in normal document flow —
+  // each marker pushed the next one down the page, and the effect compounded
+  // with marker count until the map looked shredded at low zoom.
+  position: absolute;
 
   &__core,
   &__edge {

@@ -7,11 +7,37 @@ use Tests\TestCase;
 
 class MarkerClusterRadiusTest extends TestCase
 {
-    public function test_cell_size_shrinks_with_zoom(): void
+    public function test_cell_size_is_capped_at_low_zoom(): void
     {
-        $this->assertSame(90.0, MarkerClusterRadius::cellSizeDegrees(0));
-        $this->assertSame(22.5, MarkerClusterRadius::cellSizeDegrees(2));
+        // Zoom is floored at MIN_CLUSTER_ZOOM (4), so world-zoom cells never
+        // grow coarser than the zoom-4 size — see class docblock.
+        $this->assertSame(5.625, MarkerClusterRadius::cellSizeDegrees(0));
+        $this->assertSame(5.625, MarkerClusterRadius::cellSizeDegrees(2));
+        $this->assertSame(5.625, MarkerClusterRadius::cellSizeDegrees(4));
+    }
+
+    public function test_cell_size_shrinks_with_zoom_above_the_cap(): void
+    {
         $this->assertEqualsWithDelta(0.703125, MarkerClusterRadius::cellSizeDegrees(7), 0.0001);
+        $this->assertLessThan(
+            MarkerClusterRadius::cellSizeDegrees(4),
+            MarkerClusterRadius::cellSizeDegrees(7)
+        );
+    }
+
+    public function test_world_zoom_keeps_neighbouring_countries_from_merging_into_one_giant_cluster(): void
+    {
+        // Regression: an uncapped 22.5° cell at zoom 2 merged Netherlands,
+        // Belgium, Germany, Denmark and Sweden into a single cluster whose
+        // averaged position landed over northern Germany, making the other
+        // countries look listing-free.
+        $amsterdam = MarkerClusterRadius::cellKey(52.37, 4.89, 2);
+        $berlin = MarkerClusterRadius::cellKey(52.52, 13.405, 2);
+        $stockholm = MarkerClusterRadius::cellKey(59.33, 18.06, 2);
+
+        $this->assertNotSame($amsterdam, $berlin);
+        $this->assertNotSame($amsterdam, $stockholm);
+        $this->assertNotSame($berlin, $stockholm);
     }
 
     public function test_world_zoom_keeps_europe_and_west_africa_in_different_cells(): void
@@ -50,7 +76,7 @@ class MarkerClusterRadiusTest extends TestCase
 
         $this->assertStringContainsString('clusterCellKey(ll.lat, ll.lng, zoom)', $grid);
         $this->assertStringNotContainsString('map.project(', $grid);
-        $this->assertStringContainsString('360 / 2 ** (z + 2)', $helper);
+        $this->assertStringContainsString('360 / 2 ** (effectiveZ + 2)', $helper);
         $this->assertStringContainsString('new GridMarkerCluster', $manager);
         $this->assertStringNotContainsString('L.markerClusterGroup', $manager);
     }
