@@ -7,15 +7,21 @@ namespace App\Support\Maps;
  *
  * Cell size is 360 / 2^(zoom+2) degrees so pins are bucketed by lat/lng,
  * not map pixels. A pixel grid at world zoom collapses longitude and draws
- * every pin on a vertical line down the Prime Meridian.
+ * every pin on a vertical line down the Prime Meridian. Zoom is floored at
+ * MIN_CLUSTER_ZOOM so cells never grow coarser than that at low zoom — an
+ * uncapped 22.5°/90° cell at world zoom merges half of Europe into one
+ * cluster whose averaged marker position lands nowhere near any real pin.
  */
 final class MarkerClusterRadius
 {
+    private const MIN_CLUSTER_ZOOM = 4;
+
     public static function cellSizeDegrees(int|float $zoom): float
     {
         $z = max(0, (int) round($zoom));
+        $effectiveZ = max($z, self::MIN_CLUSTER_ZOOM);
 
-        return 360 / (2 ** ($z + 2));
+        return 360 / (2 ** ($effectiveZ + 2));
     }
 
     public static function wrapLng(float $lng): float
