@@ -1,7 +1,7 @@
 /**
  * CAG Maps bundle — Leaflet product/listing maps + deferred Places shim
  */
-import mapsManager from './MapsManager';
+import mapsManager, { clusterRadiusForZoom, clusterCellKey } from './MapsManager';
 import markerFactory from './MarkerFactory';
 import ProductMap from './ProductMap';
 import ListingMap from './ListingMap';
@@ -12,6 +12,8 @@ import LandmarkLayer from './LandmarkLayer';
 
 window.CAGMaps = {
   MapsManager: mapsManager,
+  clusterRadiusForZoom,
+  clusterCellKey,
   MarkerFactory: markerFactory,
   ProductMap,
   ListingMap,
@@ -113,6 +115,8 @@ if (document.readyState === 'loading') {
 export {
   mapsManager,
   markerFactory,
+  clusterRadiusForZoom,
+  clusterCellKey,
   ProductMap,
   ListingMap,
   MapModalRail,
