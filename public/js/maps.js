@@ -3218,8 +3218,8 @@ var MarkerFactory = /*#__PURE__*/function () {
         isOther = _ref$isOther === void 0 ? false : _ref$isOther;
       var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       var classes = ['leaflet-div-icon', 'cag-map-chip', "cag-map-chip--".concat(variant), isOther ? 'cag-map-chip--other' : '', selected ? 'cag-map-chip--selected' : '', viewed ? 'cag-map-chip--viewed' : ''].filter(Boolean).join(' ');
-      var visualHeight = isOther ? 19 : 22;
-      var visualWidth = Math.min(130, Math.max(isOther ? 34 : 40, String(priceLabel).length * (isOther ? 6 : 7) + (isOther ? 20 : 24)));
+      var visualHeight = isOther ? 20 : 24;
+      var visualWidth = Math.min(136, Math.max(isOther ? 36 : 44, String(priceLabel).length * (isOther ? 7 : 8) + (isOther ? 22 : 28)));
       var hitWidth = Math.max(visualWidth, 44);
       var hitHeight = 44;
       return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({

@@ -13,7 +13,6 @@
         @endif
         <h2 class="vacation-section-heading__title">{{ $title }}</h2>
         @if($subtitle)
-            <x-title-rule />
             <p class="vacation-section-heading__subtitle">{{ $subtitle }}</p>
         @endif
     </div>

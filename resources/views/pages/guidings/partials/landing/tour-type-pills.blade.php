@@ -5,7 +5,6 @@
         <div class="cag-home-section__header cag-reveal__header">
             <div class="cag-home-species__heading">
                 <h2 class="cag-home-section__title">{{ __('homepage.landing_pills_title') }}</h2>
-                <x-title-rule />
                 <p class="cag-home-species__subtitle">{{ __('homepage.landing_pills_subtitle') }}</p>
             </div>
         </div>

@@ -761,21 +761,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
   position: relative;
   z-index: 1;
   /* Map-only marker palette (spec: "Marker colour scheme & cluster logic").
-     Deliberately separate from $category-tour/camp/trip (used sitewide for
-     badges/gradients) — the basemap needs darker, AA-compliant steps that
-     stay legible over OSM tiles rather than the brand accent shades. */
-  --map-tours: #c9442c;
-  --map-tours-hover: #823a22;
-  --map-tours-press: #9b3119;
+     Kept separate from $category-tour/camp/trip (used sitewide for badges/
+     gradients) even though the tours/camps steps happen to match — holidays
+     and "other" use their own AA-compliant shades tuned for the basemap. */
+  --map-tours: #313041;
+  --map-tours-hover: #3e3d50;
+  --map-tours-press: #262533;
   --map-camps: #0f6f63;
   --map-camps-hover: #0c5f55;
   --map-camps-press: #0b4c44;
-  --map-holidays: #2f488c;
-  --map-holidays-hover: #28407a;
-  --map-holidays-press: #1f3462;
-  --map-other: #687480;
-  --map-other-hover: #586570;
-  --map-other-press: #4a535d;
+  --map-holidays: #2f72b8;
+  --map-holidays-hover: #3780cc;
+  --map-holidays-press: #2a66a4;
+  --map-other: #aeb8c4;
+  --map-other-hover: #bec6d0;
+  --map-other-press: #a0abb9;
 }
 .cag-map--product {
   min-height: 200px;
@@ -1214,9 +1214,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 3px 8px;
+  /* Price is the only content in a pill — sized up from the spec's 12px so it
+     stays legible over the basemap instead of reading as a tiny colour blob. */
+  padding: 4px 9px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1;
   color: #fff;
@@ -1254,8 +1256,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 .leaflet-div-icon.cag-map-chip--other .cag-map-chip__inner,
 .cag-map-chip--other .cag-map-chip__inner {
-  padding: 2px 7px;
-  font-size: 11px;
+  padding: 3px 8px;
+  font-size: 12px;
   border-width: 1px;
   border-color: rgba(255, 255, 255, 0.92);
   box-shadow: none;

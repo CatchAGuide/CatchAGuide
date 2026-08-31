@@ -95,10 +95,10 @@ class MarkerFactory {
       .filter(Boolean)
       .join(' ');
 
-    const visualHeight = isOther ? 19 : 22;
+    const visualHeight = isOther ? 20 : 24;
     const visualWidth = Math.min(
-      130,
-      Math.max(isOther ? 34 : 40, String(priceLabel).length * (isOther ? 6 : 7) + (isOther ? 20 : 24))
+      136,
+      Math.max(isOther ? 36 : 44, String(priceLabel).length * (isOther ? 7 : 8) + (isOther ? 22 : 28))
     );
     const hitWidth = Math.max(visualWidth, 44);
     const hitHeight = 44;

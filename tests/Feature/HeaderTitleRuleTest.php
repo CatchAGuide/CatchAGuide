@@ -53,24 +53,45 @@ class HeaderTitleRuleTest extends TestCase
         $this->assertStringNotContainsString('cag-title-rule', $html);
     }
 
-    public function test_section_headers_render_light_title_rule_between_title_and_subtitle(): void
+    public function test_section_headers_omit_title_rule(): void
     {
         $heading = View::make('components.vacation.section-heading', [
             'title' => 'Camps or trips',
             'subtitle' => 'Pick your style',
         ])->render();
 
-        $this->assertStringContainsString('cag-title-rule', $heading);
-        $this->assertStringContainsString('cag-title-rule--light', $heading);
-        $this->assertStringNotContainsString('cag-title-rule--dark', $heading);
+        $this->assertStringNotContainsString('cag-title-rule', $heading);
+        $this->assertStringContainsString('Camps or trips', $heading);
+        $this->assertStringContainsString('Pick your style', $heading);
 
         $rail = Blade::render(
             '<x-vacation.country-slider title="Popular destinations" subtitle="From Denmark to the Ebro" slider-id="test-rail"></x-vacation.country-slider>'
         );
 
-        $this->assertStringContainsString('cag-title-rule', $rail);
+        $this->assertStringNotContainsString('cag-title-rule', $rail);
         $this->assertStringContainsString('Popular destinations', $rail);
         $this->assertStringContainsString('From Denmark to the Ebro', $rail);
+
+        $species = View::make('pages.home.partials.target-species', [
+            'targetSpecies' => collect([
+                [
+                    'url' => 'http://localhost/targets/pike',
+                    'thumbnail' => 'http://localhost/pike.webp',
+                    'name' => 'Pike',
+                ],
+            ]),
+        ])->render();
+
+        $this->assertStringNotContainsString('cag-title-rule', $species);
+        $this->assertStringContainsString('cag-home-section__title', $species);
+
+        $slider = Blade::render(
+            '<x-vacation.card-slider title="Most booked tours" subtitle="Hand-picked by our guests" slider-id="test-slider"></x-vacation.card-slider>'
+        );
+
+        $this->assertStringNotContainsString('cag-title-rule', $slider);
+        $this->assertStringContainsString('Most booked tours', $slider);
+        $this->assertStringContainsString('Hand-picked by our guests', $slider);
     }
 
     public function test_desktop_styles_hide_title_rule_and_keep_header_copy_on_one_line(): void

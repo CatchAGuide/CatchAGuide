@@ -4,7 +4,6 @@
         <div class="cag-home-section__header cag-home-species__header">
             <div class="cag-home-species__heading">
                 <h2 class="cag-home-section__title">{{ __('homepage.species_title') }}</h2>
-                <x-title-rule />
                 <p class="cag-home-species__subtitle">{{ __('homepage.species_subtitle') }}</p>
                 <a href="{{ route('targets.index') }}" class="cag-home-section__link cag-home-section__link--mobile">
                     {{ __('homepage.species_view_all') }}
