@@ -49,19 +49,6 @@ class OfferCatalogViewModelTitleTest extends TestCase
         ]), $title);
     }
 
-    public function test_suggested_place_label_uses_country_when_place_is_empty(): void
-    {
-        $vm = $this->vm(
-            type: 'vacation',
-            vacation: 'camp',
-            country: 'lettland',
-            countries: collect([['slug' => 'lettland', 'name' => 'Latvia']]),
-        );
-
-        $this->assertSame('Latvia', $vm->suggestedPlaceLabel());
-        $this->assertSame(__('offers.breadcrumb'), $this->vm()->suggestedPlaceLabel());
-    }
-
     public function test_single_species_appends_target_fish(): void
     {
         $title = $this->vm(

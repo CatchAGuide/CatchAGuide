@@ -663,13 +663,13 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-offer-type="tour"', false);
         $response->assertSee('data-offer-type="trip"', false);
         $response->assertSee('data-offer-type="camp"', false);
-        $response->assertSee(__('offers.suggested_near', ['place' => 'Nowhere']), false);
+        $response->assertSee(__('offers.suggested_near'), false);
         $response->assertSee(__('offers.filter_all').' (0)', false);
         $response->assertDontSee('offers-filters__type-btn--tour', false);
         $response->assertDontSee('offers-filters__type-btn--vacation', false);
     }
 
-    public function test_suggested_heading_uses_country_when_place_is_missing(): void
+    public function test_suggested_heading_does_not_include_place_or_country(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(
             type: 'vacation',
@@ -689,7 +689,8 @@ class OffersCatalogTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Baltic Nearby Tour', false);
-        $response->assertSee(__('offers.suggested_near', ['place' => 'Germany']), false);
+        $response->assertSee(__('offers.suggested_near'), false);
+        $response->assertDontSee('close to Germany', false);
         $response->assertSee(__('offers.filter_camps').' (0)', false);
     }
 

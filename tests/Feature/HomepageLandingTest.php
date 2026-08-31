@@ -216,7 +216,7 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-hero__door-icon', false);
         $response->assertSee('cag-home-hero__eyebrow', false);
         $response->assertSee('cag-home-hero__rule', false);
-        $response->assertSee('cag-icon--rod', false);
+        $response->assertSee('cag-icon--fish', false);
         $response->assertSee('cag-icon--camp', false);
         $response->assertSee('cag-home-ph', false);
         $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
@@ -233,14 +233,14 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee('cag-home-destinations__code', false);
         $response->assertSee(__('homepage.hero_h1'), false);
         $response->assertSee(__('homepage.hero_sub'), false);
-        $response->assertSee('cag-home-hero__door-label', false);
+        $response->assertDontSee('cag-home-hero__door-label', false);
         $response->assertSee('cag-home-hero__door-title', false);
         $response->assertSee('cag-home-hero__door-sub', false);
         $response->assertSee(__('homepage.chooser_tour_label'), false);
-        $response->assertSee(__('homepage.chooser_tour_title'), false);
+        $response->assertDontSee(__('homepage.chooser_tour_title'), false);
         $response->assertSee(__('homepage.chooser_tour_sub'), false);
         $response->assertSee(__('homepage.chooser_vacation_label'), false);
-        $response->assertSee(__('homepage.chooser_vacation_title'), false);
+        $response->assertDontSee(__('homepage.chooser_vacation_title'), false);
         $response->assertSee(__('homepage.chooser_vacation_sub'), false);
         $response->assertSee(__('homepage.species_subtitle'), false);
         $response->assertSee(__('homepage.reviews_title'), false);
@@ -370,25 +370,34 @@ class HomepageLandingTest extends TestCase
         $response->assertDontSee("reviewsRail.addEventListener('mouseenter'", false);
     }
 
-    public function test_mobile_hero_doors_keep_desktop_copy_hierarchy(): void
+    public function test_homepage_pillar_doors_use_stacked_screenshot_layout(): void
     {
+        $desktop = (string) file_get_contents(resource_path('sass/page/home.scss'));
         $mobile = (string) file_get_contents(resource_path('sass/page/_home-mobile.scss'));
 
         $this->assertMatchesRegularExpression(
-            '/\.cag-home-hero__doors\s*\{[\s\S]*flex-direction:\s*column/',
+            '/\.cag-home-hero__doors\s*\{[^}]*flex-direction:\s*column/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*flex-direction:\s*column/',
             $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*grid-template-columns/',
+            $desktop
         );
         $this->assertDoesNotMatchRegularExpression(
             '/\.cag-home-hero__door-title\s*\{\s*display:\s*none/',
             $mobile
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/\.cag-home-hero__door-label\s*\{[\s\S]*?text-transform:\s*none/',
-            $mobile
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__door-title\s*\{[^}]*color:\s*#fff/',
+            $desktop
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/\.cag-home-hero__door-label\s*\{[\s\S]*?color:\s*#fff/',
-            $mobile
+        $this->assertSame(
+            'Dein nächster Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide.',
+            trans('homepage.chooser_vacation_sub', [], 'de')
         );
     }
 }

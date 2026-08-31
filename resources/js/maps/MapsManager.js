@@ -129,7 +129,10 @@ class MapsManager {
     const cluster = L.markerClusterGroup({
       showCoverageOnHover: false,
       maxClusterRadius: muted ? 60 : 50,
-      spiderfyOnMaxZoom: true,
+      // We own click/keypress handling below instead of the plugin defaults,
+      // so a single click can jump straight to the cluster's real bounds.
+      spiderfyOnMaxZoom: false,
+      zoomToBoundsOnClick: false,
       iconCreateFunction: (clusterGroup) => this._createClusterIcon(clusterGroup, muted),
     });
 
@@ -137,13 +140,35 @@ class MapsManager {
       markers.forEach((m) => cluster.addLayer(m));
     }
 
-    cluster.on('clusterclick', (e) => {
-      const currentZoom = map.getZoom();
-      map.setView(e.latlng, Math.min(currentZoom + 2, map.getMaxZoom()));
-    });
+    cluster.on('clusterclick clusterkeypress', (e) => this._onClusterActivate(e, map));
 
     map.addLayer(cluster);
     return cluster;
+  }
+
+  /**
+   * Single click/keypress on a cluster: zoom straight to its true bounds instead of
+   * stepping the zoom level up a click at a time. Pins sitting on the same (or
+   * near-identical) coordinates never separate by zooming further in, so spiderfy
+   * them open immediately rather than forcing the user to reach max zoom first.
+   */
+  _onClusterActivate(e, map) {
+    if (e.type === 'clusterkeypress' && e.originalEvent && e.originalEvent.keyCode !== 13) {
+      return;
+    }
+
+    const cluster = e.layer;
+    const isTightCluster = cluster.getChildCount() > 1 && map.getBoundsZoom(cluster.getBounds()) >= map.getMaxZoom();
+
+    if (isTightCluster) {
+      cluster.spiderfy();
+    } else {
+      cluster.zoomToBounds({ paddingTopLeft: [24, 24], paddingBottomRight: [24, 24] });
+    }
+
+    if (e.originalEvent && e.originalEvent.keyCode === 13) {
+      map._container.focus();
+    }
   }
 
   _createClusterIcon(clusterGroup, muted = false) {

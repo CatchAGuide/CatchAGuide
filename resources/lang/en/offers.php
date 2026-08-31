@@ -80,7 +80,7 @@ return [
     'results_count' => ':count Experiences',
     'results_found' => ':count results found for your selection',
     'searching_near' => 'Showing Experiences near :place',
-    'suggested_near' => 'Additional Experiences close to :place',
+    'suggested_near' => 'Additional Experiences close to your search',
     'suggested_count' => ':count nearby Experiences',
     'see_details' => 'Details',
     'included_heading' => 'Included',

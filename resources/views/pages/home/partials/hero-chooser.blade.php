@@ -117,11 +117,10 @@
                 data-home-analytics="homepage_chooser_guidings_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
-                    @include('pages.home.partials.cag-icon', ['name' => 'rod', 'size' => 40])
+                    @include('pages.home.partials.cag-icon', ['name' => 'fish', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
-                    <span class="cag-home-hero__door-label">{{ __('homepage.chooser_tour_label') }}</span>
-                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_title') }}</span>
+                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_label') }}</span>
                     <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_tour_sub') }}</span>
                 </span>
                 <span class="cag-home-hero__door-arrow" aria-hidden="true">
@@ -138,8 +137,7 @@
                     @include('pages.home.partials.cag-icon', ['name' => 'camp', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
-                    <span class="cag-home-hero__door-label">{{ __('homepage.chooser_vacation_label') }}</span>
-                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_title') }}</span>
+                    <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_label') }}</span>
                     <span class="cag-home-hero__door-sub">{{ __('homepage.chooser_vacation_sub') }}</span>
                 </span>
                 <span class="cag-home-hero__door-arrow" aria-hidden="true">

@@ -4,6 +4,7 @@
     $iconClass = trim('cag-icon cag-icon--'.$name.' '.($iconClass ?? ''));
     $boxes = [
         'rod' => '0 0 32 32',
+        'fish' => '0 0 32 32',
         'camp' => '0 0 32 32',
         'globe' => '0 0 32 32',
     ];
@@ -27,6 +28,14 @@
             <path d="M21 19l1.6 4"></path>
             <path d="M22.6 23c-2.4.6-4-.4-4.4-2"></path>
             <path d="M4 27c2.6 0 2.6-1.8 5.2-1.8S12 27 14.6 27s2.6-1.8 5.2-1.8S22.4 27 25 27"></path>
+            @break
+        @case('fish')
+            <path d="M9 18c3.2-5.2 9.2-8.2 15.4-6.8 1.8.4 3.2 1.6 3.6 3.4-2.4.6-4.8 0-6.8-1.4"></path>
+            <path d="M9 18L4.2 15.2"></path>
+            <path d="M9 18l-3.4 4.6"></path>
+            <path d="M18.2 11.6L20.8 7.4"></path>
+            <circle cx="24.6" cy="12.2" r="0.85" fill="currentColor" stroke="none"></circle>
+            <path d="M4 24c2.8 0 2.8-1.6 5.6-1.6S12.4 24 15.2 24s2.8-1.6 5.6-1.6S23.6 24 26.4 24 29.2 22.4 32 22.4"></path>
             @break
         @case('camp')
             <path d="M5 14l7-6 7 6"></path>

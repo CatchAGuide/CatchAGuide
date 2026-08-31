@@ -151,7 +151,7 @@
             @if($vm->suggestedCards->isNotEmpty())
                 <section class="offers-catalog__suggested" data-offers-suggested>
                     <h2 class="offers-catalog__suggested-title">
-                        {{ __('offers.suggested_near', ['place' => $vm->suggestedPlaceLabel()]) }}
+                        {{ __('offers.suggested_near') }}
                     </h2>
                     <p class="offers-catalog__suggested-count">
                         {{ __('offers.suggested_count', ['count' => $vm->suggestedCards->count()]) }}

@@ -1582,8 +1582,8 @@ body .main-menu .main-menu-wrapper__nav {
 }
 
 .cag-home-hero__doors {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
   max-width: 28rem;
   margin: 0 auto;
@@ -1592,8 +1592,7 @@ body .main-menu .main-menu-wrapper__nav {
   .cag-home-hero__doors {
     max-width: none;
     margin: 0;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 0.85rem;
   }
 }
 
@@ -1601,12 +1600,12 @@ body .main-menu .main-menu-wrapper__nav {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.9rem;
   text-align: left;
-  padding: 0.85rem 2.25rem 0.85rem 0.75rem;
-  border-radius: 0.75rem;
-  background: rgba(49, 48, 65, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.1rem 1.15rem;
+  border-radius: 14px;
+  background: rgba(22, 26, 36, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #fff;
   text-decoration: none;
   position: relative;
@@ -1615,22 +1614,15 @@ body .main-menu .main-menu-wrapper__nav {
 }
 @media (min-width: 768px) {
   .cag-home-hero__door {
-    gap: 1rem;
-    padding: 1.25rem 3rem 1.25rem 1.25rem;
-    min-height: 110px;
+    gap: 1.15rem;
+    padding: 1.25rem 1.35rem;
   }
 }
 .cag-home-hero__door:hover {
   color: #fff;
-  border-color: var(--cag-coral);
+  border-color: rgba(255, 255, 255, 0.38);
   transform: translateY(-2px);
-  background: rgba(49, 48, 65, 0.95);
-}
-.cag-home-hero__door:hover .cag-home-hero__door-title {
-  color: var(--cag-coral);
-}
-.cag-home-hero__door:hover .cag-home-hero__door-icon {
-  color: var(--cag-coral);
+  background: rgba(22, 26, 36, 0.92);
 }
 
 .cag-home-hero__door-icon {
@@ -1640,18 +1632,17 @@ body .main-menu .main-menu-wrapper__nav {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  color: rgba(255, 255, 255, 0.92);
-  transition: color 0.2s ease;
+  color: #fff;
 }
 .cag-home-hero__door-icon .cag-icon {
   width: 100%;
   height: 100%;
-  stroke-width: 1.8;
+  stroke-width: 1.7;
 }
 @media (min-width: 768px) {
   .cag-home-hero__door-icon {
-    width: 2.85rem;
-    height: 2.85rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }
 
@@ -1660,45 +1651,45 @@ body .main-menu .main-menu-wrapper__nav {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 0.15rem;
+  gap: 0.2rem;
   flex: 1;
   min-width: 0;
 }
 
-.cag-home-hero__door-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--cag-coral);
-}
-
 .cag-home-hero__door-title {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  line-height: 1.2;
+  color: #fff;
 }
 @media (min-width: 768px) {
   .cag-home-hero__door-title {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
   }
 }
 
 .cag-home-hero__door-sub {
-  font-size: 0.85rem;
-  opacity: 0.85;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.88);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
+}
+@media (min-width: 768px) {
+  .cag-home-hero__door-sub {
+    font-size: 0.92rem;
+  }
 }
 
 .cag-home-hero__door-arrow {
-  position: absolute;
-  right: 1.25rem;
-  top: 50%;
-  margin-top: -0.5rem;
-  color: inherit;
+  flex-shrink: 0;
   display: flex;
+  align-items: center;
+  color: #fff;
+  margin-left: 0.25rem;
 }
 .cag-home-hero__door-arrow .cag-icon {
   stroke-width: 2.2;
@@ -3621,15 +3612,16 @@ body .main-menu .main-menu-wrapper__nav {
   .cag-home-hero__door {
     align-items: center;
     gap: 14px;
-    padding: 18px 44px 18px 18px;
+    padding: 18px;
     border-radius: 14px;
-    background: rgba(19, 23, 33, 0.68);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(19, 23, 33, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     backdrop-filter: none;
     min-height: 0;
   }
   .cag-home-hero__door:hover {
-    background: rgba(19, 23, 33, 0.85);
+    background: rgba(19, 23, 33, 0.88);
+    border-color: rgba(255, 255, 255, 0.28);
     transform: none;
   }
   .cag-home-hero__door-icon {
@@ -3637,17 +3629,19 @@ body .main-menu .main-menu-wrapper__nav {
     height: 40px;
   }
   .cag-home-hero__door-title {
-    font-size: 1.05rem;
+    font-size: 1.08rem;
+    color: #fff;
   }
   .cag-home-hero__door-sub {
     font-size: 13.5px;
     line-height: 1.45;
+    color: rgba(255, 255, 255, 0.88);
   }
   .cag-home-hero__door-arrow {
-    right: 18px;
-    top: 50%;
-    margin-top: -0.5rem;
+    position: static;
+    margin: 0;
     transform: none;
+    color: #fff;
   }
   .cag-home-destinations {
     padding: 32px 0 28px;

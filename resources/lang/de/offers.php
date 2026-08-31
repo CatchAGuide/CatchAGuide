@@ -80,7 +80,7 @@ return [
     'results_count' => ':count Angebote',
     'results_found' => ':count Ergebnisse für deine Auswahl',
     'searching_near' => 'Angebote in der Nähe von :place',
-    'suggested_near' => 'Weitere Angebote in der Nähe von :place',
+    'suggested_near' => 'Weitere Angebote in der Nähe deiner Suche',
     'suggested_count' => ':count Angebote in der Nähe',
     'see_details' => 'Details',
     'included_heading' => 'Inklusive',

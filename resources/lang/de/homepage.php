@@ -101,7 +101,7 @@ return [
     'chooser_tour_sub' => 'Erlebe perfekte Angelmomente. Halbtags- oder Ganztagestouren mit lokalen Experten.',
     'chooser_vacation_label' => 'Angelurlaub',
     'chooser_vacation_title' => 'Länger bleiben',
-    'chooser_vacation_sub' => 'Dein perfekter Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide',
+    'chooser_vacation_sub' => 'Dein nächster Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide.',
     'hero_search_placeholder' => 'Wo möchtest du angeln?',
     'hero_carousel_label' => 'Hero-Hintergrundbilder',
     'hero_carousel_slide' => 'Bild :n anzeigen',

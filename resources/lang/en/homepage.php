@@ -101,7 +101,7 @@ return [
     'chooser_tour_sub' => 'Experience perfect fishing moments. Half-day or full-day tours with local experts.',
     'chooser_vacation_label' => 'Vacations',
     'chooser_vacation_title' => 'Stay longer',
-    'chooser_vacation_sub' => 'Your perfect fishing holiday. Accommodation, rental boat and a local guide',
+    'chooser_vacation_sub' => 'Your next fishing holiday. With accommodation, rental boat and a local guide.',
     'hero_search_placeholder' => 'Where do you want to fish?',
     'hero_carousel_label' => 'Hero background images',
     'hero_carousel_slide' => 'Show image :n',

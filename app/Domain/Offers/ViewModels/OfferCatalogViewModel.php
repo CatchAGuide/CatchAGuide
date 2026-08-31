@@ -74,14 +74,6 @@ final class OfferCatalogViewModel
     }
 
     /**
-     * Place name for the nearby-suggestions heading (country dropdown included).
-     */
-    public function suggestedPlaceLabel(): string
-    {
-        return $this->locationLabel() ?? __('offers.breadcrumb');
-    }
-
-    /**
      * Most specific location for the H1: search place, then city, region, country.
      */
     private function locationLabel(): ?string
