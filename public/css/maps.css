@@ -1961,7 +1961,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .cag-map-cluster {
   background: transparent !important;
   border: none !important;
-  position: relative;
+  position: absolute;
 }
 .leaflet-div-icon.cag-map-cluster__core, .leaflet-div-icon.cag-map-cluster__edge,
 .cag-map-cluster__core,
