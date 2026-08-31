@@ -14,6 +14,7 @@ use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
 use App\Domain\CategoryPage\CategoryPageScope;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -120,8 +121,9 @@ class CategoryController extends Controller
         string $slug,
         CategoryPageContentService $categoryContent,
         OfferCatalogPageService $offerCatalog,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
     ) {
-        return $this->targets('methods', $slug, $request, $categoryContent, $offerCatalog);
+        return $this->targets('methods', $slug, $request, $categoryContent, $offerCatalog, $guidingAvailability);
     }
 
     public function targetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
@@ -140,7 +142,10 @@ class CategoryController extends Controller
         Request $request,
         CategoryPageContentService $categoryContent,
         OfferCatalogPageService $offerCatalog,
+        ?GuidingCategoryAvailabilityRepository $guidingAvailability = null,
     ) {
+        $guidingAvailability ??= app(GuidingCategoryAvailabilityRepository::class);
+
         $type = strtolower((string) $type);
 
         if ($type === 'methods' && $request->routeIs('category.targets')) {
@@ -183,6 +188,9 @@ class CategoryController extends Controller
                 'title' => $row_data->language->title ?? $row_data->name,
                 'vm' => $vm,
                 'content_scope' => CategoryPageScope::TOURS,
+                'methodRedirectOptions' => $this->methodRedirectOptions($row_data, $categoryContent, $guidingAvailability, $language, $methodId),
+                'methodRedirectCurrent' => $methodId,
+                'methodRedirectAllUrl' => route('guidings.methods'),
             ]);
         }
 
@@ -190,6 +198,51 @@ class CategoryController extends Controller
         $row_data->faq = $row_data->faq($language);
 
         return $this->showLegacyGuidingCategory($type, $row_data, $request);
+    }
+
+    /**
+     * Method category pages usable as a "switch to exactly this method" destination, gated to
+     * methods with at least one publicly visible tour (mirrors the tours hub filtering in
+     * index()). The page currently being viewed is always included — built directly from
+     * $currentPage rather than requiring a live `source` (Method) row, so an orphaned/deleted
+     * Method (source_id with no matching catalog row) doesn't silently drop the redirect config
+     * for its own page and disable the switch-method behavior there.
+     *
+     * @return Collection<int, array{id: int, name: string, url: string}>
+     */
+    private function methodRedirectOptions(
+        CategoryPage $currentPage,
+        CategoryPageContentService $categoryContent,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
+        string $language,
+        int $currentMethodId,
+    ): Collection {
+        $siblings = CategoryPage::whereRaw('LOWER(type) = ?', ['methods'])
+            ->get()
+            ->map(function (CategoryPage $item) use ($categoryContent, $language) {
+                $item->language = $categoryContent->resolveForDisplay($item, CategoryPageScope::TOURS, $language);
+
+                return $item;
+            })
+            ->filter(fn (CategoryPage $item) => $item->language !== null
+                && filled($item->language->title)
+                && $item->source !== null
+                && (int) $item->source_id !== 0
+            )
+            ->filter(fn (CategoryPage $item) => $guidingAvailability->hasGuidingsForMethod((int) $item->source_id))
+            ->reject(fn (CategoryPage $item) => (int) $item->source_id === $currentMethodId)
+            ->map(fn (CategoryPage $item) => [
+                'id' => (int) $item->source_id,
+                'name' => $item->language->title,
+                'url' => route('guidings.methods.show', ['slug' => $item->slug]),
+            ])
+            ->values();
+
+        return $siblings->push([
+            'id' => $currentMethodId,
+            'name' => $currentPage->language->title ?? $currentPage->name,
+            'url' => route('guidings.methods.show', ['slug' => $currentPage->slug]),
+        ])->values();
     }
 
     private function showLegacyGuidingCategory(string $type, CategoryPage $row_data, Request $request)

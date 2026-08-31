@@ -80,12 +80,12 @@
             @endif
         >
             @if($isRegionRedirect)
-                <select id="{{ $regionSelectId }}" class="{{ $selectClass }}" data-offers-region-redirect>
+                <select id="{{ $regionSelectId }}" class="{{ $selectClass }}" data-offers-region-redirect data-offers-redirect-dimension="country">
                     @if(filled($regionRedirectAllUrl ?? null))
-                        <option value="{{ $regionRedirectAllUrl }}">{{ __('offers.filter_show_all') }}</option>
+                        <option value="{{ $regionRedirectAllUrl }}" data-value="">{{ __('offers.filter_show_all') }}</option>
                     @endif
                     @foreach($regionRedirectOptions as $row)
-                        <option value="{{ $row['url'] }}" @selected(($regionRedirectCurrent ?? null) === $row['slug'])>
+                        <option value="{{ $row['url'] }}" data-value="{{ $row['slug'] }}" @selected(($regionRedirectCurrent ?? null) === $row['slug'])>
                             {{ $row['name'] }}
                         </option>
                     @endforeach

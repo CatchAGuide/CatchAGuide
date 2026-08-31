@@ -28,7 +28,7 @@
 @section('header_sub_title', $row_data->language->sub_title)
 
 @section('share_tags')
-    <meta property="og:title" content="{{$row_data->source->name}}" />
+    <meta property="og:title" content="{{ $row_data->source->name ?? $row_data->name }}" />
     <meta property="og:description" content="{{$row_data->language->introduction ?? ""}}" />
     
     @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
@@ -622,6 +622,12 @@
                             :vm="$vm"
                             :show-faq="false"
                             analytics-page="target-fish-offers-catalog"
+                            :species-redirect-options="$speciesRedirectOptions ?? collect()"
+                            :species-redirect-current="$speciesRedirectCurrent ?? null"
+                            :species-redirect-all-url="$speciesRedirectAllUrl ?? null"
+                            :method-redirect-options="$methodRedirectOptions ?? collect()"
+                            :method-redirect-current="$methodRedirectCurrent ?? null"
+                            :method-redirect-all-url="$methodRedirectAllUrl ?? null"
                         />
                     </div>
                 @else

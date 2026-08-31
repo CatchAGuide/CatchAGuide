@@ -6,6 +6,12 @@
     'regionRedirectOptions' => null,
     'regionRedirectCurrent' => null,
     'regionRedirectAllUrl' => null,
+    'speciesRedirectOptions' => null,
+    'speciesRedirectCurrent' => null,
+    'speciesRedirectAllUrl' => null,
+    'methodRedirectOptions' => null,
+    'methodRedirectCurrent' => null,
+    'methodRedirectAllUrl' => null,
 ])
 
 @php
@@ -90,6 +96,12 @@
                     :region-redirect-options="$regionRedirectOptions"
                     :region-redirect-current="$regionRedirectCurrent"
                     :region-redirect-all-url="$regionRedirectAllUrl"
+                    :species-redirect-options="$speciesRedirectOptions"
+                    :species-redirect-current="$speciesRedirectCurrent"
+                    :species-redirect-all-url="$speciesRedirectAllUrl"
+                    :method-redirect-options="$methodRedirectOptions"
+                    :method-redirect-current="$methodRedirectCurrent"
+                    :method-redirect-all-url="$methodRedirectAllUrl"
                 />
             </div>
         </aside>
@@ -196,4 +208,10 @@
     :region-redirect-options="$regionRedirectOptions"
     :region-redirect-current="$regionRedirectCurrent"
     :region-redirect-all-url="$regionRedirectAllUrl"
+    :species-redirect-options="$speciesRedirectOptions"
+    :species-redirect-current="$speciesRedirectCurrent"
+    :species-redirect-all-url="$speciesRedirectAllUrl"
+    :method-redirect-options="$methodRedirectOptions"
+    :method-redirect-current="$methodRedirectCurrent"
+    :method-redirect-all-url="$methodRedirectAllUrl"
 />

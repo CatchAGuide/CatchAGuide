@@ -142,13 +142,51 @@
         document.body.style.overflow = 'hidden';
     }
 
+    // Any of these present on the current URL counts as "another filter is active" and forces
+    // a switch to /offers (with the new country applied) instead of jumping to the sibling
+    // /vacations/{country} page, which would otherwise silently drop them.
+    var vacationOtherFilterKeys = ['species', 'accommodation_type', 'has_guiding', 'has_rental_boat', 'duration', 'sortby', 'num_guests', 'place', 'city', 'region', 'placeLat', 'placeLng', 'pillar'];
+    var offersIndexUrl = @json(route('offers.index'));
+
+    function vacationOtherFiltersActive() {
+        var params = new URLSearchParams(window.location.search);
+        for (var i = 0; i < vacationOtherFilterKeys.length; i++) {
+            var key = vacationOtherFilterKeys[i];
+            var values = params.getAll(key).concat(params.getAll(key + '[]'));
+            for (var j = 0; j < values.length; j++) {
+                if ((values[j] || '').trim() !== '') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function offersFallbackUrl(newCountrySlug) {
+        var params = new URLSearchParams(window.location.search);
+        var pillar = params.get('pillar');
+        params.delete('pillar');
+        params.set('country', newCountrySlug);
+        params.set('type', 'vacation');
+        if (pillar === 'trips' || pillar === 'camps') {
+            params.set('vacation', pillar === 'trips' ? 'trip' : 'camp');
+        }
+        return offersIndexUrl + '?' + params.toString();
+    }
+
     function goToCountry() {
-        showLoader();
         var selectedCountry = (select.value || '').trim().toLowerCase();
         if (selectedCountry === 'all-offers') {
+            showLoader();
             window.location.href = @json(route('vacations.all-offers'));
             return;
         }
+        if (selectedCountry && vacationOtherFiltersActive()) {
+            showLoader();
+            window.location.href = offersFallbackUrl(selectedCountry);
+            return;
+        }
+        showLoader();
         if (selectedCountry) {
             form.action = @json(url('/vacations')) + '/' + encodeURIComponent(selectedCountry);
         } else {

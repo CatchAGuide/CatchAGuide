@@ -23,6 +23,12 @@
     'regionRedirectOptions' => null,
     'regionRedirectCurrent' => null,
     'regionRedirectAllUrl' => null,
+    'speciesRedirectOptions' => null,
+    'speciesRedirectCurrent' => null,
+    'speciesRedirectAllUrl' => null,
+    'methodRedirectOptions' => null,
+    'methodRedirectCurrent' => null,
+    'methodRedirectAllUrl' => null,
 ])
 
 @php
@@ -45,6 +51,28 @@
     $tripDurationOptions = $tripDurationOptions instanceof Collection ? $tripDurationOptions : collect($tripDurationOptions ?? []);
     $accommodationTypeOptions = $accommodationTypeOptions instanceof Collection ? $accommodationTypeOptions : collect($accommodationTypeOptions ?? []);
     $regionRedirectOptions = $regionRedirectOptions instanceof Collection ? $regionRedirectOptions : collect($regionRedirectOptions ?? []);
+    $speciesRedirectOptions = $speciesRedirectOptions instanceof Collection ? $speciesRedirectOptions : collect($speciesRedirectOptions ?? []);
+    $methodRedirectOptions = $methodRedirectOptions instanceof Collection ? $methodRedirectOptions : collect($methodRedirectOptions ?? []);
+    // Species/methods pages keep the normal multi-select widget (unlike the single-value
+    // country redirect); the "switch to exactly one item" decision happens client-side by
+    // counting the final species[]/methods[] selection at submit time, so here we only need
+    // an id -> url lookup (covering the current page's own item too) for that one dimension.
+    $offersPrimaryDimension = $speciesRedirectOptions->isNotEmpty() ? 'species' : ($methodRedirectOptions->isNotEmpty() ? 'methods' : null);
+    $offersPrimaryOptions = match ($offersPrimaryDimension) {
+        'species' => $speciesRedirectOptions,
+        'methods' => $methodRedirectOptions,
+        default => collect(),
+    };
+    $offersPrimaryMap = $offersPrimaryOptions->mapWithKeys(fn ($row) => [(string) $row['id'] => $row['url']]);
+    $offersPrimaryAllUrl = match ($offersPrimaryDimension) {
+        'species' => $speciesRedirectAllUrl ?? null,
+        'methods' => $methodRedirectAllUrl ?? null,
+        default => null,
+    };
+    // The multi-select widget already renders its own live species[]/methods[] hidden inputs;
+    // excluding them here (plus 'type', which the explicit $activeType block below also renders)
+    // avoids emitting the same hidden field twice on locked pages.
+    $lockedParamsForHiddenFields = collect($lockedParams)->except(['type', 'species', 'methods'])->all();
     $activeType = $filter->type ?? 'all';
     $activeVacation = $filter->vacation ?? 'all';
     $isVacation = $activeType === 'vacation';
@@ -142,7 +170,7 @@
         @endif
     @endforeach
 
-    @foreach($lockedParams as $key => $value)
+    @foreach($lockedParamsForHiddenFields as $key => $value)
         @if(is_array($value))
             @foreach($value as $v)
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
@@ -160,6 +188,11 @@
     @endif
     @if($filter->numGuests !== null)
         <input type="hidden" name="num_guests" value="{{ $filter->numGuests }}">
+    @endif
+    @if($offersPrimaryDimension)
+        <script type="application/json" data-offers-primary-redirect-config>
+            @json(['dimension' => $offersPrimaryDimension, 'map' => $offersPrimaryMap, 'allUrl' => $offersPrimaryAllUrl])
+        </script>
     @endif
 
     @if($showTypeToggles && $renderSection === 'all')
@@ -503,7 +536,7 @@
                     @endif
                 @endforeach
 
-                @foreach($lockedParams as $key => $value)
+                @foreach($lockedParamsForHiddenFields as $key => $value)
                     @if(is_array($value))
                         @foreach($value as $v)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
@@ -518,6 +551,11 @@
                 <input type="hidden" name="sortby" value="{{ $currentSort }}">
                 @if($filter->numGuests !== null)
                     <input type="hidden" name="num_guests" value="{{ $filter->numGuests }}">
+                @endif
+                @if($offersPrimaryDimension)
+                    <script type="application/json" data-offers-primary-redirect-config>
+                        @json(['dimension' => $offersPrimaryDimension, 'map' => $offersPrimaryMap, 'allUrl' => $offersPrimaryAllUrl])
+                    </script>
                 @endif
 
                 @if($showTypeToggles)
@@ -589,17 +627,182 @@
             });
         }
 
-        document.querySelectorAll('[data-offers-region-redirect]').forEach(function (select) {
+        var offersRegionRedirectSelector = '[data-offers-region-redirect]';
+
+        document.querySelectorAll(offersRegionRedirectSelector).forEach(function (select) {
             select.dataset.initialValue = select.value;
+        });
+
+        var offersIndexUrl = @json(route('offers.index'));
+
+        // Fields that count as "another filter is active" once the country redirect select
+        // changes, or once a species/methods-locked page's multi-select ends up with a single
+        // value. Each dimension excludes its own field group from the check — e.g. the
+        // currently locked country/city/region isn't "another" filter when the country select
+        // itself is what changed. num_guests always carries a default value (see
+        // OfferListingFilter::DEFAULT_GUESTS), so it only counts once it differs from that.
+        var offersRedirectAlwaysFields = ['water[]', 'duration_types[]', 'duration', 'accommodation_type', 'has_guiding', 'has_rental_boat', 'sortby', 'num_guests'];
+        var offersRedirectCountryFields = ['country', 'country_short', 'city', 'region', 'place', 'placeLat', 'placeLng', 'bounds_ne_lat', 'bounds_ne_lng', 'bounds_sw_lat', 'bounds_sw_lng', 'place_types'];
+        var offersRedirectSpeciesFields = ['species[]'];
+        var offersRedirectMethodFields = ['methods[]'];
+        var offersRedirectDefaults = { num_guests: @json((string) \App\Domain\Offers\OfferListingFilter::DEFAULT_GUESTS) };
+
+        function offersRedirectFieldHasValue(el) {
+            if (!el) {
+                return false;
+            }
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                return el.checked;
+            }
+            var value = (el.value || '').trim();
+            if (value === '') {
+                return false;
+            }
+            var defaultValue = offersRedirectDefaults[el.name];
+
+            return defaultValue === undefined || value !== defaultValue;
+        }
+
+        function offersRedirectOtherFiltersActive(form, dimension) {
+            var tracked = offersRedirectAlwaysFields.slice();
+            if (dimension !== 'country') {
+                tracked = tracked.concat(offersRedirectCountryFields);
+            }
+            if (dimension !== 'species') {
+                tracked = tracked.concat(offersRedirectSpeciesFields);
+            }
+            if (dimension !== 'methods') {
+                tracked = tracked.concat(offersRedirectMethodFields);
+            }
+
+            var elements = form.querySelectorAll('input[name], select[name]');
+            for (var i = 0; i < elements.length; i++) {
+                if (tracked.indexOf(elements[i].name) !== -1 && offersRedirectFieldHasValue(elements[i])) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function offersRedirectSetField(form, name, value) {
+            form.querySelectorAll('input[name="' + name + '"]').forEach(function (el) {
+                el.remove();
+            });
+            if (!value) {
+                return;
+            }
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        }
+
+        function offersRedirectApplyCountry(form, value) {
+            offersRedirectCountryFields.forEach(function (name) {
+                offersRedirectSetField(form, name, null);
+            });
+            offersRedirectSetField(form, 'country', value);
+        }
+
+        function offersPrimaryRedirectConfig(form) {
+            var node = form.querySelector('[data-offers-primary-redirect-config]');
+            if (!node) {
+                return null;
+            }
+            try {
+                return JSON.parse(node.textContent || '{}');
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function offersPrimaryFieldValues(form, dimension) {
+            var fieldName = dimension === 'species' ? 'species[]' : 'methods[]';
+            var values = [];
+            form.querySelectorAll('input[name="' + fieldName + '"]').forEach(function (el) {
+                if (el.value) {
+                    values.push(el.value);
+                }
+            });
+            return values.sort();
+        }
+
+        // Snapshot the initial species[]/methods[] selection so "did the primary facet actually
+        // change" can be judged the same way the country select's dataset.initialValue is: a page
+        // whose current item can't be pre-checked in the multi-select (e.g. its catalog entry is
+        // missing — see the "wels" bug) would otherwise always read as "0 selected", wrongly
+        // treated as a real, deliberate change on every submit.
+        document.querySelectorAll('#offers-filters-form, .vacation-filters-offcanvas__form').forEach(function (form) {
+            var initialConfig = offersPrimaryRedirectConfig(form);
+            if (initialConfig && initialConfig.dimension) {
+                form.dataset.offersPrimaryInitialValues = JSON.stringify(offersPrimaryFieldValues(form, initialConfig.dimension));
+            }
         });
 
         document.querySelectorAll('#offers-filters-form, .vacation-filters-offcanvas__form').forEach(function (form) {
             form.addEventListener('submit', function (event) {
-                var select = form.querySelector('[data-offers-region-redirect]');
-                if (select && select.value && select.value !== select.dataset.initialValue) {
-                    event.preventDefault();
-                    window.location.href = select.value;
+                // Country/region: re-evaluated on every submit, not just when the select itself
+                // changes — adding another filter (e.g. methods) while staying on the same
+                // country must also fall through to /offers, exactly like species/methods below.
+                var regionSelect = form.querySelector(offersRegionRedirectSelector);
+                if (regionSelect) {
+                    var countryChanged = !!regionSelect.value && regionSelect.value !== regionSelect.dataset.initialValue;
+                    var countryOtherActive = offersRedirectOtherFiltersActive(form, 'country');
+
+                    if (countryChanged || countryOtherActive) {
+                        event.preventDefault();
+
+                        if (countryChanged && !countryOtherActive) {
+                            window.location.href = regionSelect.value;
+                            return;
+                        }
+
+                        if (countryChanged) {
+                            var chosenOption = regionSelect.selectedOptions[0];
+                            offersRedirectApplyCountry(form, chosenOption ? chosenOption.dataset.value : '');
+                        }
+                        form.action = offersIndexUrl;
+                        form.submit();
+                        return;
+                    }
                 }
+
+                // Species/methods: the normal multi-select stays in place; the decision is based
+                // on how many values it ends up with at submit time (exactly one -> jump to that
+                // item's own page when nothing else is active; otherwise -> /offers with everything).
+                var config = offersPrimaryRedirectConfig(form);
+                if (!config || !config.dimension) {
+                    return;
+                }
+
+                var values = offersPrimaryFieldValues(form, config.dimension);
+                var initialValues = form.dataset.offersPrimaryInitialValues
+                    ? JSON.parse(form.dataset.offersPrimaryInitialValues)
+                    : [];
+                var primaryChanged = JSON.stringify(values) !== JSON.stringify(initialValues);
+                var otherActive = offersRedirectOtherFiltersActive(form, config.dimension);
+                var map = config.map || {};
+
+                if (!primaryChanged && !otherActive) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                if (!otherActive && values.length === 1 && map[values[0]]) {
+                    window.location.href = map[values[0]];
+                    return;
+                }
+
+                if (!otherActive && values.length === 0) {
+                    window.location.href = config.allUrl || offersIndexUrl;
+                    return;
+                }
+
+                form.action = offersIndexUrl;
+                form.submit();
             });
         });
 

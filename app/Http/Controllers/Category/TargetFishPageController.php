@@ -6,10 +6,12 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Http\Controllers\Controller;
 use App\Models\CategoryPage;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class TargetFishPageController extends Controller
@@ -18,6 +20,7 @@ class TargetFishPageController extends Controller
         private OfferCatalogPageService $offerCatalog,
         private CategoryPageContentService $categoryContent,
         private HomepageMixedOfferSelector $mixedOffers,
+        private GuidingCategoryAvailabilityRepository $guidingAvailability,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -68,7 +71,7 @@ class TargetFishPageController extends Controller
             abort(404);
         }
 
-        $placeName = $page->source->name ?? $page->name;
+        $placeName = $page->source?->name ?? $page->name;
 
         if ($scope === CategoryPageScope::GLOBAL) {
             return view('pages.category.category-show', [
@@ -96,6 +99,64 @@ class TargetFishPageController extends Controller
             'title' => $page->language->title ?? $page->name,
             'vm' => $vm,
             'content_scope' => $scope,
+            'speciesRedirectOptions' => $this->speciesRedirectOptions($page, $scope, $locale, $speciesId),
+            'speciesRedirectCurrent' => $speciesId,
+            'speciesRedirectAllUrl' => $scope === CategoryPageScope::TOURS
+                ? route('guidings.targets.index')
+                : route('vacations.index'),
         ]);
+    }
+
+    /**
+     * Target-fish category pages usable as a "switch to exactly this species" destination,
+     * scoped the same way as the page being viewed (tours listings gated to species with at
+     * least one publicly visible tour, matching CategoryController::index's hub filtering).
+     * The page currently being viewed is always included — built directly from $currentPage
+     * rather than requiring a live `source` (Target) row, so an orphaned/deleted Target
+     * (source_id with no matching catalog row) doesn't silently drop the redirect config for
+     * its own page and disable the switch-species behavior there.
+     *
+     * @return Collection<int, array{id: int, name: string, url: string}>
+     */
+    private function speciesRedirectOptions(CategoryPage $currentPage, string $scope, string $locale, int $currentSpeciesId): Collection
+    {
+        $currentUrl = $scope === CategoryPageScope::TOURS
+            ? route('guidings.targets', ['slug' => $currentPage->slug])
+            : route('vacations.targets', ['slug' => $currentPage->slug]);
+
+        $siblings = CategoryPage::query()
+            ->whereRaw('LOWER(type) = ?', ['targets'])
+            ->get()
+            ->map(function (CategoryPage $item) use ($scope, $locale) {
+                $item->language = $this->categoryContent->resolveForDisplay($item, $scope, $locale);
+
+                return $item;
+            })
+            ->filter(fn (CategoryPage $item) => $item->language !== null
+                && filled($item->language->title)
+                && $item->source !== null
+                && (int) $item->source_id !== 0
+            )
+            ->when(
+                $scope === CategoryPageScope::TOURS,
+                fn (Collection $items) => $items->filter(
+                    fn (CategoryPage $item) => $this->guidingAvailability->hasGuidingsForTarget((int) $item->source_id)
+                ),
+            )
+            ->reject(fn (CategoryPage $item) => (int) $item->source_id === $currentSpeciesId)
+            ->map(fn (CategoryPage $item) => [
+                'id' => (int) $item->source_id,
+                'name' => $item->language->title,
+                'url' => $scope === CategoryPageScope::TOURS
+                    ? route('guidings.targets', ['slug' => $item->slug])
+                    : route('vacations.targets', ['slug' => $item->slug]),
+            ])
+            ->values();
+
+        return $siblings->push([
+            'id' => $currentSpeciesId,
+            'name' => $currentPage->language->title ?? $currentPage->name,
+            'url' => $currentUrl,
+        ])->values();
     }
 }

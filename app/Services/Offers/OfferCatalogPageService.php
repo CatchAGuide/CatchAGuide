@@ -268,13 +268,9 @@ class OfferCatalogPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            speciesOptions: $lockSpeciesScope
-                ? collect()
-                : $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
+            speciesOptions: $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
             countries: $countries,
-            methodOptions: $lockMethodScope
-                ? collect()
-                : $this->methodOptions(),
+            methodOptions: $this->methodOptions(),
             waterOptions: $this->waterOptions(),
             tourDurationOptions: $this->tourDurationOptions(),
             tripDurationOptions: $this->tripDurationOptions(),
