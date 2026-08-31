@@ -392,18 +392,6 @@
                                 {{-- Image on top (mobile) / left (desktop) --}}
                                 <div class="vacation-list-card__media">
                                     <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
-                                        {{-- Image badge - desktop only --}}
-                                        @if($has_guide)
-                                            <span class="vacation-list-card__badge vacation-list-card__badge--top">
-                                                <i class="fas fa-star" aria-hidden="true"></i>
-                                                @lang('vacations.top_rated_badge')
-                                            </span>
-                                        @elseif($has_boat)
-                                            <span class="vacation-list-card__badge vacation-list-card__badge--limited">
-                                                <i class="fas fa-bolt" aria-hidden="true"></i>
-                                                @lang('vacations.limited_avail_badge')
-                                            </span>
-                                        @endif
                                         @if($gallery_count > 0)
                                             <img
                                                 src="{{ $gallery_images[0] }}"
