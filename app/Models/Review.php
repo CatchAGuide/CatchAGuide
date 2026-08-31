@@ -49,6 +49,14 @@ class Review extends Model
         return $this->belongsTo(User::class)->whereVerifiedGuide();
     }
 
+    /**
+     * Guide user without verified-guide scope (for admin listings).
+     */
+    public function reviewedGuide()
+    {
+        return $this->belongsTo(User::class, 'guide_id');
+    }
+
     public function booking()
     {
         return $this->belongsTo(Booking::class);

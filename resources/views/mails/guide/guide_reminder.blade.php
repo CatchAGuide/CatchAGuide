@@ -29,7 +29,7 @@
                     <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                         <strong>@lang('emails.tour'): </strong>
                         @if(isset($booking->guiding))
-                            <a href="{{ route('guidings.show', [$booking->guiding->id, $booking->guiding->slug]) }}" target="_blank" style="text-decoration: none; font-weight: bold;">
+                            <a href="{{ $booking->guiding->publicShowUrl() }}" target="_blank" style="text-decoration: none; font-weight: bold;">
                                 {{ $booking->guiding->title }}
                             </a>
                         @endif

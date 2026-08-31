@@ -5,6 +5,7 @@
 @import "./settings/variables";
 @import "./settings/breakpoints";
 @import "./settings/colors";
+@import "./settings/category-colors";
 @import "./settings/helpers";
 
 // Bootstrap
@@ -15,15 +16,20 @@
 @import "./layout/btn";
 @import "./layout/main-menu";
 @import "./layout/pagination";
+@import "./layout/footer";
 
 // Page
 @import "./page/home";
+@import "./page/destination";
+@import "./page/offers";
 @import "./page/guiding";
+@import "./page/guidings-landing";
 @import "./page/vacations";
 @import "./page/trips-offer";
 @import "./page/vacations-v2";
 @import "./page/blog-single";
 @import "./page/contact-us";
+@import "./page/partner-hub";
 @import "./page/checkout";
 @import "./profile/guidings";
 @import "./profile/profile";
@@ -41,7 +47,9 @@
 @import "./components/tour-details"; // The detail page of a guide
 @import "./components/map"; // The map of the guiding page
 @import "./components/about"; // The img and about component in the /homepage
-@import "./components/header"; // The header of the page
+@import "./components/header"; // Legacy dark site chrome (newheader)
+@import "./components/site-nav"; // Generalized homepage-style header
+@import "./components/places-autocomplete"; // Google Places suggestion dropdown
 @import "./components/contact-card"; // The contact card of the page
 @import "./modern-checkout"; // Modern checkout with perfect React design match
 @import "./components/rental-boat-form"; // The rental boat multi-step form component
@@ -54,3 +62,4 @@
 @import "./components/rental-boat-card"; // The rental boat card component (all styles in one file)
 @import "./components/special-offer-card"; // The special offer card component (all styles in one file)
 @import "./components/booking-assistant-widget"; // Booking assistant chat widget (namespaced)
+@import "./components/auth-modals"; // Login / register / guide application modals

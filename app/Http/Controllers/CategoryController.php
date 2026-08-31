@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Category\TargetFishPageController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CategoryPage;
@@ -9,49 +10,158 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Target;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Offers\OfferCatalogPageService;
+use App\Domain\CategoryPage\CategoryPageScope;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
-    public function index($type, Request $request)
-    {
-        // Legacy/home links sometimes passed slug as a query param on the index route.
-        // Send those to the method/target detail page instead of the category listing.
+    public function index(
+        $type,
+        Request $request,
+        CategoryPageContentService $categoryContent,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
+    ) {
+        $type = strtolower((string) $type);
+
         if ($request->filled('slug')) {
-            return redirect()->route('category.targets', [
-                'type' => strtolower($type),
-                'slug' => $request->query('slug'),
-            ], 301);
+            $query = $request->query();
+            $slug = $query['slug'];
+            unset($query['slug']);
+
+            if ($type === 'methods') {
+                return redirect()->route('guidings.methods.show', ['slug' => $slug] + $query, 301);
+            }
+
+            if ($type === 'targets') {
+                return redirect()->route('targets.show', ['slug' => $slug] + $query, 301);
+            }
+
+            if ($request->routeIs('category.types')) {
+                return redirect()->route('category.targets', [
+                    'type' => $type,
+                    'slug' => $slug,
+                ], 301);
+            }
         }
 
-        $type = strtolower($type);
+        if ($request->routeIs('category.types')) {
+            if ($type === 'methods') {
+                return redirect()->route('guidings.methods', $request->query(), 301);
+            }
+
+            if ($type === 'targets') {
+                return redirect()->route('targets.index', $request->query(), 301);
+            }
+        }
+
         $language = app()->getLocale();
+        $scope = match (true) {
+            $type === 'targets' && $request->routeIs('guidings.targets.index') => CategoryPageScope::TOURS,
+            $type === 'targets' => CategoryPageScope::GLOBAL,
+            default => CategoryPageScope::TOURS,
+        };
+
         $allTargets = CategoryPage::whereRaw('LOWER(type) = ?', [$type])
             ->get()
-            ->map(function($item) use ($language) {
-                $item->language = $item->language($language);
+            ->map(function ($item) use ($language, $scope, $categoryContent) {
+                $item->language = $categoryContent->resolveForDisplay($item, $scope, $language);
+
                 return $item;
             })
-            ->filter(function($item) {
-                return $item->language !== null;
+            ->filter(function ($item) {
+                return $item->language !== null
+                    && filled($item->language->title)
+                    && $item->source !== null;
             });
 
-        $favories = $allTargets->filter(function($item) {
+        // Tours (guidings.targets.index / guidings.methods) must not list a target
+        // fish or method with zero publicly visible tours, even if it has vacation listings.
+        if ($scope === CategoryPageScope::TOURS) {
+            $allTargets = $allTargets->filter(function ($item) use ($type, $guidingAvailability) {
+                $sourceId = (int) $item->source_id;
+
+                return $type === 'methods'
+                    ? $guidingAvailability->hasGuidingsForMethod($sourceId)
+                    : $guidingAvailability->hasGuidingsForTarget($sourceId);
+            });
+        }
+
+        $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
-        
-        $introduction = __('category.' . $type . '.introduction');
-        $title = __('category.' . $type . '.title');
 
-        $data = compact('favories', 'allTargets', 'introduction', 'title', 'type');
+        $introduction = __('category.'.$type.'.introduction');
+        $title = __('category.'.$type.'.title');
+
+        $categoryItemUrl = fn (string $slug): string => match (true) {
+            $type === 'methods' => route('guidings.methods.show', ['slug' => $slug]),
+            $type === 'targets' && $request->routeIs('guidings.targets.index') => route('guidings.targets', ['slug' => $slug]),
+            $type === 'targets' => route('targets.show', ['slug' => $slug]),
+            default => route('category.targets', ['type' => $type, 'slug' => $slug]),
+        };
+
+        $data = compact('favories', 'allTargets', 'introduction', 'title', 'type', 'categoryItemUrl');
+
         return view('pages.category.category-index', $data);
     }
 
-    public function targets($type, $slug, Request $request)
+    public function methodsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
     {
-        $type = strtolower($type);
+        return $this->index('methods', $request, $categoryContent, $guidingAvailability);
+    }
+
+    public function methodsShow(
+        Request $request,
+        string $slug,
+        CategoryPageContentService $categoryContent,
+        OfferCatalogPageService $offerCatalog,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
+    ) {
+        return $this->targets('methods', $slug, $request, $categoryContent, $offerCatalog, $guidingAvailability);
+    }
+
+    public function targetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
+    {
+        return $this->index('targets', $request, $categoryContent, $guidingAvailability);
+    }
+
+    public function guidingsTargetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
+    {
+        return $this->index('targets', $request, $categoryContent, $guidingAvailability);
+    }
+
+    public function targets(
+        $type,
+        $slug,
+        Request $request,
+        CategoryPageContentService $categoryContent,
+        OfferCatalogPageService $offerCatalog,
+        ?GuidingCategoryAvailabilityRepository $guidingAvailability = null,
+    ) {
+        $guidingAvailability ??= app(GuidingCategoryAvailabilityRepository::class);
+
+        $type = strtolower((string) $type);
+
+        if ($type === 'methods' && $request->routeIs('category.targets')) {
+            return redirect()->route('guidings.methods.show', ['slug' => $slug] + $request->query(), 301);
+        }
+
+        if ($type === 'targets' && $request->routeIs('category.targets')) {
+            return redirect()->route('targets.show', ['slug' => $slug] + $request->query(), 301);
+        }
+
+        if ($type === 'targets') {
+            $request->route()->setParameter('content_scope', CategoryPageScope::GLOBAL);
+
+            return app(TargetFishPageController::class)->show($request, $slug);
+        }
+
         $language = app()->getLocale();
         $row_data = CategoryPage::whereSlug($slug)
             ->whereRaw('LOWER(type) = ?', [$type])
@@ -62,9 +172,81 @@ class CategoryController extends Controller
             abort(404);
         }
 
+        if ($type === 'methods') {
+            $row_data->language = $categoryContent->resolveForDisplay($row_data, CategoryPageScope::TOURS, $language);
+            $row_data->faq = $categoryContent->faqsFor($row_data, CategoryPageScope::TOURS, $language);
+
+            $methodId = (int) $row_data->source_id;
+            if ($methodId <= 0) {
+                abort(404);
+            }
+
+            $vm = $offerCatalog->buildForMethod($request, $methodId);
+
+            return view('pages.category.category-show', [
+                'row_data' => $row_data,
+                'title' => $row_data->language->title ?? $row_data->name,
+                'vm' => $vm,
+                'content_scope' => CategoryPageScope::TOURS,
+                'methodRedirectOptions' => $this->methodRedirectOptions($row_data, $categoryContent, $guidingAvailability, $language, $methodId),
+                'methodRedirectCurrent' => $methodId,
+                'methodRedirectAllUrl' => route('guidings.methods'),
+            ]);
+        }
+
         $row_data->language = $row_data->language($language);
         $row_data->faq = $row_data->faq($language);
 
+        return $this->showLegacyGuidingCategory($type, $row_data, $request);
+    }
+
+    /**
+     * Method category pages usable as a "switch to exactly this method" destination, gated to
+     * methods with at least one publicly visible tour (mirrors the tours hub filtering in
+     * index()). The page currently being viewed is always included — built directly from
+     * $currentPage rather than requiring a live `source` (Method) row, so an orphaned/deleted
+     * Method (source_id with no matching catalog row) doesn't silently drop the redirect config
+     * for its own page and disable the switch-method behavior there.
+     *
+     * @return Collection<int, array{id: int, name: string, url: string}>
+     */
+    private function methodRedirectOptions(
+        CategoryPage $currentPage,
+        CategoryPageContentService $categoryContent,
+        GuidingCategoryAvailabilityRepository $guidingAvailability,
+        string $language,
+        int $currentMethodId,
+    ): Collection {
+        $siblings = CategoryPage::whereRaw('LOWER(type) = ?', ['methods'])
+            ->get()
+            ->map(function (CategoryPage $item) use ($categoryContent, $language) {
+                $item->language = $categoryContent->resolveForDisplay($item, CategoryPageScope::TOURS, $language);
+
+                return $item;
+            })
+            ->filter(fn (CategoryPage $item) => $item->language !== null
+                && filled($item->language->title)
+                && $item->source !== null
+                && (int) $item->source_id !== 0
+            )
+            ->filter(fn (CategoryPage $item) => $guidingAvailability->hasGuidingsForMethod((int) $item->source_id))
+            ->reject(fn (CategoryPage $item) => (int) $item->source_id === $currentMethodId)
+            ->map(fn (CategoryPage $item) => [
+                'id' => (int) $item->source_id,
+                'name' => $item->language->title,
+                'url' => route('guidings.methods.show', ['slug' => $item->slug]),
+            ])
+            ->values();
+
+        return $siblings->push([
+            'id' => $currentMethodId,
+            'name' => $currentPage->language->title ?? $currentPage->name,
+            'url' => route('guidings.methods.show', ['slug' => $currentPage->slug]),
+        ])->values();
+    }
+
+    private function showLegacyGuidingCategory(string $type, CategoryPage $row_data, Request $request)
+    {
         $title = $row_data->language->title;
         $filter_title = '';
         $searchMessage = '';

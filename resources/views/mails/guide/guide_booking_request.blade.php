@@ -33,7 +33,7 @@
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
         <div class="booking-details">
             <p style="font-size: 14px;"><strong>@lang('emails.guest_name'): </strong> {{$user->firstname}}</p>
-            <p style="font-size: 14px;"><strong>@lang('emails.tour'): </strong><a href="{{route('guidings.show', [$guiding->id, $guiding->slug])}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
+            <p style="font-size: 14px;"><strong>@lang('emails.tour'): </strong><a href="{{$guiding->publicShowUrl()}}" target="_blank" style="text-decoration: none; font-weight: bold;">{{$guiding->title}}</a></p>
             <p style="font-size: 14px;"><strong>@lang('emails.location'): </strong> {{$guiding->location}}</p>
             <p style="font-size: 14px;"><strong>@lang('emails.number_of_guests'): </strong> {{$booking->count_of_users}}</p>
             <p style="font-size: 14px;"><strong>@lang('emails.date'): </strong> {{date('d F Y', strtotime($booking->book_date))}}</p>

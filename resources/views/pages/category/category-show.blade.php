@@ -1,12 +1,34 @@
 @extends('layouts.app-v2')
 
+@php
+    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show', 'vacations.targets');
+    $heroSearchAction = listing_search_action();
+    $guidingsLandingCrumb = ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')];
+    $heroParentCrumbs = match (true) {
+        request()->routeIs('guidings.methods.show') => [
+            $guidingsLandingCrumb,
+            ['label' => __('category.methods.breadcrumb'), 'url' => route('guidings.methods')],
+        ],
+        request()->routeIs('guidings.targets') => [
+            $guidingsLandingCrumb,
+            ['label' => __('category.targets.breadcrumb'), 'url' => route('guidings.targets.index')],
+        ],
+        request()->routeIs('vacations.targets') => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+        ],
+        default => [
+            ['label' => __('category.targets.breadcrumb'), 'url' => route('targets.index')],
+        ],
+    };
+@endphp
+
 @section('title', $row_data->language->title)
 @section('description', $row_data->language->introduction)
 @section('header_title', $row_data->language->title)
 @section('header_sub_title', $row_data->language->sub_title)
 
 @section('share_tags')
-    <meta property="og:title" content="{{$row_data->source->name}}" />
+    <meta property="og:title" content="{{ $row_data->source->name ?? $row_data->name }}" />
     <meta property="og:description" content="{{$row_data->language->introduction ?? ""}}" />
     
     @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
@@ -543,30 +565,72 @@
 @endsection
 
 @section('content')
+    @if($useCategoryHeroHeader)
+        <div class="category-hero-page" data-category-hero-page>
+        @include('pages.category.partials.hero-header', [
+            'listingTitle' => $row_data->language->title,
+            'listingSubtitle' => $row_data->language->sub_title,
+            'searchAction' => $heroSearchAction,
+            'breadcrumbItems' => array_merge($heroParentCrumbs, [
+                ['label' => $row_data->source->name ?? $row_data->name, 'url' => null],
+            ]),
+        ])
+    @endif
     <div class="container" id="destination">
+        @unless($useCategoryHeroHeader)
         <div class="container">
             <section class="page-header">
                 <div class="page-header__bottom breadcrumb-container guiding">
                     <div class="page-header__bottom-inner">
                         <ul class="thm-breadcrumb list-unstyled">
                             <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                            @if(request()->routeIs('guidings.methods.show', 'guidings.targets'))
+                                <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
+                                <li><a href="{{ route('guidings.landing') }}">{{ __('homepage.filter-fishing-near-me') }}</a></li>
+                            @endif
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li><a href="{{ route('category.types', ['type' => strtolower($row_data->type)]) }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
+                            <li><a href="{{ match (true) {
+                                request()->routeIs('guidings.methods.show') => route('guidings.methods'),
+                                request()->routeIs('guidings.targets') => route('guidings.targets.index'),
+                                strtolower($row_data->type) === 'methods' => route('guidings.methods'),
+                                strtolower($row_data->type) === 'targets' => route('targets.index'),
+                                default => route('category.types', ['type' => strtolower($row_data->type)]),
+                            } }}">{{ ucfirst(strtolower($row_data->type)) }}</a></li>
                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                            <li class="active">{{ $row_data->source->name }}</li>
+                            <li class="active">{{ $row_data->source->name ?? $row_data->name }}</li>
                         </ul>
                     </div>
                 </div>
             </section>
         </div>
+        @endunless
 
-        <div class="container">
+        <div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
             <div class="col-12">
                 <div id="page-main-intro" class="mb-3">
                     <div class="page-main-intro-text mb-1">{!! clean_html($row_data->language->introduction) !!}</div>
                     <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
                 </div>
-                <h5 class="mb-2">{{ $row_data->source->name }}</h5>
+                {{-- <h5 class="mb-2">{{ $row_data->source->name ?? $row_data->name }}</h5> --}}
+                @if(isset($offerModules))
+                    <div class="cag-home cag-home--embed cag-dest-offers-wrap mb-5">
+                        @include('pages.home.partials.mixed-offers-rail')
+                    </div>
+                @elseif(isset($vm))
+                    <div class="offers-catalog-page mb-5">
+                        <x-offers.catalog-listing
+                            :vm="$vm"
+                            :show-faq="false"
+                            analytics-page="target-fish-offers-catalog"
+                            :species-redirect-options="$speciesRedirectOptions ?? collect()"
+                            :species-redirect-current="$speciesRedirectCurrent ?? null"
+                            :species-redirect-all-url="$speciesRedirectAllUrl ?? null"
+                            :method-redirect-options="$methodRedirectOptions ?? collect()"
+                            :method-redirect-current="$methodRedirectCurrent ?? null"
+                            :method-redirect-all-url="$methodRedirectAllUrl ?? null"
+                        />
+                    </div>
+                @else
                 <div class="row mb-5">
                     <div id="filterCard" class="col-sm-12 col-lg-3">        
                         <div class="card mb-2 d-none d-sm-block overflow-hidden border-0 shadow-sm">
@@ -594,6 +658,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <div class="mb-3">{!! clean_html($row_data->language->content) !!}</div>
 
@@ -606,18 +671,18 @@
                             <thead>
                                 <tr>
                                     <th width="28%">@lang('destination.fish')</th>
-                                    <th width="6%" class="text-center">{{ translate('Jan') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Feb') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Mar') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Apr') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('May') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jun') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Jul') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Aug') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Sep') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Oct') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Nov') }}</th>
-                                    <th width="6%" class="text-center">{{ translate('Dec') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jan') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_feb') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_mar') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_apr') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_may') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jun') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_jul') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_aug') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_sep') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_oct') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_nov') }}</th>
+                                    <th width="6%" class="text-center">{{ __('category.month_dec') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -654,7 +719,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Size Limit') }}</th>
+                                    <th width="80%">{{ __('category.size_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -680,7 +745,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">@lang('destination.fish')</th>
-                                    <th width="80%">{{ translate('Time Limit') }}</th>
+                                    <th width="80%">{{ __('category.time_limit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -707,7 +772,7 @@
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $row->id }}" aria-expanded="true" aria-controls="faq{{ $row->id }}">{{ translate($row->question) }}</button>
                                 </h2>
                                 <div class="accordion-collapse collapse" id="faq{{ $row->id }}" data-bs-parent="#faq">
-                                    <div class="accordion-body ">{{ translate($row->answer) }}</div>
+                                    <div class="accordion-body ">{!! clean_html(translate($row->answer)) !!}</div>
                                 </div>
                             </div>
                         @endforeach
@@ -718,6 +783,7 @@
     </div>
     <!--News One End-->
 
+    @unless(isset($vm) || isset($offerModules))
     @php
         if ($allGuidings->isEmpty()) {
             $mapSource = $otherguidings ?? collect();
@@ -754,11 +820,16 @@
         :lazy-modal="true"
         :updatable="true"
         :interactive-preview="true"
+        :show-rail="true"
+        :show-filter-chips="true"
+        :price-chips="true"
+        :landmarks="false"
+        filter-form-id="filterContainer"
     />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ translate('Filter') }}</h5>
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">{{ __('message.filter') }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body small">
@@ -819,7 +890,7 @@
                                 </span>
                             </div>
                             <select id="price_rangeOffCanvass" class="form-control form-select border-0 border-bottom rounded-0 custom-select" name="price_range">
-                                <option selected disabled hidden>{{ translate('Price per Person') }}</option>
+                                <option selected disabled hidden>{{ __('trips.price_per_person_short') }}</option>
                                 <option value="" >@lang('message.choose')...</option>
                                 <option value="1-50">1 - 50 p.P.</option>
                                 <option value="51-100">51 - 100 p.P.</option>
@@ -837,9 +908,60 @@
             </form>
         </div>
     </div>
+    @endunless
+    @if($useCategoryHeroHeader)
+        </div>
+    @endif
 @endsection
 
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
+@if(isset($vm) || isset($offerModules))
+@if(isset($offerModules))
+@include('pages.category.partials.destination-offers-script')
+@else
+@include('components.offers.partials.gallery-script')
+@endif
+<script>
+    $(function() {
+        var word_char_count_allowed = $(window).width() <= 768 ? 300 : 1200;
+        var page_main_intro = $('.page-main-intro-text');
+        var page_main_intro_text = page_main_intro.html();
+        var page_main_intro_count = page_main_intro.text().length;
+        var ellipsis = "...";
+        var moreText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a>';
+        var lessText = '<a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_less')</a>';
+
+        var visible_text = page_main_intro_text.substring(0, word_char_count_allowed);
+        var hidden_text = page_main_intro_text.substring(word_char_count_allowed);
+
+        if (page_main_intro_count >= word_char_count_allowed) {
+            $('.page-main-intro-text').html(visible_text + '<span class="more-ellipsis">' + ellipsis + '</span><span class="more-text" style="display:none;">' + hidden_text + '</span>');
+            $('.see-more').click(function(e) {
+                e.preventDefault();
+                var textContainer = $(this).prev('.page-main-intro-text');
+
+                if ($(this).hasClass('less')) {
+                    $(this).removeClass('less');
+                    $(this).html(moreText);
+                    textContainer.find('.more-text').hide();
+                    textContainer.find('.more-ellipsis').show();
+                } else {
+                    $(this).addClass('less');
+                    $(this).html(lessText);
+                    textContainer.find('.more-text').show();
+                    textContainer.find('.more-ellipsis').hide();
+                }
+            });
+        } else {
+            $('.see-more').hide();
+        }
+    });
+</script>
+@endif
+@unless(isset($vm) || isset($offerModules))
 <script>
     $('#sortby').on('change',function(){
         $('#form-sortby').submit();
@@ -1117,7 +1239,7 @@ function initializeSelect2() {
 
     selectMethod.select2({
         multiple: true,
-        placeholder: '{{translate('fishing type')}}',
+        placeholder: '{{__('category.fishing_type_label')}}',
         width: 'resolve'
     });
 
@@ -1256,6 +1378,7 @@ window.addEventListener('load', function() {
 
 
 
+@endunless
 @endsection
 
 @stack('guidingListingScripts')

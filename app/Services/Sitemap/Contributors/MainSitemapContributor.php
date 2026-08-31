@@ -29,9 +29,11 @@ final class MainSitemapContributor implements SitemapContributorInterface
         $uris = [
             '/' => ['priority' => 1.0, 'changefreq' => 'weekly'],
             '/guidings' => ['priority' => 0.9, 'changefreq' => 'weekly'],
+            '/guidings/alloffers' => ['priority' => 0.8, 'changefreq' => 'weekly'],
             '/vacations' => ['priority' => 0.9, 'changefreq' => 'weekly'],
             '/faq' => ['priority' => 0.6, 'changefreq' => 'monthly'],
             '/about-us' => ['priority' => 0.7, 'changefreq' => 'monthly'],
+            '/partner' => ['priority' => 0.8, 'changefreq' => 'monthly'],
             '/for-agents' => ['priority' => 0.5, 'changefreq' => 'monthly'],
         ];
 

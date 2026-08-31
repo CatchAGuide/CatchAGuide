@@ -325,5 +325,6 @@ return [
             <li>3% des Gesamtpreises bei einer Buchung über 1.500€</li>
         </ul>',
 
-    'pricing_extra_info_text' => 'Du kannst die Extras deiner Buchung im Reservierungsprozess hinzufügen'
+    'pricing_extra_info_text' => 'Du kannst die Extras deiner Buchung im Reservierungsprozess hinzufügen',
+    'new_guiding_offer_title' => 'Neues Führungsangebot',
 ];

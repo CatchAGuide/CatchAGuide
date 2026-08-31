@@ -89,7 +89,18 @@
 @endsection
 
 @section('content')
-    <div class="trip-offer-page" data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
+    <div class="trip-offer-page category-hero-page" data-category-hero-page data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
+        @include('pages.vacations.partials.catalog-header', [
+            'listingTitle' => __('vacations.hub_header_title'),
+            'listingSubtitle' => __('vacations.hub_header_subtitle'),
+            'titleTag' => 'p',
+            'currentVacationCountry' => $tripView['country'] ?? null,
+            'breadcrumbItems' => [
+                ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+                ['label' => __('vacations.pillar_trips_title'), 'url' => route('vacations.trips.index')],
+                ['label' => $tripView['title'] ?? __('trips.page_title_fallback'), 'url' => null],
+            ],
+        ])
         @if($isDraft)
             <div class="container py-3">
                 <div class="alert alert-warning mb-0" role="status">
@@ -100,11 +111,6 @@
         @endif
         {{-- Full-width top: heading, gallery (same width as before), feature cards. Floating card starts after this. --}}
         <div class="trip-offer-page__top">
-            @include('pages.vacations.partials.offer-breadcrumb', [
-                'pillar' => 'trips',
-                'productTitle' => $tripView['title'] ?? __('trips.page_title_fallback'),
-            ])
-
             <div class="trip-offer-page__hero-heading">
                 <h1 class="trip-offer-page__title">
                     {{ $tripView['title'] }}
@@ -427,7 +433,7 @@
                                 @foreach($tripScheduleItems as $index => $item)
                                     @php
                                         $time = $item['time'] ?? null;
-                                        $title = $item['day_label'] ?? __('trips.day') . ' ' . ($index + 1);
+                                        $scheduleTitle = $item['day_label'] ?? __('trips.day') . ' ' . ($index + 1);
                                         $description = $item['description'] ?? '';
                                     @endphp
                                     <li class="trip-offer-page__schedule-item">
@@ -438,7 +444,7 @@
                                                     <span class="trip-offer-page__schedule-time">{{ $time }}</span>
                                                     <span class="trip-offer-page__schedule-sep">—</span>
                                                 @endif
-                                                <span class="trip-offer-page__schedule-title">{{ $title }}</span>
+                                                <span class="trip-offer-page__schedule-title">{{ $scheduleTitle }}</span>
                                             </p>
                                             @if($description !== '')
                                                 <p class="trip-offer-page__schedule-description">{{ $description }}</p>

@@ -3,6 +3,7 @@
     'tripsTotal' => null,
     'campsTotal' => null,
     'speciesOptions' => collect(),
+    'accommodationTypeOptions' => collect(),
     'countries' => collect(),
     'showPillarToggles' => true,
     'showMobileToolbar' => true,
@@ -17,39 +18,99 @@
 ])
 
 @php
+    use App\Domain\Vacation\VacationListingFilter;
     use Illuminate\Support\Collection;
 
     $action = $action ?? url()->current();
     $total = ($tripsTotal ?? 0) + ($campsTotal ?? 0);
     $query = request()->except(['page', 'pillar']);
     $speciesOptions = $speciesOptions instanceof Collection ? $speciesOptions : collect($speciesOptions ?? []);
+    $accommodationTypeOptions = $accommodationTypeOptions instanceof Collection ? $accommodationTypeOptions : collect($accommodationTypeOptions ?? []);
     $countries = $countries instanceof Collection ? $countries : collect($countries ?? []);
+    $tripDurationOptions = collect(VacationListingFilter::TRIP_DURATION_BUCKETS)->map(fn (string $value) => [
+        'value' => $value,
+        'label' => __('vacations.filter_duration_'.$value),
+    ]);
+    $showTripDurationFilter = $filter->showsTripDurationFilter();
+    $showCampFacets = $filter->showsCampFacets();
+    $campFacetKeys = VacationListingFilter::CAMP_FACET_KEYS;
+    $managedFilterKeys = array_merge(['species', 'country', 'duration'], $campFacetKeys);
+    $offcanvasManagedKeys = array_merge(['species', 'country', 'sortby', 'pillar', 'duration'], $campFacetKeys);
     $activePillar = $filter->pillar ?? 'all';
-    $activeFilterCount = collect(['species', 'country', 'sortby', 'pillar'])
+    $activeFilterCount = collect($offcanvasManagedKeys)
         ->filter(fn ($key) => $key === 'pillar' && $omitPillarFromQuery ? false : filled(request()->get($key)))
         ->count();
-    $pillarUrl = function (string $pillar) use ($action, $query, $pillarLinks) {
+    $hasSidebarFilters = collect($managedFilterKeys)
+        ->filter(fn ($key) => filled(request()->get($key)))
+        ->isNotEmpty();
+    $clearFiltersUrl = (function () use ($action, $query, $managedFilterKeys, $activePillar, $omitPillarFromQuery) {
+        $params = collect($query)->except($managedFilterKeys)->all();
+        if ($activePillar !== 'all' && ! $omitPillarFromQuery) {
+            $params['pillar'] = $activePillar;
+        }
+
+        return $action.($params ? '?'.http_build_query($params) : '');
+    })();
+    $pillarUrl = function (string $pillar) use ($action, $query, $pillarLinks, $campFacetKeys) {
         if (is_array($pillarLinks) && isset($pillarLinks[$pillar])) {
             return $pillarLinks[$pillar];
         }
 
-        return $action.'?'.http_build_query(array_merge($query, ['pillar' => $pillar]));
+        $params = $query;
+        if ($pillar !== 'trips') {
+            unset($params['duration']);
+        }
+        if ($pillar !== 'camps') {
+            foreach ($campFacetKeys as $key) {
+                unset($params[$key]);
+            }
+        }
+
+        return $action.'?'.http_build_query(array_merge($params, ['pillar' => $pillar]));
     };
+    $pillarBaseUrl = fn (string $pillar) => explode('?', $pillarUrl($pillar), 2)[0];
     $showPillarFilters = $showPillarToggles && ($tripsTotal ?? 0) > 0 && ($campsTotal ?? 0) > 0;
+    $showToolbar = in_array($renderSection, ['all', 'toolbar'], true);
     $showSidebar = in_array($renderSection, ['all', 'sidebar'], true);
     $showMobile = $showMobileToolbar && in_array($renderSection, ['all', 'mobile'], true);
     $showOffcanvas = $showMobileToolbar && in_array($renderSection, ['all', 'offcanvas'], true);
     $currentSort = $filter->sortBy ?? '';
 @endphp
 
-@if($showSidebar)
-<form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
+@if($showToolbar)
+<form method="get" action="{{ $action }}" class="vacation-country__sort d-flex align-items-center ms-auto" data-vacation-sort-form>
     @foreach($query as $key => $value)
         @if(is_array($value))
             @foreach($value as $v)
                 <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
             @endforeach
-        @elseif($key !== 'species' && $key !== 'country' && $key !== 'sortby')
+        @elseif($key !== 'sortby')
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endif
+    @endforeach
+
+    @if($activePillar !== 'all' && ! $omitPillarFromQuery)
+        <input type="hidden" name="pillar" value="{{ $activePillar }}">
+    @endif
+
+    <label for="vacation-sortby" class="vacation-country__sort-label">{{ __('vacations.filter_sort') }}</label>
+    <select id="vacation-sortby" name="sortby" class="form-select form-select-sm" data-vacation-sort-select>
+        @include('components.vacation.partials.sort-options', ['currentSort' => $currentSort])
+    </select>
+</form>
+@endif
+
+@if($showSidebar)
+<form method="get" action="{{ $action }}" class="vacation-filters vacation-filters--{{ $variant }}" id="vacation-filters-form{{ $variant === 'mobile' ? '-mobile' : '' }}">
+    @foreach($query as $key => $value)
+        @if(in_array($key, $managedFilterKeys, true))
+            @continue
+        @endif
+        @if(is_array($value))
+            @foreach($value as $v)
+                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+            @endforeach
+        @else
             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
         @endif
     @endforeach
@@ -82,7 +143,7 @@
                 <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
                     <label class="form-label">{{ __('vacations.filter_country') }}</label>
                     <select name="country" class="form-select form-select-sm">
-                        <option value="">{{ __('vacations.all_region') }}</option>
+                        <option value="">{{ __('vacations.filter_show_all') }}</option>
                         @foreach($countries as $row)
                             <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
                                 {{ translate($row['name']) }}
@@ -92,25 +153,48 @@
                 </div>
             @endif
 
-            @if($speciesOptions->isNotEmpty())
+            @include('components.offers.partials.multi-select', [
+                'fieldClass' => $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3',
+                'wrapperClass' => 'vacation-filters__species',
+                'inputName' => 'species[]',
+                'inputPrefix' => $variant === 'sidebar' ? 'vacation-species-sidebar' : 'vacation-species-desktop',
+                'label' => __('vacations.filter_species'),
+                'placeholder' => __('vacations.filter_species_placeholder'),
+                'searchPlaceholder' => __('vacations.filter_species_search'),
+                'options' => $speciesOptions,
+                'selectedValues' => array_merge($filter->speciesIds ?? [], $filter->speciesNames ?? []),
+            ])
+
+            @if($showTripDurationFilter)
                 <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
-                    <label class="form-label">{{ __('vacations.filter_species') }}</label>
-                    <select name="species" class="form-select form-select-sm">
-                        <option value="">{{ __('vacations.select') }}</option>
-                        @foreach($speciesOptions as $species)
-                            <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
+                    <label class="form-label">{{ __('vacations.filter_duration') }}</label>
+                    <select name="duration" class="form-select form-select-sm">
+                        <option value="">{{ __('vacations.filter_show_all') }}</option>
+                        @foreach($tripDurationOptions as $duration)
+                            <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
+                                {{ $duration['label'] }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
             @endif
 
-            <div class="{{ $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3' }}">
-                <label class="form-label">{{ __('vacations.filter_sort') }}</label>
-                <select name="sortby" class="form-select form-select-sm">
-                    <option value="">{{ __('message.newest') }}</option>
-                    <option value="price-asc" @selected(($filter->sortBy ?? '') === 'price-asc')>@lang('message.lowprice')</option>
-                    <option value="price-desc" @selected(($filter->sortBy ?? '') === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
-                </select>
+            @include('components.vacation.partials.camp-facets', [
+                'fieldClass' => $variant === 'sidebar' ? 'vacation-filters__field' : 'col-md-3',
+                'selectClass' => 'form-select form-select-sm',
+                'inputPrefix' => 'vacation-camp-sidebar',
+                'filter' => $filter,
+                'accommodationTypeOptions' => $accommodationTypeOptions,
+                'showCampFacets' => $showCampFacets,
+            ])
+
+            <div class="vacation-filters__actions {{ $variant === 'sidebar' ? 'mt-2' : 'col-md-auto' }}">
+                <button type="submit" class="btn btn-sm btn-primary w-100">{{ __('vacations.apply_filters') }}</button>
+                @if($hasSidebarFilters)
+                    <a href="{{ $clearFiltersUrl }}" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                        {{ __('vacations.clear_filters') }}
+                    </a>
+                @endif
             </div>
 
             @if($showMapButton && ! $mapInSidebar)
@@ -127,6 +211,7 @@
     </div>
     @endif
 </form>
+@include('components.offers.partials.multi-select-script')
 @endif
 
 @if($showMobile)
@@ -202,39 +287,6 @@
             </div>
         @endif
     </div>
-
-    @once
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const filterBtn = document.getElementById('vacationSfmFilterBtn');
-            if (filterBtn) {
-                filterBtn.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                });
-            }
-
-            document.querySelectorAll('.vacation-mobile-sort-option').forEach(function (option) {
-                option.addEventListener('click', function (event) {
-                    event.preventDefault();
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const sortValue = this.dataset.sort;
-
-                    if (sortValue) {
-                        urlParams.set('sortby', sortValue);
-                    } else {
-                        urlParams.delete('sortby');
-                    }
-
-                    const query = urlParams.toString();
-                    window.location.href = query
-                        ? `${window.location.pathname}?${query}`
-                        : window.location.pathname;
-                });
-            });
-        });
-        </script>
-    @endonce
 @endif
 
 @if($showOffcanvas)
@@ -246,11 +298,14 @@
         <div class="offcanvas-body">
             <form method="get" action="{{ $action }}" class="vacation-filters-offcanvas__form">
                 @foreach($query as $key => $value)
+                    @if(in_array($key, $offcanvasManagedKeys, true))
+                        @continue
+                    @endif
                     @if(is_array($value))
                         @foreach($value as $v)
                             <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
                         @endforeach
-                    @elseif(! in_array($key, ['species', 'country', 'sortby', 'pillar'], true))
+                    @else
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endif
                 @endforeach
@@ -259,19 +314,19 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_show_all') }}</label>
                         @if(is_array($pillarLinks))
-                            <div class="vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group">
-                                <a href="{{ $pillarUrl('all') }}"
+                            <div class="vacation-filters__pillar-group vacation-filters__pillar-group--mobile" role="group" data-vacation-pillar-group>
+                                <button type="button" data-pillar-vacation="all" data-pillar-base-url="{{ $pillarBaseUrl('all') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--all {{ $activePillar === 'all' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_show_all') }} ({{ $total }})
-                                </a>
-                                <a href="{{ $pillarUrl('trips') }}"
+                                </button>
+                                <button type="button" data-pillar-vacation="trips" data-pillar-base-url="{{ $pillarBaseUrl('trips') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--trips {{ $activePillar === 'trips' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_trips_only') }} ({{ $tripsTotal }})
-                                </a>
-                                <a href="{{ $pillarUrl('camps') }}"
+                                </button>
+                                <button type="button" data-pillar-vacation="camps" data-pillar-base-url="{{ $pillarBaseUrl('camps') }}"
                                    class="vacation-filters__pillar-btn vacation-filters__pillar-btn--camps {{ $activePillar === 'camps' ? 'is-active' : '' }}">
                                     {{ __('vacations.filter_camps_only') }} ({{ $campsTotal }})
-                                </a>
+                                </button>
                             </div>
                         @else
                             <select name="pillar" class="form-select">
@@ -287,7 +342,7 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('vacations.filter_country') }}</label>
                         <select name="country" class="form-select">
-                            <option value="">{{ __('vacations.all_region') }}</option>
+                            <option value="">{{ __('vacations.filter_show_all') }}</option>
                             @foreach($countries as $row)
                                 <option value="{{ $row['slug'] }}" @selected(($filter->country ?? '') === $row['slug'])>
                                     {{ translate($row['name']) }}
@@ -297,24 +352,48 @@
                     </div>
                 @endif
 
-                @if($speciesOptions->isNotEmpty())
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('vacations.filter_species') }}</label>
-                        <select name="species" class="form-select">
-                            <option value="">{{ __('vacations.select') }}</option>
-                            @foreach($speciesOptions as $species)
-                                <option value="{{ $species }}" @selected(($filter->species ?? '') === $species)>{{ $species }}</option>
-                            @endforeach
-                        </select>
+                @include('components.offers.partials.multi-select', [
+                    'fieldClass' => 'mb-3',
+                    'wrapperClass' => 'vacation-filters__species',
+                    'inputName' => 'species[]',
+                    'inputPrefix' => 'vacation-species-offcanvas',
+                    'label' => __('vacations.filter_species'),
+                    'placeholder' => __('vacations.filter_species_placeholder'),
+                    'searchPlaceholder' => __('vacations.filter_species_search'),
+                    'options' => $speciesOptions,
+                    'selectedValues' => array_merge($filter->speciesIds ?? [], $filter->speciesNames ?? []),
+                ])
+
+                @if($tripDurationOptions->isNotEmpty())
+                    <div data-vacation-facet-section="trip" @if(! $showTripDurationFilter) class="d-none" @endif>
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('vacations.filter_duration') }}</label>
+                            <select name="duration" class="form-select">
+                                <option value="">{{ __('vacations.filter_show_all') }}</option>
+                                @foreach($tripDurationOptions as $duration)
+                                    <option value="{{ $duration['value'] }}" @selected(($filter->tripDuration ?? '') === $duration['value'])>
+                                        {{ $duration['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 @endif
+
+                @include('components.vacation.partials.camp-facets', [
+                    'fieldClass' => 'mb-3',
+                    'selectClass' => 'form-select',
+                    'inputPrefix' => 'vacation-camp-offcanvas',
+                    'filter' => $filter,
+                    'accommodationTypeOptions' => $accommodationTypeOptions,
+                    'showCampFacets' => $showCampFacets,
+                    'interactive' => true,
+                ])
 
                 <div class="mb-3">
                     <label class="form-label">{{ __('vacations.filter_sort') }}</label>
                     <select name="sortby" class="form-select">
-                        <option value="">{{ __('message.newest') }}</option>
-                        <option value="price-asc" @selected(($filter->sortBy ?? '') === 'price-asc')>@lang('message.lowprice')</option>
-                        <option value="price-desc" @selected(($filter->sortBy ?? '') === 'price-desc')>{{ __('trips.catalog_sort_price_desc') }}</option>
+                        @include('components.vacation.partials.sort-options', ['currentSort' => $currentSort])
                     </select>
                 </div>
 
@@ -322,4 +401,103 @@
             </form>
         </div>
     </div>
+    @include('components.offers.partials.multi-select-script')
 @endif
+
+@once
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function showVacationFilterLoader() {
+            var overlay = document.getElementById('vacation-page-loading-overlay');
+            if (!overlay) {
+                return;
+            }
+            overlay.hidden = false;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function bindAutoSubmit(select) {
+            if (!select || select.dataset.vacationLoaderBound) {
+                return;
+            }
+            select.dataset.vacationLoaderBound = '1';
+            select.addEventListener('change', function () {
+                showVacationFilterLoader();
+                if (select.form) {
+                    select.form.submit();
+                }
+            });
+        }
+
+        document.querySelectorAll('.vacation-filters select, [data-vacation-sort-select]').forEach(bindAutoSubmit);
+        document.querySelectorAll('.vacation-filters [data-vacation-facet-toggle]').forEach(bindAutoSubmit);
+
+        document.querySelectorAll('#vacation-filters-form, .vacation-filters-offcanvas__form').forEach(function (form) {
+            form.addEventListener('submit', showVacationFilterLoader);
+        });
+
+        var filterBtn = document.getElementById('vacationSfmFilterBtn');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        }
+
+        (function () {
+            var offcanvas = document.getElementById('vacationFiltersOffcanvas');
+            var form = offcanvas ? offcanvas.querySelector('.vacation-filters-offcanvas__form') : null;
+            var pillarGroup = offcanvas ? offcanvas.querySelector('[data-vacation-pillar-group]') : null;
+            if (!offcanvas || !form || !pillarGroup) {
+                return;
+            }
+
+            var pillarButtons = pillarGroup.querySelectorAll('[data-pillar-vacation]');
+            var facetSections = offcanvas.querySelectorAll('[data-vacation-facet-section]');
+
+            function setPillarState(pillar, baseUrl) {
+                if (baseUrl) {
+                    form.action = baseUrl;
+                }
+
+                pillarButtons.forEach(function (btn) {
+                    btn.classList.toggle('is-active', btn.dataset.pillarVacation === pillar);
+                });
+
+                facetSections.forEach(function (section) {
+                    var sectionType = section.dataset.vacationFacetSection;
+                    var matches = (sectionType === 'trip' && pillar === 'trips')
+                        || (sectionType === 'camp' && pillar === 'camps');
+                    section.classList.toggle('d-none', !matches);
+                });
+            }
+
+            pillarButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setPillarState(btn.dataset.pillarVacation, btn.dataset.pillarBaseUrl);
+                });
+            });
+        })();
+
+        document.querySelectorAll('.vacation-mobile-sort-option').forEach(function (option) {
+            option.addEventListener('click', function (event) {
+                event.preventDefault();
+                showVacationFilterLoader();
+
+                var urlParams = new URLSearchParams(window.location.search);
+                var sortValue = this.dataset.sort;
+
+                if (sortValue) {
+                    urlParams.set('sortby', sortValue);
+                } else {
+                    urlParams.delete('sortby');
+                }
+
+                var query = urlParams.toString();
+                window.location.href = query
+                    ? window.location.pathname + '?' + query
+                    : window.location.pathname;
+            });
+        });
+    });
+    </script>
+@endonce

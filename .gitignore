@@ -59,6 +59,9 @@ package-lock.json
 # Local-only backups (e.g. nested public/.git moved aside)
 /_local_backup/
 
+# Local DB dumps (mysqldump backups taken before running migrations) — never commit raw DB content
+/backup/
+
 /storage/*.key
 /vendor
 /stubs
@@ -106,3 +109,4 @@ storage/debugbar/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.cursor/

@@ -1,4 +1,4 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @section('title', $translatedVacation->title ?? $vacation->title)
 
@@ -247,29 +247,17 @@
 @endsection
 
 @section('content')
-<div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        @if($destination && $destination->type)
-                            <li><a href="{{ route('destination.country', [
-                                'country' => $destination->type == 'country' || $destination->type == 'vacations' ? $destination->slug : $destination->slug,
-                                'region' => $destination->type == 'region' ? $destination->slug : null,
-                                'city' => $destination->type == 'city' ? $destination->slug : null
-                            ]) }}">{{ translate('Vacations in') }} {{ $destination->name }}</a></li>
-                             <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        @endif
-                        <li class="active">{{ $translatedVacation->title ?? $vacation->title }}</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.vacations.partials.catalog-header', [
+        'listingTitle' => __('vacations.hub_header_title'),
+        'listingSubtitle' => __('vacations.hub_header_subtitle'),
+        'titleTag' => 'p',
+        'currentVacationCountry' => $translatedVacation->country ?? $vacation->country ?? null,
+        'breadcrumbItems' => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+            ['label' => $translatedVacation->title ?? $vacation->title, 'url' => null],
+        ],
+    ])
 <!-- <div class="container">
     <section class="page-header">
         <div class="page-header__bottom">
@@ -278,14 +266,14 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
-                        <li><a href="{{ route('vacations.index') }}">{{ translate('Fishing Vacations')}}</a></li>
+                        <li><a href="{{ route('vacations.index') }}">{{ __('vacations.fishing_vacations_label')}}</a></li>
                         <li><span>&#183;</span></li>
                         @if($destination && $destination->type)
                             <li><a href="{{ route('destination.country', [
                                 'country' => $destination->type == 'country' || $destination->type == 'vacations' ? $destination->slug : $destination->slug,
                                 'region' => $destination->type == 'region' ? $destination->slug : null,
                                 'city' => $destination->type == 'city' ? $destination->slug : null
-                            ]) }}">{{ translate('Vacations in') }} {{ $destination->name }}</a></li>
+                            ]) }}">{{ __('vacations.vacations_in') }} {{ $destination->name }}</a></li>
                             <li><span>&#183;</span></li>
                         @endif
                         <li class="active">
@@ -317,7 +305,7 @@
                         </div>
                         <div class="location-map">
                             <a href="#map" class="fs-6 text-decoration-none text-muted">
-                                <span class="text-primary">{{translate('Show on map')}}</span>
+                                <span class="text-primary">{{__('destination.show_on_map')}}</span>
                             </a>
                         </div>
                     </div>
@@ -330,7 +318,7 @@
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                     <a href="#book-now" class="btn btn-orange">@lang('message.reservation')</a>
                 </div>
-                <span>{{translate('Best price guarantee')}}</span>
+                <span>{{__('guidings.Best_price_guarantee')}}</span>
             </div>
         </div>
     </div>
@@ -478,7 +466,7 @@
                 <!-- Boat Availability -->
                 <div class="info-item">
                     <i class="fas fa-ship"></i>
-                    <small class="mb-0">{{translate('Boat Available:')}}</small>
+                    <small class="mb-0">{{__('vacations.boat_available_colon')}}</small>
                     <strong><i class="fas {{ $vacation->has_boat ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
 
@@ -492,7 +480,7 @@
                 <!-- Pets -->
                 <div class="info-item">
                     <i class="fas fa-paw"></i>
-                    <small class="mb-0">{{translate('Pets:')}}</small>
+                    <small class="mb-0">{{__('vacations.pets_label')}}</small>
                     <strong><i class="fas {{ $vacation->pets_allowed ? 'fa-check text-success' : 'fa-times text-danger' }}"></i></strong>
                 </div>
             </div>
@@ -504,7 +492,7 @@
                     @if ($vacation->surroundings_description)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>{{ translate('Beschreibung')}}</span>
+                            <span>{{ __('checkout.description')}}</span>
                         </div>
                         <span class="text-wrapper">
                             {!! $translatedVacation->surroundings_description ?? $vacation->surroundings_description !!}
@@ -515,7 +503,7 @@
                     @if ($vacation->best_travel_times)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>{{ translate('Best travel times')}}</span>
+                            <span>{{ __('vacations.best_travel_times')}}</span>
                         </div>
                         <p class="text-wrapper">
                             @php $bestTravelTimes = $translatedVacation->best_travel_times ?? $vacation->best_travel_times; @endphp
@@ -526,7 +514,7 @@
                     @if ($vacation->target_fish)
                     <div class="description-item">
                         <div class="header-container">
-                            <span>{{ translate('Target fish') }}</span>
+                            <span>{{ __('homepage.searchbar-targetfish') }}</span>
                         </div>
                         <p class="text-wrapper">
                             @php $targetFish = $translatedVacation->target_fish ?? $vacation->target_fish; @endphp
@@ -683,15 +671,15 @@
                         $sections = [
                             'accommodation' => [
                                 'items' => $translatedAccommodations ?? [],
-                                'title' => translate('Accommodation')
+                                'title' => __('camps.accommodations_title')
                             ],
                             'boat' => [
                                 'items' => $translatedBoats ?? [],
-                                'title' => translate('Mietboot')
+                                'title' => __('request.rentaboat')
                             ],
                             'package' => [
                                 'items' => $translatedPackages ?? [],
-                                'title' => translate('Komplettpaket')
+                                'title' => __('vacations-booking.package')
                             ],
                             'guiding' => [
                                 'items' => $translatedGuidings ?? [],
@@ -776,13 +764,13 @@
                                                 @foreach($dynamicFields as $field => $value)
                                                     @if($field === 'prices')
                                                         <div class="mb-3">
-                                                            <h6 class="mb-2">{{ translate('Pricing') }}</h6>
+                                                            <h6 class="mb-2">{{ __('accommodations.pricing_title') }}</h6>
                                                             <div class="table-responsive">
                                                             <table class="table table-sm">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th style="width: 50px !important;">{{ translate('Persons') }}</th>
-                                                                        <th style="width: 150px !important;">{{ translate('Price') }}</th>
+                                                                        <th style="width: 50px !important;">{{ __('guidings.persons') }}</th>
+                                                                        <th style="width: 150px !important;">{{ __('emails.price') }}</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -838,17 +826,17 @@
                     $sections = [
                         'accommodation' => [
                             'items' => $translatedAccommodations,
-                            'title' => translate('Accommodation'),
+                            'title' => __('camps.accommodations_title'),
                             'lang' => 'accommodations',
                         ],
                         'boat' => [
                             'items' => $translatedBoats,
-                            'title' => translate('Mietboot'),
+                            'title' => __('request.rentaboat'),
                             'lang' => 'boats',
                         ],
                         'package' => [
                             'items' => $translatedPackages,
-                            'title' => translate('Komplettpaket'),
+                            'title' => __('vacations-booking.package'),
                             'lang' => 'package',
                         ],
                         'guiding' => [
@@ -948,13 +936,13 @@
                                                     @foreach($dynamicFields as $field => $value)
                                                         @if($field === 'prices')
                                                             <div class="mb-3">
-                                                                <h6 class="mb-2">{{ translate('Pricing') }}</h6>
+                                                                <h6 class="mb-2">{{ __('accommodations.pricing_title') }}</h6>
                                                                 <div class="table-responsive">
                                                                     <table class="table table-sm">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th>{{ translate('Persons') }}</th>
-                                                                                <th>{{ translate('Price') }}</th>
+                                                                                <th>{{ __('guidings.persons') }}</th>
+                                                                                <th>{{ __('emails.price') }}</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -1003,16 +991,16 @@
                     @if ($translatedExtras && count($translatedExtras) > 0)
                         <div class="description-item">
                             <div class="header-container">
-                                <span>{{ translate('Extras')}}</span>
+                                <span>{{ __('accommodations.extras')}}</span>
                             </div>
                             
                             <div class="table-responsive">
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>
-                                            <th>{{ translate('Description') }}</th>
-                                            <th>{{ translate('Price') }}</th>
-                                            <th style="min-width:100px !important">{{ translate('Price Type') }}</th>
+                                            <th>{{ __('checkout.description') }}</th>
+                                            <th>{{ __('emails.price') }}</th>
+                                            <th style="min-width:100px !important">{{ __('accommodations.price_type') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1065,7 +1053,7 @@
                     @foreach($sameCountries as $same_country)
                 
                         <div class="popular-tours__single">
-                            <a class="popular-tours__img" href="{{ route('guidings.show',[$same_country->id,$same_country->slug]) }}" title="{{ translate('Guide aufmachen') }}">
+                            <a class="popular-tours__img" href="{{ $same_country->publicShowUrl() }}" title="{{ __('vacations.open_guide') }}">
                                 <div class="popular-tours__img__wrapper">
                                     @if($same_country->gallery)
                                         <img src="{{ media_url($same_country->gallery[0]) }}" alt="{{ $same_country->title }}"/>
@@ -1075,7 +1063,7 @@
 
                             <div class="popular-tours__content">
                             <h5 class="crop-text-2 card-title h6">
-                                <a href="{{ route('guidings.show', [$same_country->id, $same_country->slug]) }}">
+                                <a href="{{ $same_country->publicShowUrl() }}">
                                     {{ $same_country->title ? translate(Str::limit($same_country->title, 50)) : translate($same_country->title) }}
                                 </a>
                             </h5>    
@@ -1088,7 +1076,7 @@
                     @endforeach
                 </div>
                 <div class="text-center my-3">
-                    <a href="/vacations" class="btn btn-outline-secondary">{{ translate('View all vacations') }}</a>
+                    <a href="/vacations" class="btn btn-outline-secondary">{{ __('vacations.view_all_vacations') }}</a>
                 </div>
             </div>
         </div>
@@ -1176,6 +1164,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
 

@@ -20,6 +20,7 @@
             <form action="{{route('guidings.index')}}" method="get" style="margin-bottom: 0;">
                 <select class="form-select form-select-sm" name="sortby" id="sortby-2" style="width: auto;">
                     <option value="" disabled selected>@lang('message.choose')...</option>
+                    <option value="recommended" {{request()->get('sortby') == 'recommended' ? 'selected' : '' }}>@lang('message.recommended')</option>
                     <option value="newest" {{request()->get('sortby') == 'newest' ? 'selected' : '' }}>@lang('message.newest')</option>
                     <option value="price-asc" {{request()->get('sortby') == 'price-asc' ? 'selected' : '' }}>@lang('message.lowprice')</option>
                     {{-- <option value="price-desc" {{request()->get('sortby') == 'price-desc' ? 'selected' : '' }}>@lang('message.highprice')</option> --}}
@@ -141,7 +142,7 @@
 @if($otherGuidingsUnique->count() && $hasPlaceCoords)
 <hr>
 <div class="my-0 section-title" id="other-guidings-section">
-    <h2 class="h4 text-dark fw-bolder">{{ translate('Additional Fishing Tour close to') }} {{ request()->place }}</h2>
+    <h2 class="h4 text-dark fw-bolder">{{ __('guidings.additional_fishing_tour_close_to') }} {{ request()->place }}</h2>
 </div>
 <br>
 <div class="row">

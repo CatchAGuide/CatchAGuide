@@ -121,16 +121,16 @@
                     <form method="POST" action="{{ route('password.email') }}">
                         @csrf
                         <div class="col-lg-8 offset-2 login-form-2 text-center">
-                            <h1 class="h2" style="color: #FFFFFF; margin-bottom: 30px;">{{ translate('Passwort vergessen') }}</h1>
+                            <h1 class="h2" style="color: #FFFFFF; margin-bottom: 30px;">{{ __('passwords.forgot_password_heading') }}</h1>
                             <div class="form-group" style="padding-bottom: 25px;">
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
                                        name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
-                                       placeholder="{{ translate('Deine Email') }}*" />
+                                       placeholder="{{ __('passwords.your_email') }}*" />
                             </div>
 
                             <div class="form-group">
                                 <button type="submit" class="btnSubmit">
-                                    {{ translate('Passwort zurücksetzen') }}
+                                    {{ __('global.Reset Password') }}
                                 </button>
                             </div>
                         </div>

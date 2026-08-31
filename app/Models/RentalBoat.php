@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\BoatExtra;
+use App\Models\Inclussion;
+use App\Models\RentalBoatRequirement;
 
 class RentalBoat extends Model
 {
@@ -48,19 +51,12 @@ class RentalBoat extends Model
     ];
 
     /**
-     * Get the boat extras attribute with proper JSON handling
+     * Get the boat extras attribute, resolving stored IDs against the
+     * boat_extras master data for a locale-aware name.
      */
     public function getBoatExtrasAttribute($value)
     {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-            // If not valid JSON, try comma-separated
-            return explode(',', $value);
-        }
-        return $value;
+        return $this->resolveMasterDataPairs($value, BoatExtra::class);
     }
 
     /**
@@ -76,19 +72,12 @@ class RentalBoat extends Model
     }
 
     /**
-     * Get the inclusions attribute with proper JSON handling
+     * Get the inclusions attribute, resolving stored IDs against the
+     * shared inclussions master data for a locale-aware name.
      */
     public function getInclusionsAttribute($value)
     {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-            // If not valid JSON, try comma-separated
-            return explode(',', $value);
-        }
-        return $value;
+        return $this->resolveMasterDataPairs($value, Inclussion::class);
     }
 
     /**
@@ -104,19 +93,12 @@ class RentalBoat extends Model
     }
 
     /**
-     * Get the requirements attribute with proper JSON handling
+     * Get the requirements attribute, resolving stored IDs against the
+     * rental_boat_requirements master data for a locale-aware name.
      */
     public function getRequirementsAttribute($value)
     {
-        if (is_string($value)) {
-            $decoded = json_decode($value, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-            // If not valid JSON, try comma-separated
-            return explode(',', $value);
-        }
-        return $value;
+        return $this->resolveMasterDataPairs($value, RentalBoatRequirement::class);
     }
 
     /**
@@ -207,5 +189,58 @@ class RentalBoat extends Model
     public function boatType(): BelongsTo
     {
         return $this->belongsTo(GuidingBoatType::class, 'boat_type', 'id');
+    }
+
+    /**
+     * Resolves stored {id, value} pairs (or legacy comma-separated strings)
+     * against a locale-aware master data model exposing name/name_en via a
+     * getNameAttribute accessor. Entries with no id, or an id that no longer
+     * matches a master row, keep their raw stored value instead of being
+     * dropped, so custom host-entered text is never lost.
+     *
+     * @param  mixed  $value
+     * @param  class-string<Model>  $modelClass
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveMasterDataPairs($value, string $modelClass): array
+    {
+        if (is_null($value)) {
+            return [];
+        }
+
+        $items = $value;
+
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = (json_last_error() === JSON_ERROR_NONE && is_array($decoded))
+                ? $decoded
+                : array_map(fn ($part) => ['value' => trim($part)], explode(',', $items));
+        }
+
+        if (!is_array($items) || empty($items)) {
+            return [];
+        }
+
+        $items = collect($items)->map(fn ($item) => is_array($item) ? $item : ['value' => $item]);
+
+        $ids = $items->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $definitions = $modelClass::whereIn('id', $ids)->get()->keyBy('id');
+
+        return $items->map(function ($item) use ($definitions) {
+            $id = !empty($item['id']) ? (int) $item['id'] : null;
+            $definition = $id !== null ? $definitions->get($id) : null;
+
+            return [
+                'id' => $id,
+                'value' => $item['value'] ?? null,
+                'name' => $definition?->name,
+                'name_en' => $definition?->name_en,
+            ];
+        })->values()->all();
     }
 }

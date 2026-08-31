@@ -7,6 +7,13 @@ return [
     'local_disk' => env('MEDIA_STORAGE_LOCAL_DISK', 'public'),
 
     /*
+    | Force CDN bucket folder (production|staging). When empty, derived from APP_ENV
+    | (production → production, everything else → staging). Use production locally
+    | when browsing a production DB dump so listing images resolve.
+    */
+    'bucket_prefix' => env('MEDIA_BUCKET_PREFIX'),
+
+    /*
     | URL generation: when true, managed media paths resolve straight to the DO CDN
     | URL with no remote HEAD/exists call (best for PageSpeed on listing pages).
     | Backend read/move/delete still use cached exists checks via exists_cache_ttl.
@@ -21,6 +28,15 @@ return [
     */
 
     'object_visibility' => env('MEDIA_OBJECT_VISIBILITY', 'public'),
+
+    /*
+    | Recycle bin for removed listing images. Files are moved here after a
+    | successful DB commit (never during a failed update) and purged later.
+    */
+    'trash' => [
+        'root' => env('MEDIA_TRASH_ROOT', '_trash'),
+        'retention_days' => (int) env('MEDIA_TRASH_RETENTION_DAYS', 14),
+    ],
 
     /*
     |--------------------------------------------------------------------------

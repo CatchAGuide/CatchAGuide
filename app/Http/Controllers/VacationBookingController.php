@@ -98,7 +98,7 @@ class VacationBookingController extends Controller
         // Return a JSON response for AJAX handling
         return response()->json([
             'success' => true,
-            'message' => translate('Your booking request has been submitted successfully!'),
+            'message' => __('vacations-booking.booking_request_submitted'),
             'booking' => $booking
         ]);
     }

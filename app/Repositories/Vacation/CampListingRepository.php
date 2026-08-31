@@ -46,7 +46,8 @@ class CampListingRepository implements ListingRepositoryInterface
     public function paginateForCountry(VacationListingFilter $filter, int $perPage): LengthAwarePaginator
     {
         $query = $this->filterApplicator->applyToCampQuery(
-            $this->baseQuery($filter->country)->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations']),
+            $this->baseQuery($filter->country, $filter->countryShort)
+                ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations']),
             $filter
         );
 
@@ -55,7 +56,10 @@ class CampListingRepository implements ListingRepositoryInterface
 
     public function queryForCountry(VacationListingFilter $filter): Builder
     {
-        return $this->filterApplicator->applyToCampQuery($this->baseQuery($filter->country), $filter);
+        return $this->filterApplicator->applyToCampQuery(
+            $this->baseQuery($filter->country, $filter->countryShort),
+            $filter
+        );
     }
 
     public function listNewest(int $limit, ?string $country = null): Collection
@@ -76,12 +80,12 @@ class CampListingRepository implements ListingRepositoryInterface
             ->get();
     }
 
-    private function baseQuery(?string $country): Builder
+    private function baseQuery(?string $country, ?string $countryShort = null): Builder
     {
         $query = Camp::query()->where('status', $this->policy->activeStatus());
 
         if ($country !== null && $country !== '') {
-            $variants = CountrySlug::storageVariants($country);
+            $variants = CountrySlug::storageVariants($country, $countryShort);
             $query->where(function (Builder $q) use ($variants) {
                 foreach ($variants as $variant) {
                     $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);

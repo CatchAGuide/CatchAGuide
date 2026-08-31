@@ -1,13 +1,7 @@
 .tours-list {
   position: relative;
   display: block;
-  // max-width: 1600px;
-  // width: 100%;
   margin: 0 auto;
-
-  @include media(">=tablet") {
-    padding: 0 15px;
-  }
 
   &__rate {
     font-size: 0.7rem;

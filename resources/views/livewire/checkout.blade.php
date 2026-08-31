@@ -265,7 +265,7 @@
                                     <label class="form-check-label" for="createAccount" style="font-size: 14px;">
                                     @lang('checkout.save_data_create_account')
                                       <a href="{{ route('law.agb') }}" target="_blank">@lang('checkout.terms_and_conditions')</a>
-                                      {{ translate('and') }}
+                                      {{ __('checkout.and') }}
                                       <a href="{{ route('law.data-protection') }}" target="_blank">@lang('checkout.privacy_policy')</a>
                                     </label>
                                   </div>
@@ -335,7 +335,7 @@
                                 @if($guiding->is_boat)
                                   <div class="flex-column border-bottom">
                                     <div class="my-2">
-                                      <span class="text-dark fw-bold">{{ translate('Fishing from ')}}:</span>
+                                      <span class="text-dark fw-bold">{{ __('checkout.fishing_from')}}:</span>
                                     </div>
                                     <div class="px-2 text-dark">
                                       {{$guiding->is_boat ? $guiding->boat_type : ''}}
@@ -344,14 +344,14 @@
                                 @else
                                   <div class="flex-column border-bottom">
                                     <div class="my-2">
-                                      <span class="text-dark fw-bold">{{ translate('Shore') }}</span>
+                                      <span class="text-dark fw-bold">{{ __('guidings.shore') }}</span>
                                     </div>
                                   </div>
                                 @endif
 
                                 <div class="flex-column border-bottom">
                                   <div class="my-2">
-                                    <span class="text-dark fw-bold">{{ translate('Location')}}:</span>
+                                    <span class="text-dark fw-bold">{{ __('camps.location')}}:</span>
                                   </div>
                                   <div class="px-2 text-dark">
                                     {{$guiding->location ? $guiding->location : ''}}
@@ -417,7 +417,7 @@
                         <!-- Personal Information Card -->
                         <div class="card mb-4 shadow p-1">
                           <!-- <div class="card-header bg-light">
-                            <h5 class="mb-0">{{ translate('Personal Information') }}</h5>
+                            <h5 class="mb-0">{{ __('checkout.personal_information') }}</h5>
                           </div> -->
                           <div class="card-body">
                             <div class="mb-2"> 
@@ -441,7 +441,7 @@
                                 <p class="form-control-static">{{ $userData['address'] }}</p>
                               </div>
                               <div class="col-md-4">
-                                <span class="text-dark fw-bold">{{ translate('Postal code') }}</span>
+                                <span class="text-dark fw-bold">{{ __('checkout.postal_code_label') }}</span>
                                 <p class="form-control-static">{{ $userData['postal'] }}</p>
                               </div>
                               <div class="col-md-4">
@@ -453,7 +453,7 @@
                                 <p class="form-control-static">{{ $userData['country'] }}</p>
                               </div>
                               <div class="col-12">
-                                <span class="text-dark fw-bold">{{ translate('Phone Number') }}</span>
+                                <span class="text-dark fw-bold">{{ __('checkout.phone_number') }}</span>
                                 <p class="form-control-static">{{ $userData['countryCode'] }} {{ $userData['phone'] }}</p>
                               </div>
                             </div>
@@ -639,7 +639,7 @@
                                         disabled 
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
-                                        title="{{ translate('Please accept the Terms and Conditions to enable booking') }}"
+                                        title="{{ __('checkout.please_accept_terms_booking') }}"
                                       @endif>
                                 <i class="fas fa-check-circle me-2"></i>
                                 @lang('message.reservation')

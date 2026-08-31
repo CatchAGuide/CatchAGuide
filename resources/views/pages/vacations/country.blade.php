@@ -5,14 +5,18 @@
     $destination = $vm->destination;
     $countryName = translate($destination->name);
     $hasMap = count($vm->mapMarkers) > 0;
-    $countrySubtitle = strip_tags(translate($destination->sub_title ?? ''));
-    $countryIntro = strip_tags(translate($destination->introduction ?? ''));
+    $countrySubtitle = strip_tags($destination->scopedCmsValue('sub_title') ?? '');
+    $countryIntro = strip_tags($destination->scopedCmsValue('introduction') ?? '');
+    $cmsTitle = $destination->scopedCmsValue('title');
     $listingTitle = $isAllOffers
         ? __('vacations.all_offers_listing_title')
-        : __('vacations.country_listing_title', ['country' => $countryName]);
+        : (filled($cmsTitle) ? $cmsTitle : __('vacations.country_listing_title', ['country' => $countryName]));
     $breadcrumbLabel = $isAllOffers
         ? __('vacations.all_offers_breadcrumb')
-        : __('vacations.country_listing_title', ['country' => $countryName]);
+        : (filled($cmsTitle) ? $cmsTitle : __('vacations.country_listing_title', ['country' => $countryName]));
+    $faqHeading = filled($destination->scopedCmsValue('faq_title'))
+        ? $destination->scopedCmsValue('faq_title')
+        : __('vacations.hub_faq_title');
 @endphp
 
 @section('title', $listingTitle . ' — ' . __('vacations.hub_breadcrumb'))
@@ -28,21 +32,15 @@
 @endif
 
 @section('content')
-<div class="container">
-    <section class="page-header">
-        <div class="page-header__bottom breadcrumb-container">
-            <div class="page-header__bottom-inner">
-                <ul class="thm-breadcrumb list-unstyled">
-                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li><a href="{{ route('vacations.index') }}">{{ __('vacations.hub_breadcrumb') }}</a></li>
-                    <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                    <li class="active">{{ $breadcrumbLabel }}</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-</div>
+@include('pages.vacations.partials.catalog-header', [
+    'listingTitle' => $listingTitle,
+    'listingSubtitle' => $countrySubtitle,
+    'currentVacationCountry' => $isAllOffers ? 'all-offers' : ($destination->slug ?? null),
+    'breadcrumbItems' => [
+        ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+        ['label' => $breadcrumbLabel, 'url' => null],
+    ],
+])
 
 <div
     class="container vacation-country"
@@ -50,83 +48,49 @@
     data-analytics-page="vacation-country"
     data-country="{{ $destination->slug }}"
 >
-    @if(filled($destination->introduction))
+    @if(filled($destination->scopedCmsValue('introduction')))
         <div id="page-main-intro" class="mb-3">
-            <div class="page-main-intro-text mb-1">{!! translate(nl2br($destination->introduction)) !!}</div>
+            <div class="page-main-intro-text mb-1">{!! translate(nl2br($destination->scopedCmsValue('introduction'))) !!}</div>
             <p class="see-more text-center">
                 <a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('vacations.read_more')</a>
             </p>
         </div>
     @endif
 
-    <h2 class="vacation-country__listing-title">{{ $listingTitle }}</h2>
-
     @if($hasMap)
         @include('pages.vacations.partials.country-map-modal', ['markers' => $vm->mapMarkers])
     @endif
 
-    <div class="row vacation-country__layout mb-5">
-        <div class="col-12 d-block d-sm-none mobile-selection-sfm mb-3 vacation-country__mobile-toolbar">
-            <x-vacation.filters
-                render-section="mobile"
-                :filter="$vm->filter"
-                :trips-total="$vm->tripsTotal"
-                :camps-total="$vm->campsTotal"
-                :species-options="$vm->speciesOptions"
-                :pillar-links="$vm->pillarToggleUrls()"
-                :omit-pillar-from-query="true"
-                :show-map-button="$hasMap"
-            />
-        </div>
+    <x-vacation.catalog-layout
+        :has-map="$hasMap"
+        :filter="$vm->filter"
+        :trips-total="$vm->tripsTotal"
+        :camps-total="$vm->campsTotal"
+        :species-options="$vm->speciesOptions"
+        :accommodation-type-options="$vm->accommodationTypeOptions"
+        :pillar-links="$vm->pillarToggleUrls()"
+        :title="$listingTitle"
+    >
+        @if($vm->listingsTotal > 0)
+            @foreach($listingRows as $card)
+                @if(($card['type'] ?? '') === 'camp')
+                    <x-vacation.camp-list-row :card="$card" />
+                @else
+                    <x-vacation.trip-list-row :card="$card" />
+                @endif
+            @endforeach
 
-        <aside class="col-12 col-lg-3 vacation-country__sidebar d-none d-sm-block">
-            <div class="vacation-country__sidebar-filters">
-                <x-vacation.filters
-                    render-section="sidebar"
-                    :filter="$vm->filter"
-                    :trips-total="$vm->tripsTotal"
-                    :camps-total="$vm->campsTotal"
-                    :species-options="$vm->speciesOptions"
-                    :pillar-links="$vm->pillarToggleUrls()"
-                    :omit-pillar-from-query="true"
-                    :show-map-button="false"
-                    :show-mobile-toolbar="false"
-                    variant="sidebar"
-                />
-            </div>
-
-            @if($hasMap)
-                <div class="card vacation-country__map-card mt-3">
-                    <x-maps.preview-trigger
-                        target="#vacationCountryMapModal"
-                        :label="__('vacations.show_on_map')"
-                    />
-                </div>
-            @endif
-        </aside>
-
-        <div class="col-12 col-lg-9 vacation-country__listings country-listing-item">
-            @if($vm->listingsTotal > 0)
-                @foreach($listingRows as $card)
-                    @if(($card['type'] ?? '') === 'camp')
-                        <x-vacation.camp-list-row :card="$card" />
-                    @else
-                        <x-vacation.trip-list-row :card="$card" />
-                    @endif
-                @endforeach
-
-                <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
-            @else
-                <p class="vacation-country__section-empty">
-                    @if($vm->filter->pillar === 'trips')
-                        {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
-                    @else
-                        {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
-                    @endif
-                </p>
-            @endif
-        </div>
-    </div>
+            <div class="mt-3">{{ $vm->listings->links('vendor.pagination.default') }}</div>
+        @else
+            <p class="vacation-country__section-empty">
+                @if($vm->filter->pillar === 'trips')
+                    {{ __('vacations.empty_state_body_trip', ['country' => $countryName]) }}
+                @else
+                    {{ __('vacations.empty_state_body_camp', ['country' => $countryName]) }}
+                @endif
+            </p>
+        @endif
+    </x-vacation.catalog-layout>
 
     @if($destination->fish_avail_title && $destination->fish_avail_intro && $vm->fishChart->count() > 0)
         <section class="vacation-country__seasonality mb-4">
@@ -136,42 +100,24 @@
         </section>
     @endif
 
-    @if($destination->content)
+    @if(filled($destination->scopedCmsValue('content')))
         <section class="vacation-country__seo mb-4 vacation-country__intro">
-            {!! translate($destination->content) !!}
-        </section>
-    @endif
-
-    @if($vm->faq->isNotEmpty())
-        <section class="vacation-country__faq mb-5">
-            <x-vacation.section-heading :title="__('vacations.hub_faq_title')" />
-            <div class="accordion" id="vacationCountryFaq">
-                @foreach($vm->faq as $index => $item)
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#country-faq-{{ $index }}">
-                                {{ translate($item->question ?? $item['question'] ?? '') }}
-                            </button>
-                        </h3>
-                        <div id="country-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#vacationCountryFaq">
-                            <div class="accordion-body">{!! translate($item->answer ?? $item['answer'] ?? '') !!}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
+            {!! clean_html(translate($destination->scopedCmsValue('content'))) !!}
         </section>
     @endif
 </div>
 
-<x-vacation.filters
-    render-section="offcanvas"
-    :filter="$vm->filter"
-    :trips-total="$vm->tripsTotal"
-    :camps-total="$vm->campsTotal"
-    :species-options="$vm->speciesOptions"
-    :pillar-links="$vm->pillarToggleUrls()"
-    :omit-pillar-from-query="true"
-/>
+@if($vm->faq->isNotEmpty())
+    <x-vacation.faq
+        class="vacation-country__faq"
+        :title="$faqHeading"
+        :items="$vm->faq->map(fn ($item) => [
+            'question' => translate($item->question ?? $item['question'] ?? ''),
+            'answer' => translate($item->answer ?? $item['answer'] ?? ''),
+        ])"
+    />
+@endif
+
 @endsection
 
 @section('js_after')

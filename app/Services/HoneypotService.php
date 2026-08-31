@@ -263,6 +263,10 @@ class HoneypotService
      */
     private function wasSessionTrapTriggered(Request $request): bool
     {
+        if (! $request->hasSession()) {
+            return false;
+        }
+
         $sessionId = $request->session()->getId();
         $trapData = Cache::get("session_trap_{$sessionId}");
         

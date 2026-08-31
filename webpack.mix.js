@@ -34,6 +34,7 @@ mix.sass("resources/sass/app.scss", "public/css/app.css");
 mix.sass("resources/sass/admin/_offer-sendout.scss", "public/css/admin-offer-sendout.css");
 mix.sass("resources/sass/admin/auth.scss", "public/css/admin-auth.css");
 mix.sass("resources/sass/admin/layout.scss", "public/css/admin-layout.css");
+mix.sass("resources/sass/admin/_category-pages.scss", "public/css/admin-category-pages.css");
 // creates 'dist/app.css'
 
 mix.js("resources/js/app.js", "public/js/app.js");

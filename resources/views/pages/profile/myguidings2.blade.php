@@ -187,7 +187,7 @@
                                             
                                                 </div>
                                                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 mt-1 p-1">
-                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">{{$guiding->title}}</a></h5>
+                                                    <h5 class="fw-bolder text-truncate"><a class="text-dark" href="{{ $guiding->publicShowUrl() }}">{{$guiding->title}}</a></h5>
                                                     <div class="ratings mr-2 color-primary my-1" style="font-size:0.80rem">
                                                         @if(count($guiding->user->received_ratings) > 0)
                                                         @switch(two($guiding->user->average_rating()))
@@ -392,7 +392,7 @@
                                                                     <span class="icon-user"></span>
                                                                 </div>
                                                                 <div class="mx-2" style="font-size:0.75rem">
-                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                                                {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{__('booking.people')}} @else {{__('booking.person')}} @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -402,7 +402,7 @@
                                                                     <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
                                                                 </div>
                                                                 <div class="mx-2" style="font-size:0.75rem">
-                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif
+                                                                    {{ $guiding->duration }} @if($guiding->duration != 1) {{__('checkout.hours')}} @else {{__('guidings.hour')}} @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -427,7 +427,7 @@
                                                 <div class="col-12 col-sm-12 col-md-2 col-lg-3 col-xl-2 col-xxl-2 position-relative">
 
                                                         <div class="d-flex flex-column my-5 py-2">
-                                                                <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.show', [$guiding->id,$guiding->slug])}}">View</a>
+                                                                <a class="btn btn-outline-theme  btn-sm my-1" href="{{$guiding->publicShowUrl()}}">View</a>
                                                                 <a class="btn btn-outline-theme  btn-sm my-1" href="{{route('guidings.edit', $guiding->id)}}">@lang('profile.edit')</a>
                                                                 @if($guiding->status == 1)
                                                                     <a class="btn btn-outline-theme btn-sm my-1" href="{{route('profile.guiding.deactivate', $guiding)}}">@lang('profile.deactivateGuide')</a>

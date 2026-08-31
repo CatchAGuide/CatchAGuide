@@ -1,0 +1,434 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Services\Homepage\HomepageLandingService;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+use Mockery;
+use Tests\TestCase;
+
+class HomepageLandingTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['app.url' => 'http://localhost']);
+        URL::forceRootUrl('http://localhost');
+
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+
+        Cache::flush();
+
+        $landing = Mockery::mock(HomepageLandingService::class);
+        $landing->shouldReceive('build')->andReturn([
+            'featuredCountries' => collect([
+                [
+                    'slug' => 'deutschland',
+                    'name' => 'Germany',
+                    'thumbnail' => '/assets/images/300x300.png',
+                    'countrycode' => 'DE',
+                ],
+                [
+                    'slug' => 'schweden',
+                    'name' => 'Sweden',
+                    'thumbnail' => '/assets/images/300x300.png',
+                    'countrycode' => 'SE',
+                ],
+            ]),
+            'countryCount' => 12,
+            'mixedOffers' => collect([
+                [
+                    'type' => 'tour',
+                    'id' => 1,
+                    'title' => 'Test Day Tour',
+                    'url' => '/guidings/offer/test-day-tour',
+                    'image' => '/images/placeholder_guide.jpg',
+                    'gallery_images' => ['/images/placeholder_guide.jpg'],
+                    'badge' => 'Tour',
+                    'location' => 'Berlin',
+                    'price_amount' => '€120',
+                    'price_unit' => 'person',
+                ],
+                [
+                    'type' => 'trip',
+                    'id' => 2,
+                    'title' => 'Test Trip',
+                    'url' => '/vacations/trips/test-trip',
+                    'image' => '/images/placeholder_guide.jpg',
+                    'gallery_images' => ['/images/placeholder_guide.jpg'],
+                    'badge' => 'Trip',
+                    'location' => 'Sweden',
+                    'price_amount' => '€450',
+                    'price_unit' => 'person',
+                ],
+                [
+                    'type' => 'camp',
+                    'id' => 3,
+                    'title' => 'Test Camp',
+                    'url' => '/vacations/camps/test-camp',
+                    'image' => '/images/placeholder_guide.jpg',
+                    'gallery_images' => ['/images/placeholder_guide.jpg'],
+                    'badge' => 'Camp',
+                    'location' => 'Norway',
+                    'price_amount' => '€300',
+                    'price_unit' => 'person',
+                ],
+            ]),
+            'offerModules' => [
+                'tour' => collect([
+                    [
+                        'type' => 'tour',
+                        'id' => 1,
+                        'title' => 'Test Day Tour',
+                        'url' => '/guidings/offer/test-day-tour',
+                        'image' => '/images/placeholder_guide.jpg',
+                        'gallery_images' => ['/images/placeholder_guide.jpg'],
+                        'badge' => 'Tour',
+                        'location' => 'Berlin',
+                        'price_amount' => '€120',
+                        'price_unit' => 'person',
+                    ],
+                ]),
+                'trip' => collect([
+                    [
+                        'type' => 'trip',
+                        'id' => 2,
+                        'title' => 'Test Trip',
+                        'url' => '/vacations/trips/test-trip',
+                        'image' => '/images/placeholder_guide.jpg',
+                        'gallery_images' => ['/images/placeholder_guide.jpg'],
+                        'badge' => 'Trip',
+                        'location' => 'Sweden',
+                        'price_amount' => '€450',
+                        'price_unit' => 'person',
+                    ],
+                ]),
+                'camp' => collect([
+                    [
+                        'type' => 'camp',
+                        'id' => 3,
+                        'title' => 'Test Camp',
+                        'url' => '/vacations/camps/test-camp',
+                        'image' => '/images/placeholder_guide.jpg',
+                        'gallery_images' => ['/images/placeholder_guide.jpg'],
+                        'badge' => 'Camp',
+                        'location' => 'Norway',
+                        'price_amount' => '€300',
+                        'price_unit' => 'person',
+                    ],
+                ]),
+            ],
+            'targetSpecies' => collect([
+                [
+                    'name' => 'Pike',
+                    'slug' => 'pike',
+                    'thumbnail' => '/assets/images/300x300.png',
+                    'url' => '/targets/pike',
+                ],
+            ]),
+            'featuredGuides' => collect(),
+            'testimonials' => collect([
+                [
+                    'quote' => 'Amazing trip on the lake.',
+                    'score' => 9.5,
+                    'author' => 'Sam',
+                    'date' => 'Mar 2026',
+                    'tour_title' => 'Pike fishing day tour',
+                    'tour_url' => '/guidings/offer/pike-fishing-day-tour',
+                ],
+            ]),
+            'magazineThreads' => collect(),
+            'season' => [
+                'month' => 'October',
+                'title' => "What's biting in October?",
+                'text' => 'Seasonal tips',
+                'cta_url' => '/fishing-magazine',
+                'species' => collect([
+                    [
+                        'type' => 'pair',
+                        'fish' => 'Pike',
+                        'country' => 'Sweden',
+                        'name' => 'Pike in Sweden',
+                        'slug' => 'pike',
+                        'thumbnail' => '/assets/images/300x300.png',
+                        'url' => '/destination/sweden',
+                    ],
+                    [
+                        'type' => 'pair',
+                        'fish' => 'Atlantic Salmon',
+                        'country' => 'Norway',
+                        'name' => 'Atlantic Salmon in Norway',
+                        'slug' => 'atlantic-salmon',
+                        'thumbnail' => '/assets/images/300x300.png',
+                        'url' => '/destination/norway',
+                    ],
+                ]),
+            ],
+            'trust' => [
+                'rating' => '9.8/10',
+                'bookings' => '10,000+',
+                'offers' => '450+',
+                'countries' => '24',
+                'reviews_count' => 2480,
+                'reviews_label' => 'View 2,480+ reviews',
+                'rating_label' => 'Average rating',
+                'bookings_label' => 'Tours booked',
+                'offers_label' => 'Offers',
+                'countries_label' => 'Countries',
+            ],
+        ]);
+
+        $this->app->instance(HomepageLandingService::class, $landing);
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
+    public function test_homepage_renders_landing_structure(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('cag-site-nav', false);
+        $response->assertSee('cag-home-hero-shell', false);
+        $response->assertSee('data-hero-carousel', false);
+        $response->assertSee('assets/images/homepage/hero-tour.webp', false);
+        $response->assertSee('assets/images/homepage/hero-camp.webp', false);
+        $response->assertSee('assets/images/homepage/hero-trip.webp', false);
+        $response->assertSee('assets/images/homepage/hero-vacation.webp', false);
+        $response->assertSee('cag-home-hero__search', false);
+        $response->assertSee('cag-home-hero__who', false);
+        $response->assertSee('data-offers-persons-stepper', false);
+        $response->assertSee('name="num_guests"', false);
+        $response->assertSee('action="'.url('/offers').'"', false);
+        $response->assertSee('cag-site-nav__lang', false);
+        $response->assertSee('cag-site-nav__lang-btn', false);
+        $response->assertSee('cag-auth-modal', false);
+        $response->assertSee('cag-auth-modal__accent', false);
+        $response->assertSee('id="loginModal"', false);
+        $response->assertSee('id="guideApplicationModal"', false);
+        $response->assertSee('cag-home-hero__doors', false);
+        $response->assertSee('cag-home-hero__door-icon', false);
+        $response->assertSee('cag-home-hero__eyebrow', false);
+        $response->assertSee('cag-home-hero__rule', false);
+        $response->assertSee('cag-icon--fish', false);
+        $response->assertSee('cag-icon--camp', false);
+        $response->assertSee('cag-home-ph', false);
+        $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
+        $response->assertDontSee('cag-home-species__card cag-home-ph', false);
+        $response->assertDontSee('cag-home-season__card cag-home-ph', false);
+        $response->assertSee(__('homepage.hero_eyebrow'), false);
+        $response->assertSee(route('guidings.landing', [], false), false);
+        $response->assertSee(route('vacations.index', [], false), false);
+        $response->assertSee(route('destination.country', ['country' => 'deutschland'], false), false);
+        $response->assertSee('Germany', false);
+        $response->assertSee('fi fi-de', false);
+        $response->assertSee('fi fi-se', false);
+        $response->assertSee('cag-home-destinations__flag', false);
+        $response->assertDontSee('cag-home-destinations__code', false);
+        $response->assertSee(__('homepage.hero_h1'), false);
+        $response->assertSee(__('homepage.hero_sub'), false);
+        $response->assertDontSee('cag-home-hero__door-label', false);
+        $response->assertSee('cag-home-hero__door-title', false);
+        $response->assertSee('cag-home-hero__door-sub', false);
+        $response->assertSee(__('homepage.chooser_tour_label'), false);
+        $response->assertDontSee(__('homepage.chooser_tour_title'), false);
+        $response->assertSee(__('homepage.chooser_tour_sub'), false);
+        $response->assertSee(__('homepage.chooser_vacation_label'), false);
+        $response->assertDontSee(__('homepage.chooser_vacation_title'), false);
+        $response->assertSee(__('homepage.chooser_vacation_sub'), false);
+        $response->assertSee(__('homepage.species_subtitle'), false);
+        $response->assertSee(__('homepage.reviews_title'), false);
+        $response->assertSee('cag-home-season__arrow', false);
+        $response->assertDontSee('from €90 / Person', false);
+        $response->assertDontSee('cag-home-destinations__price', false);
+        $response->assertDontSee('Fishing in Germany', false);
+        $response->assertSee('cag-home-trust', false);
+        $response->assertSee('cag-home-trust__grid', false);
+        $response->assertSee('cag-home-trust__cell-heading', false);
+        $response->assertSee('cag-home-trust__cell-line', false);
+        $response->assertDontSee('cag-home-trust__strip', false);
+        $response->assertDontSee('Shopper Approved', false);
+        $response->assertSee('450+', false);
+        $response->assertSee(__('homepage.trust_rating_sub'), false);
+        $response->assertSee(__('homepage.trust_offers_heading'), false);
+        $response->assertSee(__('homepage.trust_offers_countries', ['count' => '24']), false);
+        $response->assertSee(__('homepage.trust_advice_line1'), false);
+        $response->assertSee(__('homepage.trust_advice_line2'), false);
+        $response->assertSee(__('homepage.trust_advice_text'), false);
+        $response->assertSee(__('homepage.trust_partners_line1'), false);
+        $response->assertSee(__('homepage.trust_partners_line2'), false);
+        $response->assertSee(__('homepage.trust_partners_text'), false);
+        $response->assertSee('cag-icon--star', false);
+        $response->assertSee('cag-home-season', false);
+        $response->assertSee('cag-home-season__grid', false);
+        $response->assertSee('cag-home-season__card', false);
+        $response->assertSee('biting in October?', false);
+        $response->assertDontSee('cag-home-season__cta', false);
+        $response->assertDontSee(__('homepage.season_cta', ['month' => 'October']), false);
+        $response->assertSee('cag-home-season__badge', false);
+        $response->assertSee('Sweden', false);
+        $response->assertSee('Pike in Sweden', false);
+        $response->assertSee('Atlantic Salmon in Norway', false);
+        $response->assertDontSee('cag-home-season__species-card', false);
+        $response->assertDontSee('cag-home-guides', false);
+        $response->assertSee('cag-home-species__rail', false);
+        $response->assertSee('cag-home-species__card', false);
+        $response->assertSee('data-species-spotlight', false);
+        $response->assertSee('data-species-viewport', false);
+        $response->assertSee('data-dest-rail', false);
+        $response->assertSee('enableDragScroll', false);
+        $response->assertSee('Pike', false);
+        $response->assertSee('cag-home-reviews', false);
+        $response->assertSee('9.5', false);
+        $response->assertSee('/10', false);
+        $response->assertSee('Pike fishing day tour', false);
+        $response->assertSee('href="/guidings/offer/pike-fishing-day-tour"', false);
+        $response->assertSee('cag-home-partner', false);
+        $response->assertSee('cag-home-partner__cards', false);
+        $response->assertSee('cag-home-partner__card', false);
+        $response->assertSee(__('homepage.partner_eyebrow'), false);
+        $response->assertSee(__('homepage.partner_title'), false);
+        $response->assertSee('Kein Risiko', false);
+        $response->assertSee('Neue Kunden', false);
+        $response->assertSee('Volle Kontrolle', false);
+        $response->assertSee('Direkt registrieren', false);
+        $response->assertSee('Mehr erfahren', false);
+        $response->assertSee('cag-home-bottom-nav', false);
+        $this->assertMatchesRegularExpression(
+            '/cag-home-bottom-nav[\s\S]*'.preg_quote(__('offers.nav_label'), '/').'[\s\S]*'.preg_quote(__('homepage.filter-fishing-near-me'), '/').'[\s\S]*'.preg_quote(__('homepage.header-vacations'), '/').'[\s\S]*'.preg_quote(__('homepage.footer_destinations'), '/').'/',
+            $response->getContent()
+        );
+        $response->assertSee('cag-footer', false);
+        $response->assertSee('cag-footer__accordion', false);
+        $response->assertSee('cag-footer__group', false);
+        $response->assertSee('info.catchaguide@gmail.com', false);
+    }
+
+    public function test_homepage_mixed_offers_include_type_markers(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('Test Day Tour', false);
+        $response->assertSee('Test Trip', false);
+        $response->assertSee('Test Camp', false);
+        $response->assertSee('data-product-type="tour"', false);
+        $response->assertSee('data-product-type="trip"', false);
+        $response->assertSee('data-product-type="camp"', false);
+        $response->assertSee('cag-home-offer--tour', false);
+        $response->assertSee('cag-home-offer--trip', false);
+        $response->assertSee('cag-home-offer--camp', false);
+        $response->assertSee('cag-home-offer__badge--tour', false);
+        $response->assertSee('cag-home-offer__badge--trip', false);
+        $response->assertSee('cag-home-offer__badge--camp', false);
+        $response->assertSee('cag-home-offers__module--tour', false);
+        $response->assertSee('cag-home-offers__module--camp', false);
+        $response->assertSee('cag-home-offers__module--trip', false);
+        $response->assertSee('cag-home-offers__module-mark', false);
+        $response->assertSee('cag-home-offers__module-sub', false);
+        $response->assertSee('cag-icon--globe', false);
+        $response->assertSee('data-offer-rail="tour"', false);
+        $response->assertSee('data-offer-rail="trip"', false);
+        $response->assertSee('data-offer-rail="camp"', false);
+
+        $html = $response->getContent();
+        $campPos = strpos($html, 'data-offer-module="camp"');
+        $tripPos = strpos($html, 'data-offer-module="trip"');
+        $this->assertNotFalse($campPos);
+        $this->assertNotFalse($tripPos);
+        $this->assertLessThan($tripPos, $campPos, 'Camps module should appear before Trips on the homepage.');
+
+        $this->assertMatchesRegularExpression('/data-offer-module="tour"[\s\S]{0,800}cag-icon--rod/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="camp"[\s\S]{0,800}cag-icon--camp/', $html);
+        $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,800}cag-icon--globe/', $html);
+    }
+
+    public function test_homepage_reviews_rail_is_interactive(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('data-reviews-rail', false);
+        $response->assertSee('data-reviews-prev', false);
+        $response->assertSee('data-reviews-next', false);
+        $response->assertSee(__('homepage.reviews_slider_prev'), false);
+        $response->assertSee(__('homepage.reviews_slider_next'), false);
+        $response->assertSee("querySelector('[data-reviews-rail]')", false);
+        $response->assertSee('enableDragScroll(reviewsRail', false);
+        $response->assertSee('reviewsRail.scrollLeft +=', false);
+        $response->assertDontSee("querySelector('[data-reviews-rail] .cag-home-reviews__rail')", false);
+        $response->assertDontSee('cag-home-reviews-marquee', false);
+        $response->assertDontSee("reviewsRail.addEventListener('mouseenter'", false);
+    }
+
+    public function test_homepage_pillar_doors_are_side_by_side_on_desktop(): void
+    {
+        $desktop = (string) file_get_contents(resource_path('sass/page/home.scss'));
+        $mobile = (string) file_get_contents(resource_path('sass/page/_home-mobile.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*flex-direction:\s*column/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*grid-template-columns:\s*1fr 1fr/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*flex-direction:\s*column/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__doors\s*\{[^}]*grid-template-columns/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-hero__door-title\s*\{\s*display:\s*none/',
+            $mobile
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-hero__door-title\s*\{[^}]*color:\s*#fff/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__grid\s*\{[^}]*grid-template-columns:\s*repeat\(4/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__cell-heading\s*\{[^}]*flex-direction:\s*column/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__cell-heading\s*\{[^}]*flex-direction:\s*row/',
+            $desktop
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-trust__grid\s*\{[^}]*grid-template-columns:\s*1fr 1fr/',
+            $mobile
+        );
+        $this->assertSame(
+            'Dein nächster Angelurlaub. Mit Unterkunft, Mietboot und lokalem Guide.',
+            trans('homepage.chooser_vacation_sub', [], 'de')
+        );
+        $this->assertSame('Bewertet von Anglern, die gebucht haben', trans('homepage.trust_rating_sub', [], 'de'));
+        $this->assertSame('450+ Angelerlebnisse', trans('homepage.trust_offers_over', ['count' => '450+'], 'de'));
+        $this->assertSame(
+            'Geführte Touren und Camps in 24 Ländern',
+            trans('homepage.trust_offers_countries', ['count' => '24'], 'de')
+        );
+        $this->assertSame('Persönlicher Support', trans('homepage.trust_advice_title', [], 'de'));
+        $this->assertSame('Persönlicher', trans('homepage.trust_advice_line1', [], 'de'));
+        $this->assertSame('Support', trans('homepage.trust_advice_line2', [], 'de'));
+        $this->assertSame('Geprüfte', trans('homepage.trust_partners_line1', [], 'de'));
+        $this->assertSame('Partner', trans('homepage.trust_partners_line2', [], 'de'));
+        $this->assertSame('Angelerlebnisse', trans('homepage.trust_offers_heading', [], 'de'));
+        $this->assertSame('Echte Angler, rund um die Uhr für dich', trans('homepage.trust_advice_text', [], 'de'));
+        $this->assertSame('Handverlesene Guides, selbst getestet', trans('homepage.trust_partners_text', [], 'de'));
+    }
+}

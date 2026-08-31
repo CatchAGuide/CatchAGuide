@@ -578,6 +578,9 @@ $admin-shell-gradient-strong: #4f46e5;
 // Catalog listing tables (rental boats, accommodations, camps, etc.)
 @import "./listing-table";
 
+// Reviews viewing panel
+@import "./reviews";
+
 @keyframes admin-shell-pulse {
   0% {
     transform: scale(0.9);

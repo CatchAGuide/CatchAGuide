@@ -14,7 +14,7 @@ if (! function_exists('translate')) {
         }
         
         $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
-        $cacheKey = 'translation_'.$currentLocale.'_'.$string;
+        $cacheKey = 'translation_'.$currentLocale.'_'.md5($string);
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
             try {
@@ -29,7 +29,7 @@ if (! function_exists('translate')) {
                 }
 
                 return ucfirst($translate);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error('Translation failed: ' . $e->getMessage(), [
                     'string' => $string,
                     'locale' => $currentLocale

@@ -29,12 +29,12 @@ final class CategorySitemapContributor implements SitemapContributorInterface
     {
         $entries = collect([
             SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['category-page', 'targets']),
+                $this->encoder->join($context->baseUrl, ['targets']),
                 'weekly',
                 0.7,
             ),
             SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['category-page', 'methods']),
+                $this->encoder->join($context->baseUrl, ['guidings', 'methods']),
                 'weekly',
                 0.7,
             ),
@@ -47,8 +47,13 @@ final class CategorySitemapContributor implements SitemapContributorInterface
 
         foreach ($pages as $page) {
             $type = strtolower((string) $page->type);
+            $path = match ($type) {
+                'methods' => ['guidings', 'methods', $page->slug],
+                'targets' => ['targets', $page->slug],
+                default => ['category-page', $type, $page->slug],
+            };
             $entries->push(SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['category-page', $type, $page->slug]),
+                $this->encoder->join($context->baseUrl, $path),
                 'monthly',
                 0.6,
             ));

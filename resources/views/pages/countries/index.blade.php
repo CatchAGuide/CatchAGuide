@@ -1,9 +1,24 @@
 @extends('layouts.app-v2')
 
-@section('title', __('destination.title'))
-@section('header_title', __('destination.header_title'))
-@section('header_sub_title', __('destination.header_sub_title'))
-@section('description', __('destination.header_sub_title'))
+@php
+    $title = $title ?? __('destination.title');
+    $sub_title = $sub_title ?? __('destination.header_sub_title');
+    $introduction = $introduction ?? __('destination.introduction');
+    $content = $content ?? '';
+    $faq_title = $faq_title ?? '';
+    $faq = $faq ?? collect();
+@endphp
+
+@section('title', $title)
+@section('header_title', $title)
+@section('header_sub_title', $sub_title)
+@section('description', $sub_title)
+
+@php
+    $isDestinationHub = request()->routeIs('destination');
+    $isGuidingsCountries = request()->routeIs('guidings.countries');
+    $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries;
+@endphp
 
 @section('custom_style')
     <style>
@@ -65,6 +80,22 @@
     </style>
 @endsection
 @section('content')
+<div class="{{ $useCategoryHeroHeader ? 'category-hero-page' : '' }}" @if($useCategoryHeroHeader) data-category-hero-page @endif>
+@if($useCategoryHeroHeader)
+    @include('pages.category.partials.hero-header', [
+        'listingTitle' => $title,
+        'listingSubtitle' => $sub_title,
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => $isGuidingsCountries
+            ? [
+                ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
+                ['label' => __('destination.breadcrumb'), 'url' => null],
+            ]
+            : [
+                ['label' => __('destination.breadcrumb'), 'url' => null],
+            ],
+    ])
+@else
 <div class="container">
         <section class="page-header">
             <div class="breadcrumb-container destination">
@@ -72,26 +103,33 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">@lang('destination.title')</li>
+                        <li class="active">{{ $title }}</li>
                     </ul>
                 </div>
             </div>
         </section>
     </div>
-<div class="container">
+@endif
+<div class="container {{ $useCategoryHeroHeader ? 'category-hero-page__body offers-page-header__anim' : '' }}" @if($useCategoryHeroHeader) style="--offers-anim-i: 4" @endif>
     <section class="toptargetfish">
         <div class="container my-4">
             <div id="page-main-intro" class="section-title my-2">
                 <div class="page-main-intro-text">
-                    @lang('destination.introduction')
+                    {!! clean_html($introduction) !!}
                 </div>
                 <p class="see-more text-center"><a href="#" class="btn btn-primary btn-sm read-more-btn">@lang('destination.read_more')</a></p>
             </div>
+            @if(filled($content))
+                <div class="mb-4">{!! clean_html($content) !!}</div>
+            @endif
             <div class="row">
+                @php
+                    $destinationRoute = $destination_route ?? 'destination.country';
+                @endphp
                 @foreach($countries as $country)
                     <div class="col-md-4 my-1">
                         <div class="trending-card">
-                            <a href="{{ route('destination.country', ['country' => $country->slug]) }}"> 
+                            <a href="{{ route($destinationRoute, ['country' => $country->slug]) }}"> 
                                 <div class="trending-card-wrapper">
                                     <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 
@@ -239,11 +277,32 @@
                     </div>
                 </div> --}}
             </div>
+            @if(filled($faq_title) && $faq->count() > 0)
+                <h2 class="mb-3 mt-5">{{ $faq_title }}</h2>
+                <div class="accordion mb-5" id="destination-hub-faq">
+                    @foreach($faq as $row)
+                        <div class="accordion-item">
+                            <h3 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#destination-hub-faq-{{ $row->id }}" aria-expanded="false" aria-controls="destination-hub-faq-{{ $row->id }}">
+                                    {{ $row->question }}
+                                </button>
+                            </h3>
+                            <div id="destination-hub-faq-{{ $row->id }}" class="accordion-collapse collapse" data-bs-parent="#destination-hub-faq">
+                                <div class="accordion-body">{!! clean_html($row->answer) !!}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </section>
 </div>
+</div>
 @endsection
 @section('js_after')
+@if($useCategoryHeroHeader)
+@include('layouts.partials.category-hero-header-script')
+@endif
 <script>
     
     $(function(){
