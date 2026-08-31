@@ -256,6 +256,10 @@ class ListingMap {
 
   emitViewportChange() {
     const payload = this.getVisiblePrimaryItems();
+    const recommended = this.getVisibleRecommendedItems();
+    payload.recommendedItems = recommended.items;
+    payload.recommendedIds = recommended.ids;
+    payload.recommendedCount = recommended.count;
     this._viewportListeners.forEach((fn) => {
       try {
         fn(payload);
@@ -266,21 +270,39 @@ class ListingMap {
   }
 
   getPrimaryItems() {
-    return this.markers
-      .filter((m) => m.options && m.options.cagVariant !== 'gray' && m._cagItem)
-      .map((m) => m._cagItem);
+    return this._itemsByVariant((m) => !m.options || m.options.cagVariant !== 'gray');
+  }
+
+  getRecommendedItems() {
+    return this._itemsByVariant((m) => m.options && m.options.cagVariant === 'gray');
+  }
+
+  _itemsByVariant(matches) {
+    return this.markers.filter((m) => m._cagItem && matches(m)).map((m) => m._cagItem);
   }
 
   getVisiblePrimaryItems() {
+    return this._visibleItemsByVariant((m) => !m.options || m.options.cagVariant !== 'gray');
+  }
+
+  /**
+   * Recommended (gray) pins currently on screen — re-derived on every pan/zoom
+   * so the rail's "You might also like" section tracks the visible map area.
+   */
+  getVisibleRecommendedItems() {
+    return this._visibleItemsByVariant((m) => m.options && m.options.cagVariant === 'gray');
+  }
+
+  _visibleItemsByVariant(matches) {
     if (!this.map) {
-      const items = this._dedupeItems(this.getPrimaryItems());
+      const items = this._dedupeItems(this._itemsByVariant(matches));
       return { items, ids: items.map((i) => itemKey(i)), count: items.length };
     }
 
     const bounds = this.map.getBounds();
     const items = [];
     this.markers.forEach((m) => {
-      if (!m._cagItem || (m.options && m.options.cagVariant === 'gray')) return;
+      if (!m._cagItem || !matches(m)) return;
       const ll = m.getLatLng();
       if (bounds.contains(ll)) {
         items.push(m._cagItem);
@@ -421,7 +443,7 @@ class ListingMap {
         popupHtml: popupHtml || null,
         popupOptions,
         zIndexOffset: isGray ? 100 : 0,
-        priceChip: usePriceChips && !isGray,
+        priceChip: usePriceChips,
         price: item.price,
         priceLabel: chipPrice,
       });
@@ -467,7 +489,9 @@ class ListingMap {
     }
 
     if (grayMarkers.length) {
-      this.grayLayer = L.layerGroup(grayMarkers).addTo(this.map);
+      this.grayLayer = this.options.cluster
+        ? mapsManager.createMarkerClusterer({ map: this.map, markers: grayMarkers, muted: true })
+        : L.layerGroup(grayMarkers).addTo(this.map);
     }
 
     const shouldFit =

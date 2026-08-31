@@ -49,6 +49,8 @@
         'landmark_park' => __('destination.landmark_park'),
         'landmark_attraction' => __('destination.landmark_attraction'),
         'landmark_town' => __('destination.landmark_town'),
+        'recommended_heading' => __('destination.map_recommended_heading'),
+        'recommended_badge' => __('destination.map_recommended_badge'),
     ];
 @endphp
 

@@ -490,6 +490,10 @@ var ListingMap = /*#__PURE__*/function () {
     key: "emitViewportChange",
     value: function emitViewportChange() {
       var payload = this.getVisiblePrimaryItems();
+      var recommended = this.getVisibleRecommendedItems();
+      payload.recommendedItems = recommended.items;
+      payload.recommendedIds = recommended.ids;
+      payload.recommendedCount = recommended.count;
       this._viewportListeners.forEach(function (fn) {
         try {
           fn(payload);
@@ -501,8 +505,22 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "getPrimaryItems",
     value: function getPrimaryItems() {
+      return this._itemsByVariant(function (m) {
+        return !m.options || m.options.cagVariant !== 'gray';
+      });
+    }
+  }, {
+    key: "getRecommendedItems",
+    value: function getRecommendedItems() {
+      return this._itemsByVariant(function (m) {
+        return m.options && m.options.cagVariant === 'gray';
+      });
+    }
+  }, {
+    key: "_itemsByVariant",
+    value: function _itemsByVariant(matches) {
       return this.markers.filter(function (m) {
-        return m.options && m.options.cagVariant !== 'gray' && m._cagItem;
+        return m._cagItem && matches(m);
       }).map(function (m) {
         return m._cagItem;
       });
@@ -510,8 +528,27 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "getVisiblePrimaryItems",
     value: function getVisiblePrimaryItems() {
+      return this._visibleItemsByVariant(function (m) {
+        return !m.options || m.options.cagVariant !== 'gray';
+      });
+    }
+
+    /**
+     * Recommended (gray) pins currently on screen — re-derived on every pan/zoom
+     * so the rail's "You might also like" section tracks the visible map area.
+     */
+  }, {
+    key: "getVisibleRecommendedItems",
+    value: function getVisibleRecommendedItems() {
+      return this._visibleItemsByVariant(function (m) {
+        return m.options && m.options.cagVariant === 'gray';
+      });
+    }
+  }, {
+    key: "_visibleItemsByVariant",
+    value: function _visibleItemsByVariant(matches) {
       if (!this.map) {
-        var _items = this._dedupeItems(this.getPrimaryItems());
+        var _items = this._dedupeItems(this._itemsByVariant(matches));
         return {
           items: _items,
           ids: _items.map(function (i) {
@@ -523,7 +560,7 @@ var ListingMap = /*#__PURE__*/function () {
       var bounds = this.map.getBounds();
       var items = [];
       this.markers.forEach(function (m) {
-        if (!m._cagItem || m.options && m.options.cagVariant === 'gray') return;
+        if (!m._cagItem || !matches(m)) return;
         var ll = m.getLatLng();
         if (bounds.contains(ll)) {
           items.push(m._cagItem);
@@ -666,7 +703,7 @@ var ListingMap = /*#__PURE__*/function () {
           popupHtml: popupHtml || null,
           popupOptions: popupOptions,
           zIndexOffset: isGray ? 100 : 0,
-          priceChip: usePriceChips && !isGray,
+          priceChip: usePriceChips,
           price: item.price,
           priceLabel: chipPrice
         });
@@ -708,7 +745,11 @@ var ListingMap = /*#__PURE__*/function () {
         });
       }
       if (grayMarkers.length) {
-        this.grayLayer = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup(grayMarkers).addTo(this.map);
+        this.grayLayer = this.options.cluster ? _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].createMarkerClusterer({
+          map: this.map,
+          markers: grayMarkers,
+          muted: true
+        }) : _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup(grayMarkers).addTo(this.map);
       }
       var shouldFit = opts.fit != null ? opts.fit : this.options.fitPrimaryBounds && !this._userInteracted && !opts.preserveView;
       if (shouldFit && primaryLatLngs.length) {
@@ -2528,44 +2569,28 @@ var MapModalRail = /*#__PURE__*/function () {
       var _this6 = this;
       var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var items = Array.isArray(payload.items) ? payload.items : [];
+      var recommended = Array.isArray(payload.recommendedItems) ? payload.recommendedItems : [];
       var count = payload.count != null ? payload.count : items.length;
       var label = this._countLabel(count);
       this.countEls.forEach(function (el) {
         el.textContent = label;
       });
       if (!this.listEl) return;
-      if (!items.length) {
+      if (!items.length && !recommended.length) {
         this.listEl.innerHTML = '';
         if (this.emptyEl) this.emptyEl.hidden = false;
         return;
       }
       if (this.emptyEl) this.emptyEl.hidden = true;
-      var html = items.map(function (item) {
-        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
-        var id = _this6._escape(String(key || item.id));
-        var selected = key != null && String(key) === String(_this6._selectedId);
-        var title = _this6._escape(item.title || '');
-        var location = _this6._escape(item.location || '');
-        var image = _this6._escape(item.image || '');
-        var url = _this6._escape(item.url || '#');
-        var module = _this6._normalizeModule(item.module || item.pillar || 'tour');
-        var moduleLabel = _this6._escape(item.moduleLabel || item.badge || '');
-        var price = item.priceLabel || (item.price != null ? (_this6.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
-        var duration = _this6._escape(item.durationLabel || '');
-        var guests = _this6._escape(item.guestsLabel || '');
-        var boat = _this6._escape(item.boatLabel || '');
-        var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
-        var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
-        var cta = _this6._escape(item.cta || _this6.i18n.view_details || 'Details');
-        var showOnMap = _this6._escape(_this6.i18n.show_on_map || 'Show on map');
-        var metaBits = [duration, guests, boat].filter(Boolean);
-        var metaHtml = metaBits.length ? "<ul class=\"map-modal__rail-card-meta\">".concat(metaBits.map(function (bit) {
-          return "<li>".concat(bit, "</li>");
-        }).join(''), "</ul>") : '';
-        var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n              <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n              ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(_this6._escape((_this6.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n            </span>") : '';
-        return "\n          <article class=\"map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '', "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n            <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n              ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n              <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n                  <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n                </svg>\n              </button>\n            </div>\n            <div class=\"map-modal__rail-card-body\">\n              <div class=\"map-modal__rail-card-topline\">\n                ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n                ").concat(ratingHtml, "\n              </div>\n              <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n              ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n              ").concat(metaHtml, "\n              <div class=\"map-modal__rail-card-footer\">\n                ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(_this6._escape(price), "</span>") : '<span></span>', "\n                <div class=\"map-modal__rail-card-actions\">\n                  <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n                  <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n                </div>\n              </div>\n            </div>\n          </article>");
+      var primaryHtml = items.map(function (item) {
+        return _this6._cardHtml(item);
       }).join('');
-      this.listEl.innerHTML = html;
+      var recommendedHtml = recommended.length ? "<div class=\"map-modal__rail-section\" data-map-rail-section=\"recommended\">\n          <span class=\"map-modal__rail-section-label\">".concat(this._escape(this.i18n.recommended_heading || 'You might also like'), "</span>\n        </div>").concat(recommended.map(function (item) {
+        return _this6._cardHtml(item, {
+          recommended: true
+        });
+      }).join('')) : '';
+      this.listEl.innerHTML = primaryHtml + recommendedHtml;
       if (this._selectedId && !this._isMobile()) {
         var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
         if (selectedCard) {
@@ -2575,6 +2600,43 @@ var MapModalRail = /*#__PURE__*/function () {
           });
         }
       }
+    }
+
+    /**
+     * @param {Object} item
+     * @param {{recommended?: boolean}} [opts] recommended: nearby item that didn't match
+     *   the current filters — rendered as a visibly quieter card, never the badge color.
+     */
+  }, {
+    key: "_cardHtml",
+    value: function _cardHtml(item) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var recommended = !!opts.recommended;
+      var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+      var id = this._escape(String(key || item.id));
+      var selected = key != null && String(key) === String(this._selectedId);
+      var title = this._escape(item.title || '');
+      var location = this._escape(item.location || '');
+      var image = this._escape(item.image || '');
+      var url = this._escape(item.url || '#');
+      var module = this._normalizeModule(item.module || item.pillar || 'tour');
+      var moduleLabel = recommended ? this._escape(this.i18n.recommended_badge || 'Suggested') : this._escape(item.moduleLabel || item.badge || '');
+      var moduleClass = recommended ? 'map-modal__rail-card-module--recommended' : "map-modal__rail-card-module--".concat(module);
+      var price = item.priceLabel || (item.price != null ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+      var duration = this._escape(item.durationLabel || '');
+      var guests = this._escape(item.guestsLabel || '');
+      var boat = this._escape(item.boatLabel || '');
+      var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+      var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+      var cta = this._escape(item.cta || this.i18n.view_details || 'Details');
+      var showOnMap = this._escape(this.i18n.show_on_map || 'Show on map');
+      var metaBits = [duration, guests, boat].filter(Boolean);
+      var metaHtml = metaBits.length ? "<ul class=\"map-modal__rail-card-meta\">".concat(metaBits.map(function (bit) {
+        return "<li>".concat(bit, "</li>");
+      }).join(''), "</ul>") : '';
+      var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n          <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n          ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(this._escape((this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n        </span>") : '';
+      var cardClass = "map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '').concat(recommended ? ' map-modal__rail-card--recommended' : '');
+      return "\n      <article class=\"".concat(cardClass, "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n        <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n          ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n          <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n              <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n            </svg>\n          </button>\n        </div>\n        <div class=\"map-modal__rail-card-body\">\n          <div class=\"map-modal__rail-card-topline\">\n            ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module ".concat(moduleClass, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n            ").concat(ratingHtml, "\n          </div>\n          <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n          ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n          ").concat(metaHtml, "\n          <div class=\"map-modal__rail-card-footer\">\n            ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(this._escape(price), "</span>") : '<span></span>', "\n            <div class=\"map-modal__rail-card-actions\">\n              <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n              <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n            </div>\n          </div>\n        </div>\n      </article>");
     }
   }, {
     key: "_countLabel",
@@ -2885,13 +2947,15 @@ var MapsManager = /*#__PURE__*/function () {
     value: function createMarkerClusterer(_ref) {
       var _this2 = this;
       var map = _ref.map,
-        markers = _ref.markers;
+        markers = _ref.markers,
+        _ref$muted = _ref.muted,
+        muted = _ref$muted === void 0 ? false : _ref$muted;
       var cluster = leaflet__WEBPACK_IMPORTED_MODULE_0___default().markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: 50,
+        maxClusterRadius: muted ? 60 : 50,
         spiderfyOnMaxZoom: true,
         iconCreateFunction: function iconCreateFunction(clusterGroup) {
-          return _this2._createClusterIcon(clusterGroup);
+          return _this2._createClusterIcon(clusterGroup, muted);
         }
       });
       if (Array.isArray(markers) && markers.length) {
@@ -2909,34 +2973,37 @@ var MapsManager = /*#__PURE__*/function () {
   }, {
     key: "_createClusterIcon",
     value: function _createClusterIcon(clusterGroup) {
+      var muted = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var count = clusterGroup.getChildCount();
       var size = 'small';
-      var dim = 42;
+      var dim = muted ? 38 : 42;
       if (count >= 25) {
         size = 'large';
-        dim = 56;
+        dim = muted ? 50 : 56;
       } else if (count >= 8) {
         size = 'medium';
-        dim = 48;
+        dim = muted ? 44 : 48;
       }
-      var typeCounts = {
-        tour: 0,
-        trip: 0,
-        camp: 0
-      };
-      clusterGroup.getAllChildMarkers().forEach(function (m) {
-        var key = m.options && m.options.cagVariant || 'tour';
-        if (key === 'trip' || key === 'camp' || key === 'tour') {
-          typeCounts[key] += 1;
-        } else if (key !== 'gray') {
-          typeCounts.tour += 1;
-        }
-      });
-      var dominant = Object.keys(typeCounts).sort(function (a, b) {
-        return typeCounts[b] - typeCounts[a];
-      })[0] || 'tour';
-      var mixed = [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
-      var typeClass = mixed ? 'cag-map-cluster--mixed' : "cag-map-cluster--".concat(dominant);
+      var typeClass = muted ? 'cag-map-cluster--muted' : function () {
+        var typeCounts = {
+          tour: 0,
+          trip: 0,
+          camp: 0
+        };
+        clusterGroup.getAllChildMarkers().forEach(function (m) {
+          var key = m.options && m.options.cagVariant || 'tour';
+          if (key === 'trip' || key === 'camp' || key === 'tour') {
+            typeCounts[key] += 1;
+          } else if (key !== 'gray') {
+            typeCounts.tour += 1;
+          }
+        });
+        var dominant = Object.keys(typeCounts).sort(function (a, b) {
+          return typeCounts[b] - typeCounts[a];
+        })[0] || 'tour';
+        var mixed = [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
+        return mixed ? 'cag-map-cluster--mixed' : "cag-map-cluster--".concat(dominant);
+      }();
       return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
         html: "\n        <span class=\"cag-map-cluster__ring\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__ring cag-map-cluster__ring--delay\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__core\">\n          <span class=\"cag-map-cluster__count\">".concat(count, "</span>\n          <span class=\"cag-map-cluster__hint\" aria-hidden=\"true\">+</span>\n        </span>"),
         className: "leaflet-div-icon marker-cluster marker-cluster-".concat(size, " cag-map-cluster cag-map-cluster--").concat(size, " ").concat(typeClass),
@@ -3033,13 +3100,14 @@ var MarkerFactory = /*#__PURE__*/function () {
       var isGray = normalized === 'gray';
       var priceLabel = options.priceLabel || null;
       var selected = !!options.selected;
-      if (priceLabel && !isGray) {
+      if (priceLabel) {
         var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         var selectedClass = selected ? ' cag-map-chip--selected' : '';
         var width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
+        var recommendedFlag = isGray ? '<span class="cag-map-chip__flag" aria-hidden="true"></span>' : '';
         return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
           className: "leaflet-div-icon cag-map-chip cag-map-chip--".concat(normalized).concat(selectedClass),
-          html: "<div class=\"cag-map-chip__inner\"><span class=\"cag-map-chip__price\">".concat(safe, "</span></div>"),
+          html: "<div class=\"cag-map-chip__inner\">".concat(recommendedFlag, "<span class=\"cag-map-chip__price\">").concat(safe, "</span></div>"),
           iconSize: [width, 32],
           iconAnchor: [Math.round(width / 2), 16],
           popupAnchor: [0, -18]

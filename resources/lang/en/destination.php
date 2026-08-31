@@ -47,6 +47,8 @@ Italy: The lakes of northern Italy and the coastal regions are very popular with
     'landmark_park' => 'Park',
     'landmark_attraction' => 'Attraction',
     'landmark_town' => 'Town',
+    'map_recommended_heading' => 'You might also like',
+    'map_recommended_badge' => 'Suggested',
     'select' => 'Select',
     'search' => 'Search',
     'previous' => 'Previous',

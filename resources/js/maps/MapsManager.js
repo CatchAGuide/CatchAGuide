@@ -125,12 +125,12 @@ class MapsManager {
     }
   }
 
-  createMarkerClusterer({ map, markers }) {
+  createMarkerClusterer({ map, markers, muted = false }) {
     const cluster = L.markerClusterGroup({
       showCoverageOnHover: false,
-      maxClusterRadius: 50,
+      maxClusterRadius: muted ? 60 : 50,
       spiderfyOnMaxZoom: true,
-      iconCreateFunction: (clusterGroup) => this._createClusterIcon(clusterGroup),
+      iconCreateFunction: (clusterGroup) => this._createClusterIcon(clusterGroup, muted),
     });
 
     if (Array.isArray(markers) && markers.length) {
@@ -146,33 +146,36 @@ class MapsManager {
     return cluster;
   }
 
-  _createClusterIcon(clusterGroup) {
+  _createClusterIcon(clusterGroup, muted = false) {
     const count = clusterGroup.getChildCount();
     let size = 'small';
-    let dim = 42;
+    let dim = muted ? 38 : 42;
     if (count >= 25) {
       size = 'large';
-      dim = 56;
+      dim = muted ? 50 : 56;
     } else if (count >= 8) {
       size = 'medium';
-      dim = 48;
+      dim = muted ? 44 : 48;
     }
 
-    const typeCounts = { tour: 0, trip: 0, camp: 0 };
-    clusterGroup.getAllChildMarkers().forEach((m) => {
-      const key = (m.options && m.options.cagVariant) || 'tour';
-      if (key === 'trip' || key === 'camp' || key === 'tour') {
-        typeCounts[key] += 1;
-      } else if (key !== 'gray') {
-        typeCounts.tour += 1;
-      }
-    });
-
-    const dominant =
-      Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])[0] || 'tour';
-    const mixed =
-      [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
-    const typeClass = mixed ? 'cag-map-cluster--mixed' : `cag-map-cluster--${dominant}`;
+    const typeClass = muted
+      ? 'cag-map-cluster--muted'
+      : (() => {
+          const typeCounts = { tour: 0, trip: 0, camp: 0 };
+          clusterGroup.getAllChildMarkers().forEach((m) => {
+            const key = (m.options && m.options.cagVariant) || 'tour';
+            if (key === 'trip' || key === 'camp' || key === 'tour') {
+              typeCounts[key] += 1;
+            } else if (key !== 'gray') {
+              typeCounts.tour += 1;
+            }
+          });
+          const dominant =
+            Object.keys(typeCounts).sort((a, b) => typeCounts[b] - typeCounts[a])[0] || 'tour';
+          const mixed =
+            [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
+          return mixed ? 'cag-map-cluster--mixed' : `cag-map-cluster--${dominant}`;
+        })();
 
     return L.divIcon({
       html: `

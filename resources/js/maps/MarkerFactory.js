@@ -52,7 +52,7 @@ class MarkerFactory {
     const priceLabel = options.priceLabel || null;
     const selected = !!options.selected;
 
-    if (priceLabel && !isGray) {
+    if (priceLabel) {
       const safe = String(priceLabel)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -60,9 +60,12 @@ class MarkerFactory {
         .replace(/"/g, '&quot;');
       const selectedClass = selected ? ' cag-map-chip--selected' : '';
       const width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
+      const recommendedFlag = isGray
+        ? '<span class="cag-map-chip__flag" aria-hidden="true"></span>'
+        : '';
       return L.divIcon({
         className: `leaflet-div-icon cag-map-chip cag-map-chip--${normalized}${selectedClass}`,
-        html: `<div class="cag-map-chip__inner"><span class="cag-map-chip__price">${safe}</span></div>`,
+        html: `<div class="cag-map-chip__inner">${recommendedFlag}<span class="cag-map-chip__price">${safe}</span></div>`,
         iconSize: [width, 32],
         iconAnchor: [Math.round(width / 2), 16],
         popupAnchor: [0, -18],

@@ -25,6 +25,12 @@
     font-family: inherit;
     background: #e8ecef;
   }
+
+  /* Calmer, Google-style basemap: fewer saturated greens/blues, softer road contrast.
+     Scoped to the tile pane only so pins/clusters/popups keep full color. */
+  .leaflet-tile-pane {
+    filter: saturate(0.62) brightness(1.09) contrast(0.92);
+  }
 }
 
 /* Product / detail map chrome */
@@ -479,6 +485,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     min-width: 48px;
     height: 30px;
     padding: 0 10px;
@@ -486,7 +493,17 @@
     background: #fff;
     border: 1.5px solid rgba(49, 48, 65, 0.18);
     box-shadow: 0 2px 8px rgba(49, 48, 65, 0.16);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  }
+
+  &__flag {
+    display: block;
+    flex: 0 0 auto;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #94a3b8;
+    opacity: 0.8;
   }
 
   &__price {
@@ -497,10 +514,12 @@
     letter-spacing: 0.01em;
   }
 
+  /* A faint category wash (not plain white) gives real matches a filled, "answered"
+     identity that the outline-only recommended chip below deliberately lacks. */
   &--tour .cag-map-chip__inner,
   &--primary .cag-map-chip__inner {
-    border-color: rgba($category-tour, 0.45);
-    background: #fff;
+    border-color: rgba($category-tour, 0.55);
+    background: color-mix(in srgb, $category-tour 6%, white);
   }
 
   &--tour .cag-map-chip__price,
@@ -509,8 +528,8 @@
   }
 
   &--trip .cag-map-chip__inner {
-    border-color: rgba($category-trip, 0.5);
-    background: #fff;
+    border-color: rgba($category-trip, 0.55);
+    background: color-mix(in srgb, $category-trip 6%, white);
   }
 
   &--trip .cag-map-chip__price {
@@ -518,12 +537,41 @@
   }
 
   &--camp .cag-map-chip__inner {
-    border-color: rgba($category-camp, 0.5);
-    background: #fff;
+    border-color: rgba($category-camp, 0.55);
+    background: color-mix(in srgb, $category-camp 6%, white);
   }
 
   &--camp .cag-map-chip__price {
     color: $category-camp-end;
+  }
+
+  /* Recommended / nearby-but-unmatched listings — same chip shape, deliberately quieter
+     (thin faint outline, no fill, no glow) so it never outweighs a real match. */
+  &--gray .cag-map-chip__inner {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px dashed rgba(100, 116, 139, 0.4);
+    box-shadow: 0 1px 3px rgba(49, 48, 65, 0.06);
+  }
+
+  &--gray .cag-map-chip__price {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  &--gray.cag-map-chip--selected .cag-map-chip__inner,
+  &--gray.cag-map-chip--selected.cag-map-chip--selected .cag-map-chip__inner {
+    transform: scale(1.06);
+    background: #fff;
+    border-style: solid;
+    border-color: #64748b;
+    box-shadow:
+      0 4px 12px rgba(49, 48, 65, 0.14),
+      0 0 0 3px rgba(100, 116, 139, 0.16);
+  }
+
+  &--gray.cag-map-chip--selected .cag-map-chip__price {
+    color: #313041;
+    font-weight: 800;
   }
 
   &--selected .cag-map-chip__inner,
@@ -1293,6 +1341,23 @@
     box-shadow:
       0 3px 10px rgba(49, 48, 65, 0.28),
       0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  /* Recommended / nearby-but-unmatched cluster — quiet dashed ghost, no brand color.
+     Kept fainter than any real-match cluster so it never reads as the stronger result. */
+  &--muted &__ring {
+    border-color: rgba(100, 116, 139, 0.26);
+    background: rgba(100, 116, 139, 0.05);
+    border-style: dashed;
+    animation: none;
+    opacity: 1;
+  }
+
+  &--muted &__core {
+    background: rgba(255, 255, 255, 0.8);
+    color: #64748b;
+    border: 1px dashed rgba(100, 116, 139, 0.4);
+    box-shadow: 0 1px 4px rgba(49, 48, 65, 0.06);
   }
 
   &:hover &__core {

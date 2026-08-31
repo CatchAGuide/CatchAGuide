@@ -1120,6 +1120,29 @@ $guidings-header-bg: #f7f9fb;
         color: #64748b;
     }
 
+    /* Divider above the "You might also like" section — dashed to echo the
+       recommended pin/cluster styling on the map itself. */
+    &__rail-section {
+        margin: 4px 4px 8px;
+        padding-top: 12px;
+        border-top: 1px dashed rgba(100, 116, 139, 0.3);
+
+        &:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+    }
+
+    &__rail-section-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #94a3b8;
+    }
+
     &__rail-card {
         display: flex;
         gap: 10px;
@@ -1230,6 +1253,40 @@ $guidings-header-bg: #f7f9fb;
                 }
             }
         }
+
+        /* Recommended (nearby, unmatched) card — same layout, visibly quieter:
+           dashed outline instead of a filled hover state, slate instead of brand price. */
+        &.map-modal__rail-card--recommended {
+            border-style: dashed;
+            border-color: rgba(100, 116, 139, 0.3);
+            background: rgba(248, 250, 252, 0.6);
+
+            &:hover {
+                border-color: rgba(100, 116, 139, 0.5);
+                background: rgba(248, 250, 252, 0.9);
+            }
+
+            &.is-hovered {
+                border-color: rgba(100, 116, 139, 0.55);
+                background: rgba(241, 245, 249, 0.9);
+                box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.22);
+            }
+
+            &.is-selected {
+                border-style: solid;
+                border-color: #64748b;
+                box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.16);
+                background: #f8fafc;
+            }
+
+            .map-modal__rail-card-price {
+                color: #64748b;
+            }
+
+            .map-modal__rail-card-media {
+                opacity: 0.92;
+            }
+        }
     }
 
     &__rail-card-module {
@@ -1253,6 +1310,12 @@ $guidings-header-bg: #f7f9fb;
         &--trip {
             background: $category-trip-soft;
             color: $category-trip-end;
+        }
+
+        &--recommended {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px dashed rgba(100, 116, 139, 0.4);
         }
 
         &--camp {

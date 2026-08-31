@@ -406,6 +406,7 @@ export default class MapModalRail {
 
   renderViewport(payload = {}) {
     const items = Array.isArray(payload.items) ? payload.items : [];
+    const recommended = Array.isArray(payload.recommendedItems) ? payload.recommendedItems : [];
     const count = payload.count != null ? payload.count : items.length;
     const label = this._countLabel(count);
 
@@ -415,7 +416,7 @@ export default class MapModalRail {
 
     if (!this.listEl) return;
 
-    if (!items.length) {
+    if (!items.length && !recommended.length) {
       this.listEl.innerHTML = '';
       if (this.emptyEl) this.emptyEl.hidden = false;
       return;
@@ -423,81 +424,16 @@ export default class MapModalRail {
 
     if (this.emptyEl) this.emptyEl.hidden = true;
 
-    const html = items
-      .map((item) => {
-        const key = itemKey(item);
-        const id = this._escape(String(key || item.id));
-        const selected = key != null && String(key) === String(this._selectedId);
-        const title = this._escape(item.title || '');
-        const location = this._escape(item.location || '');
-        const image = this._escape(item.image || '');
-        const url = this._escape(item.url || '#');
-        const module = this._normalizeModule(item.module || item.pillar || 'tour');
-        const moduleLabel = this._escape(item.moduleLabel || item.badge || '');
-        const price =
-          item.priceLabel ||
-          (item.price != null
-            ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price))
-            : '');
-        const duration = this._escape(item.durationLabel || '');
-        const guests = this._escape(item.guestsLabel || '');
-        const boat = this._escape(item.boatLabel || '');
-        const rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
-        const reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
-        const cta = this._escape(item.cta || this.i18n.view_details || 'Details');
-        const showOnMap = this._escape(this.i18n.show_on_map || 'Show on map');
+    const primaryHtml = items.map((item) => this._cardHtml(item)).join('');
+    const recommendedHtml = recommended.length
+      ? `<div class="map-modal__rail-section" data-map-rail-section="recommended">
+          <span class="map-modal__rail-section-label">${this._escape(
+            this.i18n.recommended_heading || 'You might also like'
+          )}</span>
+        </div>${recommended.map((item) => this._cardHtml(item, { recommended: true })).join('')}`
+      : '';
 
-        const metaBits = [duration, guests, boat].filter(Boolean);
-        const metaHtml = metaBits.length
-          ? `<ul class="map-modal__rail-card-meta">${metaBits
-              .map((bit) => `<li>${bit}</li>`)
-              .join('')}</ul>`
-          : '';
-
-        const ratingHtml = rating
-          ? `<span class="map-modal__rail-card-rating">
-              <span class="map-modal__rail-card-rating-value">${rating}</span>
-              ${
-                reviewCount != null
-                  ? `<span class="map-modal__rail-card-rating-count">${this._escape(
-                      (this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))
-                    )}</span>`
-                  : ''
-              }
-            </span>`
-          : '';
-
-        return `
-          <article class="map-modal__rail-card map-modal__rail-card--expanded${selected ? ' is-selected' : ''}" data-map-rail-id="${id}" data-map-rail-select data-map-module="${module}">
-            <div class="map-modal__rail-card-media${image ? '' : ' is-empty'}">
-              ${image ? `<img src="${image}" alt="" loading="lazy" decoding="async" width="128" height="112">` : ''}
-              <button type="button" class="map-modal__rail-card-zoom" data-map-rail-zoom aria-label="${showOnMap}" title="${showOnMap}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                </svg>
-              </button>
-            </div>
-            <div class="map-modal__rail-card-body">
-              <div class="map-modal__rail-card-topline">
-                ${moduleLabel ? `<span class="map-modal__rail-card-module map-modal__rail-card-module--${module}">${moduleLabel}</span>` : '<span></span>'}
-                ${ratingHtml}
-              </div>
-              <h3 class="map-modal__rail-card-title">${title}</h3>
-              ${location ? `<p class="map-modal__rail-card-location">${location}</p>` : ''}
-              ${metaHtml}
-              <div class="map-modal__rail-card-footer">
-                ${price ? `<span class="map-modal__rail-card-price">${this._escape(price)}</span>` : '<span></span>'}
-                <div class="map-modal__rail-card-actions">
-                  <button type="button" class="map-modal__rail-card-zoom-text" data-map-rail-zoom title="${showOnMap}">${showOnMap}</button>
-                  <a class="map-modal__rail-card-link" href="${url}">${cta}</a>
-                </div>
-              </div>
-            </div>
-          </article>`;
-      })
-      .join('');
-
-    this.listEl.innerHTML = html;
+    this.listEl.innerHTML = primaryHtml + recommendedHtml;
 
     if (this._selectedId && !this._isMobile()) {
       const selectedCard = this.listEl.querySelector(
@@ -507,6 +443,89 @@ export default class MapModalRail {
         selectedCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
+  }
+
+  /**
+   * @param {Object} item
+   * @param {{recommended?: boolean}} [opts] recommended: nearby item that didn't match
+   *   the current filters — rendered as a visibly quieter card, never the badge color.
+   */
+  _cardHtml(item, opts = {}) {
+    const recommended = !!opts.recommended;
+    const key = itemKey(item);
+    const id = this._escape(String(key || item.id));
+    const selected = key != null && String(key) === String(this._selectedId);
+    const title = this._escape(item.title || '');
+    const location = this._escape(item.location || '');
+    const image = this._escape(item.image || '');
+    const url = this._escape(item.url || '#');
+    const module = this._normalizeModule(item.module || item.pillar || 'tour');
+    const moduleLabel = recommended
+      ? this._escape(this.i18n.recommended_badge || 'Suggested')
+      : this._escape(item.moduleLabel || item.badge || '');
+    const moduleClass = recommended ? 'map-modal__rail-card-module--recommended' : `map-modal__rail-card-module--${module}`;
+    const price =
+      item.priceLabel ||
+      (item.price != null
+        ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price))
+        : '');
+    const duration = this._escape(item.durationLabel || '');
+    const guests = this._escape(item.guestsLabel || '');
+    const boat = this._escape(item.boatLabel || '');
+    const rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+    const reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+    const cta = this._escape(item.cta || this.i18n.view_details || 'Details');
+    const showOnMap = this._escape(this.i18n.show_on_map || 'Show on map');
+
+    const metaBits = [duration, guests, boat].filter(Boolean);
+    const metaHtml = metaBits.length
+      ? `<ul class="map-modal__rail-card-meta">${metaBits.map((bit) => `<li>${bit}</li>`).join('')}</ul>`
+      : '';
+
+    const ratingHtml = rating
+      ? `<span class="map-modal__rail-card-rating">
+          <span class="map-modal__rail-card-rating-value">${rating}</span>
+          ${
+            reviewCount != null
+              ? `<span class="map-modal__rail-card-rating-count">${this._escape(
+                  (this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))
+                )}</span>`
+              : ''
+          }
+        </span>`
+      : '';
+
+    const cardClass = `map-modal__rail-card map-modal__rail-card--expanded${selected ? ' is-selected' : ''}${
+      recommended ? ' map-modal__rail-card--recommended' : ''
+    }`;
+
+    return `
+      <article class="${cardClass}" data-map-rail-id="${id}" data-map-rail-select data-map-module="${module}">
+        <div class="map-modal__rail-card-media${image ? '' : ' is-empty'}">
+          ${image ? `<img src="${image}" alt="" loading="lazy" decoding="async" width="128" height="112">` : ''}
+          <button type="button" class="map-modal__rail-card-zoom" data-map-rail-zoom aria-label="${showOnMap}" title="${showOnMap}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+        <div class="map-modal__rail-card-body">
+          <div class="map-modal__rail-card-topline">
+            ${moduleLabel ? `<span class="map-modal__rail-card-module ${moduleClass}">${moduleLabel}</span>` : '<span></span>'}
+            ${ratingHtml}
+          </div>
+          <h3 class="map-modal__rail-card-title">${title}</h3>
+          ${location ? `<p class="map-modal__rail-card-location">${location}</p>` : ''}
+          ${metaHtml}
+          <div class="map-modal__rail-card-footer">
+            ${price ? `<span class="map-modal__rail-card-price">${this._escape(price)}</span>` : '<span></span>'}
+            <div class="map-modal__rail-card-actions">
+              <button type="button" class="map-modal__rail-card-zoom-text" data-map-rail-zoom title="${showOnMap}">${showOnMap}</button>
+              <a class="map-modal__rail-card-link" href="${url}">${cta}</a>
+            </div>
+          </div>
+        </div>
+      </article>`;
   }
 
   _countLabel(count) {

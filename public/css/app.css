@@ -7665,6 +7665,28 @@ body .main-menu .main-menu-wrapper__nav {
   font-size: 13px;
   color: #64748b;
 }
+.map-modal {
+  /* Divider above the "You might also like" section — dashed to echo the
+     recommended pin/cluster styling on the map itself. */
+}
+.map-modal__rail-section {
+  margin: 4px 4px 8px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(100, 116, 139, 0.3);
+}
+.map-modal__rail-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.map-modal__rail-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
 .map-modal__rail-card {
   display: flex;
   gap: 10px;
@@ -7762,6 +7784,36 @@ body .main-menu .main-menu-wrapper__nav {
     display: none;
   }
 }
+.map-modal__rail-card {
+  /* Recommended (nearby, unmatched) card — same layout, visibly quieter:
+     dashed outline instead of a filled hover state, slate instead of brand price. */
+}
+.map-modal__rail-card.map-modal__rail-card--recommended {
+  border-style: dashed;
+  border-color: rgba(100, 116, 139, 0.3);
+  background: rgba(248, 250, 252, 0.6);
+}
+.map-modal__rail-card.map-modal__rail-card--recommended:hover {
+  border-color: rgba(100, 116, 139, 0.5);
+  background: rgba(248, 250, 252, 0.9);
+}
+.map-modal__rail-card.map-modal__rail-card--recommended.is-hovered {
+  border-color: rgba(100, 116, 139, 0.55);
+  background: rgba(241, 245, 249, 0.9);
+  box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.22);
+}
+.map-modal__rail-card.map-modal__rail-card--recommended.is-selected {
+  border-style: solid;
+  border-color: #64748b;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.16);
+  background: #f8fafc;
+}
+.map-modal__rail-card.map-modal__rail-card--recommended .map-modal__rail-card-price {
+  color: #64748b;
+}
+.map-modal__rail-card.map-modal__rail-card--recommended .map-modal__rail-card-media {
+  opacity: 0.92;
+}
 .map-modal__rail-card-module {
   display: inline-flex;
   align-items: center;
@@ -7782,6 +7834,11 @@ body .main-menu .main-menu-wrapper__nav {
 .map-modal__rail-card-module--trip {
   background: rgba(31, 111, 168, 0.11);
   color: #165887;
+}
+.map-modal__rail-card-module--recommended {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px dashed rgba(100, 116, 139, 0.4);
 }
 .map-modal__rail-card-module--camp {
   background: rgba(12, 138, 127, 0.11);

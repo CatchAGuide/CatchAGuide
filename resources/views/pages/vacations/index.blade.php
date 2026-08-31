@@ -716,7 +716,7 @@
         :show-rail="true"
         :show-filter-chips="false"
         :price-chips="true"
-        :landmarks="false"
+        :landmarks="true"
     />
 
     <div class="offcanvas offcanvas-bottom" tabindex="-1" id="offcanvasBottomSearch" aria-labelledby="offcanvasBottomLabel">
