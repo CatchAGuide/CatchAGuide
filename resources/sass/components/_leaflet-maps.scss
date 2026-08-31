@@ -1,5 +1,9 @@
 /* Leaflet map components — teaser, pins, popups, clusters, frames, modal heights */
 
+.leaflet-container .leaflet-attribution-flag {
+  display: none;
+}
+
 .cag-map {
   width: 100%;
   position: relative;
@@ -70,6 +74,10 @@
     border-radius: 8px 0 0 0;
     padding: 3px 8px;
     box-shadow: none;
+
+    .leaflet-attribution-flag {
+      display: none;
+    }
   }
 }
 
@@ -1154,6 +1162,10 @@
     border-radius: 8px 0 0 0;
     color: #64748b;
     font-size: 10px;
+
+    .leaflet-attribution-flag {
+      display: none;
+    }
   }
 }
 

@@ -212,6 +212,9 @@ class OffersCatalogTest extends TestCase
         $response->assertSee(__('destination.map_show_map'), false);
         $response->assertSee(__('destination.map_show_list'), false);
         $response->assertSee(__('destination.map_resize_list'), false);
+        $response->assertSee('tile.openstreetmap.org', false);
+        $response->assertDontSee('basemaps.cartocdn.com', false);
+        $response->assertDontSee('openfreemap.org', false);
     }
 
     public function test_species_filter_renders_tagify_dropdown_control(): void

@@ -752,6 +752,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 
 /* Leaflet map components — teaser, pins, popups, clusters, frames, modal heights */
+.leaflet-container .leaflet-attribution-flag {
+  display: none;
+}
+
 .cag-map {
   width: 100%;
   position: relative;
@@ -812,6 +816,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-radius: 8px 0 0 0;
   padding: 3px 8px;
   box-shadow: none;
+}
+.cag-map-frame .leaflet-control-attribution .leaflet-attribution-flag {
+  display: none;
 }
 
 /* Listing sidebar map teaser */
@@ -1789,6 +1796,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-radius: 8px 0 0 0;
   color: #64748b;
   font-size: 10px;
+}
+.map-modal .leaflet-control-attribution .leaflet-attribution-flag {
+  display: none;
 }
 
 .marker-cluster-small,

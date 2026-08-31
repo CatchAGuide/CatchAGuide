@@ -16,9 +16,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+L.Control.Attribution.mergeOptions({
+  prefix: false,
+});
+
 const DEFAULT_CONFIG = {
-  tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   defaultCenter: { lat: 51.165691, lng: 10.451526 },
   defaultZoom: 5,
 };
@@ -45,10 +49,9 @@ class MapsManager {
   }
 
   createTileLayer() {
-    return L.tileLayer(this.config.tileUrl, {
-      attribution: this.config.attribution,
+    return L.tileLayer(this.config.tileUrl || DEFAULT_CONFIG.tileUrl, {
+      attribution: this.config.attribution || DEFAULT_CONFIG.attribution,
       maxZoom: 19,
-      subdomains: 'abcd',
     });
   }
 
