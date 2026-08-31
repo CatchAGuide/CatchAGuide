@@ -648,7 +648,6 @@ var ListingMap = /*#__PURE__*/function () {
       var grayMarkers = [];
       var interactive = this.options.interactivePreview;
       var railMode = this.options.viewportRail;
-      var usePriceChips = this.options.priceChips;
       var locale = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de';
       var priceTpl = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.priceFromTemplate || 'From :price';
       list.forEach(function (item) {
@@ -702,8 +701,10 @@ var ListingMap = /*#__PURE__*/function () {
           title: item.title || '',
           popupHtml: popupHtml || null,
           popupOptions: popupOptions,
-          zIndexOffset: isGray ? 100 : 0,
-          priceChip: usePriceChips,
+          // z-order (bottom -> top): "other" offers, then type pills.
+          zIndexOffset: isGray ? 0 : 100,
+          priceChip: true,
+          pillMode: true,
           price: item.price,
           priceLabel: chipPrice
         });
@@ -1181,8 +1182,8 @@ var ListingMap = /*#__PURE__*/function () {
       var setPinActive = function setPinActive(active) {
         var el = marker.getElement && marker.getElement();
         if (!el) return;
-        el.classList.toggle('cag-map-pin--active', !!active);
-        el.classList.toggle('cag-map-chip--selected', !!active && marker._cagPriceChip);
+        el.classList.toggle('cag-map-chip--selected', !!active && !!marker._cagPriceChip);
+        el.classList.toggle('cag-map-dot--selected', !!active && !marker._cagPriceChip);
       };
       marker.on('popupopen', function () {
         _this10._hydratePreviewImages(marker);
@@ -1551,8 +1552,8 @@ var ListingMap = /*#__PURE__*/function () {
       if (!marker) return;
       var el = marker.getElement && marker.getElement();
       if (el) {
-        el.classList.remove('cag-map-pin--active');
         el.classList.remove('cag-map-chip--selected');
+        el.classList.remove('cag-map-dot--selected');
       }
       if (marker.isPopupOpen && marker.isPopupOpen()) {
         marker.closePopup();
@@ -2952,7 +2953,7 @@ var MapsManager = /*#__PURE__*/function () {
         muted = _ref$muted === void 0 ? false : _ref$muted;
       var cluster = leaflet__WEBPACK_IMPORTED_MODULE_0___default().markerClusterGroup({
         showCoverageOnHover: false,
-        maxClusterRadius: muted ? 60 : 50,
+        maxClusterRadius: 60,
         // We own click/keypress handling below instead of the plugin defaults,
         // so a single click can jump straight to the cluster's real bounds.
         spiderfyOnMaxZoom: false,
@@ -2999,45 +3000,90 @@ var MapsManager = /*#__PURE__*/function () {
         map._container.focus();
       }
     }
+
+    /**
+     * Canonical map colour key for a module: gray -> other | tour -> tours | camp -> camps | trip -> holidays
+     * @param {string} module
+     */
+  }, {
+    key: "_clusterSpecKey",
+    value: function _clusterSpecKey(module) {
+      return {
+        tour: 'tours',
+        camp: 'camps',
+        trip: 'holidays',
+        gray: 'other'
+      }[module] || 'tours';
+    }
+
+    /**
+     * Fixed-size cluster circle. When a cluster mixes offer types, up to 2 further
+     * types render as equally-sized plain circles behind the dominant (front) one —
+     * tie-break order tours > camps > holidays, offsets per the cluster spec.
+     */
   }, {
     key: "_createClusterIcon",
     value: function _createClusterIcon(clusterGroup) {
+      var _this3 = this;
       var muted = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var count = clusterGroup.getChildCount();
-      var size = 'small';
-      var dim = muted ? 38 : 42;
-      if (count >= 25) {
-        size = 'large';
-        dim = muted ? 50 : 56;
-      } else if (count >= 8) {
-        size = 'medium';
-        dim = muted ? 44 : 48;
-      }
-      var typeClass = muted ? 'cag-map-cluster--muted' : function () {
-        var typeCounts = {
-          tour: 0,
-          trip: 0,
-          camp: 0
-        };
-        clusterGroup.getAllChildMarkers().forEach(function (m) {
-          var key = m.options && m.options.cagVariant || 'tour';
-          if (key === 'trip' || key === 'camp' || key === 'tour') {
-            typeCounts[key] += 1;
-          } else if (key !== 'gray') {
-            typeCounts.tour += 1;
-          }
+      if (muted) {
+        return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
+          html: "<span class=\"cag-map-cluster__core\"><span class=\"cag-map-cluster__count\">".concat(count, "</span></span>"),
+          className: 'leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--muted',
+          iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(26, 26),
+          iconAnchor: [13, 13]
         });
-        var dominant = Object.keys(typeCounts).sort(function (a, b) {
-          return typeCounts[b] - typeCounts[a];
-        })[0] || 'tour';
-        var mixed = [typeCounts.tour > 0, typeCounts.trip > 0, typeCounts.camp > 0].filter(Boolean).length > 1;
-        return mixed ? 'cag-map-cluster--mixed' : "cag-map-cluster--".concat(dominant);
-      }();
+      }
+      var PRIORITY = {
+        tour: 0,
+        camp: 1,
+        trip: 2
+      };
+      var typeCounts = {
+        tour: 0,
+        camp: 0,
+        trip: 0
+      };
+      clusterGroup.getAllChildMarkers().forEach(function (m) {
+        var key = m.options && m.options.cagVariant || 'tour';
+        if (key === 'tour' || key === 'camp' || key === 'trip') {
+          typeCounts[key] += 1;
+        } else if (key !== 'gray') {
+          typeCounts.tour += 1;
+        }
+      });
+      var present = Object.keys(typeCounts).filter(function (key) {
+        return typeCounts[key] > 0;
+      }).sort(function (a, b) {
+        return typeCounts[b] - typeCounts[a] || PRIORITY[a] - PRIORITY[b];
+      });
+      var dominant = present[0] || 'tour';
+      var edges = present.slice(1, 3);
+      var edgesHtml = edges.map(function (type, i) {
+        return "<span class=\"cag-map-cluster__edge cag-map-cluster__edge--".concat(i + 1, "\" style=\"background:var(--map-").concat(_this3._clusterSpecKey(type), ")\" aria-hidden=\"true\"></span>");
+      }).join('');
+
+      // Bounding box grows to the right/up as stacked edges are added; the front
+      // circle always stays anchored at the cluster's true geographic point.
+      var minTop = 0;
+      var maxRight = 32;
+      if (edges.length >= 1) {
+        minTop = Math.min(minTop, -4);
+        maxRight = Math.max(maxRight, 9 + 32);
+      }
+      if (edges.length >= 2) {
+        minTop = Math.min(minTop, -9);
+        maxRight = Math.max(maxRight, 18 + 32);
+      }
+      var width = maxRight;
+      var height = 32 - minTop;
+      var anchor = [16, 16 - minTop];
       return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
-        html: "\n        <span class=\"cag-map-cluster__ring\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__ring cag-map-cluster__ring--delay\" aria-hidden=\"true\"></span>\n        <span class=\"cag-map-cluster__core\">\n          <span class=\"cag-map-cluster__count\">".concat(count, "</span>\n          <span class=\"cag-map-cluster__hint\" aria-hidden=\"true\">+</span>\n        </span>"),
-        className: "leaflet-div-icon marker-cluster marker-cluster-".concat(size, " cag-map-cluster cag-map-cluster--").concat(size, " ").concat(typeClass),
-        iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(dim, dim),
-        iconAnchor: [Math.round(dim / 2), Math.round(dim / 2)]
+        html: "\n        ".concat(edgesHtml, "\n        <span class=\"cag-map-cluster__core\" style=\"background:var(--map-").concat(this._clusterSpecKey(dominant), ")\">\n          <span class=\"cag-map-cluster__count\">").concat(count, "</span>\n        </span>"),
+        className: "leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--".concat(dominant),
+        iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(width, height),
+        iconAnchor: anchor
       });
     }
   }]);
@@ -3126,28 +3172,83 @@ var MarkerFactory = /*#__PURE__*/function () {
       var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'tour';
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var normalized = this.resolveColorVariant(variant, options.module);
-      var isGray = normalized === 'gray';
+      var isOther = normalized === 'gray';
       var priceLabel = options.priceLabel || null;
       var selected = !!options.selected;
+      var viewed = !!options.viewed;
+      var pillMode = !!options.pillMode;
       if (priceLabel) {
-        var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        var selectedClass = selected ? ' cag-map-chip--selected' : '';
-        var width = Math.min(120, Math.max(52, String(priceLabel).length * 8 + 28));
-        var recommendedFlag = isGray ? '<span class="cag-map-chip__flag" aria-hidden="true"></span>' : '';
-        return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
-          className: "leaflet-div-icon cag-map-chip cag-map-chip--".concat(normalized).concat(selectedClass),
-          html: "<div class=\"cag-map-chip__inner\">".concat(recommendedFlag, "<span class=\"cag-map-chip__price\">").concat(safe, "</span></div>"),
-          iconSize: [width, 32],
-          iconAnchor: [Math.round(width / 2), 16],
-          popupAnchor: [0, -18]
+        return this._createPillIcon(normalized, priceLabel, {
+          selected: selected,
+          viewed: viewed,
+          isOther: isOther
+        });
+      }
+
+      // Listing/search maps: shape carries meaning (pill = priced offer, circle =
+      // cluster) so an unpriced item still renders as a small dot, never a plain pin.
+      if (pillMode) {
+        return this._createDotIcon(normalized, {
+          selected: selected,
+          isOther: isOther
         });
       }
       return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
         className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized).concat(selected ? ' cag-map-pin--selected' : ''),
         html: "<div class=\"cag-map-pin__inner\"><span class=\"cag-map-pin__glyph\" aria-hidden=\"true\"></span></div>",
-        iconSize: isGray ? [32, 44] : [28, 40],
-        iconAnchor: isGray ? [16, 40] : [14, 36],
+        iconSize: isOther ? [32, 44] : [28, 40],
+        iconAnchor: isOther ? [16, 40] : [14, 36],
         popupAnchor: [0, -34]
+      });
+    }
+
+    /**
+     * Price pill divIcon. Geometry/hit-area matches the map marker spec: a small
+     * visual pill (22px / 19px for "other") centred inside a >=44x44 tap target.
+     */
+  }, {
+    key: "_createPillIcon",
+    value: function _createPillIcon(variant, priceLabel) {
+      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        _ref$selected = _ref.selected,
+        selected = _ref$selected === void 0 ? false : _ref$selected,
+        _ref$viewed = _ref.viewed,
+        viewed = _ref$viewed === void 0 ? false : _ref$viewed,
+        _ref$isOther = _ref.isOther,
+        isOther = _ref$isOther === void 0 ? false : _ref$isOther;
+      var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      var classes = ['leaflet-div-icon', 'cag-map-chip', "cag-map-chip--".concat(variant), isOther ? 'cag-map-chip--other' : '', selected ? 'cag-map-chip--selected' : '', viewed ? 'cag-map-chip--viewed' : ''].filter(Boolean).join(' ');
+      var visualHeight = isOther ? 19 : 22;
+      var visualWidth = Math.min(130, Math.max(isOther ? 34 : 40, String(priceLabel).length * (isOther ? 6 : 7) + (isOther ? 20 : 24)));
+      var hitWidth = Math.max(visualWidth, 44);
+      var hitHeight = 44;
+      return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+        className: classes,
+        html: "<div class=\"cag-map-chip__inner\"><span class=\"cag-map-chip__price\">".concat(safe, "</span></div>"),
+        iconSize: [hitWidth, hitHeight],
+        iconAnchor: [Math.round(hitWidth / 2), Math.round(hitHeight / 2)],
+        popupAnchor: [0, -(Math.round(visualHeight / 2) + 10)]
+      });
+    }
+
+    /**
+     * No-price fallback divIcon — a small colour dot, centred inside a 44x44 tap target.
+     */
+  }, {
+    key: "_createDotIcon",
+    value: function _createDotIcon(variant) {
+      var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref2$selected = _ref2.selected,
+        selected = _ref2$selected === void 0 ? false : _ref2$selected,
+        _ref2$isOther = _ref2.isOther,
+        isOther = _ref2$isOther === void 0 ? false : _ref2$isOther;
+      var classes = ['leaflet-div-icon', 'cag-map-dot', "cag-map-dot--".concat(variant), isOther ? 'cag-map-dot--other' : '', selected ? 'cag-map-dot--selected' : ''].filter(Boolean).join(' ');
+      return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+        className: classes,
+        html: "<span class=\"cag-map-dot__inner\" aria-hidden=\"true\"></span>",
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -14]
       });
     }
 
@@ -3163,6 +3264,7 @@ var MarkerFactory = /*#__PURE__*/function () {
      * @param {number} [options.zIndexOffset]
      * @param {string|null} [options.priceLabel]
      * @param {boolean} [options.priceChip]
+     * @param {boolean} [options.pillMode] Listing/search map: always pill or dot, never a plain pin.
      * @param {boolean} [options.selected]
      * @returns {L.Marker}
      */
@@ -3174,19 +3276,24 @@ var MarkerFactory = /*#__PURE__*/function () {
       var lat = typeof pos.lat === 'function' ? pos.lat() : pos.lat;
       var lng = typeof pos.lng === 'function' ? pos.lng() : pos.lng;
       var colorVariant = this.resolveColorVariant(options.variant, options.module);
+      var isOther = colorVariant === 'gray';
+      var pillMode = !!options.pillMode;
       var priceLabel = options.priceChip && options.priceLabel ? options.priceLabel : options.priceChip && options.price != null ? this.formatPriceChip(options.price, _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de') : null;
       var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
         icon: this.createIcon(colorVariant, {
           priceLabel: priceLabel,
           selected: options.selected,
-          module: options.module
+          module: options.module,
+          pillMode: pillMode
         }),
         title: options.title || '',
-        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : colorVariant === 'gray' ? 100 : 0,
+        // z-order (bottom -> top): "other" offers, then priced type markers.
+        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : isOther ? 0 : 100,
         riseOnHover: true
       });
       marker._cagPriceLabel = priceLabel;
       marker._cagPriceChip = !!priceLabel;
+      marker._cagPillMode = pillMode;
       marker.options.cagVariant = colorVariant;
       marker.options.cagModule = options.module || colorVariant;
       if (options.map) {
@@ -3209,13 +3316,19 @@ var MarkerFactory = /*#__PURE__*/function () {
       marker.setIcon(this.createIcon(variant, {
         priceLabel: marker._cagPriceChip ? priceLabel : null,
         selected: !!selected,
-        module: marker.options && marker.options.cagModule
+        module: marker.options && marker.options.cagModule,
+        pillMode: !!marker._cagPillMode
       }));
       var el = marker.getElement && marker.getElement();
       if (el) {
-        el.classList.toggle('cag-map-chip--selected', !!selected && !!marker._cagPriceChip);
-        el.classList.toggle('cag-map-pin--selected', !!selected && !marker._cagPriceChip);
-        el.classList.toggle('cag-map-pin--active', !!selected);
+        if (marker._cagPriceChip) {
+          el.classList.toggle('cag-map-chip--selected', !!selected);
+        } else if (marker._cagPillMode) {
+          el.classList.toggle('cag-map-dot--selected', !!selected);
+        } else {
+          el.classList.toggle('cag-map-pin--selected', !!selected);
+          el.classList.toggle('cag-map-pin--active', !!selected);
+        }
       }
     }
   }, {

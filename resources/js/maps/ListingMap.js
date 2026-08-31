@@ -380,7 +380,6 @@ class ListingMap {
     const grayMarkers = [];
     const interactive = this.options.interactivePreview;
     const railMode = this.options.viewportRail;
-    const usePriceChips = this.options.priceChips;
     const locale = mapsManager.config.locale || 'de';
     const priceTpl = mapsManager.config.priceFromTemplate || 'From :price';
 
@@ -442,8 +441,10 @@ class ListingMap {
         title: item.title || '',
         popupHtml: popupHtml || null,
         popupOptions,
-        zIndexOffset: isGray ? 100 : 0,
-        priceChip: usePriceChips,
+        // z-order (bottom -> top): "other" offers, then type pills.
+        zIndexOffset: isGray ? 0 : 100,
+        priceChip: true,
+        pillMode: true,
         price: item.price,
         priceLabel: chipPrice,
       });
@@ -920,8 +921,8 @@ class ListingMap {
     const setPinActive = (active) => {
       const el = marker.getElement && marker.getElement();
       if (!el) return;
-      el.classList.toggle('cag-map-pin--active', !!active);
-      el.classList.toggle('cag-map-chip--selected', !!active && marker._cagPriceChip);
+      el.classList.toggle('cag-map-chip--selected', !!active && !!marker._cagPriceChip);
+      el.classList.toggle('cag-map-dot--selected', !!active && !marker._cagPriceChip);
     };
 
     marker.on('popupopen', () => {
@@ -1307,8 +1308,8 @@ class ListingMap {
     if (!marker) return;
     const el = marker.getElement && marker.getElement();
     if (el) {
-      el.classList.remove('cag-map-pin--active');
       el.classList.remove('cag-map-chip--selected');
+      el.classList.remove('cag-map-dot--selected');
     }
     if (marker.isPopupOpen && marker.isPopupOpen()) {
       marker.closePopup();

@@ -9,6 +9,23 @@
   position: relative;
   z-index: 1;
 
+  /* Map-only marker palette (spec: "Marker colour scheme & cluster logic").
+     Deliberately separate from $category-tour/camp/trip (used sitewide for
+     badges/gradients) — the basemap needs darker, AA-compliant steps that
+     stay legible over OSM tiles rather than the brand accent shades. */
+  --map-tours: #c9442c;
+  --map-tours-hover: #823a22;
+  --map-tours-press: #9b3119;
+  --map-camps: #0f6f63;
+  --map-camps-hover: #0c5f55;
+  --map-camps-press: #0b4c44;
+  --map-holidays: #2f488c;
+  --map-holidays-hover: #28407a;
+  --map-holidays-press: #1f3462;
+  --map-other: #687480;
+  --map-other-hover: #586570;
+  --map-other-press: #4a535d;
+
   &--product {
     min-height: 200px;
   }
@@ -478,140 +495,190 @@
   }
 }
 
-/* Price chips — brand accent selected state (not competitor black invert) */
+/* Price pills — one offer = one pill (spec: "Marker colour scheme & cluster logic").
+   Solid fill in the offer-type colour, white text; the outer element only carries
+   Leaflet's own position transform, all visual styling lives on __inner so our own
+   hover/selected transform never fights Leaflet's translate3d placement. */
 .leaflet-div-icon.cag-map-chip,
 .cag-map-chip {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 
   &__inner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    min-width: 48px;
-    height: 30px;
-    padding: 0 10px;
+    padding: 3px 8px;
     border-radius: 999px;
-    background: #fff;
-    border: 1.5px solid rgba(49, 48, 65, 0.18);
-    box-shadow: 0 2px 8px rgba(49, 48, 65, 0.16);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-  }
-
-  &__flag {
-    display: block;
-    flex: 0 0 auto;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #94a3b8;
-    opacity: 0.8;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    white-space: nowrap;
+    border: 1.5px solid #fff;
+    box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease, opacity 0.14s ease;
   }
 
   &__price {
-    font-size: 12px;
-    font-weight: 700;
-    color: #313041;
-    white-space: nowrap;
+    font: inherit;
+    color: inherit;
     letter-spacing: 0.01em;
   }
 
-  /* A faint category wash (not plain white) gives real matches a filled, "answered"
-     identity that the outline-only recommended chip below deliberately lacks. */
   &--tour .cag-map-chip__inner,
   &--primary .cag-map-chip__inner {
-    border-color: rgba($category-tour, 0.55);
-    background: color-mix(in srgb, $category-tour 6%, white);
-  }
-
-  &--tour .cag-map-chip__price,
-  &--primary .cag-map-chip__price {
-    color: $category-tour;
+    background: var(--map-tours);
   }
 
   &--trip .cag-map-chip__inner {
-    border-color: rgba($category-trip, 0.55);
-    background: color-mix(in srgb, $category-trip 6%, white);
-  }
-
-  &--trip .cag-map-chip__price {
-    color: $category-trip-end;
+    background: var(--map-holidays);
   }
 
   &--camp .cag-map-chip__inner {
-    border-color: rgba($category-camp, 0.55);
-    background: color-mix(in srgb, $category-camp 6%, white);
+    background: var(--map-camps);
   }
 
-  &--camp .cag-map-chip__price {
-    color: $category-camp-end;
-  }
-
-  /* Recommended / nearby-but-unmatched listings — same chip shape, deliberately quieter
-     (thin faint outline, no fill, no glow) so it never outweighs a real match. */
   &--gray .cag-map-chip__inner {
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px dashed rgba(100, 116, 139, 0.4);
-    box-shadow: 0 1px 3px rgba(49, 48, 65, 0.06);
+    background: var(--map-other);
   }
 
-  &--gray .cag-map-chip__price {
-    color: #64748b;
-    font-weight: 600;
+  /* "Other offers" pill — smaller geometry, thinner border, no glow (geometry table) */
+  &--other .cag-map-chip__inner {
+    padding: 2px 7px;
+    font-size: 11px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.92);
+    box-shadow: none;
   }
 
-  &--gray.cag-map-chip--selected .cag-map-chip__inner,
-  &--gray.cag-map-chip--selected.cag-map-chip--selected .cag-map-chip__inner {
+  &:hover .cag-map-chip__inner {
     transform: scale(1.06);
-    background: #fff;
-    border-style: solid;
-    border-color: #64748b;
-    box-shadow:
-      0 4px 12px rgba(49, 48, 65, 0.14),
-      0 0 0 3px rgba(100, 116, 139, 0.16);
+    box-shadow: 0 2px 8px rgba(20, 25, 30, 0.45);
   }
 
-  &--gray.cag-map-chip--selected .cag-map-chip__price {
-    color: #313041;
-    font-weight: 800;
+  &--tour:hover .cag-map-chip__inner,
+  &--primary:hover .cag-map-chip__inner {
+    background: var(--map-tours-hover);
+  }
+
+  &--trip:hover .cag-map-chip__inner {
+    background: var(--map-holidays-hover);
+  }
+
+  &--camp:hover .cag-map-chip__inner {
+    background: var(--map-camps-hover);
+  }
+
+  &--gray:hover .cag-map-chip__inner {
+    background: var(--map-other-hover);
+  }
+
+  /* Selected / synced from the results list — outer ring, always drawn on top */
+  &--selected,
+  &.cag-map-chip--selected {
+    z-index: 1000 !important;
   }
 
   &--selected .cag-map-chip__inner,
   &.cag-map-chip--selected .cag-map-chip__inner {
-    transform: scale(1.08);
-    background: #fff;
-    box-shadow:
-      0 4px 14px rgba(49, 48, 65, 0.16),
-      0 0 0 3px $category-tour-soft;
+    box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
   }
 
   &--tour.cag-map-chip--selected .cag-map-chip__inner,
   &--primary.cag-map-chip--selected .cag-map-chip__inner {
-    border-color: $category-tour;
-    box-shadow:
-      0 4px 14px $category-tour-glow,
-      0 0 0 3px $category-tour-soft;
+    background: var(--map-tours-press);
   }
 
   &--trip.cag-map-chip--selected .cag-map-chip__inner {
-    border-color: $category-trip;
-    box-shadow:
-      0 4px 14px $category-trip-glow,
-      0 0 0 3px $category-trip-soft;
+    background: var(--map-holidays-press);
   }
 
   &--camp.cag-map-chip--selected .cag-map-chip__inner {
-    border-color: $category-camp;
-    box-shadow:
-      0 4px 14px $category-camp-glow,
-      0 0 0 3px $category-camp-soft;
+    background: var(--map-camps-press);
   }
 
-  &--selected .cag-map-chip__price,
-  &.cag-map-chip--selected .cag-map-chip__price {
-    font-weight: 800;
+  &--gray.cag-map-chip--selected .cag-map-chip__inner {
+    background: var(--map-other-press);
+  }
+
+  /* Already viewed — fill unchanged, just fades slightly */
+  &--viewed .cag-map-chip__inner {
+    opacity: 0.75;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #1d1f20;
+    outline-offset: 2px;
+  }
+}
+
+/* No-price fallback — a plain colour dot instead of an empty-looking pill.
+   Shape still carries meaning: pill = priced offer, circle = cluster, dot = unpriced. */
+.leaflet-div-icon.cag-map-dot,
+.cag-map-dot {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  &__inner {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+    box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
+  }
+
+  &--tour .cag-map-dot__inner,
+  &--primary .cag-map-dot__inner {
+    background: var(--map-tours);
+  }
+
+  &--trip .cag-map-dot__inner {
+    background: var(--map-holidays);
+  }
+
+  &--camp .cag-map-dot__inner {
+    background: var(--map-camps);
+  }
+
+  &--gray .cag-map-dot__inner {
+    background: var(--map-other);
+  }
+
+  &--other .cag-map-dot__inner {
+    width: 11px;
+    height: 11px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.92);
+    box-shadow: none;
+  }
+
+  &:hover .cag-map-dot__inner {
+    transform: scale(1.15);
+    box-shadow: 0 2px 8px rgba(20, 25, 30, 0.45);
+  }
+
+  &--selected {
+    z-index: 1000 !important;
+  }
+
+  &--selected .cag-map-dot__inner {
+    box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #1d1f20;
+    outline-offset: 2px;
   }
 }
 
@@ -1236,172 +1303,88 @@
   box-shadow: none;
 }
 
+/* Clusters — fixed-size circle (n offers). When several offer types are stacked at
+   one location, up to 2 further types render as equally-sized plain circles behind
+   the front (dominant-type) circle — offsets/z-order per the cluster spec. */
 .leaflet-div-icon.cag-map-cluster,
 .cag-map-cluster {
   background: transparent !important;
   border: none !important;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
+  position: relative;
 
-  &__ring {
+  &__core,
+  &__edge {
     position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid rgba(232, 93, 59, 0.55);
-    background: rgba(232, 93, 59, 0.12);
-    animation: cag-map-cluster-pulse 2.2s ease-out infinite;
-    pointer-events: none;
-
-    &--delay {
-      animation-delay: 1.1s;
-    }
-  }
-
-  &__core {
-    position: relative;
-    z-index: 1;
-    width: 72%;
-    height: 72%;
-    border-radius: 50%;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1.5px solid #fff;
+    box-shadow: 0 1px 4px rgba(20, 25, 30, 0.38);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1px;
-    background: #e85d3b;
+  }
+
+  &__core {
+    z-index: 3;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
     color: #fff;
-    box-shadow:
-      0 3px 10px rgba(232, 93, 59, 0.4),
-      0 0 0 2px rgba(255, 255, 255, 0.85);
-    transition: transform 0.18s ease;
+    transition: transform 0.14s ease;
   }
 
   &__count {
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
+    font: inherit;
+    color: inherit;
   }
 
-  &__hint {
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
-    opacity: 0.9;
-    transform: translateY(-0.5px);
+  &__edge {
+    z-index: 2;
+    pointer-events: none;
   }
 
-  &--medium &__count {
-    font-size: 14px;
+  /* 1st contained type behind the front circle */
+  &__edge--1 {
+    transform: translate(9px, -4px);
   }
 
-  &--large &__count {
-    font-size: 15px;
-  }
-
-  &--tour &__ring {
-    border-color: rgba($category-tour, 0.5);
-    background: $category-tour-soft;
-  }
-
-  &--tour &__core {
-    background: $category-tour;
-    box-shadow:
-      0 3px 10px $category-tour-glow,
-      0 0 0 2px rgba(255, 255, 255, 0.85);
-  }
-
-  &--trip &__ring {
-    border-color: rgba($category-trip, 0.5);
-    background: $category-trip-soft;
-  }
-
-  &--trip &__core {
-    background: $category-trip;
-    box-shadow:
-      0 3px 10px $category-trip-glow,
-      0 0 0 2px rgba(255, 255, 255, 0.85);
-  }
-
-  &--camp &__ring {
-    border-color: rgba($category-camp, 0.5);
-    background: $category-camp-soft;
-  }
-
-  &--camp &__core {
-    background: $category-camp;
-    box-shadow:
-      0 3px 10px $category-camp-glow,
-      0 0 0 2px rgba(255, 255, 255, 0.85);
-  }
-
-  &--mixed &__ring {
-    border-color: rgba(49, 48, 65, 0.35);
-    background: rgba(49, 48, 65, 0.08);
-  }
-
-  &--mixed &__core {
-    background: linear-gradient(135deg, #e85d3b 0%, #0d9488 52%, #4338ca 100%);
-    box-shadow:
-      0 3px 10px rgba(49, 48, 65, 0.28),
-      0 0 0 2px rgba(255, 255, 255, 0.85);
-  }
-
-  /* Recommended / nearby-but-unmatched cluster — quiet dashed ghost, no brand color.
-     Kept fainter than any real-match cluster so it never reads as the stronger result. */
-  &--muted &__ring {
-    border-color: rgba(100, 116, 139, 0.26);
-    background: rgba(100, 116, 139, 0.05);
-    border-style: dashed;
-    animation: none;
-    opacity: 1;
-  }
-
-  &--muted &__core {
-    background: rgba(255, 255, 255, 0.8);
-    color: #64748b;
-    border: 1px dashed rgba(100, 116, 139, 0.4);
-    box-shadow: 0 1px 4px rgba(49, 48, 65, 0.06);
+  /* 2nd contained type, further back */
+  &__edge--2 {
+    z-index: 1;
+    transform: translate(18px, -9px);
   }
 
   &:hover &__core {
     transform: scale(1.06);
   }
 
+  /* Recommended / nearby-but-unmatched cluster layer — always the "other" colour,
+     never stacks edges (it is always its own single-type layer). */
+  &--muted &__core {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.92);
+    box-shadow: none;
+    background: var(--map-other);
+  }
+
+  /* Rail hover/selection sync — outer ring, drawn topmost */
   &--preview {
-    z-index: 650 !important;
+    z-index: 1000 !important;
 
     .cag-map-cluster__core {
-      transform: scale(1.12);
-    }
-
-    .cag-map-cluster__ring {
-      animation-duration: 1.4s;
-      border-width: 2.5px;
-      opacity: 1;
+      transform: scale(1.06);
+      box-shadow: 0 0 0 2px #1d1f20, 0 2px 8px rgba(20, 25, 30, 0.45);
     }
   }
-}
 
-@keyframes cag-map-cluster-pulse {
-  0% {
-    transform: scale(0.72);
-    opacity: 0.75;
-  }
-  70% {
-    transform: scale(1.18);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.18);
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cag-map-cluster__ring {
-    animation: none;
-    opacity: 0.35;
-    transform: scale(1);
+  &:focus-visible {
+    outline: 2px solid #1d1f20;
+    outline-offset: 2px;
   }
 }
