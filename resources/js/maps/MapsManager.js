@@ -2,7 +2,8 @@
  * MapsManager — Leaflet facade (tiles, ready, invalidateSize)
  */
 import L from 'leaflet';
-import 'leaflet.markercluster';
+import GridMarkerCluster from './GridMarkerCluster';
+import { clusterCellKey, clusterCellSizeDegrees } from './clusterGrid';
 
 // Fix default marker icon paths broken by webpack
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -26,6 +27,15 @@ const DEFAULT_CONFIG = {
   defaultCenter: { lat: 51.165691, lng: 10.451526 },
   defaultZoom: 5,
 };
+
+/**
+ * @deprecated Use clusterCellSizeDegrees — listing maps cluster by lat/lng cells.
+ */
+export function clusterRadiusForZoom(zoom) {
+  return clusterCellSizeDegrees(zoom);
+}
+
+export { clusterCellKey, clusterCellSizeDegrees };
 
 class MapsManager {
   constructor() {
@@ -126,49 +136,17 @@ class MapsManager {
   }
 
   createMarkerClusterer({ map, markers, muted = false }) {
-    const cluster = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 60,
-      // We own click/keypress handling below instead of the plugin defaults,
-      // so a single click can jump straight to the cluster's real bounds.
-      spiderfyOnMaxZoom: false,
-      zoomToBoundsOnClick: false,
-      iconCreateFunction: (clusterGroup) => this._createClusterIcon(clusterGroup, muted),
+    const cluster = new GridMarkerCluster({
+      muted,
+      iconCreateFunction: (members) => this._createClusterIconFromMarkers(members, muted),
     });
 
     if (Array.isArray(markers) && markers.length) {
-      markers.forEach((m) => cluster.addLayer(m));
+      cluster.addLayers(markers);
     }
-
-    cluster.on('clusterclick clusterkeypress', (e) => this._onClusterActivate(e, map));
 
     map.addLayer(cluster);
     return cluster;
-  }
-
-  /**
-   * Single click/keypress on a cluster: zoom straight to its true bounds instead of
-   * stepping the zoom level up a click at a time. Pins sitting on the same (or
-   * near-identical) coordinates never separate by zooming further in, so spiderfy
-   * them open immediately rather than forcing the user to reach max zoom first.
-   */
-  _onClusterActivate(e, map) {
-    if (e.type === 'clusterkeypress' && e.originalEvent && e.originalEvent.keyCode !== 13) {
-      return;
-    }
-
-    const cluster = e.layer;
-    const isTightCluster = cluster.getChildCount() > 1 && map.getBoundsZoom(cluster.getBounds()) >= map.getMaxZoom();
-
-    if (isTightCluster) {
-      cluster.spiderfy();
-    } else {
-      cluster.zoomToBounds({ paddingTopLeft: [24, 24], paddingBottomRight: [24, 24] });
-    }
-
-    if (e.originalEvent && e.originalEvent.keyCode === 13) {
-      map._container.focus();
-    }
   }
 
   /**
@@ -184,8 +162,9 @@ class MapsManager {
    * types render as equally-sized plain circles behind the dominant (front) one —
    * tie-break order tours > camps > holidays, offsets per the cluster spec.
    */
-  _createClusterIcon(clusterGroup, muted = false) {
-    const count = clusterGroup.getChildCount();
+  _createClusterIconFromMarkers(markers, muted = false) {
+    const members = Array.isArray(markers) ? markers : [];
+    const count = members.length;
 
     if (muted) {
       return L.divIcon({
@@ -198,7 +177,7 @@ class MapsManager {
 
     const PRIORITY = { tour: 0, camp: 1, trip: 2 };
     const typeCounts = { tour: 0, camp: 0, trip: 0 };
-    clusterGroup.getAllChildMarkers().forEach((m) => {
+    members.forEach((m) => {
       const key = (m.options && m.options.cagVariant) || 'tour';
       if (key === 'tour' || key === 'camp' || key === 'trip') {
         typeCounts[key] += 1;
