@@ -21,6 +21,12 @@ class GuidingsLandingService
      */
     private const TILE_RAIL_LIMIT = 12;
 
+    /**
+     * How far back to count bookings for the "frequently booked" rail, so it
+     * reflects recent demand rather than a tour's all-time booking total.
+     */
+    public const MOST_BOOKED_WINDOW_DAYS = 50;
+
     public function __construct(
         private HomepageCountrySelector $countries,
         private FavoriteTargetSpeciesResolver $favoriteTargetSpecies,
@@ -64,8 +70,10 @@ class GuidingsLandingService
 
     private function mostBooked(string $locale): Collection
     {
-        return Cache::remember("guidings_landing_most_booked_v1_{$locale}", now()->addMinutes(30), function () {
-            return Guiding::withCount('bookings')
+        return Cache::remember("guidings_landing_most_booked_v2_{$locale}", now()->addMinutes(30), function () {
+            return Guiding::withCount(['bookings' => function ($query) {
+                    $query->where('created_at', '>=', now()->subDays(self::MOST_BOOKED_WINDOW_DAYS));
+                }])
                 ->publiclyVisible()
                 ->orderByDesc('bookings_count')
                 ->limit(8)
