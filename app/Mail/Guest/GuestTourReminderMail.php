@@ -3,7 +3,6 @@
 namespace App\Mail\Guest;
 
 use App\Models\Booking;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -44,14 +43,16 @@ class GuestTourReminderMail extends Mailable
      */
     public function build()
     {
-        $guestName = $this->booking->is_guest 
-            ? ($this->booking->user->firstname ?? 'Guest') 
-            : $this->booking->user->firstname;
-        
+        $guestName = $this->booking->user->firstname ?? __('emails.guest_name');
+
         $guideName = $this->booking->guiding->user->firstname;
         $location = $this->booking->guiding->location;
-        
-        $eventDate = Carbon::parse($this->booking->blocked_event->from)->format('F j, Y');
+
+        // calendar_schedule is the current system; blocked_event is a legacy fallback
+        // (see Booking::getBookingDate()) — going straight to blocked_event->from crashed
+        // the reminder for any booking created after the calendar migration.
+        $bookingDate = $this->booking->getBookingDate();
+        $eventDate = $bookingDate ? $bookingDate->format('F j, Y') : '';
 
         return $this->subject(__('emails.guest_tour_reminder_title'))
             ->view('mails.guest.guest_tour_reminder')

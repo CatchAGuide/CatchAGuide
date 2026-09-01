@@ -39,14 +39,30 @@ class OfferFilterService
      * Locale-labeled species options (catalog targets + unmatched custom names),
      * optionally limited to a country.
      *
+     * @param  list<array{id: int, name: string}>  $ensureOptions  Species that must appear
+     *                                pre-selectable regardless of current usage — e.g. the
+     *                                species a target-fish category page is locked to, so its
+     *                                own page always shows the filter as active. The caller's
+     *                                name is used as a fallback, which also covers a category
+     *                                page whose Target catalog row is itself gone (the "wels"
+     *                                orphaned-target case — see multi-select-script.blade.php).
      * @return Collection<int, array{id: int|string, name: string}>
      */
-    public function speciesOptions(?string $country = null, ?string $countryShort = null): Collection
+    public function speciesOptions(?string $country = null, ?string $countryShort = null, array $ensureOptions = []): Collection
     {
         $this->ensureDataLoaded();
         $targetIds = $country
             ? $this->targetIdsForCountry($country, $countryShort)
             : $this->usedTargetIds();
+        $ensureIds = collect($ensureOptions)
+            ->map(fn (array $ensure) => (int) ($ensure['id'] ?? 0))
+            ->filter(fn (int $id) => $id > 0)
+            ->all();
+        if ($ensureIds !== []) {
+            // Prefer the catalog's own locale-aware name when the Target row exists; the
+            // caller-supplied name below only fills in for a row that's actually missing.
+            $targetIds = array_values(array_unique(array_merge($targetIds, $ensureIds)));
+        }
         $customKeys = $country
             ? $this->customKeysForCountry($country, $countryShort)
             : $this->usedCustomKeys();
@@ -77,6 +93,17 @@ class OfferFilterService
                 'name' => $label,
                 'sort' => mb_strtolower($label, 'UTF-8'),
             ]);
+        }
+
+        $knownIds = $options->filter(fn (array $row) => is_int($row['id']))->pluck('id')->all();
+        foreach ($ensureOptions as $ensure) {
+            $id = (int) ($ensure['id'] ?? 0);
+            $name = (string) ($ensure['name'] ?? '');
+            if ($id <= 0 || $name === '' || in_array($id, $knownIds, true)) {
+                continue;
+            }
+            $options->push(['id' => $id, 'name' => $name, 'sort' => mb_strtolower($name, 'UTF-8')]);
+            $knownIds[] = $id;
         }
 
         return $options

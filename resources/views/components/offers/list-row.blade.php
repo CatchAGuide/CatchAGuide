@@ -114,11 +114,6 @@
                     <i class="fas fa-star" aria-hidden="true"></i>
                     {{ __('vacations.top_rated_badge') }}
                 </span>
-            @elseif($imageBadge === 'limited')
-                <span class="offers-card__ribbon offers-card__ribbon--alt">
-                    <i class="fas fa-bolt" aria-hidden="true"></i>
-                    {{ __('vacations.limited_avail_badge') }}
-                </span>
             @endif
 
             @if($rating)

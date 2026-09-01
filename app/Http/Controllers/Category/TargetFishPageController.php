@@ -92,7 +92,7 @@ class TargetFishPageController extends Controller
             ]);
         }
 
-        $vm = $this->offerCatalog->buildForTargetFish($request, $speciesId, $scope);
+        $vm = $this->offerCatalog->buildForTargetFish($request, $speciesId, $scope, $placeName);
 
         return view('pages.category.category-show', [
             'row_data' => $page,

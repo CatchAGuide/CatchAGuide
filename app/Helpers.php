@@ -9,16 +9,19 @@ use App\Models\EmailLog;
 if (! function_exists('translate')) {
     function translate($string, $language = '')
     {
-        if ($string === null) {
-            return '';
+        if ($string === null || trim($string) === '') {
+            return $string ?? '';
         }
-        
+
         $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
         $cacheKey = 'translation_'.$currentLocale.'_'.md5($string);
 
         $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
             try {
-                $translate = GoogleTranslate::trans($string, $currentLocale);
+                $translate = GoogleTranslate::trans($string, $currentLocale, null, [
+                    'timeout' => 10,
+                    'connect_timeout' => 5,
+                ]);
 
                 if (strpos($translate, 'Führungen')) {
                     $translate = str_replace('Führungen', 'Angelguidings', $translate);

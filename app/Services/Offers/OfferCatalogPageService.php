@@ -127,6 +127,7 @@ class OfferCatalogPageService
         Request $request,
         int $speciesId,
         string $contentScope = CategoryPageScope::GLOBAL,
+        ?string $speciesName = null,
     ): OfferCatalogViewModel {
         $input = $request->all();
         $input['species'] = [$speciesId];
@@ -151,6 +152,7 @@ class OfferCatalogPageService
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
             includeFaq: false,
+            ensureSpeciesOptions: $speciesName !== null ? [['id' => $speciesId, 'name' => $speciesName]] : [],
         );
     }
 
@@ -173,6 +175,7 @@ class OfferCatalogPageService
 
     /**
      * @param  array<string, mixed>  $input
+     * @param  list<array{id: int, name: string}>  $ensureSpeciesOptions
      */
     private function buildFromInput(
         array $input,
@@ -184,6 +187,7 @@ class OfferCatalogPageService
         bool $lockVacationScope = false,
         bool $lockMethodScope = false,
         bool $includeFaq = true,
+        array $ensureSpeciesOptions = [],
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
@@ -268,7 +272,11 @@ class OfferCatalogPageService
             tripsTotal: $tripsTotal,
             campsTotal: $campsTotal,
             listingsTotal: $listingsTotal,
-            speciesOptions: $this->offerFilters->speciesOptions($filter->country, $filter->countryShort),
+            speciesOptions: $this->offerFilters->speciesOptions(
+                $filter->country,
+                $filter->countryShort,
+                $ensureSpeciesOptions,
+            ),
             countries: $countries,
             methodOptions: $this->methodOptions(),
             waterOptions: $this->waterOptions(),

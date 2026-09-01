@@ -672,7 +672,7 @@
                                                             @foreach($languagesWithFlags as $language)
                                                                 @if($language['has_flag'])
                                                                     <span class="trip-offer-page__language-flag" title="{{ $language['name'] }}">
-                                                                        <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" alt="{{ $language['name'] }}" width="24" height="24">
+                                                                        <img src="{{ media_url('flags/' . $language['flag_code'] . '.svg') }}" alt="{{ $language['name'] }}" width="24" height="24">
                                                                     </span>
                                                                 @else
                                                                     <span class="trip-offer-page__info-card-tag trip-offer-page__info-card-tag--lang">{{ $language['name'] }}</span>

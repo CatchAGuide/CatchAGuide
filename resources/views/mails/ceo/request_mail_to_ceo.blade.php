@@ -123,7 +123,7 @@
             <div style="margin-top:20px;">
                 <p><strong>Booking ID:</strong>{{$booking->id}}</p>
                 <p><strong>@lang('profile.guidetitle'): </strong><a href="{{$guiding->publicShowUrl()}}" style="text-decoration: none;font-weight:bold">{{$guiding->title}}</a></p>
-                <p><strong>@lang('mailing.guest-name'):</strong> {{$user->firstname}}</p>
+                <p><strong>@lang('mailing.guest-name'):</strong> {{$user->firstname ?? $booking->email ?? __('emails.guest_name')}}</p>
                 <p><strong>@lang('mailing.guide-name'):</strong> {{$guide->firstname}}</p>
                 <p><strong>@lang('mailing.GuestNum'):</strong> {{$booking->count_of_users}}</p>
                 <p><strong>@lang('profile.date'):</strong> {{ Carbon\Carbon::parse($booking->book_date)->format('F j, Y') }}</p>

@@ -106,7 +106,7 @@
                                                 <h4 class="trending-title">{{ translate($loc->name) }}</h4>
                                                 <div>
                                                     @if($loc->countrycode)
-                                                    <img class="mx-2" alt="" width="32" height="32" src="{{ asset('flags/'.$loc->countrycode.'.svg') }}">
+                                                    <img class="mx-2" alt="" width="32" height="32" src="{{ media_url('flags/'.strtolower($loc->countrycode).'.svg') }}">
                                                     @endif
                                                 </div>
                                             </div>

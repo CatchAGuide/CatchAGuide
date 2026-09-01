@@ -4,6 +4,7 @@ namespace Tests\Feature\Destination;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Models\CategoryEntity;
 use App\Models\Faq;
 use App\Models\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -88,5 +89,21 @@ class DestinationHubPageTest extends TestCase
         $response->assertDontSee(__('destination.title'), false);
         $response->assertSee('data-category-header-shell', false);
         $response->assertDontSee('navbar-custom short-header long-header', false);
+    }
+
+    public function test_destination_index_lowercases_flag_url_regardless_of_stored_case(): void
+    {
+        CategoryEntity::query()->create([
+            'type' => 'country',
+            'name' => 'Argentina Test',
+            'slug' => 'argentina-test-'.uniqid(),
+            'countrycode' => 'AR',
+        ]);
+
+        $response = $this->get(route('destination'));
+
+        $response->assertOk();
+        $response->assertSee('flags/ar.svg', false);
+        $response->assertDontSee('flags/AR.svg', false);
     }
 }

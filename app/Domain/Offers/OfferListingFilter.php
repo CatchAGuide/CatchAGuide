@@ -25,7 +25,7 @@ final class OfferListingFilter
 
     public const MAX_GUESTS = 20;
 
-    public const DEFAULT_GUESTS = 2;
+    public const DEFAULT_GUESTS = 1;
 
     /**
      * Product-type facets that must not leak across type/vacation switches.

@@ -124,7 +124,7 @@
                 <div class="booking-details">
                     <h3 style="font-style:italic">@lang('profile.gn-infobooking')</h3>
                     <p><strong>Booking ID : </strong>{{$booking->id}}</p>
-                    <p><strong>@lang('profile.fname') : </strong>{{$user->firstname}}</p>
+                    <p><strong>@lang('profile.fname') : </strong>{{$user->firstname ?? $booking->email ?? __('emails.guest_name')}}</p>
                     <p><strong>@lang('profile.date') : </strong>{{ $booking->getFormattedBookingDate('F j, Y') }}</p>
                     <p><strong>@lang('profile.guests') : </strong>{{$booking->count_of_users}}</p>
                 </div>

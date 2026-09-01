@@ -621,15 +621,14 @@ class BookingsController extends Controller
             }
 
             try {
-                $guestName = $booking->is_guest 
-                    ? ($booking->user->firstname ?? 'Guest') 
-                    : $booking->user->firstname;
-                
+                $guestName = $booking->user->firstname ?? __('emails.guest_name');
+
                 $guideName = $booking->guiding->user->firstname;
                 $location = $booking->guiding->location;
-                
-                $eventDate = Carbon::parse($booking->blocked_event->from)->format('F j, Y');
-        
+
+                $bookingDate = $booking->getBookingDate();
+                $eventDate = $bookingDate ? $bookingDate->format('F j, Y') : '';
+
                 $tourReminderEmail = view('mails.guest.guest_tour_reminder')
                     ->with([
                         'guestName' => $guestName,
