@@ -27,7 +27,7 @@
         @if(!empty($card['requested_count']))
             {{-- <span class="cag-home-offer__requested">{{ __('homepage.landing_requested_badge', ['count' => $card['requested_count']]) }}</span> --}}
         @endif
-        @if(!empty($card['is_new']) && empty($card['rating']))
+        @if($type !== 'tour' && !empty($card['is_new']) && empty($card['rating']))
             <span class="cag-home-offer__new-badge">{{ __('homepage.landing_card_new') }}</span>
         @endif
         @if(!empty($card['rating']))

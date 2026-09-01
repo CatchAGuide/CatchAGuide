@@ -13,7 +13,7 @@
     </div>
     <div>
         <div style="padding: 20px;">
-            <p style="font-size:14px;">{{__('emails.dear')}} {{$user->firstname}},</p>
+            <p style="font-size:14px;">{{__('emails.dear')}} {{$user->firstname ?? __('emails.guest_name')}},</p>
             <p style="font-size:14px;">
             {{$textNote}}
             </p>

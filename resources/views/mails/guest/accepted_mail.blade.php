@@ -13,7 +13,7 @@
     </div>
     <div class="content" style="padding-bottom: 0px; font-family: 'Morrison', sans-serif;">
         <div class="content-header" style="padding: 20px; font-family: 'Morrison', sans-serif;">
-            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} {{$user->firstname}},</p>
+            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} {{$user->firstname ?? __('emails.guest_name')}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                 @lang('emails.guest_booking_request_accepted_text_1') 
             </p>

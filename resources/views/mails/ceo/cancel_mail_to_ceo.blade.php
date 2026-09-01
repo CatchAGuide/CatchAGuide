@@ -117,12 +117,12 @@
     <div class="content" style="padding-bottom:0px;">
         <div class="content-header">
             <p style="font-size:16px;">@lang('profile.booking-dear') <strong>CEO</strong>,</p>
-            <p>@lang('profile.gdc-inform') {{$user->firstname}} @lang('profile.gdc-inform2')</p>
+            <p>@lang('profile.gdc-inform') {{$user->firstname ?? $booking->email ?? __('emails.guest_name')}} @lang('profile.gdc-inform2')</p>
         </div>
         <div style="margin-top:20px;">
             <p><strong>Booking ID:</strong>{{$booking->id}}</p>
             <p><strong>@lang('profile.guidetitle') : </strong><a href="{{$guiding->publicShowUrl()}}" style="text-decoration: none;font-weight:bold">{{$guiding->title}}</a></p>
-            <p><strong>@lang('mailing.guest-name') : </strong> {{$user->firstname}}</p>
+            <p><strong>@lang('mailing.guest-name') : </strong> {{$user->firstname ?? $booking->email ?? __('emails.guest_name')}}</p>
             <p><strong>@lang('mailing.guide-name') : </strong> {{$guide->firstname}}</p>
             <p><strong>@lang('mailing.GuestNum') : </strong> {{$booking->count_of_users}}</p>
             <p><strong>@lang('profile.date') : </strong> {{ Carbon\Carbon::parse($booking->book_date)->format('F j, Y') }}</p>
