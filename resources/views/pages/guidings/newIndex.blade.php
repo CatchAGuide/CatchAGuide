@@ -1116,8 +1116,8 @@
                         @foreach($languages as $language)
                             @if($language['has_flag'])
                                 <div class="language-flag-compact" title="{{ $language['name'] }}">
-                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
-                                         alt="{{ $language['name'] }}" 
+                                    <img src="{{ media_url('flags/' . $language['flag_code'] . '.svg') }}"
+                                         alt="{{ $language['name'] }}"
                                          width="20" height="20">
                                 </div>
                             @else

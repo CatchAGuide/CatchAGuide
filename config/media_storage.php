@@ -208,6 +208,13 @@ return [
             'category' => ['migrate' => false],
         ],
 
+        'flags' => [
+            'flags' => [
+                'migrate' => true,
+                'notes' => 'Country/language flag icons (ISO 3166-1 alpha-2, lowercase filenames), also mirrored under public/flags for local fallback',
+            ],
+        ],
+
         'profiles' => [
             'images' => [
                 'migrate' => true,
