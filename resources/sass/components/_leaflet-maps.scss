@@ -547,6 +547,7 @@
 
   &--gray .cag-map-chip__inner {
     background: var(--map-other);
+    color: #000;
   }
 
   /* "Other offers" pill — smaller geometry, thinner border, no glow (geometry table) */
@@ -1378,6 +1379,7 @@
     border-color: rgba(255, 255, 255, 0.92);
     box-shadow: none;
     background: var(--map-other);
+    color: #000;
   }
 
   /* Rail hover/selection sync — outer ring, drawn topmost */

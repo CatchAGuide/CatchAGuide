@@ -186,12 +186,18 @@ class TargetFishOffersCatalogTest extends TestCase
     {
         $page = $this->createTargetFishPage('pike-scope-arg-test', CategoryPageScope::TOURS);
 
+        $expectedSpeciesName = $page->source?->name ?? $page->name;
+
         $mock = Mockery::mock(OfferCatalogPageService::class);
         $mock->shouldReceive('buildForTargetFish')
             ->once()
-            ->withArgs(function ($request, $speciesId, $scope) use ($page) {
+            ->withArgs(function ($request, $speciesId, $scope, $speciesName) use ($page, $expectedSpeciesName) {
                 return (int) $speciesId === (int) $page->source_id
-                    && $scope === CategoryPageScope::TOURS;
+                    && $scope === CategoryPageScope::TOURS
+                    // The display name is threaded through so the species multi-select can
+                    // still show this page's own species pre-selected even when its catalog
+                    // Target row has no current listings (or is missing entirely).
+                    && $speciesName === $expectedSpeciesName;
             })
             ->andReturn($this->viewModel(
                 type: 'tour',

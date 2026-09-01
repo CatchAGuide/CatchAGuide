@@ -139,7 +139,6 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'no_booking_fees' => 'No booking fees · Best price guarantee',
     'view_details' => 'View Details',
     'top_rated_badge' => 'TOP RATED',
-    'limited_avail_badge' => 'LIMITED AVAILABILITY',
 
     // Two-pillar hub & country rebuild
     'hub_title' => 'Fishing Holidays in Europe',

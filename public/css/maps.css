@@ -1249,6 +1249,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-div-icon.cag-map-chip--gray .cag-map-chip__inner,
 .cag-map-chip--gray .cag-map-chip__inner {
   background: var(--map-other);
+  color: #000;
 }
 .leaflet-div-icon.cag-map-chip,
 .cag-map-chip {
@@ -2036,6 +2037,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   border-color: rgba(255, 255, 255, 0.92);
   box-shadow: none;
   background: var(--map-other);
+  color: #000;
 }
 .leaflet-div-icon.cag-map-cluster,
 .cag-map-cluster {

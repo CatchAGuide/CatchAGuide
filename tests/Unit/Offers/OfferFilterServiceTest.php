@@ -148,6 +148,60 @@ class OfferFilterServiceTest extends TestCase
         ], $options);
     }
 
+    public function test_species_options_includes_ensured_option_with_no_current_listings(): void
+    {
+        Cache::flush();
+
+        Target::query()->delete();
+        $pike = new Target;
+        $pike->forceFill(['name' => 'Hecht', 'name_en' => 'Pike']);
+        $pike->save();
+        $carp = new Target;
+        $carp->forceFill(['name' => 'Karpfen', 'name_en' => 'Carp']);
+        $carp->save();
+
+        // Only the pike shows up in any current tour/trip/camp; the carp category page
+        // must still list itself so its own locked filter renders as selected.
+        $map = $this->baseMap([
+            'tours' => ['targets' => [(int) $pike->id => [1]], 'custom_targets' => []],
+        ]);
+
+        $this->bindMap($map, 'ensure-fingerprint');
+
+        app()->setLocale('en');
+        $service = $this->app->make(OfferFilterService::class);
+
+        $withoutEnsure = $service->speciesOptions()->pluck('id')->all();
+        $this->assertNotContains((int) $carp->id, $withoutEnsure);
+
+        $withEnsure = $service->speciesOptions(null, null, [['id' => (int) $carp->id, 'name' => 'ignored fallback']])->values()->all();
+        $this->assertContains([
+            // The catalog's own locale-aware name wins over the caller-supplied fallback
+            // whenever the Target row genuinely exists.
+            'id' => (int) $carp->id,
+            'name' => 'Carp',
+        ], $withEnsure);
+    }
+
+    public function test_species_options_falls_back_to_ensured_name_for_orphaned_target(): void
+    {
+        Cache::flush();
+
+        Target::query()->delete();
+
+        $map = $this->baseMap();
+        $this->bindMap($map, 'orphaned-fingerprint');
+
+        $service = $this->app->make(OfferFilterService::class);
+
+        // The category page's source_id (999) no longer has a matching Target row (the
+        // "wels" bug — see multi-select-script.blade.php), so the caller-supplied display
+        // name is the only way the locked species can still render as selected.
+        $options = $service->speciesOptions(null, null, [['id' => 999, 'name' => 'Wels']])->values()->all();
+
+        $this->assertContains(['id' => 999, 'name' => 'Wels'], $options);
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

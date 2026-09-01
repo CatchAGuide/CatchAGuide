@@ -139,7 +139,6 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'no_booking_fees' => 'Keine Buchungsgebühren · Bestpreisgarantie',
     'view_details' => 'Details ansehen',
     'top_rated_badge' => 'TOP BEWERTET',
-    'limited_avail_badge' => 'BEGRENZT VERFÜGBAR',
 
     // Two-pillar hub & country rebuild
     'hub_title' => 'Angelurlaub',

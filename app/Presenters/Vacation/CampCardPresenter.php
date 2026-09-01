@@ -69,7 +69,7 @@ class CampCardPresenter
         $price = $camp->getLowestAccommodationOrOfferPrice();
         $card['layout'] = 'row';
         $card['destination_id'] = $destinationId;
-        $card['image_badge'] = $this->imageBadge($camp);
+        $card['image_badge'] = null;
         $card['target_fish_tags'] = $this->targetFishTags($camp);
         $card['facilities_extra'] = max(0, $camp->facilities->count() - count($facilities));
         $card['listing_price_prefix'] = __('vacations.starting_from_label');
@@ -291,16 +291,6 @@ class CampCardPresenter
         ]);
 
         return implode(' · ', $parts);
-    }
-
-    private function imageBadge(Camp $camp): ?string
-    {
-        // "TOP RATED" must not be shown for linked guidings — camps are not reviewable.
-        if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
-            return 'limited';
-        }
-
-        return null;
     }
 
     private function minimumStayPill(Camp $camp): ?string

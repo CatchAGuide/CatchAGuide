@@ -67,11 +67,6 @@
                         <i class="fas fa-star" aria-hidden="true"></i>
                         @lang('vacations.top_rated_badge')
                     </span>
-                @elseif($imageBadge === 'limited')
-                    <span class="vacation-list-card__badge vacation-list-card__badge--limited">
-                        <i class="fas fa-bolt" aria-hidden="true"></i>
-                        @lang('vacations.limited_avail_badge')
-                    </span>
                 @elseif($imageBadge === 'trip' && ! empty($card['badge']))
                     <span class="vacation-list-card__badge vacation-list-card__badge--limited">
                         {{ $card['badge'] }}
