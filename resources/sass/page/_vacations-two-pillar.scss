@@ -1600,6 +1600,22 @@ $vac-country-panel: #313041;
         font-weight: 500;
     }
 
+    &__guests {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        margin-bottom: .45rem;
+        font-size: .72rem;
+        font-weight: 600;
+        color: $vac-ink;
+
+        i {
+            color: $vac-muted;
+            font-size: .72rem;
+            flex-shrink: 0;
+        }
+    }
+
     &__footer {
         margin-top: auto;
         display: flex;
@@ -1733,35 +1749,6 @@ $vac-country-panel: #313041;
         z-index: 3;
         line-height: 1.2;
         pointer-events: none;
-    }
-
-    &__favorite {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 4;
-        width: 34px;
-        height: 34px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(#fff, .92);
-        color: $vac-ink;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(15, 23, 42, .15);
-        transition: background .15s ease, color .15s ease, transform .15s ease;
-
-        &:hover {
-            background: #fff;
-            color: $vac-brand;
-            transform: scale(1.04);
-        }
-
-        i {
-            font-size: .9rem;
-        }
     }
 
     &__main {
@@ -1899,6 +1886,22 @@ $vac-country-panel: #313041;
             i {
                 color: #dc2626;
             }
+        }
+    }
+
+    &__guests {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: $vac-ink;
+        margin-bottom: .35rem;
+
+        i {
+            color: $vac-muted;
+            font-size: .85rem;
+            flex-shrink: 0;
         }
     }
 
@@ -2210,6 +2213,22 @@ $vac-country-panel: #313041;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+    }
+
+    &__guests {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: $vac-ink;
+        margin-bottom: .35rem;
+
+        i {
+            color: $vac-muted;
+            font-size: .85rem;
+            flex-shrink: 0;
         }
     }
 

@@ -91,6 +91,13 @@
             </div>
         @endif
 
+        @if(!empty($card['guests_label']))
+            <div class="vacation-slider-card__guests">
+                <i class="fas fa-user-friends" aria-hidden="true"></i>
+                <span>{{ $card['guests_label'] }}</span>
+            </div>
+        @endif
+
         <div class="vacation-slider-card__footer">
             @if(!empty($card['price_amount']))
                 <div class="vacation-slider-card__price">

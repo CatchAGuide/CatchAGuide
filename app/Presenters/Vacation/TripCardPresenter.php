@@ -43,6 +43,7 @@ class TripCardPresenter
             'facilities' => $included,
             'addon_pills' => [],
             'duration_pill' => $durationPill,
+            'guests_label' => $this->guestsLabel($trip),
             'price' => $trip->price_per_person,
             'price_label' => $trip->price_per_person
                 ? __('vacations.price_from_per_person_days', [
@@ -101,7 +102,6 @@ class TripCardPresenter
         ));
         $card['listing_cta'] = __('vacations.see_more');
         $card['duration_label'] = $card['duration_pill'];
-        $card['guests_label'] = $this->guestsLabel($trip);
         $card['methods_label'] = $this->methodsLabel($trip);
         $card['verified'] = true;
         $card['whats_included_title'] = __('offers.included_heading');

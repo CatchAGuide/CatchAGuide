@@ -7390,6 +7390,7 @@ body .main-menu .main-menu-wrapper__nav {
   }
 }
 .map-modal__selection-media {
+  position: relative;
   flex: 0 0 96px;
   width: 96px;
   height: 72px;
@@ -7414,6 +7415,34 @@ body .main-menu .main-menu-wrapper__nav {
     border-radius: 0;
   }
 }
+.map-modal__selection-rating-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+}
+.map-modal__selection-rating-badge svg {
+  width: 13px;
+  height: 13px;
+  color: #ffce00;
+  fill: #ffce00;
+  flex-shrink: 0;
+}
+.map-modal__selection-rating-badge-count {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.85;
+}
 .map-modal__selection-body {
   min-width: 0;
   flex: 1 1 auto;
@@ -7429,20 +7458,6 @@ body .main-menu .main-menu-wrapper__nav {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 4px;
-}
-.map-modal__selection-rating {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 12px;
-  color: #313041;
-}
-.map-modal__selection-rating-value {
-  font-weight: 800;
-}
-.map-modal__selection-rating-count {
-  color: #64748b;
-  font-weight: 600;
 }
 .map-modal__selection-meta {
   display: flex;
@@ -13054,6 +13069,20 @@ div#masonry-grid img {
   color: #666;
   font-weight: 500;
 }
+.vacation-slider-card__guests {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #313041;
+}
+.vacation-slider-card__guests i {
+  color: #666;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
 .vacation-slider-card__footer {
   margin-top: auto;
   display: flex;
@@ -13174,32 +13203,6 @@ div#masonry-grid img {
   z-index: 3;
   line-height: 1.2;
   pointer-events: none;
-}
-.vacation-camp-list-card__favorite {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 4;
-  width: 34px;
-  height: 34px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  color: #313041;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-.vacation-camp-list-card__favorite:hover {
-  background: #fff;
-  color: #E85B40;
-  transform: scale(1.04);
-}
-.vacation-camp-list-card__favorite i {
-  font-size: 0.9rem;
 }
 .vacation-camp-list-card__main {
   display: flex;
@@ -13322,6 +13325,20 @@ div#masonry-grid img {
 }
 .vacation-camp-list-card__included-item--unavailable i {
   color: #dc2626;
+}
+.vacation-camp-list-card__guests {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #313041;
+  margin-bottom: 0.35rem;
+}
+.vacation-camp-list-card__guests i {
+  color: #666;
+  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 .vacation-camp-list-card__duration {
   margin-top: auto;
@@ -13602,6 +13619,20 @@ div#masonry-grid img {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.vacation-trip-list-card__guests {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #313041;
+  margin-bottom: 0.35rem;
+}
+.vacation-trip-list-card__guests i {
+  color: #666;
+  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 .vacation-trip-list-card__duration {
   margin-top: auto;

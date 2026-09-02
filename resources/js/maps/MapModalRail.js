@@ -620,17 +620,18 @@ export default class MapModalRail {
     const metaHtml = metaBits.length
       ? `<ul class="map-modal__selection-meta">${metaBits.map((bit) => `<li>${bit}</li>`).join('')}</ul>`
       : '';
-    const ratingHtml = rating
-      ? `<span class="map-modal__selection-rating">
-          <span class="map-modal__selection-rating-value">${rating}</span>
+    const ratingBadgeHtml = rating
+      ? `<div class="map-modal__selection-rating-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span>${rating}</span>
           ${
             reviewCount != null
-              ? `<span class="map-modal__selection-rating-count">${this._escape(
-                  (this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))
-                )}</span>`
+              ? `<span class="map-modal__selection-rating-badge-count">(${this._escape(String(reviewCount))})</span>`
               : ''
           }
-        </span>`
+        </div>`
       : '';
 
     return `
@@ -639,11 +640,11 @@ export default class MapModalRail {
         <a class="map-modal__selection-link" href="${url}">
           <div class="map-modal__selection-media${image ? '' : ' is-empty'}">
             ${image ? `<img src="${image}" alt="" loading="lazy" decoding="async">` : ''}
+            ${ratingBadgeHtml}
           </div>
           <div class="map-modal__selection-body">
             <div class="map-modal__selection-topline">
               ${moduleLabel ? `<span class="map-modal__rail-card-module map-modal__rail-card-module--${module}">${moduleLabel}</span>` : '<span></span>'}
-              ${ratingHtml}
             </div>
             <h3 class="map-modal__selection-title">${title}</h3>
             ${location ? `<p class="map-modal__selection-location">${location}</p>` : ''}
