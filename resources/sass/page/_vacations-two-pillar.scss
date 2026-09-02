@@ -857,10 +857,10 @@ $vac-country-panel: #313041;
         }
 
         .vacation-product-card__cta {
-            background: $vac-brand;
+            background: linear-gradient(145deg, $vac-trip 0%, $vac-trip-dark 100%);
 
             &:hover {
-                background: darken($vac-brand, 6%);
+                filter: brightness(0.92);
                 color: #fff;
             }
         }
@@ -878,10 +878,10 @@ $vac-country-panel: #313041;
         }
 
         .vacation-product-card__cta {
-            background: $vac-brand;
+            background: linear-gradient(145deg, $vac-camp 0%, $vac-camp-dark 100%);
 
             &:hover {
-                background: darken($vac-brand, 6%);
+                filter: brightness(0.92);
                 color: #fff;
             }
         }
@@ -899,10 +899,10 @@ $vac-country-panel: #313041;
         }
 
         .vacation-product-card__cta {
-            background: $vac-brand;
+            background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
 
             &:hover {
-                background: darken($vac-brand, 6%);
+                filter: brightness(0.92);
                 color: #fff;
             }
         }
@@ -1371,10 +1371,10 @@ $vac-country-panel: #313041;
         }
 
         .vacation-slider-card__cta {
-            background: $vac-brand;
+            background: linear-gradient(145deg, $vac-trip 0%, $vac-trip-dark 100%);
 
             &:hover {
-                background: darken($vac-brand, 6%);
+                filter: brightness(0.92);
                 color: #fff;
             }
         }
@@ -1388,10 +1388,10 @@ $vac-country-panel: #313041;
         }
 
         .vacation-slider-card__cta {
-            background: $vac-brand;
+            background: linear-gradient(145deg, $vac-camp 0%, $vac-camp-dark 100%);
 
             &:hover {
-                background: darken($vac-brand, 6%);
+                filter: brightness(0.92);
                 color: #fff;
             }
         }
@@ -2332,7 +2332,7 @@ $vac-country-panel: #313041;
         justify-content: center;
         padding: .6rem 1rem;
         border-radius: 8px;
-        background: $vac-camp;
+        background: $vac-trip;
         color: #fff;
         font-size: .82rem;
         font-weight: 700;
@@ -2341,7 +2341,7 @@ $vac-country-panel: #313041;
         transition: background .15s ease;
 
         &:hover {
-            background: $vac-camp-dark;
+            background: $vac-trip-dark;
             color: #fff;
         }
     }

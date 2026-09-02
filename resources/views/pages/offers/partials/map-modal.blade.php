@@ -34,6 +34,8 @@
                 'cta' => $item['cta'] ?? null,
                 'pillar' => $pillar,
                 'variant' => $variant,
+                'rating' => $item['rating'] ?? null,
+                'reviewCount' => $item['reviewCount'] ?? null,
             ];
         })->filter()->values()->all();
     @endphp
