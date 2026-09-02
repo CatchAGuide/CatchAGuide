@@ -63,13 +63,15 @@ Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defau
 Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
 Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
 Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');
+Route::get('vacations/countries', [VacationCountryController::class, 'countries'])->name('vacations.countries')->middleware('ddos:search');
+Route::get('vacations/targets', [CategoryController::class, 'vacationsTargetsIndex'])->name('vacations.targets.index')->middleware('ddos:search');
 Route::get('vacations/targets/{slug}', [TargetFishPageController::class, 'show'])
     ->defaults('content_scope', CategoryPageScope::VACATIONS)
     ->name('vacations.targets')
     ->middleware('ddos:search');
 Route::get('vacations/{country}', [VacationCountryController::class, 'show'])
     ->name('vacations.country')
-    ->where('country', '^(?!trips$|camps$|all-offers$|targets$)[\p{L}0-9\-]+$')
+    ->where('country', '^(?!trips$|camps$|all-offers$|countries$|targets$)[\p{L}0-9\-]+$')
     ->middleware('ddos:search');
 Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->name('vacation.booking.store')

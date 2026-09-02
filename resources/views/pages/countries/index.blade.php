@@ -17,7 +17,22 @@
 @php
     $isDestinationHub = request()->routeIs('destination');
     $isGuidingsCountries = request()->routeIs('guidings.countries');
-    $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries;
+    $isVacationsCountries = request()->routeIs('vacations.countries');
+    $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries || $isVacationsCountries;
+
+    $heroBreadcrumbItems = match (true) {
+        $isGuidingsCountries => [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
+            ['label' => __('destination.breadcrumb'), 'url' => null],
+        ],
+        $isVacationsCountries => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+            ['label' => __('destination.breadcrumb'), 'url' => null],
+        ],
+        default => [
+            ['label' => __('destination.breadcrumb'), 'url' => null],
+        ],
+    };
 @endphp
 
 @section('custom_style')
@@ -86,14 +101,7 @@
         'listingTitle' => $title,
         'listingSubtitle' => $sub_title,
         'searchAction' => listing_search_action(),
-        'breadcrumbItems' => $isGuidingsCountries
-            ? [
-                ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
-                ['label' => __('destination.breadcrumb'), 'url' => null],
-            ]
-            : [
-                ['label' => __('destination.breadcrumb'), 'url' => null],
-            ],
+        'breadcrumbItems' => $heroBreadcrumbItems,
     ])
 @else
 <div class="container">
@@ -129,7 +137,7 @@
                 @foreach($countries as $country)
                     <div class="col-md-4 my-1">
                         <div class="trending-card">
-                            <a href="{{ route($destinationRoute, ['country' => $country->slug]) }}"> 
+                            <a href="{{ route($destinationRoute, $country->slug) }}">
                                 <div class="trending-card-wrapper">
                                     <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 

@@ -36,6 +36,8 @@
             <x-vacation.country-slider
                 :title="__('vacations.hub_country_slider_title')"
                 :subtitle="__('vacations.hub_country_slider_subtitle')"
+                :link-url="route('vacations.countries')"
+                :link-label="__('vacations.hub_country_slider_see_all')"
                 slider-id="countries"
             >
                 @foreach([false, true] as $isClone)
@@ -108,6 +110,8 @@
             <x-vacation.country-slider
                 :title="__('vacations.hub_target_fish_title')"
                 :subtitle="__('vacations.hub_target_fish_subtitle')"
+                :link-url="route('vacations.targets.index')"
+                :link-label="__('vacations.hub_target_fish_view_all')"
                 slider-id="target-fish"
                 block-class="vacation-fish-rail"
             >

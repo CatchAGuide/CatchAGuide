@@ -14,6 +14,8 @@
         <x-vacation.country-slider
             :title="__('vacations.hub_country_slider_title')"
             :subtitle="__('vacations.hub_country_slider_subtitle')"
+            :link-url="route('vacations.countries', ['pillar' => $pillar])"
+            :link-label="__('vacations.hub_country_slider_see_all')"
             :slider-id="$sliderId"
         >
             @foreach([false, true] as $isClone)

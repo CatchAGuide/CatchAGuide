@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Vacation;
 
 use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\Controller;
+use App\Models\CategoryEntity;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\Vacation\VacationCountryPageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ class VacationCountryController extends Controller
 {
     public function __construct(
         private VacationCountryPageService $countryPage,
+        private VacationDestinationRepository $destinations,
         private TripCardPresenter $tripPresenter,
         private CampCardPresenter $campPresenter,
     ) {}
@@ -45,6 +48,44 @@ class VacationCountryController extends Controller
         $vm = $this->countryPage->buildAllOffers($request);
 
         return $this->countryView($vm, isAllOffers: true);
+    }
+
+    /**
+     * "See all countries" page for the vacations pillar — same layout as the
+     * mixed destination hub, but scoped to countries that have vacations
+     * listings (optionally narrowed to a single pillar via ?pillar=).
+     */
+    public function countries(Request $request): View
+    {
+        $pillar = strtolower((string) $request->query('pillar', ''));
+        $pillar = in_array($pillar, ['trips', 'camps'], true) ? $pillar : null;
+
+        $countryRoute = match ($pillar) {
+            'trips' => 'vacations.trips.show',
+            'camps' => 'vacations.camps.show',
+            default => 'vacations.country',
+        };
+
+        $eligibleSlugs = $this->destinations->countriesForHubGrid()
+            ->filter(fn (array $row) => match ($pillar) {
+                'trips' => ($row['trips'] ?? 0) > 0,
+                'camps' => ($row['camps'] ?? 0) > 0,
+                default => ($row['trips'] ?? 0) > 0 || ($row['camps'] ?? 0) > 0,
+            })
+            ->map(fn (array $row) => CountrySlug::canonicalize($row['slug']) ?? $row['slug'])
+            ->flip();
+
+        $countries = CategoryEntity::countries()->get()
+            ->filter(fn (CategoryEntity $country) => $eligibleSlugs->has(CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug)))
+            ->values();
+
+        return view('pages.countries.index', [
+            'countries' => $countries,
+            'destination_route' => $countryRoute,
+            'title' => __('vacations.hub_title'),
+            'sub_title' => __('vacations.hub_header_subtitle'),
+            'introduction' => __('vacations.introduction'),
+        ]);
     }
 
     /**

@@ -186,6 +186,8 @@ class VacationHubNewSectionsTest extends TestCase
         $response->assertSee('vacation-fish-rail__tile--compact', false);
         $response->assertDontSee(__('vacations.hub_target_fish_count', ['count' => 5]), false);
         $response->assertSee(route('vacations.targets', ['slug' => 'pike-test'], false), false);
+        $response->assertSee(route('vacations.targets.index', [], false), false);
+        $response->assertSee(__('vacations.hub_target_fish_view_all'), false);
     }
 
     public function test_hub_hides_target_fish_rail_when_empty(): void
