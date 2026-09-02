@@ -92,4 +92,29 @@ class VacationListingFilterSpeciesTest extends TestCase
         $this->assertFalse($ignored->showsCampFacets());
         $this->assertSame([], $ignored->campFacetQueryParams());
     }
+
+    public function test_from_request_parses_num_guests(): void
+    {
+        $filter = VacationListingFilter::fromRequest(['num_guests' => '4']);
+        $this->assertSame(4, $filter->numGuests);
+
+        $legacyKey = VacationListingFilter::fromRequest(['num_persons' => '2']);
+        $this->assertSame(2, $legacyKey->numGuests);
+    }
+
+    public function test_from_request_num_guests_defaults_to_null_and_ignores_invalid_values(): void
+    {
+        $this->assertNull(VacationListingFilter::fromRequest([])->numGuests);
+        $this->assertNull(VacationListingFilter::fromRequest(['num_guests' => ''])->numGuests);
+        $this->assertNull(VacationListingFilter::fromRequest(['num_guests' => 'abc'])->numGuests);
+        $this->assertNull(VacationListingFilter::fromRequest(['num_guests' => '0'])->numGuests);
+        $this->assertNull(VacationListingFilter::fromRequest(['num_guests' => '-3'])->numGuests);
+    }
+
+    public function test_from_request_clamps_num_guests_to_max(): void
+    {
+        $filter = VacationListingFilter::fromRequest(['num_guests' => '999']);
+
+        $this->assertSame(VacationListingFilter::MAX_GUESTS, $filter->numGuests);
+    }
 }

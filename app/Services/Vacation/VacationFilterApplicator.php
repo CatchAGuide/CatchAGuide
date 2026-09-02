@@ -16,8 +16,24 @@ class VacationFilterApplicator
     public function applyToCampQuery(Builder $query, VacationListingFilter $filter): Builder
     {
         $query = $this->applySpeciesColumnFilter($query, 'target_fish', $filter->speciesIds, $filter->speciesNames);
+        $query = $this->applyCampGuestsFilter($query, $filter->numGuests);
 
         return $this->applyCampFacets($query, $filter);
+    }
+
+    public function applyCampGuestsFilter(Builder $query, ?int $numGuests): Builder
+    {
+        if ($numGuests === null) {
+            return $query;
+        }
+
+        return $query->whereHas('accommodations', function (Builder $q) use ($numGuests) {
+            $q->where('accommodations.status', 'active')
+                ->where(function (Builder $capacity) use ($numGuests) {
+                    $capacity->whereNull('accommodations.max_occupancy')
+                        ->orWhere('accommodations.max_occupancy', '>=', $numGuests);
+                });
+        });
     }
 
     public function applyCampFacets(Builder $query, VacationListingFilter $filter): Builder
@@ -48,8 +64,21 @@ class VacationFilterApplicator
     public function applyToTripQuery(Builder $query, VacationListingFilter $filter): Builder
     {
         $query = $this->applySpeciesColumnFilter($query, 'target_species', $filter->speciesIds, $filter->speciesNames);
+        $query = $this->applyTripGuestsFilter($query, $filter->numGuests);
 
         return $this->applyTripDurationFilter($query, $filter->tripDuration);
+    }
+
+    public function applyTripGuestsFilter(Builder $query, ?int $numGuests): Builder
+    {
+        if ($numGuests === null) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($numGuests) {
+            $q->whereNull('group_size_max')
+                ->orWhere('group_size_max', '>=', $numGuests);
+        });
     }
 
     public function applyTripDurationFilter(Builder $query, ?string $tripDuration): Builder
