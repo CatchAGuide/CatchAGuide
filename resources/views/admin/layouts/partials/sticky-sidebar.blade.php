@@ -167,6 +167,13 @@
                         <span class="side-menu__label">Monthly Highlights</span>
                     </a>
                 </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.vacation-testimonials.*') ? 'active' : '' }}"
+                       href="{{ route('admin.vacation-testimonials.index') }}">
+                        <i class="side-menu__icon fe fe-star"></i>
+                        <span class="side-menu__label">{{ __('admin.vacation_testimonials.nav') }}</span>
+                    </a>
+                </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
                     <a class="side-menu__item {{ request()->routeIs('admin.blog.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-book-open"></i>

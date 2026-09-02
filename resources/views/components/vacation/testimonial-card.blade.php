@@ -23,12 +23,12 @@
         </div>
     </div>
 
-    @if(!empty($review['tour_title']))
+    @if(!empty($review['listing_title']))
         <div class="vacation-testimonial-card__tour">
-            @if(!empty($review['tour_url']))
-                <a href="{{ $review['tour_url'] }}">{{ $review['tour_title'] }}</a>
+            @if(!empty($review['listing_url']))
+                <a href="{{ $review['listing_url'] }}">{{ $review['listing_title'] }}</a>
             @else
-                {{ $review['tour_title'] }}
+                {{ $review['listing_title'] }}
             @endif
         </div>
     @endif

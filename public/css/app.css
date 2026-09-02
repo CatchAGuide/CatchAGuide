@@ -23500,6 +23500,21 @@ input:-webkit-autofill:active {
   }
 }
 
+@keyframes cag-site-nav-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+.shake {
+  animation: cag-site-nav-shake 0.5s ease-in-out;
+}
+
 .has-cag-bottom-nav {
   padding-bottom: 5.25rem;
 }

@@ -736,6 +736,17 @@ $cag-site-nav-tracking: -0.02em;
     padding: calc(80px + 0.55rem) 0 2.1rem;
   }
 }
+// Invalid location input: shake to reinforce the "select from suggestions" tooltip
+@keyframes cag-site-nav-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: cag-site-nav-shake 0.5s ease-in-out;
+}
+
 .has-cag-bottom-nav {
   padding-bottom: 5.25rem;
 

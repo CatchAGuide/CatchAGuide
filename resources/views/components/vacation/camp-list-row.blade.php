@@ -51,14 +51,6 @@
                 @endif
 
                 <x-vacation.partials.image-pillar-badge pillar="camp" :badge="$card['badge'] ?? null" />
-
-                <button
-                    type="button"
-                    class="vacation-camp-list-card__favorite"
-                    aria-label="{{ __('vacations.add_to_favorites') }}"
-                >
-                    <i class="far fa-heart" aria-hidden="true"></i>
-                </button>
             </div>
         </div>
 
