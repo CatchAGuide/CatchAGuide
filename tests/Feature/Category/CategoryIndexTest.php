@@ -6,6 +6,7 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Enums\GuideStatus;
 use App\Models\CategoryPage;
+use App\Models\Camp;
 use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\Language;
@@ -207,6 +208,147 @@ class CategoryIndexTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee('Hidden Tourless Pike Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    private function createCamp(array $overrides = []): Camp
+    {
+        $user = User::factory()->create();
+
+        $camp = new Camp();
+        $camp->forceFill(array_merge([
+            'title' => 'Test Camp '.uniqid(),
+            'description_camp' => 'Camp desc',
+            'description_area' => 'Area desc',
+            'description_fishing' => 'Fishing desc',
+            'location' => 'Somewhere',
+            'status' => 'active',
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $camp;
+    }
+
+    public function test_vacations_targets_index_shows_vacations_scoped_content_linking_to_vacations_show(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Vacations Index Pike '.uniqid(),
+            'name_en' => 'Vacations Index Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Vacations Index Pike',
+            'type' => 'Targets',
+            'slug' => 'vacations-index-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::VACATIONS,
+            'language' => app()->getLocale(),
+            'title' => 'Visible Vacations Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $this->createCamp(['target_fish' => [$target->id]]);
+
+        $response = $this->get(route('vacations.targets.index'));
+
+        $response->assertOk();
+        $response->assertSee('Visible Vacations Pike Title', false);
+        $response->assertSee('href="'.route('vacations.targets', ['slug' => $page->slug]).'"', false);
+        $response->assertDontSee('href="'.route('targets.show', ['slug' => $page->slug]).'"', false);
+        $this->assertBreadcrumbLinksInOrder($response->getContent(), [
+            route('welcome'),
+            route('vacations.index'),
+        ]);
+        $this->assertStringContainsString(__('vacations.hub_breadcrumb'), $this->breadcrumbHtml($response->getContent()));
+        $this->assertStringContainsString(__('category.targets.breadcrumb'), $this->breadcrumbHtml($response->getContent()));
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_vacations_targets_index_excludes_target_fish_with_no_active_listings(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Listingless Pike '.uniqid(),
+            'name_en' => 'Listingless Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Listingless Pike',
+            'type' => 'Targets',
+            'slug' => 'listingless-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::VACATIONS,
+            'language' => app()->getLocale(),
+            'title' => 'Hidden Listingless Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $response = $this->get(route('vacations.targets.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('Hidden Listingless Pike Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_vacations_targets_index_excludes_target_fish_with_only_tours_content(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Tours Only Pike '.uniqid(),
+            'name_en' => 'Tours Only Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Tours Only Pike',
+            'type' => 'Targets',
+            'slug' => 'tours-only-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Hidden Tours Only Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $this->createCamp(['target_fish' => [$target->id]]);
+
+        $response = $this->get(route('vacations.targets.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('Hidden Tours Only Pike Title', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });

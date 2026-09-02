@@ -196,6 +196,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'hub_country_grid_title' => 'Nach Land entdecken',
     'hub_country_slider_title' => 'Beliebte Angelziele',
     'hub_country_slider_subtitle' => 'Von der dänischen Küste bis zum Ebro-Delta – finde dein Revier.',
+    'hub_country_slider_see_all' => 'Alle Länder ansehen',
     'hub_country_trips_camps' => ':trips Trips · :camps Camps',
     'hub_inspiration_title' => 'Finde deinen Stil',
     'hub_faq_title' => 'Häufige Fragen',

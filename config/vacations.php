@@ -15,7 +15,7 @@ return [
 
     'pillar_index_per_page' => 9,
 
-    'reserved_country_segments' => ['trips', 'camps'],
+    'reserved_country_segments' => ['trips', 'camps', 'countries', 'targets'],
 
     'inspiration_tiles' => [
         [

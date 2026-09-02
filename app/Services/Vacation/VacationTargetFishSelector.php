@@ -50,6 +50,18 @@ class VacationTargetFishSelector
         );
     }
 
+    /**
+     * Whether this species has vacations-scoped page content (so the link
+     * would not 404) and at least one active camp or trip. Used to gate the
+     * vacations-pillar target-fish index the same way the hub rail is gated.
+     */
+    public function hasActiveVacationListings(int $sourceId, string $name): bool
+    {
+        return $sourceId > 0
+            && $this->hasVacationsContent($sourceId)
+            && $this->countActiveListings($sourceId, $name) > 0;
+    }
+
     private function hasVacationsContent(int $sourceId): bool
     {
         if ($sourceId <= 0) {

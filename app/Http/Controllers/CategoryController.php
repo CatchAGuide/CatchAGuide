@@ -13,6 +13,7 @@ use App\Models\Target;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Vacation\VacationTargetFishSelector;
 use App\Domain\CategoryPage\CategoryPageScope;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
@@ -63,6 +64,7 @@ class CategoryController extends Controller
         $language = app()->getLocale();
         $scope = match (true) {
             $type === 'targets' && $request->routeIs('guidings.targets.index') => CategoryPageScope::TOURS,
+            $type === 'targets' && $request->routeIs('vacations.targets.index') => CategoryPageScope::VACATIONS,
             $type === 'targets' => CategoryPageScope::GLOBAL,
             default => CategoryPageScope::TOURS,
         };
@@ -92,6 +94,15 @@ class CategoryController extends Controller
             });
         }
 
+        // Vacations (vacations.targets.index) must not list a target fish with
+        // zero active camps/trips, even if it has tours-scoped content.
+        if ($scope === CategoryPageScope::VACATIONS) {
+            $vacationTargetAvailability = app(VacationTargetFishSelector::class);
+            $allTargets = $allTargets->filter(function ($item) use ($vacationTargetAvailability) {
+                return $vacationTargetAvailability->hasActiveVacationListings((int) $item->source_id, (string) $item->name);
+            });
+        }
+
         $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
@@ -102,6 +113,7 @@ class CategoryController extends Controller
         $categoryItemUrl = fn (string $slug): string => match (true) {
             $type === 'methods' => route('guidings.methods.show', ['slug' => $slug]),
             $type === 'targets' && $request->routeIs('guidings.targets.index') => route('guidings.targets', ['slug' => $slug]),
+            $type === 'targets' && $request->routeIs('vacations.targets.index') => route('vacations.targets', ['slug' => $slug]),
             $type === 'targets' => route('targets.show', ['slug' => $slug]),
             default => route('category.targets', ['type' => $type, 'slug' => $slug]),
         };
@@ -132,6 +144,11 @@ class CategoryController extends Controller
     }
 
     public function guidingsTargetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
+    {
+        return $this->index('targets', $request, $categoryContent, $guidingAvailability);
+    }
+
+    public function vacationsTargetsIndex(Request $request, CategoryPageContentService $categoryContent, GuidingCategoryAvailabilityRepository $guidingAvailability)
     {
         return $this->index('targets', $request, $categoryContent, $guidingAvailability);
     }

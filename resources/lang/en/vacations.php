@@ -196,6 +196,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'hub_country_grid_title' => 'Browse by country',
     'hub_country_slider_title' => 'Popular fishing destinations',
     'hub_country_slider_subtitle' => 'From the Danish coast to the Ebro Delta – find your water.',
+    'hub_country_slider_see_all' => 'See all countries',
     'hub_country_trips_camps' => ':trips trips · :camps camps',
     'hub_inspiration_title' => 'Find your style',
     'hub_faq_title' => 'Frequently asked questions',

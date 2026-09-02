@@ -1,17 +1,22 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods', 'guidings.targets.index');
+    $useCategoryHeroHeader = request()->routeIs('targets.index', 'guidings.methods', 'guidings.targets.index', 'vacations.targets.index');
     $heroBreadcrumbLabel = __('category.' . $type . '.breadcrumb');
     $heroSearchAction = listing_search_action();
-    $heroBreadcrumbItems = request()->routeIs('guidings.methods', 'guidings.targets.index')
-        ? [
+    $heroBreadcrumbItems = match (true) {
+        request()->routeIs('guidings.methods', 'guidings.targets.index') => [
             ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')],
             ['label' => $heroBreadcrumbLabel, 'url' => null],
-        ]
-        : [
+        ],
+        request()->routeIs('vacations.targets.index') => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
             ['label' => $heroBreadcrumbLabel, 'url' => null],
-        ];
+        ],
+        default => [
+            ['label' => $heroBreadcrumbLabel, 'url' => null],
+        ],
+    };
 @endphp
 
 @section('title', $title)
