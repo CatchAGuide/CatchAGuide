@@ -19,7 +19,7 @@ use App\Http\Controllers\VacationsController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('guidings', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing');
+Route::get('guidings', [WelcomeController::class, 'guidingsLanding'])->name('guidings.landing')->middleware('ddos:search');
 Route::get('guidings/alloffers', [GuidingsController::class, 'index'])->name('guidings.index')->middleware('ddos:search');
 Route::redirect('guidings/l', '/guidings', 301);
 Route::redirect('guidings/landing', '/guidings', 301);

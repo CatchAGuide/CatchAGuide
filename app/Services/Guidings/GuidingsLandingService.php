@@ -115,7 +115,11 @@ class GuidingsLandingService
             'fly' => __('homepage.landing_pill_fly'),
         ];
 
-        return Cache::remember("guidings_landing_pills_v1_{$locale}", now()->addMinutes(30), function () use ($definitions, $labels) {
+        // Stampede-protected: 5 separate inRandomOrder() queries make this the
+        // priciest block to rebuild, so a bot burst hitting a cold cache must not
+        // trigger it concurrently on every request. flexible() serves the last
+        // known value while a single locked request refreshes it in the background.
+        return Cache::flexible("guidings_landing_pills_v1_{$locale}", [now()->addMinutes(30), now()->addHour()], function () use ($definitions, $labels) {
             return collect($definitions)->map(function ($query, $key) use ($labels) {
                 $cards = $query()
                     ->publiclyVisible()

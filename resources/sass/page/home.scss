@@ -288,38 +288,6 @@ $white: #ffffff;
     linear-gradient(90deg, rgba(28, 27, 43, 0.55) 0%, transparent 60%);
 }
 
-.cag-home-hero__dots {
-  position: absolute;
-  right: 16px;
-  bottom: 1.25rem;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-
-  @media (min-width: 768px) {
-    right: 64px;
-    bottom: 2rem;
-  }
-}
-
-.cag-home-hero__dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  border: 0;
-  padding: 0;
-  background: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-
-  &.is-active,
-  &:hover {
-    background: #fff;
-    transform: scale(1.2);
-  }
-}
-
 .cag-home-hero__inner {
   @include cag-page-container;
   position: relative;

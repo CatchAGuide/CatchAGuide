@@ -4,10 +4,6 @@
     $heroGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
     $heroSlides = [
         [
-            'src' => asset('assets/images/homepage/hero-tour.webp'),
-            'key' => 'tour',
-        ],
-        [
             'src' => asset('assets/images/homepage/hero-camp.webp'),
             'key' => 'camp',
         ],
@@ -38,18 +34,6 @@
             @endforeach
         </div>
         <div class="cag-home-hero__overlay"></div>
-    </div>
-
-    <div class="cag-home-hero__dots" role="tablist" aria-label="{{ __('homepage.hero_carousel_label') }}">
-        @foreach($heroSlides as $index => $slide)
-            <button
-                type="button"
-                class="cag-home-hero__dot{{ $index === 0 ? ' is-active' : '' }}"
-                data-hero-dot="{{ $index }}"
-                aria-label="{{ __('homepage.hero_carousel_slide', ['n' => $index + 1]) }}"
-                aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
-            ></button>
-        @endforeach
     </div>
 
     <div class="cag-home-hero__inner">
