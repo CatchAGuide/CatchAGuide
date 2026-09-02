@@ -54,6 +54,23 @@ function validateSearch(event, inputId) {
     }
     if (lat && lng && (!lat.value || !lng.value)) {
         event.preventDefault();
+
+        if (window.bootstrap && typeof window.bootstrap.Tooltip === 'function') {
+            var existing = window.bootstrap.Tooltip.getInstance(searchInput);
+            if (existing) existing.dispose();
+
+            var tooltip = new window.bootstrap.Tooltip(searchInput, {
+                title: @json(__('checkout.location_suggestion_hint')),
+                placement: 'bottom',
+                trigger: 'manual'
+            });
+            tooltip.show();
+            setTimeout(function () { tooltip.dispose(); }, 3000);
+        }
+
+        searchInput.classList.add('shake');
+        setTimeout(function () { searchInput.classList.remove('shake'); }, 500);
+
         searchInput.focus();
         return false;
     }

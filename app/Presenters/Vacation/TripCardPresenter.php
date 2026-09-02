@@ -2,7 +2,6 @@
 
 namespace App\Presenters\Vacation;
 
-use App\Domain\Offers\OfferListingFilter;
 use App\Models\Trip;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
@@ -43,6 +42,7 @@ class TripCardPresenter
             'facilities' => $included,
             'addon_pills' => [],
             'duration_pill' => $durationPill,
+            'guests_label' => $this->guestsLabel($trip),
             'price' => $trip->price_per_person,
             'price_label' => $trip->price_per_person
                 ? __('vacations.price_from_per_person_days', [
@@ -94,14 +94,9 @@ class TripCardPresenter
         $card['target_fish_tags_extra'] = max(0, count($species) - 3);
         $card['listing_included'] = array_slice($allIncluded, 0, 3);
         $card['listing_included_extra'] = max(0, count($allIncluded) - 3);
-        $card = array_merge($card, $this->listingPriceFields(
-            $trip,
-            $sym,
-            $numGuests ?? OfferListingFilter::DEFAULT_GUESTS
-        ));
+        $card = array_merge($card, $this->listingPriceFields($trip, $sym));
         $card['listing_cta'] = __('vacations.see_more');
         $card['duration_label'] = $card['duration_pill'];
-        $card['guests_label'] = $this->guestsLabel($trip);
         $card['methods_label'] = $this->methodsLabel($trip);
         $card['verified'] = true;
         $card['whats_included_title'] = __('offers.included_heading');
@@ -117,7 +112,7 @@ class TripCardPresenter
      *     listing_price_note: string|null
      * }
      */
-    private function listingPriceFields(Trip $trip, string $sym, int $numGuests): array
+    private function listingPriceFields(Trip $trip, string $sym): array
     {
         $perPerson = $trip->price_per_person !== null ? (float) $trip->price_per_person : null;
         if ($perPerson === null || $perPerson <= 0) {
@@ -130,17 +125,12 @@ class TripCardPresenter
         }
 
         $format = static fn (float $amount): string => $sym.number_format($amount, 0, ',', '.');
-        $guests = max(1, $numGuests);
-        $total = $perPerson * $guests;
 
         return [
-            'listing_price_prefix' => null,
-            'listing_price_display' => $format($total),
-            'listing_price_suffix' => null,
-            'listing_price_note' => __('offers.price_per_person_for_guests', [
-                'price' => $format($perPerson),
-                'count' => $guests,
-            ]),
+            'listing_price_prefix' => __('vacations.starting_from_label'),
+            'listing_price_display' => $format($perPerson),
+            'listing_price_suffix' => __('vacations.per_person_short'),
+            'listing_price_note' => null,
         ];
     }
 

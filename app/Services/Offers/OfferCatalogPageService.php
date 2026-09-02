@@ -1212,11 +1212,14 @@ class OfferCatalogPageService
             $guidings = (clone $tourQuery)
                 ->whereNotNull('lat')
                 ->whereNotNull('lng')
-                ->get(['id', 'title', 'slug', 'location', 'lat', 'lng', 'thumbnail_path', 'price', 'prices', 'price_type', 'max_guests', 'duration', 'duration_type', 'is_boat']);
+                ->with(['user.reviews'])
+                ->get(['id', 'user_id', 'title', 'slug', 'location', 'lat', 'lng', 'thumbnail_path', 'price', 'prices', 'price_type', 'max_guests', 'duration', 'duration_type', 'is_boat']);
 
             foreach ($guidings as $guiding) {
                 $guiding->title = translate($guiding->title);
                 $guiding->location = translate($guiding->location);
+                $guiding->cached_review_count = $guiding->user?->reviews->count();
+                $guiding->cached_average_rating = $guiding->user?->average_rating();
             }
 
             $markers = array_merge($markers, $this->normalizeTourMarkers(
@@ -1257,6 +1260,8 @@ class OfferCatalogPageService
                 $clone = clone $guiding;
                 $clone->title = translate($guiding->title);
                 $clone->location = translate($guiding->location);
+                $clone->cached_review_count = $guiding->user?->reviews->count();
+                $clone->cached_average_rating = $guiding->user?->average_rating();
 
                 return $clone;
             });

@@ -41,6 +41,7 @@ use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\TripBookingsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
+use App\Http\Controllers\Admin\VacationTestimonialsController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
@@ -82,6 +83,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/vacations', [AdminFaqController::class, 'vacations'])->name('vacations');
             Route::get('/vacation-trips', [AdminFaqController::class, 'vacationTrips'])->name('vacation-trips');
             Route::get('/vacation-camps', [AdminFaqController::class, 'vacationCamps'])->name('vacation-camps');
+            Route::get('/offers', [AdminFaqController::class, 'offers'])->name('offers');
             Route::get('/create/{page}', [AdminFaqController::class, 'create'])->name('create');
             Route::get('/edit/{faq}/{page}', [AdminFaqController::class, 'edit'])->name('edit');
             Route::post('/store', [AdminFaqController::class, 'store'])->name('store');
@@ -101,6 +103,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::resource('monthly-highlights', MonthlyHighlightController::class)->except(['show']);
+        Route::resource('vacation-testimonials', VacationTestimonialsController::class)->except(['show']);
 
         Route::get('guidings/search', [AdminGuidingsController::class, 'searchForSelect'])->name('guidings.search');
         Route::get('guidings/{guiding}/details', [AdminGuidingsController::class, 'details'])->name('guidings.details');

@@ -151,6 +151,7 @@
                         <li><a href="{{ route('admin.faq.vacations') }}" class="slide-item {{ request()->routeIs('admin.faq.vacations') ? 'active' : '' }}">Vacations</a></li>
                         <li><a href="{{ route('admin.faq.vacation-trips') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-trips') ? 'active' : '' }}">Vacation trips</a></li>
                         <li><a href="{{ route('admin.faq.vacation-camps') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-camps') ? 'active' : '' }}">Vacation camps</a></li>
+                        <li><a href="{{ route('admin.faq.offers') }}" class="slide-item {{ request()->routeIs('admin.faq.offers') ? 'active' : '' }}">Offers (Angebote)</a></li>
                     </ul>
                 </li>
                 <li class="slide">
@@ -165,6 +166,13 @@
                        href="{{ route('admin.monthly-highlights.index') }}">
                         <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Monthly Highlights</span>
+                    </a>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.vacation-testimonials.*') ? 'active' : '' }}"
+                       href="{{ route('admin.vacation-testimonials.index') }}">
+                        <i class="side-menu__icon fe fe-star"></i>
+                        <span class="side-menu__label">{{ __('admin.vacation_testimonials.nav') }}</span>
                     </a>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">

@@ -167,23 +167,14 @@
     </div>
 
     @if($showFaq && $vm->faq->isNotEmpty())
-        <section class="offers-catalog__faq mb-5" data-offers-faq>
-            <x-vacation.section-heading :title="__('offers.faq_title')" />
-            <div class="accordion" id="offersCatalogFaq">
-                @foreach($vm->faq as $index => $item)
-                    <div class="accordion-item">
-                        <h3 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#offers-faq-{{ $index }}">
-                                {{ $item->question ?? $item['question'] ?? '' }}
-                            </button>
-                        </h3>
-                        <div id="offers-faq-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#offersCatalogFaq">
-                            <div class="accordion-body">{!! $item->answer ?? $item['answer'] ?? '' !!}</div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
+        {{-- Wrapper (not component :attributes) carries spacing/hook: ComponentAttributeBag::merge()
+             silently drops extra attributes passed to <x-vacation.faq> at every call site. --}}
+        <div class="offers-catalog__faq mb-5" data-offers-faq>
+            <x-vacation.faq
+                :title="__('offers.faq_title')"
+                :items="$vm->faq"
+            />
+        </div>
     @endif
 </div>
 

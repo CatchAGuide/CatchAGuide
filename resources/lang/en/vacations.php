@@ -376,7 +376,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     // Hub redesign — reviews, cross-sell, provider CTA, SEO copy
     'hub_reviews_eyebrow' => 'Experiences',
     'hub_reviews_title' => 'What other anglers say',
-    'hub_reviews_caption' => 'Real reviews from guided trips booked across the whole platform.',
+    'hub_reviews_caption' => 'Real reviews from camps, trips and vacations booked across the whole platform.',
     'hub_cross_sell_title' => 'Only got one day on the water?',
     'hub_cross_sell_text' => 'Book a guided day tour instead.',
     'hub_cross_sell_cta' => 'Browse day tours →',

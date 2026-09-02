@@ -51,14 +51,6 @@
                 @endif
 
                 <x-vacation.partials.image-pillar-badge pillar="camp" :badge="$card['badge'] ?? null" />
-
-                <button
-                    type="button"
-                    class="vacation-camp-list-card__favorite"
-                    aria-label="{{ __('vacations.add_to_favorites') }}"
-                >
-                    <i class="far fa-heart" aria-hidden="true"></i>
-                </button>
             </div>
         </div>
 
@@ -116,6 +108,13 @@
                         </li>
                     @endforeach
                 </ul>
+            @endif
+
+            @if(!empty($card['guests_label']))
+                <div class="vacation-camp-list-card__guests">
+                    <i class="fas fa-user-friends" aria-hidden="true"></i>
+                    <span>{{ $card['guests_label'] }}</span>
+                </div>
             @endif
 
             @if(!empty($card['duration_pill']))

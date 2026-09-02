@@ -205,8 +205,8 @@ class VacationHubNewSectionsTest extends TestCase
             'score' => 9.5,
             'author' => 'Alex',
             'date' => 'Jan 2026',
-            'tour_title' => 'Test Tour',
-            'tour_url' => 'https://example.test/tour',
+            'listing_title' => 'Test Camp',
+            'listing_url' => 'https://example.test/camp',
         ];
 
         $this->mockHubService($this->makeHub(['testimonials' => collect([$review])]));

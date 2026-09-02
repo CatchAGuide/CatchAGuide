@@ -376,7 +376,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     // Hub-Redesign — Bewertungen, Cross-Sell, Anbieter-CTA, SEO-Text
     'hub_reviews_eyebrow' => 'Erfahrungen',
     'hub_reviews_title' => 'Was andere Angler sagen',
-    'hub_reviews_caption' => 'Echte Bewertungen von geführten Touren, gebucht über die gesamte Plattform.',
+    'hub_reviews_caption' => 'Echte Bewertungen von Camps, Trips und Urlauben, gebucht über die gesamte Plattform.',
     'hub_cross_sell_title' => 'Nur einen Tag am Wasser?',
     'hub_cross_sell_text' => 'Buch stattdessen eine geführte Angeltour mit Guide.',
     'hub_cross_sell_cta' => 'Angeltouren ansehen →',

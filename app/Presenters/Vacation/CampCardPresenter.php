@@ -40,6 +40,7 @@ class CampCardPresenter
             'facilities' => $facilities,
             'addon_pills' => $addons,
             'duration_pill' => null,
+            'guests_label' => $this->guestsLabel($camp),
             'price' => $price,
             'price_label' => $price !== null
                 ? __('vacations.price_from_per_night', ['price' => '€' . number_format($price, 0)])
@@ -82,7 +83,6 @@ class CampCardPresenter
         $card['target_fish_tags_extra'] = max(0, count($card['target_fish_tags']) - 3);
         $card['duration_pill'] = $this->minimumStayPill($camp);
         $card['duration_label'] = $card['duration_pill'];
-        $card['guests_label'] = $this->guestsLabel($camp);
         $card['methods_label'] = ($methods = $this->methodLabels($camp)) !== []
             ? implode(', ', $methods)
             : null;
