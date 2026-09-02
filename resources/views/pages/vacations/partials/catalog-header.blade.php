@@ -1,5 +1,6 @@
 @php
     use App\Domain\Vacation\CountrySlug;
+    use App\Domain\Vacation\VacationListingFilter;
 
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $vacationCountryOptions = $vacationDestinations->countriesForSearch();
@@ -42,6 +43,13 @@
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
+    // Product pages (trip/camp show) render this header with titleTag "p" and have no
+    // listing to filter — only catalog pages (hub/country/pillar, titleTag "h1") search.
+    $showVacationPersonsFilter = $titleTag === 'h1';
+    $vacationGuestsValue = max(1, min(
+        VacationListingFilter::MAX_GUESTS,
+        (int) (request()->num_guests ?: VacationListingFilter::DEFAULT_GUESTS)
+    ));
 @endphp
 <div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
@@ -100,6 +108,26 @@
                         </span>
                     </label>
 
+                    @if($showVacationPersonsFilter)
+                        <div class="vacations-page-header__segment vacations-page-header__segment--persons" data-vacations-persons>
+                            <span class="vacations-page-header__segment-label" id="vacationsWhoLabel">{{ __('offers.search_who') }}</span>
+                            <div
+                                class="offers-persons-stepper offers-persons-stepper--catalog"
+                                data-offers-persons-stepper
+                                role="group"
+                                aria-labelledby="vacationsWhoLabel"
+                            >
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                                <div class="offers-persons-stepper__value">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]) }}</span>
+                                </div>
+                                <input type="hidden" name="num_guests" value="{{ $vacationGuestsValue }}" data-offers-persons-input>
+                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                            </div>
+                        </div>
+                    @endif
+
                     <button type="submit" class="vacations-page-header__search-btn">
                         <span>{{ __('homepage.searchbar-search') }}</span>
                         <i class="fas fa-arrow-right" aria-hidden="true"></i>
@@ -124,6 +152,10 @@
     </section>
 </div>
 
+@if($showVacationPersonsFilter)
+    @include('layouts.partials.offers-persons-stepper-script')
+@endif
+
 @once
 <script>
 (function () {
@@ -146,6 +178,14 @@
     // a switch to /offers (with the new country applied) instead of jumping to the sibling
     // /vacations/{country} page, which would otherwise silently drop them.
     var vacationOtherFilterKeys = ['species', 'accommodation_type', 'has_guiding', 'has_rental_boat', 'duration', 'sortby', 'num_guests', 'place', 'city', 'region', 'placeLat', 'placeLng', 'pillar'];
+    // num_guests is only "owned" by this form (and safe to drop from the check below) on
+    // pages that render the persons stepper — product pages have no such field, so a
+    // num_guests already on the URL there must still trigger the /offers fallback.
+    if (form.querySelector('[data-offers-persons-input]')) {
+        vacationOtherFilterKeys = vacationOtherFilterKeys.filter(function (key) {
+            return key !== 'num_guests';
+        });
+    }
     var offersIndexUrl = @json(route('offers.index'));
 
     function vacationOtherFiltersActive() {

@@ -150,12 +150,15 @@ $vacations-header-muted: #787780;
     border: 1px solid rgba($vacations-header-slate, 0.08);
     box-shadow: 0 14px 36px rgba($vacations-header-slate, 0.14);
 
-    @media (max-width: 767.98px) {
+    @media (min-width: 768px) {
       grid-template-columns: minmax(0, 1fr) auto;
     }
 
-    @media (min-width: 768px) {
-      grid-template-columns: minmax(0, 1fr) auto;
+    // Three segments (country + persons) instead of the product-page default of one.
+    &:has(.vacations-page-header__segment--persons) {
+      @media (min-width: 768px) {
+        grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.85fr) auto;
+      }
     }
   }
 
@@ -172,9 +175,11 @@ $vacations-header-muted: #787780;
     transition: background 0.15s ease;
 
     @media (max-width: 767.98px) {
-      border-bottom: 0;
-      border-right: 1px solid rgba($vacations-header-slate, 0.1);
       padding: 0.6rem 0.75rem;
+
+      &--country {
+        border-bottom: 1px solid rgba($vacations-header-slate, 0.1);
+      }
     }
 
     @media (min-width: 768px) {
@@ -183,6 +188,49 @@ $vacations-header-muted: #787780;
       &:hover,
       &:focus-within {
         background: rgba($vacations-header-slate, 0.04);
+      }
+
+      &--country {
+        border-right: 1px solid rgba($vacations-header-slate, 0.1);
+      }
+    }
+  }
+
+  &__segment--persons {
+    cursor: default;
+
+    .offers-persons-stepper--catalog {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      gap: 0.25rem;
+
+      .offers-persons-stepper__btn {
+        width: 1.65rem;
+        height: 1.65rem;
+        flex-basis: 1.65rem;
+        border-radius: 999px;
+        border-color: rgba($vacations-header-slate, 0.14);
+        font-size: 0.95rem;
+        transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+
+        &:hover:not(:disabled) {
+          border-color: rgba($vacations-header-coral, 0.45);
+          color: $vacations-header-coral;
+        }
+
+        &:active:not(:disabled) {
+          transform: scale(0.94);
+        }
+      }
+
+      .offers-persons-stepper__value {
+        font-size: 0.92rem;
+        justify-content: flex-start;
       }
     }
   }

@@ -23,6 +23,7 @@
             :url="$card['url']"
             :show-nav="false"
             gallery-class="vacation-slider-card__gallery"
+            :lazy="false"
         />
         <x-vacation.partials.image-pillar-badge
             :pillar="$pillar"

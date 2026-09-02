@@ -19,6 +19,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Shared hosting has no persistent queue worker process — the cron job that used to
+        // hit the now-removed /api/queue/run-worker route was the only thing draining the
+        // "database" queue. Drain it here instead, riding the existing per-minute schedule:run cron.
+        $schedule->command('queue:work --queue=default --stop-when-empty --tries=3 --max-time=50')
+                ->everyMinute()
+                ->withoutOverlapping();
+
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
         $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');

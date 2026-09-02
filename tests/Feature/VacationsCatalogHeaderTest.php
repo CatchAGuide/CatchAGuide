@@ -31,6 +31,9 @@ class VacationsCatalogHeaderTest extends TestCase
             '/vacations-page-header__search-btn[\s\S]{0,400}fa-arrow-right/',
             $html
         );
+        $this->assertStringContainsString('data-offers-persons-stepper', $html);
+        $this->assertStringContainsString('name="num_guests"', $html);
+        $this->assertStringContainsString('vacations-page-header__segment--persons', $html);
     }
 
     public function test_app_v2_layout_uses_site_header_for_vacations_listings(): void

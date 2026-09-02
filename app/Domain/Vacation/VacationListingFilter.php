@@ -6,6 +6,10 @@ final class VacationListingFilter
 {
     public const TRIP_DURATION_BUCKETS = ['1-3', '4-7', '8+'];
 
+    public const MAX_GUESTS = 20;
+
+    public const DEFAULT_GUESTS = 1;
+
     /**
      * Camp-only sidebar facets that must not leak onto trips / mixed views.
      *
@@ -32,6 +36,7 @@ final class VacationListingFilter
         public readonly ?int $accommodationTypeId = null,
         public readonly ?bool $hasGuiding = null,
         public readonly ?bool $hasRentalBoat = null,
+        public readonly ?int $numGuests = null,
     ) {}
 
     public static function fromRequest(array $input, ?string $country = null): self
@@ -64,6 +69,7 @@ final class VacationListingFilter
             accommodationTypeId: $accommodationTypeId,
             hasGuiding: $hasGuiding,
             hasRentalBoat: $hasRentalBoat,
+            numGuests: self::nullableGuests($input['num_guests'] ?? $input['num_persons'] ?? null),
         );
     }
 
@@ -188,6 +194,24 @@ final class VacationListingFilter
         $int = (int) $value;
 
         return $int > 0 ? $int : null;
+    }
+
+    private static function nullableGuests(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (! is_numeric($value)) {
+            return null;
+        }
+
+        $guests = (int) $value;
+        if ($guests < 1) {
+            return null;
+        }
+
+        return min($guests, self::MAX_GUESTS);
     }
 
     private static function nullableBool(mixed $value): ?bool

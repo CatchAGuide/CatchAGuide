@@ -5,6 +5,7 @@
     'url' => null,
     'showNav' => true,
     'galleryClass' => 'vacation-product-card__gallery',
+    'lazy' => true,
 ])
 
 @php
@@ -23,7 +24,7 @@
                 <img
                     src="{{ $galleryImages[0] }}"
                     alt="{{ $alt }}"
-                    loading="lazy"
+                    @if($lazy) loading="lazy" @endif
                     data-vacation-card-gallery-image
                 >
             </a>
@@ -31,7 +32,7 @@
             <img
                 src="{{ $galleryImages[0] }}"
                 alt="{{ $alt }}"
-                loading="lazy"
+                @if($lazy) loading="lazy" @endif
                 data-vacation-card-gallery-image
             >
         @endif
