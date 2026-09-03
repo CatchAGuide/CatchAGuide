@@ -600,7 +600,10 @@ class OfferCatalogPageService
 
         $this->applyTourFacets($query, $filter);
 
-        if ($filter->placeLat !== null && $filter->placeLng !== null) {
+        // Country-level page (e.g. /guidings/schweden): a radius from one centroid point
+        // can't cover a whole country, so fall through to the plain country-column match
+        // below instead — same guard applyListingGeo() uses for trips/camps.
+        if ($filter->placeLat !== null && $filter->placeLng !== null && ! $this->isCountryScope($filter)) {
             $geo = Guiding::locationFilter(
                 $filter->city,
                 $filter->country ?? $request->input('country'),
