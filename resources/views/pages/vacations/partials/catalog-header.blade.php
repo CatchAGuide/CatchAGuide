@@ -165,13 +165,10 @@
         return;
     }
 
-    var overlay = document.getElementById('vacation-page-loading-overlay');
     function showLoader() {
-        if (!overlay) {
-            return;
+        if (window.PageLoader) {
+            window.PageLoader.show();
         }
-        overlay.hidden = false;
-        document.body.style.overflow = 'hidden';
     }
 
     // Any of these present on the current URL counts as "another filter is active" and forces

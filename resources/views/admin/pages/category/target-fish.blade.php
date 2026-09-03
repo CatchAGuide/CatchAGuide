@@ -70,6 +70,10 @@
             const currentStatus = button.data('status');
             const newStatus = currentStatus === 1 ? 0 : 1;
 
+            if (window.PageLoader) {
+                window.PageLoader.show();
+            }
+
             $.ajax({
                 url: "{{ route('admin.category.target-fish.toggle-favorite') }}",
                 type: "POST",
@@ -88,6 +92,11 @@
                             button.html('<i class="fa fa-star"></i>');
                         }
                         button.data('status', newStatus);
+                    }
+                },
+                complete: function() {
+                    if (window.PageLoader) {
+                        window.PageLoader.hide();
                     }
                 },
             });

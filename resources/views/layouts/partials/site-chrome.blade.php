@@ -7,8 +7,8 @@
 
     $isHomepage = SitePrimaryNav::isHomepage();
     $includeNav = $includeNav ?? SitePrimaryNav::usesLayoutNav();
-    $includeVacationOverlay = $includeVacationOverlay ?? SitePrimaryNav::usesVacationLoadingOverlay();
 @endphp
+@include('layouts.partials.page-loader')
 @unless($isHomepage)
     @include('layouts.modal.loginModal')
     @include('layouts.modal.registerModal')
@@ -24,14 +24,5 @@
                 'idPrefix' => $idPrefix ?? 'site',
             ])
         @endif
-    @endif
-
-    @if($includeVacationOverlay)
-        <div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
-            <div class="vacation-page-loading-overlay__panel" role="status">
-                <div class="spinner-border text-danger" aria-hidden="true"></div>
-                <span>{{ __('checkout.loading') }}</span>
-            </div>
-        </div>
     @endif
 @endunless

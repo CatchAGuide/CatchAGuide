@@ -9849,30 +9849,6 @@ div#masonry-grid img {
   color: #fff;
 }
 
-.vacation-page-loading-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.82);
-}
-.vacation-page-loading-overlay[hidden] {
-  display: none !important;
-}
-.vacation-page-loading-overlay__panel {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-radius: 0.5rem;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  font-weight: 500;
-  color: #313041;
-}
-
 .vacations-page-header-shell {
   position: relative;
   margin-bottom: 0.75rem;
@@ -15354,15 +15330,9 @@ div#masonry-grid img {
 }
 
 .trip-offer-page {
-  padding-top: 0.8rem;
   padding-bottom: 4rem;
   background: #f8fafc;
   font-family: inherit;
-}
-@media (min-width: 768px) {
-  .trip-offer-page {
-    padding-top: 1.25rem;
-  }
 }
 @media (max-width: 991.98px) {
   .trip-offer-page {
@@ -15376,7 +15346,13 @@ div#masonry-grid img {
   margin-left: auto;
   padding-right: clamp(1.25rem, 3vw, 3rem);
   padding-left: clamp(1.25rem, 3vw, 3rem);
+  padding-top: 0.8rem;
   padding-bottom: 1.5rem;
+}
+@media (min-width: 768px) {
+  .trip-offer-page__top {
+    padding-top: 1.25rem;
+  }
 }
 @media (max-width: 576px) {
   .trip-offer-page__top {
@@ -34280,4 +34256,27 @@ html.booking-assistant-modal-open body {
     height: 20px;
     font-size: 0.65rem;
   }
+}
+
+.page-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.82);
+}
+.page-loading-overlay[hidden] {
+  display: none !important;
+}
+.page-loading-overlay__panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-weight: 500;
 }

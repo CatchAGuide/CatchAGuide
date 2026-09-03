@@ -581,6 +581,9 @@ $admin-shell-gradient-strong: #4f46e5;
 // Reviews viewing panel
 @import "./reviews";
 
+// Site-wide loading overlay (navigation, forms, redirects)
+@import "../components/page-loader";
+
 @keyframes admin-shell-pulse {
   0% {
     transform: scale(0.9);

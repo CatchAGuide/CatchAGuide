@@ -107,4 +107,32 @@ class GuidingTranslatedAttributeFallbackTest extends TestCase
 
         $this->assertSame('', $guiding->title);
     }
+
+    public function test_populated_translated_pricing_extra_merges_by_id_with_main_language_fallback(): void
+    {
+        $guiding = new Guiding([
+            'pricing_extra' => json_encode([
+                ['name' => 'Fishing rod rental', 'price' => 10],
+                ['name' => 'Extra bait', 'price' => 5],
+            ]),
+        ]);
+
+        // Custom (non-ExtrasPrice) names get a counter-based id from the
+        // accessor — read it once so the translated fixture can target it.
+        $mainExtras = collect($guiding->pricing_extra);
+        $first = $mainExtras->first();
+        $second = $mainExtras->last();
+
+        $guiding->translated = [
+            'pricing_extra' => [
+                ['id' => $first['id'], 'name' => 'Angelrutenverleih', 'price' => 10],
+            ],
+        ];
+
+        $result = collect($guiding->pricing_extra);
+
+        $this->assertCount(2, $result, 'The untranslated sibling extra must still appear via main-language fallback.');
+        $this->assertSame('Angelrutenverleih', $result->firstWhere('id', $first['id'])['name']);
+        $this->assertSame('Extra bait', $result->firstWhere('id', $second['id'])['name']);
+    }
 }

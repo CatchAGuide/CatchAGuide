@@ -46,15 +46,9 @@ $trip-offer-lh-relaxed: 1.7;
 }
 
 .trip-offer-page {
-    padding-top: 0.8rem;
     padding-bottom: 4rem;
     background: $trip-offer-theme-bg;
     font-family: $trip-offer-font-family;
-
-    @media (min-width: 768px) {
-        // Clearance for the floating country search bar below the short header.
-        padding-top: 1.25rem;
-    }
 
     @media (max-width: 991.98px) {
         // Leave room for the mobile sticky request footer.
@@ -63,7 +57,13 @@ $trip-offer-lh-relaxed: 1.7;
 
     &__top {
         @include cag-page-container;
+        padding-top: 0.8rem;
         padding-bottom: 1.5rem;
+
+        @media (min-width: 768px) {
+            // Clearance for the floating country search bar below the short header.
+            padding-top: 1.25rem;
+        }
 
         @media (max-width: 576px) {
             padding-bottom: 1.25rem;

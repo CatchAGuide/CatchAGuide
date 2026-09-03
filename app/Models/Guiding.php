@@ -137,15 +137,16 @@ class Guiding extends Model
 
     /**
      * List fields whose translation is a set of id-keyed rows (checkbox
-     * selections), not free text — id/name identify the row, only "value" is
-     * ever translated. A translation run rarely covers every id at once (see
+     * selections / priced extras), not free text — id (+ name for the
+     * checkbox fields) identifies the row, only "value"/"name" is ever
+     * translated. A translation run rarely covers every id at once (see
      * GuidingTranslationService::getTranslatableFields, and admin edits made
      * one row at a time via the details modal), so the translated side is
      * usually a partial list. Returning it as-is would silently drop every
      * id that hasn't been translated yet instead of showing the
      * main-language row for it.
      */
-    private const TRANSLATABLE_LIST_FIELDS = ['requirements', 'recommendations', 'other_information'];
+    private const TRANSLATABLE_LIST_FIELDS = ['requirements', 'recommendations', 'other_information', 'pricing_extra'];
 
     public function __get($key)
     {
