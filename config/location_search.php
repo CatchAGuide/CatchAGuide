@@ -1,9 +1,16 @@
 <?php
 
 return [
+    /*
+    | City/locality searches always use radius_fallback_km below, ignoring any
+    | viewport bounds Google Places returns for the place — a small town's
+    | bounding box can be a couple of km across, which is too tight a catch
+    | area for guides/camps/trips based just outside town. Region/country
+    | searches still prefer Places bounds when present (see GeospatialSearchService).
+    */
     'scopes' => [
         'city' => [
-            'radius_fallback_km' => (int) env('LOCATION_SEARCH_CITY_RADIUS_KM', 20),
+            'radius_fallback_km' => (int) env('LOCATION_SEARCH_CITY_RADIUS_KM', 50),
             'max_results' => 100,
         ],
         'region' => [

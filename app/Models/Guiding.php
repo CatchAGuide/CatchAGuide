@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
@@ -134,10 +135,22 @@ class Guiding extends Model
 
     public $translated = null;
 
+    /**
+     * List fields whose translation is a set of id-keyed rows (checkbox
+     * selections), not free text — id/name identify the row, only "value" is
+     * ever translated. A translation run rarely covers every id at once (see
+     * GuidingTranslationService::getTranslatableFields, and admin edits made
+     * one row at a time via the details modal), so the translated side is
+     * usually a partial list. Returning it as-is would silently drop every
+     * id that hasn't been translated yet instead of showing the
+     * main-language row for it.
+     */
+    private const TRANSLATABLE_LIST_FIELDS = ['requirements', 'recommendations', 'other_information'];
+
     public function __get($key)
     {
         if ($this->translated !== null && isset($this->translated[$key])) {
-            return $this->translated[$key];
+            return $this->mergeTranslatedListField($key, $this->translated[$key]);
         }
         // When translationForCurrentLocale is eager-loaded, use its json_data for translated attributes
         if ($this->relationLoaded('translationForCurrentLocale')) {
@@ -146,11 +159,50 @@ class Guiding extends Model
             if ($translation && $sourceLanguage !== app()->getLocale()) {
                 $data = $translation->json_data ?? null;
                 if (is_array($data) && array_key_exists($key, $data)) {
-                    return $data[$key];
+                    return $this->mergeTranslatedListField($key, $data[$key]);
                 }
             }
         }
         return parent::__get($key);
+    }
+
+    /**
+     * For a TRANSLATABLE_LIST_FIELDS key, merge the translated rows over the
+     * main-language rows by id — a translated row wins for its id, any id
+     * missing from the translation falls back to the main-language row.
+     * Non-list keys (and non-array translated values) pass through untouched.
+     */
+    private function mergeTranslatedListField(string $key, $translatedValue)
+    {
+        if (! in_array($key, self::TRANSLATABLE_LIST_FIELDS, true) || ! is_array($translatedValue)) {
+            return $translatedValue;
+        }
+
+        $mainList = parent::__get($key);
+        if ($mainList instanceof Collection) {
+            $mainList = $mainList->values()->all();
+        } elseif (! is_array($mainList)) {
+            $mainList = [];
+        }
+
+        if (empty($mainList)) {
+            return $translatedValue;
+        }
+
+        $translatedById = [];
+        foreach ($translatedValue as $item) {
+            if (is_array($item) && isset($item['id'])) {
+                $translatedById[(string) $item['id']] = $item;
+            }
+        }
+
+        return array_map(function ($mainItem) use ($translatedById) {
+            if (! is_array($mainItem) || ! isset($mainItem['id'])) {
+                return $mainItem;
+            }
+
+            return $translatedById[(string) $mainItem['id']] ?? $mainItem;
+        }, $mainList);
     }
 
     /**

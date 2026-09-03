@@ -21,6 +21,7 @@ use App\Models\Language;
 use App\Services\Translation\GuidingTranslationService;
 use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\MediaTrashService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -371,7 +372,7 @@ class GuidingsController extends Controller
             if (! is_array($jsonData)) {
                 $jsonData = is_string($jsonData) ? json_decode($jsonData, true) : [];
             }
-            $translations[$record->language] = array_merge($main, is_array($jsonData) ? $jsonData : []);
+            $translations[$record->language] = $this->mergeTranslationWithMain($main, is_array($jsonData) ? $jsonData : []);
         }
 
         return response()->json([
@@ -380,6 +381,67 @@ class GuidingsController extends Controller
             'translations' => $translations,
             'available_languages' => array_values(array_unique(array_merge([$mainLanguage], array_keys($translations)))),
         ]);
+    }
+
+    /**
+     * Merge a translation's json_data over the main-language payload for modal
+     * display. List fields (other_information/requirements/recommendations) are
+     * merged item-by-item, keyed by id: use the translated entry for an id when
+     * one exists, otherwise fall back to the main-language entry. A plain
+     * array_merge would let json_data's whole-array value for a list field win
+     * outright — including an empty array, written whenever a translation run
+     * never populated that field, which silently blanked out populated
+     * main-language data — and even a partially-translated list would hide
+     * every item that hadn't been translated yet instead of falling back to
+     * the main-language item.
+     */
+    private function mergeTranslationWithMain(array $main, array $jsonData): array
+    {
+        $merged = array_merge($main, $jsonData);
+
+        foreach (self::DETAILS_LIST_FIELDS as $field) {
+            $mainList = is_array($main[$field] ?? null) ? $main[$field] : [];
+            if (empty($mainList)) {
+                continue;
+            }
+
+            $translatedById = [];
+            foreach ((is_array($jsonData[$field] ?? null) ? $jsonData[$field] : []) as $item) {
+                if (is_array($item) && isset($item['id'])) {
+                    $translatedById[(string) $item['id']] = $item;
+                }
+            }
+
+            $merged[$field] = array_map(function ($mainItem) use ($translatedById) {
+                if (! is_array($mainItem) || ! isset($mainItem['id'])) {
+                    return $mainItem;
+                }
+
+                return $translatedById[(string) $mainItem['id']] ?? $mainItem;
+            }, $mainList);
+        }
+
+        return $merged;
+    }
+
+    /**
+     * Find the main-language list entry (id/name/value) for a given list field
+     * and id, used to seed a translated row the first time it's edited.
+     */
+    private function findMainListEntry(Guiding $guiding, string $field, $listId): ?array
+    {
+        if ($listId === null || $listId === '') {
+            return null;
+        }
+
+        $main = $this->buildGuidingTextPayload($guiding)[$field] ?? [];
+        foreach ($main as $item) {
+            if (is_array($item) && isset($item['id']) && (string) $item['id'] === (string) $listId) {
+                return $item;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -392,8 +454,6 @@ class GuidingsController extends Controller
         $language = $request->input('language');
         $field = $request->input('field');
         $value = $request->input('value');
-        $listIndex = $request->input('list_index'); // 0-based index for list items (translations)
-        $listId = $request->input('list_id');       // id key for list items (main language, guidings table)
 
         $scalarFields = self::DETAILS_SCALAR_FIELDS;
         $listFields = self::DETAILS_LIST_FIELDS;
@@ -463,21 +523,41 @@ class GuidingsController extends Controller
                 $jsonData[$field] = $value;
                 $payload = $jsonData;
             } else {
-                $listIndex = $listIndex !== null ? (int) $listIndex : null;
-                if ($listIndex === null) {
-                    return response()->json(['error' => 'list_index required for list field in translation'], 422);
+                $listId = $request->input('list_id');
+                if ($listId === null || $listId === '') {
+                    return response()->json(['error' => 'list_id required for list field in translation'], 422);
                 }
-                $arr = isset($jsonData[$field]) && is_array($jsonData[$field]) ? $jsonData[$field] : [];
-                $arr = array_values($arr);
-                if (isset($arr[$listIndex])) {
-                    $item = $arr[$listIndex];
-                    if (is_array($item)) {
-                        $item['value'] = $value;
-                        $arr[$listIndex] = $item;
-                    } else {
-                        $arr[$listIndex] = $value;
+
+                $arr = isset($jsonData[$field]) && is_array($jsonData[$field]) ? array_values($jsonData[$field]) : [];
+
+                $targetIndex = null;
+                foreach ($arr as $i => $item) {
+                    if (is_array($item) && isset($item['id']) && (string) $item['id'] === (string) $listId) {
+                        $targetIndex = $i;
+                        break;
                     }
                 }
+
+                if ($targetIndex !== null) {
+                    $item = $arr[$targetIndex];
+                    if (is_array($item)) {
+                        $item['value'] = $value;
+                        $arr[$targetIndex] = $item;
+                    } else {
+                        $arr[$targetIndex] = $value;
+                    }
+                } else {
+                    // This id has never been translated before (the translation's
+                    // list is empty or shorter than the main list) — seed the row
+                    // from the main-language entry instead of silently dropping the
+                    // edit, which is what happened when this only matched by a
+                    // positional list_index into a (possibly still-empty) array.
+                    $mainEntry = $this->findMainListEntry($guiding, $field, $listId);
+                    $arr[] = $mainEntry
+                        ? array_merge($mainEntry, ['value' => $value])
+                        : ['id' => $listId, 'value' => $value];
+                }
+
                 $jsonData[$field] = $arr;
                 $payload = $jsonData;
             }
@@ -506,16 +586,26 @@ class GuidingsController extends Controller
      */
     private function buildGuidingTextPayload(Guiding $guiding): array
     {
-        $inclusions = $guiding->inclusions;
-        $inclusions = is_string($inclusions) ? json_decode($inclusions, true) : $inclusions;
-        $requirements = $guiding->requirements;
-        $requirements = is_string($requirements) ? json_decode($requirements, true) : $requirements;
-        $recommendations = $guiding->recommendations;
-        $recommendations = is_string($recommendations) ? json_decode($recommendations, true) : $recommendations;
-        $otherInformation = $guiding->other_information;
-        $otherInformation = is_string($otherInformation) ? json_decode($otherInformation, true) : $otherInformation;
-        $pricingExtra = $guiding->pricing_extra;
-        $pricingExtra = is_string($pricingExtra) ? json_decode($pricingExtra, true) : $pricingExtra;
+        // requirements/recommendations/other_information/pricing_extra go through
+        // Guiding accessors that return an Illuminate\Support\Collection, not the
+        // raw array — normalize to a plain array so downstream is_array() checks
+        // (mergeTranslationWithMain, findMainListEntry) see the real content
+        // instead of silently treating it as empty/absent.
+        $normalizeList = function ($value) {
+            if (is_string($value)) {
+                return json_decode($value, true);
+            }
+            if ($value instanceof Collection) {
+                return $value->values()->all();
+            }
+            return $value;
+        };
+
+        $inclusions = $normalizeList($guiding->inclusions);
+        $requirements = $normalizeList($guiding->requirements);
+        $recommendations = $normalizeList($guiding->recommendations);
+        $otherInformation = $normalizeList($guiding->other_information);
+        $pricingExtra = $normalizeList($guiding->pricing_extra);
 
         // Only text-based fields from multi-step-form (no location/city/region/country, no departure_times).
         return array_filter([

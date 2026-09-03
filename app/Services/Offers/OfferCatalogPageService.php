@@ -901,7 +901,10 @@ class OfferCatalogPageService
             return $query;
         }
 
-        $bounds = $this->geoSearch->normalizeBounds($geoParams);
+        // City/locality bounds from Places are often too tight (a small town's
+        // viewport can be a couple of km across) — always use the radius for
+        // city scope instead, same as GeospatialSearchService does for tours.
+        $bounds = $scope === GeospatialSearchService::SCOPE_CITY ? null : $this->geoSearch->normalizeBounds($geoParams);
         if ($bounds !== null) {
             return $query
                 ->whereNotNull($latCol)
