@@ -51,6 +51,12 @@ class GuidingDestinationController extends Controller
             abort(404);
         }
 
+        // A country with zero publicly visible tours has no page — nor do its
+        // regions/cities, since they're all subsets of the same country.
+        if (! $this->guidingAvailability->hasGuidingsForCountry($countryRow->slug, $countryRow->countrycode)) {
+            abort(404);
+        }
+
         $regionRow = null;
         $cityRow = null;
 

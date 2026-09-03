@@ -4,11 +4,18 @@ namespace Tests\Feature\Destination;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Enums\GuideStatus;
 use App\Models\CategoryEntity;
 use App\Models\Faq;
+use App\Models\FishingType;
+use App\Models\Guiding;
 use App\Models\Language;
+use App\Models\User;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
+use Mockery;
 use Tests\TestCase;
 
 class DestinationHubPageTest extends TestCase
@@ -21,11 +28,57 @@ class DestinationHubPageTest extends TestCase
 
         config(['app.url' => 'http://localhost']);
         URL::forceRootUrl('http://localhost');
+        Cache::forget('guiding_category_availability_v1');
 
         $this->withoutMiddleware([
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+    }
+
+    private function createTour(string $country, ?string $countryIso = null): Guiding
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $guiding = new Guiding();
+        $guiding->forceFill([
+            'title' => 'Test Tour '.uniqid(),
+            'slug' => 'test-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+            'country' => $country,
+            'country_iso' => $countryIso,
+        ])->save();
+
+        return $guiding;
+    }
+
+    private function hubGridRow(CategoryEntity $country, int $trips, int $camps): array
+    {
+        return [
+            'destination' => $country,
+            'slug' => $country->slug,
+            'name' => $country->name,
+            'sub_title' => null,
+            'camps' => $camps,
+            'trips' => $trips,
+            'thumbnail_path' => null,
+            'countrycode' => $country->countrycode,
+        ];
+    }
+
+    private function mockHubGrid(array $rows): void
+    {
+        $mock = Mockery::mock(VacationDestinationRepository::class);
+        $mock->shouldReceive('countriesForHubGrid')->andReturn(collect($rows));
+        $this->app->instance(VacationDestinationRepository::class, $mock);
     }
 
     public function test_destination_index_falls_back_to_lang_title(): void
@@ -93,17 +146,62 @@ class DestinationHubPageTest extends TestCase
 
     public function test_destination_index_lowercases_flag_url_regardless_of_stored_case(): void
     {
-        CategoryEntity::query()->create([
+        $country = CategoryEntity::query()->create([
             'type' => 'country',
             'name' => 'Argentina Test',
             'slug' => 'argentina-test-'.uniqid(),
             'countrycode' => 'AR',
         ]);
 
+        $this->mockHubGrid([$this->hubGridRow($country, trips: 1, camps: 0)]);
+
         $response = $this->get(route('destination'));
 
         $response->assertOk();
         $response->assertSee('flags/ar.svg', false);
         $response->assertDontSee('flags/AR.svg', false);
+    }
+
+    public function test_destination_index_excludes_countries_with_no_listings(): void
+    {
+        $withVacations = CategoryEntity::query()->create([
+            'type' => 'country',
+            'name' => 'Vacation Country',
+            'slug' => 'vacation-country-'.uniqid(),
+            'countrycode' => 'VC',
+        ]);
+        $withoutListings = CategoryEntity::query()->create([
+            'type' => 'country',
+            'name' => 'Empty Country',
+            'slug' => 'empty-country-'.uniqid(),
+            'countrycode' => 'EC',
+        ]);
+
+        $this->mockHubGrid([$this->hubGridRow($withVacations, trips: 1, camps: 0)]);
+
+        $response = $this->get(route('destination'));
+
+        $response->assertOk();
+        $response->assertSee(route('destination.country', $withVacations->slug, false), false);
+        $response->assertDontSee(route('destination.country', $withoutListings->slug, false), false);
+    }
+
+    public function test_destination_index_includes_country_with_tours_only(): void
+    {
+        $country = CategoryEntity::query()->create([
+            'type' => 'country',
+            'name' => 'Tours Only Country',
+            'slug' => 'tours-only-country-'.uniqid(),
+            'countrycode' => 'TC',
+        ]);
+
+        $this->createTour($country->slug, $country->countrycode);
+        Cache::forget('guiding_category_availability_v1');
+        $this->mockHubGrid([]);
+
+        $response = $this->get(route('destination'));
+
+        $response->assertOk();
+        $response->assertSee(route('destination.country', $country->slug, false), false);
     }
 }

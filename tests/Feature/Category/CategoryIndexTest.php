@@ -86,10 +86,89 @@ class CategoryIndexTest extends TestCase
             'faq_title' => '',
         ]);
 
+        $this->createTour(['target_fish' => json_encode([$target->id])]);
+        Cache::forget('guiding_category_availability_v1');
+
         $response = $this->get(route('targets.index'));
 
         $response->assertOk();
         $response->assertSee('Visible Pike Index Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_targets_index_excludes_target_fish_with_no_tours_and_no_active_listings(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Listingless Global Pike '.uniqid(),
+            'name_en' => 'Listingless Global Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Listingless Global Pike',
+            'type' => 'Targets',
+            'slug' => 'listingless-global-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Hidden Listingless Global Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $response = $this->get(route('targets.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('Hidden Listingless Global Pike Title', false);
+        $response->assertViewHas('allTargets', function ($items) use ($page) {
+            return ! $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
+        });
+    }
+
+    public function test_targets_index_includes_target_fish_with_vacation_listings_only(): void
+    {
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Vacations Only Global Pike '.uniqid(),
+            'name_en' => 'Vacations Only Global Pike',
+        ])->save();
+
+        $page = CategoryPage::query()->create([
+            'name' => 'Vacations Only Global Pike',
+            'type' => 'Targets',
+            'slug' => 'vacations-only-global-pike-'.uniqid(),
+            'source_id' => $target->id,
+            'is_favorite' => true,
+        ]);
+
+        Language::query()->create([
+            'source_id' => (string) $target->id,
+            'type' => CategoryPageEntityType::TARGET_FISH,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => app()->getLocale(),
+            'title' => 'Visible Vacations Only Global Pike Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => '',
+        ]);
+
+        $this->createCamp(['target_fish' => [$target->id]]);
+
+        $response = $this->get(route('targets.index'));
+
+        $response->assertOk();
+        $response->assertSee('Visible Vacations Only Global Pike Title', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });

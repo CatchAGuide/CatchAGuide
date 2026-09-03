@@ -103,6 +103,18 @@ class CategoryController extends Controller
             });
         }
 
+        // Global (targets.index) must not list a target fish with zero tours
+        // AND zero active camps/trips — it just needs listings on either side.
+        if ($scope === CategoryPageScope::GLOBAL) {
+            $vacationTargetAvailability = app(VacationTargetFishSelector::class);
+            $allTargets = $allTargets->filter(function ($item) use ($guidingAvailability, $vacationTargetAvailability) {
+                $sourceId = (int) $item->source_id;
+
+                return $guidingAvailability->hasGuidingsForTarget($sourceId)
+                    || $vacationTargetAvailability->hasActiveListings($sourceId, (string) $item->name);
+            });
+        }
+
         $favories = $allTargets->filter(function ($item) {
             return $item->is_favorite === true || $item->is_favorite === 1;
         });
@@ -195,6 +207,12 @@ class CategoryController extends Controller
 
             $methodId = (int) $row_data->source_id;
             if ($methodId <= 0) {
+                abort(404);
+            }
+
+            // A method with zero publicly visible tours has no page, mirroring
+            // the guidings.methods hub filtering in index().
+            if (! $guidingAvailability->hasGuidingsForMethod($methodId)) {
                 abort(404);
             }
 

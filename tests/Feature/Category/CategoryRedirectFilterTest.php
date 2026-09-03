@@ -7,6 +7,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
 use App\Enums\GuideStatus;
+use App\Models\Camp;
 use App\Models\CategoryPage;
 use App\Models\FishingType;
 use App\Models\Guiding;
@@ -131,6 +132,24 @@ class CategoryRedirectFilterTest extends TestCase
         return $guiding;
     }
 
+    private function createCamp(array $overrides = []): Camp
+    {
+        $user = User::factory()->create();
+
+        $camp = new Camp();
+        $camp->forceFill(array_merge([
+            'title' => 'Redirect Camp '.uniqid(),
+            'description_camp' => 'Camp desc',
+            'description_area' => 'Area desc',
+            'description_fishing' => 'Fishing desc',
+            'location' => 'Somewhere',
+            'status' => 'active',
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $camp;
+    }
+
     /**
      * @param  array<int, array{id:int,name:string}>  $speciesOptions
      */
@@ -230,7 +249,9 @@ class CategoryRedirectFilterTest extends TestCase
         $pikeId = (int) $pike->source_id;
         $zanderId = (int) $zander->source_id;
 
+        $this->createTour(['target_fish' => json_encode([$pikeId])]);
         $this->createTour(['target_fish' => json_encode([$zanderId])]);
+        Cache::forget('guiding_category_availability_v1');
 
         $this->bindTargetFishCatalog($pikeId, [
             ['id' => $pikeId, 'name' => 'Pike'],
@@ -268,6 +289,9 @@ class CategoryRedirectFilterTest extends TestCase
         $pikeId = (int) $pike->source_id;
 
         // No tour references $unavailable's target id.
+        $this->createTour(['target_fish' => json_encode([$pikeId])]);
+        Cache::forget('guiding_category_availability_v1');
+
         $this->bindTargetFishCatalog($pikeId, [['id' => $pikeId, 'name' => 'Pike']]);
 
         $response = $this->get(route('guidings.targets', ['slug' => $pike->slug]));
@@ -287,6 +311,8 @@ class CategoryRedirectFilterTest extends TestCase
     {
         $pike = $this->createTargetFishPage('pike-orphaned', CategoryPageScope::TOURS, 'Pike');
         $pikeId = (int) $pike->source_id;
+        $this->createTour(['target_fish' => json_encode([$pikeId])]);
+        Cache::forget('guiding_category_availability_v1');
         Target::whereKey($pikeId)->delete();
 
         $this->bindTargetFishCatalog($pikeId, []);
@@ -306,7 +332,10 @@ class CategoryRedirectFilterTest extends TestCase
         $pikeId = (int) $pike->source_id;
         $zanderId = (int) $zander->source_id;
 
-        // No tours at all for either species: vacations scope must not availability-gate.
+        // No tours at all for either species: vacations scope must not availability-gate
+        // the sibling list — but the page being viewed still needs its own listing.
+        $this->createCamp(['target_fish' => [$pikeId]]);
+
         $this->bindTargetFishCatalog(
             $pikeId,
             [['id' => $pikeId, 'name' => 'Pike'], ['id' => $zanderId, 'name' => 'Zander']],
@@ -331,7 +360,9 @@ class CategoryRedirectFilterTest extends TestCase
         $spinId = (int) $spin->source_id;
         $flyId = (int) $fly->source_id;
 
+        $this->createTour(['fishing_methods' => json_encode([$spinId])]);
         $this->createTour(['fishing_methods' => json_encode([$flyId])]);
+        Cache::forget('guiding_category_availability_v1');
 
         $this->bindMethodCatalog($spinId, [
             ['id' => $spinId, 'name' => 'Spinning'],
@@ -362,6 +393,8 @@ class CategoryRedirectFilterTest extends TestCase
     {
         $spin = $this->createMethodPage('spin-orphaned', 'Spinning');
         $spinId = (int) $spin->source_id;
+        $this->createTour(['fishing_methods' => json_encode([$spinId])]);
+        Cache::forget('guiding_category_availability_v1');
         Method::whereKey($spinId)->delete();
 
         $this->bindMethodCatalog($spinId, []);

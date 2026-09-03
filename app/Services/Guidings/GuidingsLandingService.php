@@ -6,6 +6,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryPage;
 use App\Models\Guiding;
 use App\Presenters\Guiding\GuidingCardPresenter;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
@@ -31,6 +32,7 @@ class GuidingsLandingService
         private HomepageCountrySelector $countries,
         private FavoriteTargetSpeciesResolver $favoriteTargetSpecies,
         private GuidingCardPresenter $cardPresenter,
+        private GuidingCategoryAvailabilityRepository $guidingAvailability,
     ) {}
 
     /**
@@ -50,7 +52,7 @@ class GuidingsLandingService
         $locale = app()->getLocale();
 
         return [
-            'featuredCountries' => $this->countries->featured(null, CategoryPageScope::TOURS),
+            'featuredCountries' => $this->featuredCountries(),
             'countryCount' => $this->countries->totalCount(),
             'tourCount' => $this->tourCount(),
             'pills' => $this->pills($locale),
@@ -59,6 +61,17 @@ class GuidingsLandingService
             'methods' => $this->methodTiles($locale),
             'targetSpecies' => $this->speciesTiles($locale),
         ];
+    }
+
+    /**
+     * Country carousel: category-page copy is not enough — a country with zero
+     * publicly visible tours has no destination page to link to (it 404s).
+     */
+    private function featuredCountries(): Collection
+    {
+        return $this->countries->featured(null, CategoryPageScope::TOURS)
+            ->filter(fn (array $country) => $this->guidingAvailability->hasGuidingsForCountry($country['slug'], $country['countrycode']))
+            ->values();
     }
 
     private function tourCount(): int
@@ -176,7 +189,9 @@ class GuidingsLandingService
                             : 0,
                         'url' => route('guidings.methods.show', ['slug' => $page->slug]),
                     ];
-                });
+                })
+                ->filter(fn (array $tile) => $tile['count'] > 0)
+                ->values();
         });
     }
 
@@ -198,7 +213,9 @@ class GuidingsLandingService
                         : 0,
                     'url' => route('guidings.targets', ['slug' => $card['slug']]),
                 ];
-            });
+            })
+                ->filter(fn (array $card) => $card['count'] > 0)
+                ->values();
         });
     }
 }

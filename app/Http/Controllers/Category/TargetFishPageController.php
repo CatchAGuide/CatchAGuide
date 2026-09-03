@@ -10,6 +10,7 @@ use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Vacation\VacationTargetFishSelector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -21,6 +22,7 @@ class TargetFishPageController extends Controller
         private CategoryPageContentService $categoryContent,
         private HomepageMixedOfferSelector $mixedOffers,
         private GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private VacationTargetFishSelector $vacationTargetAvailability,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -72,6 +74,20 @@ class TargetFishPageController extends Controller
         }
 
         $placeName = $page->source?->name ?? $page->name;
+
+        // A species with zero listings for this scope has no page — the global
+        // page needs listings on either side, tours/vacations need their own.
+        $hasTours = fn () => $this->guidingAvailability->hasGuidingsForTarget($speciesId);
+        $hasVacations = fn () => $this->vacationTargetAvailability->hasActiveListings($speciesId, $placeName);
+        $hasListings = match ($scope) {
+            CategoryPageScope::TOURS => $hasTours(),
+            CategoryPageScope::VACATIONS => $hasVacations(),
+            default => $hasTours() || $hasVacations(),
+        };
+
+        if (! $hasListings) {
+            abort(404);
+        }
 
         if ($scope === CategoryPageScope::GLOBAL) {
             return view('pages.category.category-show', [

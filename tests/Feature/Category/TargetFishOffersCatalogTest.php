@@ -6,13 +6,19 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Offers\OfferListingFilter;
 use App\Domain\Offers\ViewModels\OfferCatalogViewModel;
+use App\Enums\GuideStatus;
+use App\Models\Camp;
 use App\Models\CategoryPage;
+use App\Models\FishingType;
+use App\Models\Guiding;
 use App\Models\Language;
 use App\Models\Target;
+use App\Models\User;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Mockery;
 use Tests\TestCase;
@@ -27,11 +33,52 @@ class TargetFishOffersCatalogTest extends TestCase
 
         config(['app.url' => 'http://localhost']);
         URL::forceRootUrl('http://localhost');
+        Cache::forget('guiding_category_availability_v1');
 
         $this->withoutMiddleware([
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+    }
+
+    private function createTour(array $overrides = []): Guiding
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $guiding = new Guiding();
+        $guiding->forceFill(array_merge([
+            'title' => 'Test Tour '.uniqid(),
+            'slug' => 'test-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $guiding;
+    }
+
+    private function createCamp(array $overrides = []): Camp
+    {
+        $user = User::factory()->create();
+
+        $camp = new Camp();
+        $camp->forceFill(array_merge([
+            'title' => 'Test Camp '.uniqid(),
+            'description_camp' => 'Camp desc',
+            'description_area' => 'Area desc',
+            'description_fishing' => 'Fishing desc',
+            'location' => 'Somewhere',
+            'status' => 'active',
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $camp;
     }
 
     private function createTargetFishPage(string $slugPrefix, string $scope = CategoryPageScope::GLOBAL): CategoryPage
@@ -68,6 +115,8 @@ class TargetFishOffersCatalogTest extends TestCase
     public function test_target_fish_category_renders_offer_modules_for_global_scope(): void
     {
         $page = $this->createTargetFishPage('pike-offers-test');
+        $this->createTour(['target_fish' => json_encode([(int) $page->source_id])]);
+        Cache::forget('guiding_category_availability_v1');
 
         $mock = Mockery::mock(HomepageMixedOfferSelector::class);
         $mock->shouldReceive('byModuleForTargetFish')
@@ -103,6 +152,8 @@ class TargetFishOffersCatalogTest extends TestCase
     public function test_tours_target_fish_page_uses_tours_scope_and_locks_catalog(): void
     {
         $page = $this->createTargetFishPage('pike-tours-test', CategoryPageScope::TOURS);
+        $this->createTour(['target_fish' => json_encode([(int) $page->source_id])]);
+        Cache::forget('guiding_category_availability_v1');
 
         $this->bindTargetFishCatalog(fn () => $this->viewModel(
             type: 'tour',
@@ -147,6 +198,7 @@ class TargetFishOffersCatalogTest extends TestCase
     public function test_vacations_target_fish_page_uses_vacations_scope_and_locks_catalog(): void
     {
         $page = $this->createTargetFishPage('pike-vacations-test', CategoryPageScope::VACATIONS);
+        $this->createCamp(['target_fish' => [(int) $page->source_id]]);
 
         $this->bindTargetFishCatalog(fn () => $this->viewModel(
             type: 'vacation',
@@ -185,6 +237,8 @@ class TargetFishOffersCatalogTest extends TestCase
     public function test_build_for_target_fish_receives_route_scope(): void
     {
         $page = $this->createTargetFishPage('pike-scope-arg-test', CategoryPageScope::TOURS);
+        $this->createTour(['target_fish' => json_encode([(int) $page->source_id])]);
+        Cache::forget('guiding_category_availability_v1');
 
         $expectedSpeciesName = $page->source?->name ?? $page->name;
 

@@ -3,6 +3,7 @@
 namespace App\Services\Homepage;
 
 use App\Domain\Offers\DestinationOfferScope;
+use App\Domain\Vacation\CountrySlug;
 use App\Models\Booking;
 use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
@@ -10,8 +11,11 @@ use App\Models\MonthlyHighlight;
 use App\Models\Review;
 use App\Models\Target;
 use App\Models\Thread;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Reviews\TestimonialSelector;
+use App\Services\Vacation\VacationTargetFishSelector;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -30,6 +34,9 @@ class HomepageLandingService
         private HomepageMixedOfferSelector $mixedOffers,
         private FavoriteTargetSpeciesResolver $favoriteTargetSpecies,
         private TestimonialSelector $testimonialSelector,
+        private GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private VacationDestinationRepository $vacationDestinations,
+        private VacationTargetFishSelector $vacationTargetAvailability,
     ) {}
 
     /**
@@ -51,7 +58,7 @@ class HomepageLandingService
         $countryCount = $this->countries->totalCount();
 
         return [
-            'featuredCountries' => $this->countries->featured(),
+            'featuredCountries' => $this->featuredCountries(),
             'countryCount' => $countryCount,
             'mixedOffers' => $this->mixedOffers->mixed(9),
             'offerModules' => $this->mixedOffers->byModule(8),
@@ -63,15 +70,35 @@ class HomepageLandingService
         ];
     }
 
+    /**
+     * Country carousel: category-page copy is not enough — a country with zero
+     * tours AND zero active camps/trips has no destination page to link to (it 404s).
+     */
+    private function featuredCountries(): Collection
+    {
+        $vacationCountrySlugs = $this->vacationDestinations->countriesForHubGrid()
+            ->map(fn (array $row) => CountrySlug::canonicalize($row['slug']) ?? $row['slug'])
+            ->flip();
+
+        return $this->countries->featured()
+            ->filter(fn (array $country) => $this->guidingAvailability->hasGuidingsForCountry($country['slug'], $country['countrycode'])
+                || $vacationCountrySlugs->has(CountrySlug::canonicalize($country['slug']) ?? strtolower((string) $country['slug'])))
+            ->values();
+    }
+
     private function targetSpecies(string $locale): Collection
     {
         return Cache::remember("homepage_target_species_v5_{$locale}", now()->addMinutes(30), function () {
-            return $this->favoriteTargetSpecies->resolve(10)->map(fn (array $card) => [
-                'name' => $card['name'],
-                'slug' => $card['slug'],
-                'thumbnail' => $card['thumbnail'],
-                'url' => route('targets.show', ['slug' => $card['slug']]),
-            ]);
+            return $this->favoriteTargetSpecies->resolve(10)
+                ->filter(fn (array $card) => $this->guidingAvailability->hasGuidingsForTarget((int) $card['source_id'])
+                    || $this->vacationTargetAvailability->hasActiveListings((int) $card['source_id'], (string) $card['name']))
+                ->map(fn (array $card) => [
+                    'name' => $card['name'],
+                    'slug' => $card['slug'],
+                    'thumbnail' => $card['thumbnail'],
+                    'url' => route('targets.show', ['slug' => $card['slug']]),
+                ])
+                ->values();
         });
     }
 

@@ -8,6 +8,7 @@ use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
 use App\Presenters\Guiding\GuidingCardPresenter;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Guidings\GuidingsLandingService;
 use App\Services\Homepage\HomepageCountrySelector;
@@ -82,7 +83,12 @@ class GuidingsLandingServiceMostBookedTest extends TestCase
         $countries = Mockery::mock(HomepageCountrySelector::class);
         $favoriteTargetSpecies = Mockery::mock(FavoriteTargetSpeciesResolver::class);
 
-        $service = new GuidingsLandingService($countries, $favoriteTargetSpecies, new GuidingCardPresenter());
+        $service = new GuidingsLandingService(
+            $countries,
+            $favoriteTargetSpecies,
+            new GuidingCardPresenter(),
+            app(GuidingCategoryAvailabilityRepository::class),
+        );
 
         $method = new ReflectionMethod(GuidingsLandingService::class, 'mostBooked');
         $method->setAccessible(true);
