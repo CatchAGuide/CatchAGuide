@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Category;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\Controller;
 use App\Models\CategoryEntity;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +21,8 @@ class DestinationCountryController extends Controller
     public function __construct(
         private HomepageMixedOfferSelector $mixedOffers,
         private CategoryPageContentService $categoryContent,
+        private GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private VacationDestinationRepository $destinations,
     ) {}
 
     public function index(): View
@@ -32,7 +37,17 @@ class DestinationCountryController extends Controller
             null,
             false,
         );
-        $countries = CategoryEntity::countries()->get();
+
+        // A country card must not show with zero tours AND zero active
+        // camps/trips — listings on either side keep it eligible.
+        $vacationCountrySlugs = $this->destinations->countriesForHubGrid()
+            ->map(fn (array $row) => CountrySlug::canonicalize($row['slug']) ?? $row['slug'])
+            ->flip();
+
+        $countries = CategoryEntity::countries()->get()
+            ->filter(fn (CategoryEntity $country) => $this->guidingAvailability->hasGuidingsForCountry($country->slug, $country->countrycode)
+                || $vacationCountrySlugs->has(CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug)))
+            ->values();
 
         return view('pages.countries.index', [
             'countries' => $countries,
@@ -51,6 +66,15 @@ class DestinationCountryController extends Controller
         $countryRow = CategoryEntity::countries()
             ->whereSlug($country)
             ->firstOrFail();
+
+        // A country with zero tours AND zero active camps/trips has no page,
+        // mirroring the destination hub filtering in index().
+        $hasTours = $this->guidingAvailability->hasGuidingsForCountry($countryRow->slug, $countryRow->countrycode);
+        $hasVacations = $this->destinations->hubGridCountry($countryRow->slug) !== null;
+
+        if (! $hasTours && ! $hasVacations) {
+            abort(404);
+        }
 
         $locale = app()->getLocale();
         $rowData = $this->categoryContent->applyScopedContentToModel(

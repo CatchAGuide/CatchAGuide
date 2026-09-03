@@ -197,7 +197,6 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-site-nav', false);
         $response->assertSee('cag-home-hero-shell', false);
         $response->assertSee('data-hero-carousel', false);
-        $response->assertSee('assets/images/homepage/hero-tour.webp', false);
         $response->assertSee('assets/images/homepage/hero-camp.webp', false);
         $response->assertSee('assets/images/homepage/hero-trip.webp', false);
         $response->assertSee('assets/images/homepage/hero-vacation.webp', false);

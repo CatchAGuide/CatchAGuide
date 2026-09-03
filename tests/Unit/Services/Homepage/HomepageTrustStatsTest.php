@@ -2,11 +2,14 @@
 
 namespace Tests\Unit\Services\Homepage;
 
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Homepage\HomepageLandingService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Reviews\TestimonialSelector;
+use App\Services\Vacation\VacationTargetFishSelector;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use ReflectionMethod;
@@ -29,7 +32,15 @@ class HomepageTrustStatsTest extends TestCase
         $favoriteTargetSpecies = Mockery::mock(FavoriteTargetSpeciesResolver::class);
         $testimonialSelector = Mockery::mock(TestimonialSelector::class);
 
-        $service = new HomepageLandingService($countries, $mixedOffers, $favoriteTargetSpecies, $testimonialSelector);
+        $service = new HomepageLandingService(
+            $countries,
+            $mixedOffers,
+            $favoriteTargetSpecies,
+            $testimonialSelector,
+            app(GuidingCategoryAvailabilityRepository::class),
+            app(VacationDestinationRepository::class),
+            app(VacationTargetFishSelector::class),
+        );
 
         $method = new ReflectionMethod(HomepageLandingService::class, 'trustStats');
         $method->setAccessible(true);
@@ -58,7 +69,15 @@ class HomepageTrustStatsTest extends TestCase
         $favoriteTargetSpecies = Mockery::mock(FavoriteTargetSpeciesResolver::class);
         $testimonialSelector = Mockery::mock(TestimonialSelector::class);
 
-        $service = new HomepageLandingService($countries, $mixedOffers, $favoriteTargetSpecies, $testimonialSelector);
+        $service = new HomepageLandingService(
+            $countries,
+            $mixedOffers,
+            $favoriteTargetSpecies,
+            $testimonialSelector,
+            app(GuidingCategoryAvailabilityRepository::class),
+            app(VacationDestinationRepository::class),
+            app(VacationTargetFishSelector::class),
+        );
 
         $method = new ReflectionMethod(HomepageLandingService::class, 'trustStats');
         $method->setAccessible(true);

@@ -3,9 +3,15 @@
 namespace Tests\Unit\Offers;
 
 use App\Domain\Offers\OfferListingFilter;
+use App\Enums\GuideStatus;
+use App\Models\FishingType;
+use App\Models\Guiding;
+use App\Models\User;
 use App\Services\Location\GeospatialSearchService;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Request;
 use Mockery;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -13,6 +19,68 @@ use Tests\TestCase;
 
 class OfferCatalogPageServiceGeoTest extends TestCase
 {
+    use DatabaseTransactions;
+
+    public function test_country_scope_tours_query_includes_tours_outside_centroid_radius(): void
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        // Stockholm — treated as the country's stored centroid below.
+        $near = $this->createTour($user, [
+            'country' => 'Sweden',
+            'lat' => 59.33,
+            'lng' => 18.06,
+        ]);
+
+        // Kiruna — same country, but ~1000km from the centroid, well outside
+        // the 120km country radius fallback. Must still show on the country page.
+        $far = $this->createTour($user, [
+            'country' => 'Sweden',
+            'lat' => 67.85,
+            'lng' => 20.22,
+        ]);
+
+        $filter = OfferListingFilter::fromRequest([
+            'type' => 'tour',
+            'country' => 'sweden',
+            'place' => 'Sweden',
+            'placeLat' => '59.33',
+            'placeLng' => '18.06',
+            'place_types' => '["country"]',
+        ]);
+
+        $service = $this->app->make(OfferCatalogPageService::class);
+        $method = new ReflectionMethod(OfferCatalogPageService::class, 'queryTours');
+        $method->setAccessible(true);
+
+        $ids = $method->invoke($service, $filter, Request::create('/guidings/sweden'))
+            ->pluck('guidings.id')
+            ->all();
+
+        $this->assertContains($near->id, $ids);
+        $this->assertContains($far->id, $ids);
+    }
+
+    private function createTour(User $user, array $overrides = []): Guiding
+    {
+        $guiding = new Guiding();
+        $guiding->forceFill(array_merge([
+            'title' => 'Geo Scope Tour '.uniqid(),
+            'slug' => 'geo-scope-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+        ], $overrides))->save();
+
+        return $guiding;
+    }
+
     public function test_country_scope_skips_tight_radius_when_country_filter_present(): void
     {
         $geo = Mockery::mock(GeospatialSearchService::class);

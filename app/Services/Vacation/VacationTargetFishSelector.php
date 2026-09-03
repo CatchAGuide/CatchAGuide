@@ -62,6 +62,17 @@ class VacationTargetFishSelector
             && $this->countActiveListings($sourceId, $name) > 0;
     }
 
+    /**
+     * Whether this species has at least one active camp or trip, regardless of
+     * whether it has vacations-scoped page content. Unlike hasActiveVacationListings(),
+     * this skips the vacations-link-safety check — for pages (e.g. the global
+     * targets index) that link elsewhere and just need to know real listings exist.
+     */
+    public function hasActiveListings(int $sourceId, string $name): bool
+    {
+        return $sourceId > 0 && $this->countActiveListings($sourceId, $name) > 0;
+    }
+
     private function hasVacationsContent(int $sourceId): bool
     {
         if ($sourceId <= 0) {
