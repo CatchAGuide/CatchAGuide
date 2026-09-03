@@ -129,6 +129,37 @@ class OfferCatalogPageServiceGeoTest extends TestCase
         $this->assertSame($query, $result);
     }
 
+    public function test_city_scope_ignores_bounds_and_uses_radius(): void
+    {
+        $geo = Mockery::mock(GeospatialSearchService::class);
+        $geo->shouldReceive('normalizePlaceTypes')->andReturn(['locality', 'political']);
+        $geo->shouldReceive('detectScope')->andReturn(GeospatialSearchService::SCOPE_CITY);
+        $geo->shouldReceive('normalizeBounds')->never();
+
+        $service = $this->serviceWithGeo($geo);
+        $query = Mockery::mock(Builder::class);
+        $query->shouldReceive('whereNotNull')->with('latitude')->once()->andReturnSelf();
+        $query->shouldReceive('whereNotNull')->with('longitude')->once()->andReturnSelf();
+        $query->shouldReceive('whereBetween')->never();
+        $query->shouldReceive('whereRaw')->once()->andReturnSelf();
+
+        $result = $this->invokeApplyListingGeo($service, $query, OfferListingFilter::fromRequest([
+            'place' => 'Deltebre, Spanien',
+            'placeLat' => '40.72123879999999',
+            'placeLng' => '0.7176492',
+            'city' => 'Deltebre',
+            'country' => 'spanien',
+            'region' => 'Katalonien',
+            'bounds_ne_lat' => '40.72879507717366',
+            'bounds_ne_lng' => '0.7507595327871844',
+            'bounds_sw_lat' => '40.71088703432743',
+            'bounds_sw_lng' => '0.6807395495465434',
+            'place_types' => '["locality","political"]',
+        ]));
+
+        $this->assertSame($query, $result);
+    }
+
     public function test_bbox_is_preferred_over_radius(): void
     {
         $geo = Mockery::mock(GeospatialSearchService::class);

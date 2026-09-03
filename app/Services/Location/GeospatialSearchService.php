@@ -43,7 +43,10 @@ class GeospatialSearchService
             ? (int) $params['radius']
             : null;
 
-        $bounds = $this->normalizeBounds($params);
+        // City/locality bounds from Places are often too tight (a small town's
+        // viewport can be a couple of km across) — always use the radius for
+        // city scope instead. Region/country bounds are still trusted.
+        $bounds = $scope === self::SCOPE_CITY ? null : $this->normalizeBounds($params);
         $areaType = 'radius';
         $query = Guiding::query()->select('id')->publiclyVisible()
             ->whereNotNull('lat')

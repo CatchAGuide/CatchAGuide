@@ -1333,7 +1333,9 @@
                     
                     <!-- Requirements Section -->
                     @php
-                        $requirements = $guiding->getRequirementsAttribute();
+                        // Magic property (not getRequirementsAttribute() directly) so a
+                        // translated value set via $guiding->translated is respected.
+                        $requirements = collect($guiding->requirements);
                     @endphp
                     @if(!$requirements->isEmpty())
                         <div class="tab-category mb-4">
@@ -1358,7 +1360,7 @@
 
                     <!-- Other Information Section -->
                     @php
-                        $otherInformation = $guiding->getOtherInformationAttribute();
+                        $otherInformation = collect($guiding->other_information);
                     @endphp
                     @if(!$otherInformation->isEmpty())
                         <div class="tab-category mb-4">
@@ -1382,7 +1384,7 @@
                     @endif
 
                     @php
-                        $recommendations = $guiding->getRecommendationsAttribute();
+                        $recommendations = collect($guiding->recommendations);
                     @endphp
                     @if(!$recommendations->isEmpty())
                         <div class="tab-category mb-4">
@@ -1628,30 +1630,37 @@
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             <!-- Requirements Section -->
-                            @if(!empty(decode_if_json( $guiding->requirements)))
+                            @php
+                                // Magic properties (not getXAttribute() directly) so a
+                                // translated value set via $guiding->translated is respected.
+                                $accordionRequirements = collect($guiding->requirements);
+                                $accordionOtherInformation = collect($guiding->other_information);
+                                $accordionRecommendations = collect($guiding->recommendations);
+                            @endphp
+                            @if(!$accordionRequirements->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                                 <ul>
-                                    @foreach ($guiding->getRequirementsAttribute() as $requirements)
+                                    @foreach ($accordionRequirements as $requirements)
                                         <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Other Information Section -->
-                            @if(!$guiding->getOtherInformationAttribute()->isEmpty())
+                            @if(!$accordionOtherInformation->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                                 <ul>
-                                    @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
+                                    @foreach ($accordionOtherInformation as $otherIndex => $other)
                                         <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Recommended Preparation Section -->
-                            @if(!$guiding->getRecommendationsAttribute()->isEmpty())
+                            @if(!$accordionRecommendations->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                                 <ul>
-                                    @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
+                                    @foreach ($accordionRecommendations as $recIndex => $recommendations)
                                         <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>

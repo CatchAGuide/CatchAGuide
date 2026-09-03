@@ -243,9 +243,16 @@ class GuidingTranslationService
             $fields['desc_tour_unique'] = $guiding->desc_tour_unique;
         }
 
-        // JSON fields that might contain translatable text
-        if ($guiding->inclusions) {
-            $inclusions = is_string($guiding->inclusions) ? json_decode($guiding->inclusions, true) : $guiding->inclusions;
+        // JSON fields that might contain translatable text. Read the raw
+        // column value (not the magic property) — several of these have
+        // Guiding accessors (getRequirementsAttribute, getRecommendationsAttribute,
+        // getOtherInformationAttribute, getPricingExtraAttribute) that return an
+        // Illuminate\Support\Collection of enriched {id,name,value} rows rather
+        // than the raw id-keyed array, which made every is_array() check below
+        // fail silently and skip these fields from translation entirely.
+        $inclusionsRaw = $guiding->getRawOriginal('inclusions');
+        if ($inclusionsRaw) {
+            $inclusions = is_string($inclusionsRaw) ? json_decode($inclusionsRaw, true) : $inclusionsRaw;
             if (is_array($inclusions)) {
                 foreach ($inclusions as $key => $value) {
                     if (is_string($value) && !is_numeric($value)) {
@@ -255,8 +262,9 @@ class GuidingTranslationService
             }
         }
 
-        if ($guiding->requirements) {
-            $requirements = is_string($guiding->requirements) ? json_decode($guiding->requirements, true) : $guiding->requirements;
+        $requirementsRaw = $guiding->getRawOriginal('requirements');
+        if ($requirementsRaw) {
+            $requirements = is_string($requirementsRaw) ? json_decode($requirementsRaw, true) : $requirementsRaw;
             if (is_array($requirements)) {
                 foreach ($requirements as $key => $value) {
                     if (is_array($value) && isset($value['value']) && is_string($value['value'])) {
@@ -268,8 +276,9 @@ class GuidingTranslationService
             }
         }
 
-        if ($guiding->recommendations) {
-            $recommendations = is_string($guiding->recommendations) ? json_decode($guiding->recommendations, true) : $guiding->recommendations;
+        $recommendationsRaw = $guiding->getRawOriginal('recommendations');
+        if ($recommendationsRaw) {
+            $recommendations = is_string($recommendationsRaw) ? json_decode($recommendationsRaw, true) : $recommendationsRaw;
             if (is_array($recommendations)) {
                 foreach ($recommendations as $key => $value) {
                     if (is_array($value) && isset($value['value']) && is_string($value['value'])) {
@@ -281,8 +290,9 @@ class GuidingTranslationService
             }
         }
 
-        if ($guiding->other_information) {
-            $otherInfo = is_string($guiding->other_information) ? json_decode($guiding->other_information, true) : $guiding->other_information;
+        $otherInfoRaw = $guiding->getRawOriginal('other_information');
+        if ($otherInfoRaw) {
+            $otherInfo = is_string($otherInfoRaw) ? json_decode($otherInfoRaw, true) : $otherInfoRaw;
             if (is_array($otherInfo)) {
                 foreach ($otherInfo as $key => $value) {
                     if (is_array($value) && isset($value['value']) && is_string($value['value'])) {
@@ -294,8 +304,9 @@ class GuidingTranslationService
             }
         }
 
-        if ($guiding->pricing_extra) {
-            $pricingExtra = is_string($guiding->pricing_extra) ? json_decode($guiding->pricing_extra, true) : $guiding->pricing_extra;
+        $pricingExtraRaw = $guiding->getRawOriginal('pricing_extra');
+        if ($pricingExtraRaw) {
+            $pricingExtra = is_string($pricingExtraRaw) ? json_decode($pricingExtraRaw, true) : $pricingExtraRaw;
             if (is_array($pricingExtra)) {
                 foreach ($pricingExtra as $key => $value) {
                     if (is_array($value) && isset($value['name']) && is_string($value['name']) && !is_numeric($value['name'])) {
@@ -346,8 +357,12 @@ class GuidingTranslationService
         $jsonFields = ['inclusions', 'requirements', 'recommendations', 'other_information', 'pricing_extra'];
         
         foreach ($jsonFields as $jsonField) {
-            if ($guiding->$jsonField) {
-                $original = is_string($guiding->$jsonField) ? json_decode($guiding->$jsonField, true) : $guiding->$jsonField;
+            // Raw column value, not the magic property — see getTranslatableFields()
+            // for why several of these fields have accessors that return a
+            // Collection rather than the raw id-keyed array.
+            $rawValue = $guiding->getRawOriginal($jsonField);
+            if ($rawValue) {
+                $original = is_string($rawValue) ? json_decode($rawValue, true) : $rawValue;
                 if (is_array($original)) {
                     $reconstructedJson = $original;
                     
