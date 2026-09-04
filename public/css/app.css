@@ -3200,7 +3200,18 @@ body .main-menu .main-menu-wrapper__nav {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   min-height: 64px;
   height: auto;
+  overflow: visible;
   padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom, 0px));
+}
+.cag-home-bottom-nav::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 100vh;
+  background: #fff;
+  pointer-events: none;
 }
 
 .cag-home-bottom-nav__item {
@@ -23538,7 +23549,7 @@ input:-webkit-autofill:active {
 }
 
 .has-cag-bottom-nav {
-  padding-bottom: 5.25rem;
+  padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 768px) {
   .has-cag-bottom-nav {

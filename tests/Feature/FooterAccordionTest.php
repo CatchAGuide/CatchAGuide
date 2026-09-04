@@ -76,6 +76,10 @@ class FooterAccordionTest extends TestCase
             $home
         );
         $this->assertStringNotContainsString('.cag-home-bottom-nav__item', $mobile);
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-bottom-nav\s*\{[\s\S]*overflow:\s*visible[\s\S]*&::after\s*\{[\s\S]*top:\s*100%[\s\S]*height:\s*100vh/',
+            $home
+        );
     }
 
     public function test_footer_mobile_styles_hide_duplicate_contact_and_scroll_top(): void

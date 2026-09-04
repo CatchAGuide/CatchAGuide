@@ -39,6 +39,23 @@ class SiteChromePagesTest extends TestCase
         }
     }
 
+    public function test_bottom_nav_is_outside_page_wrapper(): void
+    {
+        foreach ([
+            resource_path('views/layouts/app.blade.php'),
+            resource_path('views/layouts/app-v2.blade.php'),
+            resource_path('views/layouts/app-v2-1.blade.php'),
+        ] as $layout) {
+            $source = (string) file_get_contents($layout);
+            $wrapperClose = strpos($source, '</div><!-- /.page-wrapper -->');
+            $navInclude = strpos($source, 'layouts.partials.site-bottom-nav');
+
+            $this->assertNotFalse($wrapperClose, $layout);
+            $this->assertNotFalse($navInclude, $layout);
+            $this->assertGreaterThan($wrapperClose, $navInclude, $layout);
+        }
+    }
+
     public function test_about_us_uses_page_header_band_instead_of_legacy_header(): void
     {
         $this->assertInnerPageHeader($this->get(route('additional.about_us')));

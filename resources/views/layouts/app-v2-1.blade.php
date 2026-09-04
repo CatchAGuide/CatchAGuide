@@ -258,10 +258,10 @@
     @yield('content')
 
     @include('layouts.partials.footer')
-    @include('layouts.partials.site-bottom-nav')
 
 </div><!-- /.page-wrapper -->
 
+@include('layouts.partials.site-bottom-nav')
 
 <div class="mobile-nav__wrapper">
     <div class="mobile-nav__overlay mobile-nav__toggler"></div>

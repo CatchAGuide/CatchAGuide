@@ -2084,7 +2084,22 @@ $white: #ffffff;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   min-height: 64px;
   height: auto;
+  overflow: visible;
   padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom, 0px));
+
+  // iOS Safari collapses its browser chrome while scrolling. position:fixed;
+  // bottom:0 often lags, leaving a gap where listing cards show through.
+  // This fill sits under the bar so that gap stays the nav color.
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 100vh;
+    background: #fff;
+    pointer-events: none;
+  }
 }
 
 .cag-home-bottom-nav__item {
