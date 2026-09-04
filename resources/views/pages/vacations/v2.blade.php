@@ -3,6 +3,7 @@
 
 @php
     $isDraft = !empty($isDraft);
+    $preselectedGuests = $preselectedGuests ?? null;
 @endphp
 
 @section('meta_robots')
@@ -669,7 +670,7 @@
                 showCategories,
                 checkIn: '',
                 checkOut: '',
-                guests: Math.min(2, accommodations[0]?.max_occupancy ?? 2),
+                guests: Math.min(@json($preselectedGuests) ?? 2, accommodations[0]?.max_occupancy ?? 2),
                 selectedAccId: accommodations[0]?.id ? String(accommodations[0].id) : null,
                 selectedBoatId: null,
                 selectedGuideId: null,
@@ -809,7 +810,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
-                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" required>
+                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" value="{{ $preselectedGuests ?? '' }}" required>
                                 </div>
                             </div>
                         </div>

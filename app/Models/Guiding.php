@@ -580,6 +580,42 @@ class Guiding extends Model
         ];
     }
 
+    /**
+     * Guest count to pre-select on the product booking widget.
+     * Clamps to min/max guests and, for per-person tiers, the nearest priced option.
+     */
+    public function resolveBookingGuestCount(?int $requestedGuests): ?int
+    {
+        if ($requestedGuests === null || $requestedGuests < 1) {
+            return null;
+        }
+
+        $max = (int) ($this->max_guests ?: 0);
+        $min = max(1, (int) ($this->min_guests ?: 1));
+        $guests = $requestedGuests;
+
+        if ($max > 0) {
+            $guests = min($max, $guests);
+        }
+        $guests = max($min, $guests);
+
+        if ($this->price_type === 'per_person') {
+            $resolved = $this->resolvePriceForGuests($guests);
+            if ($resolved === null) {
+                return null;
+            }
+
+            $tier = (int) $resolved['guests'];
+            if ($max > 0) {
+                $tier = min($max, $tier);
+            }
+
+            return max($min, $tier);
+        }
+
+        return $guests;
+    }
+
     public function ratings(){
         return $this->hasMany(Rating::class,'guide_id','id');
     }

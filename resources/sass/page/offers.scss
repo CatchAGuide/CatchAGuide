@@ -1835,18 +1835,11 @@ $muted: #787780;
   &__top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     padding-top: max(0.75rem, env(safe-area-inset-top));
     z-index: 2;
-  }
-
-  &__top-left {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    min-width: 0;
   }
 
   &__top-right {
@@ -1884,16 +1877,25 @@ $muted: #787780;
   }
 
   &__badge {
+    position: absolute;
+    top: 0.65rem;
+    left: 0.65rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.04em;
+    line-height: 1.2;
     text-transform: uppercase;
     color: #fff;
     background: linear-gradient(145deg, $category-tour 0%, $category-tour-end 100%);
     border-radius: 999px;
-    padding: 0.28rem 0.65rem;
+    padding: 0.4rem 0.72rem;
+    min-height: 1.6rem;
     white-space: nowrap;
-    position: relative;
+    pointer-events: none;
     @include badge-metallic-glare(3.9s, 0.25s);
   }
 
@@ -1910,16 +1912,27 @@ $muted: #787780;
   }
 
   &__counter {
-    display: inline-flex;
+    position: absolute;
+    left: 50%;
+    bottom: 0.55rem;
+    z-index: 3;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.2rem;
+    width: fit-content;
+    margin: 0;
     font-size: 0.78rem;
     font-weight: 700;
+    line-height: 1.2;
     color: rgba(255, 255, 255, 0.92);
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(17, 24, 39, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
     padding: 0.28rem 0.65rem;
+    transform: translateX(-50%);
+    box-shadow: none;
+    pointer-events: none;
   }
 
   &__close {
@@ -1945,7 +1958,10 @@ $muted: #787780;
 
   &__stage {
     position: relative;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    container-type: size;
     width: 100%;
     min-height: 0;
     height: 100%;
@@ -1956,10 +1972,13 @@ $muted: #787780;
 
   &__frame {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: fit-content;
+    max-width: 100%;
+    max-height: 100%;
     min-width: 0;
     min-height: 0;
+    line-height: 0;
+    border-radius: 10px;
   }
 
   &__loader {
@@ -2002,29 +2021,30 @@ $muted: #787780;
   }
 
   &__image {
-    position: absolute;
-    inset: 0;
+    position: relative;
     display: block;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
     margin: 0;
     object-fit: contain;
     object-position: center;
     border-radius: 10px;
     opacity: 0;
-    transform: scale(0.985);
-    transition: opacity 0.28s ease, transform 0.28s ease;
+    transition: opacity 0.28s ease;
+
+    @supports (max-height: 100cqh) {
+      max-width: 100cqw;
+      max-height: 100cqh;
+    }
 
     &.is-ready {
       opacity: 1;
-      transform: scale(1);
     }
 
     &.is-fading {
       opacity: 0;
-      transform: scale(0.985);
     }
   }
 
@@ -2070,7 +2090,7 @@ $muted: #787780;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
     gap: 1rem;
-    padding: 1rem 1.15rem;
+    padding: 0.85rem 1.15rem 1rem;
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
     background: linear-gradient(180deg, rgba(10, 12, 18, 0) 0%, rgba(10, 12, 18, 0.88) 28%, rgba(10, 12, 18, 0.98) 100%);
     color: #fff;
@@ -2245,6 +2265,15 @@ $muted: #787780;
       padding: 0.15rem 0.5rem;
     }
 
+    &__badge {
+      top: 0.5rem;
+      left: 0.5rem;
+    }
+
+    &__counter {
+      bottom: 0.45rem;
+    }
+
     &__nav {
       display: none !important;
     }
@@ -2252,7 +2281,7 @@ $muted: #787780;
     &__dock {
       grid-template-columns: 1fr;
       gap: 0.75rem;
-      padding: 0.85rem 0.85rem;
+      padding: 0.7rem 0.85rem 0.85rem;
       padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
     }
 
@@ -2313,11 +2342,6 @@ $muted: #787780;
   .offers-gallery-modal {
     &__image {
       transition: none;
-      transform: none;
-
-      &.is-fading {
-        transform: none;
-      }
     }
 
     &__spinner {

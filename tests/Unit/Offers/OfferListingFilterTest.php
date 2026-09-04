@@ -171,6 +171,47 @@ class OfferListingFilterTest extends TestCase
         ])->hasPlaceSearch());
     }
 
+    public function test_product_page_query_keeps_place_geo_and_guests(): void
+    {
+        $filter = OfferListingFilter::fromRequest([
+            'place' => 'Düsseldorf, Deutschland',
+            'placeLat' => '51.2277',
+            'placeLng' => '6.7735',
+            'city' => 'Düsseldorf',
+            'country' => 'germany',
+            'region' => 'Nordrhein-Westfalen',
+            'num_guests' => '3',
+        ]);
+
+        $query = $filter->productPageQuery();
+
+        $this->assertSame('Düsseldorf, Deutschland', $query['place']);
+        $this->assertSame(51.2277, $query['placeLat']);
+        $this->assertSame(6.7735, $query['placeLng']);
+        $this->assertSame('Düsseldorf', $query['city']);
+        $this->assertSame('germany', $query['country']);
+        $this->assertSame(3, $query['num_guests']);
+    }
+
+    public function test_product_page_query_from_input_omits_guests_unless_present(): void
+    {
+        $withoutGuests = OfferListingFilter::productPageQueryFromInput([
+            'place' => 'Berlin',
+            'placeLat' => '52.52',
+            'placeLng' => '13.40',
+        ]);
+
+        $this->assertSame('Berlin', $withoutGuests['place']);
+        $this->assertArrayNotHasKey('num_guests', $withoutGuests);
+
+        $withGuests = OfferListingFilter::productPageQueryFromInput([
+            'num_guests' => '3',
+        ]);
+
+        $this->assertSame(3, $withGuests['num_guests']);
+        $this->assertArrayNotHasKey('place', $withGuests);
+    }
+
     public function test_empty_place_drops_orphan_geo_params(): void
     {
         $filter = OfferListingFilter::fromRequest([
@@ -256,6 +297,17 @@ class OfferListingFilterTest extends TestCase
         $this->assertSame(3, $filter->accommodationTypeId);
         $this->assertTrue($filter->hasGuiding);
         $this->assertFalse($filter->hasRentalBoat);
+    }
+
+    public function test_to_vacation_filter_keeps_num_guests(): void
+    {
+        $filter = OfferListingFilter::fromRequest([
+            'type' => 'vacation',
+            'num_guests' => '4',
+        ])->toVacationFilter();
+
+        $this->assertSame(4, $filter->numGuests);
+        $this->assertSame(['num_guests' => 4], $filter->productPageQuery());
     }
 
     public function test_parses_tour_facets_only_for_tour_type(): void

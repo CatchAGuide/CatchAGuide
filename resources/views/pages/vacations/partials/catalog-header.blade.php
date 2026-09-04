@@ -4,21 +4,20 @@
 
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $vacationCountryOptions = $vacationDestinations->countriesForSearch();
-    $isVacationProductPage = request()->routeIs(
-        'vacations.trips.show',
-        'vacations.camps.show',
-        'vacations.show',
-        'trips.show',
-        'vacations.v2',
-    );
+    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
+    $isVacationListingPdp = $titleTag === 'p';
     $currentVacationCountry = $currentVacationCountry
         ?? (request()->routeIs('vacations.all-offers')
             ? 'all-offers'
-            : ($isVacationProductPage
-                ? null
+            : ($isVacationListingPdp
+                ? request('country')
                 : (request()->route('country')
                     ?? request()->route('slug')
                     ?? request('country'))));
+    $queryCountry = request('country');
+    if ($isVacationListingPdp && is_string($queryCountry) && $queryCountry !== '') {
+        $currentVacationCountry = $queryCountry;
+    }
     if (is_string($currentVacationCountry) && $currentVacationCountry !== '' && $currentVacationCountry !== 'all-offers') {
         $canonicalCountry = CountrySlug::canonicalize($currentVacationCountry) ?? $currentVacationCountry;
         $matchedCountry = $vacationCountryOptions->firstWhere('slug', $canonicalCountry)
@@ -38,14 +37,10 @@
     }
     $listingTitle = trim((string) ($listingTitle ?? __('vacations.hub_header_title')));
     $listingSubtitle = trim((string) ($listingSubtitle ?? __('vacations.hub_header_subtitle')));
-    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
     $headerEyebrow = trim((string) ($headerEyebrow ?? ''));
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
-    // Product pages (trip/camp show) render this header with titleTag "p" and have no
-    // listing to filter — only catalog pages (hub/country/pillar, titleTag "h1") search.
-    $showVacationPersonsFilter = $titleTag === 'h1';
     $vacationGuestsValue = max(1, min(
         VacationListingFilter::MAX_GUESTS,
         (int) (request()->num_guests ?: VacationListingFilter::DEFAULT_GUESTS)
@@ -108,25 +103,23 @@
                         </span>
                     </label>
 
-                    @if($showVacationPersonsFilter)
-                        <div class="vacations-page-header__segment vacations-page-header__segment--persons" data-vacations-persons>
-                            <span class="vacations-page-header__segment-label" id="vacationsWhoLabel">{{ __('offers.search_who') }}</span>
-                            <div
-                                class="offers-persons-stepper offers-persons-stepper--catalog"
-                                data-offers-persons-stepper
-                                role="group"
-                                aria-labelledby="vacationsWhoLabel"
-                            >
-                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
-                                <div class="offers-persons-stepper__value">
-                                    <i class="fa fa-user" aria-hidden="true"></i>
-                                    <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]) }}</span>
-                                </div>
-                                <input type="hidden" name="num_guests" value="{{ $vacationGuestsValue }}" data-offers-persons-input>
-                                <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
+                    <div class="vacations-page-header__segment vacations-page-header__segment--persons" data-vacations-persons>
+                        <span class="vacations-page-header__segment-label" id="vacationsWhoLabel">{{ __('offers.search_who') }}</span>
+                        <div
+                            class="offers-persons-stepper offers-persons-stepper--catalog"
+                            data-offers-persons-stepper
+                            role="group"
+                            aria-labelledby="vacationsWhoLabel"
+                        >
+                            <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="-">−</button>
+                            <div class="offers-persons-stepper__value">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                                <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]) }}</span>
                             </div>
+                            <input type="hidden" name="num_guests" value="{{ $vacationGuestsValue }}" data-offers-persons-input>
+                            <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
                         </div>
-                    @endif
+                    </div>
 
                     <button type="submit" class="vacations-page-header__search-btn">
                         <span>{{ __('homepage.searchbar-search') }}</span>
@@ -152,9 +145,7 @@
     </section>
 </div>
 
-@if($showVacationPersonsFilter)
-    @include('layouts.partials.offers-persons-stepper-script')
-@endif
+@include('layouts.partials.offers-persons-stepper-script')
 
 @once
 <script>
@@ -174,15 +165,8 @@
     // Any of these present on the current URL counts as "another filter is active" and forces
     // a switch to /offers (with the new country applied) instead of jumping to the sibling
     // /vacations/{country} page, which would otherwise silently drop them.
-    var vacationOtherFilterKeys = ['species', 'accommodation_type', 'has_guiding', 'has_rental_boat', 'duration', 'sortby', 'num_guests', 'place', 'city', 'region', 'placeLat', 'placeLng', 'pillar'];
-    // num_guests is only "owned" by this form (and safe to drop from the check below) on
-    // pages that render the persons stepper — product pages have no such field, so a
-    // num_guests already on the URL there must still trigger the /offers fallback.
-    if (form.querySelector('[data-offers-persons-input]')) {
-        vacationOtherFilterKeys = vacationOtherFilterKeys.filter(function (key) {
-            return key !== 'num_guests';
-        });
-    }
+    // num_guests is owned by this form on every vacation page (catalog + PDP).
+    var vacationOtherFilterKeys = ['species', 'accommodation_type', 'has_guiding', 'has_rental_boat', 'duration', 'sortby', 'place', 'city', 'region', 'placeLat', 'placeLng', 'pillar'];
     var offersIndexUrl = @json(route('offers.index'));
 
     function vacationOtherFiltersActive() {

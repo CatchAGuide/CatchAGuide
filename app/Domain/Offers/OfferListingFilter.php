@@ -334,6 +334,7 @@ final class OfferListingFilter
             accommodationTypeId: $this->accommodationTypeId,
             hasGuiding: $this->hasGuiding,
             hasRentalBoat: $this->hasRentalBoat,
+            numGuests: $this->numGuests,
         );
     }
 
@@ -355,6 +356,43 @@ final class OfferListingFilter
             'bounds_sw_lng' => $this->boundsSwLng,
             'country_short' => $this->countryShort,
         ], fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * Query keys to keep on a tour product URL so the header and booking
+     * widget can restore Where / Who from search results.
+     *
+     * @return array<string, mixed>
+     */
+    public function productPageQuery(bool $includeGuests = true): array
+    {
+        $query = [];
+
+        if ($this->place !== null && $this->place !== '') {
+            $query['place'] = $this->place;
+            $query = array_merge($query, $this->geoSearchParams());
+        }
+
+        if ($includeGuests && $this->numGuests !== null) {
+            $query['num_guests'] = $this->numGuests;
+        }
+
+        return array_filter($query, fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * Same as productPageQuery(), but only copies guests when the input actually
+     * contained a guest param (avoids inventing num_guests=1 on destination cards).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    public static function productPageQueryFromInput(array $input): array
+    {
+        $rawGuests = $input['num_guests'] ?? $input['num_persons'] ?? null;
+        $includeGuests = $rawGuests !== null && $rawGuests !== '';
+
+        return self::fromRequest($input)->productPageQuery($includeGuests);
     }
 
     /**

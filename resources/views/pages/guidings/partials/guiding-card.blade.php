@@ -7,11 +7,13 @@
     $targetsMap = $targetsMap ?? null;
     $fromDestination = $fromDestination ?? false;
     $destinationId = $destinationId ?? null;
-    $showUrl = $guiding->publicShowUrl(
+    $searchQuery = \App\Domain\Offers\OfferListingFilter::productPageQueryFromInput(request()->query());
+    $showUrl = $guiding->publicShowUrl(array_merge(
+        $searchQuery,
         ($fromDestination && $destinationId !== null)
             ? ['from_destination' => true, 'destination_id' => $destinationId]
             : []
-    );
+    ));
 
     $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
     $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();

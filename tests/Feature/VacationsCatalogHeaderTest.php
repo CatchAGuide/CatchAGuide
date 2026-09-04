@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Tests\TestCase;
 
@@ -69,8 +70,38 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('data-vacations-header-search', $html);
         $this->assertStringContainsString('Hausboot Fürstenberg', $html);
         $this->assertStringNotContainsString('categoryHeroSearchPlace', $html);
-        $this->assertStringNotContainsString('data-offers-persons-stepper', $html);
-        $this->assertStringNotContainsString('name="num_guests"', $html);
+        $this->assertStringContainsString('data-offers-persons-stepper', $html);
+        $this->assertStringContainsString('name="num_guests"', $html);
+        $this->assertStringContainsString('vacations-page-header__segment--persons', $html);
+    }
+
+    public function test_vacations_product_header_takes_over_search_country_and_guests(): void
+    {
+        $request = Request::create('/trips/hausboot', 'GET', [
+            'country' => 'spain',
+            'num_guests' => '3',
+        ]);
+        $this->app->instance('request', $request);
+
+        $html = View::make('pages.vacations.partials.catalog-header', [
+            'listingTitle' => 'Book your next fishing holiday',
+            'listingSubtitle' => 'Choose between camps and trips',
+            'titleTag' => 'p',
+            'currentVacationCountry' => 'germany',
+            'breadcrumbItems' => [
+                ['label' => 'Fishing Holidays', 'url' => route('vacations.index')],
+                ['label' => 'Hausboot Fürstenberg', 'url' => null],
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('name="num_guests" value="3"', $html);
+        $this->assertStringContainsString('data-offers-persons-stepper', $html);
+        if (preg_match('/<option[^>]*value="spain"/', $html)) {
+            $this->assertMatchesRegularExpression(
+                '/<option[^>]*value="spain"[^>]*selected|<option[^>]*selected[^>]*value="spain"/',
+                $html
+            );
+        }
     }
 
     public function test_trip_and_camp_product_views_use_vacations_catalog_header(): void

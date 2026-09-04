@@ -12,7 +12,7 @@ class TripCardPresenter
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
-    public function present(Trip $trip): array
+    public function present(Trip $trip, array $query = []): array
     {
         $this->viewTranslation->applyToModel($trip, ListingTranslationService::TYPE_TRIP);
 
@@ -30,7 +30,7 @@ class TripCardPresenter
             'id' => $trip->id,
             'title' => $trip->title,
             'slug' => $trip->slug,
-            'url' => route('vacations.trips.show', $trip->slug),
+            'url' => route('vacations.trips.show', array_merge(['slug' => $trip->slug], $this->filterQuery($query))),
             'image' => media_url($trip->thumbnail_path),
             'gallery_images' => get_galleries_image_link($trip, 0),
             'badge' => __('vacations.badge_trip'),
@@ -72,9 +72,13 @@ class TripCardPresenter
         ];
     }
 
-    public function presentListRow(Trip $trip, ?int $numGuests = null): array
+    public function presentListRow(Trip $trip, ?int $numGuests = null, array $query = []): array
     {
-        $card = $this->present($trip);
+        if ($numGuests !== null && ! array_key_exists('num_guests', $query)) {
+            $query['num_guests'] = $numGuests;
+        }
+
+        $card = $this->present($trip, $query);
         $currency = $trip->currency ?: 'EUR';
         $sym = match ($currency) {
             'EUR' => '€',
@@ -247,5 +251,14 @@ class TripCardPresenter
         }
 
         return trim($inclusions . ($group ? ' · ' . $group : ''));
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function filterQuery(array $query): array
+    {
+        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 }

@@ -205,11 +205,13 @@ class OfferCatalogPageService
 
         $listings = $this->buildListingsPaginator($filter, $tourQuery, $tripQuery, $campQuery, $perPage);
         $numGuests = $filter->numGuests;
-        $cards = collect($listings->items())->map(function (array $item) use ($numGuests) {
+        $productQuery = $filter->productPageQuery();
+        $vacationProductQuery = $vacationFilter->productPageQuery();
+        $cards = collect($listings->items())->map(function (array $item) use ($numGuests, $productQuery, $vacationProductQuery) {
             $card = match ($item['type']) {
-                'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests),
-                'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests),
-                default => $this->campPresenter->presentListRow($item['model']),
+                'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests, $productQuery),
+                'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests, $vacationProductQuery),
+                default => $this->campPresenter->presentListRow($item['model'], null, $vacationProductQuery),
             };
             $card['badge'] = __('offers.badge_'.$card['type']);
 
@@ -244,11 +246,11 @@ class OfferCatalogPageService
         }
 
         $suggestedCards = $suggestedItems
-            ->map(function (array $item) use ($numGuests) {
+            ->map(function (array $item) use ($numGuests, $productQuery, $vacationProductQuery) {
                 $card = match ($item['type']) {
-                    'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests),
-                    'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests),
-                    default => $this->campPresenter->presentListRow($item['model']),
+                    'tour' => $this->tourPresenter->presentListRow($item['model'], $numGuests, $productQuery),
+                    'trip' => $this->tripPresenter->presentListRow($item['model'], $numGuests, $vacationProductQuery),
+                    default => $this->campPresenter->presentListRow($item['model'], null, $vacationProductQuery),
                 };
                 $card['badge'] = __('offers.badge_'.$card['type']);
                 $card['is_suggested'] = true;
@@ -787,6 +789,7 @@ class OfferCatalogPageService
             accommodationTypeId: $filter->accommodationTypeId,
             hasGuiding: $filter->hasGuiding,
             hasRentalBoat: $filter->hasRentalBoat,
+            numGuests: $filter->numGuests,
         );
     }
 
@@ -1213,6 +1216,7 @@ class OfferCatalogPageService
         Collection $suggestedItems,
     ): array {
         $markers = [];
+        $vacationProductQuery = $filter->toVacationFilter()->productPageQuery();
 
         if ($filter->showsTours()) {
             $guidings = (clone $tourQuery)
@@ -1229,7 +1233,7 @@ class OfferCatalogPageService
             }
 
             $markers = array_merge($markers, $this->normalizeTourMarkers(
-                MapMarkerCollection::fromGuidings($guidings),
+                MapMarkerCollection::fromGuidings($guidings, [], $filter->productPageQuery()),
                 'tour',
             ));
         }
@@ -1240,7 +1244,7 @@ class OfferCatalogPageService
                 ->whereNotNull('longitude')
                 ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path', 'price_per_person', 'currency']);
 
-            $markers = array_merge($markers, MapMarkerCollection::fromTrips($trips));
+            $markers = array_merge($markers, MapMarkerCollection::fromTrips($trips, $vacationProductQuery));
         }
 
         if ($filter->showsCamps()) {
@@ -1254,7 +1258,7 @@ class OfferCatalogPageService
                 $camp->title = translate($camp->title);
             }
 
-            $markers = array_merge($markers, MapMarkerCollection::fromCamps($camps));
+            $markers = array_merge($markers, MapMarkerCollection::fromCamps($camps, $vacationProductQuery));
         }
 
         $suggestedTours = $suggestedItems->where('type', 'tour')->pluck('model')->values();
@@ -1272,7 +1276,7 @@ class OfferCatalogPageService
                 return $clone;
             });
             $grayIds = $suggestedForMap->pluck('id')->map(fn ($id) => (int) $id)->all();
-            $suggestedMarkers = MapMarkerCollection::fromGuidings($suggestedForMap, $grayIds);
+            $suggestedMarkers = MapMarkerCollection::fromGuidings($suggestedForMap, $grayIds, $filter->productPageQuery());
             foreach ($suggestedMarkers as &$marker) {
                 $marker['pillar'] = 'tour';
                 $marker['variant'] = 'gray';
@@ -1288,7 +1292,7 @@ class OfferCatalogPageService
         }
 
         if ($suggestedTrips->isNotEmpty()) {
-            $tripMarkers = MapMarkerCollection::fromTrips($suggestedTrips);
+            $tripMarkers = MapMarkerCollection::fromTrips($suggestedTrips, $vacationProductQuery);
             foreach ($tripMarkers as &$marker) {
                 $marker['variant'] = 'gray';
             }
@@ -1300,7 +1304,7 @@ class OfferCatalogPageService
             foreach ($suggestedCamps as $camp) {
                 $camp->title = translate($camp->title);
             }
-            $campMarkers = MapMarkerCollection::fromCamps($suggestedCamps);
+            $campMarkers = MapMarkerCollection::fromCamps($suggestedCamps, $vacationProductQuery);
             foreach ($campMarkers as &$marker) {
                 $marker['variant'] = 'gray';
             }

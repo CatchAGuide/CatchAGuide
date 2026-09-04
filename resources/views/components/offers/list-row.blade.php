@@ -266,16 +266,6 @@
         >
             <div class="offers-gallery-modal__shell">
                 <div class="offers-gallery-modal__top">
-                    <div class="offers-gallery-modal__top-left">
-                        <span class="offers-gallery-modal__badge">{{ $badge }}</span>
-                        @if($galleryCount > 1)
-                            <span class="offers-gallery-modal__counter vacation-gallery-modal__counter">
-                                <span class="vacation-gallery-modal__current">1</span>
-                                <span aria-hidden="true">/</span>
-                                <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
-                            </span>
-                        @endif
-                    </div>
                     <div class="offers-gallery-modal__top-right">
                         @if($galleryCount > 1)
                             <div class="offers-gallery-modal__top-nav">
@@ -321,7 +311,13 @@
                             draggable="false"
                             decoding="async"
                         >
+                        <span class="offers-gallery-modal__badge">{{ $badge }}</span>
                         @if($galleryCount > 1)
+                            <div class="offers-gallery-modal__counter" aria-live="polite">
+                                <span class="vacation-gallery-modal__current">1</span>
+                                <span aria-hidden="true">/</span>
+                                <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
+                            </div>
                             <button
                                 type="button"
                                 class="offers-gallery-modal__nav offers-gallery-modal__nav--prev"

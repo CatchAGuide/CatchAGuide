@@ -17,14 +17,15 @@
                         
                         <div class="booking-select" style="min-width: 150px;">
                             <select class="form-select border-0" aria-label="Personenanzahl" name="person" required id="personSelect">
-                                <option selected disabled>{{ __('booking.people') }}</option>
+                                @php $preselectedGuests = $preselectedGuests ?? null; @endphp
+                                <option value="" disabled @selected($preselectedGuests === null)>{{ __('booking.people') }}</option>
                                 @if($guiding->price_type == 'per_person')
-                                    @foreach(json_decode($guiding->prices) as $price)
-                                        <option value="{{ $price->person }}" data-price="{{ $price->amount }}">{{ $price->person }} {{ $price->person == 1 ? __('booking.person') : __('booking.people') }}</option>
+                                    @foreach(json_decode($guiding->prices) ?? [] as $price)
+                                        <option value="{{ $price->person }}" data-price="{{ $price->amount }}" @selected($preselectedGuests !== null && (int) $price->person === (int) $preselectedGuests)>{{ $price->person }} {{ $price->person == 1 ? __('booking.person') : __('booking.people') }}</option>
                                     @endforeach
                                 @else
                                     @for($i = 1; $i <= $guiding->max_guests; $i++)
-                                        <option value="{{ $i }}" data-price="{{ $guiding->price }}">{{ $i }} {{ $i == 1 ? __('booking.person') : __('booking.people') }}</option>
+                                        <option value="{{ $i }}" data-price="{{ $guiding->price }}" @selected($preselectedGuests !== null && $i === (int) $preselectedGuests)>{{ $i }} {{ $i == 1 ? __('booking.person') : __('booking.people') }}</option>
                                     @endfor
                                 @endif
 
@@ -207,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
             priceCalculation.style.display = 'none';
         }
     });
+
+    if (personSelect.value) {
+        personSelect.dispatchEvent(new Event('change'));
+    }
 });
 
 // Listen for calendar date selection events (outside DOMContentLoaded for immediate availability)

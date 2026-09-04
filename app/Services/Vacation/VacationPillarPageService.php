@@ -155,7 +155,7 @@ class VacationPillarPageService
 
             $this->viewTranslation->applyToCollection($trips, ListingTranslationService::TYPE_TRIP);
 
-            return \App\Support\Maps\MapMarkerCollection::fromTrips($trips);
+            return \App\Support\Maps\MapMarkerCollection::fromTrips($trips, $filter->productPageQuery());
         }
 
         if ($pillar === VacationPillar::Camps) {
@@ -167,7 +167,7 @@ class VacationPillarPageService
 
             $this->viewTranslation->applyToCollection($camps, ListingTranslationService::TYPE_CAMP);
 
-            return \App\Support\Maps\MapMarkerCollection::fromCamps($camps);
+            return \App\Support\Maps\MapMarkerCollection::fromCamps($camps, $filter->productPageQuery());
         }
 
         return [];
@@ -179,7 +179,9 @@ class VacationPillarPageService
     private function tripListings(VacationListingFilter $filter, int $perPage): array
     {
         $listings = $this->trips->paginateForCountry($filter, $perPage);
-        $cards = collect($listings->items())->map(fn ($trip) => $this->tripPresenter->presentListRow($trip));
+        $cards = collect($listings->items())->map(
+            fn ($trip) => $this->tripPresenter->presentListRow($trip, $filter->numGuests, $filter->productPageQuery())
+        );
 
         return [$listings, $cards];
     }
@@ -190,7 +192,9 @@ class VacationPillarPageService
     private function campListings(VacationListingFilter $filter, int $perPage, ?int $destinationId = null): array
     {
         $listings = $this->camps->paginateForCountry($filter, $perPage);
-        $cards = collect($listings->items())->map(fn ($camp) => $this->campPresenter->presentListRow($camp, $destinationId));
+        $cards = collect($listings->items())->map(
+            fn ($camp) => $this->campPresenter->presentListRow($camp, $destinationId, $filter->productPageQuery())
+        );
 
         return [$listings, $cards];
     }

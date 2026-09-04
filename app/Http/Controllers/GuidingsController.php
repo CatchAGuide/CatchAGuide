@@ -38,6 +38,7 @@ use App\Services\Translation\GuidingTranslationService;
 use App\Services\Media\ListingGalleryRetention;
 use App\Services\Media\ListingMediaRelocator;
 use App\Services\Media\MediaTrashService;
+use App\Domain\Offers\OfferListingFilter;
 use App\Services\Offers\OfferCatalogPageService;
 
 class GuidingsController extends Controller
@@ -412,6 +413,14 @@ class GuidingsController extends Controller
         $this->applyGuidingTranslations($sameGuidings);
         $this->applyGuidingTranslations($otherGuidings);
 
+        $preselectedGuests = null;
+        $productPageQuery = OfferListingFilter::productPageQueryFromInput($request->query());
+        if ($request->filled('num_guests') || $request->filled('num_persons')) {
+            $preselectedGuests = $guiding->resolveBookingGuestCount(
+                OfferListingFilter::fromRequest($request->all())->numGuests
+            );
+        }
+
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
             'same_guiding' => $sameGuidings,
@@ -424,6 +433,8 @@ class GuidingsController extends Controller
             'other_guidings' => $otherGuidings,
             'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
+            'preselectedGuests' => $preselectedGuests,
+            'productPageQuery' => $productPageQuery,
         ]);
     }
 

@@ -46,6 +46,7 @@ final class VacationCountryViewModel
                 ? $this->filter->speciesIds
                 : ($this->filter->speciesNames !== [] ? $this->filter->speciesNames : null),
             'sortby' => $this->filter->sortBy,
+            'num_guests' => $this->filter->numGuests,
         ], fn ($v) => $v !== null && $v !== '');
         $tripsQuery = array_filter([
             ...$query,

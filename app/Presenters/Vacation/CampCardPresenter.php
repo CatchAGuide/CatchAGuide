@@ -12,7 +12,7 @@ class CampCardPresenter
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
-    public function present(Camp $camp): array
+    public function present(Camp $camp, array $query = []): array
     {
         $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
 
@@ -28,7 +28,7 @@ class CampCardPresenter
             'id' => $camp->id,
             'title' => $camp->title,
             'slug' => $camp->slug,
-            'url' => route('vacations.camps.show', $camp->slug),
+            'url' => route('vacations.camps.show', array_merge(['slug' => $camp->slug], $this->filterQuery($query))),
             'image' => media_url($camp->thumbnail_path),
             'gallery_images' => get_galleries_image_link($camp, 0),
             'badge' => __('vacations.badge_camp'),
@@ -63,9 +63,9 @@ class CampCardPresenter
         ];
     }
 
-    public function presentListRow(Camp $camp, ?int $destinationId = null): array
+    public function presentListRow(Camp $camp, ?int $destinationId = null, array $query = []): array
     {
-        $card = $this->present($camp);
+        $card = $this->present($camp, $query);
         $facilities = $this->facilityLabels($camp);
         $price = $camp->getLowestAccommodationOrOfferPrice();
         $card['layout'] = 'row';
@@ -303,5 +303,14 @@ class CampCardPresenter
         $nights = (int) $accommodation->minimum_stay_nights;
 
         return $nights . ' ' . ($nights === 1 ? __('vacations.night') : __('vacations.nights'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function filterQuery(array $query): array
+    {
+        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 }

@@ -1983,7 +1983,7 @@
                             $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
                             $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
                         @endphp
-                        <a href="{{ $other_guiding->publicShowUrl() }}" class="guiding-tile text-decoration-none">
+                        <a href="{{ $other_guiding->publicShowUrl($productPageQuery ?? []) }}" class="guiding-tile text-decoration-none">
                             <div class="guiding-tile__img-wrap">
                                 @if($tile_img)
                                     <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">

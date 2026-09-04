@@ -172,6 +172,42 @@ final class VacationListingFilter
         ], fn ($v) => $v !== null && $v !== '');
     }
 
+    /**
+     * Query keys to keep on a trip/camp product URL so the header (and booking
+     * widgets) can restore Where / Who from catalog search.
+     *
+     * @return array<string, mixed>
+     */
+    public function productPageQuery(bool $includeGuests = true): array
+    {
+        $query = [];
+
+        if ($this->country !== null && $this->country !== '') {
+            $query['country'] = $this->country;
+        }
+
+        if ($includeGuests && $this->numGuests !== null) {
+            $query['num_guests'] = $this->numGuests;
+        }
+
+        return $query;
+    }
+
+    /**
+     * Same as productPageQuery(), but only copies guests when the input actually
+     * contained a guest param (avoids inventing num_guests=1 on destination cards).
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    public static function productPageQueryFromInput(array $input, ?string $country = null): array
+    {
+        $rawGuests = $input['num_guests'] ?? $input['num_persons'] ?? null;
+        $includeGuests = $rawGuests !== null && $rawGuests !== '';
+
+        return self::fromRequest($input, $country)->productPageQuery($includeGuests);
+    }
+
     private static function nullableString(mixed $value): ?string
     {
         if ($value === null || $value === '') {
