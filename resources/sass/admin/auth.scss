@@ -1,5 +1,8 @@
 // Admin authentication (login) screen – focused, mobile-first, and animated
 
+// Site-wide loading overlay (navigation, forms, redirects)
+@import "../components/page-loader";
+
 .admin-auth {
   min-height: 100vh;
   padding: 2.5rem 1.5rem;

@@ -239,10 +239,11 @@ class TripCatalogService
             }
         }
 
-        // Extras from pricing_extra accessor (already normalized)
+        // Extras from pricing_extra (magic property, not getPricingExtraAttribute()
+        // directly, so a translated value is respected — see Guiding::__get()).
         $extras = [];
         if ($guiding->pricing_extra) {
-            $extrasCollection = $guiding->getPricingExtraAttribute();
+            $extrasCollection = collect($guiding->pricing_extra);
             foreach ($extrasCollection as $extra) {
                 if (!isset($extra['name'], $extra['price'])) {
                     continue;

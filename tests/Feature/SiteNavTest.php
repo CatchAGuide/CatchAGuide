@@ -251,6 +251,7 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString('.cag-site-nav-shell .cag-site-nav:not(.is-solid)', $scss);
         $this->assertStringContainsString('#mobileMenuModal', $scss);
         $this->assertStringContainsString('.has-cag-bottom-nav', $scss);
+        $this->assertStringContainsString('env(safe-area-inset-bottom, 0px)', $scss);
         $this->assertStringContainsString('appearance: none', $scss);
         $this->assertMatchesRegularExpression(
             '/\.cag-site-nav-shell \.cag-site-nav:not\(\.is-solid\)[\s\S]*&\\.is-active::after/',

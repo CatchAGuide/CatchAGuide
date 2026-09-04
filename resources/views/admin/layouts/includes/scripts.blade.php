@@ -84,7 +84,7 @@
 @else
 <script>console.error('GOOGLE_MAPS_API_KEY is not set — Places Autocomplete will not work.');</script>
 @endif
-<script src="/js/app.js"></script>
+<script src="{{ mix('js/app.js') }}"></script>
 {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
 {{-- <script>

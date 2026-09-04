@@ -15,9 +15,10 @@ class MapMarkerCollection
      *
      * @param  iterable  $guidings
      * @param  array<int>  $grayIds
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromGuidings(iterable $guidings, array $grayIds = []): array
+    public static function fromGuidings(iterable $guidings, array $grayIds = [], array $query = []): array
     {
         $markers = [];
         $grayLookup = array_fill_keys(array_map('intval', $grayIds), true);
@@ -47,7 +48,7 @@ class MapMarkerCollection
                 'variant' => isset($grayLookup[$id]) ? 'gray' : 'primary',
                 'pillar' => 'guiding',
                 'title' => $title,
-                'url' => $guiding->publicShowUrl(),
+                'url' => self::guidingShowUrl($guiding, $query),
                 'location' => (string) ($guiding->location ?? ''),
                 'image' => (string) $image,
                 'images' => $images,
@@ -69,9 +70,10 @@ class MapMarkerCollection
      * Structured vacation markers (trips) — popup HTML built client-side.
      *
      * @param  iterable  $trips
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromTrips(iterable $trips): array
+    public static function fromTrips(iterable $trips, array $query = []): array
     {
         $markers = [];
 
@@ -100,7 +102,10 @@ class MapMarkerCollection
                 'variant' => 'trip',
                 'pillar' => 'trip',
                 'title' => (string) ($trip->title ?? ''),
-                'url' => route('vacations.trips.show', $trip->slug),
+                'url' => route('vacations.trips.show', array_merge(
+                    ['slug' => $trip->slug],
+                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
+                )),
                 'location' => (string) ($trip->location ?? ''),
                 'image' => (string) $image,
                 'images' => $images,
@@ -121,9 +126,10 @@ class MapMarkerCollection
      * Eager-load accommodations + specialOffers before calling to avoid N+1.
      *
      * @param  iterable  $camps
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromCamps(iterable $camps): array
+    public static function fromCamps(iterable $camps, array $query = []): array
     {
         $markers = [];
 
@@ -154,7 +160,10 @@ class MapMarkerCollection
                 'variant' => 'camp',
                 'pillar' => 'camp',
                 'title' => (string) ($camp->title ?? ''),
-                'url' => route('vacations.camps.show', $camp->slug),
+                'url' => route('vacations.camps.show', array_merge(
+                    ['slug' => $camp->slug],
+                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
+                )),
                 'location' => (string) ($camp->location ?? $camp->city ?? ''),
                 'image' => (string) $image,
                 'images' => $images,
@@ -277,6 +286,25 @@ class MapMarkerCollection
     public static function toJson(array $markers): string
     {
         return json_encode(array_values($markers), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private static function guidingShowUrl(object $guiding, array $query = []): string
+    {
+        $query = array_filter($query, fn ($v) => $v !== null && $v !== '');
+
+        if (method_exists($guiding, 'publicShowUrl')) {
+            return $guiding->publicShowUrl($query);
+        }
+
+        $slug = $guiding->slug ?? null;
+        if (! is_string($slug) || $slug === '') {
+            return '#';
+        }
+
+        return route('guidings.show', array_merge(['slug' => $slug], $query));
     }
 
     /**

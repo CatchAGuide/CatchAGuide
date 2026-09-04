@@ -12,9 +12,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_selfSwiper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./modules/selfSwiper */ "./resources/js/modules/selfSwiper.js");
 /* harmony import */ var _modules_vacationCardGallery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/vacationCardGallery */ "./resources/js/modules/vacationCardGallery.js");
 /* harmony import */ var _modules_vacationCampFishTags__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/vacationCampFishTags */ "./resources/js/modules/vacationCampFishTags.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
+/* harmony import */ var _modules_pageLoader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/pageLoader */ "./resources/js/modules/pageLoader.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
 // require("./bootstrap");
+
 
 
 
@@ -25,10 +27,112 @@ window.addEventListener("load", function () {
 document.addEventListener('DOMContentLoaded', function () {
   (0,_modules_vacationCardGallery__WEBPACK_IMPORTED_MODULE_1__.initVacationCardGalleries)();
   (0,_modules_vacationCampFishTags__WEBPACK_IMPORTED_MODULE_2__.initVacationCampFishTags)();
-  (0,lucide__WEBPACK_IMPORTED_MODULE_3__.createIcons)({
-    icons: lucide__WEBPACK_IMPORTED_MODULE_4__
+  (0,_modules_pageLoader__WEBPACK_IMPORTED_MODULE_3__.initPageLoader)();
+  (0,lucide__WEBPACK_IMPORTED_MODULE_4__.createIcons)({
+    icons: lucide__WEBPACK_IMPORTED_MODULE_5__
   });
 });
+
+/***/ },
+
+/***/ "./resources/js/modules/pageLoader.js"
+/*!********************************************!*\
+  !*** ./resources/js/modules/pageLoader.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initPageLoader: () => (/* binding */ initPageLoader)
+/* harmony export */ });
+var OVERLAY_ID = "page-loading-overlay";
+var WATCHDOG_MS = 8000;
+var watchdogTimer = null;
+function getOverlay() {
+  return document.getElementById(OVERLAY_ID);
+}
+function show() {
+  var overlay = getOverlay();
+  if (!overlay) {
+    return;
+  }
+  overlay.hidden = false;
+  document.body.style.overflow = "hidden";
+  clearTimeout(watchdogTimer);
+  watchdogTimer = setTimeout(hide, WATCHDOG_MS);
+}
+function hide() {
+  var overlay = getOverlay();
+  if (!overlay) {
+    return;
+  }
+  clearTimeout(watchdogTimer);
+  overlay.hidden = true;
+  document.body.style.overflow = "";
+}
+function isModifiedClick(event) {
+  return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
+}
+function isSameOrigin(url) {
+  try {
+    return new URL(url, window.location.href).origin === window.location.origin;
+  } catch (e) {
+    return false;
+  }
+}
+function shouldSkipLink(link, href) {
+  if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("javascript:")) {
+    return true;
+  }
+  if (link.hasAttribute("download") || link.closest("[data-no-loader]")) {
+    return true;
+  }
+  var target = link.getAttribute("target");
+  if (target && target !== "_self") {
+    return true;
+  }
+  return !isSameOrigin(href);
+}
+function onDocumentClick(event) {
+  if (isModifiedClick(event)) {
+    return;
+  }
+  var link = event.target.closest("a[href]");
+  if (!link) {
+    return;
+  }
+  var href = link.getAttribute("href");
+  if (shouldSkipLink(link, href)) {
+    return;
+  }
+  show();
+}
+function onDocumentSubmit(event) {
+  if (event.defaultPrevented) {
+    return;
+  }
+  var form = event.target;
+  if (!(form instanceof HTMLFormElement) || form.closest("[data-no-loader]")) {
+    return;
+  }
+  show();
+}
+function onPageShow() {
+  hide();
+}
+function initPageLoader() {
+  if (!getOverlay()) {
+    return;
+  }
+  document.addEventListener("click", onDocumentClick);
+  document.addEventListener("submit", onDocumentSubmit);
+  window.addEventListener("beforeunload", show);
+  window.addEventListener("pageshow", onPageShow);
+  window.PageLoader = {
+    show: show,
+    hide: hide
+  };
+}
 
 /***/ },
 

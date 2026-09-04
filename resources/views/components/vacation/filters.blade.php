@@ -408,12 +408,9 @@
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         function showVacationFilterLoader() {
-            var overlay = document.getElementById('vacation-page-loading-overlay');
-            if (!overlay) {
-                return;
+            if (window.PageLoader) {
+                window.PageLoader.show();
             }
-            overlay.hidden = false;
-            document.body.style.overflow = 'hidden';
         }
 
         function bindAutoSubmit(select) {

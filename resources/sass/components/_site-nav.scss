@@ -748,7 +748,7 @@ $cag-site-nav-tracking: -0.02em;
 }
 
 .has-cag-bottom-nav {
-  padding-bottom: 5.25rem;
+  padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
 
   @media (min-width: 768px) {
     padding-bottom: 0;

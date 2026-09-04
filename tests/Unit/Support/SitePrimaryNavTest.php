@@ -137,7 +137,6 @@ class SitePrimaryNavTest extends TestCase
 
         $this->bindNamedRequest('/vacations', 'vacations.index');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
-        $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
 
         $this->bindNamedRequest('/destination', 'destination');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
@@ -152,7 +151,6 @@ class SitePrimaryNavTest extends TestCase
 
         $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
-        $this->assertTrue(SitePrimaryNav::usesVacationLoadingOverlay());
         $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
         $this->assertTrue(SitePrimaryNav::isProductDetailPage());
     }
@@ -164,7 +162,6 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::usesLayoutNav());
         $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());
         $this->assertTrue(SitePrimaryNav::usesLayoutBottomNav());
-        $this->assertFalse(SitePrimaryNav::usesVacationLoadingOverlay());
 
         $this->bindNamedRequest('/about-us', 'additional.about_us');
         $this->assertTrue(SitePrimaryNav::usesLayoutPageHeader());

@@ -865,6 +865,42 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('data-offers-gallery-modal-image', false);
     }
 
+    public function test_gallery_modal_places_type_badge_and_counter_on_image_frame(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'tour',
+            cards: collect([
+                array_merge($this->card('tour', 'Gallery Layout Tour'), [
+                    'gallery_images' => [
+                        '/images/placeholder_guide.jpg',
+                        '/images/gallery-two.jpg',
+                        '/images/gallery-three.jpg',
+                    ],
+                    'badge' => __('offers.badge_tour'),
+                ]),
+            ]),
+        ));
+
+        $response = $this->get(route('offers.index', ['type' => 'tour']));
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $response->assertSeeInOrder([
+            'offers-gallery-modal__top',
+            'offers-gallery-modal__close',
+            'data-offers-gallery-stage',
+            'offers-gallery-modal__frame',
+            'data-offers-gallery-modal-image',
+            'offers-gallery-modal__badge',
+            'offers-gallery-modal__counter',
+            'offers-gallery-modal__dock',
+        ], false);
+        $this->assertStringNotContainsString('offers-gallery-modal__top-left', $html);
+        $this->assertStringNotContainsString('vacation-gallery-modal__counter', $html);
+        $this->assertStringContainsString(__('offers.badge_tour'), $html);
+    }
+
     public function test_guest_total_price_renders_with_subtle_per_person_note(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

@@ -122,9 +122,11 @@ class VacationCountryController extends Controller
             'vm' => $vm,
             'isAllOffers' => $isAllOffers,
             'listingRows' => collect($vm->listings->items())->map(function (array $item) use ($vm) {
+                $productQuery = $vm->filter->productPageQuery();
+
                 return $item['type'] === 'trip'
-                    ? $this->tripPresenter->presentListRow($item['model'])
-                    : $this->campPresenter->presentListRow($item['model'], $vm->destination->id);
+                    ? $this->tripPresenter->presentListRow($item['model'], $vm->filter->numGuests, $productQuery)
+                    : $this->campPresenter->presentListRow($item['model'], $vm->destination->id, $productQuery);
             }),
         ]);
     }

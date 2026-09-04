@@ -7,7 +7,10 @@ use App\Models\Guiding;
 
 class TourCardPresenter
 {
-    public function present(Guiding $guiding): array
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    public function present(Guiding $guiding, array $query = []): array
     {
         $title = translate($guiding->title);
         $gallery = $this->galleryImages($guiding);
@@ -23,7 +26,7 @@ class TourCardPresenter
             'id' => $guiding->id,
             'title' => $title,
             'slug' => $guiding->slug,
-            'url' => $guiding->publicShowUrl(),
+            'url' => $guiding->publicShowUrl($this->filterQuery($query)),
             'image' => $image,
             'gallery_images' => $gallery,
             'badge' => __('offers.badge_tour'),
@@ -54,9 +57,16 @@ class TourCardPresenter
         ];
     }
 
-    public function presentListRow(Guiding $guiding, ?int $numGuests = null): array
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    public function presentListRow(Guiding $guiding, ?int $numGuests = null, array $query = []): array
     {
-        $card = $this->present($guiding);
+        if ($numGuests !== null && ! array_key_exists('num_guests', $query)) {
+            $query['num_guests'] = $numGuests;
+        }
+
+        $card = $this->present($guiding, $query);
         $price = $guiding->getLowestPrice();
         $inclusions = $this->inclusionNames($guiding);
         $waters = $this->waterNames($guiding);
@@ -116,6 +126,15 @@ class TourCardPresenter
     private function formatEuro(float|int $amount): string
     {
         return number_format((float) $amount, 0, ',', '.').'€';
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function filterQuery(array $query): array
+    {
+        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 
     /**

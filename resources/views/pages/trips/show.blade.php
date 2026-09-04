@@ -1051,7 +1051,7 @@
                                     <div class="col-12 col-md-6">
                                         <div class="form-group">
                                             <label for="trip_number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
-                                            <input type="number" class="form-control" id="trip_number_of_persons" name="number_of_persons" min="1" step="1" required>
+                                            <input type="number" class="form-control" id="trip_number_of_persons" name="number_of_persons" min="1" step="1" value="{{ $preselectedGuests ?? '' }}" required>
                                         </div>
                                     </div>
                                 </div>

@@ -224,7 +224,7 @@ class VacationCountryPageService
                 ->whereNotNull('longitude')
                 ->get(['id', 'title', 'slug', 'location', 'latitude', 'longitude', 'thumbnail_path', 'price_per_person', 'currency']);
 
-            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromTrips($trips));
+            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromTrips($trips, $filter->productPageQuery()));
         }
 
         if ($filter->showsCamps() && $filter->pillar !== 'trips') {
@@ -238,7 +238,7 @@ class VacationCountryPageService
                 $camp->title = translate($camp->title);
             }
 
-            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromCamps($camps));
+            $markers = array_merge($markers, \App\Support\Maps\MapMarkerCollection::fromCamps($camps, $filter->productPageQuery()));
         }
 
         return $markers;

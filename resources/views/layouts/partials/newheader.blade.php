@@ -338,44 +338,8 @@
     @endif
 </nav>
 
-@if ($isVacation)
-<div id="vacation-page-loading-overlay" class="vacation-page-loading-overlay" hidden aria-live="polite" aria-busy="true">
-    <div class="vacation-page-loading-overlay__panel" role="status">
-        <div class="spinner-border text-danger" aria-hidden="true"></div>
-        <span>{{ __('checkout.loading') }}</span>
-    </div>
-</div>
-@endif
 
 <style>
-    @if ($isVacation)
-    .vacation-page-loading-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 10050;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.82);
-    }
-
-    .vacation-page-loading-overlay[hidden] {
-        display: none !important;
-    }
-
-    .vacation-page-loading-overlay__panel {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem 1.25rem;
-        border-radius: 0.5rem;
-        background: #fff;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        font-weight: 500;
-        color: #313041;
-    }
-    @endif
-
     /* Vacation mobile country select – inline within dark header */
     #filterContainer {
         height: {{ $isVacation ? 'auto' : '200px' }};
@@ -1355,13 +1319,9 @@ input[type=number] {
 
 <script>
 function showVacationPageLoader() {
-    const overlay = document.getElementById('vacation-page-loading-overlay');
-    if (!overlay) {
-        return;
+    if (window.PageLoader) {
+        window.PageLoader.show();
     }
-
-    overlay.hidden = false;
-    document.body.style.overflow = 'hidden';
 }
 
 function bindVacationCountrySelect(select, formId) {
@@ -1461,16 +1421,6 @@ function updateFormAction(selectElement, formId) {
 
     form.submit();
 }
-
-window.addEventListener('pageshow', function() {
-    const overlay = document.getElementById('vacation-page-loading-overlay');
-    if (!overlay) {
-        return;
-    }
-
-    overlay.hidden = true;
-    document.body.style.overflow = '';
-});
 
 function closeMobileMenu() {
     // Close the mobile menu modal before opening login modal

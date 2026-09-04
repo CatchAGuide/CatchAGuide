@@ -70,6 +70,81 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
         ], $markers[0]['images']);
     }
 
+    public function test_from_guidings_appends_search_query_to_product_url(): void
+    {
+        $guiding = (object) [
+            'id' => 9,
+            'slug' => 'rhine-perch',
+            'title' => 'Rhine Perch',
+            'lat' => 51.22,
+            'lng' => 6.77,
+            'location' => 'Düsseldorf',
+            'thumbnail_path' => null,
+            'price' => 200,
+        ];
+
+        $markers = MapMarkerCollection::fromGuidings([$guiding], [], [
+            'place' => 'Düsseldorf, Deutschland',
+            'num_guests' => 3,
+        ]);
+
+        $query = [];
+        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
+
+        $this->assertSame('3', $query['num_guests']);
+        $this->assertSame('Düsseldorf, Deutschland', $query['place']);
+    }
+
+    public function test_from_trips_appends_search_query_to_product_url(): void
+    {
+        $trip = (object) [
+            'id' => 8,
+            'slug' => 'valencia-bass',
+            'title' => 'Valencia Bass',
+            'latitude' => 39.47,
+            'longitude' => -0.38,
+            'location' => 'Valencia',
+            'thumbnail_path' => null,
+            'price_per_person' => 1500,
+            'currency' => 'EUR',
+        ];
+
+        $markers = MapMarkerCollection::fromTrips([$trip], [
+            'country' => 'spain',
+            'num_guests' => 3,
+        ]);
+
+        $query = [];
+        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
+
+        $this->assertSame('3', $query['num_guests']);
+        $this->assertSame('spain', $query['country']);
+    }
+
+    public function test_from_camps_appends_search_query_to_product_url(): void
+    {
+        $camp = (object) [
+            'id' => 5,
+            'slug' => 'danube-camp',
+            'title' => 'Danube Camp',
+            'latitude' => 48.2,
+            'longitude' => 16.3,
+            'location' => 'Vienna',
+            'thumbnail_path' => null,
+        ];
+
+        $markers = MapMarkerCollection::fromCamps([$camp], [
+            'country' => 'austria',
+            'num_guests' => 2,
+        ]);
+
+        $query = [];
+        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
+
+        $this->assertSame('2', $query['num_guests']);
+        $this->assertSame('austria', $query['country']);
+    }
+
     public function test_normalize_module_maps_guiding_to_tour(): void
     {
         $this->assertSame('tour', MapMarkerCollection::normalizeModule('guiding'));

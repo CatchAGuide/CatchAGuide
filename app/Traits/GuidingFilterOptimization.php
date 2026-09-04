@@ -7,6 +7,7 @@ use App\Models\Target;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Inclussion;
+use App\Domain\Offers\OfferListingFilter;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Support\Maps\MapMarkerCollection;
@@ -431,8 +432,9 @@ trait GuidingFilterOptimization
 
         $others = collect($otherguidings);
         $mainIds = $main->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $productQuery = OfferListingFilter::productPageQueryFromInput(request()->query());
 
-        $toPayload = function ($guiding, bool $isGray) {
+        $toPayload = function ($guiding, bool $isGray) use ($productQuery) {
             $price = $guiding->lowest_price
                 ?? $guiding->price
                 ?? null;
@@ -477,7 +479,7 @@ trait GuidingFilterOptimization
                 'badge' => __('offers.badge_tour'),
                 'cta' => __('vacations.view_details'),
                 'url' => ! empty($guiding->slug)
-                    ? $guiding->publicShowUrl()
+                    ? $guiding->publicShowUrl($productQuery)
                     : '#',
             ], $moduleFields, $listMeta);
         };

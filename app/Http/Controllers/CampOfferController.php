@@ -7,6 +7,7 @@ use App\Models\RentalBoat;
 use App\Models\Accommodation;
 use App\Models\Guiding;
 use App\Models\Camp;
+use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
@@ -217,6 +218,7 @@ class CampOfferController extends Controller
         
         $showCategories = true;
         $contactModalTitle = !empty($campData['title']) ? '' . $campData['title'] : '';
+        $preselectedGuests = VacationListingFilter::fromRequest($request->query())->numGuests;
 
         return view('pages.vacations.v2', compact(
             'campData',
@@ -234,7 +236,8 @@ class CampOfferController extends Controller
             'remainingGalleryCount',
             'galleryImages',
             'contactModalTitle',
-            'isDraft'
+            'isDraft',
+            'preselectedGuests'
         ))->with('camp', $campData);
     }
     

@@ -175,24 +175,6 @@ final class SitePrimaryNav
         return ! static::usesOverlayHeader($request);
     }
 
-    public static function usesVacationLoadingOverlay(?Request $request = null): bool
-    {
-        $request ??= request();
-
-        return $request->routeIs(
-            'vacations.index',
-            'vacations.country',
-            'vacations.all-offers',
-            'vacations.trips.index',
-            'vacations.camps.index',
-            'vacations.trips.show',
-            'vacations.camps.show',
-            'vacations.show',
-            'vacations.v2',
-            'trips.show',
-        );
-    }
-
     /**
      * Mobile catalog bar on public pages. Product detail and checkout stay clear.
      */

@@ -499,6 +499,10 @@
             var url = $(this).data('url');
             var imageContainer = $(this).parent();
 
+            if (window.PageLoader) {
+                window.PageLoader.show();
+            }
+
             $.ajax({
                 url: url,
                 type: 'GET',
@@ -508,6 +512,11 @@
                 },
                 error: function (xhr, status, error) {
                     console.error(error);
+                },
+                complete: function () {
+                    if (window.PageLoader) {
+                        window.PageLoader.hide();
+                    }
                 }
             });
         });

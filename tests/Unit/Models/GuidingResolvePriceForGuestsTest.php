@@ -62,4 +62,47 @@ class GuidingResolvePriceForGuestsTest extends TestCase
             'is_fixed' => true,
         ], $resolved);
     }
+
+    public function test_booking_guest_count_selects_matching_per_person_tier(): void
+    {
+        $guiding = new Guiding([
+            'price_type' => 'per_person',
+            'max_guests' => 4,
+            'prices' => json_encode([
+                ['person' => 1, 'amount' => 150],
+                ['person' => 2, 'amount' => 256],
+                ['person' => 3, 'amount' => 369],
+                ['person' => 4, 'amount' => 480],
+            ]),
+        ]);
+
+        $this->assertSame(3, $guiding->resolveBookingGuestCount(3));
+        $this->assertNull($guiding->resolveBookingGuestCount(null));
+        $this->assertNull($guiding->resolveBookingGuestCount(0));
+    }
+
+    public function test_booking_guest_count_falls_back_to_next_tier_and_clamps_to_max(): void
+    {
+        $guiding = new Guiding([
+            'price_type' => 'per_person',
+            'max_guests' => 4,
+            'prices' => json_encode([
+                ['person' => 1, 'amount' => 150],
+                ['person' => 4, 'amount' => 480],
+            ]),
+        ]);
+
+        $this->assertSame(4, $guiding->resolveBookingGuestCount(3));
+
+        $fixed = new Guiding();
+        $fixed->forceFill([
+            'price_type' => 'per_boat',
+            'price' => 549,
+            'max_guests' => 4,
+            'min_guests' => 2,
+        ]);
+
+        $this->assertSame(4, $fixed->resolveBookingGuestCount(8));
+        $this->assertSame(2, $fixed->resolveBookingGuestCount(1));
+    }
 }

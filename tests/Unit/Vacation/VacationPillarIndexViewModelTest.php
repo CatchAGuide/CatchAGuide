@@ -152,4 +152,36 @@ class VacationPillarIndexViewModelTest extends TestCase
         $this->assertStringNotContainsString('duration=', $urls['camps']);
         $this->assertStringContainsString('sortby=price-asc', $urls['camps']);
     }
+
+    public function test_pillar_toggle_urls_keep_num_guests(): void
+    {
+        $destination = new CategoryEntity([
+            'type' => 'country',
+            'slug' => 'sweden',
+            'name' => 'Sweden',
+        ]);
+
+        $vm = new VacationPillarIndexViewModel(
+            pillar: VacationPillar::Trips,
+            filter: VacationListingFilter::fromRequest([
+                'pillar' => 'trips',
+                'num_guests' => '3',
+            ], 'sweden'),
+            listings: new LengthAwarePaginator([], 0, 9),
+            cards: collect(),
+            countries: collect(),
+            speciesOptions: collect(),
+            accommodationTypeOptions: collect(),
+            tripsTotal: 2,
+            campsTotal: 4,
+            faq: collect(),
+            destination: $destination,
+        );
+
+        $urls = $vm->pillarToggleUrls();
+
+        $this->assertStringContainsString('num_guests=3', $urls['all']);
+        $this->assertStringContainsString('num_guests=3', $urls['trips']);
+        $this->assertStringContainsString('num_guests=3', $urls['camps']);
+    }
 }

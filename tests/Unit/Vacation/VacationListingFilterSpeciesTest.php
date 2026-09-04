@@ -117,4 +117,40 @@ class VacationListingFilterSpeciesTest extends TestCase
 
         $this->assertSame(VacationListingFilter::MAX_GUESTS, $filter->numGuests);
     }
+
+    public function test_product_page_query_keeps_country_and_guests(): void
+    {
+        $filter = VacationListingFilter::fromRequest([
+            'country' => 'spain',
+            'num_guests' => '3',
+        ]);
+
+        $this->assertSame([
+            'country' => 'spain',
+            'num_guests' => 3,
+        ], $filter->productPageQuery());
+    }
+
+    public function test_product_page_query_omits_guests_when_unset(): void
+    {
+        $filter = VacationListingFilter::fromRequest(['country' => 'spain']);
+
+        $this->assertSame(['country' => 'spain'], $filter->productPageQuery());
+        $this->assertSame(['country' => 'spain'], $filter->productPageQuery(false));
+    }
+
+    public function test_product_page_query_from_input_skips_invented_guests(): void
+    {
+        $withoutGuests = VacationListingFilter::productPageQueryFromInput(['country' => 'spain']);
+        $this->assertSame(['country' => 'spain'], $withoutGuests);
+
+        $withGuests = VacationListingFilter::productPageQueryFromInput([
+            'country' => 'spain',
+            'num_guests' => '3',
+        ]);
+        $this->assertSame([
+            'country' => 'spain',
+            'num_guests' => 3,
+        ], $withGuests);
+    }
 }

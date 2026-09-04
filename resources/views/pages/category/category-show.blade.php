@@ -799,7 +799,11 @@
                 ? collect($otherguidings)->pluck('id')->map(fn ($id) => (int) $id)->all()
                 : [];
         }
-        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings($mapSource, $mapGrayIds);
+        $guidingMapMarkers = \App\Support\Maps\MapMarkerCollection::fromGuidings(
+            $mapSource,
+            $mapGrayIds,
+            \App\Domain\Offers\OfferListingFilter::productPageQueryFromInput(request()->query())
+        );
         $mapCenterLat = request()->get('placeLat')
             ?: (isset($guides[0]) ? $guides[0]->lat : config('services.maps.default_center.lat'));
         $mapCenterLng = request()->get('placeLng')
