@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CategoryPage;
 use App\Models\Target;
 use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Media\MediaWriteStorageResolver;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class AdminCategoryTargetFishController extends Controller
     use HandlesScopedCategoryContent;
 
     public function __construct(
-        private CategoryPageContentService $content
+        private CategoryPageContentService $content,
+        private MediaWriteStorageResolver $mediaWriteStorage,
     ) {}
 
     public function index()
@@ -290,16 +292,13 @@ class AdminCategoryTargetFishController extends Controller
         $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME).'.webp';
         $webpImage = $image->encode('webp', 75);
 
-        $webp_path = 'category/targets/';
+        $webp_path = 'category/targets/'.$webpImageName;
 
-        if (! Storage::disk('public_path')->exists($webp_path)) {
-            Storage::disk('public_path')->makeDirectory($webp_path);
-        }
+        $this->mediaWriteStorage->forUploads()->write($webp_path, $webpImage->encoded, [
+            'visibility' => config('media_storage.object_visibility', 'public'),
+        ]);
 
-        $webp_path .= $webpImageName;
-
-        Storage::disk('public_path')->put($webp_path, $webpImage->encoded);
-        $webpImage->save(public_path($webp_path));
+        Storage::disk()->delete($thumbnail_path);
 
         return $webp_path;
     }

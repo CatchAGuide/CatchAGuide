@@ -13,7 +13,10 @@ use App\Models\Faq;
 use App\Models\Language;
 use App\Models\Method;
 use App\Models\Target;
+use App\Services\Media\MediaEnvironmentResolver;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -85,6 +88,45 @@ class CategoryPagesAdminTest extends TestCase
             'language' => 'de',
             'title' => 'Vacations Pike Title',
         ]);
+    }
+
+    public function test_target_fish_thumbnail_upload_is_written_to_object_storage(): void
+    {
+        $this->actingAsEmployee();
+
+        Storage::fake('do_spaces');
+
+        $target = new Target();
+        $target->forceFill([
+            'name' => 'Thumbnail Pike '.uniqid(),
+            'name_en' => 'Thumbnail Pike',
+        ])->save();
+
+        $response = $this->put(route('admin.category.target-fish.update', $target->id), [
+            'name' => $target->getRawOriginal('name'),
+            'title' => 'Title',
+            'sub_title' => 'Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => 'FAQ',
+            'languageSwitch' => 'de',
+            'content_scope' => CategoryPageScope::TOURS,
+            'thumbnailImage' => UploadedFile::fake()->image('thumb.jpg', 200, 200),
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+
+        $categoryPage = CategoryPage::query()
+            ->where('source_id', $target->id)
+            ->where('type', 'Targets')
+            ->first();
+
+        $this->assertNotNull($categoryPage);
+        $this->assertStringStartsWith('category/targets/', $categoryPage->thumbnail_path);
+
+        $storagePath = app(MediaEnvironmentResolver::class)->applyBucketPrefix($categoryPage->thumbnail_path);
+        Storage::disk('do_spaces')->assertExists($storagePath);
     }
 
     public function test_target_fish_editor_renders_scoped_form(): void
