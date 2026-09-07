@@ -11,6 +11,7 @@ return [
     'header-close' => 'Close',
     'header-language' => 'Language',
     'header-vacations' => 'Fishing Holidays',
+    'header-home' => 'Home',
 
     'searchbar-destination' => 'Destination',
     'searchbar-person' => 'Guests',

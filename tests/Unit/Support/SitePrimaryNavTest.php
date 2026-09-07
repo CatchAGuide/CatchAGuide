@@ -104,14 +104,37 @@ class SitePrimaryNavTest extends TestCase
         $links = SitePrimaryNav::bottomNavLinks();
         $keys = array_column($links, 'key');
 
-        $this->assertSame(['offers', 'tours', 'vacations', 'destinations', 'account'], $keys);
+        $this->assertSame(['home', 'offers', 'tours', 'vacations', 'account'], $keys);
         $this->assertSame(__('homepage.header-login'), $links[4]['label']);
         $this->assertTrue($links[4]['opens_login']);
-        $this->assertSame('fas fa-th-large', $links[0]['icon']);
-        $this->assertSame('fas fa-ship', $links[1]['icon']);
-        $this->assertSame('fas fa-suitcase-rolling', $links[2]['icon']);
-        $this->assertSame('fas fa-map-marker-alt', $links[3]['icon']);
+        $this->assertSame('fas fa-home', $links[0]['icon']);
+        $this->assertSame('fas fa-th-large', $links[1]['icon']);
+        $this->assertSame('fas fa-ship', $links[2]['icon']);
+        $this->assertSame('fas fa-suitcase-rolling', $links[3]['icon']);
+        $this->assertTrue($links[0]['active']);
+        $this->assertFalse($links[1]['active']);
+    }
+
+    public function test_bottom_nav_home_is_only_active_on_the_homepage(): void
+    {
+        $this->bindNamedRequest('/offers', 'offers.index');
+
+        $links = SitePrimaryNav::bottomNavLinks();
+
+        $this->assertSame('home', $links[0]['key']);
         $this->assertFalse($links[0]['active']);
+        $this->assertTrue($links[1]['active']);
+    }
+
+    public function test_bottom_nav_omits_destinations_but_burger_menu_keeps_it(): void
+    {
+        $this->bindNamedRequest('/', 'welcome');
+
+        $bottomNavKeys = array_column(SitePrimaryNav::bottomNavLinks(), 'key');
+        $browseKeys = array_column(SitePrimaryNav::browseLinks(), 'key');
+
+        $this->assertNotContains('destinations', $bottomNavKeys);
+        $this->assertContains('destinations', $browseKeys);
     }
 
     public function test_catalog_and_homepage_use_overlay_header(): void

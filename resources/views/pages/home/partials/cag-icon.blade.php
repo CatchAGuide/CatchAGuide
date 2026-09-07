@@ -95,6 +95,11 @@
             <path d="M6.5 10.5V17h11v-6.5"></path>
             <path d="M9.5 20h11"></path>
             @break
+        @case('nav-home')
+            <path d="M4 11l8-7 8 7"></path>
+            <path d="M6 10.5V20h12v-9.5"></path>
+            <path d="M10 20v-6h4v6"></path>
+            @break
         @case('nav-pin')
             <path d="M12 21s6.5-6.1 6.5-10.4A6.5 6.5 0 0 0 5.5 10.6C5.5 14.9 12 21 12 21z"></path>
             <path d="M14 10.4a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"></path>

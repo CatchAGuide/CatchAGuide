@@ -300,7 +300,7 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('Mehr erfahren', false);
         $response->assertSee('cag-home-bottom-nav', false);
         $this->assertMatchesRegularExpression(
-            '/cag-home-bottom-nav[\s\S]*'.preg_quote(__('offers.nav_label'), '/').'[\s\S]*'.preg_quote(__('homepage.filter-fishing-near-me'), '/').'[\s\S]*'.preg_quote(__('homepage.header-vacations'), '/').'[\s\S]*'.preg_quote(__('homepage.footer_destinations'), '/').'/',
+            '/cag-home-bottom-nav[\s\S]*'.preg_quote(__('homepage.header-home'), '/').'[\s\S]*'.preg_quote(__('offers.nav_label'), '/').'[\s\S]*'.preg_quote(__('homepage.filter-fishing-near-me'), '/').'[\s\S]*'.preg_quote(__('homepage.header-vacations'), '/').'/',
             $response->getContent()
         );
         $response->assertSee('cag-footer', false);

@@ -62,7 +62,8 @@ final class SitePrimaryNav
     }
 
     /**
-     * Fixed mobile bottom bar: browse links plus login/profile.
+     * Fixed mobile bottom bar: home, catalog links, and login/profile. Destinations
+     * stays in the burger menu (browseLinks()) but is left out of this tab bar.
      *
      * @return list<array{key: string, label: string, url: string, active: bool, icon: string, opens_login: bool}>
      */
@@ -71,7 +72,20 @@ final class SitePrimaryNav
         $request ??= request();
         $links = [];
 
+        $links[] = [
+            'key' => 'home',
+            'label' => __('homepage.header-home'),
+            'url' => route('welcome'),
+            'active' => static::isHomepage($request),
+            'icon' => static::iconFor('home'),
+            'opens_login' => false,
+        ];
+
         foreach (static::browseLinks($request) as $link) {
+            if ($link['key'] === 'destinations') {
+                continue;
+            }
+
             $link['opens_login'] = false;
             $links[] = $link;
         }
@@ -236,6 +250,7 @@ final class SitePrimaryNav
     private static function iconFor(string $key): string
     {
         return match ($key) {
+            'home' => 'fas fa-home',
             'offers' => 'fas fa-th-large',
             'tours' => 'fas fa-ship',
             'vacations' => 'fas fa-suitcase-rolling',

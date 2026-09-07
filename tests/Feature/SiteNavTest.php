@@ -194,19 +194,26 @@ class SiteNavTest extends TestCase
         $html = View::make('pages.home.partials.mobile-bottom-nav')->render();
 
         $this->assertPrimaryNavOrder($html);
-        $this->assertStringContainsString(__('homepage.footer_destinations'), $html);
+        $this->assertStringNotContainsString(__('homepage.footer_destinations'), $html);
+        $this->assertStringContainsString(__('homepage.header-home'), $html);
         $this->assertStringContainsString(__('homepage.header-login'), $html);
         $this->assertStringContainsString('cag-home-bottom-nav__item', $html);
+        $this->assertStringContainsString('cag-icon--nav-home', $html);
         $this->assertStringContainsString('cag-icon--nav-grid', $html);
         $this->assertStringContainsString('cag-icon--nav-rod', $html);
         $this->assertStringContainsString('cag-icon--nav-camp', $html);
-        $this->assertStringContainsString('cag-icon--nav-pin', $html);
+        $this->assertStringNotContainsString('cag-icon--nav-pin', $html);
         $this->assertStringContainsString('cag-icon--nav-user', $html);
         $this->assertStringContainsString('data-bs-target="#loginModal"', $html);
         $this->assertStringNotContainsString(__('homepage.mobile_nav_explore'), $html);
         $this->assertStringNotContainsString(__('homepage.mobile_nav_bookings'), $html);
         $this->assertStringNotContainsString(__('homepage.mobile_nav_saved'), $html);
-        $this->assertStringNotContainsString('aria-current="page"', $html);
+        $this->assertNavItemIsActive($html, route('welcome'));
+        $this->assertLessThan(
+            strpos($html, __('offers.nav_label')),
+            strpos($html, __('homepage.header-home')),
+            'Home should render before the catalog links.'
+        );
     }
 
     public function test_mobile_bottom_nav_highlights_active_catalog_section(): void
@@ -216,6 +223,7 @@ class SiteNavTest extends TestCase
         $html = View::make('pages.home.partials.mobile-bottom-nav')->render();
 
         $this->assertNavItemIsActive($html, route('guidings.landing'));
+        $this->assertNavItemIsInactive($html, route('welcome'));
         $this->assertNavItemIsInactive($html, route('offers.index'));
         $this->assertNavItemIsInactive($html, route('vacations.index'));
     }
