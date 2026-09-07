@@ -48,6 +48,13 @@ class PartnerHubPageTest extends TestCase
         $this->assertStringNotContainsString('navbar-custom short-header', $html);
         $this->assertStringContainsString('cag-footer', $html);
         $this->assertStringContainsString('cag-home-bottom-nav', $html);
+        $this->assertStringContainsString('assets/images/homepage/hero-partner.webp', $html);
+        $this->assertSame(2, substr_count($html, 'assets/images/homepage/hero-partner.webp'));
+        $this->assertStringContainsString('assets/images/homepage/hero-guiding.webp', $html);
+        $this->assertSame(1, substr_count($html, 'assets/images/homepage/hero-guiding.webp'));
+        $this->assertStringNotContainsString('hero-tour.webp', $html);
+        $this->assertStringContainsString('assets/images/homepage/hero-camp.webp', $html);
+        $this->assertStringContainsString('assets/images/homepage/hero-trip.webp', $html);
         $this->assertSame(1, substr_count($html, 'cag-site-nav--overlay'));
         $this->assertStringContainsString(__('partner.hero_title'), $html);
         $this->assertStringContainsString(__('partner.cta_become'), $html);
