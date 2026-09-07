@@ -11,6 +11,7 @@ return [
     'header-close' => 'Schließen',
     'header-language' => 'Sprache',
     'header-vacations' => 'Angelurlaub',
+    'header-home' => 'Start',
 
     'searchbar-destination' => 'Länder',
     'searchbar-person' => 'Personen',

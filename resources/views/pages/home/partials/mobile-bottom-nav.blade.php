@@ -2,10 +2,10 @@
     @foreach ($siteBottomNavLinks as $item)
         @php
             $navIcon = match ($item['key'] ?? '') {
+                'home' => 'nav-home',
                 'offers' => 'nav-grid',
                 'tours' => 'nav-rod',
                 'vacations' => 'nav-camp',
-                'destinations' => 'nav-pin',
                 default => 'nav-user',
             };
         @endphp
