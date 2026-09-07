@@ -12,13 +12,22 @@ class FavoriteTargetSpeciesResolver
      * Favorite-first list of "Targets" category pages, topped up with the next
      * alphabetical pages if there aren't enough favorites.
      *
+     * @param  list<int>|null  $allowedSourceIds  When set, only pages whose source
+     *                                            is in this list are considered.
      * @return Collection<int, array{name: string, slug: string, thumbnail: ?string, source_id: int}>
      */
-    public function resolve(int $limit): Collection
+    public function resolve(int $limit, ?array $allowedSourceIds = null): Collection
     {
+        if ($allowedSourceIds !== null && $allowedSourceIds === []) {
+            return collect();
+        }
+
+        $sourceIds = $allowedSourceIds === null ? null : array_map('strval', $allowedSourceIds);
+
         $favorites = CategoryPage::query()
             ->where('type', 'Targets')
             ->where('is_favorite', 1)
+            ->when($sourceIds !== null, fn ($query) => $query->whereIn('source_id', $sourceIds))
             ->orderBy('name')
             ->limit($limit)
             ->get();
@@ -28,6 +37,7 @@ class FavoriteTargetSpeciesResolver
         if ($pages->count() < $limit) {
             $extra = CategoryPage::query()
                 ->where('type', 'Targets')
+                ->when($sourceIds !== null, fn ($query) => $query->whereIn('source_id', $sourceIds))
                 ->whereNotIn('id', $pages->pluck('id'))
                 ->orderBy('name')
                 ->limit($limit - $pages->count())

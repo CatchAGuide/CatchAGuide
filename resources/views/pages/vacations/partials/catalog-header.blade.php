@@ -1,6 +1,7 @@
 @php
     use App\Domain\Vacation\CountrySlug;
     use App\Domain\Vacation\VacationListingFilter;
+    use App\Services\Search\ListingSearchStateService;
 
     $vacationDestinations = app(\App\Repositories\Vacation\VacationDestinationRepository::class);
     $vacationCountryOptions = $vacationDestinations->countriesForSearch();
@@ -14,6 +15,19 @@
                 : (request()->route('country')
                     ?? request()->route('slug')
                     ?? request('country'))));
+
+    // On a listing detail page, a location carried over from an earlier search takes
+    // priority over the listing's own country -- but only as a fallback if it fails to
+    // match a known destination below.
+    $vacationCountryFallback = $currentVacationCountry;
+    if ($isVacationListingPdp && ! request()->filled('country')) {
+        $persistedSearch = app(ListingSearchStateService::class)->resolveFromRequest(request());
+        $persistedLocation = $persistedSearch['country'] !== '' ? $persistedSearch['country'] : $persistedSearch['place'];
+        if ($persistedLocation !== '') {
+            $currentVacationCountry = $persistedLocation;
+        }
+    }
+
     $queryCountry = request('country');
     if ($isVacationListingPdp && is_string($queryCountry) && $queryCountry !== '') {
         $currentVacationCountry = $queryCountry;
@@ -33,7 +47,7 @@
 
                 return false;
             });
-        $currentVacationCountry = $matchedCountry->slug ?? $canonicalCountry;
+        $currentVacationCountry = $matchedCountry->slug ?? $vacationCountryFallback ?? $canonicalCountry;
     }
     $listingTitle = trim((string) ($listingTitle ?? __('vacations.hub_header_title')));
     $listingSubtitle = trim((string) ($listingSubtitle ?? __('vacations.hub_header_subtitle')));

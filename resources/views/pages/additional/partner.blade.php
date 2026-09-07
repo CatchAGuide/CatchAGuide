@@ -6,7 +6,7 @@
 @section('share_tags')
     <meta property="og:title" content="{{ __('partner.meta_title') }}" />
     <meta property="og:description" content="{{ __('partner.meta_description') }}" />
-    <meta property="og:image" content="{{ asset('assets/images/homepage/hero-tour.webp') }}"/>
+    <meta property="og:image" content="{{ asset('assets/images/homepage/hero-partner.webp') }}"/>
 @endsection
 
 @php
@@ -39,7 +39,7 @@
         <section class="cag-partner-hub__hero" data-partner-hero>
             <img
                 class="cag-partner-hub__hero-img"
-                src="{{ asset('assets/images/homepage/hero-tour.webp') }}"
+                src="{{ asset('assets/images/homepage/hero-partner.webp') }}"
                 alt=""
             >
             <div class="cag-partner-hub__hero-shade"></div>
@@ -82,7 +82,7 @@
             <p class="cag-partner-hub__lead">{{ __('partner.audience_text') }}</p>
             <div class="cag-partner-hub__offer-grid">
                 <article class="cag-partner-hub__offer-card">
-                    <img src="{{ asset('assets/images/homepage/hero-tour.webp') }}" alt="{{ __('partner.offer_guidings_title') }}">
+                    <img src="{{ asset('assets/images/homepage/hero-guiding.webp') }}" alt="{{ __('partner.offer_guidings_title') }}">
                     <div class="cag-partner-hub__offer-body">
                         <h3>{{ __('partner.offer_guidings_title') }}</h3>
                         <p>{{ __('partner.offer_guidings_text') }}</p>

@@ -63,4 +63,46 @@ class FavoriteTargetSpeciesResolverTest extends TestCase
 
         $this->assertLessThanOrEqual(3, $result->count());
     }
+
+    public function test_allowed_source_ids_exclude_other_targets(): void
+    {
+        $marker = 'test-allowed-target-'.uniqid();
+
+        $included = new Target();
+        $included->name = $marker.'-in';
+        $included->save();
+
+        $excluded = new Target();
+        $excluded->name = $marker.'-out';
+        $excluded->save();
+
+        CategoryPage::query()->create([
+            'name' => $marker.'-in',
+            'type' => 'Targets',
+            'slug' => $marker.'-in',
+            'source_id' => (string) $included->id,
+            'is_favorite' => true,
+        ]);
+
+        CategoryPage::query()->create([
+            'name' => $marker.'-out',
+            'type' => 'Targets',
+            'slug' => $marker.'-out',
+            'source_id' => (string) $excluded->id,
+            'is_favorite' => true,
+        ]);
+
+        $resolver = app(FavoriteTargetSpeciesResolver::class);
+        $result = $resolver->resolve(500, [$included->id]);
+
+        $this->assertNotNull($result->first(fn (array $row) => $row['slug'] === $marker.'-in'));
+        $this->assertNull($result->first(fn (array $row) => $row['slug'] === $marker.'-out'));
+    }
+
+    public function test_empty_allowed_source_ids_returns_no_tiles(): void
+    {
+        $resolver = app(FavoriteTargetSpeciesResolver::class);
+
+        $this->assertTrue($resolver->resolve(12, [])->isEmpty());
+    }
 }

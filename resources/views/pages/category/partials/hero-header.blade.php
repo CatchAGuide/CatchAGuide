@@ -1,5 +1,6 @@
 @php
     use App\Domain\Offers\OfferListingFilter;
+    use App\Services\Search\ListingSearchStateService;
 
     $listingEyebrow = trim((string) ($listingEyebrow ?? ''));
     $listingTitle = trim((string) ($listingTitle ?? ''));
@@ -7,14 +8,29 @@
     $breadcrumbItems = $breadcrumbItems ?? [];
     $searchAction = listing_search_action($searchAction ?? null);
     $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
+    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
     $requestHasPlace = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng);
+
+    // On a listing detail page (titleTag 'p') with no place of its own to show, fall
+    // back to a location carried over from an earlier search elsewhere on the site.
+    if ($titleTag === 'p' && ! $requestHasPlace && trim((string) ($placeValue ?? '')) === '') {
+        $persistedSearch = app(ListingSearchStateService::class)->current();
+        if ($persistedSearch['place'] !== '' || $persistedSearch['country'] !== '') {
+            $placeValue = $persistedSearch['place'] !== '' ? $persistedSearch['place'] : $persistedSearch['country'];
+            $placeLat = $persistedSearch['placeLat'];
+            $placeLng = $persistedSearch['placeLng'];
+            $placeCity = $persistedSearch['city'];
+            $placeCountry = $persistedSearch['country'];
+            $placeRegion = $persistedSearch['region'];
+        }
+    }
+
     $placeValue = $requestHasPlace ? request()->place : (string) ($placeValue ?? '');
     $placeLat = $requestHasPlace ? request()->placeLat : ($placeLat ?? '');
     $placeLng = $requestHasPlace ? request()->placeLng : ($placeLng ?? '');
     $placeCity = $requestHasPlace ? request()->city : ($placeCity ?? '');
     $placeCountry = $requestHasPlace ? request()->country : ($placeCountry ?? '');
     $placeRegion = $requestHasPlace ? request()->region : ($placeRegion ?? '');
-    $titleTag = in_array($titleTag ?? 'h1', ['h1', 'p', 'div'], true) ? ($titleTag ?? 'h1') : 'h1';
     $headerCarry = OfferListingFilter::headerCarryParams(
         request()->query(),
         isset($lockedParams) && is_array($lockedParams) ? $lockedParams : [],

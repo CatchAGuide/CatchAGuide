@@ -2,7 +2,11 @@
 
 namespace Tests\Feature\Guidings;
 
+use App\Models\CategoryPage;
+use App\Models\Method;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -16,6 +20,7 @@ class GuidingsLandingPageTest extends TestCase
 
         config(['app.url' => 'http://localhost']);
         URL::forceRootUrl('http://localhost');
+        Cache::forget('guiding_category_availability_v1');
 
         $this->withoutMiddleware([
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
@@ -65,5 +70,42 @@ class GuidingsLandingPageTest extends TestCase
         $response->assertSee('action="'.url('/guidings/alloffers').'"', false);
         $response->assertSee('categoryHeroSearchPlace', false);
         $response->assertSee('data-offers-persons-stepper', false);
+    }
+
+    public function test_guidings_landing_methods_rail_includes_available_method(): void
+    {
+        app()->setLocale('de');
+
+        $marker = 'landing-method-'.uniqid();
+        $method = new Method();
+        $method->forceFill([
+            'name' => $marker,
+            'name_en' => $marker,
+        ])->save();
+
+        CategoryPage::query()->create([
+            'name' => $marker,
+            'type' => 'Methods',
+            'slug' => $marker,
+            'source_id' => (string) $method->id,
+            'is_favorite' => true,
+        ]);
+
+        $this->mock(GuidingCategoryAvailabilityRepository::class, function ($mock) use ($method) {
+            $mock->allows('methodIdsWithGuidings')->andReturn([$method->id]);
+            $mock->allows('targetIdsWithGuidings')->andReturn([]);
+            $mock->allows('hasGuidingsForCountry')->andReturn(true);
+            $mock->shouldIgnoreMissing();
+        });
+
+        Cache::forget('guidings_landing_methods_v3_de');
+
+        $response = $this->get(route('guidings.landing'));
+
+        $response->assertOk();
+        $response->assertSee($marker, false);
+        $response->assertSee(route('guidings.methods.show', ['slug' => $marker], false), false);
+        $response->assertSee('guidings-landing-methods', false);
+        $response->assertSee('vacation-fish-rail__tile', false);
     }
 }

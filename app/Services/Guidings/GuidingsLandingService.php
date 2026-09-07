@@ -5,6 +5,7 @@ namespace App\Services\Guidings;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryPage;
 use App\Models\Guiding;
+use App\Models\Method;
 use App\Presenters\Guiding\GuidingCardPresenter;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
@@ -155,43 +156,28 @@ class GuidingsLandingService
      */
     private function methodTiles(string $locale): Collection
     {
-        return Cache::remember("guidings_landing_methods_v2_{$locale}", now()->addMinutes(30), function () {
-            $favorites = CategoryPage::query()
-                ->where('type', 'Methods')
-                ->where('is_favorite', 1)
-                ->orderBy('name')
-                ->limit(self::TILE_RAIL_LIMIT)
-                ->get();
+        return Cache::remember("guidings_landing_methods_v3_{$locale}", now()->addMinutes(30), function () {
+            $pages = $this->favoriteCategoryPages(
+                'Methods',
+                $this->guidingAvailability->methodIdsWithGuidings(),
+            );
 
-            $pages = $favorites;
+            $methods = Method::query()
+                ->whereIn('id', $pages->pluck('source_id')->filter()->unique())
+                ->get()
+                ->keyBy('id');
 
-            if ($pages->count() < self::TILE_RAIL_LIMIT) {
-                $extra = CategoryPage::query()
-                    ->where('type', 'Methods')
-                    ->whereNotIn('id', $pages->pluck('id'))
-                    ->orderBy('name')
-                    ->limit(self::TILE_RAIL_LIMIT - $pages->count())
-                    ->get();
+            return $pages->map(function (CategoryPage $page) use ($methods) {
+                $method = $methods->get($page->source_id) ?? $methods->get((int) $page->source_id);
 
-                $pages = $pages->concat($extra);
-            }
-
-            return $pages
-                ->map(function (CategoryPage $page) {
-                    return [
-                        'name' => $page->source->name ?? $page->name,
-                        'slug' => $page->slug,
-                        'thumbnail' => media_url($page->thumbnail_path),
-                        'count' => $page->source_id
-                            ? Guiding::whereHas('guidingMethods', fn ($q) => $q->where('method_id', $page->source_id))
-                                ->publiclyVisible()
-                                ->count()
-                            : 0,
-                        'url' => route('guidings.methods.show', ['slug' => $page->slug]),
-                    ];
-                })
-                ->filter(fn (array $tile) => $tile['count'] > 0)
-                ->values();
+                return [
+                    'name' => $method?->name ?? $page->name,
+                    'slug' => $page->slug,
+                    'thumbnail' => $page->getThumbnailPath(),
+                    'count' => 1,
+                    'url' => route('guidings.methods.show', ['slug' => $page->slug]),
+                ];
+            })->values();
         });
     }
 
@@ -200,22 +186,56 @@ class GuidingsLandingService
      */
     private function speciesTiles(string $locale): Collection
     {
-        return Cache::remember("guidings_landing_species_v2_{$locale}", now()->addMinutes(30), function () {
-            return $this->favoriteTargetSpecies->resolve(self::TILE_RAIL_LIMIT)->map(function (array $card) {
-                return [
-                    'name' => $card['name'],
-                    'slug' => $card['slug'],
-                    'thumbnail' => $card['thumbnail'],
-                    'count' => $card['source_id']
-                        ? Guiding::whereHas('guidingTargets', fn ($q) => $q->where('target_id', $card['source_id']))
-                            ->publiclyVisible()
-                            ->count()
-                        : 0,
-                    'url' => route('guidings.targets', ['slug' => $card['slug']]),
-                ];
-            })
-                ->filter(fn (array $card) => $card['count'] > 0)
+        return Cache::remember("guidings_landing_species_v3_{$locale}", now()->addMinutes(30), function () {
+            return $this->favoriteTargetSpecies
+                ->resolve(self::TILE_RAIL_LIMIT, $this->guidingAvailability->targetIdsWithGuidings())
+                ->map(function (array $card) {
+                    return [
+                        'name' => $card['name'],
+                        'slug' => $card['slug'],
+                        'thumbnail' => $card['thumbnail'],
+                        'count' => 1,
+                        'url' => route('guidings.targets', ['slug' => $card['slug']]),
+                    ];
+                })
                 ->values();
         });
+    }
+
+    /**
+     * Favorite-first category pages whose source already has publicly visible tours.
+     *
+     * @param  list<int>  $availableSourceIds
+     * @return Collection<int, CategoryPage>
+     */
+    private function favoriteCategoryPages(string $type, array $availableSourceIds): Collection
+    {
+        if ($availableSourceIds === []) {
+            return collect();
+        }
+
+        $sourceIds = array_map('strval', $availableSourceIds);
+
+        $favorites = CategoryPage::query()
+            ->where('type', $type)
+            ->where('is_favorite', 1)
+            ->whereIn('source_id', $sourceIds)
+            ->orderBy('name')
+            ->limit(self::TILE_RAIL_LIMIT)
+            ->get();
+
+        if ($favorites->count() >= self::TILE_RAIL_LIMIT) {
+            return $favorites;
+        }
+
+        $extra = CategoryPage::query()
+            ->where('type', $type)
+            ->whereIn('source_id', $sourceIds)
+            ->whereNotIn('id', $favorites->pluck('id'))
+            ->orderBy('name')
+            ->limit(self::TILE_RAIL_LIMIT - $favorites->count())
+            ->get();
+
+        return $favorites->concat($extra);
     }
 }

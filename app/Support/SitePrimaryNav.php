@@ -144,6 +144,7 @@ final class SitePrimaryNav
             'destination.legacy-geo',
             'targets.index',
             'targets.show',
+            'vacations.countries',
             'guidings.landing',
             'guidings.index',
             'guidings.destination',
