@@ -112,13 +112,13 @@
                         <div class="trending-card">
                             <a href="{{ route('vacations.country', ['country' => $country->slug]) }}"> 
                                 <div class="trending-card-wrapper">
-                                    <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
+                                    <img alt="{{$country->name}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 
                                     <div class="trending-card-wrapper-content">
                                         <div class="overlay-wrapper"></div>
                                         <div class="trending-card-main">
                                             <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">{{translate($country->name)}}</h4>
+                                                <h4 class="trending-title">{{$country->name}}</h4>
                                                 <div>
                                                     <img class="mx-2" alt="Flag" width="32" height="32" src="{{media_url('flags/'.strtolower($country->countrycode).'.svg')}}">
                                                 </div>
