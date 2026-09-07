@@ -2,9 +2,16 @@
     use App\Domain\Offers\OfferListingFilter;
 
     $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
-    $placeValue = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng)
-        ? request()->place
-        : '';
+    $offersRequestHasPlace = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng);
+    $offersSearchState = [
+        'place' => $offersRequestHasPlace ? (string) request()->place : '',
+        'placeLat' => $offersRequestHasPlace ? (string) request()->placeLat : '',
+        'placeLng' => $offersRequestHasPlace ? (string) request()->placeLng : '',
+        'city' => $offersRequestHasPlace ? (string) request()->city : '',
+        'country' => $offersRequestHasPlace ? (string) request()->country : '',
+        'region' => $offersRequestHasPlace ? (string) request()->region : '',
+    ];
+    $placeValue = $offersSearchState['place'];
     $headerCarry = OfferListingFilter::headerCarryParams(
         request()->query(),
         isset($vm) ? $vm->lockedScopeParams() : [],
@@ -54,11 +61,11 @@
                                 autocomplete="off"
                             >
                         </span>
-                        <input type="hidden" id="LocationLatOffersCatalog" name="placeLat" value="{{ request()->placeLat }}">
-                        <input type="hidden" id="LocationLngOffersCatalog" name="placeLng" value="{{ request()->placeLng }}">
-                        <input type="hidden" id="LocationCityOffersCatalog" name="city" value="{{ request()->city }}">
-                        <input type="hidden" id="LocationCountryOffersCatalog" name="country" value="{{ request()->country }}">
-                        <input type="hidden" id="LocationRegionOffersCatalog" name="region" value="{{ request()->region }}">
+                        <input type="hidden" id="LocationLatOffersCatalog" name="placeLat" value="{{ $offersSearchState['placeLat'] }}">
+                        <input type="hidden" id="LocationLngOffersCatalog" name="placeLng" value="{{ $offersSearchState['placeLng'] }}">
+                        <input type="hidden" id="LocationCityOffersCatalog" name="city" value="{{ $offersSearchState['city'] }}">
+                        <input type="hidden" id="LocationCountryOffersCatalog" name="country" value="{{ $offersSearchState['country'] }}">
+                        <input type="hidden" id="LocationRegionOffersCatalog" name="region" value="{{ $offersSearchState['region'] }}">
                         @include('layouts.partials.geosearch-hidden-fields')
                     </label>
 

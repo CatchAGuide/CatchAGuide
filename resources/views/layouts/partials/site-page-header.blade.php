@@ -1,11 +1,12 @@
 {{-- Slate title + search band for inner pages that do not own a catalog hero. --}}
 @php
     use App\Domain\Offers\OfferListingFilter;
+    use App\Services\Search\ListingSearchStateService;
 
     $hasPageTitle = $__env->hasSection('header_title');
     $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
-    $requestHasPlace = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng);
-    $placeValue = $requestHasPlace ? request()->place : '';
+    $sitePageSearchState = app(ListingSearchStateService::class)->resolveFromRequest(request());
+    $placeValue = $sitePageSearchState['place'];
     $headerCarry = OfferListingFilter::headerCarryParams(request()->query());
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-site-page-header-shell>
@@ -53,11 +54,11 @@
                                 autocomplete="off"
                             >
                         </span>
-                        <input type="hidden" id="LocationLatSitePage" name="placeLat" value="{{ $requestHasPlace ? request()->placeLat : '' }}">
-                        <input type="hidden" id="LocationLngSitePage" name="placeLng" value="{{ $requestHasPlace ? request()->placeLng : '' }}">
-                        <input type="hidden" id="LocationCitySitePage" name="city" value="{{ $requestHasPlace ? request()->city : '' }}">
-                        <input type="hidden" id="LocationCountrySitePage" name="country" value="{{ $requestHasPlace ? request()->country : '' }}">
-                        <input type="hidden" id="LocationRegionSitePage" name="region" value="{{ $requestHasPlace ? request()->region : '' }}">
+                        <input type="hidden" id="LocationLatSitePage" name="placeLat" value="{{ $sitePageSearchState['placeLat'] }}">
+                        <input type="hidden" id="LocationLngSitePage" name="placeLng" value="{{ $sitePageSearchState['placeLng'] }}">
+                        <input type="hidden" id="LocationCitySitePage" name="city" value="{{ $sitePageSearchState['city'] }}">
+                        <input type="hidden" id="LocationCountrySitePage" name="country" value="{{ $sitePageSearchState['country'] }}">
+                        <input type="hidden" id="LocationRegionSitePage" name="region" value="{{ $sitePageSearchState['region'] }}">
                         @include('layouts.partials.geosearch-hidden-fields')
                     </label>
 
