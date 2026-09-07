@@ -93,7 +93,6 @@
                         :region="$formData['region'] ?? ''"
                         city-id="cityField"
                         region-id="regionField"
-                        :types="['geocode']"
                         wrapper-class=""
                     />
                 </div>

@@ -7,7 +7,8 @@
     'tooltip' => null,
     'required' => false,
     'class' => 'form-control',
-    'types' => ['geocode'],
+    // Unrestricted by default — same as navbar/public search (no Places `types` filter).
+    'types' => null,
     // Linked field names / ids
     'latName' => 'latitude',
     'latId' => 'latitude',
@@ -57,7 +58,9 @@
         @if($required) required @endif
         autocomplete="off"
         data-places-location
-        data-places-types='@json($types)'
+        @if(is_array($types) && count($types) > 0)
+            data-places-types='@json($types)'
+        @endif
         data-places-lat="#{{ $latId }}"
         data-places-lng="#{{ $lngId }}"
         data-places-country="#{{ $countryId }}"

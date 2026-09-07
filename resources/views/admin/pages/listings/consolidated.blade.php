@@ -497,7 +497,7 @@
                 return;
             }
             try {
-                var ac = new google.maps.places.Autocomplete(input, { types: ['(regions)'] });
+                var ac = new google.maps.places.Autocomplete(input);
                 ac.addListener('place_changed', function () {
                     applyFiltersDebounced();
                 });

@@ -95,7 +95,6 @@
                         postal-name="postal_code"
                         postal-id="postal_code"
                         :postal="$formData['postal_code'] ?? ''"
-                        :types="['(regions)']"
                         wrapper-class=""
                     />
                 </div>
