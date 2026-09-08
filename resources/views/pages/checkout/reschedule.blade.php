@@ -253,7 +253,7 @@
         
         <form id="rescheduleForm" method="POST" action="{{ route('booking.reschedule.store') }}">
             @csrf
-            <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+            <input type="hidden" name="token" value="{{ $booking->token }}">
             <input type="hidden" name="selectedDate" value="{{ $selectedDate }}">
             
             <!-- Main Content -->

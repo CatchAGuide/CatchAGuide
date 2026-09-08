@@ -83,13 +83,18 @@ class ProfileController extends Controller
 
         // $user->number_of_guides = $request->numguides;
 
+        // Only the validated `information.*` keys — passing the raw request array let a
+        // logged-in user submit information[user_id] and repoint their own information
+        // row at another account, since UserInformation::$fillable includes user_id.
+        $informationData = $request->validated('information') ?? [];
+
         if($user->information()) {
-            $user->information->update($request->information);
+            $user->information->update($informationData);
         } else {
-            $user->information->create($request->information);
+            $user->information->create($informationData);
         }
         $user->language = $request->get('language') ?? app()->getLocale();
-        $user->tax_id = $request->get('information')['tax_id'];
+        $user->tax_id = $informationData['tax_id'] ?? null;
         $user->phone = $request->phone;
         $user->phone_country_code = $request->countryCode;
 

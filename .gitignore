@@ -66,6 +66,7 @@ package-lock.json
 /vendor
 /stubs
 .env
+.env.local
 .env.strato
 .phpunit.result.cache
 docker-compose.override.yml

@@ -702,7 +702,7 @@
                                             <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
                                                 <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                 <span class="text-wrapper">
-                                                    {!! $item->description !!}
+                                                    {!! nl2br(e($item->description)) !!}
                                                 </span>
                                                 <!-- Other Details Row -->
                                                 @php 
@@ -874,7 +874,7 @@
                                                 <div class="col-12 col-lg-7 mb-3 mb-lg-0 tab-item">
                                                     <h6 class="card-title mb-3">{{ !empty($item->title) ? $item->title : translate($sectionKey . ' ' . ($itemIndex + 1)) }}</h6>
                                                     <span class="text-wrapper">
-                                                        {!! $item->description !!}
+                                                        {!! nl2br(e($item->description)) !!}
                                                     </span>
                                                     <!-- Other Details Row -->
                                                     @php 
