@@ -248,7 +248,7 @@ class VacationsController extends Controller
             }
         } else if ($hasOnlyPageParam) {
             // Use random ordering for first page with no filters
-            $query->orderByRaw("RAND($randomSeed)");
+            $query->orderByRaw('RAND(?)', [(int) $randomSeed]);
         } else {
             // Default ordering by ID to ensure consistent pagination
             $query->orderBy('id', 'asc');

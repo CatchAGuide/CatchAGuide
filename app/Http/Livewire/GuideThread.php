@@ -209,7 +209,7 @@ class GuideThread extends Component
                 break;
             default:
                 // Default random ordering for initial load
-                $query->orderByRaw("RAND($randomSeed)");
+                $query->orderByRaw('RAND(?)', [(int) $randomSeed]);
         }
     }
 

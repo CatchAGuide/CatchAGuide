@@ -132,7 +132,7 @@ class CategoryTargetFishController extends Controller
         $isFirstPage = !$cleanedRequest->has('page') || $cleanedRequest->get('page') == 1;
 
         if ($hasOnlyPageParam && $isFirstPage) {
-            $filteredQuery->orderByRaw("RAND($randomSeed)");
+            $filteredQuery->orderByRaw('RAND(?)', [(int) $randomSeed]);
         } else {
             // Default ordering for all other cases
             if ($cleanedRequest->has('sortby') && !empty($cleanedRequest->get('sortby'))) {
