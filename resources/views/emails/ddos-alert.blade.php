@@ -66,6 +66,8 @@
                     <span class="value">{{ $details['detected_pattern'] }}</span>
                 </div>
                 @endif
+
+                @if(isset($details['endpoint']))
                 <div class="detail-row">
                     <span class="label">Endpoint:</span>
                     <span class="value">{{ $details['endpoint'] }}</span>
