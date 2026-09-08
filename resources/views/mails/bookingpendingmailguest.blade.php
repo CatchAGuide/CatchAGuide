@@ -66,10 +66,10 @@
 
                                     @if($guiding->additional_information)
                                         <br>Sonstiges:</br>
-                                        {!! $guiding->additional_information !!}
+                                        {!! nl2br(e($guiding->additional_information)) !!}
                                     @endif
 
-                                    {!! $guiding->description !!}
+                                    {!! nl2br(e($guiding->description)) !!}
 
 
                                 </td></tr>

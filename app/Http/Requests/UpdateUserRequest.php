@@ -25,7 +25,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'firstname' => ['required', 'string'],
-            'image' => ['image:jpeg,png,jpg,gif,svg|max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'lastname'=> ['required', 'string'],
             'phone' => ['string', 'required'],
             'countryCode' => ['required', 'string'],

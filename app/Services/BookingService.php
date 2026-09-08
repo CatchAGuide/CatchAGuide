@@ -10,6 +10,7 @@ use App\Models\Guiding;
 use App\Models\User;
 use App\Models\UserGuest;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class BookingService
@@ -161,6 +162,10 @@ class BookingService
         $persons = (int) $data['count_of_users'];
         $totalPrice = (float) $data['total_price'];
         $extrasSerialized = $data['extras_serialized'] ?? null;
+
+        if ($guiding->isDateBlocked($selectedDate)) {
+            throw new InvalidArgumentException('The selected date is no longer available for this guiding.');
+        }
 
         $eventService = app(EventService::class);
         $helperService = app(HelperService::class);
@@ -365,10 +370,13 @@ class BookingService
 
     private function generateBookingToken($eventId): string
     {
-        $timestamp = time();
-        $combinedString = $eventId . '-' . $timestamp;
-
-        return hash('sha256', $combinedString);
+        // Must stay unguessable: this token is the entire authorization for the public
+        // accept/reject/reschedule/review links mailed to guests and guides. It used to be
+        // hash('sha256', $eventId.'-'.time()) — both inputs are low-entropy and largely
+        // known/guessable, making the token brute-forceable offline. Tokens are looked up
+        // by stored value (Booking::where('token', ...)), never recomputed, so switching
+        // the generator here doesn't invalidate already-issued tokens on existing bookings.
+        return Str::random(64);
     }
 }
 

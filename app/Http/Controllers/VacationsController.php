@@ -112,9 +112,9 @@ class VacationsController extends Controller
         return $othervacations;
     }
 
-    private function otherVacationsBasedByLocation($latitude,$longitude){
+    private function otherVacationsBasedByLocation(float $latitude, float $longitude){
         $nearestlisting = Vacation::select(['vacations.*']) // Include necessary attributes here
-        ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
+        ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance', [$latitude, $longitude, $latitude])
         ->orderBy('distance')
         ->where('status',1)
         ->limit(10)
@@ -283,11 +283,14 @@ class VacationsController extends Controller
         $othervacations = array();
 
         if($allVacations->isEmpty()){
-            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
-                $latitude = $request->get('placeLat');
-                $longitude = $request->get('placeLng');
-            
-                $othervacations = $this->otherVacationsBasedByLocation($latitude,$longitude);
+            $latitude = $request->get('placeLat');
+            $longitude = $request->get('placeLng');
+
+            if(is_numeric($latitude) && is_numeric($longitude)
+                && (float) $latitude >= -90 && (float) $latitude <= 90
+                && (float) $longitude >= -180 && (float) $longitude <= 180
+            ){
+                $othervacations = $this->otherVacationsBasedByLocation((float) $latitude, (float) $longitude);
             }else{
                 $othervacations = $this->otherVacations();
             }
