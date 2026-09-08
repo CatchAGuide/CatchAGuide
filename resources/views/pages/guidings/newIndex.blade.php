@@ -1345,7 +1345,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $requirement['name'] }}:</strong> {{ $requirement['value'] ?? '' }}
+                                                <strong>{{ $requirement['name'] ?? '' }}:</strong> {{ $requirement['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
