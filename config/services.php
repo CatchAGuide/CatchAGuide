@@ -68,6 +68,20 @@ return [
 
     'translation' => [
         'driver' => env('TRANSLATION_SERVICE', 'gemini'), // Options: 'gemini' or 'google'
+
+        // Automatically queue a translation job when a Trip/Camp/RentalBoat/SpecialOffer/
+        // Accommodation/Guiding/Vacation is created or updated. The queued job always uses the
+        // free Google engine (see FishingCopyGoogleTranslator) and skips the API call entirely
+        // when the listing's translatable content hash hasn't changed, so this is safe to leave
+        // on. Set to false to disable during a bulk import/backfill.
+        'auto_translate' => env('TRANSLATION_AUTO_TRANSLATE', true),
+
+        // Per-listing debounce: at most one queued translation job per listing per this many
+        // seconds, no matter how many times it's saved in that window. Protects the job queue
+        // and the free (unofficial, scraping-based) Google Translate engine from being flooded
+        // by a burst of rapid saves on the same listing — an autosave flurry, or someone
+        // hammering an edit form. Set to 0 to disable (dispatch on every save).
+        'dispatch_cooldown_seconds' => env('TRANSLATION_DISPATCH_COOLDOWN', 120),
     ],
 
     'stripe' => [

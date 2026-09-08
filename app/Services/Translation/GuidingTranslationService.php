@@ -4,21 +4,13 @@ namespace App\Services\Translation;
 
 use App\Models\Guiding;
 use App\Models\Language;
-use App\Helpers\TranslationHelper;
+use App\Services\Translation\Support\FishingCopyGoogleTranslator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
-use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class GuidingTranslationService
 {
-    private GeminiTranslationService $translator;
-
-    public function __construct()
-    {
-        $this->translator = new GeminiTranslationService();
-    }
-
     private const DE_SOURCE_WORDS = [
         'und', 'oder', 'für', 'mit', 'auf', 'dem', 'der', 'die', 'das', 'den', 'des',
         'ein', 'eine', 'einer', 'einem', 'einen', 'ist', 'sind', 'wird', 'werden',
@@ -171,18 +163,18 @@ class GuidingTranslationService
     /**
      * Translate guiding content to target language
      */
-    public function translateGuiding(Guiding $guiding, string $targetLanguage): bool
+    public function translateGuiding(Guiding $guiding, string $targetLanguage, ?string $engine = null): bool
     {
         try {
             $fromLanguage = $guiding->language ?? 'de';
-            
+
             if ($fromLanguage === $targetLanguage) {
                 return true; // No translation needed
             }
 
             // Prepare translatable fields
             $translatableFields = $this->getTranslatableFields($guiding);
-            
+
             if (empty($translatableFields)) {
                 return true; // Nothing to translate
             }
@@ -191,7 +183,8 @@ class GuidingTranslationService
             $translatedFields = $this->batchTranslateWithGoogle(
                 $translatableFields,
                 $targetLanguage,
-                $fromLanguage
+                $fromLanguage,
+                $engine
             );
 
             // Store the translation
@@ -594,41 +587,21 @@ class GuidingTranslationService
     }
 
     /**
-     * Batch translate fields using Google Translate
+     * Batch translate fields, defaulting to the free Google engine. Pass $engine = 'gemini'
+     * to force the paid engine for a one-off high-quality re-translation.
      */
-    private function batchTranslateWithGoogle(array $fields, string $toLanguage, string $fromLanguage = 'de'): array
+    private function batchTranslateWithGoogle(array $fields, string $toLanguage, string $fromLanguage = 'de', ?string $engine = null): array
     {
-        $translatedFields = [];
-
-        foreach ($fields as $key => $text) {
-            if (empty($text)) {
-                $translatedFields[$key] = $text;
-                continue;
-            }
-
+        if ($engine === 'gemini') {
             try {
-                $translated = GoogleTranslate::trans($text, $toLanguage, $fromLanguage);
-
-                // Apply custom replacements
-                if (strpos($translated, 'Führungen')) {
-                    $translated = str_replace('Führungen', 'Angelguidings', $translated);
-                }
-
-                if (strpos($translated, 'Führung')) {
-                    $translated = str_replace('Führung', 'guiding', $translated);
-                }
-
-                $translatedFields[$key] = ucfirst($translated);
-            } catch (\Exception $e) {
-                Log::error('Google Translate failed for field', [
-                    'key' => $key,
-                    'error' => $e->getMessage()
+                return TranslationEngineFactory::make('gemini')->batchTranslate($fields, $toLanguage, $fromLanguage);
+            } catch (\Throwable $e) {
+                Log::error('Gemini guiding translation failed, falling back to Google Translate', [
+                    'error' => $e->getMessage(),
                 ]);
-                // Keep original text if translation fails
-                $translatedFields[$key] = $text;
             }
         }
 
-        return $translatedFields;
+        return (new FishingCopyGoogleTranslator())->batchTranslate($fields, $toLanguage, $fromLanguage);
     }
-} 
+}

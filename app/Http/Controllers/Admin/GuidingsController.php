@@ -693,13 +693,15 @@ class GuidingsController extends Controller
             ]);
         }
 
+        $engine = $request->filled('engine') ? (string) $request->input('engine') : null;
+
         $guiding->load(['user', 'guidingTargets', 'guidingMethods', 'guidingWaters']);
         $translated = [];
         $failed = [];
 
         foreach ($missing as $lang) {
             try {
-                if ($service->translateGuiding($guiding, $lang)) {
+                if ($service->translateGuiding($guiding, $lang, $engine)) {
                     $translated[] = $lang;
                 } else {
                     $failed[] = $lang;
