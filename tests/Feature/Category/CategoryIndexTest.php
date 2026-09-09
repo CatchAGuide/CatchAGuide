@@ -352,6 +352,8 @@ class CategoryIndexTest extends TestCase
         ]);
         $this->assertStringContainsString(__('vacations.hub_breadcrumb'), $this->breadcrumbHtml($response->getContent()));
         $this->assertStringContainsString(__('category.targets.breadcrumb'), $this->breadcrumbHtml($response->getContent()));
+        $response->assertSee('data-category-header-shell', false);
+        $response->assertDontSee('data-site-page-header-shell', false);
         $response->assertViewHas('allTargets', function ($items) use ($page) {
             return $items->contains(fn ($item) => (int) $item->id === (int) $page->id);
         });

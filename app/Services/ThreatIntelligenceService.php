@@ -24,6 +24,10 @@ class ThreatIntelligenceService
     {
         $ip = $request->ip();
 
+        if ($persist) {
+            $this->recordActivity($ip, $request, $context);
+        }
+
         $networkData = $this->analyzeNetworkData($ip, $request, $persist);
         $fingerprint = $this->generateFingerprint($request);
         $behavioralData = $this->analyzeBehavior($request, $context);
@@ -137,6 +141,7 @@ class ThreatIntelligenceService
         $frequencyAnalysis = $this->analyzeFrequency($recentActivity);
         
         return [
+            'user_agent' => $request->userAgent() ?? '',
             'request_count_last_hour' => count($recentActivity),
             'unique_endpoints' => count(array_unique(array_column($recentActivity, 'endpoint'))),
             'timing_patterns' => $timingPatterns,
@@ -146,6 +151,46 @@ class ThreatIntelligenceService
             'page_views' => $this->getPageViews($sessionId),
             'form_interactions' => $this->getFormInteractions($sessionId),
         ];
+    }
+
+    /**
+     * Record this request into the per-IP activity/request logs that
+     * analyzeBehavior()/analyzeRequestPatterns() read back via
+     * getRecentActivity()/getRecentRequests(). These caches used to be
+     * read-only (nothing ever wrote to them), so request-frequency,
+     * automation-timing, and concurrent-request scoring always saw an
+     * empty history and never contributed to the threat score.
+     */
+    private function recordActivity(string $ip, Request $request, string $context): void
+    {
+        $now = time();
+        $endpoint = $request->path();
+
+        $activity = Cache::get("threat_activity_{$ip}", []);
+        $activity[] = ['timestamp' => $now, 'endpoint' => $endpoint, 'context' => $context];
+        $activity = array_slice(array_filter(
+            $activity,
+            fn ($entry) => $now - $entry['timestamp'] < 3600
+        ), -500);
+        Cache::put("threat_activity_{$ip}", array_values($activity), 3600);
+
+        // status_code/response_time aren't known yet at this point in the request
+        // lifecycle (this runs before a response exists), so they're omitted rather
+        // than recorded as null — array_count_values()/array_sum() over a column of
+        // nulls throws/skews results in analyzeRequestPatterns().
+        $requests = Cache::get("recent_requests_{$ip}", []);
+        $requests[] = [
+            'timestamp' => $now,
+            'method' => $request->method(),
+            'endpoint' => $endpoint,
+            'parameters' => $request->query(),
+            'headers' => array_keys($request->headers->all()),
+        ];
+        $requests = array_slice(array_filter(
+            $requests,
+            fn ($entry) => $now - $entry['timestamp'] < 300
+        ), -200);
+        Cache::put("recent_requests_{$ip}", array_values($requests), 300);
     }
 
     /**
@@ -316,7 +361,10 @@ class ThreatIntelligenceService
 
     private function getRecentActivity(string $ip, int $seconds): array
     {
-        return Cache::get("threat_activity_{$ip}", []);
+        $now = time();
+        $activity = Cache::get("threat_activity_{$ip}", []);
+
+        return array_values(array_filter($activity, fn ($entry) => $now - $entry['timestamp'] < $seconds));
     }
 
     private function analyzeTimingPatterns(array $activity): array
@@ -396,14 +444,17 @@ class ThreatIntelligenceService
 
     private function getRecentRequests(string $ip, int $seconds): array
     {
-        return Cache::get("recent_requests_{$ip}", []);
+        $now = time();
+        $requests = Cache::get("recent_requests_{$ip}", []);
+
+        return array_values(array_filter($requests, fn ($entry) => $now - $entry['timestamp'] < $seconds));
     }
 
     private function calculateAverageResponseTime(array $requests): float
     {
-        if (empty($requests)) return 0;
-        
         $times = array_column($requests, 'response_time');
+        if (empty($times)) return 0;
+
         return array_sum($times) / count($times);
     }
 

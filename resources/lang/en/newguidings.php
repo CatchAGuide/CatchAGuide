@@ -112,6 +112,10 @@ return [
     'saving_draft' => 'Saving draft...',
     'uploading_guiding' => 'Uploading your guiding...',
     'keep_tab_open' => 'Please keep this tab open',
+    'preparing_adventure' => 'Preparing your fishing adventure...',
+    'setting_up_experience' => 'Setting up your guide experience...',
+    'uploading_your_images' => 'Uploading your images...',
+    'please_wait_a_moment' => 'Please wait a moment',
 
     // Additional text
     'extra_input_placeholder' => 'Add a comment or additional information for your guests.',

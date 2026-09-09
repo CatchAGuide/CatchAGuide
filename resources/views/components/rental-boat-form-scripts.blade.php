@@ -885,24 +885,14 @@
     }
 
     function showLoadingScreen() {
-        if (document.getElementById('loadingScreen')) return;
-
-        const loadingScreen = document.createElement('div');
-        loadingScreen.id = 'loadingScreen';
-        loadingScreen.className = 'loading-screen';
-        loadingScreen.innerHTML = `
-            <div class="loading-content">
-                <div class="spinner"></div>
-                <div style="font-size: 1.2rem; font-weight: 500;">Processing...</div>
-            </div>
-        `;
-        document.body.appendChild(loadingScreen);
+        if (window.PageLoader) {
+            window.PageLoader.show();
+        }
     }
 
     function hideLoadingScreen() {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            loadingScreen.remove();
+        if (window.PageLoader) {
+            window.PageLoader.hide();
         }
     }
 

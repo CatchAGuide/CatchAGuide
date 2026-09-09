@@ -439,8 +439,8 @@ transform: translate3d(0,0,0); width: 100%;">
                                 </ul>
 
                                 <p class="js-trigger-more-text"><b>{{ __('guidings.About_me') }}:</b>
-                                    {!! translate($guiding->aboutme()[0]) !!}
-                                    {!! translate($guiding->aboutme()[1]) !!}
+                                    {!! translate(nl2br(e($guiding->aboutme()[0]))) !!}
+                                    {!! translate(nl2br(e($guiding->aboutme()[1]))) !!}
                                 </p>
                                 <button class="thm-btn js-btn-more-text" onclick="moreOrLessFunction(this)">{{ __('guidings.More') }} </button>
                             </div>

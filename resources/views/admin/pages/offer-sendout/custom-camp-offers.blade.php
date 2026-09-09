@@ -202,9 +202,7 @@
             </div>
             <div class="modal-body" id="offerDetailsContent">
                 <div class="text-center">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                    <x-loading.inline label="Loading..." />
                 </div>
             </div>
             <div class="modal-footer">
@@ -220,7 +218,7 @@ function viewOfferDetails(offerId) {
     const content = document.getElementById('offerDetailsContent');
     
     // Show loading
-    content.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+    content.innerHTML = `<div class="text-center"><x-loading.inline label="Loading..." /></div>`;
     modal.show();
     
     // Fetch offer details
@@ -347,7 +345,7 @@ function sendFollowUpEmail(offerId) {
     const originalHtml = confirmBtn ? confirmBtn.innerHTML : '';
     if (confirmBtn) {
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending…';
+        confirmBtn.innerHTML = `<x-loading.inline style="width:1rem;height:1rem;" class="me-2" />Sending…`;
     }
     fetch('{{ route("admin.offer-sendout.custom-camp-offers.follow-up", ["customCampOffer" => "__ID__"]) }}'.replace('__ID__', offerId), {
         method: 'POST',

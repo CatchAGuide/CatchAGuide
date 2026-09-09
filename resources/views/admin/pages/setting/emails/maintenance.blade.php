@@ -427,9 +427,7 @@
                 </div>
                 <div class="modal-body" id="emailPreviewContent">
                     <div class="text-center py-4">
-                        <div class="spinner-border" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        <x-loading.inline label="Loading..." />
                         <p class="mt-2 text-muted">Loading email preview…</p>
                     </div>
                 </div>
@@ -499,9 +497,7 @@
             $('#emailPreviewModal').modal('show');
             $('#emailPreviewContent').html(`
                 <div class="text-center py-4">
-                    <div class="spinner-border" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                    <x-loading.inline label="Loading..." />
                     <p class="mt-2 text-muted">Loading email preview…</p>
                 </div>
             `);

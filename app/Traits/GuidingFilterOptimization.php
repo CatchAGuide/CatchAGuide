@@ -130,7 +130,7 @@ trait GuidingFilterOptimization
         $isFirstPage = !$request->has('page') || $request->get('page') == 1;
 
         if ($hasOnlyPageParam && $isFirstPage) {
-            $query->orderByRaw("RAND($randomSeed)");
+            $query->orderByRaw('RAND(?)', [(int) $randomSeed]);
         } else {
             if ($request->has('sortby') && !empty($request->get('sortby'))) {
                 switch ($request->get('sortby')) {

@@ -1492,7 +1492,7 @@
 
             if (loading) {
                 submitBtn.dataset.loading = '1';
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Rescheduling…';
+                submitBtn.innerHTML = `<x-loading.inline style="width:1rem;height:1rem;" class="me-2" />Rescheduling…`;
                 submitBtn.disabled = true;
                 if (cancelBtn) {
                     cancelBtn.disabled = true;

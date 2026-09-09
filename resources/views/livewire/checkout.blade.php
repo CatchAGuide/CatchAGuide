@@ -1,13 +1,6 @@
 <div>
-  <div wire:loading wire:target="checkout" class="overlay-container">
-    <div class="overlay">
-      <div class="spinner">
-        <div class="spinner-icon" style="background-image: url({{asset('/assets/images/fish.png')}})"></div>
-      </div>
-      <div class="message">
-        @lang('checkout.please_wait_while_processing')
-      </div>
-    </div>
+  <div wire:loading wire:target="checkout">
+    <x-loading.overlay :message="__('checkout.please_wait_while_processing')" />
   </div>
 
   <div id="all">

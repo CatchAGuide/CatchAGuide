@@ -4,6 +4,7 @@ namespace Tests\Unit\Models;
 
 use App\Models\Guiding;
 use App\Models\GuidingAdditionalInformation;
+use App\Models\GuidingRequirements;
 use App\Models\Language;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -106,6 +107,55 @@ class GuidingTranslatedAttributeFallbackTest extends TestCase
         $guiding->translated = ['title' => ''];
 
         $this->assertSame('', $guiding->title);
+    }
+
+    /**
+     * GuidingTranslationService::reconstructJsonFields() rebuilds translated
+     * list fields as {id, value} only — it never carries `name` — so a
+     * translated row must not fully replace the main-language row or the
+     * blade view's `$requirement['name']` throws "Undefined array key".
+     */
+    public function test_translated_item_missing_name_falls_back_to_main_language_name(): void
+    {
+        [$guiding, $info] = $this->makeGuidingWithOtherInformation();
+
+        $guiding->translated = [
+            'other_information' => [
+                ['id' => $info->id, 'value' => 'Kinderfreundlich (translated)'],
+            ],
+        ];
+
+        $result = collect($guiding->other_information)->firstWhere('id', $info->id);
+
+        $this->assertSame('Kinderfreundlich (translated)', $result['value']);
+        $this->assertSame($info->name, $result['name'], 'Missing name in translated row must fall back to the main-language name.');
+    }
+
+    /**
+     * The current save path stores requirements as a list of rows that each
+     * carry their own `id` (e.g. [{"id":4,"value":"..."}]), not an id-keyed
+     * dict. Keying by the raw array's list index instead of each item's own
+     * `id` paired every row with the wrong GuidingRequirements record.
+     */
+    public function test_requirements_list_with_non_sequential_ids_maps_each_row_to_its_own_id(): void
+    {
+        $first = GuidingRequirements::query()->create(['name' => 'Lizenzen / Erlaubnis', 'name_en' => 'Licenses / Permits']);
+        $second = GuidingRequirements::query()->create(['name' => 'Equipment', 'name_en' => 'Equipment']);
+
+        $guiding = new Guiding([
+            'language' => 'de',
+            'requirements' => json_encode([
+                ['id' => $first->id, 'value' => 'Fishing license required'],
+                ['id' => $second->id, 'value' => 'Bring your own gear'],
+            ]),
+        ]);
+
+        $result = collect($guiding->requirements);
+
+        $this->assertSame('Fishing license required', $result->firstWhere('id', $first->id)['value']);
+        $this->assertSame($first->name, $result->firstWhere('id', $first->id)['name']);
+        $this->assertSame('Bring your own gear', $result->firstWhere('id', $second->id)['value']);
+        $this->assertSame($second->name, $result->firstWhere('id', $second->id)['name']);
     }
 
     public function test_populated_translated_pricing_extra_merges_by_id_with_main_language_fallback(): void

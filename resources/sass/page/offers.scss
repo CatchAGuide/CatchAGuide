@@ -2004,12 +2004,7 @@ $muted: #787780;
   }
 
   &__spinner {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    border: 2px solid rgba(255, 255, 255, 0.22);
-    border-top-color: #fff;
-    animation: offers-gallery-spin 0.7s linear infinite;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
   }
 
   &__loader-text {
@@ -2329,12 +2324,6 @@ $muted: #787780;
   to {
     opacity: 1;
     transform: translateX(0);
-  }
-}
-
-@keyframes offers-gallery-spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 

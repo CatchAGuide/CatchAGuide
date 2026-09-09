@@ -202,7 +202,13 @@ class Guiding extends Model
                 return $mainItem;
             }
 
-            return $translatedById[(string) $mainItem['id']] ?? $mainItem;
+            $translatedItem = $translatedById[(string) $mainItem['id']] ?? null;
+
+            // array_merge (not a straight replace) so a translated row that only
+            // carries id/value — e.g. the requirements/recommendations/other_information
+            // reconstruction, which never stores `name` — doesn't drop the display
+            // name that only the main-language row has.
+            return $translatedItem !== null ? array_merge($mainItem, $translatedItem) : $mainItem;
         }, $mainList);
     }
 
@@ -1120,6 +1126,23 @@ class Guiding extends Model
     }
 
     /**
+     * Normalize a TRANSLATABLE_LIST_FIELDS raw column value into an id-keyed
+     * collection. Storage has used two shapes over time: an id-keyed dict
+     * (legacy save path, e.g. {"3": "text"}) and a list of rows that carry
+     * their own `id` (current save path, e.g. [{"id":3,"value":"text"}]) —
+     * keying by the raw array's own list index (the previous behavior)
+     * silently paired each row with the wrong GuidingRequirements /
+     * GuidingRecommendations / GuidingAdditionalInformation record.
+     */
+    private function keyListFieldById($rawValue)
+    {
+        return collect(decode_if_json($rawValue, true))->mapWithKeys(function ($item, $key) {
+            $id = is_array($item) && isset($item['id']) ? $item['id'] : $key;
+            return [$id => $item];
+        });
+    }
+
+    /**
      * Get the requirements associated with the guiding.
      *
      * @return \Illuminate\Support\Collection
@@ -1130,12 +1153,12 @@ class Guiding extends Model
             return collect();
         }
 
-        $requirementsData = collect(decode_if_json($this->attributes['requirements'], true));
-        return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
+        $requirementsData = $this->keyListFieldById($this->attributes['requirements']);
+        return GuidingRequirements::whereIn('id', $requirementsData->keys())
             ->get()
             ->map(function ($requirement) use ($requirementsData) {
                 $data = $requirementsData[$requirement->id];
-                
+
                 return [
                     'id' => $requirement->id,
                     'value' => is_array($data) && isset($data['value']) ? $data['value'] : $data,
@@ -1150,9 +1173,9 @@ class Guiding extends Model
             return collect();
         }
 
-        $otherInformationData = collect(decode_if_json($this->attributes['other_information'], true));
-        
-        return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
+        $otherInformationData = $this->keyListFieldById($this->attributes['other_information']);
+
+        return GuidingAdditionalInformation::whereIn('id', $otherInformationData->keys())
             ->get()
             ->map(function ($otherInformation) use ($otherInformationData) {
                 $data = $otherInformationData[$otherInformation->id];
@@ -1170,9 +1193,9 @@ class Guiding extends Model
             return collect();
         }
 
-        $recommendationsData = collect(decode_if_json($this->attributes['recommendations'], true));
+        $recommendationsData = $this->keyListFieldById($this->attributes['recommendations']);
 
-        return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
+        return GuidingRecommendations::whereIn('id', $recommendationsData->keys())
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
                 $data = $recommendationsData[$recommendation->id];

@@ -15,7 +15,7 @@
                     <strong>pending</strong>. Emails are optional below.
                 </p>
                 <div id="reschedule-loading" class="text-center py-4 d-none">
-                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <x-loading.inline style="width:1rem;height:1rem;" />
                     <div class="small text-muted mt-2">Loading booking details…</div>
                 </div>
                 <div id="reschedule-form-wrap" class="d-none">

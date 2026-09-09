@@ -63,7 +63,7 @@
                         <button type="submit" class="btn theme-primary">
                             <span class="normal-state">{{ __('forms.login') }}</span>
                             <span class="loading-state d-none">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <x-loading.inline style="width:1rem;height:1rem;" />
                                 {{ __('forms.loading') }}
                             </span>
                         </button>

@@ -515,10 +515,6 @@
             transform: scale(1);
         }
 
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
     </style>
 @endsection
 
