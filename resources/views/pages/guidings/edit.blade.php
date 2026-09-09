@@ -13,61 +13,9 @@
         padding-bottom:28px !important;
         color:gray;
     }
-    .overlay-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 100%;
-  transform: translate(-50%, -50%);
-  z-index: 999;
-}
-
-.overlay {
-  position: relative;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: 4px solid #fff;
-  border-top-color: transparent;
-  animation: spin 1s infinite linear;
-}
-
-.spinner-icon {
-  width: 100%;
-  height: 100%;
-  background-image: url('path/to/spinner-icon.png');
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-.message {
-  margin-top: 20px;
-  color: #fff;
-  font-weight: bold;
-  text-align: center;
-}
-
-.gallery-container{
+    .gallery-container{
   background: rgb(237, 237, 237);
   padding:20px;
-}
-
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>
 @endsection

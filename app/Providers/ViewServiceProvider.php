@@ -267,14 +267,17 @@ class ViewServiceProvider extends ServiceProvider
             $host = request()->getHost();
             $path = request()->path();
             $cacheKey = "page_attributes_{$host}_{$path}";
-            
-            $attributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
+
+            // Named "pageAttributes", not "attributes" - the latter is Blade's reserved
+            // variable for a component's HTML attribute bag, and sharing it to every
+            // view clobbers $attributes inside any <x-...> component in the app.
+            $pageAttributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
                 return PageAttribute::where('domain', '=', $host)
                     ->where('uri', $path)
                     ->get();
             });
-            
-            $view->with('attributes', $attributes);
+
+            $view->with('pageAttributes', $pageAttributes);
         });
 
 

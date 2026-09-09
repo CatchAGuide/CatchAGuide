@@ -201,11 +201,6 @@
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
     
-    .spinner-border {
-        width: 3rem;
-        height: 3rem;
-    }
-
     /* Modal styling to match thankYouModal */
     #successModal .modal-content,
     #errorModal .modal-content {
@@ -594,9 +589,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" style="display: none;">
         <div class="spinner-container">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+            <x-loading.inline style="width:3rem;height:3rem;" label="Loading..." />
             <p class="mt-2">Processing your reschedule request...</p>
         </div>
     </div>

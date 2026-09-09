@@ -32,7 +32,7 @@ class AdminCategoryCountryController extends Controller
 
     public function index()
     {
-        $rows = CategoryEntity::countries()->paginate(25);
+        $rows = CategoryEntity::countries()->orderBy('name', 'ASC')->paginate(25);
         $languagesByEntity = $this->languagesByEntity($rows->pluck('id'), CategoryPageEntityType::GEO_COUNTRY);
 
         $data = compact('rows', 'languagesByEntity');
@@ -133,7 +133,7 @@ class AdminCategoryCountryController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Country Successfully Added!');
+            return redirect()->route('admin.category.country.index')->with('success', 'Country Successfully Added!');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Exception', ['message' => $e->getMessage()]);

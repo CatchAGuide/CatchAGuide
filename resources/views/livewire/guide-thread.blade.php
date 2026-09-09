@@ -395,7 +395,7 @@
                                             View more
                                         </button>
                                         <div wire:loading.delay>
-                                            <div class="spinner-border" role="status"></div>
+                                            <x-loading.inline :label="__('forms.loading')" />
                                         </div>
                                     </div>
                                 @endif

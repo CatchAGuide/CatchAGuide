@@ -1152,9 +1152,7 @@
                 <!-- Loading Overlay -->
                 <div id="contactLoadingOverlay" style="display: none;">
                     <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                        <div class="spinner-border text-orange mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        <x-loading.inline class="mb-3" label="Loading..." />
                         <p class="text-center">@lang('contact.submitting')...</p>
                     </div>
                 </div>

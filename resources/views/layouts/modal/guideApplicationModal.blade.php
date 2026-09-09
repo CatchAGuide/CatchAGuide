@@ -245,7 +245,7 @@
                                 <i class="fas fa-paper-plane me-2"></i>{{ __('profile.submitApplication') }}
                             </span>
                             <span class="loading-state d-none">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <x-loading.inline style="width:1rem;height:1rem;" />
                                 {{ __('checkout.loading') }}
                             </span>
                         </button>

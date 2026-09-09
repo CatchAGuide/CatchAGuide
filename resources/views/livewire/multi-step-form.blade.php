@@ -1,14 +1,7 @@
 <div>
     {{-- To attain knowledge, add things every day; To attain wisdom, subtract things every day. --}}
-    <div wire:loading wire:target="register" class="overlay-container">
-        <div class="overlay">
-            <div class="spinner">
-              <div class="spinner-icon"></div>
-                </div>
-                <div class="message">
-                Please wait while processing...
-                </div>
-            </div>
+    <div wire:loading wire:target="register">
+        <x-loading.overlay :message="__('loading.processing')" />
     </div>
 
 

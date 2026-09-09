@@ -463,9 +463,7 @@
                 <div class="modal-body">
                     <div id="userICalFeedsList">
                         <div class="text-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
+                            <x-loading.inline label="Loading..." />
                         </div>
                     </div>
                 </div>

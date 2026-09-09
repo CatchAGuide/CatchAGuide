@@ -4,41 +4,39 @@ namespace App\Http\Controllers\Blog;
 
 use App\Http\Controllers\Controller;
 use App\Models\Thread;
+use App\Services\Magazine\MagazineListingService;
 use Illuminate\Http\Request;
-
-use App\Support\SharedData;
 
 class BlogController extends Controller
 {
-    public function index()
-    {
-        if(in_array(app()->getLocale(),config('app.locales'))){
+    public function __construct(
+        private MagazineListingService $magazine
+    ) {}
 
-            $query =  Thread::orderBy('id','desc');
-    
-            $threads =  $query->where('language',app()->getLocale())->get();
-    
-            return view('pages.blog.index', [
-                'threads' => $threads,
-            ]);
+    public function index(Request $request)
+    {
+        $locale = app()->getLocale();
+
+        if (! in_array($locale, config('app.locales'), true)) {
+            abort(404);
         }
 
-        abort(404);
+        $data = $this->magazine->build(
+            $locale,
+            $request->query('q')
+        );
 
+        return view('pages.blog.index', $data);
     }
 
-    public function redirectToFishingMagazine(){
-       return redirect(route('blog.thread.show',[$slug, $thread->language]), 301);
-    }
+    public function redirectToNewFormat($slug)
+    {
+        $thread = Thread::where('slug', $slug)->first();
 
-    public function redirectToNewFormat($slug){
-
-       $thread = Thread::where('slug', $slug)->first();
-
-       if(!$thread){
+        if (! $thread) {
             return redirect()->route('blog.index');
-       }
-   
-       return redirect(route('blog.thread.show',[$slug]), 301);
+        }
+
+        return redirect(route('blog.thread.show', [$slug]), 301);
     }
 }

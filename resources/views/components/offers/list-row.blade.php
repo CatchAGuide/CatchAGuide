@@ -300,7 +300,7 @@
                             hidden
                             aria-hidden="true"
                         >
-                            <span class="offers-gallery-modal__spinner" aria-hidden="true"></span>
+                            <x-loading.inline class="offers-gallery-modal__spinner" />
                             <span class="offers-gallery-modal__loader-text">{{ __('vacations.loading') }}</span>
                         </div>
                         <img

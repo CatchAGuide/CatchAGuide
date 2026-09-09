@@ -4,7 +4,10 @@
 @php
     $isDraft = !empty($isDraft);
     $preselectedGuests = $preselectedGuests ?? null;
+    $campMetaDescription = \Illuminate\Support\Str::limit(strip_tags($camp['description']['camp_description'] ?? ''), 200);
 @endphp
+
+@section('description', $campMetaDescription)
 
 @section('meta_robots')
     @if($isDraft)
@@ -19,6 +22,13 @@
 @endsection
 
 @section('share_tags')
+    <meta property="og:title" content="{{ $camp['title'] ?? '' }}" />
+    <meta property="og:description" content="{{ $campMetaDescription }}" />
+    <meta property="og:type" content="product" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    @if(!empty($primaryImage))
+        <meta property="og:image" content="{{ $primaryImage }}" />
+    @endif
 @endsection
 
 @section('content')
@@ -830,9 +840,7 @@
                 <!-- Loading Overlay -->
                 <div id="contactLoadingOverlay" style="display: none;">
                     <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                        <div class="spinner-border text-orange mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        <x-loading.inline class="mb-3" label="Loading..." />
                         <p class="text-center">{{ __('contact.submitting') }}...</p>
                     </div>
                 </div>
@@ -896,9 +904,7 @@
                 </div>
                 <div id="campGeneralContactLoadingOverlay" style="display: none;">
                     <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                        <div class="spinner-border text-orange mb-3" role="status">
-                            <span class="visually-hidden">{{ __('vacations.loading') }}</span>
-                        </div>
+                        <x-loading.inline class="mb-3" :label="__('vacations.loading')" />
                         <p class="text-center">{{ __('contact.submitting') }}...</p>
                     </div>
                 </div>

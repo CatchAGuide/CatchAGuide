@@ -9,7 +9,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use App\Services\DDoSProtectionService;
 use App\Services\DDoSNotificationService;
-use Stichoza\GoogleTranslate\GoogleTranslate;
+use App\Services\Translation\Support\FishingCopyGoogleTranslator;
 
 class GeminiTranslationService implements TranslationServiceInterface
 {
@@ -523,23 +523,14 @@ class GeminiTranslationService implements TranslationServiceInterface
     private function googleTranslateFallback(string $text, string $targetLanguage = 'en'): string
     {
         try {
-            $translate = GoogleTranslate::trans($text, $targetLanguage);
-
-            // Apply the same custom replacements as in the translate helper
-            if (strpos($translate, 'Führungen')) {
-                $translate = str_replace('Führungen', 'Angelguidings', $translate);
-            }
-
-            if (strpos($translate, 'Führung')) {
-                $translate = str_replace('Führung', 'guiding', $translate);
-            }
+            $translate = (new FishingCopyGoogleTranslator())->translate($text, $targetLanguage);
 
             Log::channel('gemini_usage')->info('Google Translate fallback succeeded', [
                 'text' => substr($text, 0, 50),
                 'result' => substr($translate, 0, 50)
             ]);
 
-            return ucfirst($translate);
+            return $translate;
         } catch (\Exception $e) {
             Log::error('Google Translate fallback failed', [
                 'error' => $e->getMessage(),

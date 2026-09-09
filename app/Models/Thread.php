@@ -36,7 +36,14 @@ class Thread extends Model
     {
         $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
 
-        return '/'.$thumbnail_path;
+        return url('/'.$thumbnail_path);
+    }
+
+    public function estimatedReadingMinutes(): int
+    {
+        $words = str_word_count(strip_tags((string) $this->body));
+
+        return max(1, (int) ceil($words / 200));
     }
 
     public function getSlugOptions(): SlugOptions

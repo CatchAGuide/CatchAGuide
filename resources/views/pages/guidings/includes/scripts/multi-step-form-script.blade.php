@@ -22,6 +22,10 @@
         saving_draft: @json(__('newguidings.saving_draft')),
         uploading_guiding: @json(__('newguidings.uploading_guiding')),
         keep_tab_open: @json(__('newguidings.keep_tab_open')),
+        preparing_adventure: @json(__('newguidings.preparing_adventure')),
+        setting_up_experience: @json(__('newguidings.setting_up_experience')),
+        uploading_your_images: @json(__('newguidings.uploading_your_images')),
+        please_wait_a_moment: @json(__('newguidings.please_wait_a_moment')),
     };
 
     function guidingUploadMessage(key, count) {
@@ -256,153 +260,22 @@
         if (!loadingScreen) {
             loadingScreen = document.createElement('div');
             loadingScreen.id = 'loadingScreen';
-            loadingScreen.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                z-index: 9999;
-                backdrop-filter: blur(10px);
+            loadingScreen.className = 'page-loading-overlay';
+            loadingScreen.setAttribute('role', 'status');
+            loadingScreen.setAttribute('aria-live', 'polite');
+            loadingScreen.setAttribute('aria-busy', 'true');
+            loadingScreen.innerHTML = `
+                <span class="page-loading-overlay__spinner">
+                    <svg class="cag-spinner" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <g class="cag-spinner__ring"><circle cx="24" cy="24" r="18" /></g>
+                        <g class="cag-spinner__orbit"><path class="cag-spinner__fish" d="M24,3.5 L27,7 L24,10.5 L21,7 Z" /></g>
+                        <circle class="cag-spinner__ripple" cx="24" cy="24" r="6" />
+                        <circle class="cag-spinner__bobber" cx="24" cy="24" r="5" />
+                    </svg>
+                </span>
+                <span class="page-loading-overlay__text"></span>
+                <span class="page-loading-overlay__subtext"></span>
             `;
-            
-            // Create the main container
-            const container = document.createElement('div');
-            container.style.cssText = `
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            `;
-            
-            // Create fishing boat icon with animation
-            const boatIcon = document.createElement('div');
-            boatIcon.innerHTML = '🚤';
-            boatIcon.style.cssText = `
-                font-size: 4rem;
-                margin-bottom: 1rem;
-                animation: float 3s ease-in-out infinite;
-            `;
-            
-            // Create waves animation
-            const wavesContainer = document.createElement('div');
-            wavesContainer.style.cssText = `
-                position: relative;
-                width: 200px;
-                height: 20px;
-                margin-bottom: 2rem;
-            `;
-            
-            for (let i = 0; i < 3; i++) {
-                const wave = document.createElement('div');
-                wave.style.cssText = `
-                    position: absolute;
-                    top: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: ${60 + i * 40}px;
-                    height: 4px;
-                    background: rgba(255, 255, 255, ${0.7 - i * 0.2});
-                    border-radius: 2px;
-                    animation: wave ${2 + i * 0.5}s ease-in-out infinite;
-                    animation-delay: ${i * 0.3}s;
-                `;
-                wavesContainer.appendChild(wave);
-            }
-            
-            // Create loading dots
-            const dotsContainer = document.createElement('div');
-            dotsContainer.style.cssText = `
-                display: flex;
-                gap: 8px;
-                margin-bottom: 1rem;
-            `;
-            
-            for (let i = 0; i < 3; i++) {
-                const dot = document.createElement('div');
-                dot.style.cssText = `
-                    width: 12px;
-                    height: 12px;
-                    background: white;
-                    border-radius: 50%;
-                    animation: bounce 1.4s ease-in-out infinite both;
-                    animation-delay: ${i * 0.16}s;
-                `;
-                dotsContainer.appendChild(dot);
-            }
-            
-            // Create loading text with typing effect
-            const loadingText = document.createElement('div');
-            loadingText.style.cssText = `
-                color: white;
-                font-size: 1.2rem;
-                font-weight: 500;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                margin-bottom: 0.5rem;
-            `;
-            
-            const subText = document.createElement('div');
-            subText.style.cssText = `
-                color: rgba(255, 255, 255, 0.8);
-                font-size: 0.9rem;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            `;
-            
-            // Add all elements to container
-            container.appendChild(boatIcon);
-            container.appendChild(wavesContainer);
-            container.appendChild(dotsContainer);
-            container.appendChild(loadingText);
-            container.appendChild(subText);
-            
-            loadingScreen.appendChild(container);
-            
-            // Add CSS animations
-            const keyframes = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px); }
-                    50% { transform: translateY(-10px); }
-                }
-                
-                @keyframes wave {
-                    0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.7; }
-                    50% { transform: translateX(-50%) scaleX(1.2); opacity: 1; }
-                }
-                
-                @keyframes bounce {
-                    0%, 80%, 100% { 
-                        transform: scale(0);
-                        opacity: 0.5;
-                    } 
-                    40% { 
-                        transform: scale(1);
-                        opacity: 1;
-                    }
-                }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `;
-            
-            if (!document.getElementById('interactive-loader-styles')) {
-                const style = document.createElement('style');
-                style.id = 'interactive-loader-styles';
-                style.textContent = keyframes;
-                document.head.appendChild(style);
-            }
-            
             document.body.appendChild(loadingScreen);
         }
 
@@ -411,35 +284,32 @@
             clearInterval(loadingScreen.textInterval);
             loadingScreen.textInterval = null;
         }
-        const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
-        const subText = loadingScreen.querySelector('div[style*="font-size: 0.9rem"]');
+        const loadingText = loadingScreen.querySelector('.page-loading-overlay__text');
+        const subText = loadingScreen.querySelector('.page-loading-overlay__subtext');
+        const i18n = window.GuidingFormI18n || {};
         const messages = [
-            'Preparing your fishing adventure...',
-            'Setting up your guide experience...',
-            'Uploading your images...',
-            'Saving your progress...'
+            i18n.preparing_adventure || 'Preparing your fishing adventure...',
+            i18n.setting_up_experience || 'Setting up your guide experience...',
+            i18n.uploading_your_images || 'Uploading your images...',
+            i18n.saving_progress || 'Saving your progress...'
         ];
         let messageIndex = 0;
         if (loadingText) {
             loadingText.textContent = message || messages[0];
         }
         if (subText) {
-            subText.textContent = subMessage || 'Please wait a moment';
+            subText.textContent = subMessage || i18n.please_wait_a_moment || 'Please wait a moment';
         }
         if (!message) {
             loadingScreen.textInterval = setInterval(() => {
                 messageIndex = (messageIndex + 1) % messages.length;
                 if (loadingText) {
-                    loadingText.style.animation = 'fadeIn 0.5s ease-in-out';
                     loadingText.textContent = messages[messageIndex];
-                    setTimeout(() => {
-                        loadingText.style.animation = '';
-                    }, 500);
                 }
             }, 2000);
         }
 
-        loadingScreen.style.display = 'flex';
+        loadingScreen.hidden = false;
         if (typeof GuidingFormLoading !== 'undefined') {
             GuidingFormLoading.armLoadingWatchdog(GuidingFormLoading.DEFAULT_WATCHDOG_MS, function (err) {
                 hideLoadingScreen();
@@ -459,7 +329,7 @@
             if (typeof GuidingFormLoading !== 'undefined') {
                 GuidingFormLoading.clearLoadingWatchdog();
             }
-            loadingScreen.style.display = 'none';
+            loadingScreen.hidden = true;
         }
     }
 

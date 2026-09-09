@@ -20,12 +20,15 @@ class SearchController extends Controller
         $longitude = $request->get('placeLng');
 
         if (! is_numeric($latitude) || ! is_numeric($longitude)) {
-            $latitude = 0;
-            $longitude = 0;
+            return view('pages.search.search');
         }
 
-        $latitude = max(-90, min(90, (float) $latitude));
-        $longitude = max(-180, min(180, (float) $longitude));
+        $latitude = (float) $latitude;
+        $longitude = (float) $longitude;
+
+        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+            return view('pages.search.search');
+        }
 
         $radius = 500;
 
