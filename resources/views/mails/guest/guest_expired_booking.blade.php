@@ -11,7 +11,7 @@
     </div>
     <div class="content" style="padding-bottom:0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size:16px;">{{__('emails.dear')}} {{ $user->firstname }},</p>
+            <p style="font-size:16px;">{{__('emails.dear')}} {{ $user->firstname ?? __('emails.guest_name') }},</p>
             <p>@lang('emails.guest_booking_request_expired_text_1')</p>
             <p>@lang('emails.guest_booking_request_expired_text_2')</p>
             <div style="margin-top:20px;">

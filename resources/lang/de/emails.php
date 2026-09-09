@@ -416,4 +416,6 @@ return [
     'guide_application_rejected_no_reason' => 'Es wurden keine weiteren Details angegeben.',
     'guide_application_rejected_reapply' => 'Du kannst jederzeit eine neue Anfrage mit aktualisierten Angaben einreichen.',
     'guide_application_rejected_cta' => 'Neue Anfrage stellen',
+    'cash_on_site' => 'Barzahlung vor Ort',
+    'contact_guide_please' => 'Kontaktiere bitten den Guide!',
 ];

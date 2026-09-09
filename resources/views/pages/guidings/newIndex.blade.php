@@ -1,7 +1,11 @@
-@extends('layouts.app-v2-1')
+@extends('layouts.app-v2')
 
 @section('title',$guiding->title)
 @section('description',$guiding->desc_course_of_action ?? $guiding->title)
+
+@section('canonical')
+    <link rel="canonical" href="{{ $guiding->publicShowUrl() }}" />
+@endsection
 
 @section('share_tags')
     <meta property="og:title" content="{{$guiding->title}}" />
@@ -18,7 +22,7 @@
             '@type' => 'TouristTrip',
             'name' => $guiding->title,
             'description' => $guiding->desc_tour_unique ?? $guiding->desc_course_of_action ?? $guiding->description,
-            'url' => url()->current(),
+            'url' => $guiding->publicShowUrl(),
             'image' => $guiding->thumbnail_path ? media_url($guiding->thumbnail_path) : null,
             'touristType' => 'Fishing trip',
             'areaServed' => array_filter([
@@ -791,25 +795,17 @@
 @endsection
 
 @section('content')
-<div class="container">
-        <section class="page-header">
-            <div class="page-header__bottom breadcrumb-container guiding">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li><a href="{{ route('guidings.index') }}">@lang('message.Guiding')</a></li>
-                        <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">
-                            {{$guiding->title}}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-    </div>
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.category.partials.product-hero-header', [
+        'listingTitle' => __('homepage.filter-fishing-near-me'),
+        'searchAction' => listing_search_action(),
+        'breadcrumbItems' => [
+            ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            ['label' => $guiding->title, 'url' => null],
+        ],
+    ])
 
- <div id="guidings-page" class="container">
+ <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 4">
     <div class="title-container">
         <div class="title-wrapper">
             {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
@@ -1120,8 +1116,8 @@
                         @foreach($languages as $language)
                             @if($language['has_flag'])
                                 <div class="language-flag-compact" title="{{ $language['name'] }}">
-                                    <img src="{{ asset('flags/' . $language['flag_code'] . '.svg') }}" 
-                                         alt="{{ $language['name'] }}" 
+                                    <img src="{{ media_url('flags/' . $language['flag_code'] . '.svg') }}"
+                                         alt="{{ $language['name'] }}"
                                          width="20" height="20">
                                 </div>
                             @else
@@ -1337,7 +1333,9 @@
                     
                     <!-- Requirements Section -->
                     @php
-                        $requirements = $guiding->getRequirementsAttribute();
+                        // Magic property (not getRequirementsAttribute() directly) so a
+                        // translated value set via $guiding->translated is respected.
+                        $requirements = collect($guiding->requirements);
                     @endphp
                     @if(!$requirements->isEmpty())
                         <div class="tab-category mb-4">
@@ -1347,7 +1345,7 @@
                                     <div class="col-12 text-start">
                                         <ul>
                                             <li>
-                                                <strong>{{ $requirement['name'] }}:</strong> {{ $requirement['value'] ?? '' }}
+                                                <strong>{{ $requirement['name'] ?? '' }}:</strong> {{ $requirement['value'] ?? '' }}
                                             </li>
                                         </ul>
                                     </div>
@@ -1362,7 +1360,7 @@
 
                     <!-- Other Information Section -->
                     @php
-                        $otherInformation = $guiding->getOtherInformationAttribute();
+                        $otherInformation = collect($guiding->other_information);
                     @endphp
                     @if(!$otherInformation->isEmpty())
                         <div class="tab-category mb-4">
@@ -1386,7 +1384,7 @@
                     @endif
 
                     @php
-                        $recommendations = $guiding->getRecommendationsAttribute();
+                        $recommendations = collect($guiding->recommendations);
                     @endphp
                     @if(!$recommendations->isEmpty())
                         <div class="tab-category mb-4">
@@ -1632,30 +1630,37 @@
                     <div class="accordion-body">
                         <div class="row card tab-card h-100 shadow m-0 p-3">
                             <!-- Requirements Section -->
-                            @if(!empty(decode_if_json( $guiding->requirements)))
+                            @php
+                                // Magic properties (not getXAttribute() directly) so a
+                                // translated value set via $guiding->translated is respected.
+                                $accordionRequirements = collect($guiding->requirements);
+                                $accordionOtherInformation = collect($guiding->other_information);
+                                $accordionRecommendations = collect($guiding->recommendations);
+                            @endphp
+                            @if(!$accordionRequirements->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Requirements')</strong>
                                 <ul>
-                                    @foreach ($guiding->getRequirementsAttribute() as $requirements)
+                                    @foreach ($accordionRequirements as $requirements)
                                         <li><span>{{ $requirements['name'] }}:</span> {{ $requirements['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Other Information Section -->
-                            @if(!$guiding->getOtherInformationAttribute()->isEmpty())
+                            @if(!$accordionOtherInformation->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Other_Info')</strong>
                                 <ul>
-                                    @foreach ($guiding->getOtherInformationAttribute() as $otherIndex => $other)
+                                    @foreach ($accordionOtherInformation as $otherIndex => $other)
                                         <li><span>{{ $other['name'] }}:</span> {{ $other['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
                                 <hr/>
                             @endif
                             <!-- Recommended Preparation Section -->
-                            @if(!$guiding->getRecommendationsAttribute()->isEmpty())
+                            @if(!$accordionRecommendations->isEmpty())
                                 <strong class="subtitle-text">@lang('guidings.Reco_Prep')</strong>
                                 <ul>
-                                    @foreach ($guiding->getRecommendationsAttribute() as $recIndex => $recommendations)
+                                    @foreach ($accordionRecommendations as $recIndex => $recommendations)
                                         <li><span>{{ $recommendations['name'] }}:</span> {{ $recommendations['value'] ?? '' }}</li>
                                     @endforeach
                                 </ul>
@@ -1978,7 +1983,7 @@
                             $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
                             $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
                         @endphp
-                        <a href="{{ route('guidings.show', [$other_guiding->id, $other_guiding->slug]) }}" class="guiding-tile text-decoration-none">
+                        <a href="{{ $other_guiding->publicShowUrl($productPageQuery ?? []) }}" class="guiding-tile text-decoration-none">
                             <div class="guiding-tile__img-wrap">
                                 @if($tile_img)
                                     <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
@@ -2077,9 +2082,11 @@
         </div>
     </div>
 </div>
+</div>
 @endsection
 
 @section('js_after')
+@include('layouts.partials.category-hero-header-script')
 
 <script>
     
@@ -2401,7 +2408,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/${newGuiding.id}/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                        <a href="/guidings/offer/${newGuiding.slug}" class="btn btn-primary">Details</a>
                     </div>
                 </div>
             `;

@@ -5,10 +5,36 @@
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@latest/dist/browser-image-compression.js"></script>
 {{-- HEIC/HEIF to JPEG converter for broader mobile support --}}
 <script src="https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="{{ asset('assets/js/guiding-form-loading.js') }}"></script>
 <script src="{{ asset('assets/js/ImageManager.js') }}"></script>
 @include('components.image-manager-media-config')
 
 <script>
+    window.GuidingFormI18n = {
+        upload_timeout: @json(__('newguidings.upload_timeout')),
+        upload_watchdog: @json(__('newguidings.upload_watchdog')),
+        upload_prepare_failed: @json(__('newguidings.upload_prepare_failed')),
+        uploading_images: @json(__('newguidings.uploading_images')),
+        uploading_images_hint: @json(__('newguidings.uploading_images_hint')),
+        preparing_images: @json(__('newguidings.preparing_images')),
+        preparing_images_hint: @json(__('newguidings.preparing_images_hint')),
+        saving_progress: @json(__('newguidings.saving_progress')),
+        saving_draft: @json(__('newguidings.saving_draft')),
+        uploading_guiding: @json(__('newguidings.uploading_guiding')),
+        keep_tab_open: @json(__('newguidings.keep_tab_open')),
+    };
+
+    function guidingUploadMessage(key, count) {
+        const i18n = window.GuidingFormI18n || {};
+        let template = i18n[key] || '';
+        if (typeof count === 'number' && (key === 'uploading_images' || key === 'preparing_images')) {
+            const parts = String(template).split('|');
+            template = (count === 1 ? parts[0] : (parts[1] || parts[0]));
+            return String(template).replace(':count', String(count));
+        }
+        return template;
+    }
+
     window.imageManagerLoaded = window.imageManagerLoaded || null;
     window.currentStep = window.currentStep || 1;
     window.totalSteps = window.totalSteps || 7;
@@ -34,14 +60,44 @@
     }
 
     function appendCroppedImagesToFormData(formData) {
-        const croppedImages = getUnsavedCroppedImages();
         clearTitleImagesFromFormData(formData);
+        let croppedImages = [];
+        try {
+            croppedImages = getUnsavedCroppedImages();
+        } catch (error) {
+            console.error('Failed to prepare cropped images:', error);
+            throw new Error(guidingUploadMessage('upload_prepare_failed') || 'Could not prepare your images for upload.');
+        }
+        if (typeof GuidingFormLoading !== 'undefined') {
+            GuidingFormLoading.setLoadingMessage(
+                croppedImages.length > 0
+                    ? guidingUploadMessage('preparing_images', croppedImages.length)
+                    : guidingUploadMessage('saving_progress'),
+                croppedImages.length > 0 ? guidingUploadMessage('preparing_images_hint') : ''
+            );
+        }
         croppedImages.forEach((imgObj, idx) => {
             const blob = dataURLtoBlob(imgObj.dataUrl);
-            const filename = imgObj.filename || `cropped_${idx}.png`;
+            // Prefer jpeg extension so draft mime validation stays happy after compression.
+            let filename = imgObj.filename || `cropped_${idx}.jpg`;
+            if (blob.type === 'image/jpeg' && /\.webp$/i.test(filename)) {
+                filename = filename.replace(/\.webp$/i, '.jpg');
+            }
             formData.append('title_image[]', blob, filename);
         });
         return croppedImages.length;
+    }
+
+    function showUploadError(message) {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.style.display = 'block';
+            errorContainer.innerHTML = '<div class="alert alert-danger"></div>';
+            errorContainer.querySelector('.alert').textContent = message;
+            scrollToFormCenter();
+        } else {
+            alert(message);
+        }
     }
 
     function applyGallerySaveResponse(data) {
@@ -195,7 +251,7 @@
     }
 
 
-    function showLoadingScreen() {
+    function showLoadingScreen(message, subMessage) {
         let loadingScreen = document.getElementById('loadingScreen');
         if (!loadingScreen) {
             loadingScreen = document.createElement('div');
@@ -347,34 +403,49 @@
                 document.head.appendChild(style);
             }
             
-            // Animate text changes
-            const messages = [
-                'Preparing your fishing adventure...',
-                'Setting up your guide experience...',
-                'Loading fishing spots...',
-                'Getting everything ready...'
-            ];
-            
-            let messageIndex = 0;
-            loadingText.textContent = messages[0];
-            subText.textContent = 'Please wait a moment';
-            
-            const textInterval = setInterval(() => {
-                messageIndex = (messageIndex + 1) % messages.length;
-                loadingText.style.animation = 'fadeIn 0.5s ease-in-out';
-                loadingText.textContent = messages[messageIndex];
-                
-                setTimeout(() => {
-                    loadingText.style.animation = '';
-                }, 500);
-            }, 2000);
-            
-            // Store interval reference to clear it later
-            loadingScreen.textInterval = textInterval;
-            
             document.body.appendChild(loadingScreen);
         }
+
+        // Restart message rotation each time the overlay is shown.
+        if (loadingScreen.textInterval) {
+            clearInterval(loadingScreen.textInterval);
+            loadingScreen.textInterval = null;
+        }
+        const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
+        const subText = loadingScreen.querySelector('div[style*="font-size: 0.9rem"]');
+        const messages = [
+            'Preparing your fishing adventure...',
+            'Setting up your guide experience...',
+            'Uploading your images...',
+            'Saving your progress...'
+        ];
+        let messageIndex = 0;
+        if (loadingText) {
+            loadingText.textContent = message || messages[0];
+        }
+        if (subText) {
+            subText.textContent = subMessage || 'Please wait a moment';
+        }
+        if (!message) {
+            loadingScreen.textInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % messages.length;
+                if (loadingText) {
+                    loadingText.style.animation = 'fadeIn 0.5s ease-in-out';
+                    loadingText.textContent = messages[messageIndex];
+                    setTimeout(() => {
+                        loadingText.style.animation = '';
+                    }, 500);
+                }
+            }, 2000);
+        }
+
         loadingScreen.style.display = 'flex';
+        if (typeof GuidingFormLoading !== 'undefined') {
+            GuidingFormLoading.armLoadingWatchdog(GuidingFormLoading.DEFAULT_WATCHDOG_MS, function (err) {
+                hideLoadingScreen();
+                showUploadError(err.message);
+            });
+        }
     }
 
     function hideLoadingScreen() {
@@ -385,8 +456,18 @@
                 clearInterval(loadingScreen.textInterval);
                 loadingScreen.textInterval = null;
             }
+            if (typeof GuidingFormLoading !== 'undefined') {
+                GuidingFormLoading.clearLoadingWatchdog();
+            }
             loadingScreen.style.display = 'none';
         }
+    }
+
+    function formFetch(url, options, timeoutMs) {
+        if (typeof GuidingFormLoading !== 'undefined' && typeof GuidingFormLoading.fetchWithTimeout === 'function') {
+            return GuidingFormLoading.fetchWithTimeout(url, options, timeoutMs);
+        }
+        return fetch(url, options);
     }
 
     async function saveDraft(shouldRedirect = false) {
@@ -397,16 +478,7 @@
         }
 
         // Show loading screen
-        showLoadingScreen();
-        
-        // Update loading screen message
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) {
-            const loadingText = loadingScreen.querySelector('div[style*="font-size: 1.2rem"]');
-            if (loadingText) {
-                loadingText.textContent = 'Saving draft...';
-            }
-        }
+        showLoadingScreen(guidingUploadMessage('saving_draft'), guidingUploadMessage('uploading_images_hint'));
 
         try {
             const formData = new FormData(form);
@@ -427,8 +499,14 @@
             }
 
             const uploadedCount = appendCroppedImagesToFormData(formData);
+            if (uploadedCount > 0 && typeof GuidingFormLoading !== 'undefined') {
+                GuidingFormLoading.setLoadingMessage(
+                    guidingUploadMessage('uploading_images', uploadedCount),
+                    guidingUploadMessage('uploading_images_hint')
+                );
+            }
 
-            const response = await fetch(window.saveDraftUrl, {
+            const response = await formFetch(window.saveDraftUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -470,14 +548,7 @@
 
         } catch (error) {
             console.error('Failed to save draft:', error);
-            
-            // Show error message
-            const errorContainer = document.getElementById('error-container');
-            if (errorContainer) {
-                errorContainer.style.display = 'block';
-                errorContainer.innerHTML = '<div class="alert alert-danger">Failed to save draft. Please try again.</div>';
-                scrollToFormCenter();
-            }
+            showUploadError((error && error.message) ? error.message : 'Failed to save draft. Please try again.');
         } finally {
             // Hide loading screen
             hideLoadingScreen();
@@ -1447,14 +1518,21 @@
                 })
             ).then(() => {
                 // Submit the form after compression
-                fetch(form.action, {
+                if (typeof GuidingFormLoading !== 'undefined') {
+                    GuidingFormLoading.setLoadingMessage(
+                        guidingUploadMessage('uploading_guiding'),
+                        guidingUploadMessage('keep_tab_open')
+                    );
+                }
+                return formFetch(form.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                })
+                });
+            })
                     .then(response => {
                         if (!response.ok) {
                             return response.text().then(text => {
@@ -1496,25 +1574,19 @@
                         if (error instanceof Error) {
                             if (error.message.startsWith('<!DOCTYPE html>')) {
                                 console.error('Server returned an HTML error page. Check server logs for details.');
-                                alert('An unexpected error occurred. Please try again later.');
+                                showUploadError('An unexpected error occurred. Please try again later.');
                             } else {
-                                console.error(error.message);
-                                alert(error.message);
+                                showUploadError(error.message);
                             }
                         } else if (typeof error === 'object' && error !== null) {
                             displayValidationErrors(error.errors || {});
                         } else {
-                            alert('An unexpected error occurred. Please try again.');
+                            showUploadError('An unexpected error occurred. Please try again.');
                         }
                     })
                     .finally(() => {
                         hideLoadingScreen();
                     });
-            }).catch(error => {
-                console.error('Image compression error:', error);
-                hideLoadingScreen();
-                alert('Failed to compress images. Please try again.');
-            });
 
         } catch (error) {
             console.error('Error preparing form data:', error);
@@ -2192,7 +2264,8 @@
     var saveStepProgressQueue = Promise.resolve();
 
     function saveStepProgress(stepNumber) {
-        saveStepProgressQueue = saveStepProgressQueue.then(() => new Promise((resolve, reject) => {
+        // Keep the queue alive after a failed save so later steps can still persist.
+        saveStepProgressQueue = saveStepProgressQueue.catch(() => null).then(() => new Promise((resolve, reject) => {
             const form = document.getElementById('newGuidingForm');
             const formData = new FormData(form);
 
@@ -2210,13 +2283,25 @@
 
             // Only upload images that have not been persisted yet.
             let uploadedCount = 0;
-            if (stepNumber === 1) {
-                uploadedCount = appendCroppedImagesToFormData(formData);
-            } else {
-                clearTitleImagesFromFormData(formData);
+            try {
+                if (stepNumber === 1) {
+                    uploadedCount = appendCroppedImagesToFormData(formData);
+                } else {
+                    clearTitleImagesFromFormData(formData);
+                }
+            } catch (prepError) {
+                reject(prepError);
+                return;
             }
 
-            fetch(window.saveDraftSyncUrl, {
+            if (uploadedCount > 0 && typeof GuidingFormLoading !== 'undefined') {
+                GuidingFormLoading.setLoadingMessage(
+                    guidingUploadMessage('uploading_images', uploadedCount),
+                    guidingUploadMessage('uploading_images_hint')
+                );
+            }
+
+            formFetch(window.saveDraftSyncUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {

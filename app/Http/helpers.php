@@ -5,6 +5,7 @@ use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\ListingMediaStorageRegistry;
 use App\Services\Media\ManagedMediaPathMatcher;
 use App\Services\Media\MediaPathResolver;
+use App\Services\Media\MediaTrashService;
 use App\Services\Media\MediaUrlResolver;
 use App\Services\Media\MediaWriteStorageResolver;
 use Illuminate\Support\Facades\Storage;
@@ -220,6 +221,21 @@ if (!function_exists('media_delete')) {
         app(MediaPathResolver::class)->forgetExistsCache($path);
 
         return $deleted;
+    }
+}
+
+if (!function_exists('media_trash_paths')) {
+    /**
+     * Move listing media into the recycle bin after a successful DB commit.
+     * Paths still referenced by $keepPaths are skipped.
+     *
+     * @param  array<int, mixed>  $paths
+     * @param  array<int, mixed>  $keepPaths
+     * @return array<int, string>
+     */
+    function media_trash_paths(array $paths, array $keepPaths = []): array
+    {
+        return app(MediaTrashService::class)->trashMany($paths, $keepPaths);
     }
 }
 
@@ -729,5 +745,32 @@ if (!function_exists('getLocationDetails')) {
         }
 
         return null;
+    }
+}
+
+if (! function_exists('listing_search_action')) {
+    /**
+     * Header location-search catalog: guidings stays on tours, offers stays on offers.
+     */
+    function listing_search_action(?string $override = null): string
+    {
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
+        $request = request();
+
+        if ($request->routeIs('guidings.*') || $request->is('guidings*')) {
+            return route('guidings.index');
+        }
+
+        if (
+            $request->routeIs('vacations.*', 'trips.show')
+            || $request->is('vacations*', 'trips*', 'vacations-v2*')
+        ) {
+            return route('vacations.index');
+        }
+
+        return route('offers.index');
     }
 }

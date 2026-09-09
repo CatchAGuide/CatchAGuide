@@ -136,7 +136,7 @@ class ProductReport extends Model
 
         return match (strtolower((string) $this->source_type)) {
             self::SOURCE_GUIDING => $model->slug
-                ? route('guidings.show', ['id' => $model->id, 'slug' => $model->slug])
+                ? $model->publicShowUrl()
                 : null,
             self::SOURCE_CAMP => $model->slug
                 ? route('vacations.camps.show', $model->slug)

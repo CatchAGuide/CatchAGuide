@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vacation;
 use App\Models\Camp;
-use App\Models\Destination;
+use App\Models\CategoryEntity;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
+use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Location\ListingCountryFilter;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
@@ -15,7 +18,7 @@ class VacationsController extends Controller
 {
     public function index(Request $request)
     {
-        $countries = Destination::whereType('vacations')->where('language',app()->getLocale())->get();
+        $countries = CategoryEntity::countries()->get();
         return view('pages.countries.vacations', compact('countries'));
     }
 
@@ -84,7 +87,7 @@ class VacationsController extends Controller
 
 
         $destinationId = session('vacation_destination_id');
-        $destination = Destination::find($destinationId);
+        $destination = $destinationId ? CategoryEntity::countries()->find($destinationId) : null;
         session()->forget('vacation_destination_id');
         $vacationTitle = $translatedVacation->title ?? $vacation->title ?? null;
         $contactModalTitle = trim('Please provide your details for booking the trip' . (!empty($vacationTitle) ? ': ' . $vacationTitle : ''));
@@ -109,9 +112,9 @@ class VacationsController extends Controller
         return $othervacations;
     }
 
-    private function otherVacationsBasedByLocation($latitude,$longitude){
+    private function otherVacationsBasedByLocation(float $latitude, float $longitude){
         $nearestlisting = Vacation::select(['vacations.*']) // Include necessary attributes here
-        ->selectRaw("(6371 * acos(cos(radians($latitude)) * cos(radians(lat)) * cos(radians(lng) - radians($longitude)) + sin(radians($latitude)) * sin(radians(lat)))) AS distance")
+        ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance', [$latitude, $longitude, $latitude])
         ->orderBy('distance')
         ->where('status',1)
         ->limit(10)
@@ -162,23 +165,36 @@ class VacationsController extends Controller
     public function category(Request $request, $country)
     {
         $place_location = $country;
-        $query = Destination::with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])->where('language',app()->getLocale());
 
-        $country_row = Destination::whereSlug($country)->whereType('vacations')->where('language',app()->getLocale())->first();
-        if (is_null($country_row)) {
-            abort(404);
-        }
-        $query = $query->whereType('vacations')->whereId($country_row->id);
-        $row_data = $query->first();
+        $row_data = CategoryEntity::countries()
+            ->where('slug', $country)
+            ->first();
 
         if (is_null($row_data)) {
             abort(404);
         }
 
-        $faq = $row_data->faq;
-        $fish_chart = $row_data->fish_chart;
-        $fish_size_limit = $row_data->fish_size_limit;
-        $fish_time_limit = $row_data->fish_time_limit;
+        $locale = app()->getLocale();
+        $categoryContent = app(CategoryPageContentService::class);
+        $row_data = $categoryContent->applyScopedContentToModel(
+            $row_data,
+            CategoryPageEntityType::GEO_COUNTRY,
+            CategoryPageScope::VACATIONS,
+            $locale,
+            null,
+            false,
+        );
+        $faq = $categoryContent->resolveFaqsForEntityDisplay(
+            CategoryPageEntityType::GEO_COUNTRY,
+            $row_data->id,
+            CategoryPageScope::VACATIONS,
+            $locale,
+            null,
+            false,
+        );
+        $fish_chart = $row_data->fish_charts();
+        $fish_size_limit = $row_data->fish_size_limits();
+        $fish_time_limit = $row_data->fish_time_limits();
 
         $locale = Config::get('app.locale');
 
@@ -189,9 +205,9 @@ class VacationsController extends Controller
             Session::put('random_seed', $randomSeed);
         }
 
-        $filterData = json_decode($row_data->filters, true) ?? [];
+        $filterData = is_array($row_data->filters) ? $row_data->filters : (json_decode($row_data->filters, true) ?? []);
         $countryFilter = app(ListingCountryFilter::class);
-        $countryFilterValues = $countryFilter->valuesForVacationDestination($row_data, $country, $filterData);
+        $countryFilterValues = $countryFilter->valuesForCountry($row_data, $country, $filterData);
 
         $query = Camp::with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])
             ->where('status', 'active');
@@ -232,7 +248,7 @@ class VacationsController extends Controller
             }
         } else if ($hasOnlyPageParam) {
             // Use random ordering for first page with no filters
-            $query->orderByRaw("RAND($randomSeed)");
+            $query->orderByRaw('RAND(?)', [(int) $randomSeed]);
         } else {
             // Default ordering by ID to ensure consistent pagination
             $query->orderBy('id', 'asc');
@@ -267,11 +283,14 @@ class VacationsController extends Controller
         $othervacations = array();
 
         if($allVacations->isEmpty()){
-            if($request->has('placeLat') && $request->has('placeLng') && !empty($request->get('placeLat')) && !empty($request->get('placeLng')) ){
-                $latitude = $request->get('placeLat');
-                $longitude = $request->get('placeLng');
-            
-                $othervacations = $this->otherVacationsBasedByLocation($latitude,$longitude);
+            $latitude = $request->get('placeLat');
+            $longitude = $request->get('placeLng');
+
+            if(is_numeric($latitude) && is_numeric($longitude)
+                && (float) $latitude >= -90 && (float) $latitude <= 90
+                && (float) $longitude >= -180 && (float) $longitude <= 180
+            ){
+                $othervacations = $this->otherVacationsBasedByLocation((float) $latitude, (float) $longitude);
             }else{
                 $othervacations = $this->otherVacations();
             }

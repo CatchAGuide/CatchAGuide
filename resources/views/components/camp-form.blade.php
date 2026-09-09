@@ -103,7 +103,6 @@
                         :country="$formData['country'] ?? ''"
                         :city="$formData['city'] ?? ''"
                         :region="$formData['region'] ?? ''"
-                        :types="['geocode']"
                         wrapper-class=""
                     />
                 </div>

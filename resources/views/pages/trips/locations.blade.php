@@ -97,16 +97,16 @@
                         <div class="trending-card">
                             <a href="{{ route('trips.category', ['location' => $loc->slug]) }}">
                                 <div class="trending-card-wrapper">
-                                    <img alt="{{ translate($loc->name) }}" class="trending-card-background" src="{{ media_url($loc->thumbnail_path) }}">
+                                    <img alt="{{ $loc->name }}" class="trending-card-background" src="{{ media_url($loc->thumbnail_path) }}">
 
                                     <div class="trending-card-wrapper-content">
                                         <div class="overlay-wrapper"></div>
                                         <div class="trending-card-main">
                                             <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">{{ translate($loc->name) }}</h4>
+                                                <h4 class="trending-title">{{ $loc->name }}</h4>
                                                 <div>
                                                     @if($loc->countrycode)
-                                                    <img class="mx-2" alt="" width="32" height="32" src="{{ asset('flags/'.$loc->countrycode.'.svg') }}">
+                                                    <img class="mx-2" alt="" width="32" height="32" src="{{ media_url('flags/'.strtolower($loc->countrycode).'.svg') }}">
                                                     @endif
                                                 </div>
                                             </div>

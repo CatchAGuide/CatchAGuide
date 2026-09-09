@@ -11,7 +11,7 @@
     </div>
     <div class="content" style="padding-bottom: 0px;">
         <div class="content-header" style="padding: 20px;">
-            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname}},</p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname ?? __('emails.guest_name')}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
             @lang('emails.guest_booking_request_processing')
             </p>

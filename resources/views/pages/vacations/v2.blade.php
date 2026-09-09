@@ -3,6 +3,7 @@
 
 @php
     $isDraft = !empty($isDraft);
+    $preselectedGuests = $preselectedGuests ?? null;
 @endphp
 
 @section('meta_robots')
@@ -21,6 +22,18 @@
 @endsection
 
 @section('content')
+<div class="category-hero-page" data-category-hero-page>
+    @include('pages.vacations.partials.catalog-header', [
+        'listingTitle' => __('vacations.hub_header_title'),
+        'listingSubtitle' => __('vacations.hub_header_subtitle'),
+        'titleTag' => 'p',
+        'currentVacationCountry' => $camp['country'] ?? null,
+        'breadcrumbItems' => [
+            ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
+            ['label' => __('vacations.pillar_camps_title'), 'url' => route('vacations.camps.index')],
+            ['label' => translate($camp['title'] ?? ''), 'url' => null],
+        ],
+    ])
 <div 
     x-data="campConfigurator({
         camp: @json($camp),
@@ -40,14 +53,6 @@
             </div>
         </div>
     @endif
-    <div class="camp-container">
-        @include('pages.vacations.partials.offer-breadcrumb', [
-            'pillar' => 'camps',
-            'productTitle' => translate($camp['title'] ?? ''),
-        ])
-    </div>
-
-    <!-- Camp Header -->
     <header class="camp-topbar">
         <div class="camp-container camp-topbar__inner">
             <div class="camp-topbar__info">
@@ -504,7 +509,7 @@
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
         <section id="special-offers" class="camp-section mb-3">
-            <h2 class="camp-section__title">{{ __('Special Offers') }}</h2>
+            <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
                 <div class="mb-4">
                     <x-special-offer.card :specialOffer="$specialOffer" />
@@ -665,7 +670,7 @@
                 showCategories,
                 checkIn: '',
                 checkOut: '',
-                guests: Math.min(2, accommodations[0]?.max_occupancy ?? 2),
+                guests: Math.min(@json($preselectedGuests) ?? 2, accommodations[0]?.max_occupancy ?? 2),
                 selectedAccId: accommodations[0]?.id ? String(accommodations[0].id) : null,
                 selectedBoatId: null,
                 selectedGuideId: null,
@@ -805,7 +810,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
-                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" required>
+                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" value="{{ $preselectedGuests ?? '' }}" required>
                                 </div>
                             </div>
                         </div>
@@ -1169,6 +1174,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+</div>
 @endsection
 
 @section('css_after')

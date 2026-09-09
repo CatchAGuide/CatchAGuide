@@ -7,8 +7,10 @@ use App\Models\Target;
 use App\Models\Method;
 use App\Models\Water;
 use App\Models\Inclussion;
+use App\Domain\Offers\OfferListingFilter;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
+use App\Support\Maps\MapMarkerCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
@@ -128,10 +130,15 @@ trait GuidingFilterOptimization
         $isFirstPage = !$request->has('page') || $request->get('page') == 1;
 
         if ($hasOnlyPageParam && $isFirstPage) {
-            $query->orderByRaw("RAND($randomSeed)");
+            $query->orderByRaw('RAND(?)', [(int) $randomSeed]);
         } else {
             if ($request->has('sortby') && !empty($request->get('sortby'))) {
                 switch ($request->get('sortby')) {
+                    case 'recommended':
+                        $query->orderByRaw('(SELECT AVG(grandtotal_score) FROM reviews WHERE reviews.guide_id = guidings.user_id) DESC')
+                            ->orderByRaw('(SELECT COUNT(*) FROM reviews WHERE reviews.guide_id = guidings.user_id) DESC')
+                            ->orderBy('created_at', 'desc');
+                        break;
                     case 'newest':
                         $query->orderBy('created_at', 'desc');
                         break;
@@ -395,10 +402,14 @@ trait GuidingFilterOptimization
                 'guidings.lat',
                 'guidings.lng',
                 'guidings.thumbnail_path',
+                'guidings.gallery_images',
                 'guidings.price',
                 'guidings.price_type',
                 'guidings.prices',
                 'guidings.max_guests',
+                'guidings.duration',
+                'guidings.duration_type',
+                'guidings.is_boat',
             ])
             ->whereNotNull('guidings.lat')
             ->whereNotNull('guidings.lng')
@@ -421,22 +432,56 @@ trait GuidingFilterOptimization
 
         $others = collect($otherguidings);
         $mainIds = $main->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $productQuery = OfferListingFilter::productPageQueryFromInput(request()->query());
 
-        $toPayload = function ($guiding, bool $isGray) {
-            return [
+        $toPayload = function ($guiding, bool $isGray) use ($productQuery) {
+            $price = $guiding->lowest_price
+                ?? $guiding->price
+                ?? null;
+            if ($price !== null && $price !== '' && (float) $price <= 0) {
+                $price = null;
+            }
+
+            $thumbnail = $guiding->thumbnail_path ?? null;
+            if ($thumbnail && function_exists('media_url') && ! str_starts_with((string) $thumbnail, 'http')) {
+                $thumbnail = media_url($thumbnail);
+            }
+
+            $images = MapMarkerCollection::resolveImages($guiding);
+            $image = $images[0] ?? $thumbnail;
+
+            $moduleFields = MapMarkerCollection::moduleFields(
+                MapMarkerCollection::MODULE_TOUR,
+                $guiding->id ?? null,
+            );
+            $listMeta = MapMarkerCollection::guidingListMeta($guiding);
+
+            return array_merge([
                 'id' => $guiding->id,
                 'slug' => $guiding->slug ?? null,
                 'title' => $guiding->title ?? '',
                 'location' => $guiding->location ?? '',
                 'lat' => $guiding->lat ?? null,
                 'lng' => $guiding->lng ?? null,
-                'thumbnail_path' => $guiding->thumbnail_path ?? null,
-                'lowest_price' => $guiding->lowest_price
-                    ?? $guiding->price
-                    ?? null,
+                'thumbnail_path' => $thumbnail,
+                'image' => $image,
+                'images' => $images,
+                'lowest_price' => $price,
+                'price' => $price,
+                'priceLabel' => $price !== null
+                    ? __('destination.map_price_from', [
+                        'price' => '€'.number_format((float) $price, 0, ',', '.'),
+                    ])
+                    : null,
                 'is_gray' => $isGray,
                 'variant' => $isGray ? 'gray' : 'primary',
-            ];
+                'pillar' => 'guiding',
+                'badge' => __('offers.badge_tour'),
+                'cta' => __('vacations.view_details'),
+                'url' => ! empty($guiding->slug)
+                    ? $guiding->publicShowUrl($productQuery)
+                    : '#',
+            ], $moduleFields, $listMeta);
         };
 
         return $main

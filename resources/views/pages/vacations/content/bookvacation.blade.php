@@ -6,34 +6,34 @@
                 <div class="booking-form-container">
                     <form id="bookingForm">
                         <div class="mb-3">
-                            <label>{{ translate('Earliest availability') }} <span class="required-field">*</span></label>
+                            <label>{{ __('vacations-booking.start_date') }} <span class="required-field">*</span></label>
                             <input type="date" class="form-control required-input" name="start_date" required>
                         </div>
                         <div class="mb-3">
-                            <label>{{ translate('to') }} <span class="required-field">*</span></label>
+                            <label>{{ __('global.to') }} <span class="required-field">*</span></label>
                             <input type="date" class="form-control required-input" name="end_date" required>
                         </div>
                         <div class="mb-3">
-                            <label>{{ translate('Duration') }} <span class="required-field">*</span></label>
+                            <label>{{ __('checkout.duration') }} <span class="required-field">*</span></label>
                             <select class="form-control required-input" name="duration_preset" id="duration_preset" required>
-                                <option value="0">{{ translate('Select Duration') }}</option>
-                                <option value="3">3 {{ translate('days') }}</option>
-                                <option value="7">1 {{ translate('week') }}</option>
-                                <option value="14">2 {{ translate('weeks') }}</option>
-                                <option value="30">1 {{ translate('month') }}</option>
-                                <option value="other">{{ translate('Other') }}</option>
+                                <option value="0">{{ __('trips.select_duration') }}</option>
+                                <option value="3">3 {{ __('checkout.days') }}</option>
+                                <option value="7">1 {{ __('vacations-booking.week') }}</option>
+                                <option value="14">2 {{ __('vacations-booking.weeks') }}</option>
+                                <option value="30">1 {{ __('vacations-booking.month_singular') }}</option>
+                                <option value="other">{{ __('mailing.other') }}</option>
                             </select>
                             <div id="custom_duration_container" style="display: none;" class="mt-2">
                                 <input type="number" 
                                        class="form-control" 
                                        name="duration" 
                                        id="custom_duration" 
-                                       placeholder="{{ translate('Enter number of days') }}"
+                                       placeholder="{{ __('vacations-booking.enter_number_of_days') }}"
                                        min="1">
                             </div>
                         </div>
                         <div class="booking-select mb-3">
-                            <label>{{ translate('Number of Person') }} <span class="required-field">*</span></label>
+                            <label>{{ __('vacations-booking.number_of_person') }} <span class="required-field">*</span></label>
                             <input type="number" class="form-control required-input" name="person" required>
                         </div>
                         <input type="hidden" name="vacation_id" value="{{ $vacation->id }}">
@@ -68,7 +68,7 @@
                                 <div class="form-group">
                                     <label>@lang('vacations-booking.select_package')</label>
                                     <select class="form-control" name="package_id">
-                                        <option value="" selected>{{ translate('No package needed') }}</option>
+                                        <option value="" selected>{{ __('vacations-booking.no_package_needed') }}</option>
                                         @foreach($vacation->packages as $packageIndex => $package)
                                             <option value="{{ $package->id }}">{{ !empty($package->title) ? $package->title : translate('Package ' . ($packageIndex + 1)) }}</option>
                                         @endforeach
@@ -83,7 +83,7 @@
                                     <div class="form-group mb-3">
                                         <label>@lang('vacations-booking.accommodations')</label>
                                         <select class="form-control" name="accommodation_id">
-                                            <option value="" selected>{{ translate('No accommodation needed') }}</option>
+                                            <option value="" selected>{{ __('vacations-booking.no_accommodation_needed') }}</option>
                                             @foreach($vacation->accommodations as $accommodationIndex => $accommodation)
                                                 <option value="{{ $accommodation->id }}">{{ !empty($accommodation->title) ? $accommodation->title : translate('Accommodation ' . ($accommodationIndex + 1)) }}</option>
                                             @endforeach
@@ -95,7 +95,7 @@
                                     <div class="form-group mb-3">
                                         <label>@lang('vacations-booking.boat_rental')</label>
                                         <select class="form-control" name="boat_id">
-                                            <option value="" selected>{{ translate('No boat needed') }}</option>
+                                            <option value="" selected>{{ __('vacations-booking.no_boat_needed') }}</option>
                                             @foreach($vacation->boats as $boatIndex => $boat)
                                                 <option value="{{ $boat->id }}">{{ !empty($boat->title) ? $boat->title : translate('Boat ' . ($boatIndex + 1)) }}</option>
                                             @endforeach
@@ -109,7 +109,7 @@
                             <div class="form-group mb-3">
                                 <label>@lang('vacations-booking.guiding')</label>
                                 <select class="form-control" name="guiding_id">
-                                    <option value="" selected>{{ translate('No guiding needed') }}</option>
+                                    <option value="" selected>{{ __('vacations-booking.no_guiding_needed') }}</option>
                                     @foreach($vacation->guidings as $guidingIndex => $guiding)
                                         <option value="{{ $guiding->id }}">{{ !empty($guiding->title) ? $guiding->title : translate('Guiding ' . ($guidingIndex + 1)) }}</option>
                                     @endforeach
@@ -172,7 +172,7 @@
                                 id="proceedToBookingBtn" 
                                 disabled
                                 data-bs-placement="top" 
-                                data-bs-title="{{ translate('Please complete all required fields marked with *') }}">
+                                data-bs-title="{{ __('vacations-booking.complete_required_fields') }}">
                             @lang('vacations-booking.proceed_booking')
                         </button>
                     </form>
@@ -190,39 +190,39 @@
                     <div class="modal-dialog modal-lg modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header border-bottom">
-                                <h5 class="modal-title" id="checkoutModalLabel">{{ translate('Contact Information') }}</h5>
+                                <h5 class="modal-title" id="checkoutModalLabel">{{ __('vacations-booking.contact_information') }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-4">
                                 <!-- Add Booking Summary Section -->
                                 <div class="booking-summary mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3 color-black">{{ translate('Booking Summary') }}</h6>
+                                    <h6 class="border-bottom pb-2 mb-3 color-black">{{ __('profile.booking_summary') }}</h6>
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Check-in') }}:</span>
+                                                <span class="text-muted">{{ __('trips.check_in_info') }}:</span>
                                                 <span class="fw-medium" id="summary_start_date"></span>
                                             </div>
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Check-out') }}:</span>
+                                                <span class="text-muted">{{ __('vacations.check_out') }}:</span>
                                                 <span class="fw-medium" id="summary_end_date"></span>
                                             </div>
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Duration') }}:</span>
-                                                <span class="fw-medium"><span id="summary_duration"></span> {{ translate('days') }}</span>
+                                                <span class="text-muted">{{ __('checkout.duration') }}:</span>
+                                                <span class="fw-medium"><span id="summary_duration"></span> {{ __('checkout.days') }}</span>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Guests') }}:</span>
-                                                <span class="fw-medium"><span id="summary_persons"></span> {{ translate('person(s)') }}</span>
+                                                <span class="text-muted">{{ __('checkout.guests') }}:</span>
+                                                <span class="fw-medium"><span id="summary_persons"></span> {{ __('vacations-booking.person_s') }}</span>
                                             </div>
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Booking Type') }}:</span>
+                                                <span class="text-muted">{{ __('vacations-booking.booking_type') }}:</span>
                                                 <span class="fw-medium" id="summary_booking_type"></span>
                                             </div>
                                             <div class="d-flex justify-content-between">
-                                                <span class="text-muted">{{ translate('Total Price') }}:</span>
+                                                <span class="text-muted">{{ __('checkout.total_price') }}:</span>
                                                 <span class="fw-medium" id="summary_total_price"></span>
                                             </div>
                                         </div>
@@ -252,40 +252,40 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Title') }}</label>
+                                                <label class="form-label">{{ __('camps.title') }}</label>
                                                 <select class="form-control" name="title" required>
-                                                    <option value="Mr">{{ translate('Mr.') }}</option>
-                                                    <option value="Mrs">{{ translate('Mrs.') }}</option>
+                                                    <option value="Mr">{{ __('vacations-booking.mr') }}</option>
+                                                    <option value="Mrs">{{ __('vacations-booking.mrs') }}</option>
                                                 </select>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Name') }}</label>
+                                                <label class="form-label">{{ __('global.Name') }}</label>
                                                 <input type="text" class="form-control" name="name" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Surname') }}</label>
+                                                <label class="form-label">{{ __('checkout.surname') }}</label>
                                                 <input type="text" class="form-control" name="surname" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Street') }}</label>
+                                                <label class="form-label">{{ __('forms.street') }}</label>
                                                 <input type="text" class="form-control" name="street" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Post Code') }}</label>
+                                                <label class="form-label">{{ __('checkout.postal_code_label') }}</label>
                                                 <input type="text" class="form-control" name="post_code" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('City') }}</label>
+                                                <label class="form-label">{{ __('checkout.city') }}</label>
                                                 <input type="text" class="form-control" name="city" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Country') }}</label>
+                                                <label class="form-label">{{ __('global.Country') }}</label>
                                                 <input type="text" class="form-control" name="country" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Phone + Country Code') }}</label>
+                                                <label class="form-label">{{ __('vacations-booking.phone_country_code') }}</label>
                                                 <div class="input-group">
                                                     <select class="form-select" name="phone_country_code" style=" max-width: 80px;" required>
                                                         <option data-code="+1" value="+1">+1</option>
@@ -308,21 +308,21 @@
                                                 </div>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">{{ translate('Email') }}</label>
+                                                <label class="form-label">{{ __('global.Email') }}</label>
                                                 <input type="email" class="form-control" name="email" required>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="mb-4">
-                                                <label class="form-label">{{ translate('Comments') }}</label>
+                                                <label class="form-label">{{ __('vacations-booking.comments') }}</label>
                                                 <textarea class="form-control" name="comments" rows="3"></textarea>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="text-end d-flex">
-                                        <button type="button" id="cancelBookingBtn" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ translate('Cancel') }}</button>
-                                        <button type="submit" id="completeBookingBtn" class="btn btn-orange">{{ translate('Complete Booking') }}</button>
+                                        <button type="button" id="cancelBookingBtn" class="btn btn-secondary me-2" data-bs-dismiss="modal">{{ __('global.Cancel') }}</button>
+                                        <button type="submit" id="completeBookingBtn" class="btn btn-orange">{{ __('message.complete-booking') }}</button>
                                     </div>
                                 </form>
                             </div>
@@ -334,16 +334,16 @@
         <!-- Add Contact Card - Only show when not in modal -->
         @if(!$agent->ismobile() || !isset($inModal))
             <div class="contact-card mb-4 mt-4 tour-details-two__book-tours">
-                <h5 class="contact-card__title">{{ translate('Contact Us') }}</h5>
+                <h5 class="contact-card__title">{{ __('checkout.contact_us') }}</h5>
                 <div class="contact-card__content">
-                    <p class="">{{ translate('Do you have questions about this vacation? Our team is here to help!') }}</p>
+                    <p class="">{{ __('vacations-booking.questions_help') }}</p>
                     <div class="">
                         <div class="contact-info">
                             <i class="fas fa-phone-alt me-2"></i>
                             <a href="tel:+49{{config('cag.contact_num')}}" class="text-decoration-none">+49 (0) {{config('cag.contact_num')}}</a>
                         </div>
                         <a href="#" id="contact-product" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#contactModal">
-                            {{ translate('Contact Form') }}
+                            {{ __('booking.contact_form') }}
                             <i class="fas fa-arrow-right ms-2"></i>
                         </a>
                     </div>
@@ -367,11 +367,11 @@
             </div>
             <div class="modal-body text-center px-4 py-5">
                 <i class="fas fa-check-circle text-success mb-4" style="font-size: 4rem;"></i>
-                <h3 class="mb-4">{{ translate('Thank You for Your Booking Request!') }}</h3>
-                <p class="mb-4">{{ translate('We have received your booking request and will process it shortly. You will receive a confirmation email with further details.') }}</p>
-                <p class="text-muted mb-4">{{ translate('Booking Reference:') }} <span id="bookingReference"></span></p>
+                <h3 class="mb-4">{{ __('vacations-booking.thank_you_booking_request') }}</h3>
+                <p class="mb-4">{{ __('vacations-booking.booking_request_received') }}</p>
+                <p class="text-muted mb-4">{{ __('vacations-booking.booking_reference') }} <span id="bookingReference"></span></p>
                 <button type="button" class="btn btn-orange" data-bs-dismiss="modal">
-                    {{ translate('Close') }}
+                    {{ __('booking-assistant.widget_close') }}
                 </button>
             </div>
         </div>
@@ -381,23 +381,23 @@
 <script>
     // Create translations object for JavaScript
     const translations = {
-        package: '{{ translate("Komplettpaket") }}',
-        custom: '{{ translate("Single Offer") }}',
-        selectedPackage: '{{ translate("Selected Package") }}',
-        selectedAccommodation: '{{ translate("Selected Accommodation") }}',
-        selectedBoat: '{{ translate("Selected Boat") }}',
-        selectedGuiding: '{{ translate("Selected Guiding") }}',
-        accommodation: '{{ translate("Accommodation") }}',
-        boat: '{{ translate("Boat") }}',
-        guiding: '{{ translate("Guiding") }}',
-        selectedItems: '{{ translate("Selected Items") }}',
-        selectedExtras: '{{ translate("Selected Extras") }}',
-        extraOffer: '{{ translate("Extra offer") }}',
-        days: '{{ translate("days") }}',
-        persons: '{{ translate("person(s)") }}',
-        basePrice: '{{ translate("Base price for") }}',
-        fixed: '{{ translate("Fixed price") }}',
-        total: '{{ translate("Total") }}'
+        package: '{{ __('vacations-booking.package') }}',
+        custom: '{{ __('vacations-booking.single_offer') }}',
+        selectedPackage: '{{ __('vacations-booking.selected_package_label') }}',
+        selectedAccommodation: '{{ __('vacations-booking.selected_accommodation') }}',
+        selectedBoat: '{{ __('vacations-booking.selected_boat') }}',
+        selectedGuiding: '{{ __('vacations-booking.selected_guiding') }}',
+        accommodation: '{{ __('camps.accommodations_title') }}',
+        boat: '{{ __('guidings.boat') }}',
+        guiding: '{{ __('offers.filter_guiding') }}',
+        selectedItems: '{{ __('vacations-booking.selected_items') }}',
+        selectedExtras: '{{ __('checkout.selected_extras') }}',
+        extraOffer: '{{ __('vacations-booking.extra_offer') }}',
+        days: '{{ __('checkout.days') }}',
+        persons: '{{ __('vacations-booking.person_s') }}',
+        basePrice: '{{ __('vacations-booking.base_price_for') }}',
+        fixed: '{{ __('vacations-booking.fixed_price') }}',
+        total: '{{ __('checkout.total') }}'
     };
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1130,7 +1130,7 @@
             
             // Disable submit button
             // submitBtn.disabled = true;
-            // submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ translate("Processing...") }}';
+            // submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ __('checkout.processing') }}';
             
             // Submit form via AJAX
             fetch('{{ route("vacation.booking.store") }}', {
@@ -1166,12 +1166,12 @@
                     document.getElementById('bookingForm').reset();
                 } else {
                     // Handle error
-                    alert(data.message || '{{ translate("An error occurred. Please try again.") }}');
+                    alert(data.message || '{{ __('contact.errorMessage') }}');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                let errorMessage = '{{ translate("An error occurred. Please try again.") }}';
+                let errorMessage = '{{ __('contact.errorMessage') }}';
                 
                 try {
                     const errorData = JSON.parse(error.message);
@@ -1189,7 +1189,7 @@
                 
                 // Re-enable submit button
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '{{ translate("Proceed to booking") }}';
+                submitBtn.innerHTML = '{{ __('vacations-booking.proceed_to_booking') }}';
             });
         });
 
@@ -1664,8 +1664,8 @@
 <div class="loading-overlay">
     <div class="loading-spinner">
         <div class="spinner-border text-orange" role="status">
-            <span class="visually-hidden">{{ translate('Loading...') }}</span>
+            <span class="visually-hidden">{{ __('checkout.loading') }}</span>
         </div>
-        <span>{{ translate('Processing your booking...') }}</span>
+        <span>{{ __('vacations-booking.processing_your_booking') }}</span>
     </div>
 </div>

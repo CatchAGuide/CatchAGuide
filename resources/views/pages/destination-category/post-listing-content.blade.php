@@ -58,7 +58,7 @@
             <thead>
                 <tr>
                     <th width="20%">@lang('vacations.fish')</th>
-                    <th width="80%">{{ translate('Size Limit') }}</th>
+                    <th width="80%">{{ __('category.size_limit') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@
             <thead>
                 <tr>
                     <th width="20%">@lang('vacations.fish')</th>
-                    <th width="80%">{{ translate('Time Limit') }}</th>
+                    <th width="80%">{{ __('category.time_limit') }}</th>
                 </tr>
             </thead>
             <tbody>

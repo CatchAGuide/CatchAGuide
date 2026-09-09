@@ -424,7 +424,7 @@ class ICalGeneratorService
         
         // Only create new feed if no existing feed found
         try {
-            $feedName = $forGuide ? 'My Fishing Tours' : 'My Fishing Trips';
+            $feedName = $forGuide ? 'My Fishing Tours' : 'My Fishing Holidays';
             $feed = $this->createUserFeed($user, [
                 'name' => $feedName,
                 'feed_type' => 'bookings_only',

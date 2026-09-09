@@ -95,6 +95,8 @@ class SpecialOffersController extends Controller
                 $specialOffer->refresh();
             }
 
+            $this->galleryProcessor->trashPendingDeletesForGallery($specialOffer->gallery_images, $specialOffer->thumbnail_path);
+
             $this->syncSpecialOfferRelationships($specialOffer, $request);
 
             // Clear caches
@@ -232,6 +234,8 @@ class SpecialOffersController extends Controller
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
                 ]);
             }
+
+            $this->galleryProcessor->trashPendingDeletesForGallery($specialOffer->gallery_images, $specialOffer->thumbnail_path);
 
             $this->syncSpecialOfferRelationships($specialOffer, $request);
 

@@ -13,7 +13,7 @@
     </div>
     <div class="content" style="padding-bottom: 0px; font-family: 'Morrison', sans-serif;">
         <div class="content-header" style="padding: 20px; font-family: 'Morrison', sans-serif;">
-            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} {{$user->firstname}},</p>
+            <p style="font-size: 16px; font-family: 'Morrison', sans-serif;">{{__('emails.dear')}} {{$user->firstname ?? __('emails.guest_name')}},</p>
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                 @lang('emails.guest_booking_request_accepted_text_1') 
             </p>
@@ -26,7 +26,7 @@
                     <p><strong>{{__('emails.guest_booking_accepted_text_7')}}</strong> {{$guide->firstname}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_8')}}</strong> {{$guide->phone_country_code ?? ''}} {{$guide->phone ?? $guide->information->phone ?? null}}</p>
                     <p><strong>{{__('emails.guest_booking_accepted_text_9')}}</strong> {{$guide->email}}</p>
-                    <p><strong>{{__('emails.tour')}}:</strong> <a href="{{route('guidings.show', ['id' => $guiding->id, 'slug' => $guiding->slug])}}" target="_blank">{{$guiding->title}}</a></p>
+                    <p><strong>{{__('emails.tour')}}:</strong> <a href="{{$guiding->publicShowUrl()}}" target="_blank">{{$guiding->title}}</a></p>
                     <p><strong>{{__('emails.location')}}:</strong> {{$guiding->location}}</p>
                     <p><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>

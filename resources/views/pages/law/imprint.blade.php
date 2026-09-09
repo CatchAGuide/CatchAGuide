@@ -1,6 +1,6 @@
 @extends('layouts.app-v2-1')
 
-@section('title',  ucwords(translate('Impressum')))
+@section('title',  ucwords(__('message.imprint')))
 
 @section('meta_robots')
     <meta name="robots" content="noindex, nofollow">

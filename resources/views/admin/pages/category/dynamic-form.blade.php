@@ -7,33 +7,6 @@
     input[type=number] {
     -moz-appearance: textfield;
     }
-
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
-    
-    .spinner {
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid #3498db;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
 </style>
 @endsection
 
@@ -296,8 +269,10 @@
             var languageRoute = $('#dynamic-form').data('language-route').replace(':id', id);
             
             // Show loading indicator
-            $('body').append('<div class="overlay"><div class="spinner"></div></div>');
-            
+            if (window.PageLoader) {
+                window.PageLoader.show();
+            }
+
             // Make AJAX request to get content in selected language
             $.ajax({
                 url: languageRoute,
@@ -343,14 +318,18 @@
                     }
                     
                     // Remove loading indicator
-                    $('.overlay').remove();
+                    if (window.PageLoader) {
+                        window.PageLoader.hide();
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error loading language data:', xhr.responseText);
                     console.error('Status:', status);
                     console.error('Error:', error);
                     // Remove loading indicator
-                    $('.overlay').remove();
+                    if (window.PageLoader) {
+                        window.PageLoader.hide();
+                    }
                     alert('Error loading language data. Please try again.');
                 }
             });

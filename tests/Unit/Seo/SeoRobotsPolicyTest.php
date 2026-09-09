@@ -22,16 +22,28 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertFalse($this->policy->shouldNoindexGuidings($request));
     }
 
+    public function test_clean_guidings_alloffers_url_is_indexable(): void
+    {
+        $request = Request::create('/guidings/alloffers', 'GET');
+        $this->assertFalse($this->policy->shouldNoindexGuidings($request));
+    }
+
     public function test_guidings_filter_params_are_noindexed(): void
     {
-        $request = Request::create('/guidings', 'GET', ['place' => 'Berlin', 'sortby' => 'price']);
+        $request = Request::create('/guidings/alloffers', 'GET', ['place' => 'Berlin', 'sortby' => 'price']);
         $this->assertTrue($this->policy->shouldNoindexGuidings($request));
         $this->assertSame('NOINDEX, NOFOLLOW', $this->policy->robotsContentForGuidings($request));
     }
 
-    public function test_guidings_legacy_checkbox_filters_still_noindex(): void
+    public function test_guidings_species_filter_noindexes(): void
     {
-        $request = Request::create('/guidings', 'GET', ['target_fish' => '1']);
+        $request = Request::create('/guidings/alloffers', 'GET', ['species' => '1']);
+        $this->assertTrue($this->policy->shouldNoindexGuidings($request));
+    }
+
+    public function test_guidings_num_guests_filter_noindexes(): void
+    {
+        $request = Request::create('/guidings/alloffers', 'GET', ['num_guests' => '4']);
         $this->assertTrue($this->policy->shouldNoindexGuidings($request));
     }
 

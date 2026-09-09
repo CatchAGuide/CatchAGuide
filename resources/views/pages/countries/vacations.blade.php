@@ -74,7 +74,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">{{ translate('Fishing Vacations')}}</li>
+                        <li class="active">{{ __('vacations.fishing_vacations_label')}}</li>
                     </ul>
                 </div>
             </div>
@@ -87,7 +87,7 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span>&#183;</span></li>
-                        <li class="active">{{ translate('Fishing Vacations')}}
+                        <li class="active">{{ __('vacations.fishing_vacations_label')}}
                         </li>
                         
                     </ul>
@@ -112,15 +112,15 @@
                         <div class="trending-card">
                             <a href="{{ route('vacations.country', ['country' => $country->slug]) }}"> 
                                 <div class="trending-card-wrapper">
-                                    <img alt="{{translate($country->name)}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
+                                    <img alt="{{$country->name}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
 
                                     <div class="trending-card-wrapper-content">
                                         <div class="overlay-wrapper"></div>
                                         <div class="trending-card-main">
                                             <div class="trending-text-wrapper">
-                                                <h4 class="trending-title">{{translate($country->name)}}</h4>
+                                                <h4 class="trending-title">{{$country->name}}</h4>
                                                 <div>
-                                                    <img class="mx-2" alt="Flag" width="32" height="32" src="{{asset('flags/'.$country->countrycode.'.svg')}}">
+                                                    <img class="mx-2" alt="Flag" width="32" height="32" src="{{media_url('flags/'.strtolower($country->countrycode).'.svg')}}">
                                                 </div>
                                             
                                             </div>

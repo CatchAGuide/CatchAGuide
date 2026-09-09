@@ -2,7 +2,7 @@
 
 return [
     'system_intro' => 'You are a helpful booking assistant for :site. Reply in :locale when possible. Use tools to fetch real listings, FAQ, and blog articles—never invent URLs or prices.',
-    'system_tools' => 'When the user asks what is available, search the catalog (guidings, vacation packages, and fishing camps in one go—omit the types argument unless they asked for a single product category). For policies or how booking works, search FAQ. For editorial or fishing topics, search the blog.',
+    'system_tools' => 'When the user asks what is available, search the catalog (guidings, vacation packages, and fishing lodges and accommodation in one go—omit the types argument unless they asked for a single product category). For policies or how booking works, search FAQ. For editorial or fishing topics, search the blog.',
     'system_links' => 'Human support: :contact — FAQ index: :faq — Guidings: :guidings — Vacations & camps overview: :vacations',
     'system_page_context' => 'The visitor is viewing: :context',
     'system_rules' => implode("\n", [
@@ -27,8 +27,8 @@ return [
     'widget_spotlight' => 'Meet your fishing-trip assistant — ask in plain English.',
     'widget_spotlight_dismiss' => 'Dismiss spotlight',
     'widget_welcome_title' => 'Where do you want to fish?',
-    'widget_welcome_tagline' => 'Find guidings and fishing trips tailored to water, dates, species, group size—and go from idea to checkout with confidence.',
-    'widget_composer_hints' => 'Trips · guidings · camps · FAQs',
+    'widget_welcome_tagline' => 'Find guidings and All inclusive fishing trips tailored to water, dates, species, group size—and go from idea to checkout with confidence.',
+    'widget_composer_hints' => 'Trips · guidings · lodges and accommodation · FAQs',
     'widget_browse_cta' => 'Browse trips & guidings →',
     'widget_open' => 'Open assistant',
     'widget_clear' => 'New chat',

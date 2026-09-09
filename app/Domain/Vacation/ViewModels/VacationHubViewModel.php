@@ -10,13 +10,13 @@ final class VacationHubViewModel
         public readonly PillarTileViewModel $campTile,
         public readonly PillarTileViewModel $tripTile,
         public readonly Collection $popularListings,
-        public readonly Collection $newTrips,
-        public readonly bool $showNewTripsRail,
-        public readonly Collection $newCamps,
-        public readonly bool $showNewCampsRail,
+        public readonly Collection $newListings,
+        public readonly bool $showNewListingsRail,
         public readonly Collection $countryGrid,
         public readonly array $faqItems,
         public readonly int $totalTrips,
         public readonly int $totalCamps,
+        public readonly Collection $targetFishTiles,
+        public readonly Collection $testimonials,
     ) {}
 }

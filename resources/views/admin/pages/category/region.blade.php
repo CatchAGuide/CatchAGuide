@@ -57,15 +57,13 @@
                                                 <td>{{ $row->country->name ?? 'N/A' }}</td>
                                                 <td>{{ $row->name }}</td>
                                                 <td class="text-center">
-                                                    @if($row->translations->count() > 0)
-                                                        @foreach($row->translations as $translation)
-                                                            @if($translation->language == 'de')
-                                                            <i class="fi fi-de" style="font-size: 1.2em; margin: 0 2px;"></i>
-                                                            @elseif($translation->language == 'en')
-                                                            <i class="fi fi-gb" style="font-size: 1.2em; margin: 0 2px;"></i>
-                                                            @endif
-                                                        @endforeach
-                                                    @endif
+                                                    @foreach($languagesByEntity[$row->id] ?? [] as $lang)
+                                                        @if($lang == 'de')
+                                                        <i class="fi fi-de" style="font-size: 1.2em; margin: 0 2px;"></i>
+                                                        @elseif($lang == 'en')
+                                                        <i class="fi fi-gb" style="font-size: 1.2em; margin: 0 2px;"></i>
+                                                        @endif
+                                                    @endforeach
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('admin.category.region.edit', $row->id) }}" class="btn btn-sm btn-secondary"><i class="fa fa-edit"></i></a>

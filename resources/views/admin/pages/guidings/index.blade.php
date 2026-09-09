@@ -310,7 +310,7 @@
 
                                         // Guidings without a slug go through the admin route, which backfills it before redirecting.
                                         $publicUrl = !empty($guiding->slug)
-                                            ? route('guidings.show', [$guiding->id, $guiding->slug])
+                                            ? $guiding->publicShowUrl()
                                             : route('admin.guidings.show', $guiding);
 
                                         $fullName = $guiding->user->full_name ?? '';

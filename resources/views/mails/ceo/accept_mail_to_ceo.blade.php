@@ -124,13 +124,13 @@
                 <div class="booking-details">
                     <h3 style="font-style:italic">@lang('profile.gn-infobooking')</h3>
                     <p><strong>Booking ID : </strong>{{$booking->id}}</p>
-                    <p><strong>@lang('profile.fname') : </strong>{{$user->firstname}}</p>
+                    <p><strong>@lang('profile.fname') : </strong>{{$user->firstname ?? $booking->email ?? __('emails.guest_name')}}</p>
                     <p><strong>@lang('profile.date') : </strong>{{ $booking->getFormattedBookingDate('F j, Y') }}</p>
                     <p><strong>@lang('profile.guests') : </strong>{{$booking->count_of_users}}</p>
                 </div>
                 <div class="booking-details" style="margin-top:30px;">
                     <h3 style="font-style:italic">@lang('profile.gn-infoguiding'):</h3>
-                    <p><strong>@lang('profile.guidetitle') : </strong><a href="{{route('guidings.show',[$guiding->id,$guiding->slug])}}" style="text-decoration: none;font-weight:bold">{{$guiding->title}}</a></p>
+                    <p><strong>@lang('profile.guidetitle') : </strong><a href="{{$guiding->publicShowUrl()}}" style="text-decoration: none;font-weight:bold">{{$guiding->title}}</a></p>
                     <p><strong>@lang('profile.location') : </strong>{{$guiding->location}}</p>
                     <p><strong>@lang('profile.meetingPoint') : </strong> {{$guiding->meeting_point}}</p>
                 </div>

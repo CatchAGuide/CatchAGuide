@@ -48,6 +48,7 @@ class DisableSessionForCrawlers
         'PetalBot',
         'SemrushBot',
         'AhrefsBot',
+        'Amazonbot',
         'DotBot',
         'MJ12bot',
         'Bytespider',

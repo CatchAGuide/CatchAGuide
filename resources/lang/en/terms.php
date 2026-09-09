@@ -16,4 +16,5 @@ return [
     'next' => 'Next',
     'results_count' => ':count of :total sections',
     'min_read' => 'min read',
+    'title' => 'General Terms and Conditions',
 ];

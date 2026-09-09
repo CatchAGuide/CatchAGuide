@@ -1278,7 +1278,7 @@
         <div class="new-custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
+                    <a href="{{$most_booked_guiding->publicShowUrl()}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1300,7 +1300,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($bookedGuidings as $most_booked_guiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$most_booked_guiding->id,$most_booked_guiding->slug])}}">
+                    <a href="{{$most_booked_guiding->publicShowUrl()}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($most_booked_guiding))
                             <img src="{{get_featured_image_link($most_booked_guiding)}}" class="card-img-top">
@@ -1493,7 +1493,7 @@
             <div class="new-custom-owl owl-carousel owl-theme">
                 @foreach($newGuidings as $newGuiding)
                     <div class="item">
-                        <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
+                        <a href="{{$newGuiding->publicShowUrl()}}">
                             <div class="card" style="min-height:360px;">
                                 @if(get_featured_image_link($newGuiding))
                                 <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">
@@ -1514,7 +1514,7 @@
         <div class="custom-owl owl-carousel owl-theme">
             @foreach($newGuidings as $newGuiding)
                 <div class="item">
-                    <a href="{{route('guidings.show',[$newGuiding->id,$newGuiding->slug])}}">
+                    <a href="{{$newGuiding->publicShowUrl()}}">
                         <div class="card" style="min-height:360px;">
                             @if(get_featured_image_link($newGuiding))
                             <img src="{{get_featured_image_link($newGuiding)}}" class="card-img-top">

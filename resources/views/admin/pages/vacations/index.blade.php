@@ -160,8 +160,7 @@
         if (locationInput) {
             
             const autocomplete = new google.maps.places.Autocomplete(locationInput, {
-                types: ['(cities)'],
-                fields: ['address_components', 'geometry', 'formatted_address']
+                fields: ['address_components', 'geometry', 'formatted_address', 'name', 'place_id', 'types']
             });
 
             autocomplete.addListener('place_changed', function() {

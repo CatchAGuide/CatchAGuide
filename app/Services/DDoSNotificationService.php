@@ -21,20 +21,67 @@ class DDoSNotificationService
     /**
      * Send alert for rate limit violations
      */
-    public function sendRateLimitAlert($identifier, $violations, $endpoint = null)
+    public function sendRateLimitAlert($identifier, $violations, $endpoint = null, ?string $context = null, $classification = null)
     {
+        if (! config('ddos.notifications.send_on_rate_limit', true)) {
+            return;
+        }
+
+        if ($classification && method_exists($classification, 'isTrusted') && $classification->isTrusted()) {
+            return;
+        }
+
+        $minViolations = (int) config('ddos.notifications.min_rate_limit_violations_for_alert', 5);
+        if ($violations < $minViolations) {
+            return;
+        }
+
         $alertKey = "rate_limit_alert_{$identifier}";
-        
+
         if ($this->shouldSendAlert($alertKey)) {
+            $rpmKey = $context ? "{$context}_rate_limit_minute_{$identifier}" : null;
             $details = [
                 'ip' => $this->extractIpFromIdentifier($identifier),
                 'violations' => $violations,
                 'endpoint' => $endpoint,
-                'requests_per_minute' => $violations,
+                'requests_per_minute' => $rpmKey ? Cache::get($rpmKey, 0) : $violations,
+                'user_agent' => request()->userAgent(),
+                'classification' => $classification?->name ?? $classification?->lane->value ?? null,
+            ];
+
+            $this->sendAlert('Rate Limit Violations', $details);
+            $this->recordAlertSent($alertKey);
+        }
+    }
+
+    /**
+     * Send alert for a blocked exploit payload (SQLi / XSS / path traversal).
+     */
+    public function sendExploitAlert($identifier, string $type, ?string $endpoint = null, int $violations = 1): void
+    {
+        if (! config('ddos.notifications.send_on_exploit', true)) {
+            return;
+        }
+
+        $alertKey = "exploit_alert_{$type}_{$identifier}";
+
+        if ($this->shouldSendAlert($alertKey)) {
+            $details = [
+                'ip' => $this->extractIpFromIdentifier($identifier),
+                'violations' => $violations,
+                'endpoint' => $endpoint !== null ? substr($endpoint, 0, 500) : null,
+                'detected_pattern' => $type,
+                'classification' => $type,
                 'user_agent' => request()->userAgent(),
             ];
-            
-            $this->sendAlert('Rate Limit Violations', $details);
+
+            $labels = [
+                'sqli' => 'SQL Injection Probe',
+                'xss' => 'XSS Probe',
+                'path_traversal' => 'Path Traversal Probe',
+            ];
+
+            $this->sendAlert($labels[$type] ?? 'Exploit Probe', $details);
             $this->recordAlertSent($alertKey);
         }
     }
@@ -44,6 +91,10 @@ class DDoSNotificationService
      */
     public function sendIPBlockAlert($identifier, $blockDuration, $violations)
     {
+        if (! config('ddos.notifications.send_on_block', true)) {
+            return;
+        }
+
         $alertKey = "ip_block_alert_{$identifier}";
         
         if ($this->shouldSendAlert($alertKey)) {
@@ -83,6 +134,10 @@ class DDoSNotificationService
      */
     public function sendSuspiciousInputAlert($identifier, $input, $pattern)
     {
+        if (! config('ddos.notifications.send_on_exploit', true)) {
+            return;
+        }
+
         $alertKey = "suspicious_input_alert_{$identifier}";
         
         if ($this->shouldSendAlert($alertKey)) {

@@ -625,7 +625,7 @@ return [
     "This user already belongs to the team." => "This user already belongs to the team.",
     "This user has already been invited to the team." => "This user has already been invited to the team.",
     "Timor-Leste" => "Timor-Leste",
-    "to" => "to",
+    "to" => "To",
     "Today" => "Today",
     "Toggle navigation" => "Toggle navigation",
     "Togo" => "Togo",
@@ -722,4 +722,5 @@ return [
     "Reset Password" => "Reset Password",
     "Set New Password" => "Set New Password",
     "E-Mail Address" => "E-Mail Address",
+    'result' => 'result',
 ];

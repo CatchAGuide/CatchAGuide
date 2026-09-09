@@ -47,6 +47,7 @@ return [
     'max_passengers' => 'Maximum number of passengers',
     'engine' => 'Engine',
     'engine_type' => 'Engine type and power',
+    'license' => 'License',
     'year' => 'Year',
     'manufacturing_year' => 'Year of manufacture',
     'fuel_type' => 'Fuel Type',

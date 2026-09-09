@@ -48,7 +48,7 @@
             </div>
             <div class="info-content">
                 <p class="mb-0">
-                    {{ translate('Für die Freigabe zum Guide benötigen wir weitere Informationen über Dich. Deine persönlichen Daten werden nicht auf der Webseite veröffentlicht oder mit dritten geteilt. Zudem hilft uns die Verifizierung sicher zu stellen, dass Du als Guide im Besitz der für Deine Guidings benötigten Angelerlaubnisse bist und somit ein nachhaltiges sowie waidgerechtes Angeln gewährleistest.') }}
+                    {{ __('profile.guideVerificationIntro') }}
                 </p>
             </div>
         </div>
@@ -76,17 +76,17 @@
                     <div class="section-icon"><i class="fas fa-user-plus"></i></div>
                     <div class="section-title">
                         <h4>{{ __('profile.onboarding_step_account') }}</h4>
-                        <p class="text-muted mb-0">{{ translate('Create your Catch A Guide account') }}</p>
+                        <p class="text-muted mb-0">{{ __('profile.createAccount') }}</p>
                     </div>
                 </div>
                 <div class="section-content">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Vorname') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('checkout.forename') }} <span class="required">*</span></label>
                             <input type="text" name="firstname" class="form-control" value="{{ old('firstname') }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Nachname') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('checkout.surname') }} <span class="required">*</span></label>
                             <input type="text" name="lastname" class="form-control" value="{{ old('lastname') }}" required>
                         </div>
                         <div class="col-12">
@@ -94,11 +94,11 @@
                             <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autocomplete="email">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Password') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('global.Password') }} <span class="required">*</span></label>
                             <input type="password" name="password" class="form-control" required autocomplete="new-password">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Confirm Password') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('global.Confirm Password') }} <span class="required">*</span></label>
                             <input type="password" name="password_confirmation" class="form-control" required autocomplete="new-password">
                         </div>
                         <div class="col-12">
@@ -108,7 +108,7 @@
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="privacy" value="1" id="privacy" required @checked(old('privacy'))>
-                                <label class="form-check-label" for="privacy">{{ translate('Privacy Policy') }} <span class="required">*</span></label>
+                                <label class="form-check-label" for="privacy">{{ __('checkout.privacy_policy') }} <span class="required">*</span></label>
                             </div>
                         </div>
                     </div>
@@ -124,7 +124,7 @@
                     <div class="section-icon"><i class="fas fa-id-card"></i></div>
                     <div class="section-title">
                         <h4>{{ __('profile.onboarding_step_type') }}</h4>
-                        <p class="text-muted mb-0">{{ translate('How do you offer your guidings?') }}</p>
+                        <p class="text-muted mb-0">{{ __('profile.howDoYouOffer') }}</p>
                     </div>
                 </div>
                 <div class="section-content">
@@ -134,8 +134,8 @@
                                 {{ old('guide_type', 'private') === 'private' ? 'checked' : '' }} required>
                             <span class="guide-type-card__body">
                                 <i class="fas fa-user"></i>
-                                <strong>{{ translate('Private Person') }}</strong>
-                                <small>{{ translate('You offer guidings as an individual') }}</small>
+                                <strong>{{ __('profile.privatePerson') }}</strong>
+                                <small>{{ __('profile.offerAsIndividual') }}</small>
                             </span>
                         </label>
                         @if($companyEnabled)
@@ -144,8 +144,8 @@
                                 {{ old('guide_type') === 'company' ? 'checked' : '' }}>
                             <span class="guide-type-card__body">
                                 <i class="fas fa-building"></i>
-                                <strong>{{ translate('Company') }}</strong>
-                                <small>{{ translate('You represent a company or business') }}</small>
+                                <strong>{{ __('profile.company') }}</strong>
+                                <small>{{ __('profile.representCompany') }}</small>
                             </span>
                         </label>
                         @endif
@@ -172,7 +172,7 @@
                         </div>
                         <dl class="account-summary-panel__details mb-0">
                             <div class="account-summary-panel__row">
-                                <dt>{{ translate('Name') }}</dt>
+                                <dt>{{ __('global.Name') }}</dt>
                                 <dd>{{ trim($user->firstname . ' ' . $user->lastname) }}</dd>
                             </div>
                             <div class="account-summary-panel__row">
@@ -192,8 +192,8 @@
                 <div class="section-header">
                     <div class="section-icon"><i class="fas fa-map-marker-alt"></i></div>
                     <div class="section-title">
-                        <h4>{{ translate('Address Information') }}</h4>
-                        <p class="text-muted mb-0">{{ translate('Your current address for verification') }}</p>
+                        <h4>{{ __('profile.address_information') }}</h4>
+                        <p class="text-muted mb-0">{{ __('profile.currentAddressVerification') }}</p>
                     </div>
                 </div>
                 @php
@@ -207,13 +207,13 @@
                 <div class="section-content">
                     <div class="row g-4">
                         <div class="col-md-6 company-only" @if(!$isCompanySelected) style="display:none" @endif>
-                            <label class="form-label">{{ translate('Company Name') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('profile.companyName') }} <span class="required">*</span></label>
                             <input type="text" name="information[company_name]" class="form-control"
                                 @if($isCompanySelected) required @endif
                                 value="{{ old('information.company_name', $user?->information?->company_name) }}">
                         </div>
                         <div class="col-md-6 company-only" @if(!$isCompanySelected) style="display:none" @endif>
-                            <label class="form-label">{{ translate('Legal Form') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('profile.legalForm') }} <span class="required">*</span></label>
                             <select name="information[legal_form]" class="form-select" @if($isCompanySelected) required @endif>
                                 <option value="">—</option>
                                 @foreach(['GmbH','UG','GbR','Einzelunternehmen','e.K.','AG','sonstige'] as $form)
@@ -222,47 +222,47 @@
                             </select>
                         </div>
                         <div class="col-md-6 private-only" @if($isCompanySelected) style="display:none" @endif>
-                            <label class="form-label">{{ translate('Geburtstag') }}</label>
+                            <label class="form-label">{{ __('profile.bday') }}</label>
                             <input type="date" max="{{ now()->format('Y-m-d') }}" name="information[birthday]" class="form-control"
                                 value="{{ old('information.birthday', optional($user?->information?->birthday)->format('Y-m-d')) }}">
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label">{{ translate('Straße') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('forms.street') }} <span class="required">*</span></label>
                             <input type="text" name="information[address]" class="form-control" required
                                 value="{{ old('information.address', $user?->information?->address) }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">{{ translate('Nr.') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('profile.no.') }} <span class="required">*</span></label>
                             <input type="text" name="information[address_number]" class="form-control" required
                                 value="{{ old('information.address_number', $user?->information?->address_number) }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">{{ translate('PLZ') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('profile.zip') }} <span class="required">*</span></label>
                             <input type="text" name="information[postal]" class="form-control" required
                                 value="{{ old('information.postal', $user?->information?->postal) }}">
                         </div>
                         <div class="col-md-8">
-                            <label class="form-label">{{ translate('Stadt') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('checkout.city') }} <span class="required">*</span></label>
                             <input type="text" name="information[city]" class="form-control" required
                                 value="{{ old('information.city', $user?->information?->city) }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Country') }}</label>
+                            <label class="form-label">{{ __('global.Country') }}</label>
                             <input type="text" name="information[country]" class="form-control"
                                 maxlength="3" placeholder="DE" autocomplete="country"
                                 value="{{ $countryPrefill }}">
                             <small class="form-text text-muted">{{ __('profile.onboarding_country_hint') }}</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Telefonnummer') }} <span class="required">*</span></label>
+                            <label class="form-label">{{ __('search-request.phone') }} <span class="required">*</span></label>
                             <input type="text" name="information[phone]" class="form-control" required
                                 value="{{ old('information.phone', $user?->information?->phone ?? $user?->phone) }}">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">{{ translate('Umsatzsteuer-Identifikationsnummer') }}</label>
+                            <label class="form-label">{{ __('profile.taxIdNum') }}</label>
                             <input type="text" name="information[taxId]" class="form-control"
                                 value="{{ old('information.taxId', $user?->tax_id) }}">
-                            <small class="form-text text-muted">{{ translate('*Falls eine Umsatzsteuer-Identifikationsnummer vorhanden ist, gib diese hier an.') }}</small>
+                            <small class="form-text text-muted">{{ __('profile.taxIdNumHint') }}</small>
                         </div>
                     </div>
                 </div>
@@ -276,8 +276,8 @@
                 <div class="section-header">
                     <div class="section-icon"><i class="fas fa-shield-alt"></i></div>
                     <div class="section-title">
-                        <h4>{{ translate('Legal Confirmation') }}</h4>
-                        <p class="text-muted mb-0">{{ translate('Fishing license and legal compliance') }}</p>
+                        <h4>{{ __('profile.legalConfirmation') }}</h4>
+                        <p class="text-muted mb-0">{{ __('profile.fishingLicenseCompliance') }}</p>
                     </div>
                 </div>
                 <div class="section-content">
@@ -285,23 +285,23 @@
                         <div class="form-check legal-check mb-3">
                             <input class="form-check-input" type="checkbox" name="lawcard" value="1" id="lawcard" required @checked(old('lawcard'))>
                             <label class="form-check-label" for="lawcard">
-                                <strong>{{ translate('Fischereierlaubnis') }}</strong>
+                                <strong>{{ __('profile.fishingLicense') }}</strong>
                                 <small class="d-block text-muted mt-1">
-                                    {{ translate('Hiermit bestätige ich, dass ich über die für meine Guidings notwendige Angelerlaubnis verfüge.') }}
+                                    {{ __('profile.confirmLicense') }}
                                 </small>
                             </label>
                         </div>
                         <div class="form-check legal-check mb-3">
                             <input class="form-check-input" type="checkbox" name="lawcard_nature" value="1" id="lawcard_nature" required @checked(old('lawcard_nature'))>
                             <label class="form-check-label" for="lawcard_nature">
-                                <strong>{{ translate('Nature protection laws') }}</strong>
+                                <strong>{{ __('profile.natureProtectionLaws') }}</strong>
                                 <small class="d-block text-muted mt-1">{{ __('profile.lawcard_nature_text') }}</small>
                             </label>
                         </div>
                         <div class="form-check legal-check">
                             <input class="form-check-input" type="checkbox" name="lawcard_truthful" value="1" id="lawcard_truthful" required @checked(old('lawcard_truthful'))>
                             <label class="form-check-label" for="lawcard_truthful">
-                                <strong>{{ translate('Truthful data confirmation') }}</strong>
+                                <strong>{{ __('profile.truthfulDataConfirmation') }}</strong>
                                 <small class="d-block text-muted mt-1">{{ __('profile.lawcard_truthful_text') }}</small>
                             </label>
                         </div>
@@ -311,10 +311,10 @@
             <div class="form-actions">
                 <div class="d-flex justify-content-between flex-wrap gap-3">
                     <button type="button" class="btn btn-outline-secondary btn-lg wizard-prev">
-                        <i class="fas fa-arrow-left me-2"></i>{{ translate('Zurück') }}
+                        <i class="fas fa-arrow-left me-2"></i>{{ __('accommodations.previous') }}
                     </button>
                     <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-paper-plane me-2"></i>{{ translate('Submit Application') }}
+                        <i class="fas fa-paper-plane me-2"></i>{{ __('profile.submitApplication') }}
                     </button>
                 </div>
             </div>

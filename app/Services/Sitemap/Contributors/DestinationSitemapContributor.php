@@ -3,9 +3,7 @@
 namespace App\Services\Sitemap\Contributors;
 
 use App\Contracts\Sitemap\SitemapContributorInterface;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\Region;
+use App\Models\CategoryEntity;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapPathEncoder;
@@ -37,36 +35,9 @@ final class DestinationSitemapContributor implements SitemapContributorInterface
             ),
         ]);
 
-        foreach (Country::query()->whereNotNull('slug')->where('slug', '!=', '')->get(['slug']) as $country) {
+        foreach (CategoryEntity::countries()->whereNotNull('slug')->where('slug', '!=', '')->get(['slug']) as $country) {
             $entries->push(SitemapEntry::make(
                 $this->encoder->join($context->baseUrl, ['destination', $country->slug]),
-                'monthly',
-                0.7,
-            ));
-        }
-
-        foreach (Region::with('country')->whereNotNull('slug')->where('slug', '!=', '')->get() as $region) {
-            if (! $region->country) {
-                continue;
-            }
-            $entries->push(SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['destination', $region->country->slug, $region->slug]),
-                'monthly',
-                0.7,
-            ));
-        }
-
-        foreach (City::with(['country', 'region'])->whereNotNull('slug')->where('slug', '!=', '')->get() as $city) {
-            if (! $city->country || ! $city->region) {
-                continue;
-            }
-            $entries->push(SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, [
-                    'destination',
-                    $city->country->slug,
-                    $city->region->slug,
-                    $city->slug,
-                ]),
                 'monthly',
                 0.7,
             ));

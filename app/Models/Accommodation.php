@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\AccommodationDetail;
+use App\Models\AccommodationExtra;
+use App\Models\AccommodationInclusive;
 use App\Models\AccommodationPolicy;
+use App\Models\BathroomAmenity;
+use App\Models\Facility;
+use App\Models\KitchenEquipment;
 use App\Models\RoomConfiguration;
 
 class Accommodation extends Model
@@ -334,5 +339,113 @@ class Accommodation extends Model
             ->all();
 
         $this->attributes['room_configurations'] = json_encode($normalized);
+    }
+
+    /**
+     * Accessor for amenities that enriches stored ID/value pairs
+     * with their master data and translated names.
+     *
+     * @param  mixed  $value
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAmenitiesAttribute($value): array
+    {
+        return $this->resolveMasterDataPairs($value, Facility::class);
+    }
+
+    /**
+     * Accessor for kitchen equipment that enriches stored ID/value pairs
+     * with their master data and translated names.
+     *
+     * @param  mixed  $value
+     * @return array<int, array<string, mixed>>
+     */
+    public function getKitchenEquipmentAttribute($value): array
+    {
+        return $this->resolveMasterDataPairs($value, KitchenEquipment::class);
+    }
+
+    /**
+     * Accessor for bathroom amenities that enriches stored ID/value pairs
+     * with their master data and translated names.
+     *
+     * @param  mixed  $value
+     * @return array<int, array<string, mixed>>
+     */
+    public function getBathroomAmenitiesAttribute($value): array
+    {
+        return $this->resolveMasterDataPairs($value, BathroomAmenity::class);
+    }
+
+    /**
+     * Accessor for extras that enriches stored ID/value pairs
+     * with their master data and translated names.
+     *
+     * @param  mixed  $value
+     * @return array<int, array<string, mixed>>
+     */
+    public function getExtrasAttribute($value): array
+    {
+        return $this->resolveMasterDataPairs($value, AccommodationExtra::class);
+    }
+
+    /**
+     * Accessor for inclusives that enriches stored ID/value pairs
+     * with their master data and translated names.
+     *
+     * @param  mixed  $value
+     * @return array<int, array<string, mixed>>
+     */
+    public function getInclusivesAttribute($value): array
+    {
+        return $this->resolveMasterDataPairs($value, AccommodationInclusive::class);
+    }
+
+    /**
+     * Resolves stored {id, value} pairs against a locale-aware master data
+     * model (which exposes name/name_en via a getNameAttribute accessor).
+     *
+     * @param  mixed  $value
+     * @param  class-string<Model>  $modelClass
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveMasterDataPairs($value, string $modelClass): array
+    {
+        if (is_null($value)) {
+            return [];
+        }
+
+        $items = is_string($value) ? json_decode($value, true) : $value;
+
+        if (!is_array($items) || empty($items)) {
+            return [];
+        }
+
+        $ids = collect($items)
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $definitions = $modelClass::whereIn('id', $ids)->get()->keyBy('id');
+
+        return collect($items)
+            ->filter(fn ($item) => is_array($item))
+            ->map(function ($item) use ($definitions) {
+                // Freeform entries (no id, or an id with no matching master row) keep
+                // their raw stored value so custom, host-entered text is never dropped.
+                $id = !empty($item['id']) ? (int) $item['id'] : null;
+                $definition = $id !== null ? $definitions->get($id) : null;
+
+                return [
+                    'id' => $id,
+                    'value' => $item['value'] ?? null,
+                    'name' => $definition?->name,
+                    'name_en' => $definition?->name_en,
+                ];
+            })
+            ->values()
+            ->all();
     }
 }

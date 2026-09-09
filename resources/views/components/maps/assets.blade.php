@@ -13,7 +13,12 @@
                     lng: {{ (float) config('services.maps.default_center.lng') }}
                 },
                 defaultZoom: {{ (int) config('services.maps.default_zoom') }},
-                googleMapsApiKey: @json(config('services.google_maps.api_key'))
+                googleMapsApiKey: @json(config('services.google_maps.api_key')),
+                locale: @json(app()->getLocale()),
+                currency: 'EUR',
+                landmarksUrl: @json(route('maps.landmarks')),
+                landmarksMinZoom: {{ (int) config('services.maps.landmarks.min_zoom', 10) }},
+                priceFromTemplate: @json(__('destination.map_price_from', ['price' => ':price']))
             };
         </script>
         <script src="{{ mix('js/maps.js') }}" defer></script>

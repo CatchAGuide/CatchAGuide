@@ -2,38 +2,40 @@
 
 namespace App\Services\Trip;
 
-use App\Domain\Destination\DestinationCategoryType;
+use App\Domain\CategoryPage\CategoryPageEntityType;
+use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
-use App\Models\Destination;
+use App\Models\CategoryEntity;
 use App\Models\Trip;
+use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 /**
- * Public catalog: trip location categories (destinations.type=trips) + trip listings by category slug.
+ * Public catalog: trip location categories using c_countries + trip listings by country slug.
  */
 class TripLocationCatalogService
 {
+    public function __construct(
+        private CategoryPageContentService $categoryContent,
+    ) {}
+
     public function listLocationsForLocale(?string $locale = null): Collection
     {
-        $locale = $locale ?? app()->getLocale();
-
-        return Destination::query()
-            ->where('type', DestinationCategoryType::TRIPS)
-            ->where('language', $locale)
+        return CategoryEntity::countries()
             ->orderBy('name')
             ->get();
     }
 
     /**
      * @return array{
-     *   row_data: Destination,
-     *   faq: \Illuminate\Database\Eloquent\Collection,
-     *   fish_chart: \Illuminate\Database\Eloquent\Collection,
-     *   fish_size_limit: \Illuminate\Database\Eloquent\Collection,
-     *   fish_time_limit: \Illuminate\Database\Eloquent\Collection,
+     *   row_data: CategoryEntity,
+     *   faq: \Illuminate\Support\Collection,
+     *   fish_chart: \Illuminate\Support\Collection,
+     *   fish_size_limit: \Illuminate\Support\Collection,
+     *   fish_time_limit: \Illuminate\Support\Collection,
      *   trips: LengthAwarePaginator,
      *   trips_total: int
      * }
@@ -42,16 +44,31 @@ class TripLocationCatalogService
     {
         $locale = $locale ?? app()->getLocale();
 
-        $row_data = Destination::query()
-            ->with(['faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit'])
+        $row_data = CategoryEntity::countries()
             ->where('slug', $locationSlug)
-            ->where('type', DestinationCategoryType::TRIPS)
-            ->where('language', $locale)
             ->first();
 
         if ($row_data === null) {
             abort(404);
         }
+
+        if ($row_data->id) {
+            $row_data = $this->categoryContent->applyScopedContentToModel(
+                $row_data,
+                CategoryPageEntityType::GEO_COUNTRY,
+                CategoryPageScope::TRIPS,
+                $locale,
+                null,
+            );
+        }
+
+        $faq = $this->categoryContent->resolveFaqsForEntityDisplay(
+            CategoryPageEntityType::GEO_COUNTRY,
+            $row_data->id,
+            CategoryPageScope::TRIPS,
+            $locale,
+            null,
+        );
 
         $base = Trip::query()
             ->where('status', 'active')
@@ -67,19 +84,15 @@ class TripLocationCatalogService
 
         return [
             'row_data' => $row_data,
-            'faq' => $row_data->faq,
-            'fish_chart' => $row_data->fish_chart,
-            'fish_size_limit' => $row_data->fish_size_limit,
-            'fish_time_limit' => $row_data->fish_time_limit,
+            'faq' => $faq,
+            'fish_chart' => $row_data->fish_charts(),
+            'fish_size_limit' => $row_data->fish_size_limits(),
+            'fish_time_limit' => $row_data->fish_time_limits(),
             'trips' => $trips,
             'trips_total' => $trips_total,
         ];
     }
 
-    /**
-     * @param Builder<Trip> $query
-     * @return Builder<Trip>
-     */
     private function applyListingSort(Builder $query, Request $request): Builder
     {
         $hasOnlyPage = count(array_diff(array_keys($request->all()), ['page'])) === 0;

@@ -53,6 +53,8 @@ return [
     'data-protection' => 'Datenschutzerklärung',
     'conditions' => 'AGB',
     'notice-takedown' => 'Hinweis & Entfernung',
+    'faq' => 'FAQ',
+    'for_agents' => 'Für KI-Agenten & Entwickler',
     'product-reports' => 'Produktmeldungen',
     'term-conditions' => "AGB'S",
     'accept-policy' => 'Datenschutzbestimmungen',
@@ -244,6 +246,7 @@ return [
 
     //sort
     'sortby' => 'Sortieren',
+    'recommended' => 'Empfohlen',
     'newest' => 'Neustes',
     'lowprice' => 'Preis (niedrigster zuerst)',
     'shortduration' => 'Dauer (kurze zuerst)',
@@ -319,4 +322,6 @@ Wichtiger Hinweis: Solltest du persönliche Kontaktdaten wie z.B. deine E-Mail-A
     'bookedWithMe' => 'Bei mir gebucht',
     'diary' => 'Kalender',
 
+    'faq-page-title' => 'Häufig gestellte Fragen zu Catch A Guide',
+    'accept_the' => 'Ich akzeptiere die',
 ];

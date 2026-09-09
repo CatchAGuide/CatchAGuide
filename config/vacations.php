@@ -1,21 +1,21 @@
 <?php
 
 return [
-    'new_trips_rail_max_catalog' => 30,
-
-    'new_camps_rail_max_catalog' => 30,
+    'new_listings_rail_max_catalog' => 60,
 
     'popular_listing_limit' => 6,
 
-    'new_trips_rail_limit' => 6,
+    'new_listings_rail_limit' => 8,
 
-    'new_camps_rail_limit' => 6,
+    'hub_target_fish_limit' => 8,
+
+    'hub_testimonials_limit' => 6,
 
     'country_page_per_page' => 6,
 
     'pillar_index_per_page' => 9,
 
-    'reserved_country_segments' => ['trips', 'camps'],
+    'reserved_country_segments' => ['trips', 'camps', 'countries', 'targets'],
 
     'inspiration_tiles' => [
         [
@@ -55,6 +55,21 @@ return [
             'icon' => 'fa-globe-europe',
             'title_key' => 'vacations.hub_usp_europe_title',
             'text_key' => 'vacations.hub_usp_europe_text',
+        ],
+    ],
+
+    'hub_consultation_checklist' => [
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_matches',
+        ],
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_operators',
+        ],
+        [
+            'icon' => 'fa-check-circle',
+            'text_key' => 'vacations.hub_consultation_point_groups',
         ],
     ],
 

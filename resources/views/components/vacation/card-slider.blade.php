@@ -1,4 +1,5 @@
 @props([
+    'eyebrow' => null,
     'title' => null,
     'subtitle' => null,
     'linkUrl' => null,
@@ -14,6 +15,9 @@
     @if($title)
         <div class="vacation-card-slider__header">
             <div class="vacation-card-slider__intro">
+                @if($eyebrow)
+                    <span class="vacation-card-slider__eyebrow">{{ $eyebrow }}</span>
+                @endif
                 <h2 class="vacation-card-slider__title">{{ $title }}</h2>
                 @if($subtitle)
                     <p class="vacation-card-slider__subtitle">{{ $subtitle }}</p>

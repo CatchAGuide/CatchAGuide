@@ -43,6 +43,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\CleanUrlParameters::class,
+            \App\Http\Middleware\RememberListingSearch::class,
         ],
 
         'api' => [

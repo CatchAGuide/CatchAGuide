@@ -15,9 +15,10 @@
                     <div class="booking-select position-relative">
                         <div style="display: flex;">
                             <select class="form-select" id="personSelect" aria-label="Personenanzahl" name="person" required>
-                                <option selected disabled>{{ __('booking.people') }}</option>
-                                @foreach(json_decode($guiding->prices) as $price)
-                                    <option value="{{ $price->person }}" data-price="{{ $price->amount }}" @if($guiding->price_type == 'per_boat') data-total-price="{{ $guiding->price }}" @endif>
+                                @php $preselectedGuests = $preselectedGuests ?? null; @endphp
+                                <option value="" disabled @selected($preselectedGuests === null)>{{ __('booking.people') }}</option>
+                                @foreach(json_decode($guiding->prices) ?? [] as $price)
+                                    <option value="{{ $price->person }}" data-price="{{ $price->amount }}" @if($guiding->price_type == 'per_boat') data-total-price="{{ $guiding->price }}" @endif @selected($preselectedGuests !== null && (int) $price->person === (int) $preselectedGuests)>
                                         {{ $price->person }} {{ $price->person == 1 ? __('booking.person') : __('booking.people') }}
                                     </option>
                                 @endforeach
@@ -212,6 +213,10 @@
                 peopleText.textContent = personText;
             }
         }
+    }
+
+    if (personSelect.value) {
+        personSelect.dispatchEvent(new Event('change'));
     }
 });
 

@@ -29,6 +29,8 @@
 
 <body class="app sidebar-mini ltr light-mode admin-shell">
 
+@include('layouts.partials.page-loader')
+
 <!-- PAGE -->
 <div class="page">
     <div class="page-main">

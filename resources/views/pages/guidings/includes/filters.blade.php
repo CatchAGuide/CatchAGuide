@@ -8,7 +8,7 @@
             <div class="row">
                 <div class="col-12 mb-4">
                     <div class="form-group my-1">
-                        <h5 class="mb-2">{{translate('Your budget')}}</h5>
+                        <h5 class="mb-2">{{__('checkout.budget')}}</h5>
                         <div class="price-range-slider">
                             {{-- <div class="chart-container mb-2">
                                 <canvas id="price-histogram"></canvas>
@@ -24,7 +24,7 @@
                 {{-- Target Fish --}}
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
-                        <h5 class="mb-2">{{translate('Target Fish')}}</h5>
+                        <h5 class="mb-2">{{__('camps.target_fish_title')}}</h5>
                         <div class="checkbox-group">
                             @php
                                 $visibleCount = 0;
@@ -69,7 +69,7 @@
                 {{-- Methods --}}
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
-                        <h5 class="mb-2">{{translate('Methods')}}</h5>
+                        <h5 class="mb-2">{{__('checkout.methods')}}</h5>
                         <div class="checkbox-group">
                             @php
                                 $visibleCount = 0;
@@ -113,7 +113,7 @@
                 {{-- Water Types --}}
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
-                        <h5 class="mb-2">{{translate('Water Types')}}</h5>
+                        <h5 class="mb-2">{{__('newguidings.water_types')}}</h5>
                         <div class="checkbox-group">
                             @php
                                 $visibleCount = 0;
@@ -156,13 +156,13 @@
                 <hr>
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
-                        <h5 class="mb-2">{{translate('Duration')}}</h5>
+                        <h5 class="mb-2">{{__('checkout.duration')}}</h5>
                         <div class="checkbox-group">
                             @php
                                 $durationLabels = [
-                                    'half_day' => translate('Half Day'),
-                                    'full_day' => translate('Full Day'),
-                                    'multi_day' => translate('Multi Day')
+                                    'half_day' => __('guidings.half_day'),
+                                    'full_day' => __('guidings.full_day'),
+                                    'multi_day' => __('guidings.multi_day')
                                 ];
                             @endphp
                             @foreach($durationLabels as $durationType => $label)
@@ -186,7 +186,7 @@
                 <hr>
                 <div class="filter-section mb-3">
                     <div class="form-group mb-3">
-                        <h5 class="mb-2">{{translate('Number of People')}}</h5>
+                        <h5 class="mb-2">{{__('checkout.number_of_people')}}</h5>
                         <div class="checkbox-group" id="person-checkbox-group">
                             @foreach($personCounts as $persons => $count)
                                 <div class="form-check">
@@ -197,7 +197,7 @@
                                            value="{{ $persons }}"
                                            {{ request()->get('num_persons') == (string)$persons ? 'checked' : '' }}>
                                     <label class="form-check-label" for="persons_{{ $persons }}">
-                                        {{ translate('Up to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
+                                        {{ __('emails.up_to') }} {{ $persons }} {{ translate('person'.($persons > 1 ? 's' : '')) }}
                                         <span class="count">({{ $count }})</span>
                                     </label>
                                 </div>

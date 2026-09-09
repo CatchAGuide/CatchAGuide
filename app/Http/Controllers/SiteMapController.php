@@ -16,14 +16,15 @@ class SiteMapController extends Controller
         
         // Add main pages
         $content .= $this->addUrl(url('/'), '1.0', 'daily');
-        $content .= $this->addUrl(route('guidings.index'), '0.9', 'daily');
+        $content .= $this->addUrl(route('guidings.landing'), '0.9', 'daily');
+        $content .= $this->addUrl(route('guidings.index'), '0.8', 'daily');
         $content .= $this->addUrl(route('vacations.index'), '0.8', 'weekly');
         
         // Add guidings (only active ones)
         $guidings = Guiding::publiclyVisible()->get();
         foreach ($guidings as $guiding) {
             $content .= $this->addUrl(
-                route('guidings.show', [$guiding->id, $guiding->slug]),
+                $guiding->publicShowUrl(),
                 '0.7',
                 'weekly',
                 $guiding->updated_at

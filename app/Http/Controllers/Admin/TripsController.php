@@ -82,6 +82,8 @@ class TripsController extends Controller
                 $trip->refresh();
             }
 
+            $this->galleryProcessor->trashPendingDeletesForGallery($trip->gallery_images, $trip->thumbnail_path);
+
             $providerPhoto = $this->galleryProcessor->uploadExtraFile($request, 'trip', 'provider_photo', $trip->slug, $trip->id, 'provider');
             if ($providerPhoto) {
                 $trip->update(['provider_photo' => $providerPhoto]);
@@ -168,6 +170,8 @@ class TripsController extends Controller
                     'thumbnail_path' => $updatedImageData['thumbnail_path'],
                 ]);
             }
+
+            $this->galleryProcessor->trashPendingDeletesForGallery($trip->gallery_images, $trip->thumbnail_path);
 
             $providerPhoto = $this->galleryProcessor->uploadExtraFile($request, 'trip', 'provider_photo', $trip->slug, $trip->id, 'provider');
             if ($providerPhoto) {

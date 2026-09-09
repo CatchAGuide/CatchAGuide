@@ -100,6 +100,19 @@ return [
     'next' => 'Next',
     'submit_publish' => 'Submit & Publish',
 
+    // Upload / loading feedback
+    'upload_timeout' => 'Upload timed out after :seconds seconds. Try fewer or smaller images.',
+    'upload_watchdog' => 'This is taking too long. Please try fewer or smaller images, then save again.',
+    'upload_prepare_failed' => 'Could not prepare your images for upload. Please remove and re-add them, then try again.',
+    'uploading_images' => 'Uploading :count image|Uploading :count images',
+    'uploading_images_hint' => 'This can take a minute on slower connections',
+    'preparing_images' => 'Preparing :count image|Preparing :count images',
+    'preparing_images_hint' => 'Compressing before upload',
+    'saving_progress' => 'Saving your progress...',
+    'saving_draft' => 'Saving draft...',
+    'uploading_guiding' => 'Uploading your guiding...',
+    'keep_tab_open' => 'Please keep this tab open',
+
     // Additional text
     'extra_input_placeholder' => 'Add a comment or additional information for your guests.',
     'error_message' => 'Please fill in all required fields.',
@@ -309,5 +322,6 @@ return [
             <li>3% of the total price for bookings over €1,500</li>
         </ul>',
 
-    'pricing_extra_info_text' => 'You can add the extras to your booking during the reservation process'
+    'pricing_extra_info_text' => 'You can add the extras to your booking during the reservation process',
+    'new_guiding_offer_title' => 'New Guiding Offer',
 ];

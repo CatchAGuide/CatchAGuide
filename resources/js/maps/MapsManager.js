@@ -2,7 +2,8 @@
  * MapsManager — Leaflet facade (tiles, ready, invalidateSize)
  */
 import L from 'leaflet';
-import 'leaflet.markercluster';
+import GridMarkerCluster from './GridMarkerCluster';
+import { clusterCellKey, clusterCellSizeDegrees } from './clusterGrid';
 
 // Fix default marker icon paths broken by webpack
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -16,12 +17,25 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+L.Control.Attribution.mergeOptions({
+  prefix: false,
+});
+
 const DEFAULT_CONFIG = {
-  tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   defaultCenter: { lat: 51.165691, lng: 10.451526 },
   defaultZoom: 5,
 };
+
+/**
+ * @deprecated Use clusterCellSizeDegrees — listing maps cluster by lat/lng cells.
+ */
+export function clusterRadiusForZoom(zoom) {
+  return clusterCellSizeDegrees(zoom);
+}
+
+export { clusterCellKey, clusterCellSizeDegrees };
 
 class MapsManager {
   constructor() {
@@ -45,10 +59,9 @@ class MapsManager {
   }
 
   createTileLayer() {
-    return L.tileLayer(this.config.tileUrl, {
-      attribution: this.config.attribution,
+    return L.tileLayer(this.config.tileUrl || DEFAULT_CONFIG.tileUrl, {
+      attribution: this.config.attribution || DEFAULT_CONFIG.attribution,
       maxZoom: 19,
-      subdomains: 'abcd',
     });
   }
 
@@ -122,24 +135,97 @@ class MapsManager {
     }
   }
 
-  createMarkerClusterer({ map, markers }) {
-    const cluster = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
+  createMarkerClusterer({ map, markers, muted = false }) {
+    const cluster = new GridMarkerCluster({
+      muted,
+      iconCreateFunction: (members) => this._createClusterIconFromMarkers(members, muted),
     });
 
     if (Array.isArray(markers) && markers.length) {
-      markers.forEach((m) => cluster.addLayer(m));
+      cluster.addLayers(markers);
     }
-
-    cluster.on('clusterclick', (e) => {
-      const currentZoom = map.getZoom();
-      map.setView(e.latlng, Math.min(currentZoom + 2, map.getMaxZoom()));
-    });
 
     map.addLayer(cluster);
     return cluster;
+  }
+
+  /**
+   * Canonical map colour key for a module: gray -> other | tour -> tours | camp -> camps | trip -> holidays
+   * @param {string} module
+   */
+  _clusterSpecKey(module) {
+    return { tour: 'tours', camp: 'camps', trip: 'holidays', gray: 'other' }[module] || 'tours';
+  }
+
+  /**
+   * Fixed-size cluster circle. When a cluster mixes offer types, up to 2 further
+   * types render as equally-sized plain circles behind the dominant (front) one —
+   * tie-break order tours > camps > holidays, offsets per the cluster spec.
+   */
+  _createClusterIconFromMarkers(markers, muted = false) {
+    const members = Array.isArray(markers) ? markers : [];
+    const count = members.length;
+
+    if (muted) {
+      return L.divIcon({
+        html: `<span class="cag-map-cluster__core"><span class="cag-map-cluster__count">${count}</span></span>`,
+        className: 'leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--muted',
+        iconSize: L.point(26, 26),
+        iconAnchor: [13, 13],
+      });
+    }
+
+    const PRIORITY = { tour: 0, camp: 1, trip: 2 };
+    const typeCounts = { tour: 0, camp: 0, trip: 0 };
+    members.forEach((m) => {
+      const key = (m.options && m.options.cagVariant) || 'tour';
+      if (key === 'tour' || key === 'camp' || key === 'trip') {
+        typeCounts[key] += 1;
+      } else if (key !== 'gray') {
+        typeCounts.tour += 1;
+      }
+    });
+
+    const present = Object.keys(typeCounts)
+      .filter((key) => typeCounts[key] > 0)
+      .sort((a, b) => typeCounts[b] - typeCounts[a] || PRIORITY[a] - PRIORITY[b]);
+
+    const dominant = present[0] || 'tour';
+    const edges = present.slice(1, 3);
+
+    const edgesHtml = edges
+      .map(
+        (type, i) =>
+          `<span class="cag-map-cluster__edge cag-map-cluster__edge--${i + 1}" style="background:var(--map-${this._clusterSpecKey(type)})" aria-hidden="true"></span>`
+      )
+      .join('');
+
+    // Bounding box grows to the right/up as stacked edges are added; the front
+    // circle always stays anchored at the cluster's true geographic point.
+    let minTop = 0;
+    let maxRight = 32;
+    if (edges.length >= 1) {
+      minTop = Math.min(minTop, -4);
+      maxRight = Math.max(maxRight, 9 + 32);
+    }
+    if (edges.length >= 2) {
+      minTop = Math.min(minTop, -9);
+      maxRight = Math.max(maxRight, 18 + 32);
+    }
+    const width = maxRight;
+    const height = 32 - minTop;
+    const anchor = [16, 16 - minTop];
+
+    return L.divIcon({
+      html: `
+        ${edgesHtml}
+        <span class="cag-map-cluster__core" style="background:var(--map-${this._clusterSpecKey(dominant)})">
+          <span class="cag-map-cluster__count">${count}</span>
+        </span>`,
+      className: `leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--${dominant}`,
+      iconSize: L.point(width, height),
+      iconAnchor: anchor,
+    });
   }
 }
 

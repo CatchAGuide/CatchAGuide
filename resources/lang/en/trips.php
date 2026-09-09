@@ -237,9 +237,9 @@ return [
 
     // Public catalog (trip location categories — destinations.type=trips)
     'catalog_title' => 'Fishing trips by destination',
-    'catalog_header_title' => 'Fishing trips',
+    'catalog_header_title' => 'All inclusive fishing trips',
     'catalog_header_sub_title' => 'Choose a destination to see available all-inclusive trips.',
-    'catalog_breadcrumb' => 'Fishing trips',
+    'catalog_breadcrumb' => 'All inclusive fishing trips',
     'catalog_intro' => 'Browse trip destinations below. Each region has its own information page and a live list of active trips.',
     'catalog_no_locations' => 'No trip destinations are published for this language yet.',
     'catalog_browser_title_prefix' => 'Trips | ',

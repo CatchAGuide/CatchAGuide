@@ -178,12 +178,6 @@
         </div>
     </div>
 
-    <!-- Add this loading overlay HTML just before the closing </div> of rating-wrapper -->
-    <div class="loading-overlay d-none">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
 @endsection
 
 @section('css_after')
@@ -521,20 +515,6 @@
             transform: scale(1);
         }
 
-        /* Add these loading overlay styles */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
         .spinner-border {
             width: 3rem;
             height: 3rem;
@@ -576,7 +556,6 @@ $(document).ready(function(){
         const form = $(this);
         const formData = new FormData(this);
         const errorElement = document.getElementById('ratingError');
-        const loadingOverlay = document.querySelector('.loading-overlay');
 
         // Validate form data
         const comment = (formData.get('comment') || '').toString().trim();
@@ -597,7 +576,9 @@ $(document).ready(function(){
 
         // Hide error and show loading overlay
         errorElement.classList.add('d-none');
-        loadingOverlay.classList.remove('d-none');
+        if (window.PageLoader) {
+            window.PageLoader.show();
+        }
 
         // Submit form via AJAX
         $.ajax({
@@ -607,7 +588,9 @@ $(document).ready(function(){
             processData: false,
             contentType: false,
             success: function(response) {
-                loadingOverlay.classList.add('d-none');
+                if (window.PageLoader) {
+                    window.PageLoader.hide();
+                }
                 if (response.success) {
                     // Show thank you modal
                     const modal = new bootstrap.Modal(document.getElementById('thankYouModal'));
@@ -618,7 +601,9 @@ $(document).ready(function(){
                 }
             },
             error: function(xhr) {
-                loadingOverlay.classList.add('d-none');
+                if (window.PageLoader) {
+                    window.PageLoader.hide();
+                }
                 // Handle validation errors
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;

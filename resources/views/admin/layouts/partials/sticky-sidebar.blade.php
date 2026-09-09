@@ -99,6 +99,9 @@
                     <h3>Communications</h3>
                 </li>
                 <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.reviews.index') }}"><i class="side-menu__icon fe fe-star"></i><span class="side-menu__label">{{ __('admin.reviews.nav') }}</span></a>
+                </li>
+                <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
                 </li>
                 <li class="slide">
@@ -148,6 +151,7 @@
                         <li><a href="{{ route('admin.faq.vacations') }}" class="slide-item {{ request()->routeIs('admin.faq.vacations') ? 'active' : '' }}">Vacations</a></li>
                         <li><a href="{{ route('admin.faq.vacation-trips') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-trips') ? 'active' : '' }}">Vacation trips</a></li>
                         <li><a href="{{ route('admin.faq.vacation-camps') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-camps') ? 'active' : '' }}">Vacation camps</a></li>
+                        <li><a href="{{ route('admin.faq.offers') }}" class="slide-item {{ request()->routeIs('admin.faq.offers') ? 'active' : '' }}">Offers (Angebote)</a></li>
                     </ul>
                 </li>
                 <li class="slide">
@@ -155,6 +159,20 @@
                        href="{{ route('admin.terms.index') }}">
                         <i class="side-menu__icon fe fe-file-text"></i>
                         <span class="side-menu__label">Terms & Conditions</span>
+                    </a>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.monthly-highlights.*') ? 'active' : '' }}"
+                       href="{{ route('admin.monthly-highlights.index') }}">
+                        <i class="side-menu__icon fe fe-calendar"></i>
+                        <span class="side-menu__label">Monthly Highlights</span>
+                    </a>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.vacation-testimonials.*') ? 'active' : '' }}"
+                       href="{{ route('admin.vacation-testimonials.index') }}">
+                        <i class="side-menu__icon fe fe-star"></i>
+                        <span class="side-menu__label">{{ __('admin.vacation_testimonials.nav') }}</span>
                     </a>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">
@@ -168,21 +186,20 @@
                         <li><a href="{{ route('admin.blog.categories.index') }}" class="slide-item {{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}">Categories</a></li>
                     </ul>
                 </li>
-                <li class="slide {{ (request()->routeIs('admin.category.*') || request()->routeIs('admin.newblog.*')) ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ (request()->routeIs('admin.category.*') || request()->routeIs('admin.newblog.*')) ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                <li class="slide {{ (request()->routeIs('admin.category.*') && !request()->routeIs('admin.newblog.*')) ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ (request()->routeIs('admin.category.*') && !request()->routeIs('admin.newblog.*')) ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-layers"></i>
-                        <span class="side-menu__label">Category pages</span>
+                        <span class="side-menu__label">{{ __('admin.category_pages.sidebar.menu') }}</span>
                         <i class="angle fe fe-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}">Target fish</a></li>
-                        <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}">Methods</a></li>
-                        <li><a href="{{ route('admin.newblog.threads.index') }}" class="slide-item {{ request()->routeIs('admin.newblog.threads.*') ? 'active' : '' }}">Posts (guide blog)</a></li>
-                        <li><a href="{{ route('admin.category.country.index') }}" class="slide-item {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}">Country</a></li>
-                        <li><a href="{{ route('admin.category.vacation-country.index') }}" class="slide-item {{ request()->routeIs('admin.category.vacation-country.*') ? 'active' : '' }}">Vacation country</a></li>
-                        <li><a href="{{ route('admin.category.trip-location.index') }}" class="slide-item {{ request()->routeIs('admin.category.trip-location.*') ? 'active' : '' }}">Trip locations</a></li>
-                        <li><a href="{{ route('admin.category.region.index') }}" class="slide-item {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}">Region</a></li>
-                        <li><a href="{{ route('admin.category.city.index') }}" class="slide-item {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}">City</a></li>
+                        <li><a href="{{ route('admin.category.hub') }}" class="slide-item {{ request()->routeIs('admin.category.hub') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.hub') }}</a></li>
+                        <li><a href="{{ route('admin.category.destination-hub.edit') }}" class="slide-item {{ request()->routeIs('admin.category.destination-hub.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.destination_hub') }}</a></li>
+                        <li><a href="{{ route('admin.category.target-fish.index') }}" class="slide-item {{ request()->routeIs('admin.category.target-fish.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.target_fish') }}</a></li>
+                        <li><a href="{{ route('admin.category.methods.index') }}" class="slide-item {{ request()->routeIs('admin.category.methods.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.methods') }}</a></li>
+                        <li><a href="{{ route('admin.category.country.index') }}" class="slide-item {{ request()->routeIs('admin.category.country.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.countries') }}</a></li>
+                        <li><a href="{{ route('admin.category.region.index') }}" class="slide-item {{ request()->routeIs('admin.category.region.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.region') }}</a></li>
+                        <li><a href="{{ route('admin.category.city.index') }}" class="slide-item {{ request()->routeIs('admin.category.city.*') ? 'active' : '' }}">{{ __('admin.category_pages.sidebar.city') }}</a></li>
                     </ul>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.page-attribute.*') ? 'is-expanded' : '' }}">

@@ -7,15 +7,21 @@ return [
     // login
     'user' => 'Email*',
     'pass' => 'Password*',
-
+    'login_title' => 'Welcome back',
+    'login_sub' => 'Sign in to book guides and manage your trips.',
+    'remember_me' => 'Remember me',
+    'not_a_member' => 'Not a member?',
+    'loading' => 'Loading...',
 
     // register
     'fname' => "Name*",
     'lname' => "Surename*",
     'email' => "Email*",
-    'pass' => "Password*",
     'rpass' => "Repeat Password*",
     'agree' => 'I accept the terms and conditions and privacy policy regulations.',
+    'signup_title' => 'Create your account',
+    'signup_sub' => 'Join Catch A Guide to discover tours and vacations.',
+    'already_have_account' => 'Already have an account?',
 
 
     //forgaot pass word

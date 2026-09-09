@@ -121,6 +121,7 @@ return [
     'reset_filters' => 'Filter zurücksetzen',
     'no_results' => 'Keine Ergebnisse gefunden',
     'try_different_filters' => 'Versuchen Sie andere Filter',
+    'show_results_count' => ':count Ergebnisse anzeigen',
 
     'show_on_map' => 'Auf Karte anzeigen',
     'Best_price_guarantee' => 'Best-Preis-Garantie',
@@ -155,4 +156,14 @@ return [
     'persons' => 'Personen',
     'person' => 'Person',
     'View_all_from' => 'Alle von',
+    'less' => 'Weniger',
+    'similar_guidings' => 'Ähnliche Guidings',
+    'about_this_guiding' => 'Über dieses Guiding',
+    'meta_description_suffix' => '. Buche professionelle Angelguides und Touren online.',
+    'additional_fishing_tour_close_to' => 'Zusätzliche Angeltour in der Nähe von',
+    'all_guidings_at' => 'Alle Guidings bei ',
+    'meta_description' => 'Finde und buche geführte Angeltouren online. Durchstöbere unsere Auswahl an professionellen Angelguides und Touren.',
+    'find_guided_trips_in' => 'Finde geführte Angeltouren in ',
+    'confirm_activate_guiding' => 'Willst Du das Guiding wirklich aktivieren? Es steht dann für Buchungen zur Verfügung.',
+    'confirm_deactivate_guiding' => 'Willst Du das Guiding wirklich deaktivieren? Es erscheint dann nicht mehr im Suchverlauf...',
 ];  

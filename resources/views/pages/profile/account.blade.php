@@ -273,21 +273,21 @@
                     <div class="form-group">
                         <label class="form-label" for="firstname">@lang('profile.fname')<span class="required">*</span></label>
                         <input type="text" class="form-control" id="firstname" name="firstname" 
-                               placeholder="{{translate('Vorname')}}" value="{{ auth()->user()->firstname }}" required>
+                               placeholder="{{__('checkout.forename')}}" value="{{ auth()->user()->firstname }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label" for="lastname">@lang('profile.lname')<span class="required">*</span></label>
                         <input type="text" class="form-control" id="lastname" name="lastname" 
-                               placeholder="{{translate('Nachname')}}" value="{{ auth()->user()->lastname }}" required>
+                               placeholder="{{__('checkout.surname')}}" value="{{ auth()->user()->lastname }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label class="form-label" for="birthday">@lang('profile.bday')</label>
                         <input type="date" max="{{ Carbon\Carbon::now()->format('Y-m-d') }}" class="form-control" 
-                               id="birthday" name="information[birthday]" placeholder="{{translate('Geburtstag')}}" 
+                               id="birthday" name="information[birthday]" placeholder="{{__('profile.bday')}}" 
                                value="{{ auth()->user()?->information?->birthday?->format('Y-m-d') ?? '' }}">
                     </div>
                 </div>
@@ -332,7 +332,7 @@
                 <div class="col-md-8">
                     <div class="form-group">
                         <label class="form-label" for="address">@lang('profile.street')<span class="required">*</span></label>
-                        <input type="text" class="form-control" id="address" placeholder="{{translate('Straße')}}" 
+                        <input type="text" class="form-control" id="address" placeholder="{{__('forms.street')}}" 
                                name="information[address]" value="{{auth()->user()->information->address ?? ''}}" required>
                     </div>
                 </div>
@@ -354,14 +354,14 @@
                     <div class="form-group">
                         <label class="form-label" for="city">@lang('profile.city')<span class="required">*</span></label>
                         <input type="text" class="form-control" id="city" name="information[city]" 
-                               placeholder="{{translate('Stadt')}}" value="{{auth()->user()?->information->city ?? ''}}" required>
+                               placeholder="{{__('checkout.city')}}" value="{{auth()->user()?->information->city ?? ''}}" required>
                     </div>
                 </div>
                 <div class="col-md-12">
                     <div class="form-group">
                         <label class="form-label" for="tax_id">@lang('profile.taxIdNum')</label>
                         <input type="text" class="form-control" id="tax_id" name="information[tax_id]" 
-                               placeholder="{{translate('Umsatzsteuer-Identifikationsnummer')}}" value="{{auth()->user()?->tax_id ?? ''}}">
+                               placeholder="{{__('profile.taxIdNum')}}" value="{{auth()->user()?->tax_id ?? ''}}">
                         <small class="helper-text">@lang('profile.taxNummsg')</small>
                     </div>
                 </div>

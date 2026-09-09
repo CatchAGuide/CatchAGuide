@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Guiding;
 use App\Services\CalendarScheduleService;
 use App\Services\Media\ListingMediaRelocator;
+use App\Services\Media\MediaTrashService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -108,9 +109,11 @@ class SaveGuidingDraftJob implements ShouldQueue
             DB::commit();
 
             $pathsToDelete = $this->guidingData['paths_to_delete'] ?? [];
-            foreach (array_unique(array_filter($pathsToDelete)) as $path) {
-                media_delete($path);
+            $committed = json_decode($guiding->gallery_images ?? '[]', true) ?? [];
+            if (! empty($guiding->thumbnail_path)) {
+                $committed[] = $guiding->thumbnail_path;
             }
+            app(MediaTrashService::class)->trashMany($pathsToDelete, $committed);
 
         } catch (\Exception $e) {
             DB::rollBack();

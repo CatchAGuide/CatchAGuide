@@ -4,14 +4,21 @@ namespace App\Support\Maps;
 
 class MapMarkerCollection
 {
+    public const MODULE_TOUR = 'tour';
+
+    public const MODULE_TRIP = 'trip';
+
+    public const MODULE_CAMP = 'camp';
+
     /**
      * Build listing markers without per-item Blade renders (popup HTML is built client-side).
      *
      * @param  iterable  $guidings
      * @param  array<int>  $grayIds
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromGuidings(iterable $guidings, array $grayIds = []): array
+    public static function fromGuidings(iterable $guidings, array $grayIds = [], array $query = []): array
     {
         $markers = [];
         $grayLookup = array_fill_keys(array_map('intval', $grayIds), true);
@@ -23,10 +30,8 @@ class MapMarkerCollection
 
             $id = (int) $guiding->id;
             $title = (string) ($guiding->title ?? '');
-            $image = $guiding->thumbnail_path ?? null;
-            if ($image && function_exists('media_url')) {
-                $image = media_url($image);
-            }
+            $images = self::resolveImages($guiding);
+            $image = $images[0] ?? '';
 
             $price = method_exists($guiding, 'getLowestPrice')
                 ? $guiding->getLowestPrice()
@@ -35,23 +40,27 @@ class MapMarkerCollection
                 $price = null;
             }
 
-            $markers[] = [
+            $module = self::MODULE_TOUR;
+            $markers[] = array_merge([
                 'id' => $id,
                 'lat' => (float) $guiding->lat,
                 'lng' => (float) $guiding->lng,
                 'variant' => isset($grayLookup[$id]) ? 'gray' : 'primary',
                 'pillar' => 'guiding',
                 'title' => $title,
-                'url' => route('guidings.show', [$guiding->id, $guiding->slug]),
+                'url' => self::guidingShowUrl($guiding, $query),
                 'location' => (string) ($guiding->location ?? ''),
-                'image' => (string) ($image ?? ''),
+                'image' => (string) $image,
+                'images' => $images,
                 'price' => $price,
                 'priceLabel' => $price !== null
-                    ? ('ab ' . $price . '€ p.P.')
+                    ? __('destination.map_price_from', [
+                        'price' => '€'.number_format((float) $price, 0, ',', '.'),
+                    ])
                     : null,
-                'badge' => function_exists('translate') ? translate('Guiding') : 'Guiding',
+                'badge' => __('offers.badge_tour'),
                 'cta' => __('vacations.view_details'),
-            ];
+            ], self::moduleFields($module, $id), self::guidingListMeta($guiding));
         }
 
         return $markers;
@@ -61,9 +70,10 @@ class MapMarkerCollection
      * Structured vacation markers (trips) — popup HTML built client-side.
      *
      * @param  iterable  $trips
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromTrips(iterable $trips): array
+    public static function fromTrips(iterable $trips, array $query = []): array
     {
         $markers = [];
 
@@ -74,34 +84,38 @@ class MapMarkerCollection
                 continue;
             }
 
-            $image = $trip->thumbnail_path ?? null;
-            if ($image && function_exists('media_url')) {
-                $image = media_url($image);
-            }
+            $images = self::resolveImages($trip);
+            $image = $images[0] ?? '';
 
             $currency = $trip->currency ?? 'EUR';
-            $sym = $currency === 'EUR' ? '€' : (($currency === 'USD' ? '$' : $currency . ' '));
+            $sym = $currency === 'EUR' ? '€' : (($currency === 'USD' ? '$' : $currency.' '));
             $price = isset($trip->price_per_person) && (float) $trip->price_per_person > 0
                 ? (float) $trip->price_per_person
                 : null;
 
-            $markers[] = [
-                'id' => (int) ($trip->id ?? 0),
+            $module = self::MODULE_TRIP;
+            $id = (int) ($trip->id ?? 0);
+            $markers[] = array_merge([
+                'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
                 'variant' => 'trip',
                 'pillar' => 'trip',
                 'title' => (string) ($trip->title ?? ''),
-                'url' => route('vacations.trips.show', $trip->slug),
+                'url' => route('vacations.trips.show', array_merge(
+                    ['slug' => $trip->slug],
+                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
+                )),
                 'location' => (string) ($trip->location ?? ''),
-                'image' => (string) ($image ?? ''),
+                'image' => (string) $image,
+                'images' => $images,
                 'price' => $price,
                 'priceLabel' => $price !== null
-                    ? __('vacations.price_from_per_person', ['price' => $sym . number_format($price, 0)])
+                    ? __('vacations.price_from_per_person', ['price' => $sym.number_format($price, 0)])
                     : null,
-                'badge' => __('vacations.badge_trip'),
+                'badge' => __('offers.badge_trip'),
                 'cta' => __('vacations.view_details'),
-            ];
+            ], self::moduleFields($module, $id), self::tripListMeta($trip));
         }
 
         return $markers;
@@ -112,9 +126,10 @@ class MapMarkerCollection
      * Eager-load accommodations + specialOffers before calling to avoid N+1.
      *
      * @param  iterable  $camps
+     * @param  array<string, mixed>  $query
      * @return array<int, array<string, mixed>>
      */
-    public static function fromCamps(iterable $camps): array
+    public static function fromCamps(iterable $camps, array $query = []): array
     {
         $markers = [];
 
@@ -125,10 +140,8 @@ class MapMarkerCollection
                 continue;
             }
 
-            $image = $camp->thumbnail_path ?? null;
-            if ($image && function_exists('media_url')) {
-                $image = media_url($image);
-            }
+            $images = self::resolveImages($camp);
+            $image = $images[0] ?? '';
 
             $price = null;
             if (method_exists($camp, 'getLowestAccommodationOrOfferPrice')) {
@@ -138,23 +151,29 @@ class MapMarkerCollection
                 $price = $raw > 0 ? (float) $raw : null;
             }
 
-            $markers[] = [
-                'id' => (int) ($camp->id ?? 0),
+            $module = self::MODULE_CAMP;
+            $id = (int) ($camp->id ?? 0);
+            $markers[] = array_merge([
+                'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
                 'variant' => 'camp',
                 'pillar' => 'camp',
                 'title' => (string) ($camp->title ?? ''),
-                'url' => route('vacations.camps.show', $camp->slug),
+                'url' => route('vacations.camps.show', array_merge(
+                    ['slug' => $camp->slug],
+                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
+                )),
                 'location' => (string) ($camp->location ?? $camp->city ?? ''),
-                'image' => (string) ($image ?? ''),
+                'image' => (string) $image,
+                'images' => $images,
                 'price' => $price,
                 'priceLabel' => $price !== null
-                    ? __('vacations.price_from_per_night', ['price' => '€' . number_format($price, 0)])
+                    ? __('vacations.price_from_per_night', ['price' => '€'.number_format($price, 0)])
                     : null,
-                'badge' => __('vacations.badge_camp'),
+                'badge' => __('offers.badge_camp'),
                 'cta' => __('vacations.view_details'),
-            ];
+            ], self::moduleFields($module, $id), self::campListMeta($camp));
         }
 
         return $markers;
@@ -195,10 +214,8 @@ class MapMarkerCollection
                 }
             }
 
-            $image = $vacation->thumbnail_path ?? $vacation->image ?? null;
-            if ($image && function_exists('media_url')) {
-                $image = media_url($image);
-            }
+            $images = self::resolveImages($vacation);
+            $image = $images[0] ?? '';
 
             $price = null;
             if (method_exists($vacation, 'getLowestAccommodationOrOfferPrice')) {
@@ -210,7 +227,8 @@ class MapMarkerCollection
                 $price = $vacation->price;
             }
 
-            $markers[] = [
+            $module = self::MODULE_CAMP;
+            $markers[] = array_merge([
                 'id' => $id,
                 'lat' => (float) $lat,
                 'lng' => (float) $lng,
@@ -219,14 +237,15 @@ class MapMarkerCollection
                 'title' => (string) $title,
                 'url' => $url,
                 'location' => (string) ($vacation->location ?? $vacation->city ?? ''),
-                'image' => (string) ($image ?? ''),
+                'image' => (string) $image,
+                'images' => $images,
                 'price' => $price,
                 'priceLabel' => $price !== null
-                    ? __('vacations.price_from_per_night', ['price' => '€' . number_format((float) $price, 0)])
+                    ? __('vacations.price_from_per_night', ['price' => '€'.number_format((float) $price, 0)])
                     : null,
-                'badge' => __('vacations.badge_camp'),
+                'badge' => __('offers.badge_camp'),
                 'cta' => __('vacations.view_details'),
-            ];
+            ], self::moduleFields($module, $id));
         }
 
         return $markers;
@@ -243,8 +262,20 @@ class MapMarkerCollection
         $markers = [];
         foreach ($items as $item) {
             $mapped = $mapper($item);
-            if (!$mapped || empty($mapped['lat']) || empty($mapped['lng'])) {
+            if (! $mapped || empty($mapped['lat']) || empty($mapped['lng'])) {
                 continue;
+            }
+            if (empty($mapped['module']) && ! empty($mapped['pillar'])) {
+                $mapped = array_merge(
+                    $mapped,
+                    self::moduleFields(self::normalizeModule((string) $mapped['pillar']), $mapped['id'] ?? null)
+                );
+            }
+            if (empty($mapped['key']) && isset($mapped['id'])) {
+                $mapped['key'] = self::itemKey(
+                    (string) ($mapped['module'] ?? $mapped['pillar'] ?? self::MODULE_TOUR),
+                    $mapped['id']
+                );
             }
             $markers[] = $mapped;
         }
@@ -255,5 +286,188 @@ class MapMarkerCollection
     public static function toJson(array $markers): string
     {
         return json_encode(array_values($markers), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private static function guidingShowUrl(object $guiding, array $query = []): string
+    {
+        $query = array_filter($query, fn ($v) => $v !== null && $v !== '');
+
+        if (method_exists($guiding, 'publicShowUrl')) {
+            return $guiding->publicShowUrl($query);
+        }
+
+        $slug = $guiding->slug ?? null;
+        if (! is_string($slug) || $slug === '') {
+            return '#';
+        }
+
+        return route('guidings.show', array_merge(['slug' => $slug], $query));
+    }
+
+    /**
+     * Stable map identity across mixed offer types (tour / trip / camp share numeric IDs).
+     */
+    public static function itemKey(string $module, int|string $id): string
+    {
+        return self::normalizeModule($module).':'.$id;
+    }
+
+    /**
+     * Canonical offer module for mixed listings (tour | trip | camp).
+     *
+     * @return array{module: string, moduleLabel: string, key?: string}
+     */
+    public static function moduleFields(string $module, int|string|null $id = null): array
+    {
+        $module = self::normalizeModule($module);
+
+        $fields = [
+            'module' => $module,
+            'moduleLabel' => __('offers.badge_'.$module),
+        ];
+
+        if ($id !== null && $id !== '') {
+            $fields['key'] = self::itemKey($module, $id);
+        }
+
+        return $fields;
+    }
+
+    public static function normalizeModule(string $value): string
+    {
+        $value = strtolower(trim($value));
+
+        return match ($value) {
+            'guiding', 'tour', 'primary' => self::MODULE_TOUR,
+            'trip', 'trips' => self::MODULE_TRIP,
+            'camp', 'camps', 'vacation' => self::MODULE_CAMP,
+            default => self::MODULE_TOUR,
+        };
+    }
+
+    /**
+     * Absolute image URLs for map preview carousel (thumbnail first, then gallery).
+     *
+     * @return list<string>
+     */
+    public static function resolveImages(object $model, int $limit = 5): array
+    {
+        $limit = max(1, min(8, $limit));
+        $urls = [];
+        $seen = [];
+
+        $push = static function (?string $path) use (&$urls, &$seen, $limit): void {
+            if (count($urls) >= $limit || $path === null || $path === '') {
+                return;
+            }
+            $url = $path;
+            if (function_exists('media_url') && ! str_starts_with($path, 'http://') && ! str_starts_with($path, 'https://')) {
+                $url = (string) media_url($path);
+            }
+            if ($url === '' || isset($seen[$url])) {
+                return;
+            }
+            $seen[$url] = true;
+            $urls[] = $url;
+        };
+
+        $gallery = $model->gallery_images ?? $model->gallery ?? [];
+        if (is_string($gallery)) {
+            $gallery = json_decode($gallery, true) ?: [];
+        }
+        if (! is_array($gallery)) {
+            $gallery = [];
+        }
+
+        $push(isset($model->thumbnail_path) ? (string) $model->thumbnail_path : null);
+        if (empty($urls) && isset($model->image) && is_string($model->image)) {
+            $push($model->image);
+        }
+        foreach ($gallery as $path) {
+            if (is_string($path)) {
+                $push($path);
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Extra list-rail fields for guidings/tours (kept off the map popup).
+     *
+     * @return array<string, mixed>
+     */
+    public static function guidingListMeta(object $guiding): array
+    {
+        $durationLabel = null;
+        if (! empty($guiding->duration)) {
+            $unit = ($guiding->duration_type ?? '') === 'multi_day'
+                ? __('guidings.days')
+                : __('guidings.hours');
+            $durationLabel = trim((string) $guiding->duration.' '.$unit);
+        }
+
+        $guestsLabel = null;
+        $maxGuests = (int) ($guiding->max_guests ?? 0);
+        if ($maxGuests > 0) {
+            $guestsLabel = $maxGuests === 1
+                ? __('destination.map_max_guests_one')
+                : __('destination.map_max_guests', ['count' => $maxGuests]);
+        }
+
+        $rating = $guiding->cached_average_rating ?? null;
+        $reviewCount = $guiding->cached_review_count ?? null;
+        if ($rating !== null && (float) $rating <= 0) {
+            $rating = null;
+        }
+
+        $boatLabel = $guiding->cached_boat_type_name ?? null;
+        if ($boatLabel === null && isset($guiding->is_boat)) {
+            $boatLabel = ((int) $guiding->is_boat === 1)
+                ? __('guidings.boat')
+                : __('guidings.shore');
+        }
+
+        return array_filter([
+            'durationLabel' => $durationLabel,
+            'guestsLabel' => $guestsLabel,
+            'maxGuests' => $maxGuests > 0 ? $maxGuests : null,
+            'rating' => $rating !== null ? round((float) $rating, 1) : null,
+            'reviewCount' => $reviewCount !== null ? (int) $reviewCount : null,
+            'boatLabel' => $boatLabel ? (string) $boatLabel : null,
+        ], static fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function tripListMeta(object $trip): array
+    {
+        $durationLabel = null;
+        if (! empty($trip->duration_days)) {
+            $durationLabel = trim((string) $trip->duration_days.' '.__('guidings.days'));
+        } elseif (! empty($trip->days)) {
+            $durationLabel = trim((string) $trip->days.' '.__('guidings.days'));
+        }
+
+        return array_filter([
+            'durationLabel' => $durationLabel,
+            'rating' => isset($trip->cached_average_rating) ? round((float) $trip->cached_average_rating, 1) : null,
+            'reviewCount' => isset($trip->cached_review_count) ? (int) $trip->cached_review_count : null,
+        ], static fn ($v) => $v !== null && $v !== '');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function campListMeta(object $camp): array
+    {
+        return array_filter([
+            'rating' => isset($camp->cached_average_rating) ? round((float) $camp->cached_average_rating, 1) : null,
+            'reviewCount' => isset($camp->cached_review_count) ? (int) $camp->cached_review_count : null,
+        ], static fn ($v) => $v !== null && $v !== '');
     }
 }

@@ -88,6 +88,13 @@
                 </ul>
             @endif
 
+            @if(!empty($card['guests_label']))
+                <div class="vacation-trip-list-card__guests">
+                    <i class="fas fa-user-friends" aria-hidden="true"></i>
+                    <span>{{ $card['guests_label'] }}</span>
+                </div>
+            @endif
+
             @if(!empty($card['duration_pill']))
                 <div class="vacation-trip-list-card__duration">
                     <i class="far fa-clock" aria-hidden="true"></i>

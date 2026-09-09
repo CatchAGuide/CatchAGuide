@@ -99,6 +99,8 @@ class RentalBoatsController extends Controller
                 $rentalBoat->refresh();
             }
 
+            $this->galleryProcessor->trashPendingDeletesForGallery($rentalBoat->gallery_images, $rentalBoat->thumbnail_path);
+
             // Clear caches
             $this->cacheService->clearAllCaches();
 
@@ -214,6 +216,8 @@ class RentalBoatsController extends Controller
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
                 ]);
             }
+
+            $this->galleryProcessor->trashPendingDeletesForGallery($rentalBoat->gallery_images, $rentalBoat->thumbnail_path);
 
             // Clear caches
             $this->cacheService->clearRentalBoatCache($rentalBoat->id);

@@ -1,7 +1,7 @@
 @extends('layouts.app-v2')
 
 @section('title', 'FAQ')
-@section('description',translate('Frequently Asked Questions for Catch A Guide'))
+@section('description',__('message.faq-page-title'))
 
 @section('content')
 <div class="container">

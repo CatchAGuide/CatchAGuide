@@ -9,15 +9,22 @@ class Language extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'source_id', 
-        'language', 
-        'title', 
-        'sub_title', 
-        'introduction', 
-        'content', 
+        'source_id',
+        'type',
+        'scope',
+        'language',
+        'title',
+        'sub_title',
+        'introduction',
+        'content',
         'faq_title',
+        'fish_avail_title',
+        'fish_avail_intro',
+        'size_limit_title',
+        'size_limit_intro',
+        'time_limit_title',
+        'time_limit_intro',
         'json_data',
-        'type'
     ];
 
     protected $casts = [

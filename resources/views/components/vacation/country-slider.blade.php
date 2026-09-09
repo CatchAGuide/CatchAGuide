@@ -4,43 +4,39 @@
     'linkUrl' => null,
     'linkLabel' => null,
     'sliderId' => 'countries',
+    'blockClass' => 'vacation-country-rail',
 ])
 
-@php
-    $swiperClass = 'vacation-country-slider__swiper--' . $sliderId;
-@endphp
-
-<div class="vacation-country-slider" data-vacation-country-slider data-slider-id="{{ $sliderId }}">
+<div class="{{ $blockClass }}" data-vacation-country-rail data-block-class="{{ $blockClass }}" data-slider-id="{{ $sliderId }}">
     @if($title)
-        <div class="vacation-country-slider__header">
-            <div class="vacation-country-slider__intro">
-                <h2 class="vacation-country-slider__title">{{ $title }}</h2>
+        <div class="{{ $blockClass }}__header">
+            <div class="{{ $blockClass }}__intro">
+                <h2 class="{{ $blockClass }}__title">{{ $title }}</h2>
                 @if($subtitle)
-                    <p class="vacation-country-slider__subtitle">{{ $subtitle }}</p>
+                    <p class="{{ $blockClass }}__subtitle">{{ $subtitle }}</p>
                 @endif
             </div>
 
-            <div class="vacation-country-slider__actions">
+            <div class="{{ $blockClass }}__tools">
                 @if($linkUrl && $linkLabel)
-                    <a href="{{ $linkUrl }}" class="vacation-country-slider__link">
+                    <a href="{{ $linkUrl }}" class="{{ $blockClass }}__link d-none d-md-inline">
                         {{ $linkLabel }}
-                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
                     </a>
                 @endif
 
-                <div class="vacation-country-slider__nav">
+                <div class="{{ $blockClass }}__nav d-none d-md-flex">
                     <button
                         type="button"
-                        class="vacation-country-slider__btn vacation-country-slider__btn--prev"
-                        data-country-slider-prev="{{ $sliderId }}"
+                        class="{{ $blockClass }}__btn"
+                        data-vac-dest-prev="{{ $sliderId }}"
                         aria-label="{{ __('vacations.slider_prev') }}"
                     >
                         <i class="fas fa-chevron-left" aria-hidden="true"></i>
                     </button>
                     <button
                         type="button"
-                        class="vacation-country-slider__btn vacation-country-slider__btn--next"
-                        data-country-slider-next="{{ $sliderId }}"
+                        class="{{ $blockClass }}__btn"
+                        data-vac-dest-next="{{ $sliderId }}"
                         aria-label="{{ __('vacations.slider_next') }}"
                     >
                         <i class="fas fa-chevron-right" aria-hidden="true"></i>
@@ -50,8 +46,8 @@
         </div>
     @endif
 
-    <div class="swiper vacation-country-slider__swiper {{ $swiperClass }}">
-        <div class="swiper-wrapper">
+    <div class="{{ $blockClass }}__viewport" data-vac-dest-rail="{{ $sliderId }}">
+        <div class="{{ $blockClass }}__track" role="list">
             {{ $slot }}
         </div>
     </div>
@@ -61,48 +57,92 @@
     @push('js_push')
         <script>
             (function () {
-                function initVacationCountrySliders() {
-                    if (typeof Swiper === 'undefined') {
-                        return;
-                    }
-
-                    document.querySelectorAll('[data-vacation-country-slider]').forEach(function (root) {
-                        if (root.dataset.sliderInit === '1') {
+                function initVacationCountryRails() {
+                    document.querySelectorAll('[data-vacation-country-rail]').forEach(function (root) {
+                        if (root.dataset.railInit === '1') {
                             return;
                         }
 
                         var sliderId = root.dataset.sliderId;
-                        var swiperEl = root.querySelector('.vacation-country-slider__swiper--' + sliderId);
-
-                        if (!swiperEl) {
+                        var rail = root.querySelector('[data-vac-dest-rail="' + sliderId + '"]');
+                        if (!rail) {
                             return;
                         }
 
-                        root.dataset.sliderInit = '1';
+                        root.dataset.railInit = '1';
 
-                        new Swiper(swiperEl, {
-                            slidesPerView: 1.15,
-                            spaceBetween: 14,
-                            watchOverflow: true,
-                            grabCursor: true,
-                            breakpoints: {
-                                576: { slidesPerView: 1.65, spaceBetween: 16 },
-                                768: { slidesPerView: 2.35, spaceBetween: 18 },
-                                992: { slidesPerView: 3.15, spaceBetween: 20 },
-                                1200: { slidesPerView: 4, spaceBetween: 22 },
-                            },
-                            navigation: {
-                                nextEl: root.querySelector('[data-country-slider-next="' + sliderId + '"]'),
-                                prevEl: root.querySelector('[data-country-slider-prev="' + sliderId + '"]'),
-                            },
+                        var prev = root.querySelector('[data-vac-dest-prev="' + sliderId + '"]');
+                        var next = root.querySelector('[data-vac-dest-next="' + sliderId + '"]');
+                        var paused = false;
+                        var resumeTimer = null;
+                        var pauseTemporarily = function () {
+                            paused = true;
+                            if (resumeTimer) clearTimeout(resumeTimer);
+                            resumeTimer = setTimeout(function () { paused = false; }, 2500);
+                        };
+                        var scrollBy = function (dir) {
+                            pauseTemporarily();
+                            var step = Math.min(rail.clientWidth * 0.75, 320);
+                            rail.scrollBy({ left: dir * step, behavior: 'smooth' });
+                        };
+                        if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
+                        if (next) next.addEventListener('click', function () { scrollBy(1); });
+
+                        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        var loopWidth = Math.floor(rail.scrollWidth / 2);
+                        var loopNeeded = !reduceMotion && loopWidth > 0 && loopWidth > rail.clientWidth;
+
+                        if (!loopNeeded) {
+                            // Not enough tiles to fill the viewport twice over — the cloned
+                            // set for the seamless loop would just sit visible as duplicates.
+                            rail.querySelectorAll('[aria-hidden="true"]').forEach(function (clone) {
+                                clone.remove();
+                            });
+                        }
+
+                        if (reduceMotion || !loopNeeded) {
+                            return;
+                        }
+
+                        var syncLoop = function () {
+                            loopWidth = Math.floor(rail.scrollWidth / 2);
+                        };
+                        window.addEventListener('resize', syncLoop);
+                        if (typeof ResizeObserver !== 'undefined') {
+                            new ResizeObserver(syncLoop).observe(rail);
+                        }
+                        rail.addEventListener('mouseenter', function () { paused = true; });
+                        rail.addEventListener('mouseleave', function () { paused = false; });
+                        rail.addEventListener('touchstart', function () { paused = true; }, { passive: true });
+                        rail.addEventListener('touchend', function () {
+                            if (resumeTimer) clearTimeout(resumeTimer);
+                            resumeTimer = setTimeout(function () { paused = false; }, 1500);
+                        });
+                        rail.addEventListener('wheel', function () { pauseTemporarily(); }, { passive: true });
+
+                        var last = performance.now();
+                        var tick = function (now) {
+                            var dt = Math.min(now - last, 64);
+                            last = now;
+                            if (!paused && loopWidth > rail.clientWidth) {
+                                rail.scrollLeft += (32 * dt) / 1000;
+                                if (rail.scrollLeft >= loopWidth) {
+                                    rail.scrollLeft -= loopWidth;
+                                }
+                            }
+                            requestAnimationFrame(tick);
+                        };
+                        requestAnimationFrame(function (t) {
+                            last = t;
+                            requestAnimationFrame(tick);
                         });
                     });
                 }
 
                 if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', initVacationCountrySliders);
+                    document.addEventListener('DOMContentLoaded', initVacationCountryRails);
                 } else {
-                    initVacationCountrySliders();
+                    initVacationCountryRails();
                 }
             })();
         </script>

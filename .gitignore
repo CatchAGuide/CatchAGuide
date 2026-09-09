@@ -59,10 +59,14 @@ package-lock.json
 # Local-only backups (e.g. nested public/.git moved aside)
 /_local_backup/
 
+# Local DB dumps (mysqldump backups taken before running migrations) — never commit raw DB content
+/backup/
+
 /storage/*.key
 /vendor
 /stubs
 .env
+.env.local
 .env.strato
 .phpunit.result.cache
 docker-compose.override.yml
@@ -106,3 +110,4 @@ storage/debugbar/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.cursor/

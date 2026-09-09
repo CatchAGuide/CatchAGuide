@@ -9,7 +9,7 @@
 
 <!--Tours List Single-->
     <div class="tours-list__single" style="color: black; display: flex;" >
-            <a class="tours-list__img" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ route('guidings.show',[$guiding->id,$guiding->slug]) }}">
+            <a class="tours-list__img" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ $guiding->publicShowUrl() }}">
                 <div id="carouselExampleControls-{{$guiding->id}}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                     <div class="carousel-inner">
                         @foreach(app('guiding')->getImagesUrl($guiding) as $limgKey => $limg)
@@ -40,7 +40,7 @@
                 </a>
             </div>
 
-            <a class="tours-list__content" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ route('guidings.show', [$guiding->id,$guiding->slug]) }}" >
+            <a class="tours-list__content" title="Guide mit Slug {{ $guiding->slug }} aufmachen" href="{{ $guiding->publicShowUrl() }}" >
                 <span>{{ translate($guiding->location) }}</span>
                 <div class="tours-list__body">
                     <h3 class="tours-list__title">{{ translate( $guiding->title ) }} {{$guiding->columns_with_value_count}}</h3>
@@ -116,13 +116,13 @@
                                 <span class="icon-user"></span>
                             </div>
                             <div class="tours-list__content__trait__text">
-                                {{ translate( 'Gästeanzahl:' )  }} {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{translate('Personen')}} @else {{translate('Person')}} @endif
+                                {{ translate( 'Gästeanzahl:' )  }} {{ $guiding->max_guests }} @if($guiding->max_guests != 1) {{__('booking.people')}} @else {{__('booking.person')}} @endif
                             </div>
                         </div>
 
                         <div class="tours-list__content__trait">
                             <img src="{{asset('assets/images/icons/clock.svg')}}" height="20" width="20" alt="" />
-                            <div class="tours-list__content__trait__text">Dauer: {{ $guiding->duration }} @if($guiding->duration != 1) {{translate('Stunden')}} @else {{translate('Stunde')}} @endif</div>
+                            <div class="tours-list__content__trait__text">Dauer: {{ $guiding->duration }} @if($guiding->duration != 1) {{__('checkout.hours')}} @else {{__('guidings.hour')}} @endif</div>
                         </div>
 
                     </div>

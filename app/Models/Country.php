@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\DestinationFaq;
 use App\Models\DestinationFishChart;
 use App\Models\DestinationFishSizeLimit;
+use App\Models\Concerns\OverlaysScopedCategoryContent;
 use App\Models\DestinationFishTimeLimit;
 
 class Country extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, OverlaysScopedCategoryContent, SoftDeletes;
 
     protected $table = 'c_countries';
 
@@ -51,31 +51,6 @@ class Country extends Model
     }
 
     /**
-     * Get all regions in this country
-     */
-    public function regions()
-    {
-        return $this->hasMany(Region::class);
-    }
-
-    /**
-     * Get all cities in this country
-     */
-    public function cities()
-    {
-        return $this->hasMany(City::class);
-    }
-
-    /**
-     * Get FAQs for this country
-     */
-    public function faqs()
-    {
-        return $this->hasMany(DestinationFaq::class, 'destination_id')
-            ->where('destination_type', 'country');
-    }
-
-    /**
      * Get fish charts for this country
      */
     public function fish_charts()
@@ -105,14 +80,9 @@ class Country extends Model
     /**
      * Get thumbnail path with fallback
      */
-    public function getThumbnailPath()
+    public function getThumbnailPath(): string
     {
-        if (empty($this->thumbnail_path)) {
-            return asset('assets/images/300x300.png');
-        }
-
-        $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
-        return '/' . $thumbnail_path;
+        return media_url($this->thumbnail_path, 'assets/images/300x300.png');
     }
 
     /**
@@ -223,5 +193,18 @@ class Country extends Model
     {
         $translation = $this->getCurrentTranslation();
         return $translation ? $translation->faq_title : null;
+    }
+
+    protected function setCurrentTranslation($translation): void
+    {
+        $this->currentTranslation = $translation;
+    }
+
+    protected function newTranslationForOverlay(string $locale): CountryTranslation
+    {
+        return new CountryTranslation([
+            'country_id' => $this->id,
+            'language' => $locale,
+        ]);
     }
 }

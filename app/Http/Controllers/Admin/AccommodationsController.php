@@ -90,6 +90,8 @@ class AccommodationsController extends Controller
                 $accommodation->refresh();
             }
 
+            $this->galleryProcessor->trashPendingDeletesForGallery($accommodation->gallery_images, $accommodation->thumbnail_path);
+
             // Clear caches
             $this->cacheService->clearAllCaches();
 
@@ -187,6 +189,8 @@ class AccommodationsController extends Controller
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
                 ]);
             }
+
+            $this->galleryProcessor->trashPendingDeletesForGallery($accommodation->gallery_images, $accommodation->thumbnail_path);
 
             // Clear caches
             $this->cacheService->clearAccommodationCache($accommodation->id);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
+use App\Domain\Vacation\VacationListingFilter;
 use App\Presenters\Vacation\TripTrustSignalResolver;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
@@ -56,6 +57,7 @@ class TripOfferController extends Controller
         $availabilityCards = $this->buildAvailabilityCards($trip);
         $selectedDate = $this->resolveSelectedDate($request, $availabilityCards);
         $isYearRoundTrip = (bool) $trip->year_round_availability;
+        $preselectedGuests = VacationListingFilter::fromRequest($request->query())->numGuests;
 
         $tripOfferData = [
             'gallery' => $gallery['all'] ?? [],
@@ -76,6 +78,7 @@ class TripOfferController extends Controller
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
             'reviewTrust' => $this->tripTrust->resolve($trip),
             'canonicalUrl' => $isDraft ? null : route('vacations.trips.show', $slug),
+            'preselectedGuests' => $preselectedGuests,
         ]);
     }
 

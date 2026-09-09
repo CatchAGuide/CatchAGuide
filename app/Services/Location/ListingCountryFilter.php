@@ -2,33 +2,34 @@
 
 namespace App\Services\Location;
 
-use App\Models\Destination;
+use App\Models\CategoryEntity;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ListingCountryFilter
 {
     public function __construct(private readonly CountryResolver $countryResolver) {}
 
     /**
-     * Build all country string variants that should match a vacation destination page.
+     * Build all country string variants that should match a country page.
      *
      * @param  array<string, mixed>  $filterData
      * @return array<int, string>
      */
-    public function valuesForVacationDestination(
-        Destination $destination,
+    public function valuesForCountry(
+        CategoryEntity $country,
         string $countrySlug,
         array $filterData = []
     ): array {
         $baseValues = array_values(array_unique(array_filter([
             $countrySlug,
-            $destination->name,
+            $country->name,
             $filterData['country'] ?? null,
         ], fn ($value) => is_string($value) && $value !== '')));
 
         $iso = $this->countryResolver->resolveIso(
-            $destination->countrycode ?? ($filterData['country_short'] ?? null),
-            $filterData['country'] ?? $destination->name ?? $countrySlug
+            $country->countrycode ?? ($filterData['country_short'] ?? null),
+            $filterData['country'] ?? $country->name ?? $countrySlug
         );
 
         foreach ($baseValues as $value) {

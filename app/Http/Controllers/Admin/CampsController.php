@@ -97,6 +97,8 @@ class CampsController extends Controller
                 $camp->refresh();
             }
 
+            $this->galleryProcessor->trashPendingDeletesForGallery($camp->gallery_images, $camp->thumbnail_path);
+
             // Sync relationships
             $this->syncCampRelationships($camp, $request);
 
@@ -245,6 +247,8 @@ class CampsController extends Controller
                     'thumbnail_path' => $updatedImageData['thumbnail_path']
                 ]);
             }
+
+            $this->galleryProcessor->trashPendingDeletesForGallery($camp->gallery_images, $camp->thumbnail_path);
 
             // Sync relationships
             $this->syncCampRelationships($camp, $request);

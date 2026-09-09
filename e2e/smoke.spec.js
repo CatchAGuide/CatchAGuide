@@ -10,6 +10,9 @@ test.describe('smoke', () => {
     expect(response?.ok() || response?.status() === 304).toBeTruthy();
     await expect(page.locator('body')).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.cag-home-hero__doors a[href*="guidings"]').first()).toBeVisible();
+    await expect(page.locator('.cag-home-hero__doors a[href*="vacations"]').first()).toBeVisible();
+    await expect(page.locator('.cag-home-hero__search')).toBeVisible();
   });
 
   test('compiled app assets are reachable', async ({ page, request }) => {
@@ -33,7 +36,7 @@ test.describe('smoke', () => {
     { name: 'vacations hub', path: '/vacations' },
     { name: 'trips destinations', path: '/trips-destinations' },
     { name: 'guide onboarding', path: '/guide/onboarding' },
-    { name: 'login', path: '/login' },
+    { name: 'login redirect', path: '/login' },
     { name: 'password reset', path: '/password/reset' },
     { name: 'search request', path: '/searchrequest' },
     { name: 'contact', path: '/contact' },

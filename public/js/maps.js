@@ -1,6 +1,513 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./resources/js/maps/GridMarkerCluster.js"
+/*!************************************************!*\
+  !*** ./resources/js/maps/GridMarkerCluster.js ***!
+  \************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! leaflet */ "./node_modules/leaflet/dist/leaflet-src.js");
+/* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _clusterGrid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./clusterGrid */ "./resources/js/maps/clusterGrid.js");
+/**
+ * Grid clustering for listing maps.
+ *
+ * Leaflet.markercluster uses a greedy radius that *chains* across stepping-stone
+ * pins (Germany → France → Med → West Africa). The cluster's weighted centroid
+ * then sits in Africa, so the Netherlands/Germany look empty until you zoom in
+ * enough for the chain to break.
+ *
+ * This layer buckets currently-visible markers into a lat/lng degree grid.
+ * A pin in Amsterdam can only share a cluster with pins in the same cell,
+ * so country-level coverage stays in-country. Pixel grids are not used:
+ * dividing Mercator x by a small radius at world zoom collapses longitude
+ * and draws every pin on a vertical line down the Atlantic.
+ */
+
+
+var GridMarkerCluster = leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.extend({
+  initialize: function initialize() {
+    var _this = this;
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.initialize.call(this, []);
+    this.options = {
+      iconCreateFunction: options.iconCreateFunction || null,
+      muted: !!options.muted
+    };
+    this._source = [];
+    this._parentByMarker = {};
+    this._onViewChange = function () {
+      return _this._scheduleRebuild();
+    };
+    this._rebuildRaf = null;
+  },
+  onAdd: function onAdd(map) {
+    leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.onAdd.call(this, map);
+    map.on('zoomend moveend', this._onViewChange);
+    this._rebuild();
+  },
+  onRemove: function onRemove(map) {
+    map.off('zoomend moveend', this._onViewChange);
+    if (this._rebuildRaf && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(this._rebuildRaf);
+      this._rebuildRaf = null;
+    }
+    this._restoreSpiderPositions();
+    leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.onRemove.call(this, map);
+  },
+  addLayer: function addLayer(marker) {
+    if (marker && this._source.indexOf(marker) === -1) {
+      this._source.push(marker);
+    }
+    if (this._map) {
+      this._rebuild();
+    }
+    return this;
+  },
+  addLayers: function addLayers(markers) {
+    var _this2 = this;
+    (markers || []).forEach(function (marker) {
+      if (marker && _this2._source.indexOf(marker) === -1) {
+        _this2._source.push(marker);
+      }
+    });
+    if (this._map) {
+      this._rebuild();
+    }
+    return this;
+  },
+  clearLayers: function clearLayers() {
+    this._restoreSpiderPositions();
+    this._source = [];
+    this._parentByMarker = {};
+    leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.clearLayers.call(this);
+    return this;
+  },
+  getVisibleParent: function getVisibleParent(marker) {
+    if (!marker) {
+      return null;
+    }
+    var id = leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(marker);
+    return this._parentByMarker[id] || marker;
+  },
+  zoomToShowLayer: function zoomToShowLayer(marker, callback) {
+    var done = function done() {
+      if (typeof callback === 'function') {
+        callback();
+      }
+    };
+    if (!marker || !this._map) {
+      done();
+      return this;
+    }
+    var parent = this.getVisibleParent(marker);
+    if (!parent || parent === marker) {
+      done();
+      return this;
+    }
+    this._activateCluster(parent, done);
+    return this;
+  },
+  _scheduleRebuild: function _scheduleRebuild() {
+    var _this3 = this;
+    if (typeof requestAnimationFrame !== 'function') {
+      this._rebuild();
+      return;
+    }
+    if (this._rebuildRaf) {
+      cancelAnimationFrame(this._rebuildRaf);
+    }
+    this._rebuildRaf = requestAnimationFrame(function () {
+      _this3._rebuildRaf = null;
+      _this3._rebuild();
+    });
+  },
+  _rebuild: function _rebuild() {
+    var _this4 = this;
+    var map = this._map;
+    if (!map) {
+      return;
+    }
+    this._restoreSpiderPositions();
+    var zoom = map.getZoom();
+    var size = map.getSize();
+    var bounds = null;
+    if (size && size.x > 8 && size.y > 8 && typeof map.getBounds === 'function') {
+      var raw = map.getBounds();
+      if (raw && typeof raw.isValid === 'function' && raw.isValid()) {
+        bounds = raw.pad(0.08);
+      }
+    }
+    var cells = {};
+    this._source.forEach(function (marker) {
+      if (!marker || typeof marker.getLatLng !== 'function') {
+        return;
+      }
+      var ll = marker.getLatLng();
+      if (bounds && !bounds.contains(ll)) {
+        return;
+      }
+      var key = (0,_clusterGrid__WEBPACK_IMPORTED_MODULE_1__.clusterCellKey)(ll.lat, ll.lng, zoom);
+      if (!cells[key]) {
+        cells[key] = [];
+      }
+      cells[key].push(marker);
+    });
+    var nextLayers = [];
+    var nextParents = {};
+    Object.keys(cells).forEach(function (key) {
+      var members = cells[key];
+      if (members.length === 1) {
+        var marker = members[0];
+        nextLayers.push(marker);
+        nextParents[leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(marker)] = marker;
+        return;
+      }
+      var clusterMarker = _this4._makeClusterMarker(members);
+      nextLayers.push(clusterMarker);
+      members.forEach(function (marker) {
+        nextParents[leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(marker)] = clusterMarker;
+      });
+    });
+    var nextSet = {};
+    nextLayers.forEach(function (layer) {
+      nextSet[leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(layer)] = layer;
+    });
+    this.getLayers().forEach(function (layer) {
+      if (!nextSet[leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(layer)]) {
+        leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.removeLayer.call(_this4, layer);
+      }
+    });
+    nextLayers.forEach(function (layer) {
+      if (!_this4.hasLayer(layer)) {
+        leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.addLayer.call(_this4, layer);
+      }
+    });
+    this._parentByMarker = nextParents;
+  },
+  _makeClusterMarker: function _makeClusterMarker(members) {
+    var _this5 = this;
+    var lat = 0;
+    var lng = 0;
+    members.forEach(function (marker) {
+      var ll = marker.getLatLng();
+      lat += ll.lat;
+      lng += ll.lng;
+    });
+    lat /= members.length;
+    lng /= members.length;
+    var icon = typeof this.options.iconCreateFunction === 'function' ? this.options.iconCreateFunction(members) : undefined;
+    var clusterMarker = leaflet__WEBPACK_IMPORTED_MODULE_0___default().marker([lat, lng], {
+      icon: icon,
+      keyboard: true,
+      zIndexOffset: 250
+    });
+    clusterMarker._cagMembers = members;
+    clusterMarker._cagIsCluster = true;
+    clusterMarker.getChildCount = function () {
+      return members.length;
+    };
+    clusterMarker.getAllChildMarkers = function () {
+      return members.slice();
+    };
+    clusterMarker.getBounds = function () {
+      return leaflet__WEBPACK_IMPORTED_MODULE_0___default().latLngBounds(members.map(function (m) {
+        return m.getLatLng();
+      }));
+    };
+    clusterMarker.zoomToBounds = function (opts) {
+      if (!_this5._map) return;
+      _this5._map.fitBounds(clusterMarker.getBounds(), opts || {
+        paddingTopLeft: [24, 24],
+        paddingBottomRight: [24, 24]
+      });
+    };
+    clusterMarker.spiderfy = function () {
+      return _this5._spiderfy(clusterMarker);
+    };
+    clusterMarker.on('click', function (e) {
+      if (e && e.originalEvent) {
+        leaflet__WEBPACK_IMPORTED_MODULE_0___default().DomEvent.stopPropagation(e.originalEvent);
+      }
+      _this5._activateCluster(clusterMarker);
+    });
+    clusterMarker.on('keypress', function (e) {
+      if (e.originalEvent && e.originalEvent.keyCode !== 13) {
+        return;
+      }
+      _this5._activateCluster(clusterMarker);
+      if (_this5._map && _this5._map._container) {
+        _this5._map._container.focus();
+      }
+    });
+    return clusterMarker;
+  },
+  _activateCluster: function _activateCluster(clusterMarker, callback) {
+    var map = this._map;
+    var members = clusterMarker && clusterMarker._cagMembers;
+    var done = function done() {
+      if (typeof callback === 'function') {
+        callback();
+      }
+    };
+    if (!map || !members || members.length < 2) {
+      done();
+      return;
+    }
+    var bounds = leaflet__WEBPACK_IMPORTED_MODULE_0___default().latLngBounds(members.map(function (m) {
+      return m.getLatLng();
+    }));
+    var atMax = map.getBoundsZoom(bounds) >= map.getMaxZoom();
+    if (atMax) {
+      this._spiderfy(clusterMarker);
+      done();
+      return;
+    }
+    map.once('moveend', done);
+    map.fitBounds(bounds, {
+      paddingTopLeft: [24, 24],
+      paddingBottomRight: [24, 24]
+    });
+  },
+  _spiderfy: function _spiderfy(clusterMarker) {
+    var _this6 = this;
+    var map = this._map;
+    var members = clusterMarker && clusterMarker._cagMembers;
+    if (!map || !members || members.length < 2) {
+      return;
+    }
+    this._restoreSpiderPositions();
+    leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.removeLayer.call(this, clusterMarker);
+    var center = map.latLngToLayerPoint(clusterMarker.getLatLng());
+    var radius = Math.max(28, 10 + members.length * 6);
+    members.forEach(function (marker, i) {
+      var angle = Math.PI * 2 * i / members.length - Math.PI / 2;
+      var point = leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(center.x + radius * Math.cos(angle), center.y + radius * Math.sin(angle));
+      marker._cagSpiderOrig = marker.getLatLng();
+      marker.setLatLng(map.layerPointToLatLng(point));
+      _this6._parentByMarker[leaflet__WEBPACK_IMPORTED_MODULE_0___default().stamp(marker)] = marker;
+      if (!_this6.hasLayer(marker)) {
+        leaflet__WEBPACK_IMPORTED_MODULE_0___default().LayerGroup.prototype.addLayer.call(_this6, marker);
+      }
+    });
+  },
+  _restoreSpiderPositions: function _restoreSpiderPositions() {
+    this._source.forEach(function (marker) {
+      if (marker && marker._cagSpiderOrig) {
+        marker.setLatLng(marker._cagSpiderOrig);
+        delete marker._cagSpiderOrig;
+      }
+    });
+  }
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GridMarkerCluster);
+
+/***/ },
+
+/***/ "./resources/js/maps/LandmarkLayer.js"
+/*!********************************************!*\
+  !*** ./resources/js/maps/LandmarkLayer.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LandmarkLayer)
+/* harmony export */ });
+/* harmony import */ var _MapsManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MapsManager */ "./resources/js/maps/MapsManager.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * LandmarkLayer — sparse OSM POIs via cached Laravel proxy
+ */
+
+var LandmarkLayer = /*#__PURE__*/function () {
+  /**
+   * @param {import('./ListingMap').default} listingMap
+   */
+  function LandmarkLayer(listingMap) {
+    _classCallCheck(this, LandmarkLayer);
+    this.listingMap = listingMap;
+    this.layer = null;
+    this._timer = null;
+    this._lastKey = '';
+    this._abort = null;
+    this.minZoom = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config && _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.landmarksMinZoom || 10;
+    this.url = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config && _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.landmarksUrl || '/maps/landmarks';
+  }
+  return _createClass(LandmarkLayer, [{
+    key: "attach",
+    value: function attach() {
+      var _this = this;
+      if (!this.listingMap.map) return;
+      this.layer = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup().addTo(this.listingMap.map);
+      this.listingMap.map.on('moveend', function () {
+        return _this.scheduleFetch();
+      });
+      this.listingMap.map.on('zoomend', function () {
+        return _this.scheduleFetch();
+      });
+      this.scheduleFetch();
+    }
+  }, {
+    key: "scheduleFetch",
+    value: function scheduleFetch() {
+      var _this2 = this;
+      if (this._timer) clearTimeout(this._timer);
+      this._timer = setTimeout(function () {
+        return _this2.fetch();
+      }, 350);
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      if (this.layer) {
+        this.layer.clearLayers();
+      }
+      this._lastKey = '';
+    }
+  }, {
+    key: "fetch",
+    value: function (_fetch) {
+      function fetch() {
+        return _fetch.apply(this, arguments);
+      }
+      fetch.toString = function () {
+        return _fetch.toString();
+      };
+      return fetch;
+    }(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var map, zoom, b, sw, ne, key, params, res, data, landmarks, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            map = this.listingMap.map;
+            if (!(!map || !this.layer)) {
+              _context.n = 1;
+              break;
+            }
+            return _context.a(2);
+          case 1:
+            zoom = map.getZoom();
+            if (!(zoom < this.minZoom)) {
+              _context.n = 2;
+              break;
+            }
+            this.clear();
+            return _context.a(2);
+          case 2:
+            b = map.getBounds();
+            sw = b.getSouthWest();
+            ne = b.getNorthEast();
+            key = [zoom, sw.lat.toFixed(2), sw.lng.toFixed(2), ne.lat.toFixed(2), ne.lng.toFixed(2)].join('|');
+            if (!(key === this._lastKey)) {
+              _context.n = 3;
+              break;
+            }
+            return _context.a(2);
+          case 3:
+            if (this._abort) {
+              this._abort.abort();
+            }
+            this._abort = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            params = new URLSearchParams({
+              sw_lat: String(sw.lat),
+              sw_lng: String(sw.lng),
+              ne_lat: String(ne.lat),
+              ne_lng: String(ne.lng),
+              zoom: String(Math.round(zoom))
+            });
+            _context.p = 4;
+            _context.n = 5;
+            return fetch("".concat(this.url, "?").concat(params.toString()), {
+              headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              signal: this._abort ? this._abort.signal : undefined
+            });
+          case 5:
+            res = _context.v;
+            if (res.ok) {
+              _context.n = 6;
+              break;
+            }
+            return _context.a(2);
+          case 6:
+            _context.n = 7;
+            return res.json();
+          case 7:
+            data = _context.v;
+            landmarks = Array.isArray(data.landmarks) ? data.landmarks : [];
+            this._lastKey = key;
+            this.render(landmarks);
+            _context.n = 9;
+            break;
+          case 8:
+            _context.p = 8;
+            _t = _context.v;
+            if (!(_t && _t.name === 'AbortError')) {
+              _context.n = 9;
+              break;
+            }
+            return _context.a(2);
+          case 9:
+            return _context.a(2);
+        }
+      }, _callee, this, [[4, 8]]);
+    })))
+  }, {
+    key: "render",
+    value: function render(landmarks) {
+      var _this3 = this;
+      if (!this.layer) return;
+      this.layer.clearLayers();
+      landmarks.forEach(function (lm) {
+        var lat = parseFloat(lm.lat);
+        var lng = parseFloat(lm.lng);
+        if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+        var category = lm.category || 'attraction';
+        var name = lm.name || '';
+        var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
+          icon: _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+            className: "leaflet-div-icon cag-map-landmark cag-map-landmark--".concat(category),
+            html: "<span class=\"cag-map-landmark__dot\" aria-hidden=\"true\"></span>".concat(name ? "<span class=\"cag-map-landmark__label\">".concat(_this3._escape(name), "</span>") : ''),
+            iconSize: [120, 28],
+            iconAnchor: [8, 8]
+          }),
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: -200
+        });
+        _this3.layer.addLayer(marker);
+      });
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  }]);
+}();
+
+
+/***/ },
+
 /***/ "./resources/js/maps/ListingMap.js"
 /*!*****************************************!*\
   !*** ./resources/js/maps/ListingMap.js ***!
@@ -15,6 +522,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _MapsManager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MapsManager */ "./resources/js/maps/MapsManager.js");
 /* harmony import */ var _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MarkerFactory */ "./resources/js/maps/MarkerFactory.js");
+/* harmony import */ var _LandmarkLayer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LandmarkLayer */ "./resources/js/maps/LandmarkLayer.js");
+/* harmony import */ var _MapModalRail__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./MapModalRail */ "./resources/js/maps/MapModalRail.js");
+/* harmony import */ var _MapModalFilters__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MapModalFilters */ "./resources/js/maps/MapModalFilters.js");
+/* harmony import */ var _mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./mapItemIdentity */ "./resources/js/maps/mapItemIdentity.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -25,8 +536,12 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
- * ListingMap — multi-marker listing / modal map with clustering + AJAX setMarkers
+ * ListingMap — multi-marker listing / modal map with clustering, viewport rail, price chips
  */
+
+
+
+
 
 
 var ListingMap = /*#__PURE__*/function () {
@@ -44,8 +559,21 @@ var ListingMap = /*#__PURE__*/function () {
     this.markers = [];
     this._initialized = false;
     this._activePreviewMarker = null;
+    this._selectedMarker = null;
+    this._detachedPreview = null;
+    this._clusterPreviewEl = null;
     this._hoverOpenTimer = null;
     this._hoverCloseTimer = null;
+    this._viewportTimer = null;
+    this._userInteracted = false;
+    this._viewportListeners = [];
+    this._selectionListeners = [];
+    this._previewListeners = [];
+    this._landmarkLayer = null;
+    this._overlayPadding = {
+      top: 0,
+      bottom: 0
+    };
     this._canHover = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)').matches : true;
     this.options = _objectSpread(_objectSpread({}, this._parseOptions(el)), overrideOptions);
   }
@@ -74,7 +602,6 @@ var ListingMap = /*#__PURE__*/function () {
         if (Array.isArray(fromScript)) {
           markers = fromScript;
         } else if (ds.markers) {
-          // Legacy fallback (small payloads only)
           markers = JSON.parse(ds.markers);
         }
       } catch (e) {
@@ -103,6 +630,9 @@ var ListingMap = /*#__PURE__*/function () {
         lazyModal: ds.lazyModal !== 'false' && ds.lazyModal !== '0',
         updatable: ds.updatable !== 'false' && ds.updatable !== '0',
         interactivePreview: ds.interactivePreview === 'true' || ds.interactivePreview === '1',
+        priceChips: ds.priceChips === 'true' || ds.priceChips === '1',
+        landmarks: ds.landmarks === 'true' || ds.landmarks === '1',
+        viewportRail: ds.viewportRail === 'true' || ds.viewportRail === '1',
         instanceKey: ds.instanceKey || el.id || 'listingMap'
       };
     }
@@ -125,8 +655,10 @@ var ListingMap = /*#__PURE__*/function () {
               start();
             } else {
               _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(_this.map);
+              _this.emitViewportChange();
             }
           });
+          this._bootModalHelpers(modal);
         } else {
           start();
         }
@@ -136,16 +668,31 @@ var ListingMap = /*#__PURE__*/function () {
       if (this.options.updatable) {
         window.__cagListingMaps = window.__cagListingMaps || {};
         window.__cagListingMaps[this.options.instanceKey] = this;
-        // Back-compat for listing filters — optional enrich hook from page scripts
         if (this.options.instanceKey === 'guidings' || this.options.instanceKey === 'category-country' || this.options.instanceKey === 'category-show' || this.options.instanceKey === 'category' || this.el.id === 'map') {
           window.updateMapWithGuidings = function (guidings) {
             var enrich = window.__cagEnrichGuidingsForMap;
             var payload = typeof enrich === 'function' ? enrich(guidings) : guidings;
-            _this.setMarkersFromGuidings(payload);
+            _this.setMarkersFromGuidings(payload, {
+              preserveView: _this._userInteracted
+            });
           };
         }
       }
       return this;
+    }
+  }, {
+    key: "_bootModalHelpers",
+    value: function _bootModalHelpers(modal) {
+      if (modal._cagMapHelpersBooted) {
+        return;
+      }
+      modal._cagMapHelpersBooted = true;
+      if (this.options.viewportRail) {
+        modal._cagMapRail = new _MapModalRail__WEBPACK_IMPORTED_MODULE_3__["default"](modal, this);
+      }
+      if (modal.getAttribute('data-map-show-chips') === 'true') {
+        modal._cagMapFilters = new _MapModalFilters__WEBPACK_IMPORTED_MODULE_4__["default"](modal);
+      }
     }
   }, {
     key: "_create",
@@ -163,23 +710,210 @@ var ListingMap = /*#__PURE__*/function () {
       this._initialized = true;
       this.setMarkers(this.options.markers);
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(this.map);
+      this.map.on('dragend', function () {
+        if (_this2._programmaticView) return;
+        _this2._userInteracted = true;
+      });
+      this.map.on('zoomend', function () {
+        // fitBounds also fires zoomend; mark interaction only after first paint settle
+        if (_this2._programmaticView) return;
+        if (_this2._markersReady) {
+          _this2._userInteracted = true;
+        }
+      });
+      if (this.options.viewportRail) {
+        this.map.on('moveend', function () {
+          return _this2._scheduleViewportEmit();
+        });
+        this.map.on('zoomend', function () {
+          return _this2._scheduleViewportEmit();
+        });
+        this._scheduleViewportEmit();
+      }
       if (this.options.interactivePreview) {
         this.map.on('click', function () {
-          return _this2._clearStickyPreviews();
+          _this2._clearStickyPreviews();
+          if (_this2.options.viewportRail) {
+            _this2.clearSelection();
+          }
         });
         this.map.on('movestart', function () {
+          if (_this2._ignoreMoveClose) return;
           if (_this2._activePreviewMarker && !_this2._activePreviewMarker._cagSticky) {
             _this2._closePreview(_this2._activePreviewMarker);
           }
         });
+      } else if (this.options.viewportRail) {
+        this.map.on('click', function () {
+          return _this2.clearSelection();
+        });
       }
+      if (this.options.landmarks) {
+        this._landmarkLayer = new _LandmarkLayer__WEBPACK_IMPORTED_MODULE_2__["default"](this);
+        this._landmarkLayer.attach();
+      }
+      this._markersReady = true;
+    }
+  }, {
+    key: "onViewportChange",
+    value: function onViewportChange(fn) {
+      if (typeof fn === 'function') {
+        this._viewportListeners.push(fn);
+      }
+    }
+  }, {
+    key: "onSelectionChange",
+    value: function onSelectionChange(fn) {
+      if (typeof fn === 'function') {
+        this._selectionListeners.push(fn);
+      }
+    }
+  }, {
+    key: "onPreviewChange",
+    value: function onPreviewChange(fn) {
+      if (typeof fn === 'function') {
+        this._previewListeners.push(fn);
+      }
+    }
+  }, {
+    key: "_emitPreview",
+    value: function _emitPreview(item) {
+      this._previewListeners.forEach(function (fn) {
+        try {
+          fn(item || null);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "_scheduleViewportEmit",
+    value: function _scheduleViewportEmit() {
+      var _this3 = this;
+      if (this._viewportTimer) clearTimeout(this._viewportTimer);
+      this._viewportTimer = setTimeout(function () {
+        return _this3.emitViewportChange();
+      }, 220);
+    }
+  }, {
+    key: "emitViewportChange",
+    value: function emitViewportChange() {
+      var payload = this.getVisiblePrimaryItems();
+      var recommended = this.getVisibleRecommendedItems();
+      payload.recommendedItems = recommended.items;
+      payload.recommendedIds = recommended.ids;
+      payload.recommendedCount = recommended.count;
+      this._viewportListeners.forEach(function (fn) {
+        try {
+          fn(payload);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "getPrimaryItems",
+    value: function getPrimaryItems() {
+      return this._itemsByVariant(function (m) {
+        return !m.options || m.options.cagVariant !== 'gray';
+      });
+    }
+  }, {
+    key: "getRecommendedItems",
+    value: function getRecommendedItems() {
+      return this._itemsByVariant(function (m) {
+        return m.options && m.options.cagVariant === 'gray';
+      });
+    }
+  }, {
+    key: "_itemsByVariant",
+    value: function _itemsByVariant(matches) {
+      return this.markers.filter(function (m) {
+        return m._cagItem && matches(m);
+      }).map(function (m) {
+        return m._cagItem;
+      });
+    }
+  }, {
+    key: "getVisiblePrimaryItems",
+    value: function getVisiblePrimaryItems() {
+      return this._visibleItemsByVariant(function (m) {
+        return !m.options || m.options.cagVariant !== 'gray';
+      });
+    }
+
+    /**
+     * Recommended (gray) pins currently on screen — re-derived on every pan/zoom
+     * so the rail's "You might also like" section tracks the visible map area.
+     */
+  }, {
+    key: "getVisibleRecommendedItems",
+    value: function getVisibleRecommendedItems() {
+      return this._visibleItemsByVariant(function (m) {
+        return m.options && m.options.cagVariant === 'gray';
+      });
+    }
+  }, {
+    key: "_visibleItemsByVariant",
+    value: function _visibleItemsByVariant(matches) {
+      if (!this.map) {
+        var _items = this._dedupeItems(this._itemsByVariant(matches));
+        return {
+          items: _items,
+          ids: _items.map(function (i) {
+            return (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(i);
+          }),
+          count: _items.length
+        };
+      }
+      var bounds = this.map.getBounds();
+      var items = [];
+      this.markers.forEach(function (m) {
+        if (!m._cagItem || !matches(m)) return;
+        var ll = m.getLatLng();
+        if (bounds.contains(ll)) {
+          items.push(m._cagItem);
+        }
+      });
+      var unique = this._dedupeItems(items);
+      return {
+        items: unique,
+        ids: unique.map(function (i) {
+          return (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(i);
+        }),
+        count: unique.length
+      };
+    }
+  }, {
+    key: "_dedupeItems",
+    value: function _dedupeItems(items) {
+      var seen = new Set();
+      var out = [];
+      (items || []).forEach(function (item) {
+        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemKey)(item);
+        if (!key) return;
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push(item);
+      });
+      return out;
+    }
+  }, {
+    key: "_findMarkerById",
+    value: function _findMarkerById(id) {
+      return this.markers.find(function (m) {
+        return m._cagItem && (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemsMatch)(m._cagItem, id);
+      });
     }
   }, {
     key: "clearMarkers",
     value: function clearMarkers() {
-      var _this3 = this;
+      var _this4 = this;
       this._clearHoverTimers();
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
       this._activePreviewMarker = null;
+      this._selectedMarker = null;
       if (this.cluster) {
         this.cluster.clearLayers();
         if (this.map) {
@@ -195,20 +929,22 @@ var ListingMap = /*#__PURE__*/function () {
         this.grayLayer = null;
       }
       this.markers.forEach(function (m) {
-        if (_this3.map && _this3.map.hasLayer(m)) {
-          _this3.map.removeLayer(m);
+        if (_this4.map && _this4.map.hasLayer(m)) {
+          _this4.map.removeLayer(m);
         }
       });
       this.markers = [];
     }
 
     /**
-     * @param {Array<{id?:*, lat:number, lng:number, variant?:string, popupHtml?:string, title?:string}>} items
+     * @param {Array} items
+     * @param {{fit?: boolean|null}} [opts]
      */
   }, {
     key: "setMarkers",
     value: function setMarkers(items) {
-      var _this4 = this;
+      var _this5 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       if (!this.map) {
         this.options.markers = items || [];
         return;
@@ -220,6 +956,9 @@ var ListingMap = /*#__PURE__*/function () {
       var primaryMarkers = [];
       var grayMarkers = [];
       var interactive = this.options.interactivePreview;
+      var railMode = this.options.viewportRail;
+      var locale = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de';
+      var priceTpl = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.priceFromTemplate || 'From :price';
       list.forEach(function (item) {
         if (item.lat == null || item.lng == null) {
           return;
@@ -241,19 +980,24 @@ var ListingMap = /*#__PURE__*/function () {
             lng: parseFloat(item.lng)
           });
         }
-        var variant = item.variant || item.pillar || 'primary';
-        if (!_this4.options.showGrayNearby && variant === 'gray') {
+        var isGray = item.variant === 'gray' || item.is_gray || item.isGray;
+        var colorVariant = isGray ? 'gray' : _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].resolveColorVariant(item.variant || item.pillar, item.module || item.pillar);
+        if (!_this5.options.showGrayNearby && isGray) {
           return;
         }
-        var popupHtml = item.popupHtml || (interactive ? _this4.buildInteractivePreviewHtml(item) : _this4.buildPopupHtml(item));
-        var previewWidth = interactive ? _this4._previewCardWidth() : 220;
+        var chipPrice = item.price != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(item.price, locale) : null;
+        if (!item.priceLabel && chipPrice) {
+          item.priceLabel = priceTpl.replace(':price', chipPrice);
+        }
+        var popupHtml = item.popupHtml || (interactive ? _this5.buildInteractivePreviewHtml(item) : _this5.buildPopupHtml(item));
+        var previewWidth = interactive ? _this5._previewCardWidth() : 220;
         var popupOptions = interactive ? {
           className: "cag-map-popup cag-map-popup--interactive".concat(item.pillar ? " cag-map-popup--".concat(item.pillar) : ''),
           maxWidth: previewWidth,
           minWidth: Math.min(236, previewWidth),
           closeButton: false,
-          // Hover should feel instant; pan only when the user pins a card (click/tap)
-          autoPan: false,
+          autoPan: true,
+          autoPanPadding: [36, 36],
           offset: [0, -6]
         } : undefined;
         var marker = _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].createMarker({
@@ -261,37 +1005,45 @@ var ListingMap = /*#__PURE__*/function () {
             lat: lat,
             lng: lng
           },
-          variant: variant,
+          variant: colorVariant,
+          module: item.module || item.pillar || colorVariant,
           title: item.title || '',
-          popupHtml: popupHtml,
+          popupHtml: popupHtml || null,
           popupOptions: popupOptions,
-          zIndexOffset: variant === 'gray' ? 100 : 0
+          // z-order (bottom -> top): "other" offers, then type pills.
+          zIndexOffset: isGray ? 0 : 100,
+          priceChip: true,
+          pillMode: true,
+          price: item.price,
+          priceLabel: chipPrice
         });
         marker.options = marker.options || {};
-        marker.options.cagVariant = variant;
+        marker.options.cagVariant = colorVariant;
         marker._cagItem = item;
         marker._cagSticky = false;
-        if (interactive) {
-          _this4._bindInteractivePreview(marker);
+        if (railMode && interactive) {
+          _this5._bindRailSelectionWithPreview(marker);
+        } else if (railMode) {
+          _this5._bindRailSelection(marker);
+        } else if (interactive) {
+          _this5._bindInteractivePreview(marker);
         } else {
           marker.on('click', function () {
-            _this4.markers.forEach(function (m) {
+            _this5.markers.forEach(function (m) {
               if (m !== marker && m.isPopupOpen && m.isPopupOpen()) {
                 m.closePopup();
               }
             });
           });
         }
-        _this4.markers.push(marker);
-        if (variant === 'gray') {
+        _this5.markers.push(marker);
+        if (isGray) {
           grayMarkers.push(marker);
           return;
         }
         primaryMarkers.push(marker);
         primaryLatLngs.push(_MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.latLng(parseFloat(item.lat), parseFloat(item.lng)));
       });
-
-      // Cluster only filtered/primary results so nearby (gray) pins never inflate cluster counts
       if (this.options.cluster && primaryMarkers.length) {
         this.cluster = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].createMarkerClusterer({
           map: this.map,
@@ -299,44 +1051,65 @@ var ListingMap = /*#__PURE__*/function () {
         });
       } else {
         primaryMarkers.forEach(function (m) {
-          return m.addTo(_this4.map);
+          return m.addTo(_this5.map);
         });
       }
       if (grayMarkers.length) {
-        this.grayLayer = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup(grayMarkers).addTo(this.map);
+        this.grayLayer = this.options.cluster ? _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].createMarkerClusterer({
+          map: this.map,
+          markers: grayMarkers,
+          muted: true
+        }) : _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.layerGroup(grayMarkers).addTo(this.map);
       }
-      if (this.options.fitPrimaryBounds && primaryLatLngs.length) {
+      var shouldFit = opts.fit != null ? opts.fit : this.options.fitPrimaryBounds && !this._userInteracted && !opts.preserveView;
+      if (shouldFit && primaryLatLngs.length) {
         this._fitPrimary(primaryLatLngs);
       }
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].resizeMap(this.map);
+      this.emitViewportChange();
+      // Re-check after layout/fitBounds settle so the rail matches visible pins
+      this._scheduleViewportEmit();
     }
   }, {
-    key: "_bindInteractivePreview",
-    value: function _bindInteractivePreview(marker) {
-      var _this5 = this;
-      var setPinActive = function setPinActive(active) {
-        var el = marker.getElement && marker.getElement();
-        if (!el) return;
-        el.classList.toggle('cag-map-pin--active', !!active);
-      };
-      marker.on('popupopen', function () {
-        _this5._hydratePreviewImages(marker);
-        _this5._wirePreviewPointerBridge(marker);
-        setPinActive(true);
-        _this5._activePreviewMarker = marker;
-      });
-      marker.on('popupclose', function () {
-        setPinActive(false);
-        marker._cagSticky = false;
-        if (_this5._activePreviewMarker === marker) {
-          _this5._activePreviewMarker = null;
-        }
-      });
+    key: "_bindRailSelection",
+    value: function _bindRailSelection(marker) {
+      var _this6 = this;
       marker.on('click', function (e) {
         if (e && e.originalEvent) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
         }
-        _this5.markers.forEach(function (m) {
+        _this6.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+      });
+      if (!this._canHover) {
+        return;
+      }
+      marker.on('mouseover', function () {
+        if (_this6._selectedMarker === marker) return;
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      });
+      marker.on('mouseout', function () {
+        if (_this6._selectedMarker === marker) return;
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
+      });
+    }
+
+    /**
+     * Rail highlight + interactive map popup (click opens both).
+     */
+  }, {
+    key: "_bindRailSelectionWithPreview",
+    value: function _bindRailSelectionWithPreview(marker) {
+      var _this7 = this;
+      this._bindInteractivePreview(marker);
+      marker.off('click');
+      marker.on('click', function (e) {
+        if (e && e.originalEvent) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
+        }
+        _this7.markers.forEach(function (m) {
           if (m !== marker) {
             m._cagSticky = false;
             if (m.isPopupOpen && m.isPopupOpen()) {
@@ -345,22 +1118,443 @@ var ListingMap = /*#__PURE__*/function () {
           }
         });
         marker._cagSticky = true;
+        if (!_this7._isMobileSheet() && !marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        _this7.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+        if (_this7._isMobileSheet()) {
+          _this7._panIntoVisibleArea(marker);
+        } else {
+          _this7._panPopupIntoView(marker);
+        }
+      });
+    }
+  }, {
+    key: "selectById",
+    value: function selectById(id) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var marker = this._findMarkerById(id);
+      if (marker) {
+        this.selectMarker(marker, opts);
+      }
+    }
+
+    /**
+     * Zoom/spiderfy to a pin from the rail (button or double-click).
+     * Shows the real marker popup after the pin is visible.
+     */
+  }, {
+    key: "zoomToById",
+    value: function zoomToById(id) {
+      var marker = this._findMarkerById(id);
+      if (!marker) return;
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
+      this.selectMarker(marker, {
+        pan: true,
+        allowZoom: true,
+        source: 'rail-zoom'
+      });
+    }
+  }, {
+    key: "highlightById",
+    value: function highlightById(id, on) {
+      if (this._selectedMarker && (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_5__.itemsMatch)(this._selectedMarker._cagItem, id)) {
+        return;
+      }
+      var marker = this._findMarkerById(id);
+      if (marker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, !!on);
+      }
+    }
+
+    /**
+     * Hover from rail: show pin popup in place — never pan/zoom.
+     * If the pin is inside a cluster, open a detached preview on the cluster.
+     * Sticky (clicked) previews stay open until outside click / other selection.
+     */
+  }, {
+    key: "previewById",
+    value: function previewById(id) {
+      var _this8 = this;
+      var on = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var marker = this._findMarkerById(id);
+      if (!marker) return;
+      if (!on) {
+        // Sticky/selected click preview must survive leaving the rail card
+        if (marker._cagSticky || this._selectedMarker === marker) {
+          _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+          return;
+        }
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, false);
+        if (marker.isPopupOpen && marker.isPopupOpen()) {
+          marker.closePopup();
+        }
+        if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+          this._closeDetachedPreview();
+          this._setClusterPreviewHighlight(null);
+        }
+        if (this._activePreviewMarker === marker) {
+          this._activePreviewMarker = null;
+        }
+        if (this._selectedMarker && this._selectedMarker._cagSticky) {
+          this._restoreStickyPreview();
+        } else {
+          this._emitPreview(null);
+        }
+        return;
+      }
+
+      // While a clicked sticky preview is open, ignore hover on other cards
+      if (this._selectedMarker && this._selectedMarker._cagSticky && this._selectedMarker !== marker) {
+        return;
+      }
+
+      // Close other non-sticky marker popups
+      this.markers.forEach(function (m) {
+        if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
+          m.closePopup();
+          if (_this8._selectedMarker !== m) {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(m, false);
+          }
+        }
+      });
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      this._activePreviewMarker = marker;
+      this._emitPreview(marker._cagItem || null);
+      var visible = this._isMarkerVisibleOnMap(marker);
+      if (visible && marker.getPopup && marker.getPopup()) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
         if (!marker.isPopupOpen()) {
           marker.openPopup();
         }
+        this._hydratePreviewImages(marker);
+        this._wirePreviewPointerBridge(marker);
+        this._wirePreviewCarousel(marker);
+        this._ensurePopupVisible(marker);
+        return;
+      }
+
+      // Pin is clustered — show detached preview (hover or sticky)
+      this._openDetachedPreview(marker);
+    }
+  }, {
+    key: "_restoreStickyPreview",
+    value: function _restoreStickyPreview() {
+      var marker = this._selectedMarker;
+      if (!marker || !marker._cagSticky) return;
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      this._activePreviewMarker = marker;
+      this._emitPreview(marker._cagItem || null);
+      if (this._isMarkerVisibleOnMap(marker) && marker.getPopup && marker.getPopup()) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
+        if (!marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        this._hydratePreviewImages(marker);
+        this._wirePreviewPointerBridge(marker);
+        this._wirePreviewCarousel(marker);
+        this._ensurePopupVisible(marker);
+        return;
+      }
+      this._openDetachedPreview(marker);
+    }
+  }, {
+    key: "_getClusterParent",
+    value: function _getClusterParent(marker) {
+      if (!marker || !this.cluster || typeof this.cluster.getVisibleParent !== 'function') {
+        return null;
+      }
+      try {
+        var parent = this.cluster.getVisibleParent(marker);
+        if (parent && parent !== marker) {
+          return parent;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+      return null;
+    }
+  }, {
+    key: "_setClusterPreviewHighlight",
+    value: function _setClusterPreviewHighlight(clusterMarker) {
+      if (this._clusterPreviewEl) {
+        this._clusterPreviewEl.classList.remove('cag-map-cluster--preview');
+        this._clusterPreviewEl = null;
+      }
+      if (!clusterMarker) return;
+      var el = clusterMarker.getElement && clusterMarker.getElement();
+      if (el) {
+        el.classList.add('cag-map-cluster--preview');
+        this._clusterPreviewEl = el;
+      }
+    }
+  }, {
+    key: "_openDetachedPreview",
+    value: function _openDetachedPreview(marker) {
+      var _this9 = this;
+      if (!this.map || !marker) return;
+      var item = marker._cagItem || {};
+      var html = marker.getPopup && marker.getPopup() && marker.getPopup().getContent && marker.getPopup().getContent() || this.buildInteractivePreviewHtml(item);
+      if (!html) return;
+      this._closeDetachedPreview();
+      var clusterParent = this._getClusterParent(marker);
+      this._setClusterPreviewHighlight(clusterParent);
+      var latlng = clusterParent && clusterParent.getLatLng ? clusterParent.getLatLng() : marker.getLatLng();
+      var previewWidth = this._previewCardWidth();
+      var pillar = item.pillar || item.module || '';
+      var placement = this._resolvePopupPlacement(latlng, {
+        offsetHeight: 300
+      });
+      var offsetY = placement === 'below' ? 316 : -18;
+      var belowClass = placement === 'below' ? ' cag-map-popup--below' : '';
+      var popup = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.popup({
+        className: "cag-map-popup cag-map-popup--interactive cag-map-popup--detached".concat(belowClass).concat(pillar ? " cag-map-popup--".concat(pillar) : ''),
+        maxWidth: previewWidth,
+        minWidth: Math.min(236, previewWidth),
+        closeButton: false,
+        autoPan: true,
+        autoPanPadding: [36, 36],
+        offset: [0, offsetY]
+      }).setLatLng(latlng).setContent(html);
+      this._detachedPreview = popup;
+      popup._cagDetachedFor = marker;
+      popup.on('remove', function () {
+        if (_this9._detachedPreview === popup) {
+          _this9._detachedPreview = null;
+        }
+      });
+      popup.openOn(this.map);
+
+      // Allow DOM to mount before wiring carousel / lazy images
+      requestAnimationFrame(function () {
+        if (_this9._detachedPreview !== popup) return;
+        var el = popup.getElement && popup.getElement();
+        if (!el) return;
+        _this9._hydratePreviewImagesFromEl(el);
+        _this9._wirePreviewCarouselFromEl(marker, el);
+        _this9._wireDetachedPreviewBridge(marker, el);
+        _this9._ensurePopupVisible(popup);
+      });
+    }
+  }, {
+    key: "_closeDetachedPreview",
+    value: function _closeDetachedPreview() {
+      if (!this._detachedPreview) return;
+      var popup = this._detachedPreview;
+      this._detachedPreview = null;
+      if (this.map) {
+        this.map.closePopup(popup);
+      }
+    }
+  }, {
+    key: "_wireDetachedPreviewBridge",
+    value: function _wireDetachedPreviewBridge(marker, el) {
+      var _this0 = this;
+      if (!el || el._cagDetachedBridgeWired) return;
+      el._cagDetachedBridgeWired = true;
+      var dismiss = el.querySelector('.cag-map-preview__dismiss');
+      if (dismiss) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          marker._cagSticky = false;
+          _this0.clearSelection();
+        });
+      }
+
+      // Keep map click-to-dismiss from firing when interacting with the popup
+      _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
+      _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'click', function (e) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e);
+      });
+    }
+  }, {
+    key: "_isMarkerVisibleOnMap",
+    value: function _isMarkerVisibleOnMap(marker) {
+      if (!marker || !this.map) return false;
+      if (this.cluster && typeof this.cluster.getVisibleParent === 'function') {
+        try {
+          var parent = this.cluster.getVisibleParent(marker);
+          return parent === marker;
+        } catch (e) {
+          /* fall through */
+        }
+      }
+      return this.map.hasLayer(marker);
+    }
+  }, {
+    key: "selectMarker",
+    value: function selectMarker(marker) {
+      var _this1 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      if (!marker) return;
+      if (this._selectedMarker && this._selectedMarker !== marker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(this._selectedMarker, false);
+      }
+      this._selectedMarker = marker;
+      _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+      var fromRail = opts.source === 'rail';
+      var fromRailZoom = opts.source === 'rail-zoom';
+      // Preview-only rail interactions never zoom; "Show on map" / double-click do
+      var allowZoom = fromRailZoom || !fromRail && opts.allowZoom !== false;
+      var openRailPreview = function openRailPreview() {
+        if (_this1._isMobileSheet()) {
+          if (fromRailZoom || opts.pan || opts.source === 'map') {
+            _this1._panIntoVisibleArea(marker);
+          }
+          return;
+        }
+        if (!_this1.options.interactivePreview || !fromRail && !fromRailZoom) return;
+        _this1.markers.forEach(function (m) {
+          if (m !== marker) {
+            m._cagSticky = false;
+            if (m.isPopupOpen && m.isPopupOpen()) {
+              m.closePopup();
+            }
+          }
+        });
+        marker._cagSticky = true;
+        _this1._closeDetachedPreview();
+        _this1._setClusterPreviewHighlight(null);
+        if (_this1._isMarkerVisibleOnMap(marker)) {
+          if (!marker.isPopupOpen()) {
+            marker.openPopup();
+          }
+          _this1._hydratePreviewImages(marker);
+          _this1._wirePreviewPointerBridge(marker);
+          _this1._wirePreviewCarousel(marker);
+          _this1._ensurePopupVisible(marker);
+        } else if (fromRail) {
+          // Keep detached preview when not zooming into a cluster
+          _this1._openDetachedPreview(marker);
+        }
+      };
+      if (allowZoom && this.cluster && typeof this.cluster.zoomToShowLayer === 'function') {
+        try {
+          this.cluster.zoomToShowLayer(marker, function () {
+            _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(marker, true);
+            openRailPreview();
+          });
+        } catch (e) {
+          if (opts.pan && this.map) {
+            this.map.panTo(marker.getLatLng(), {
+              animate: true
+            });
+          }
+          openRailPreview();
+        }
+      } else {
+        if (opts.pan && this.map) {
+          this.map.panTo(marker.getLatLng(), {
+            animate: true
+          });
+        }
+        openRailPreview();
+      }
+      var item = marker._cagItem || null;
+      this._selectionListeners.forEach(function (fn) {
+        try {
+          fn(item, opts);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "clearSelection",
+    value: function clearSelection() {
+      if (this._selectedMarker) {
+        _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].setSelected(this._selectedMarker, false);
+        this._selectedMarker = null;
+      }
+      this._clearStickyPreviews();
+      this._setClusterPreviewHighlight(null);
+      this._activePreviewMarker = null;
+      this._emitPreview(null);
+      this._selectionListeners.forEach(function (fn) {
+        try {
+          fn(null);
+        } catch (e) {
+          /* ignore */
+        }
+      });
+    }
+  }, {
+    key: "_bindInteractivePreview",
+    value: function _bindInteractivePreview(marker) {
+      var _this10 = this;
+      var setPinActive = function setPinActive(active) {
+        var el = marker.getElement && marker.getElement();
+        if (!el) return;
+        el.classList.toggle('cag-map-chip--selected', !!active && !!marker._cagPriceChip);
+        el.classList.toggle('cag-map-dot--selected', !!active && !marker._cagPriceChip);
+      };
+      marker.on('popupopen', function () {
+        _this10._hydratePreviewImages(marker);
+        _this10._wirePreviewPointerBridge(marker);
+        _this10._wirePreviewCarousel(marker);
         setPinActive(true);
-        _this5._panPopupIntoView(marker);
+        _this10._activePreviewMarker = marker;
+        _this10._emitPreview(marker._cagItem || null);
+        _this10._ensurePopupVisible(marker);
+      });
+      marker.on('popupclose', function () {
+        setPinActive(false);
+        // Keep sticky flag while this listing remains the rail selection
+        if (_this10._selectedMarker !== marker) {
+          marker._cagSticky = false;
+        }
+        if (_this10._activePreviewMarker === marker) {
+          _this10._activePreviewMarker = null;
+        }
+        if (_this10._selectedMarker !== marker) {
+          _this10._emitPreview(null);
+        }
+      });
+      marker.on('click', function (e) {
+        if (e && e.originalEvent) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stopPropagation(e.originalEvent);
+        }
+        _this10._closeDetachedPreview();
+        _this10._setClusterPreviewHighlight(null);
+        _this10.markers.forEach(function (m) {
+          if (m !== marker) {
+            m._cagSticky = false;
+            if (m.isPopupOpen && m.isPopupOpen()) {
+              m.closePopup();
+            }
+          }
+        });
+        marker._cagSticky = true;
+        if (!_this10._isMobileSheet() && !marker.isPopupOpen()) {
+          marker.openPopup();
+        }
+        setPinActive(true);
+        _this10.selectMarker(marker, {
+          pan: false,
+          source: 'map'
+        });
+        if (_this10._isMobileSheet()) {
+          _this10._panIntoVisibleArea(marker);
+        } else {
+          _this10._panPopupIntoView(marker);
+        }
       });
       if (!this._canHover) {
         return;
       }
       marker.on('mouseover', function () {
-        _this5._clearHoverTimers();
-        _this5._hoverOpenTimer = setTimeout(function () {
-          if (_this5._activePreviewMarker && _this5._activePreviewMarker !== marker && _this5._activePreviewMarker._cagSticky) {
+        _this10._clearHoverTimers();
+        _this10._hoverOpenTimer = setTimeout(function () {
+          if (_this10._activePreviewMarker && _this10._activePreviewMarker !== marker && _this10._activePreviewMarker._cagSticky) {
             return;
           }
-          _this5.markers.forEach(function (m) {
+          _this10.markers.forEach(function (m) {
             if (m !== marker && m.isPopupOpen && m.isPopupOpen() && !m._cagSticky) {
               m.closePopup();
             }
@@ -369,13 +1563,17 @@ var ListingMap = /*#__PURE__*/function () {
             marker.openPopup();
           }
           setPinActive(true);
+          _this10._emitPreview(marker._cagItem || null);
         }, 70);
       });
       marker.on('mouseout', function () {
-        _this5._clearHoverTimers();
-        _this5._hoverCloseTimer = setTimeout(function () {
+        _this10._clearHoverTimers();
+        _this10._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky && !marker._cagPointerOnPopup) {
-            _this5._closePreview(marker);
+            _this10._closePreview(marker);
+            if (_this10._selectedMarker !== marker) {
+              _this10._emitPreview(null);
+            }
           }
         }, 140);
       });
@@ -383,7 +1581,7 @@ var ListingMap = /*#__PURE__*/function () {
   }, {
     key: "_wirePreviewPointerBridge",
     value: function _wirePreviewPointerBridge(marker) {
-      var _this6 = this;
+      var _this11 = this;
       var popup = marker.getPopup && marker.getPopup();
       var el = popup && popup.getElement && popup.getElement();
       if (!el || el._cagBridgeWired) {
@@ -392,14 +1590,14 @@ var ListingMap = /*#__PURE__*/function () {
       el._cagBridgeWired = true;
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseenter', function () {
         marker._cagPointerOnPopup = true;
-        _this6._clearHoverTimers();
+        _this11._clearHoverTimers();
       });
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(el, 'mouseleave', function () {
         marker._cagPointerOnPopup = false;
-        _this6._clearHoverTimers();
-        _this6._hoverCloseTimer = setTimeout(function () {
+        _this11._clearHoverTimers();
+        _this11._hoverCloseTimer = setTimeout(function () {
           if (!marker._cagSticky) {
-            _this6._closePreview(marker);
+            _this11._closePreview(marker);
           }
         }, 120);
       });
@@ -408,11 +1606,9 @@ var ListingMap = /*#__PURE__*/function () {
         _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dismiss, 'click', function (e) {
           _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
           marker._cagSticky = false;
-          _this6._closePreview(marker);
+          _this11._closePreview(marker);
         });
       }
-
-      // Keep popup clicks from bubbling to the map (which would clear sticky)
       _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.disableClickPropagation(el);
     }
   }, {
@@ -420,13 +1616,25 @@ var ListingMap = /*#__PURE__*/function () {
     value: function _hydratePreviewImages(marker) {
       var popup = marker.getPopup && marker.getPopup();
       var el = popup && popup.getElement && popup.getElement();
+      this._hydratePreviewImagesFromEl(el);
+    }
+  }, {
+    key: "_hydratePreviewImagesFromEl",
+    value: function _hydratePreviewImagesFromEl(el) {
+      var _this12 = this;
       if (!el) return;
       el.querySelectorAll('img[data-src]').forEach(function (img) {
         if (img.getAttribute('src')) return;
         var src = img.getAttribute('data-src');
         if (!src) return;
         img.onload = function () {
-          return img.classList.add('is-loaded');
+          img.classList.add('is-loaded');
+          // Re-fit after image expands the card height
+          if (_this12._detachedPreview) {
+            _this12._ensurePopupVisible(_this12._detachedPreview);
+          } else if (_this12._activePreviewMarker) {
+            _this12._ensurePopupVisible(_this12._activePreviewMarker);
+          }
         };
         img.onerror = function () {
           return img.classList.add('is-error');
@@ -436,50 +1644,239 @@ var ListingMap = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "_wirePreviewCarousel",
+    value: function _wirePreviewCarousel(marker) {
+      var popup = marker.getPopup && marker.getPopup();
+      var root = popup && popup.getElement && popup.getElement();
+      this._wirePreviewCarouselFromEl(marker, root);
+    }
+  }, {
+    key: "_wirePreviewCarouselFromEl",
+    value: function _wirePreviewCarouselFromEl(marker, root) {
+      var _this13 = this;
+      if (!root) return;
+      var carousel = root.querySelector('[data-cag-preview-carousel]');
+      if (!carousel || carousel._cagCarouselWired) {
+        return;
+      }
+      carousel._cagCarouselWired = true;
+      var slides = Array.from(carousel.querySelectorAll('[data-cag-preview-slide]'));
+      if (slides.length < 2) {
+        return;
+      }
+      var index = Math.max(0, slides.findIndex(function (s) {
+        return s.classList.contains('is-active');
+      }));
+      if (index < 0) index = 0;
+      var dots = Array.from(carousel.querySelectorAll('[data-cag-preview-dot]'));
+      var prevBtn = carousel.querySelector('[data-cag-preview-prev]');
+      var nextBtn = carousel.querySelector('[data-cag-preview-next]');
+      var counter = carousel.querySelector('[data-cag-preview-counter]');
+      var show = function show(nextIndex) {
+        index = (nextIndex % slides.length + slides.length) % slides.length;
+        slides.forEach(function (slide, i) {
+          slide.classList.toggle('is-active', i === index);
+        });
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('is-active', i === index);
+          dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+        });
+        if (counter) {
+          counter.textContent = "".concat(index + 1, "/").concat(slides.length);
+        }
+        _this13._hydratePreviewImagesFromEl(root);
+      };
+      var bindNav = function bindNav(btn, delta) {
+        if (!btn) return;
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(btn, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          if (marker) marker._cagSticky = true;
+          show(index + delta);
+        });
+      };
+      bindNav(prevBtn, -1);
+      bindNav(nextBtn, 1);
+      dots.forEach(function (dot, i) {
+        _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.on(dot, 'click', function (e) {
+          _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.DomEvent.stop(e);
+          if (marker) marker._cagSticky = true;
+          show(i);
+        });
+      });
+      show(index);
+    }
+  }, {
     key: "_panPopupIntoView",
     value: function _panPopupIntoView(marker) {
-      if (!this.map || !marker) return;
-      var popup = marker.getPopup && marker.getPopup();
-      var el = popup && popup.getElement && popup.getElement();
-      if (!el) return;
+      this._ensurePopupVisible(marker);
+    }
+
+    /**
+     * Keep preview fully inside the map viewport.
+     * Prefer flipping below when clipped at the top, then pan any remaining overflow.
+     * @param {L.Marker|L.Popup} source
+     */
+  }, {
+    key: "_ensurePopupVisible",
+    value: function _ensurePopupVisible(source) {
+      var _this14 = this;
+      if (!this.map || !source) return;
+      var popup = typeof source.getPopup === 'function' ? source.getPopup() : source;
+      if (!popup) return;
+      var run = function run() {
+        if (!_this14.map) return;
+        var stillDetached = popup === _this14._detachedPreview;
+        var stillMarkerPopup = typeof source.getPopup === 'function' && source.getPopup() === popup && source.isPopupOpen && source.isPopupOpen();
+        if (!stillDetached && typeof source.getPopup === 'function' && !stillMarkerPopup) {
+          return;
+        }
+        if (!stillDetached && typeof source.getPopup !== 'function' && popup !== _this14._detachedPreview) {
+          return;
+        }
+        var el = popup.getElement && popup.getElement();
+        if (!el) return;
+        var root = el.classList && el.classList.contains('leaflet-popup') ? el : el.closest ? el.closest('.leaflet-popup') : el;
+        if (!root) return;
+        var mapRect = _this14.map.getContainer().getBoundingClientRect();
+        var rect = root.getBoundingClientRect();
+        var edgePad = 18;
+        var clippedTop = rect.top < mapRect.top + edgePad;
+        var clippedBottom = rect.bottom > mapRect.bottom - edgePad;
+        var height = Math.max(root.offsetHeight || 0, 240);
+
+        // If the card is cut off at the top, force it below the pin
+        if (clippedTop && !clippedBottom) {
+          _this14._applyPopupPlacement(popup, root, 'below', height);
+        } else {
+          var latlng = popup.getLatLng && popup.getLatLng();
+          if (latlng) {
+            var placement = _this14._resolvePopupPlacement(latlng, root);
+            _this14._applyPopupPlacement(popup, root, placement, height);
+          }
+        }
+
+        // Leaflet built-in pan as a first pass
+        try {
+          if (typeof popup._adjustPan === 'function') {
+            var prevAutoPan = popup.options.autoPan;
+            popup.options.autoPan = true;
+            popup.options.autoPanPadding = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.point(36, 36);
+            popup._adjustPan();
+            popup.options.autoPan = prevAutoPan;
+          }
+        } catch (e) {
+          /* ignore */
+        }
+        _this14._panPopupElementIntoView(root);
+      };
+      requestAnimationFrame(function () {
+        return requestAnimationFrame(run);
+      });
+      if (this._popupVisibilityTimers) {
+        this._popupVisibilityTimers.forEach(function (t) {
+          return clearTimeout(t);
+        });
+      }
+      this._popupVisibilityTimers = [setTimeout(run, 80), setTimeout(run, 280), setTimeout(run, 560)];
+    }
+  }, {
+    key: "_resolvePopupPlacement",
+    value: function _resolvePopupPlacement(latlng, el) {
+      var pt = this.map.latLngToContainerPoint(latlng);
+      var size = this.map.getSize();
+      var height = Math.max(el && el.offsetHeight || 0, 260);
+      var pad = 24;
+      var spaceAbove = pt.y - pad;
+      var spaceBelow = size.y - pt.y - pad;
+
+      // Flip when the card would not fit above the pin
+      if (spaceAbove < height && spaceBelow >= Math.min(height, spaceAbove + 40)) {
+        return 'below';
+      }
+      return 'above';
+    }
+  }, {
+    key: "_applyPopupPlacement",
+    value: function _applyPopupPlacement(popup, el, placement, height) {
+      var h = height || el && el.offsetHeight || 280;
+      // Leaflet anchors the tip at latlng; positive offset.y shifts the card downward.
+      // To place the whole card under the pin, offset by roughly the card height.
+      var offsetY = placement === 'below' ? Math.round(h) + 16 : -8;
+      popup.options.offset = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.point(0, offsetY);
+      var root = el && el.classList && el.classList.contains('leaflet-popup') ? el : el && el.closest ? el.closest('.leaflet-popup') : el;
+      if (root && root.classList) {
+        root.classList.toggle('cag-map-popup--below', placement === 'below');
+      }
+      if (typeof popup.options.className === 'string') {
+        popup.options.className = popup.options.className.replace(/\s*cag-map-popup--below\b/g, '').trim();
+        if (placement === 'below') {
+          popup.options.className += ' cag-map-popup--below';
+        }
+      }
+      if (typeof popup._updatePosition === 'function') {
+        popup._updatePosition();
+      }
+    }
+  }, {
+    key: "_panPopupElementIntoView",
+    value: function _panPopupElementIntoView(el) {
+      var _this15 = this;
+      if (!this.map || !el) return;
       var pad = {
-        x: 28,
-        y: 88
+        top: 20,
+        right: 24,
+        bottom: 24,
+        left: 24
       };
       var rect = el.getBoundingClientRect();
       var mapRect = this.map.getContainer().getBoundingClientRect();
       var dx = 0;
       var dy = 0;
-      if (rect.left < mapRect.left + pad.x) {
-        dx = rect.left - (mapRect.left + pad.x);
-      } else if (rect.right > mapRect.right - pad.x) {
-        dx = rect.right - (mapRect.right - pad.x);
+      if (rect.left < mapRect.left + pad.left) {
+        dx = rect.left - (mapRect.left + pad.left);
+      } else if (rect.right > mapRect.right - pad.right) {
+        dx = rect.right - (mapRect.right - pad.right);
       }
-      if (rect.top < mapRect.top + pad.y) {
-        dy = rect.top - (mapRect.top + pad.y);
-      } else if (rect.bottom > mapRect.bottom - pad.y) {
-        dy = rect.bottom - (mapRect.bottom - pad.y);
+      if (rect.top < mapRect.top + pad.top) {
+        dy = rect.top - (mapRect.top + pad.top);
+      } else if (rect.bottom > mapRect.bottom - pad.bottom) {
+        dy = rect.bottom - (mapRect.bottom - pad.bottom);
       }
-      if (dx !== 0 || dy !== 0) {
-        this.map.panBy([dx, dy], {
-          animate: true,
-          duration: 0.25
-        });
+      if (dx === 0 && dy === 0) return;
+      this._ignoreMoveClose = true;
+      this.map.panBy([dx, dy], {
+        animate: true,
+        duration: 0.3
+      });
+      if (this._ignoreMoveCloseTimer) {
+        clearTimeout(this._ignoreMoveCloseTimer);
       }
+      this._ignoreMoveCloseTimer = setTimeout(function () {
+        _this15._ignoreMoveClose = false;
+      }, 400);
     }
   }, {
     key: "_closePreview",
     value: function _closePreview(marker) {
       if (!marker) return;
       var el = marker.getElement && marker.getElement();
-      if (el) el.classList.remove('cag-map-pin--active');
+      if (el) {
+        el.classList.remove('cag-map-chip--selected');
+        el.classList.remove('cag-map-dot--selected');
+      }
       if (marker.isPopupOpen && marker.isPopupOpen()) {
         marker.closePopup();
+      }
+      if (this._detachedPreview && this._detachedPreview._cagDetachedFor === marker) {
+        this._closeDetachedPreview();
+        this._setClusterPreviewHighlight(null);
       }
     }
   }, {
     key: "_clearStickyPreviews",
     value: function _clearStickyPreviews() {
+      this._closeDetachedPreview();
+      this._setClusterPreviewHighlight(null);
       this.markers.forEach(function (m) {
         m._cagSticky = false;
         if (m.isPopupOpen && m.isPopupOpen()) {
@@ -500,55 +1897,143 @@ var ListingMap = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "_isMobileSheet",
+    value: function _isMobileSheet() {
+      return !!(this.options.viewportRail && typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 991.98px)').matches);
+    }
+  }, {
+    key: "setOverlayPadding",
+    value: function setOverlayPadding() {
+      var pad = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      this._overlayPadding = {
+        top: Math.max(0, pad.top || 0),
+        bottom: Math.max(0, pad.bottom || 0)
+      };
+      this.refitIfPristine();
+    }
+  }, {
+    key: "refitIfPristine",
+    value: function refitIfPristine() {
+      if (this._userInteracted || !this.map || !this._initialized) return;
+      var latLngs = this.markers.filter(function (m) {
+        return m.options && m.options.cagVariant !== 'gray' && m.getLatLng;
+      }).map(function (m) {
+        return m.getLatLng();
+      });
+      if (latLngs.length) {
+        this._fitPrimary(latLngs);
+      }
+    }
+  }, {
+    key: "_fitPadding",
+    value: function _fitPadding() {
+      var overlay = this._overlayPadding || {};
+      return {
+        paddingTopLeft: [24, 24 + (overlay.top || 0)],
+        paddingBottomRight: [24, 24 + (overlay.bottom || 0)]
+      };
+    }
+  }, {
     key: "_fitPrimary",
     value: function _fitPrimary(latLngs) {
       var unique = new Set(latLngs.map(function (ll) {
         return "".concat(ll.lat, ",").concat(ll.lng);
       }));
+      var pad = this._fitPadding();
+      this._beginProgrammaticView();
       if (unique.size === 1) {
         this.map.setView(latLngs[0], this.options.singleZoom);
+        var dy = (this._overlayPadding && this._overlayPadding.bottom || 0) - (this._overlayPadding && this._overlayPadding.top || 0);
+        if (dy) {
+          this.map.panBy([0, dy / 2], {
+            animate: false
+          });
+        }
         return;
       }
       var bounds = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.latLngBounds(latLngs);
-      this.map.fitBounds(bounds, {
-        padding: [40, 40]
-      });
+      this.map.fitBounds(bounds, pad);
+    }
+  }, {
+    key: "_beginProgrammaticView",
+    value: function _beginProgrammaticView() {
+      var _this16 = this;
+      this._programmaticView = true;
+      if (this._programmaticViewTimer) clearTimeout(this._programmaticViewTimer);
+      this._programmaticViewTimer = setTimeout(function () {
+        _this16._programmaticView = false;
+      }, 500);
+    }
+  }, {
+    key: "_panIntoVisibleArea",
+    value: function _panIntoVisibleArea(marker) {
+      var _this17 = this;
+      if (!this.map || !marker || typeof marker.getLatLng !== 'function') return;
+      var overlay = this._overlayPadding || {};
+      var size = this.map.getSize();
+      var top = overlay.top || 0;
+      var bottom = overlay.bottom || 0;
+      var visibleH = Math.max(80, size.y - top - bottom);
+      var target = this.map.latLngToContainerPoint(marker.getLatLng());
+      var desiredY = top + visibleH * 0.5;
+      var dx = target.x - size.x / 2;
+      var dy = target.y - desiredY;
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        this._ignoreMoveClose = true;
+        this._beginProgrammaticView();
+        this.map.panBy([dx, dy], {
+          animate: true
+        });
+        if (this._ignoreMoveCloseTimer) clearTimeout(this._ignoreMoveCloseTimer);
+        this._ignoreMoveCloseTimer = setTimeout(function () {
+          _this17._ignoreMoveClose = false;
+        }, 400);
+      }
     }
 
     /**
      * AJAX remap from guidings filter payload (server objects).
-     * Expects items with lat, lng, and optional popupHtml / id / title / location / price.
      */
   }, {
     key: "setMarkersFromGuidings",
     value: function setMarkersFromGuidings(guidings) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var locale = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de';
+      var priceTpl = _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.priceFromTemplate || 'From :price';
       var markers = (guidings || []).map(function (g) {
         var price = g.lowest_price != null ? g.lowest_price : g.price;
         var normalizedPrice = price != null && price !== '' && Number(price) > 0 ? price : null;
-
-        // Prefer structured fields so interactive preview can render; ignore legacy popupHtml
+        var chip = normalizedPrice != null ? _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"].formatPriceChip(normalizedPrice, locale) : null;
+        var pillar = g.pillar || g.module || 'guiding';
+        var module = g.module || (pillar === 'trip' ? 'trip' : pillar === 'camp' ? 'camp' : 'tour');
         return {
           id: g.id,
+          key: g.key || "".concat(module, ":").concat(g.id),
           lat: g.lat,
           lng: g.lng,
           variant: g.variant || (g.is_gray || g.isGray ? 'gray' : 'primary'),
-          pillar: g.pillar || 'guiding',
+          pillar: pillar,
+          module: module,
+          moduleLabel: g.moduleLabel || g.badge || '',
           title: g.title || '',
           location: g.location || '',
           price: normalizedPrice,
-          priceLabel: g.priceLabel || (normalizedPrice != null ? "ab ".concat(normalizedPrice, "\u20AC p.P.") : null),
-          badge: g.badge || '',
+          priceLabel: g.priceLabel || (chip ? priceTpl.replace(':price', chip) : null),
+          badge: g.badge || g.moduleLabel || '',
           cta: g.cta || '',
           url: g.url || g.link || '#',
-          image: g.thumbnail || g.thumbnail_path || g.image || ''
+          image: g.thumbnail || g.thumbnail_path || g.image || '',
+          images: Array.isArray(g.images) ? g.images : [],
+          durationLabel: g.durationLabel || g.duration_label || '',
+          guestsLabel: g.guestsLabel || g.guests_label || '',
+          maxGuests: g.maxGuests || g.max_guests || null,
+          rating: g.rating != null ? g.rating : null,
+          reviewCount: g.reviewCount != null ? g.reviewCount : g.review_count != null ? g.review_count : null,
+          boatLabel: g.boatLabel || g.boat_label || ''
         };
       });
-      this.setMarkers(markers);
+      this.setMarkers(markers, opts);
     }
-
-    /**
-     * Build popup card HTML from structured marker fields (avoids server-side Blade per pin).
-     */
   }, {
     key: "buildPopupHtml",
     value: function buildPopupHtml() {
@@ -557,39 +2042,79 @@ var ListingMap = /*#__PURE__*/function () {
       var location = this._escape(item.location || '');
       var url = this._escape(item.url || item.link || '#');
       var image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
-      var price = item.price != null && item.price !== '' ? item.price : null;
-      if (!title && !image && !location && price == null) {
+      var priceLabel = this._escape(item.priceLabel || '');
+      if (!title && !image && !location && !priceLabel) {
         return null;
       }
-      var priceLine = price != null ? "<div class=\"cag-map-popup__price\"><span class=\"fw-bold\">ab ".concat(this._escape(String(price)), "\u20AC</span> p.P.</div>") : '';
+      var priceLine = priceLabel ? "<div class=\"cag-map-popup__price\"><span class=\"fw-bold\">".concat(priceLabel, "</span></div>") : '';
       return "\n      <div class=\"cag-map-popup__card\">\n        ".concat(image ? "<img class=\"cag-map-popup__image\" src=\"".concat(image, "\" alt=\"\">") : '', "\n        <div class=\"cag-map-popup__body\">\n          <a class=\"text-decoration-none\" href=\"").concat(url, "\">\n            <h5 class=\"cag-map-popup__title\">").concat(title, "</h5>\n          </a>\n          ").concat(location ? "<div class=\"cag-map-popup__location\">".concat(location, "</div>") : '', "\n          ").concat(priceLine, "\n        </div>\n      </div>");
     }
-
-    /**
-     * Rich interactive preview card — images hydrate on first open (keeps map boot light).
-     * Shared by vacations + guidings listing maps.
-     */
   }, {
     key: "buildInteractivePreviewHtml",
     value: function buildInteractivePreviewHtml() {
+      var _this18 = this;
       var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var title = this._escape(item.title || '');
       var location = this._escape(item.location || '');
       var url = this._escape(item.url || item.link || '#');
-      var image = this._escape(item.image || item.thumbnail || item.thumbnail_path || '');
+      var images = this._previewImages(item);
+      var image = images[0] || '';
       var badge = this._escape(item.badge || '');
       var cta = this._escape(item.cta || '');
       var priceLabel = this._escape(item.priceLabel || '');
-      var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'guiding' ? item.pillar : '';
-      var badgeTone = pillar === 'trip' || pillar === 'camp' ? pillar : 'primary';
-      var price = item.price != null && item.price !== '' ? item.price : null;
-      if (!title && !image && !location && !priceLabel && price == null) {
+      var i18n = this._previewI18n();
+      var prevLabel = this._escape(i18n.prev || 'Previous image');
+      var nextLabel = this._escape(i18n.next || 'Next image');
+      var pillar = item.pillar === 'trip' || item.pillar === 'camp' || item.pillar === 'tour' || item.pillar === 'guiding' ? item.pillar === 'guiding' ? 'tour' : item.pillar : '';
+      var badgeTone = pillar === 'trip' || pillar === 'camp' || pillar === 'tour' ? pillar : 'primary';
+      if (!title && !image && !location && !priceLabel) {
         return null;
       }
-      var fallbackPrice = !priceLabel && price != null ? "<span class=\"cag-map-preview__price-value\">ab ".concat(this._escape(String(price)), "\u20AC</span>") : '';
-      var priceBlock = priceLabel || fallbackPrice ? "<div class=\"cag-map-preview__price\">".concat(priceLabel || fallbackPrice, "</div>") : '';
+      var priceBlock = priceLabel ? "<div class=\"cag-map-preview__price\">".concat(priceLabel, "</div>") : '';
       var cardWidth = this._previewCardWidth();
-      return "\n      <div class=\"cag-map-preview\" data-pillar=\"".concat(pillar, "\" style=\"width:").concat(cardWidth, "px\">\n        <button type=\"button\" class=\"cag-map-preview__dismiss\" aria-label=\"Close\" tabindex=\"0\">&times;</button>\n        <a class=\"cag-map-preview__link\" href=\"").concat(url, "\">\n          <div class=\"cag-map-preview__media").concat(image ? '' : ' cag-map-preview__media--empty', "\">\n            ").concat(image ? "<img class=\"cag-map-preview__image\" data-src=\"".concat(image, "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">") : '', "\n            ").concat(badge ? "<span class=\"cag-map-preview__badge cag-map-preview__badge--".concat(badgeTone, "\">").concat(badge, "</span>") : '', "\n          </div>\n          <div class=\"cag-map-preview__body\">\n            <h5 class=\"cag-map-preview__title\">").concat(title, "</h5>\n            ").concat(location ? "<div class=\"cag-map-preview__location\"><span aria-hidden=\"true\"></span>".concat(location, "</div>") : '', "\n            <div class=\"cag-map-preview__footer\">\n              ").concat(priceBlock, "\n              ").concat(cta ? "<span class=\"cag-map-preview__cta\">".concat(cta, "</span>") : '', "\n            </div>\n          </div>\n        </a>\n      </div>");
+      var hasCarousel = images.length > 1;
+      var slidesHtml = images.length ? images.map(function (src, i) {
+        return "\n            <div class=\"cag-map-preview__slide".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-slide>\n              <img class=\"cag-map-preview__image\" data-src=\"").concat(_this18._escape(src), "\" alt=\"\" decoding=\"async\" width=\"").concat(cardWidth, "\" height=\"150\">\n            </div>");
+      }).join('') : '';
+      var navHtml = hasCarousel ? "\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--prev\" data-cag-preview-prev aria-label=\"".concat(prevLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8249;</span>\n          </button>\n          <button type=\"button\" class=\"cag-map-preview__nav cag-map-preview__nav--next\" data-cag-preview-next aria-label=\"").concat(nextLabel, "\" tabindex=\"0\">\n            <span aria-hidden=\"true\">&#8250;</span>\n          </button>\n          <div class=\"cag-map-preview__dots\" role=\"tablist\">\n            ").concat(images.map(function (_, i) {
+        return "<button type=\"button\" class=\"cag-map-preview__dot".concat(i === 0 ? ' is-active' : '', "\" data-cag-preview-dot aria-label=\"").concat(i + 1, "\" aria-current=\"").concat(i === 0 ? 'true' : 'false', "\" tabindex=\"0\"></button>");
+      }).join(''), "\n          </div>\n          <span class=\"cag-map-preview__counter\" data-cag-preview-counter>1/").concat(images.length, "</span>") : '';
+      var mediaInner = images.length ? "<div class=\"cag-map-preview__carousel\" data-cag-preview-carousel>\n            <a class=\"cag-map-preview__media-link\" href=\"".concat(url, "\" tabindex=\"-1\">").concat(slidesHtml, "</a>\n            ").concat(navHtml, "\n          </div>") : '';
+      return "\n      <div class=\"cag-map-preview\" data-pillar=\"".concat(pillar, "\" style=\"width:").concat(cardWidth, "px\">\n        <button type=\"button\" class=\"cag-map-preview__dismiss\" aria-label=\"Close\" tabindex=\"0\">&times;</button>\n        <div class=\"cag-map-preview__media").concat(image ? '' : ' cag-map-preview__media--empty', "\">\n          ").concat(mediaInner, "\n          ").concat(badge ? "<span class=\"cag-map-preview__badge cag-map-preview__badge--".concat(badgeTone, "\">").concat(badge, "</span>") : '', "\n        </div>\n        <a class=\"cag-map-preview__link\" href=\"").concat(url, "\">\n          <div class=\"cag-map-preview__body\">\n            <h5 class=\"cag-map-preview__title\">").concat(title, "</h5>\n            ").concat(location ? "<div class=\"cag-map-preview__location\"><span aria-hidden=\"true\"></span>".concat(location, "</div>") : '', "\n            <div class=\"cag-map-preview__footer\">\n              ").concat(priceBlock, "\n              ").concat(cta ? "<span class=\"cag-map-preview__cta\">".concat(cta, "</span>") : '', "\n            </div>\n          </div>\n        </a>\n      </div>");
+    }
+  }, {
+    key: "_previewImages",
+    value: function _previewImages() {
+      var item = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var list = [];
+      var seen = Object.create(null);
+      var push = function push(src) {
+        if (!src || typeof src !== 'string') return;
+        var trimmed = src.trim();
+        if (!trimmed || seen[trimmed]) return;
+        seen[trimmed] = true;
+        list.push(trimmed);
+      };
+      if (Array.isArray(item.images)) {
+        item.images.forEach(push);
+      }
+      push(item.image || item.thumbnail || item.thumbnail_path || '');
+      return list.slice(0, 5);
+    }
+  }, {
+    key: "_previewI18n",
+    value: function _previewI18n() {
+      if (this._previewI18nCache) {
+        return this._previewI18nCache;
+      }
+      try {
+        var modal = this.el && this.el.closest ? this.el.closest('[data-maps-i18n]') : null;
+        var raw = modal && modal.getAttribute('data-maps-i18n');
+        this._previewI18nCache = raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        this._previewI18nCache = {};
+      }
+      return this._previewI18nCache;
     }
 
     /** @deprecated Use buildInteractivePreviewHtml */
@@ -627,6 +2152,944 @@ var ListingMap = /*#__PURE__*/function () {
 
 /***/ },
 
+/***/ "./resources/js/maps/MapModalFilters.js"
+/*!**********************************************!*\
+  !*** ./resources/js/maps/MapModalFilters.js ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MapModalFilters)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * MapModalFilters — chip bar synced to existing listing filter form (#filterContainer)
+ */
+var CHIP_SECTIONS = {
+  filters: null,
+  duration: ['duration_types[]', 'duration_'],
+  price: ['price_min', 'price_max'],
+  target_fish: ['target_fish[]', 'fish_'],
+  methods: ['methods[]', 'method_'],
+  people: ['num_persons', 'persons_']
+};
+var MapModalFilters = /*#__PURE__*/function () {
+  /**
+   * @param {HTMLElement} modal
+   */
+  function MapModalFilters(modal) {
+    _classCallCheck(this, MapModalFilters);
+    this.modal = modal;
+    this.formId = modal.getAttribute('data-map-filter-form') || 'filterContainer';
+    this.chipsRoot = modal.querySelector('[data-map-filter-chips]');
+    this.panel = modal.querySelector('[data-map-filter-panel]');
+    this.panelBody = modal.querySelector('[data-map-filter-panel-body]');
+    this.panelTitle = modal.querySelector('[data-map-filter-panel-title]');
+    this.activeChip = null;
+    if (!this.chipsRoot || !this.panel) {
+      return;
+    }
+    this._bind();
+    this.refreshChipStates();
+  }
+  return _createClass(MapModalFilters, [{
+    key: "form",
+    get: function get() {
+      return document.getElementById(this.formId);
+    }
+  }, {
+    key: "_bind",
+    value: function _bind() {
+      var _this = this;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-map-chip');
+          if (_this.activeChip === key && !_this.panel.hidden) {
+            _this.closePanel();
+            return;
+          }
+          _this.openPanel(key, btn);
+        });
+      });
+      var closeBtn = this.modal.querySelector('[data-map-filter-panel-close]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          return _this.closePanel();
+        });
+      }
+      var applyBtn = this.modal.querySelector('[data-map-filter-apply]');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', function () {
+          _this._commitPanelToForm();
+          _this.closePanel();
+          _this._triggerFormFilter();
+        });
+      }
+      var clearBtn = this.modal.querySelector('[data-map-filter-clear]');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+          _this._clearSectionInPanel();
+        });
+      }
+      this.modal.addEventListener('shown.bs.modal', function () {
+        return _this.refreshChipStates();
+      });
+      var form = this.form;
+      if (form) {
+        form.addEventListener('change', function () {
+          return _this.refreshChipStates();
+        });
+      }
+    }
+  }, {
+    key: "openPanel",
+    value: function openPanel(key, chipBtn) {
+      var form = this.form;
+      if (!form) {
+        return;
+      }
+      this.activeChip = key;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (b) {
+        b.setAttribute('aria-expanded', b === chipBtn ? 'true' : 'false');
+        b.classList.toggle('is-open', b === chipBtn);
+      });
+      var title = chipBtn ? chipBtn.textContent.trim() : key;
+      if (this.panelTitle) {
+        this.panelTitle.textContent = title;
+      }
+      this.panelBody.innerHTML = this._buildPanelHtml(key, form);
+      this.panel.hidden = false;
+      this.modal.classList.add('map-modal--filters-open');
+    }
+  }, {
+    key: "closePanel",
+    value: function closePanel() {
+      this.panel.hidden = true;
+      this.modal.classList.remove('map-modal--filters-open');
+      this.activeChip = null;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (b) {
+        b.setAttribute('aria-expanded', 'false');
+        b.classList.remove('is-open');
+      });
+    }
+  }, {
+    key: "_buildPanelHtml",
+    value: function _buildPanelHtml(key, form) {
+      if (key === 'price') {
+        var min = form.querySelector('#price_min_main, [name="price_min"]');
+        var max = form.querySelector('#price_max_main, [name="price_max"]');
+        var minVal = min ? min.value : '';
+        var maxVal = max ? max.value : '';
+        return "\n        <div class=\"map-modal__filter-price\">\n          <label>\n            <span>Min \u20AC</span>\n            <input type=\"number\" inputmode=\"numeric\" data-panel-price-min value=\"".concat(this._escape(minVal), "\" min=\"0\" step=\"1\">\n          </label>\n          <label>\n            <span>Max \u20AC</span>\n            <input type=\"number\" inputmode=\"numeric\" data-panel-price-max value=\"").concat(this._escape(maxVal), "\" min=\"0\" step=\"1\">\n          </label>\n        </div>");
+      }
+      if (key === 'filters') {
+        return this._cloneCheckboxGroups(form, ['target_fish[]', 'methods[]', 'water[]', 'duration_types[]', 'num_persons']);
+      }
+      var meta = CHIP_SECTIONS[key];
+      if (!meta) {
+        return '<p class="map-modal__filter-empty">—</p>';
+      }
+      var name = meta[0];
+      return this._cloneCheckboxGroups(form, [name]);
+    }
+  }, {
+    key: "_cloneCheckboxGroups",
+    value: function _cloneCheckboxGroups(form, names) {
+      var _this2 = this;
+      var blocks = [];
+      names.forEach(function (name) {
+        var inputs = form.querySelectorAll("input[name=\"".concat(name, "\"]"));
+        if (!inputs.length) return;
+        var options = [];
+        inputs.forEach(function (input) {
+          if (input.closest('.d-none') && !input.checked) {
+            // still include checked hidden ones
+          }
+          var label = form.querySelector("label[for=\"".concat(input.id, "\"]"));
+          var text = label ? label.textContent.replace(/\s+/g, ' ').trim() : input.value;
+          options.push("\n          <label class=\"map-modal__filter-option\">\n            <input type=\"checkbox\" data-panel-filter-name=\"".concat(_this2._escape(name), "\" value=\"").concat(_this2._escape(input.value), "\" ").concat(input.checked ? 'checked' : '', ">\n            <span>").concat(_this2._escape(text), "</span>\n          </label>"));
+        });
+        if (options.length) {
+          blocks.push("<div class=\"map-modal__filter-group\">".concat(options.join(''), "</div>"));
+        }
+      });
+      if (!blocks.length) {
+        return '<p class="map-modal__filter-empty">—</p>';
+      }
+      return blocks.join('');
+    }
+  }, {
+    key: "_commitPanelToForm",
+    value: function _commitPanelToForm() {
+      var form = this.form;
+      if (!form || !this.panelBody) return;
+      if (this.activeChip === 'price') {
+        var minInput = this.panelBody.querySelector('[data-panel-price-min]');
+        var maxInput = this.panelBody.querySelector('[data-panel-price-max]');
+        var formMin = form.querySelector('#price_min_main, [name="price_min"]');
+        var formMax = form.querySelector('#price_max_main, [name="price_max"]');
+        if (formMin && minInput) formMin.value = minInput.value;
+        if (formMax && maxInput) formMax.value = maxInput.value;
+        return;
+      }
+      var panelInputs = this.panelBody.querySelectorAll('[data-panel-filter-name]');
+      var byName = {};
+      panelInputs.forEach(function (input) {
+        var name = input.getAttribute('data-panel-filter-name');
+        if (!byName[name]) byName[name] = [];
+        if (input.checked) byName[name].push(input.value);
+      });
+      Object.keys(byName).forEach(function (name) {
+        var selected = new Set(byName[name]);
+        form.querySelectorAll("input[name=\"".concat(name, "\"]")).forEach(function (input) {
+          var shouldCheck = selected.has(input.value);
+          if (name === 'num_persons') {
+            input.checked = shouldCheck;
+          } else {
+            input.checked = shouldCheck;
+          }
+        });
+      });
+    }
+  }, {
+    key: "_clearSectionInPanel",
+    value: function _clearSectionInPanel() {
+      if (!this.panelBody) return;
+      this.panelBody.querySelectorAll('input[type="checkbox"]').forEach(function (input) {
+        input.checked = false;
+      });
+      this.panelBody.querySelectorAll('[data-panel-price-min], [data-panel-price-max]').forEach(function (input) {
+        input.value = '';
+      });
+    }
+  }, {
+    key: "_triggerFormFilter",
+    value: function _triggerFormFilter() {
+      var form = this.form;
+      if (!form) return;
+      var firstCheckbox = form.querySelector('.filter-checkbox');
+      if (firstCheckbox) {
+        firstCheckbox.dispatchEvent(new Event('change', {
+          bubbles: true
+        }));
+        return;
+      }
+      form.dispatchEvent(new Event('change', {
+        bubbles: true
+      }));
+    }
+  }, {
+    key: "refreshChipStates",
+    value: function refreshChipStates() {
+      var form = this.form;
+      if (!form || !this.chipsRoot) return;
+      this.chipsRoot.querySelectorAll('[data-map-chip]').forEach(function (btn) {
+        var key = btn.getAttribute('data-map-chip');
+        var active = false;
+        if (key === 'price') {
+          var min = form.querySelector('#price_min_main, [name="price_min"]');
+          var max = form.querySelector('#price_max_main, [name="price_max"]');
+          active = !!(min && min.value) || !!(max && max.value);
+        } else if (key === 'filters') {
+          active = !!form.querySelector('input.filter-checkbox:checked, input[name="target_fish[]"]:checked, input[name="methods[]"]:checked, input[name="duration_types[]"]:checked, input[name="num_persons"]:checked');
+        } else if (CHIP_SECTIONS[key]) {
+          var name = CHIP_SECTIONS[key][0];
+          active = !!form.querySelector("input[name=\"".concat(name, "\"]:checked"));
+        }
+        btn.classList.toggle('is-active', active);
+      });
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  }]);
+}();
+
+
+/***/ },
+
+/***/ "./resources/js/maps/MapModalRail.js"
+/*!*******************************************!*\
+  !*** ./resources/js/maps/MapModalRail.js ***!
+  \*******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MapModalRail)
+/* harmony export */ });
+/* harmony import */ var _mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mapItemIdentity */ "./resources/js/maps/mapItemIdentity.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+var MOBILE_MQ = '(max-width: 991.98px)';
+var SHEET_SNAPS = {
+  peek: 0.2,
+  mid: 0.58,
+  full: 0.88
+};
+var SHEET_PEEK_MIN = 132;
+
+/**
+ * MapModalRail — viewport-synced listing rail + docked selection (not map overlay).
+ * On mobile the rail is a draggable bottom sheet over a full-screen map.
+ */
+var MapModalRail = /*#__PURE__*/function () {
+  /**
+   * @param {HTMLElement} modal
+   * @param {import('./ListingMap').default} listingMap
+   */
+  function MapModalRail(modal, listingMap) {
+    _classCallCheck(this, MapModalRail);
+    this.modal = modal;
+    this.listingMap = listingMap;
+    this.rail = modal.querySelector('[data-map-modal-rail]');
+    this.listEl = modal.querySelector('[data-map-rail-list]');
+    this.emptyEl = modal.querySelector('[data-map-rail-empty]');
+    this.selectionEl = modal.querySelector('[data-map-selection]');
+    this.countEls = modal.querySelectorAll('[data-map-viewport-count]');
+    this.toggleBtn = modal.querySelector('[data-map-rail-toggle]');
+    this.toggleLabel = modal.querySelector('[data-map-rail-toggle-label]');
+    this.handleEl = modal.querySelector('[data-map-rail-handle]');
+    this.headingEl = modal.querySelector('[data-map-rail-heading]');
+    this.fabBtn = modal.querySelector('[data-map-sheet-fab]');
+    this.fabLabel = modal.querySelector('[data-map-sheet-fab-label]');
+    this.i18n = this._parseI18n();
+    this._itemsById = new Map();
+    this._selectedId = null;
+    this._railOpen = false;
+    this._snap = 'mid';
+    this._snapBeforeSelection = 'mid';
+    this._drag = null;
+    this._mq = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(MOBILE_MQ) : null;
+    if (!this.rail || !this.listEl) {
+      return;
+    }
+    this._bind();
+  }
+  return _createClass(MapModalRail, [{
+    key: "_parseI18n",
+    value: function _parseI18n() {
+      try {
+        var raw = this.modal.getAttribute('data-maps-i18n');
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+  }, {
+    key: "_isMobile",
+    value: function _isMobile() {
+      return !!(this._mq && this._mq.matches);
+    }
+  }, {
+    key: "_bind",
+    value: function _bind() {
+      var _this = this;
+      this.listingMap.onViewportChange(function (payload) {
+        return _this.renderViewport(payload);
+      });
+      this.listingMap.onSelectionChange(function (item, opts) {
+        return _this.renderSelection(item, opts);
+      });
+      this.listingMap.onPreviewChange(function (item) {
+        return _this.setHoveredId(item ? (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item) : null);
+      });
+      this.listEl.addEventListener('click', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        // Allow "View details" (and any real link) to navigate to the product page
+        if (e.target.closest('a[href]')) {
+          return;
+        }
+        var id = card.getAttribute('data-map-rail-id');
+        // Explicit "Show on map" zooms to the pin
+        if (e.target.closest('[data-map-rail-zoom]')) {
+          e.preventDefault();
+          e.stopPropagation();
+          _this.listingMap.zoomToById(id);
+          return;
+        }
+        e.preventDefault();
+        _this.listingMap.selectById(id, {
+          pan: false,
+          allowZoom: false,
+          source: 'rail'
+        });
+      });
+      this.listEl.addEventListener('dblclick', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        if (e.target.closest('a[href]')) return;
+        e.preventDefault();
+        var id = card.getAttribute('data-map-rail-id');
+        _this.listingMap.zoomToById(id);
+      });
+      this.listEl.addEventListener('mouseover', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        var id = card.getAttribute('data-map-rail-id');
+        if (_this._hoverRailId === id) return;
+        _this._hoverRailId = id;
+        _this.listingMap.previewById(id, true);
+      });
+      this.listEl.addEventListener('mouseout', function (e) {
+        var card = e.target.closest('[data-map-rail-id]');
+        if (!card) return;
+        var related = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('[data-map-rail-id]') : null;
+        if (related === card) return;
+        var id = card.getAttribute('data-map-rail-id');
+        if (_this._hoverRailId === id) {
+          _this._hoverRailId = null;
+        }
+        _this.listingMap.previewById(id, false);
+      });
+      if (this.toggleBtn) {
+        this.toggleBtn.addEventListener('click', function () {
+          return _this.toggleRail();
+        });
+      }
+      if (this.fabBtn) {
+        this.fabBtn.addEventListener('click', function () {
+          return _this._toggleSheetFromFab();
+        });
+      }
+      if (this.selectionEl) {
+        this.selectionEl.addEventListener('click', function (e) {
+          if (e.target.closest('[data-map-selection-dismiss]')) {
+            e.preventDefault();
+            e.stopPropagation();
+            _this.listingMap.clearSelection();
+          }
+        });
+      }
+      this._bindSheetDrag();
+      if (this._mq) {
+        var onMq = function onMq() {
+          return _this._syncLayoutMode();
+        };
+        if (typeof this._mq.addEventListener === 'function') {
+          this._mq.addEventListener('change', onMq);
+        } else if (typeof this._mq.addListener === 'function') {
+          this._mq.addListener(onMq);
+        }
+      }
+      this.modal.addEventListener('shown.bs.modal', function () {
+        _this._syncLayoutMode(true);
+        _this.listingMap.emitViewportChange();
+      });
+      this.modal.addEventListener('hidden.bs.modal', function () {
+        _this._hideSelectionCard();
+        _this.setRailOpen(false);
+        _this.listingMap.clearSelection();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && _this.modal.classList.contains('show')) {
+          _this.listingMap.clearSelection();
+        }
+      });
+    }
+  }, {
+    key: "_syncLayoutMode",
+    value: function _syncLayoutMode(fromShow) {
+      if (this._isMobile()) {
+        this.setSnap(fromShow ? 'mid' : this._snap || 'mid', {
+          animate: false
+        });
+        return;
+      }
+      this.modal.classList.remove('map-modal--sheet-peek', 'map-modal--sheet-mid', 'map-modal--sheet-full', 'map-modal--has-selection', 'map-modal--sheet-dragging');
+      this.rail.style.height = '';
+      this.modal.style.removeProperty('--map-sheet-h');
+      this.modal.style.removeProperty('--map-header-h');
+      this._hideSelectionCard();
+      this.setRailOpen(true);
+      if (this.listingMap && this.listingMap.setOverlayPadding) {
+        this.listingMap.setOverlayPadding({
+          top: 0,
+          bottom: 0
+        });
+      }
+    }
+  }, {
+    key: "toggleRail",
+    value: function toggleRail() {
+      if (this._isMobile()) {
+        this.setSnap(this._snap === 'peek' ? 'mid' : 'peek');
+        return;
+      }
+      this.setRailOpen(!this._railOpen);
+    }
+  }, {
+    key: "_toggleSheetFromFab",
+    value: function _toggleSheetFromFab() {
+      if (!this._isMobile()) return;
+      if (this.modal.classList.contains('map-modal--has-selection')) {
+        this.listingMap.clearSelection();
+        this.setSnap('mid');
+        return;
+      }
+      this.setSnap(this._snap === 'peek' ? 'mid' : 'peek');
+    }
+  }, {
+    key: "setRailOpen",
+    value: function setRailOpen(open) {
+      var _this2 = this;
+      this._railOpen = !!open;
+      this.modal.classList.toggle('map-modal--rail-open', this._railOpen);
+      if (this.toggleBtn) {
+        this.toggleBtn.setAttribute('aria-expanded', this._railOpen ? 'true' : 'false');
+      }
+      if (this.toggleLabel) {
+        this.toggleLabel.textContent = this._railOpen ? this.i18n.hide_list || 'Hide list' : this.i18n.show_list || 'Show list';
+      }
+      if (this._isMobile()) {
+        this._syncFab();
+        return;
+      }
+      if (this.listingMap && this.listingMap.invalidate) {
+        setTimeout(function () {
+          _this2.listingMap.invalidate();
+          _this2.listingMap.emitViewportChange();
+        }, 220);
+      }
+    }
+  }, {
+    key: "setSnap",
+    value: function setSnap(snap) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var next = SHEET_SNAPS[snap] ? snap : 'mid';
+      this._snap = next;
+      this._railOpen = next !== 'peek';
+      this.modal.classList.toggle('map-modal--rail-open', this._railOpen);
+      var heights = this._snapHeights();
+      this._applySheetHeight(heights[next], {
+        animate: opts.animate !== false
+      });
+      this._syncSheetClasses();
+      this._syncFab();
+      this._syncOverlayPadding();
+      if (this.toggleBtn) {
+        this.toggleBtn.setAttribute('aria-expanded', this._railOpen ? 'true' : 'false');
+      }
+      if (this.toggleLabel) {
+        this.toggleLabel.textContent = this._railOpen ? this.i18n.hide_list || 'Hide list' : this.i18n.show_list || 'Show list';
+      }
+    }
+  }, {
+    key: "_bodyHeight",
+    value: function _bodyHeight() {
+      var body = this.modal.querySelector('.map-modal__body') || this.modal;
+      return body.getBoundingClientRect().height || window.innerHeight;
+    }
+  }, {
+    key: "_headerHeight",
+    value: function _headerHeight() {
+      var chrome = this.modal.querySelector('.map-modal__chrome');
+      return chrome ? Math.round(chrome.getBoundingClientRect().height) : 0;
+    }
+  }, {
+    key: "_snapHeights",
+    value: function _snapHeights() {
+      var bodyH = this._bodyHeight();
+      return {
+        peek: Math.max(SHEET_PEEK_MIN, Math.round(bodyH * SHEET_SNAPS.peek)),
+        mid: Math.round(bodyH * SHEET_SNAPS.mid),
+        full: Math.round(bodyH * SHEET_SNAPS.full)
+      };
+    }
+  }, {
+    key: "_applySheetHeight",
+    value: function _applySheetHeight(px) {
+      var _this3 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var height = Math.max(SHEET_PEEK_MIN, Math.round(px));
+      this.modal.style.setProperty('--map-sheet-h', "".concat(height, "px"));
+      this.rail.style.height = "".concat(height, "px");
+      if (opts.animate === false) {
+        this.rail.style.transition = 'none';
+        requestAnimationFrame(function () {
+          _this3.rail.style.transition = '';
+        });
+      }
+    }
+  }, {
+    key: "_syncSheetClasses",
+    value: function _syncSheetClasses() {
+      this.modal.classList.toggle('map-modal--sheet-peek', this._isMobile() && this._snap === 'peek');
+      this.modal.classList.toggle('map-modal--sheet-mid', this._isMobile() && this._snap === 'mid');
+      this.modal.classList.toggle('map-modal--sheet-full', this._isMobile() && this._snap === 'full');
+    }
+  }, {
+    key: "_syncFab",
+    value: function _syncFab() {
+      if (!this.fabBtn) return;
+      var showMap = this._snap !== 'peek';
+      this.fabBtn.classList.toggle('is-list', !showMap);
+      this.fabBtn.setAttribute('aria-expanded', showMap ? 'true' : 'false');
+      if (this.fabLabel) {
+        this.fabLabel.textContent = showMap ? this.i18n.show_map || 'Map' : this.i18n.show_list || 'Show list';
+      }
+    }
+  }, {
+    key: "_syncOverlayPadding",
+    value: function _syncOverlayPadding() {
+      if (!this.listingMap || !this.listingMap.setOverlayPadding) return;
+      var headerH = this._headerHeight();
+      this.modal.style.setProperty('--map-header-h', "".concat(headerH, "px"));
+      if (!this._isMobile()) {
+        this.listingMap.setOverlayPadding({
+          top: 0,
+          bottom: 0
+        });
+        return;
+      }
+      if (this.modal.classList.contains('map-modal--has-selection')) {
+        var cardH = this.selectionEl && !this.selectionEl.hidden ? this.selectionEl.getBoundingClientRect().height + 24 : 220;
+        this.listingMap.setOverlayPadding({
+          top: headerH,
+          bottom: cardH
+        });
+        return;
+      }
+      // Mobile listings sheet is removed — nothing docked at the bottom until a pin is selected.
+      this.listingMap.setOverlayPadding({
+        top: headerH,
+        bottom: 0
+      });
+    }
+  }, {
+    key: "_bindSheetDrag",
+    value: function _bindSheetDrag() {
+      var _this4 = this;
+      var startEls = [this.handleEl, this.headingEl].filter(Boolean);
+      if (!startEls.length) return;
+      var onPointerDown = function onPointerDown(e) {
+        if (!_this4._isMobile() || _this4.modal.classList.contains('map-modal--has-selection')) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        _this4._drag = {
+          startY: e.clientY,
+          startH: _this4.rail.getBoundingClientRect().height,
+          pointerId: e.pointerId,
+          lastY: e.clientY,
+          lastT: Date.now(),
+          velocity: 0
+        };
+        _this4.modal.classList.add('map-modal--sheet-dragging');
+        _this4.rail.style.transition = 'none';
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch (err) {
+          /* ignore */
+        }
+        e.preventDefault();
+      };
+      var onPointerMove = function onPointerMove(e) {
+        if (!_this4._drag) return;
+        var now = Date.now();
+        var dy = _this4._drag.startY - e.clientY;
+        var nextH = _this4._drag.startH + dy;
+        var heights = _this4._snapHeights();
+        var clamped = Math.max(heights.peek, Math.min(heights.full, nextH));
+        var dt = Math.max(1, now - _this4._drag.lastT);
+        _this4._drag.velocity = (_this4._drag.lastY - e.clientY) / dt;
+        _this4._drag.lastY = e.clientY;
+        _this4._drag.lastT = now;
+        _this4._applySheetHeight(clamped, {
+          animate: false
+        });
+      };
+      var onPointerUp = function onPointerUp() {
+        if (!_this4._drag) return;
+        _this4.modal.classList.remove('map-modal--sheet-dragging');
+        _this4.rail.style.transition = '';
+        var height = _this4.rail.getBoundingClientRect().height;
+        var velocity = _this4._drag.velocity;
+        _this4._drag = null;
+        _this4.setSnap(_this4._nearestSnap(height, velocity));
+      };
+      startEls.forEach(function (el) {
+        el.addEventListener('pointerdown', onPointerDown);
+        el.addEventListener('pointermove', onPointerMove);
+        el.addEventListener('pointerup', onPointerUp);
+        el.addEventListener('pointercancel', onPointerUp);
+      });
+    }
+  }, {
+    key: "_nearestSnap",
+    value: function _nearestSnap(height) {
+      var velocity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var heights = this._snapHeights();
+      if (Math.abs(velocity) > 0.45) {
+        if (velocity > 0) {
+          return height > heights.mid ? 'full' : 'mid';
+        }
+        return height < heights.mid ? 'peek' : 'mid';
+      }
+      var entries = Object.entries(heights);
+      var best = 'mid';
+      var bestDist = Infinity;
+      entries.forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+          name = _ref2[0],
+          value = _ref2[1];
+        var dist = Math.abs(value - height);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = name;
+        }
+      });
+      return best;
+    }
+  }, {
+    key: "setItems",
+    value: function setItems(items) {
+      var _this5 = this;
+      this._itemsById = new Map();
+      (items || []).forEach(function (item) {
+        var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+        if (key && item.variant !== 'gray') {
+          _this5._itemsById.set(key, item);
+        }
+      });
+    }
+  }, {
+    key: "renderViewport",
+    value: function renderViewport() {
+      var _this6 = this;
+      var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var items = Array.isArray(payload.items) ? payload.items : [];
+      var recommended = Array.isArray(payload.recommendedItems) ? payload.recommendedItems : [];
+      var count = payload.count != null ? payload.count : items.length;
+      var label = this._countLabel(count);
+      this.countEls.forEach(function (el) {
+        el.textContent = label;
+      });
+      if (!this.listEl) return;
+      if (!items.length && !recommended.length) {
+        this.listEl.innerHTML = '';
+        if (this.emptyEl) this.emptyEl.hidden = false;
+        return;
+      }
+      if (this.emptyEl) this.emptyEl.hidden = true;
+      var primaryHtml = items.map(function (item) {
+        return _this6._cardHtml(item);
+      }).join('');
+      var recommendedHtml = recommended.length ? "<div class=\"map-modal__rail-section\" data-map-rail-section=\"recommended\">\n          <span class=\"map-modal__rail-section-label\">".concat(this._escape(this.i18n.recommended_heading || 'You might also like'), "</span>\n        </div>").concat(recommended.map(function (item) {
+        return _this6._cardHtml(item, {
+          recommended: true
+        });
+      }).join('')) : '';
+      this.listEl.innerHTML = primaryHtml + recommendedHtml;
+      if (this._selectedId && !this._isMobile()) {
+        var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
+        if (selectedCard) {
+          selectedCard.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
+
+    /**
+     * @param {Object} item
+     * @param {{recommended?: boolean}} [opts] recommended: nearby item that didn't match
+     *   the current filters — rendered as a visibly quieter card, never the badge color.
+     */
+  }, {
+    key: "_cardHtml",
+    value: function _cardHtml(item) {
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var recommended = !!opts.recommended;
+      var key = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+      var id = this._escape(String(key || item.id));
+      var selected = key != null && String(key) === String(this._selectedId);
+      var title = this._escape(item.title || '');
+      var location = this._escape(item.location || '');
+      var image = this._escape(item.image || '');
+      var url = this._escape(item.url || '#');
+      var module = this._normalizeModule(item.module || item.pillar || 'tour');
+      var moduleLabel = recommended ? this._escape(this.i18n.recommended_badge || 'Suggested') : this._escape(item.moduleLabel || item.badge || '');
+      var moduleClass = recommended ? 'map-modal__rail-card-module--recommended' : "map-modal__rail-card-module--".concat(module);
+      var price = item.priceLabel || (item.price != null ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+      var duration = this._escape(item.durationLabel || '');
+      var guests = this._escape(item.guestsLabel || '');
+      var boat = this._escape(item.boatLabel || '');
+      var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+      var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+      var cta = this._escape(item.cta || this.i18n.view_details || 'Details');
+      var showOnMap = this._escape(this.i18n.show_on_map || 'Show on map');
+      var metaBits = [duration, guests, boat].filter(Boolean);
+      var metaHtml = metaBits.length ? "<ul class=\"map-modal__rail-card-meta\">".concat(metaBits.map(function (bit) {
+        return "<li>".concat(bit, "</li>");
+      }).join(''), "</ul>") : '';
+      var ratingHtml = rating ? "<span class=\"map-modal__rail-card-rating\">\n          <span class=\"map-modal__rail-card-rating-value\">".concat(rating, "</span>\n          ").concat(reviewCount != null ? "<span class=\"map-modal__rail-card-rating-count\">".concat(this._escape((this.i18n.reviews || '(:count)').replace(':count', String(reviewCount))), "</span>") : '', "\n        </span>") : '';
+      var cardClass = "map-modal__rail-card map-modal__rail-card--expanded".concat(selected ? ' is-selected' : '').concat(recommended ? ' map-modal__rail-card--recommended' : '');
+      return "\n      <article class=\"".concat(cardClass, "\" data-map-rail-id=\"").concat(id, "\" data-map-rail-select data-map-module=\"").concat(module, "\">\n        <div class=\"map-modal__rail-card-media").concat(image ? '' : ' is-empty', "\">\n          ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"128\" height=\"112\">") : '', "\n          <button type=\"button\" class=\"map-modal__rail-card-zoom\" data-map-rail-zoom aria-label=\"").concat(showOnMap, "\" title=\"").concat(showOnMap, "\">\n            <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n              <path fill-rule=\"evenodd\" d=\"M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z\" clip-rule=\"evenodd\"/>\n            </svg>\n          </button>\n        </div>\n        <div class=\"map-modal__rail-card-body\">\n          <div class=\"map-modal__rail-card-topline\">\n            ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module ".concat(moduleClass, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n            ").concat(ratingHtml, "\n          </div>\n          <h3 class=\"map-modal__rail-card-title\">").concat(title, "</h3>\n          ").concat(location ? "<p class=\"map-modal__rail-card-location\">".concat(location, "</p>") : '', "\n          ").concat(metaHtml, "\n          <div class=\"map-modal__rail-card-footer\">\n            ").concat(price ? "<span class=\"map-modal__rail-card-price\">".concat(this._escape(price), "</span>") : '<span></span>', "\n            <div class=\"map-modal__rail-card-actions\">\n              <button type=\"button\" class=\"map-modal__rail-card-zoom-text\" data-map-rail-zoom title=\"").concat(showOnMap, "\">").concat(showOnMap, "</button>\n              <a class=\"map-modal__rail-card-link\" href=\"").concat(url, "\">").concat(cta, "</a>\n            </div>\n          </div>\n        </div>\n      </article>");
+    }
+  }, {
+    key: "_countLabel",
+    value: function _countLabel(count) {
+      if (count === 0) {
+        return this.i18n.in_map_area_zero || 'No listings in map area';
+      }
+      if (count === 1) {
+        return (this.i18n.in_map_area_one || ':count listing in map area').replace(':count', String(count));
+      }
+      return (this.i18n.in_map_area || ':count listings in map area').replace(':count', String(count));
+    }
+  }, {
+    key: "renderSelection",
+    value: function renderSelection(item) {
+      var _this7 = this;
+      var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      if (!item) {
+        var hadSelectionCard = this.modal.classList.contains('map-modal--has-selection');
+        this._selectedId = null;
+        this._hideSelectionCard();
+        this.listEl.querySelectorAll('.map-modal__rail-card.is-selected').forEach(function (el) {
+          el.classList.remove('is-selected');
+        });
+        if (this._isMobile() && hadSelectionCard) {
+          this.setSnap(this._snapBeforeSelection || 'peek');
+        } else if (this._isMobile()) {
+          this._syncOverlayPadding();
+        }
+        return;
+      }
+      this._selectedId = (0,_mapItemIdentity__WEBPACK_IMPORTED_MODULE_0__.itemKey)(item);
+      this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
+        el.classList.toggle('is-selected', el.getAttribute('data-map-rail-id') === _this7._selectedId);
+      });
+      var selectedCard = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(this._selectedId), "\"]"));
+      if (selectedCard && !this._isMobile()) {
+        selectedCard.scrollIntoView({
+          block: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+      var fromMap = opts.source === 'map' || opts.source === 'rail-zoom';
+      if (this._isMobile() && fromMap) {
+        this._snapBeforeSelection = this._snap;
+        this._showSelectionCard(item);
+        return;
+      }
+      if (this._isMobile() && this.selectionEl && !this.selectionEl.hidden) {
+        this._showSelectionCard(item);
+      }
+    }
+  }, {
+    key: "_showSelectionCard",
+    value: function _showSelectionCard(item) {
+      var _this8 = this;
+      if (!this.selectionEl) return;
+      this.selectionEl.innerHTML = this._selectionHtml(item);
+      this.selectionEl.hidden = false;
+      this.modal.classList.add('map-modal--has-selection');
+      this._syncOverlayPadding();
+      requestAnimationFrame(function () {
+        return _this8._syncOverlayPadding();
+      });
+    }
+  }, {
+    key: "_hideSelectionCard",
+    value: function _hideSelectionCard() {
+      if (this.selectionEl) {
+        this.selectionEl.hidden = true;
+        this.selectionEl.innerHTML = '';
+      }
+      this.modal.classList.remove('map-modal--has-selection');
+    }
+  }, {
+    key: "_selectionHtml",
+    value: function _selectionHtml(item) {
+      var title = this._escape(item.title || '');
+      var location = this._escape(item.location || '');
+      var image = this._escape(item.image || '');
+      var url = this._escape(item.url || '#');
+      var module = this._normalizeModule(item.module || item.pillar || 'tour');
+      var moduleLabel = this._escape(item.moduleLabel || item.badge || '');
+      var price = item.priceLabel || (item.price != null ? (this.i18n.price_from || 'From :price').replace(':price', String(item.price)) : '');
+      var duration = this._escape(item.durationLabel || '');
+      var guests = this._escape(item.guestsLabel || '');
+      var boat = this._escape(item.boatLabel || '');
+      var rating = item.rating != null && Number(item.rating) > 0 ? Number(item.rating).toFixed(1) : '';
+      var reviewCount = item.reviewCount != null ? Number(item.reviewCount) : null;
+      var cta = this._escape(item.cta || this.i18n.view_details || 'Details');
+      var closeLabel = this._escape(this.i18n.close_map || 'Close');
+      var metaBits = [duration, guests, boat].filter(Boolean);
+      var metaHtml = metaBits.length ? "<ul class=\"map-modal__selection-meta\">".concat(metaBits.map(function (bit) {
+        return "<li>".concat(bit, "</li>");
+      }).join(''), "</ul>") : '';
+      var ratingBadgeHtml = rating ? "<div class=\"map-modal__selection-rating-badge\">\n          <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\">\n            <path d=\"M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z\"/>\n          </svg>\n          <span>".concat(rating, "</span>\n          ").concat(reviewCount != null ? "<span class=\"map-modal__selection-rating-badge-count\">(".concat(this._escape(String(reviewCount)), ")</span>") : '', "\n        </div>") : '';
+      return "\n      <article class=\"map-modal__selection-card\" data-map-module=\"".concat(module, "\">\n        <button type=\"button\" class=\"map-modal__selection-dismiss\" data-map-selection-dismiss aria-label=\"").concat(closeLabel, "\">&times;</button>\n        <a class=\"map-modal__selection-link\" href=\"").concat(url, "\">\n          <div class=\"map-modal__selection-media").concat(image ? '' : ' is-empty', "\">\n            ").concat(image ? "<img src=\"".concat(image, "\" alt=\"\" loading=\"lazy\" decoding=\"async\">") : '', "\n            ").concat(ratingBadgeHtml, "\n          </div>\n          <div class=\"map-modal__selection-body\">\n            <div class=\"map-modal__selection-topline\">\n              ").concat(moduleLabel ? "<span class=\"map-modal__rail-card-module map-modal__rail-card-module--".concat(module, "\">").concat(moduleLabel, "</span>") : '<span></span>', "\n            </div>\n            <h3 class=\"map-modal__selection-title\">").concat(title, "</h3>\n            ").concat(location ? "<p class=\"map-modal__selection-location\">".concat(location, "</p>") : '', "\n            ").concat(metaHtml, "\n            <div class=\"map-modal__selection-footer\">\n              ").concat(price ? "<span class=\"map-modal__selection-price\">".concat(this._escape(price), "</span>") : '<span></span>', "\n              <span class=\"map-modal__selection-cta\">").concat(cta, "</span>\n            </div>\n          </div>\n        </a>\n      </article>");
+    }
+  }, {
+    key: "setHoveredId",
+    value: function setHoveredId(id) {
+      var hoverId = id != null ? String(id) : null;
+      this.listEl.querySelectorAll('.map-modal__rail-card').forEach(function (el) {
+        var match = hoverId && el.getAttribute('data-map-rail-id') === hoverId;
+        el.classList.toggle('is-hovered', !!match);
+      });
+      if (hoverId && hoverId !== String(this._selectedId || '') && !this._isMobile()) {
+        var card = this.listEl.querySelector("[data-map-rail-id=\"".concat(this._escapeAttrSelector(hoverId), "\"]"));
+        if (card) {
+          card.scrollIntoView({
+            block: 'nearest',
+            behavior: 'smooth'
+          });
+        }
+      }
+    }
+  }, {
+    key: "_normalizeModule",
+    value: function _normalizeModule(value) {
+      var v = String(value || '').toLowerCase();
+      if (v === 'trip' || v === 'trips') return 'trip';
+      if (v === 'camp' || v === 'camps' || v === 'vacation') return 'camp';
+      return 'tour';
+    }
+  }, {
+    key: "_escapeAttrSelector",
+    value: function _escapeAttrSelector(id) {
+      if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+        return CSS.escape(String(id));
+      }
+      return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+  }, {
+    key: "_escape",
+    value: function _escape(value) {
+      return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+  }]);
+}();
+
+
+/***/ },
+
 /***/ "./resources/js/maps/MapsManager.js"
 /*!******************************************!*\
   !*** ./resources/js/maps/MapsManager.js ***!
@@ -638,15 +3101,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   L: () => (/* reexport default from dynamic */ leaflet__WEBPACK_IMPORTED_MODULE_0___default.a),
 /* harmony export */   MapsManager: () => (/* binding */ MapsManager),
+/* harmony export */   clusterCellKey: () => (/* reexport safe */ _clusterGrid__WEBPACK_IMPORTED_MODULE_2__.clusterCellKey),
+/* harmony export */   clusterCellSizeDegrees: () => (/* reexport safe */ _clusterGrid__WEBPACK_IMPORTED_MODULE_2__.clusterCellSizeDegrees),
+/* harmony export */   clusterRadiusForZoom: () => (/* binding */ clusterRadiusForZoom),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! leaflet */ "./node_modules/leaflet/dist/leaflet-src.js");
 /* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var leaflet_markercluster__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! leaflet.markercluster */ "./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js");
-/* harmony import */ var leaflet_markercluster__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(leaflet_markercluster__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var leaflet_dist_images_marker_icon_2x_png__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! leaflet/dist/images/marker-icon-2x.png */ "./node_modules/leaflet/dist/images/marker-icon-2x.png");
-/* harmony import */ var leaflet_dist_images_marker_icon_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! leaflet/dist/images/marker-icon.png */ "./node_modules/leaflet/dist/images/marker-icon.png");
-/* harmony import */ var leaflet_dist_images_marker_shadow_png__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! leaflet/dist/images/marker-shadow.png */ "./node_modules/leaflet/dist/images/marker-shadow.png");
+/* harmony import */ var _GridMarkerCluster__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GridMarkerCluster */ "./resources/js/maps/GridMarkerCluster.js");
+/* harmony import */ var _clusterGrid__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./clusterGrid */ "./resources/js/maps/clusterGrid.js");
+/* harmony import */ var leaflet_dist_images_marker_icon_2x_png__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! leaflet/dist/images/marker-icon-2x.png */ "./node_modules/leaflet/dist/images/marker-icon-2x.png");
+/* harmony import */ var leaflet_dist_images_marker_icon_png__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! leaflet/dist/images/marker-icon.png */ "./node_modules/leaflet/dist/images/marker-icon.png");
+/* harmony import */ var leaflet_dist_images_marker_shadow_png__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! leaflet/dist/images/marker-shadow.png */ "./node_modules/leaflet/dist/images/marker-shadow.png");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -662,25 +3128,37 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 
+
 // Fix default marker icon paths broken by webpack
 
 
 
 delete (leaflet__WEBPACK_IMPORTED_MODULE_0___default().Icon).Default.prototype._getIconUrl;
 leaflet__WEBPACK_IMPORTED_MODULE_0___default().Icon.Default.mergeOptions({
-  iconRetinaUrl: leaflet_dist_images_marker_icon_2x_png__WEBPACK_IMPORTED_MODULE_2__["default"],
-  iconUrl: leaflet_dist_images_marker_icon_png__WEBPACK_IMPORTED_MODULE_3__["default"],
-  shadowUrl: leaflet_dist_images_marker_shadow_png__WEBPACK_IMPORTED_MODULE_4__["default"]
+  iconRetinaUrl: leaflet_dist_images_marker_icon_2x_png__WEBPACK_IMPORTED_MODULE_3__["default"],
+  iconUrl: leaflet_dist_images_marker_icon_png__WEBPACK_IMPORTED_MODULE_4__["default"],
+  shadowUrl: leaflet_dist_images_marker_shadow_png__WEBPACK_IMPORTED_MODULE_5__["default"]
+});
+leaflet__WEBPACK_IMPORTED_MODULE_0___default().Control.Attribution.mergeOptions({
+  prefix: false
 });
 var DEFAULT_CONFIG = {
-  tileUrl: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   defaultCenter: {
     lat: 51.165691,
     lng: 10.451526
   },
   defaultZoom: 5
 };
+
+/**
+ * @deprecated Use clusterCellSizeDegrees — listing maps cluster by lat/lng cells.
+ */
+function clusterRadiusForZoom(zoom) {
+  return (0,_clusterGrid__WEBPACK_IMPORTED_MODULE_2__.clusterCellSizeDegrees)(zoom);
+}
+
 var MapsManager = /*#__PURE__*/function () {
   function MapsManager() {
     _classCallCheck(this, MapsManager);
@@ -709,10 +3187,9 @@ var MapsManager = /*#__PURE__*/function () {
   }, {
     key: "createTileLayer",
     value: function createTileLayer() {
-      return leaflet__WEBPACK_IMPORTED_MODULE_0___default().tileLayer(this.config.tileUrl, {
-        attribution: this.config.attribution,
-        maxZoom: 19,
-        subdomains: 'abcd'
+      return leaflet__WEBPACK_IMPORTED_MODULE_0___default().tileLayer(this.config.tileUrl || DEFAULT_CONFIG.tileUrl, {
+        attribution: this.config.attribution || DEFAULT_CONFIG.attribution,
+        maxZoom: 19
       });
     }
 
@@ -790,24 +3267,109 @@ var MapsManager = /*#__PURE__*/function () {
   }, {
     key: "createMarkerClusterer",
     value: function createMarkerClusterer(_ref) {
+      var _this2 = this;
       var map = _ref.map,
-        markers = _ref.markers;
-      var cluster = leaflet__WEBPACK_IMPORTED_MODULE_0___default().markerClusterGroup({
-        showCoverageOnHover: false,
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true
+        markers = _ref.markers,
+        _ref$muted = _ref.muted,
+        muted = _ref$muted === void 0 ? false : _ref$muted;
+      var cluster = new _GridMarkerCluster__WEBPACK_IMPORTED_MODULE_1__["default"]({
+        muted: muted,
+        iconCreateFunction: function iconCreateFunction(members) {
+          return _this2._createClusterIconFromMarkers(members, muted);
+        }
       });
       if (Array.isArray(markers) && markers.length) {
-        markers.forEach(function (m) {
-          return cluster.addLayer(m);
-        });
+        cluster.addLayers(markers);
       }
-      cluster.on('clusterclick', function (e) {
-        var currentZoom = map.getZoom();
-        map.setView(e.latlng, Math.min(currentZoom + 2, map.getMaxZoom()));
-      });
       map.addLayer(cluster);
       return cluster;
+    }
+
+    /**
+     * Canonical map colour key for a module: gray -> other | tour -> tours | camp -> camps | trip -> holidays
+     * @param {string} module
+     */
+  }, {
+    key: "_clusterSpecKey",
+    value: function _clusterSpecKey(module) {
+      return {
+        tour: 'tours',
+        camp: 'camps',
+        trip: 'holidays',
+        gray: 'other'
+      }[module] || 'tours';
+    }
+
+    /**
+     * Fixed-size cluster circle. When a cluster mixes offer types, up to 2 further
+     * types render as equally-sized plain circles behind the dominant (front) one —
+     * tie-break order tours > camps > holidays, offsets per the cluster spec.
+     */
+  }, {
+    key: "_createClusterIconFromMarkers",
+    value: function _createClusterIconFromMarkers(markers) {
+      var _this3 = this;
+      var muted = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var members = Array.isArray(markers) ? markers : [];
+      var count = members.length;
+      if (muted) {
+        return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
+          html: "<span class=\"cag-map-cluster__core\"><span class=\"cag-map-cluster__count\">".concat(count, "</span></span>"),
+          className: 'leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--muted',
+          iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(26, 26),
+          iconAnchor: [13, 13]
+        });
+      }
+      var PRIORITY = {
+        tour: 0,
+        camp: 1,
+        trip: 2
+      };
+      var typeCounts = {
+        tour: 0,
+        camp: 0,
+        trip: 0
+      };
+      members.forEach(function (m) {
+        var key = m.options && m.options.cagVariant || 'tour';
+        if (key === 'tour' || key === 'camp' || key === 'trip') {
+          typeCounts[key] += 1;
+        } else if (key !== 'gray') {
+          typeCounts.tour += 1;
+        }
+      });
+      var present = Object.keys(typeCounts).filter(function (key) {
+        return typeCounts[key] > 0;
+      }).sort(function (a, b) {
+        return typeCounts[b] - typeCounts[a] || PRIORITY[a] - PRIORITY[b];
+      });
+      var dominant = present[0] || 'tour';
+      var edges = present.slice(1, 3);
+      var edgesHtml = edges.map(function (type, i) {
+        return "<span class=\"cag-map-cluster__edge cag-map-cluster__edge--".concat(i + 1, "\" style=\"background:var(--map-").concat(_this3._clusterSpecKey(type), ")\" aria-hidden=\"true\"></span>");
+      }).join('');
+
+      // Bounding box grows to the right/up as stacked edges are added; the front
+      // circle always stays anchored at the cluster's true geographic point.
+      var minTop = 0;
+      var maxRight = 32;
+      if (edges.length >= 1) {
+        minTop = Math.min(minTop, -4);
+        maxRight = Math.max(maxRight, 9 + 32);
+      }
+      if (edges.length >= 2) {
+        minTop = Math.min(minTop, -9);
+        maxRight = Math.max(maxRight, 18 + 32);
+      }
+      var width = maxRight;
+      var height = 32 - minTop;
+      var anchor = [16, 16 - minTop];
+      return leaflet__WEBPACK_IMPORTED_MODULE_0___default().divIcon({
+        html: "\n        ".concat(edgesHtml, "\n        <span class=\"cag-map-cluster__core\" style=\"background:var(--map-").concat(this._clusterSpecKey(dominant), ")\">\n          <span class=\"cag-map-cluster__count\">").concat(count, "</span>\n        </span>"),
+        className: "leaflet-div-icon marker-cluster-small cag-map-cluster cag-map-cluster--".concat(dominant),
+        iconSize: leaflet__WEBPACK_IMPORTED_MODULE_0___default().point(width, height),
+        iconAnchor: anchor
+      });
     }
   }]);
 }();
@@ -840,7 +3402,7 @@ function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), 
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 /**
- * MarkerFactory — primary / gray / trip / camp Leaflet divIcon pins + popup binding
+ * MarkerFactory — primary / gray / trip / camp / tour / price-chip Leaflet divIcons
  */
 
 var MarkerFactory = /*#__PURE__*/function () {
@@ -848,17 +3410,130 @@ var MarkerFactory = /*#__PURE__*/function () {
     _classCallCheck(this, MarkerFactory);
   }
   return _createClass(MarkerFactory, [{
+    key: "resolveColorVariant",
+    value:
+    /**
+     * Canonical map color key: gray | tour | trip | camp
+     * @param {string} [value]
+     * @param {string} [module]
+     * @returns {'gray'|'tour'|'trip'|'camp'}
+     */
+    function resolveColorVariant(value, module) {
+      var variant = String(value || '').toLowerCase().trim();
+      if (variant === 'gray') {
+        return 'gray';
+      }
+      var raw = String(module || value || '').toLowerCase().trim();
+      if (raw === 'gray') return 'gray';
+      if (raw === 'trip' || raw === 'trips') return 'trip';
+      if (raw === 'camp' || raw === 'camps' || raw === 'vacation') return 'camp';
+      // guiding / tour / primary / empty → tour (ink slate identity)
+      return 'tour';
+    }
+  }, {
+    key: "formatPriceChip",
+    value: function formatPriceChip(price) {
+      var locale = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'de';
+      if (price == null || price === '') {
+        return null;
+      }
+      var num = Number(price);
+      if (!Number.isFinite(num) || num <= 0) {
+        return null;
+      }
+      try {
+        return new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'de-DE', {
+          style: 'currency',
+          currency: 'EUR',
+          maximumFractionDigits: 0
+        }).format(num);
+      } catch (e) {
+        return "\u20AC".concat(Math.round(num));
+      }
+    }
+  }, {
     key: "createIcon",
     value: function createIcon() {
-      var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'primary';
-      var normalized = ['gray', 'trip', 'camp'].includes(variant) ? variant : 'primary';
-      var isGray = normalized === 'gray';
+      var variant = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'tour';
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var normalized = this.resolveColorVariant(variant, options.module);
+      var isOther = normalized === 'gray';
+      var priceLabel = options.priceLabel || null;
+      var selected = !!options.selected;
+      var viewed = !!options.viewed;
+      var pillMode = !!options.pillMode;
+      if (priceLabel) {
+        return this._createPillIcon(normalized, priceLabel, {
+          selected: selected,
+          viewed: viewed,
+          isOther: isOther
+        });
+      }
+
+      // Listing/search maps: shape carries meaning (pill = priced offer, circle =
+      // cluster) so an unpriced item still renders as a small dot, never a plain pin.
+      if (pillMode) {
+        return this._createDotIcon(normalized, {
+          selected: selected,
+          isOther: isOther
+        });
+      }
       return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
-        className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized),
+        className: "leaflet-div-icon cag-map-pin cag-map-pin--".concat(normalized).concat(selected ? ' cag-map-pin--selected' : ''),
         html: "<div class=\"cag-map-pin__inner\"><span class=\"cag-map-pin__glyph\" aria-hidden=\"true\"></span></div>",
-        iconSize: isGray ? [32, 44] : [28, 40],
-        iconAnchor: isGray ? [16, 40] : [14, 36],
+        iconSize: isOther ? [32, 44] : [28, 40],
+        iconAnchor: isOther ? [16, 40] : [14, 36],
         popupAnchor: [0, -34]
+      });
+    }
+
+    /**
+     * Price pill divIcon. Geometry/hit-area matches the map marker spec: a small
+     * visual pill (22px / 19px for "other") centred inside a >=44x44 tap target.
+     */
+  }, {
+    key: "_createPillIcon",
+    value: function _createPillIcon(variant, priceLabel) {
+      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        _ref$selected = _ref.selected,
+        selected = _ref$selected === void 0 ? false : _ref$selected,
+        _ref$viewed = _ref.viewed,
+        viewed = _ref$viewed === void 0 ? false : _ref$viewed,
+        _ref$isOther = _ref.isOther,
+        isOther = _ref$isOther === void 0 ? false : _ref$isOther;
+      var safe = String(priceLabel).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      var classes = ['leaflet-div-icon', 'cag-map-chip', "cag-map-chip--".concat(variant), isOther ? 'cag-map-chip--other' : '', selected ? 'cag-map-chip--selected' : '', viewed ? 'cag-map-chip--viewed' : ''].filter(Boolean).join(' ');
+      var visualHeight = isOther ? 20 : 24;
+      var visualWidth = Math.min(136, Math.max(isOther ? 36 : 44, String(priceLabel).length * (isOther ? 7 : 8) + (isOther ? 22 : 28)));
+      var hitWidth = Math.max(visualWidth, 44);
+      var hitHeight = 44;
+      return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+        className: classes,
+        html: "<div class=\"cag-map-chip__inner\"><span class=\"cag-map-chip__price\">".concat(safe, "</span></div>"),
+        iconSize: [hitWidth, hitHeight],
+        iconAnchor: [Math.round(hitWidth / 2), Math.round(hitHeight / 2)],
+        popupAnchor: [0, -(Math.round(visualHeight / 2) + 10)]
+      });
+    }
+
+    /**
+     * No-price fallback divIcon — a small colour dot, centred inside a 44x44 tap target.
+     */
+  }, {
+    key: "_createDotIcon",
+    value: function _createDotIcon(variant) {
+      var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref2$selected = _ref2.selected,
+        selected = _ref2$selected === void 0 ? false : _ref2$selected,
+        _ref2$isOther = _ref2.isOther,
+        isOther = _ref2$isOther === void 0 ? false : _ref2$isOther;
+      var classes = ['leaflet-div-icon', 'cag-map-dot', "cag-map-dot--".concat(variant), isOther ? 'cag-map-dot--other' : '', selected ? 'cag-map-dot--selected' : ''].filter(Boolean).join(' ');
+      return _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.divIcon({
+        className: classes,
+        html: "<span class=\"cag-map-dot__inner\" aria-hidden=\"true\"></span>",
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -14]
       });
     }
 
@@ -867,10 +3542,15 @@ var MarkerFactory = /*#__PURE__*/function () {
      * @param {L.Map} options.map
      * @param {{lat:number,lng:number}|L.LatLng} options.position
      * @param {string} [options.variant]
+     * @param {string} [options.module]
      * @param {string} [options.title]
      * @param {string} [options.popupHtml]
      * @param {Object} [options.popupOptions]
      * @param {number} [options.zIndexOffset]
+     * @param {string|null} [options.priceLabel]
+     * @param {boolean} [options.priceChip]
+     * @param {boolean} [options.pillMode] Listing/search map: always pill or dot, never a plain pin.
+     * @param {boolean} [options.selected]
      * @returns {L.Marker}
      */
   }, {
@@ -880,13 +3560,27 @@ var MarkerFactory = /*#__PURE__*/function () {
       var pos = options.position;
       var lat = typeof pos.lat === 'function' ? pos.lat() : pos.lat;
       var lng = typeof pos.lng === 'function' ? pos.lng() : pos.lng;
-      var variant = options.variant || 'primary';
+      var colorVariant = this.resolveColorVariant(options.variant, options.module);
+      var isOther = colorVariant === 'gray';
+      var pillMode = !!options.pillMode;
+      var priceLabel = options.priceChip && options.priceLabel ? options.priceLabel : options.priceChip && options.price != null ? this.formatPriceChip(options.price, _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"].config.locale || 'de') : null;
       var marker = _MapsManager__WEBPACK_IMPORTED_MODULE_0__.L.marker([lat, lng], {
-        icon: this.createIcon(variant),
+        icon: this.createIcon(colorVariant, {
+          priceLabel: priceLabel,
+          selected: options.selected,
+          module: options.module,
+          pillMode: pillMode
+        }),
         title: options.title || '',
-        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : variant === 'gray' ? 100 : 0,
+        // z-order (bottom -> top): "other" offers, then priced type markers.
+        zIndexOffset: options.zIndexOffset != null ? options.zIndexOffset : isOther ? 0 : 100,
         riseOnHover: true
       });
+      marker._cagPriceLabel = priceLabel;
+      marker._cagPriceChip = !!priceLabel;
+      marker._cagPillMode = pillMode;
+      marker.options.cagVariant = colorVariant;
+      marker.options.cagModule = options.module || colorVariant;
       if (options.map) {
         marker.addTo(options.map);
       }
@@ -897,6 +3591,30 @@ var MarkerFactory = /*#__PURE__*/function () {
         }, options.popupOptions || {}));
       }
       return marker;
+    }
+  }, {
+    key: "setSelected",
+    value: function setSelected(marker, selected) {
+      if (!marker) return;
+      var variant = marker.options && marker.options.cagVariant || 'tour';
+      var priceLabel = marker._cagPriceLabel || null;
+      marker.setIcon(this.createIcon(variant, {
+        priceLabel: marker._cagPriceChip ? priceLabel : null,
+        selected: !!selected,
+        module: marker.options && marker.options.cagModule,
+        pillMode: !!marker._cagPillMode
+      }));
+      var el = marker.getElement && marker.getElement();
+      if (el) {
+        if (marker._cagPriceChip) {
+          el.classList.toggle('cag-map-chip--selected', !!selected);
+        } else if (marker._cagPillMode) {
+          el.classList.toggle('cag-map-dot--selected', !!selected);
+        } else {
+          el.classList.toggle('cag-map-pin--selected', !!selected);
+          el.classList.toggle('cag-map-pin--active', !!selected);
+        }
+      }
     }
   }, {
     key: "getRandomOffset",
@@ -1443,6 +4161,118 @@ var ProductMap = /*#__PURE__*/function () {
 
 /***/ },
 
+/***/ "./resources/js/maps/clusterGrid.js"
+/*!******************************************!*\
+  !*** ./resources/js/maps/clusterGrid.js ***!
+  \******************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   clusterCellKey: () => (/* binding */ clusterCellKey),
+/* harmony export */   clusterCellSizeDegrees: () => (/* binding */ clusterCellSizeDegrees),
+/* harmony export */   wrapLng: () => (/* binding */ wrapLng)
+/* harmony export */ });
+/**
+ * Geographic cluster grid (degrees). Shared by GridMarkerCluster and PHP tests.
+ *
+ * Cell size is 360 / 2^(zoom+2): ~5.6° at z4, ~0.7° at z7. Zoom is floored at
+ * MIN_CLUSTER_ZOOM so cells never grow coarser than that at low zoom — an
+ * uncapped 22.5°/90° cell at world zoom merges half of Europe into one
+ * cluster whose averaged marker position lands nowhere near any real pin
+ * (e.g. in the open Atlantic), making whole countries look listing-free.
+ * Pins are bucketed by lat/lng, never by map pixels — pixel grids collapse
+ * longitude at world zoom and draw a vertical line down the Prime Meridian.
+ */
+var MIN_CLUSTER_ZOOM = 4;
+function clusterCellSizeDegrees(zoom) {
+  var z = Math.max(0, Math.round(Number(zoom)) || 0);
+  var effectiveZ = Math.max(z, MIN_CLUSTER_ZOOM);
+  return 360 / Math.pow(2, effectiveZ + 2);
+}
+function wrapLng(lng) {
+  var wrapped = Number(lng);
+  if (!Number.isFinite(wrapped)) {
+    return 0;
+  }
+  while (wrapped < -180) {
+    wrapped += 360;
+  }
+  while (wrapped > 180) {
+    wrapped -= 360;
+  }
+  return wrapped;
+}
+function clusterCellKey(lat, lng, zoom) {
+  var span = clusterCellSizeDegrees(zoom);
+  var safeLat = Math.max(-90, Math.min(90, Number(lat) || 0));
+  var safeLng = wrapLng(lng);
+  var x = Math.floor((safeLng + 180) / span);
+  var y = Math.floor((safeLat + 90) / span);
+  return "".concat(x, ":").concat(y);
+}
+
+/***/ },
+
+/***/ "./resources/js/maps/mapItemIdentity.js"
+/*!**********************************************!*\
+  !*** ./resources/js/maps/mapItemIdentity.js ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   itemKey: () => (/* binding */ itemKey),
+/* harmony export */   itemsMatch: () => (/* binding */ itemsMatch),
+/* harmony export */   normalizeModule: () => (/* binding */ normalizeModule)
+/* harmony export */ });
+/**
+ * Stable identity for mixed offer map markers.
+ * Tours, trips, and camps share numeric IDs, so viewport counts and rail
+ * selection must key on module + id (e.g. trip:2 vs camp:2).
+ */
+
+function normalizeModule(value) {
+  var v = String(value || '').toLowerCase().trim();
+  if (v === 'trip' || v === 'trips') return 'trip';
+  if (v === 'camp' || v === 'camps' || v === 'vacation') return 'camp';
+  if (v === 'guiding' || v === 'tour' || v === 'primary') return 'tour';
+  return 'tour';
+}
+
+/**
+ * @param {{ id?: number|string, key?: string, module?: string, pillar?: string }|null|undefined} item
+ * @returns {string|null}
+ */
+function itemKey(item) {
+  if (!item || item.id == null) return null;
+  if (item.key != null && String(item.key) !== '') {
+    return String(item.key);
+  }
+  return "".concat(normalizeModule(item.module || item.pillar), ":").concat(item.id);
+}
+
+/**
+ * Match a marker item against a composite key (module:id) or legacy bare id.
+ * @param {{ id?: number|string, key?: string, module?: string, pillar?: string }|null|undefined} item
+ * @param {string|number|null|undefined} idOrKey
+ */
+function itemsMatch(item, idOrKey) {
+  if (!item || item.id == null || idOrKey == null) return false;
+  var needle = String(idOrKey);
+  var key = itemKey(item);
+  if (key === needle) return true;
+  // Legacy callers may pass a bare numeric id (tour-only maps).
+  if (!needle.includes(':')) {
+    return String(item.id) === needle;
+  }
+  return false;
+}
+
+/***/ },
+
 /***/ "./node_modules/leaflet/dist/images/marker-icon-2x.png"
 /*!*************************************************************!*\
   !*** ./node_modules/leaflet/dist/images/marker-icon-2x.png ***!
@@ -1485,2733 +4315,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ("/images/vendor/leaflet/dist/marker-shadow.png?264f5c640339f042dd729062cfc04c17f8ea0f29882b538e3848ed8f10edb4da");
-
-/***/ },
-
-/***/ "./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js"
-/*!******************************************************************************!*\
-  !*** ./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js ***!
-  \******************************************************************************/
-(__unused_webpack_module, exports) {
-
-/*
- * Leaflet.markercluster 1.5.3+master.e5124b2,
- * Provides Beautiful Animated Marker Clustering functionality for Leaflet, a JS library for interactive maps.
- * https://github.com/Leaflet/Leaflet.markercluster
- * (c) 2012-2017, Dave Leaver, smartrak
- */
-(function (global, factory) {
-	 true ? factory(exports) :
-	0;
-}(this, function (exports) { 'use strict';
-
-	/*
-	 * L.MarkerClusterGroup extends L.FeatureGroup by clustering the markers contained within
-	 */
-
-	var MarkerClusterGroup = L.MarkerClusterGroup = L.FeatureGroup.extend({
-
-		options: {
-			maxClusterRadius: 80, //A cluster will cover at most this many pixels from its center
-			iconCreateFunction: null,
-			clusterPane: L.Marker.prototype.options.pane,
-
-			spiderfyOnEveryZoom: false,
-			spiderfyOnMaxZoom: true,
-			showCoverageOnHover: true,
-			zoomToBoundsOnClick: true,
-			singleMarkerMode: false,
-
-			disableClusteringAtZoom: null,
-
-			// Setting this to false prevents the removal of any clusters outside of the viewpoint, which
-			// is the default behaviour for performance reasons.
-			removeOutsideVisibleBounds: true,
-
-			// Set to false to disable all animations (zoom and spiderfy).
-			// If false, option animateAddingMarkers below has no effect.
-			// If L.DomUtil.TRANSITION is falsy, this option has no effect.
-			animate: true,
-
-			//Whether to animate adding markers after adding the MarkerClusterGroup to the map
-			// If you are adding individual markers set to true, if adding bulk markers leave false for massive performance gains.
-			animateAddingMarkers: false,
-
-			// Make it possible to provide custom function to calculate spiderfy shape positions
-			spiderfyShapePositions: null,
-
-			//Increase to increase the distance away that spiderfied markers appear from the center
-			spiderfyDistanceMultiplier: 1,
-
-			// Make it possible to specify a polyline options on a spider leg
-			spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
-
-			// When bulk adding layers, adds markers in chunks. Means addLayers may not add all the layers in the call, others will be loaded during setTimeouts
-			chunkedLoading: false,
-			chunkInterval: 200, // process markers for a maximum of ~ n milliseconds (then trigger the chunkProgress callback)
-			chunkDelay: 50, // at the end of each interval, give n milliseconds back to system/browser
-			chunkProgress: null, // progress callback: function(processed, total, elapsed) (e.g. for a progress indicator)
-
-			//Options to pass to the L.Polygon constructor
-			polygonOptions: {}
-		},
-
-		initialize: function (options) {
-			L.Util.setOptions(this, options);
-			if (!this.options.iconCreateFunction) {
-				this.options.iconCreateFunction = this._defaultIconCreateFunction;
-			}
-
-			this._featureGroup = L.featureGroup();
-			this._featureGroup.addEventParent(this);
-
-			this._nonPointGroup = L.featureGroup();
-			this._nonPointGroup.addEventParent(this);
-
-			this._inZoomAnimation = 0;
-			this._needsClustering = [];
-			this._needsRemoving = []; //Markers removed while we aren't on the map need to be kept track of
-			//The bounds of the currently shown area (from _getExpandedVisibleBounds) Updated on zoom/move
-			this._currentShownBounds = null;
-
-			this._queue = [];
-
-			this._childMarkerEventHandlers = {
-				'dragstart': this._childMarkerDragStart,
-				'move': this._childMarkerMoved,
-				'dragend': this._childMarkerDragEnd,
-			};
-
-			// Hook the appropriate animation methods.
-			var animate = L.DomUtil.TRANSITION && this.options.animate;
-			L.extend(this, animate ? this._withAnimation : this._noAnimation);
-			// Remember which MarkerCluster class to instantiate (animated or not).
-			this._markerCluster = animate ? L.MarkerCluster : L.MarkerClusterNonAnimated;
-		},
-
-		addLayer: function (layer) {
-
-			if (layer instanceof L.LayerGroup) {
-				return this.addLayers([layer]);
-			}
-
-			//Don't cluster non point data
-			if (!layer.getLatLng) {
-				this._nonPointGroup.addLayer(layer);
-				this.fire('layeradd', { layer: layer });
-				return this;
-			}
-
-			if (!this._map) {
-				this._needsClustering.push(layer);
-				this.fire('layeradd', { layer: layer });
-				return this;
-			}
-
-			if (this.hasLayer(layer)) {
-				return this;
-			}
-
-
-			//If we have already clustered we'll need to add this one to a cluster
-
-			if (this._unspiderfy) {
-				this._unspiderfy();
-			}
-
-			this._addLayer(layer, this._maxZoom);
-			this.fire('layeradd', { layer: layer });
-
-			// Refresh bounds and weighted positions.
-			this._topClusterLevel._recalculateBounds();
-
-			this._refreshClustersIcons();
-
-			//Work out what is visible
-			var visibleLayer = layer,
-			    currentZoom = this._zoom;
-			if (layer.__parent) {
-				while (visibleLayer.__parent._zoom >= currentZoom) {
-					visibleLayer = visibleLayer.__parent;
-				}
-			}
-
-			if (this._currentShownBounds.contains(visibleLayer.getLatLng())) {
-				if (this.options.animateAddingMarkers) {
-					this._animationAddLayer(layer, visibleLayer);
-				} else {
-					this._animationAddLayerNonAnimated(layer, visibleLayer);
-				}
-			}
-			return this;
-		},
-
-		removeLayer: function (layer) {
-
-			if (layer instanceof L.LayerGroup) {
-				return this.removeLayers([layer]);
-			}
-
-			//Non point layers
-			if (!layer.getLatLng) {
-				this._nonPointGroup.removeLayer(layer);
-				this.fire('layerremove', { layer: layer });
-				return this;
-			}
-
-			if (!this._map) {
-				if (!this._arraySplice(this._needsClustering, layer) && this.hasLayer(layer)) {
-					this._needsRemoving.push({ layer: layer, latlng: layer._latlng });
-				}
-				this.fire('layerremove', { layer: layer });
-				return this;
-			}
-
-			if (!layer.__parent) {
-				return this;
-			}
-
-			if (this._unspiderfy) {
-				this._unspiderfy();
-				this._unspiderfyLayer(layer);
-			}
-
-			//Remove the marker from clusters
-			this._removeLayer(layer, true);
-			this.fire('layerremove', { layer: layer });
-
-			// Refresh bounds and weighted positions.
-			this._topClusterLevel._recalculateBounds();
-
-			this._refreshClustersIcons();
-
-			layer.off(this._childMarkerEventHandlers, this);
-
-			if (this._featureGroup.hasLayer(layer)) {
-				this._featureGroup.removeLayer(layer);
-				if (layer.clusterShow) {
-					layer.clusterShow();
-				}
-			}
-
-			return this;
-		},
-
-		//Takes an array of markers and adds them in bulk
-		addLayers: function (layersArray, skipLayerAddEvent) {
-			if (!L.Util.isArray(layersArray)) {
-				return this.addLayer(layersArray);
-			}
-
-			var fg = this._featureGroup,
-			    npg = this._nonPointGroup,
-			    chunked = this.options.chunkedLoading,
-			    chunkInterval = this.options.chunkInterval,
-			    chunkProgress = this.options.chunkProgress,
-			    l = layersArray.length,
-			    offset = 0,
-			    originalArray = true,
-			    m;
-
-			if (this._map) {
-				var started = (new Date()).getTime();
-				var process = L.bind(function () {
-					var start = (new Date()).getTime();
-
-					// Make sure to unspiderfy before starting to add some layers
-					if (this._map && this._unspiderfy) {
-						this._unspiderfy();
-					}
-
-					for (; offset < l; offset++) {
-						if (chunked && offset % 200 === 0) {
-							// every couple hundred markers, instrument the time elapsed since processing started:
-							var elapsed = (new Date()).getTime() - start;
-							if (elapsed > chunkInterval) {
-								break; // been working too hard, time to take a break :-)
-							}
-						}
-
-						m = layersArray[offset];
-
-						// Group of layers, append children to layersArray and skip.
-						// Side effects:
-						// - Total increases, so chunkProgress ratio jumps backward.
-						// - Groups are not included in this group, only their non-group child layers (hasLayer).
-						// Changing array length while looping does not affect performance in current browsers:
-						// http://jsperf.com/for-loop-changing-length/6
-						if (m instanceof L.LayerGroup) {
-							if (originalArray) {
-								layersArray = layersArray.slice();
-								originalArray = false;
-							}
-							this._extractNonGroupLayers(m, layersArray);
-							l = layersArray.length;
-							continue;
-						}
-
-						//Not point data, can't be clustered
-						if (!m.getLatLng) {
-							npg.addLayer(m);
-							if (!skipLayerAddEvent) {
-								this.fire('layeradd', { layer: m });
-							}
-							continue;
-						}
-
-						if (this.hasLayer(m)) {
-							continue;
-						}
-
-						this._addLayer(m, this._maxZoom);
-						if (!skipLayerAddEvent) {
-							this.fire('layeradd', { layer: m });
-						}
-
-						//If we just made a cluster of size 2 then we need to remove the other marker from the map (if it is) or we never will
-						if (m.__parent) {
-							if (m.__parent.getChildCount() === 2) {
-								var markers = m.__parent.getAllChildMarkers(),
-								    otherMarker = markers[0] === m ? markers[1] : markers[0];
-								fg.removeLayer(otherMarker);
-							}
-						}
-					}
-
-					if (chunkProgress) {
-						// report progress and time elapsed:
-						chunkProgress(offset, l, (new Date()).getTime() - started);
-					}
-
-					// Completed processing all markers.
-					if (offset === l) {
-
-						// Refresh bounds and weighted positions.
-						this._topClusterLevel._recalculateBounds();
-
-						this._refreshClustersIcons();
-
-						this._topClusterLevel._recursivelyAddChildrenToMap(null, this._zoom, this._currentShownBounds);
-					} else {
-						setTimeout(process, this.options.chunkDelay);
-					}
-				}, this);
-
-				process();
-			} else {
-				var needsClustering = this._needsClustering;
-
-				for (; offset < l; offset++) {
-					m = layersArray[offset];
-
-					// Group of layers, append children to layersArray and skip.
-					if (m instanceof L.LayerGroup) {
-						if (originalArray) {
-							layersArray = layersArray.slice();
-							originalArray = false;
-						}
-						this._extractNonGroupLayers(m, layersArray);
-						l = layersArray.length;
-						continue;
-					}
-
-					//Not point data, can't be clustered
-					if (!m.getLatLng) {
-						npg.addLayer(m);
-						continue;
-					}
-
-					if (this.hasLayer(m)) {
-						continue;
-					}
-
-					needsClustering.push(m);
-				}
-			}
-			return this;
-		},
-
-		//Takes an array of markers and removes them in bulk
-		removeLayers: function (layersArray) {
-			var i, m,
-			    l = layersArray.length,
-			    fg = this._featureGroup,
-			    npg = this._nonPointGroup,
-			    originalArray = true;
-
-			if (!this._map) {
-				for (i = 0; i < l; i++) {
-					m = layersArray[i];
-
-					// Group of layers, append children to layersArray and skip.
-					if (m instanceof L.LayerGroup) {
-						if (originalArray) {
-							layersArray = layersArray.slice();
-							originalArray = false;
-						}
-						this._extractNonGroupLayers(m, layersArray);
-						l = layersArray.length;
-						continue;
-					}
-
-					this._arraySplice(this._needsClustering, m);
-					npg.removeLayer(m);
-					if (this.hasLayer(m)) {
-						this._needsRemoving.push({ layer: m, latlng: m._latlng });
-					}
-					this.fire('layerremove', { layer: m });
-				}
-				return this;
-			}
-
-			if (this._unspiderfy) {
-				this._unspiderfy();
-
-				// Work on a copy of the array, so that next loop is not affected.
-				var layersArray2 = layersArray.slice(),
-				    l2 = l;
-				for (i = 0; i < l2; i++) {
-					m = layersArray2[i];
-
-					// Group of layers, append children to layersArray and skip.
-					if (m instanceof L.LayerGroup) {
-						this._extractNonGroupLayers(m, layersArray2);
-						l2 = layersArray2.length;
-						continue;
-					}
-
-					this._unspiderfyLayer(m);
-				}
-			}
-
-			for (i = 0; i < l; i++) {
-				m = layersArray[i];
-
-				// Group of layers, append children to layersArray and skip.
-				if (m instanceof L.LayerGroup) {
-					if (originalArray) {
-						layersArray = layersArray.slice();
-						originalArray = false;
-					}
-					this._extractNonGroupLayers(m, layersArray);
-					l = layersArray.length;
-					continue;
-				}
-
-				if (!m.__parent) {
-					npg.removeLayer(m);
-					this.fire('layerremove', { layer: m });
-					continue;
-				}
-
-				this._removeLayer(m, true, true);
-				this.fire('layerremove', { layer: m });
-
-				if (fg.hasLayer(m)) {
-					fg.removeLayer(m);
-					if (m.clusterShow) {
-						m.clusterShow();
-					}
-				}
-			}
-
-			// Refresh bounds and weighted positions.
-			this._topClusterLevel._recalculateBounds();
-
-			this._refreshClustersIcons();
-
-			//Fix up the clusters and markers on the map
-			this._topClusterLevel._recursivelyAddChildrenToMap(null, this._zoom, this._currentShownBounds);
-
-			return this;
-		},
-
-		//Removes all layers from the MarkerClusterGroup
-		clearLayers: function () {
-			//Need our own special implementation as the LayerGroup one doesn't work for us
-
-			//If we aren't on the map (yet), blow away the markers we know of
-			if (!this._map) {
-				this._needsClustering = [];
-				this._needsRemoving = [];
-				delete this._gridClusters;
-				delete this._gridUnclustered;
-			}
-
-			if (this._noanimationUnspiderfy) {
-				this._noanimationUnspiderfy();
-			}
-
-			//Remove all the visible layers
-			this._featureGroup.clearLayers();
-			this._nonPointGroup.clearLayers();
-
-			this.eachLayer(function (marker) {
-				marker.off(this._childMarkerEventHandlers, this);
-				delete marker.__parent;
-			}, this);
-
-			if (this._map) {
-				//Reset _topClusterLevel and the DistanceGrids
-				this._generateInitialClusters();
-			}
-
-			return this;
-		},
-
-		//Override FeatureGroup.getBounds as it doesn't work
-		getBounds: function () {
-			var bounds = new L.LatLngBounds();
-
-			if (this._topClusterLevel) {
-				bounds.extend(this._topClusterLevel._bounds);
-			}
-
-			for (var i = this._needsClustering.length - 1; i >= 0; i--) {
-				bounds.extend(this._needsClustering[i].getLatLng());
-			}
-
-			bounds.extend(this._nonPointGroup.getBounds());
-
-			return bounds;
-		},
-
-		//Overrides LayerGroup.eachLayer
-		eachLayer: function (method, context) {
-			var markers = this._needsClustering.slice(),
-				needsRemoving = this._needsRemoving,
-				thisNeedsRemoving, i, j;
-
-			if (this._topClusterLevel) {
-				this._topClusterLevel.getAllChildMarkers(markers);
-			}
-
-			for (i = markers.length - 1; i >= 0; i--) {
-				thisNeedsRemoving = true;
-
-				for (j = needsRemoving.length - 1; j >= 0; j--) {
-					if (needsRemoving[j].layer === markers[i]) {
-						thisNeedsRemoving = false;
-						break;
-					}
-				}
-
-				if (thisNeedsRemoving) {
-					method.call(context, markers[i]);
-				}
-			}
-
-			this._nonPointGroup.eachLayer(method, context);
-		},
-
-		//Overrides LayerGroup.getLayers
-		getLayers: function () {
-			var layers = [];
-			this.eachLayer(function (l) {
-				layers.push(l);
-			});
-			return layers;
-		},
-
-		//Overrides LayerGroup.getLayer, WARNING: Really bad performance
-		getLayer: function (id) {
-			var result = null;
-
-			id = parseInt(id, 10);
-
-			this.eachLayer(function (l) {
-				if (L.stamp(l) === id) {
-					result = l;
-				}
-			});
-
-			return result;
-		},
-
-		//Returns true if the given layer is in this MarkerClusterGroup
-		hasLayer: function (layer) {
-			if (!layer) {
-				return false;
-			}
-
-			var i, anArray = this._needsClustering;
-
-			for (i = anArray.length - 1; i >= 0; i--) {
-				if (anArray[i] === layer) {
-					return true;
-				}
-			}
-
-			anArray = this._needsRemoving;
-			for (i = anArray.length - 1; i >= 0; i--) {
-				if (anArray[i].layer === layer) {
-					return false;
-				}
-			}
-
-			return !!(layer.__parent && layer.__parent._group === this) || this._nonPointGroup.hasLayer(layer);
-		},
-
-		//Zoom down to show the given layer (spiderfying if necessary) then calls the callback
-		zoomToShowLayer: function (layer, callback) {
-
-			var map = this._map;
-
-			if (typeof callback !== 'function') {
-				callback = function () {};
-			}
-
-			var showMarker = function () {
-				// Assumes that map.hasLayer checks for direct appearance on map, not recursively calling
-				// hasLayer on Layer Groups that are on map (typically not calling this MarkerClusterGroup.hasLayer, which would always return true)
-				if ((map.hasLayer(layer) || map.hasLayer(layer.__parent)) && !this._inZoomAnimation) {
-					this._map.off('moveend', showMarker, this);
-					this.off('animationend', showMarker, this);
-
-					if (map.hasLayer(layer)) {
-						callback();
-					} else if (layer.__parent._icon) {
-						this.once('spiderfied', callback, this);
-						layer.__parent.spiderfy();
-					}
-				}
-			};
-
-			if (layer._icon && this._map.getBounds().contains(layer.getLatLng())) {
-				//Layer is visible ond on screen, immediate return
-				callback();
-			} else if (layer.__parent._zoom < Math.round(this._map._zoom)) {
-				//Layer should be visible at this zoom level. It must not be on screen so just pan over to it
-				this._map.on('moveend', showMarker, this);
-				this._map.panTo(layer.getLatLng());
-			} else {
-				this._map.on('moveend', showMarker, this);
-				this.on('animationend', showMarker, this);
-				layer.__parent.zoomToBounds();
-			}
-		},
-
-		//Overrides FeatureGroup.onAdd
-		onAdd: function (map) {
-			this._map = map;
-			var i, l, layer;
-
-			if (!isFinite(this._map.getMaxZoom())) {
-				throw "Map has no maxZoom specified";
-			}
-
-			this._featureGroup.addTo(map);
-			this._nonPointGroup.addTo(map);
-
-			if (!this._gridClusters) {
-				this._generateInitialClusters();
-			}
-
-			this._maxLat = map.options.crs.projection.MAX_LATITUDE;
-
-			//Restore all the positions as they are in the MCG before removing them
-			for (i = 0, l = this._needsRemoving.length; i < l; i++) {
-				layer = this._needsRemoving[i];
-				layer.newlatlng = layer.layer._latlng;
-				layer.layer._latlng = layer.latlng;
-			}
-			//Remove them, then restore their new positions
-			for (i = 0, l = this._needsRemoving.length; i < l; i++) {
-				layer = this._needsRemoving[i];
-				this._removeLayer(layer.layer, true);
-				layer.layer._latlng = layer.newlatlng;
-			}
-			this._needsRemoving = [];
-
-			//Remember the current zoom level and bounds
-			this._zoom = Math.round(this._map._zoom);
-			this._currentShownBounds = this._getExpandedVisibleBounds();
-
-			this._map.on('zoomend', this._zoomEnd, this);
-			this._map.on('moveend', this._moveEnd, this);
-
-			if (this._spiderfierOnAdd) { //TODO FIXME: Not sure how to have spiderfier add something on here nicely
-				this._spiderfierOnAdd();
-			}
-
-			this._bindEvents();
-
-			//Actually add our markers to the map:
-			l = this._needsClustering;
-			this._needsClustering = [];
-			this.addLayers(l, true);
-		},
-
-		//Overrides FeatureGroup.onRemove
-		onRemove: function (map) {
-			map.off('zoomend', this._zoomEnd, this);
-			map.off('moveend', this._moveEnd, this);
-
-			this._unbindEvents();
-
-			//In case we are in a cluster animation
-			this._map._mapPane.className = this._map._mapPane.className.replace(' leaflet-cluster-anim', '');
-
-			if (this._spiderfierOnRemove) { //TODO FIXME: Not sure how to have spiderfier add something on here nicely
-				this._spiderfierOnRemove();
-			}
-
-			delete this._maxLat;
-
-			//Clean up all the layers we added to the map
-			this._hideCoverage();
-			this._featureGroup.remove();
-			this._nonPointGroup.remove();
-
-			this._featureGroup.clearLayers();
-
-			this._map = null;
-		},
-
-		getVisibleParent: function (marker) {
-			var vMarker = marker;
-			while (vMarker && !vMarker._icon) {
-				vMarker = vMarker.__parent;
-			}
-			return vMarker || null;
-		},
-
-		//Remove the given object from the given array
-		_arraySplice: function (anArray, obj) {
-			for (var i = anArray.length - 1; i >= 0; i--) {
-				if (anArray[i] === obj) {
-					anArray.splice(i, 1);
-					return true;
-				}
-			}
-		},
-
-		/**
-		 * Removes a marker from all _gridUnclustered zoom levels, starting at the supplied zoom.
-		 * @param marker to be removed from _gridUnclustered.
-		 * @param z integer bottom start zoom level (included)
-		 * @private
-		 */
-		_removeFromGridUnclustered: function (marker, z) {
-			var map = this._map,
-			    gridUnclustered = this._gridUnclustered,
-				minZoom = Math.floor(this._map.getMinZoom());
-
-			for (; z >= minZoom; z--) {
-				if (!gridUnclustered[z].removeObject(marker, map.project(marker.getLatLng(), z))) {
-					break;
-				}
-			}
-		},
-
-		_childMarkerDragStart: function (e) {
-			e.target.__dragStart = e.target._latlng;
-		},
-
-		_childMarkerMoved: function (e) {
-			if (!this._ignoreMove && !e.target.__dragStart) {
-				var isPopupOpen = e.target._popup && e.target._popup.isOpen();
-
-				this._moveChild(e.target, e.oldLatLng, e.latlng);
-
-				if (isPopupOpen) {
-					e.target.openPopup();
-				}
-			}
-		},
-
-		_moveChild: function (layer, from, to) {
-			layer._latlng = from;
-			this.removeLayer(layer);
-
-			layer._latlng = to;
-			this.addLayer(layer);
-		},
-
-		_childMarkerDragEnd: function (e) {
-			var dragStart = e.target.__dragStart;
-			delete e.target.__dragStart;
-			if (dragStart) {
-				this._moveChild(e.target, dragStart, e.target._latlng);
-			}		
-		},
-
-
-		//Internal function for removing a marker from everything.
-		//dontUpdateMap: set to true if you will handle updating the map manually (for bulk functions)
-		_removeLayer: function (marker, removeFromDistanceGrid, dontUpdateMap) {
-			var gridClusters = this._gridClusters,
-				gridUnclustered = this._gridUnclustered,
-				fg = this._featureGroup,
-				map = this._map,
-				minZoom = Math.floor(this._map.getMinZoom());
-
-			//Remove the marker from distance clusters it might be in
-			if (removeFromDistanceGrid) {
-				this._removeFromGridUnclustered(marker, this._maxZoom);
-			}
-
-			//Work our way up the clusters removing them as we go if required
-			var cluster = marker.__parent,
-				markers = cluster._markers,
-				otherMarker;
-
-			//Remove the marker from the immediate parents marker list
-			this._arraySplice(markers, marker);
-
-			while (cluster) {
-				cluster._childCount--;
-				cluster._boundsNeedUpdate = true;
-
-				if (cluster._zoom < minZoom) {
-					//Top level, do nothing
-					break;
-				} else if (removeFromDistanceGrid && cluster._childCount <= 1) { //Cluster no longer required
-					//We need to push the other marker up to the parent
-					otherMarker = cluster._markers[0] === marker ? cluster._markers[1] : cluster._markers[0];
-
-					//Update distance grid
-					gridClusters[cluster._zoom].removeObject(cluster, map.project(cluster._cLatLng, cluster._zoom));
-					gridUnclustered[cluster._zoom].addObject(otherMarker, map.project(otherMarker.getLatLng(), cluster._zoom));
-
-					//Move otherMarker up to parent
-					this._arraySplice(cluster.__parent._childClusters, cluster);
-					cluster.__parent._markers.push(otherMarker);
-					otherMarker.__parent = cluster.__parent;
-
-					if (cluster._icon) {
-						//Cluster is currently on the map, need to put the marker on the map instead
-						fg.removeLayer(cluster);
-						if (!dontUpdateMap) {
-							fg.addLayer(otherMarker);
-						}
-					}
-				} else {
-					cluster._iconNeedsUpdate = true;
-				}
-
-				cluster = cluster.__parent;
-			}
-
-			delete marker.__parent;
-		},
-
-		_isOrIsParent: function (el, oel) {
-			while (oel) {
-				if (el === oel) {
-					return true;
-				}
-				oel = oel.parentNode;
-			}
-			return false;
-		},
-
-		//Override L.Evented.fire
-		fire: function (type, data, propagate) {
-			if (data && data.layer instanceof L.MarkerCluster) {
-				//Prevent multiple clustermouseover/off events if the icon is made up of stacked divs (Doesn't work in ie <= 8, no relatedTarget)
-				if (data.originalEvent && this._isOrIsParent(data.layer._icon, data.originalEvent.relatedTarget)) {
-					return;
-				}
-				type = 'cluster' + type;
-			}
-
-			L.FeatureGroup.prototype.fire.call(this, type, data, propagate);
-		},
-
-		//Override L.Evented.listens
-		listens: function (type, propagate) {
-			return L.FeatureGroup.prototype.listens.call(this, type, propagate) || L.FeatureGroup.prototype.listens.call(this, 'cluster' + type, propagate);
-		},
-
-		//Default functionality
-		_defaultIconCreateFunction: function (cluster) {
-			var childCount = cluster.getChildCount();
-
-			var c = ' marker-cluster-';
-			if (childCount < 10) {
-				c += 'small';
-			} else if (childCount < 100) {
-				c += 'medium';
-			} else {
-				c += 'large';
-			}
-
-			return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>', className: 'marker-cluster' + c, iconSize: new L.Point(40, 40) });
-		},
-
-		_bindEvents: function () {
-			var map = this._map,
-			    spiderfyOnMaxZoom = this.options.spiderfyOnMaxZoom,
-			    showCoverageOnHover = this.options.showCoverageOnHover,
-			    zoomToBoundsOnClick = this.options.zoomToBoundsOnClick,
-			    spiderfyOnEveryZoom = this.options.spiderfyOnEveryZoom;
-
-			//Zoom on cluster click or spiderfy if we are at the lowest level
-			if (spiderfyOnMaxZoom || zoomToBoundsOnClick || spiderfyOnEveryZoom) {
-				this.on('clusterclick clusterkeypress', this._zoomOrSpiderfy, this);
-			}
-
-			//Show convex hull (boundary) polygon on mouse over
-			if (showCoverageOnHover) {
-				this.on('clustermouseover', this._showCoverage, this);
-				this.on('clustermouseout', this._hideCoverage, this);
-				map.on('zoomend', this._hideCoverage, this);
-			}
-		},
-
-		_zoomOrSpiderfy: function (e) {
-			var cluster = e.layer,
-			    bottomCluster = cluster;
-
-			if (e.type === 'clusterkeypress' && e.originalEvent && e.originalEvent.keyCode !== 13) {
-				return;
-			}
-
-			while (bottomCluster._childClusters.length === 1) {
-				bottomCluster = bottomCluster._childClusters[0];
-			}
-
-			if (bottomCluster._zoom === this._maxZoom &&
-				bottomCluster._childCount === cluster._childCount &&
-				this.options.spiderfyOnMaxZoom) {
-
-				// All child markers are contained in a single cluster from this._maxZoom to this cluster.
-				cluster.spiderfy();
-			} else if (this.options.zoomToBoundsOnClick) {
-				cluster.zoomToBounds();
-			}
-
-			if (this.options.spiderfyOnEveryZoom) {
-				cluster.spiderfy();
-			}
-
-			// Focus the map again for keyboard users.
-			if (e.originalEvent && e.originalEvent.keyCode === 13) {
-				this._map._container.focus();
-			}
-		},
-
-		_showCoverage: function (e) {
-			var map = this._map;
-			if (this._inZoomAnimation) {
-				return;
-			}
-			if (this._shownPolygon) {
-				map.removeLayer(this._shownPolygon);
-			}
-			if (e.layer.getChildCount() > 2 && e.layer !== this._spiderfied) {
-				this._shownPolygon = new L.Polygon(e.layer.getConvexHull(), this.options.polygonOptions);
-				map.addLayer(this._shownPolygon);
-			}
-		},
-
-		_hideCoverage: function () {
-			if (this._shownPolygon) {
-				this._map.removeLayer(this._shownPolygon);
-				this._shownPolygon = null;
-			}
-		},
-
-		_unbindEvents: function () {
-			var spiderfyOnMaxZoom = this.options.spiderfyOnMaxZoom,
-				showCoverageOnHover = this.options.showCoverageOnHover,
-				zoomToBoundsOnClick = this.options.zoomToBoundsOnClick,
-				spiderfyOnEveryZoom = this.options.spiderfyOnEveryZoom,
-				map = this._map;
-
-			if (spiderfyOnMaxZoom || zoomToBoundsOnClick || spiderfyOnEveryZoom) {
-				this.off('clusterclick clusterkeypress', this._zoomOrSpiderfy, this);
-			}
-			if (showCoverageOnHover) {
-				this.off('clustermouseover', this._showCoverage, this);
-				this.off('clustermouseout', this._hideCoverage, this);
-				map.off('zoomend', this._hideCoverage, this);
-			}
-		},
-
-		_zoomEnd: function () {
-			if (!this._map) { //May have been removed from the map by a zoomEnd handler
-				return;
-			}
-			this._mergeSplitClusters();
-
-			this._zoom = Math.round(this._map._zoom);
-			this._currentShownBounds = this._getExpandedVisibleBounds();
-		},
-
-		_moveEnd: function () {
-			if (this._inZoomAnimation) {
-				return;
-			}
-
-			var newBounds = this._getExpandedVisibleBounds();
-
-			this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, Math.floor(this._map.getMinZoom()), this._zoom, newBounds);
-			this._topClusterLevel._recursivelyAddChildrenToMap(null, Math.round(this._map._zoom), newBounds);
-
-			this._currentShownBounds = newBounds;
-			return;
-		},
-
-		_generateInitialClusters: function () {
-			var maxZoom = Math.ceil(this._map.getMaxZoom()),
-				minZoom = Math.floor(this._map.getMinZoom()),
-				radius = this.options.maxClusterRadius,
-				radiusFn = radius;
-
-			//If we just set maxClusterRadius to a single number, we need to create
-			//a simple function to return that number. Otherwise, we just have to
-			//use the function we've passed in.
-			if (typeof radius !== "function") {
-				radiusFn = function () { return radius; };
-			}
-
-			if (this.options.disableClusteringAtZoom !== null) {
-				maxZoom = this.options.disableClusteringAtZoom - 1;
-			}
-			this._maxZoom = maxZoom;
-			this._gridClusters = {};
-			this._gridUnclustered = {};
-
-			//Set up DistanceGrids for each zoom
-			for (var zoom = maxZoom; zoom >= minZoom; zoom--) {
-				this._gridClusters[zoom] = new L.DistanceGrid(radiusFn(zoom));
-				this._gridUnclustered[zoom] = new L.DistanceGrid(radiusFn(zoom));
-			}
-
-			// Instantiate the appropriate L.MarkerCluster class (animated or not).
-			this._topClusterLevel = new this._markerCluster(this, minZoom - 1);
-		},
-
-		//Zoom: Zoom to start adding at (Pass this._maxZoom to start at the bottom)
-		_addLayer: function (layer, zoom) {
-			var gridClusters = this._gridClusters,
-			    gridUnclustered = this._gridUnclustered,
-				minZoom = Math.floor(this._map.getMinZoom()),
-			    markerPoint, z;
-
-			if (this.options.singleMarkerMode) {
-				this._overrideMarkerIcon(layer);
-			}
-
-			layer.on(this._childMarkerEventHandlers, this);
-
-			//Find the lowest zoom level to slot this one in
-			for (; zoom >= minZoom; zoom--) {
-				markerPoint = this._map.project(layer.getLatLng(), zoom); // calculate pixel position
-
-				//Try find a cluster close by
-				var closest = gridClusters[zoom].getNearObject(markerPoint);
-				if (closest) {
-					closest._addChild(layer);
-					layer.__parent = closest;
-					return;
-				}
-
-				//Try find a marker close by to form a new cluster with
-				closest = gridUnclustered[zoom].getNearObject(markerPoint);
-				if (closest) {
-					var parent = closest.__parent;
-					if (parent) {
-						this._removeLayer(closest, false);
-					}
-
-					//Create new cluster with these 2 in it
-
-					var newCluster = new this._markerCluster(this, zoom, closest, layer);
-					gridClusters[zoom].addObject(newCluster, this._map.project(newCluster._cLatLng, zoom));
-					closest.__parent = newCluster;
-					layer.__parent = newCluster;
-
-					//First create any new intermediate parent clusters that don't exist
-					var lastParent = newCluster;
-					for (z = zoom - 1; z > parent._zoom; z--) {
-						lastParent = new this._markerCluster(this, z, lastParent);
-						gridClusters[z].addObject(lastParent, this._map.project(closest.getLatLng(), z));
-					}
-					parent._addChild(lastParent);
-
-					//Remove closest from this zoom level and any above that it is in, replace with newCluster
-					this._removeFromGridUnclustered(closest, zoom);
-
-					return;
-				}
-
-				//Didn't manage to cluster in at this zoom, record us as a marker here and continue upwards
-				gridUnclustered[zoom].addObject(layer, markerPoint);
-			}
-
-			//Didn't get in anything, add us to the top
-			this._topClusterLevel._addChild(layer);
-			layer.__parent = this._topClusterLevel;
-			return;
-		},
-
-		/**
-		 * Refreshes the icon of all "dirty" visible clusters.
-		 * Non-visible "dirty" clusters will be updated when they are added to the map.
-		 * @private
-		 */
-		_refreshClustersIcons: function () {
-			this._featureGroup.eachLayer(function (c) {
-				if (c instanceof L.MarkerCluster && c._iconNeedsUpdate) {
-					c._updateIcon();
-				}
-			});
-		},
-
-		//Enqueue code to fire after the marker expand/contract has happened
-		_enqueue: function (fn) {
-			this._queue.push(fn);
-			if (!this._queueTimeout) {
-				this._queueTimeout = setTimeout(L.bind(this._processQueue, this), 300);
-			}
-		},
-		_processQueue: function () {
-			for (var i = 0; i < this._queue.length; i++) {
-				this._queue[i].call(this);
-			}
-			this._queue.length = 0;
-			clearTimeout(this._queueTimeout);
-			this._queueTimeout = null;
-		},
-
-		//Merge and split any existing clusters that are too big or small
-		_mergeSplitClusters: function () {
-			var mapZoom = Math.round(this._map._zoom);
-
-			//In case we are starting to split before the animation finished
-			this._processQueue();
-
-			if (this._zoom < mapZoom && this._currentShownBounds.intersects(this._getExpandedVisibleBounds())) { //Zoom in, split
-				this._animationStart();
-				//Remove clusters now off screen
-				this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, Math.floor(this._map.getMinZoom()), this._zoom, this._getExpandedVisibleBounds());
-
-				this._animationZoomIn(this._zoom, mapZoom);
-
-			} else if (this._zoom > mapZoom) { //Zoom out, merge
-				this._animationStart();
-
-				this._animationZoomOut(this._zoom, mapZoom);
-			} else {
-				this._moveEnd();
-			}
-		},
-
-		//Gets the maps visible bounds expanded in each direction by the size of the screen (so the user cannot see an area we do not cover in one pan)
-		_getExpandedVisibleBounds: function () {
-			if (!this.options.removeOutsideVisibleBounds) {
-				return this._mapBoundsInfinite;
-			} else if (L.Browser.mobile) {
-				return this._checkBoundsMaxLat(this._map.getBounds());
-			}
-
-			return this._checkBoundsMaxLat(this._map.getBounds().pad(1)); // Padding expands the bounds by its own dimensions but scaled with the given factor.
-		},
-
-		/**
-		 * Expands the latitude to Infinity (or -Infinity) if the input bounds reach the map projection maximum defined latitude
-		 * (in the case of Web/Spherical Mercator, it is 85.0511287798 / see https://en.wikipedia.org/wiki/Web_Mercator#Formulas).
-		 * Otherwise, the removeOutsideVisibleBounds option will remove markers beyond that limit, whereas the same markers without
-		 * this option (or outside MCG) will have their position floored (ceiled) by the projection and rendered at that limit,
-		 * making the user think that MCG "eats" them and never displays them again.
-		 * @param bounds L.LatLngBounds
-		 * @returns {L.LatLngBounds}
-		 * @private
-		 */
-		_checkBoundsMaxLat: function (bounds) {
-			var maxLat = this._maxLat;
-
-			if (maxLat !== undefined) {
-				if (bounds.getNorth() >= maxLat) {
-					bounds._northEast.lat = Infinity;
-				}
-				if (bounds.getSouth() <= -maxLat) {
-					bounds._southWest.lat = -Infinity;
-				}
-			}
-
-			return bounds;
-		},
-
-		//Shared animation code
-		_animationAddLayerNonAnimated: function (layer, newCluster) {
-			if (newCluster === layer) {
-				this._featureGroup.addLayer(layer);
-			} else if (newCluster._childCount === 2) {
-				newCluster._addToMap();
-
-				var markers = newCluster.getAllChildMarkers();
-				this._featureGroup.removeLayer(markers[0]);
-				this._featureGroup.removeLayer(markers[1]);
-			} else {
-				newCluster._updateIcon();
-			}
-		},
-
-		/**
-		 * Extracts individual (i.e. non-group) layers from a Layer Group.
-		 * @param group to extract layers from.
-		 * @param output {Array} in which to store the extracted layers.
-		 * @returns {*|Array}
-		 * @private
-		 */
-		_extractNonGroupLayers: function (group, output) {
-			var layers = group.getLayers(),
-			    i = 0,
-			    layer;
-
-			output = output || [];
-
-			for (; i < layers.length; i++) {
-				layer = layers[i];
-
-				if (layer instanceof L.LayerGroup) {
-					this._extractNonGroupLayers(layer, output);
-					continue;
-				}
-
-				output.push(layer);
-			}
-
-			return output;
-		},
-
-		/**
-		 * Implements the singleMarkerMode option.
-		 * @param layer Marker to re-style using the Clusters iconCreateFunction.
-		 * @returns {L.Icon} The newly created icon.
-		 * @private
-		 */
-		_overrideMarkerIcon: function (layer) {
-			var icon = layer.options.icon = this.options.iconCreateFunction({
-				getChildCount: function () {
-					return 1;
-				},
-				getAllChildMarkers: function () {
-					return [layer];
-				}
-			});
-
-			return icon;
-		}
-	});
-
-	// Constant bounds used in case option "removeOutsideVisibleBounds" is set to false.
-	L.MarkerClusterGroup.include({
-		_mapBoundsInfinite: new L.LatLngBounds(new L.LatLng(-Infinity, -Infinity), new L.LatLng(Infinity, Infinity))
-	});
-
-	L.MarkerClusterGroup.include({
-		_noAnimation: {
-			//Non Animated versions of everything
-			_animationStart: function () {
-				//Do nothing...
-			},
-			_animationZoomIn: function (previousZoomLevel, newZoomLevel) {
-				this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, Math.floor(this._map.getMinZoom()), previousZoomLevel);
-				this._topClusterLevel._recursivelyAddChildrenToMap(null, newZoomLevel, this._getExpandedVisibleBounds());
-
-				//We didn't actually animate, but we use this event to mean "clustering animations have finished"
-				this.fire('animationend');
-			},
-			_animationZoomOut: function (previousZoomLevel, newZoomLevel) {
-				this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, Math.floor(this._map.getMinZoom()), previousZoomLevel);
-				this._topClusterLevel._recursivelyAddChildrenToMap(null, newZoomLevel, this._getExpandedVisibleBounds());
-
-				//We didn't actually animate, but we use this event to mean "clustering animations have finished"
-				this.fire('animationend');
-			},
-			_animationAddLayer: function (layer, newCluster) {
-				this._animationAddLayerNonAnimated(layer, newCluster);
-			}
-		},
-
-		_withAnimation: {
-			//Animated versions here
-			_animationStart: function () {
-				this._map._mapPane.className += ' leaflet-cluster-anim';
-				this._inZoomAnimation++;
-			},
-
-			_animationZoomIn: function (previousZoomLevel, newZoomLevel) {
-				var bounds = this._getExpandedVisibleBounds(),
-				    fg = this._featureGroup,
-					minZoom = Math.floor(this._map.getMinZoom()),
-				    i;
-
-				this._ignoreMove = true;
-
-				//Add all children of current clusters to map and remove those clusters from map
-				this._topClusterLevel._recursively(bounds, previousZoomLevel, minZoom, function (c) {
-					var startPos = c._latlng,
-					    markers  = c._markers,
-					    m;
-
-					if (!bounds.contains(startPos)) {
-						startPos = null;
-					}
-
-					if (c._isSingleParent() && previousZoomLevel + 1 === newZoomLevel) { //Immediately add the new child and remove us
-						fg.removeLayer(c);
-						c._recursivelyAddChildrenToMap(null, newZoomLevel, bounds);
-					} else {
-						//Fade out old cluster
-						c.clusterHide();
-						c._recursivelyAddChildrenToMap(startPos, newZoomLevel, bounds);
-					}
-
-					//Remove all markers that aren't visible any more
-					//TODO: Do we actually need to do this on the higher levels too?
-					for (i = markers.length - 1; i >= 0; i--) {
-						m = markers[i];
-						if (!bounds.contains(m._latlng)) {
-							fg.removeLayer(m);
-						}
-					}
-
-				});
-
-				this._forceLayout();
-
-				//Update opacities
-				this._topClusterLevel._recursivelyBecomeVisible(bounds, newZoomLevel);
-				//TODO Maybe? Update markers in _recursivelyBecomeVisible
-				fg.eachLayer(function (n) {
-					if (!(n instanceof L.MarkerCluster) && n._icon) {
-						n.clusterShow();
-					}
-				});
-
-				//update the positions of the just added clusters/markers
-				this._topClusterLevel._recursively(bounds, previousZoomLevel, newZoomLevel, function (c) {
-					c._recursivelyRestoreChildPositions(newZoomLevel);
-				});
-
-				this._ignoreMove = false;
-
-				//Remove the old clusters and close the zoom animation
-				this._enqueue(function () {
-					//update the positions of the just added clusters/markers
-					this._topClusterLevel._recursively(bounds, previousZoomLevel, minZoom, function (c) {
-						fg.removeLayer(c);
-						c.clusterShow();
-					});
-
-					this._animationEnd();
-				});
-			},
-
-			_animationZoomOut: function (previousZoomLevel, newZoomLevel) {
-				this._animationZoomOutSingle(this._topClusterLevel, previousZoomLevel - 1, newZoomLevel);
-
-				//Need to add markers for those that weren't on the map before but are now
-				this._topClusterLevel._recursivelyAddChildrenToMap(null, newZoomLevel, this._getExpandedVisibleBounds());
-				//Remove markers that were on the map before but won't be now
-				this._topClusterLevel._recursivelyRemoveChildrenFromMap(this._currentShownBounds, Math.floor(this._map.getMinZoom()), previousZoomLevel, this._getExpandedVisibleBounds());
-			},
-
-			_animationAddLayer: function (layer, newCluster) {
-				var me = this,
-				    fg = this._featureGroup;
-
-				fg.addLayer(layer);
-				if (newCluster !== layer) {
-					if (newCluster._childCount > 2) { //Was already a cluster
-
-						newCluster._updateIcon();
-						this._forceLayout();
-						this._animationStart();
-
-						layer._setPos(this._map.latLngToLayerPoint(newCluster.getLatLng()));
-						layer.clusterHide();
-
-						this._enqueue(function () {
-							fg.removeLayer(layer);
-							layer.clusterShow();
-
-							me._animationEnd();
-						});
-
-					} else { //Just became a cluster
-						this._forceLayout();
-
-						me._animationStart();
-						me._animationZoomOutSingle(newCluster, this._map.getMaxZoom(), this._zoom);
-					}
-				}
-			}
-		},
-
-		// Private methods for animated versions.
-		_animationZoomOutSingle: function (cluster, previousZoomLevel, newZoomLevel) {
-			var bounds = this._getExpandedVisibleBounds(),
-				minZoom = Math.floor(this._map.getMinZoom());
-
-			//Animate all of the markers in the clusters to move to their cluster center point
-			cluster._recursivelyAnimateChildrenInAndAddSelfToMap(bounds, minZoom, previousZoomLevel + 1, newZoomLevel);
-
-			var me = this;
-
-			//Update the opacity (If we immediately set it they won't animate)
-			this._forceLayout();
-			cluster._recursivelyBecomeVisible(bounds, newZoomLevel);
-
-			//TODO: Maybe use the transition timing stuff to make this more reliable
-			//When the animations are done, tidy up
-			this._enqueue(function () {
-
-				//This cluster stopped being a cluster before the timeout fired
-				if (cluster._childCount === 1) {
-					var m = cluster._markers[0];
-					//If we were in a cluster animation at the time then the opacity and position of our child could be wrong now, so fix it
-					this._ignoreMove = true;
-					m.setLatLng(m.getLatLng());
-					this._ignoreMove = false;
-					if (m.clusterShow) {
-						m.clusterShow();
-					}
-				} else {
-					cluster._recursively(bounds, newZoomLevel, minZoom, function (c) {
-						c._recursivelyRemoveChildrenFromMap(bounds, minZoom, previousZoomLevel + 1);
-					});
-				}
-				me._animationEnd();
-			});
-		},
-
-		_animationEnd: function () {
-			if (this._map) {
-				this._map._mapPane.className = this._map._mapPane.className.replace(' leaflet-cluster-anim', '');
-			}
-			this._inZoomAnimation--;
-			this.fire('animationend');
-		},
-
-		//Force a browser layout of stuff in the map
-		// Should apply the current opacity and location to all elements so we can update them again for an animation
-		_forceLayout: function () {
-			//In my testing this works, infact offsetWidth of any element seems to work.
-			//Could loop all this._layers and do this for each _icon if it stops working
-
-			L.Util.falseFn(document.body.offsetWidth);
-		}
-	});
-
-	L.markerClusterGroup = function (options) {
-		return new L.MarkerClusterGroup(options);
-	};
-
-	var MarkerCluster = L.MarkerCluster = L.Marker.extend({
-		options: L.Icon.prototype.options,
-
-		initialize: function (group, zoom, a, b) {
-
-			L.Marker.prototype.initialize.call(this, a ? (a._cLatLng || a.getLatLng()) : new L.LatLng(0, 0),
-	            { icon: this, pane: group.options.clusterPane });
-
-			this._group = group;
-			this._zoom = zoom;
-
-			this._markers = [];
-			this._childClusters = [];
-			this._childCount = 0;
-			this._iconNeedsUpdate = true;
-			this._boundsNeedUpdate = true;
-
-			this._bounds = new L.LatLngBounds();
-
-			if (a) {
-				this._addChild(a);
-			}
-			if (b) {
-				this._addChild(b);
-			}
-		},
-
-		//Recursively retrieve all child markers of this cluster
-		getAllChildMarkers: function (storageArray, ignoreDraggedMarker) {
-			storageArray = storageArray || [];
-
-			for (var i = this._childClusters.length - 1; i >= 0; i--) {
-				this._childClusters[i].getAllChildMarkers(storageArray, ignoreDraggedMarker);
-			}
-
-			for (var j = this._markers.length - 1; j >= 0; j--) {
-				if (ignoreDraggedMarker && this._markers[j].__dragStart) {
-					continue;
-				}
-				storageArray.push(this._markers[j]);
-			}
-
-			return storageArray;
-		},
-
-		//Returns the count of how many child markers we have
-		getChildCount: function () {
-			return this._childCount;
-		},
-
-		//Zoom to the minimum of showing all of the child markers, or the extents of this cluster
-		zoomToBounds: function (fitBoundsOptions) {
-			var childClusters = this._childClusters.slice(),
-				map = this._group._map,
-				boundsZoom = map.getBoundsZoom(this._bounds),
-				zoom = this._zoom + 1,
-				mapZoom = map.getZoom(),
-				i;
-
-			//calculate how far we need to zoom down to see all of the markers
-			while (childClusters.length > 0 && boundsZoom > zoom) {
-				zoom++;
-				var newClusters = [];
-				for (i = 0; i < childClusters.length; i++) {
-					newClusters = newClusters.concat(childClusters[i]._childClusters);
-				}
-				childClusters = newClusters;
-			}
-
-			if (boundsZoom > zoom) {
-				this._group._map.setView(this._latlng, zoom);
-			} else if (boundsZoom <= mapZoom) { //If fitBounds wouldn't zoom us down, zoom us down instead
-				this._group._map.setView(this._latlng, mapZoom + 1);
-			} else {
-				this._group._map.fitBounds(this._bounds, fitBoundsOptions);
-			}
-		},
-
-		getBounds: function () {
-			var bounds = new L.LatLngBounds();
-			bounds.extend(this._bounds);
-			return bounds;
-		},
-
-		_updateIcon: function () {
-			this._iconNeedsUpdate = true;
-			if (this._icon) {
-				this.setIcon(this);
-			}
-		},
-
-		//Cludge for Icon, we pretend to be an icon for performance
-		createIcon: function () {
-			if (this._iconNeedsUpdate) {
-				this._iconObj = this._group.options.iconCreateFunction(this);
-				this._iconNeedsUpdate = false;
-			}
-			return this._iconObj.createIcon();
-		},
-		createShadow: function () {
-			return this._iconObj.createShadow();
-		},
-
-
-		_addChild: function (new1, isNotificationFromChild) {
-
-			this._iconNeedsUpdate = true;
-
-			this._boundsNeedUpdate = true;
-			this._setClusterCenter(new1);
-
-			if (new1 instanceof L.MarkerCluster) {
-				if (!isNotificationFromChild) {
-					this._childClusters.push(new1);
-					new1.__parent = this;
-				}
-				this._childCount += new1._childCount;
-			} else {
-				if (!isNotificationFromChild) {
-					this._markers.push(new1);
-				}
-				this._childCount++;
-			}
-
-			if (this.__parent) {
-				this.__parent._addChild(new1, true);
-			}
-		},
-
-		/**
-		 * Makes sure the cluster center is set. If not, uses the child center if it is a cluster, or the marker position.
-		 * @param child L.MarkerCluster|L.Marker that will be used as cluster center if not defined yet.
-		 * @private
-		 */
-		_setClusterCenter: function (child) {
-			if (!this._cLatLng) {
-				// when clustering, take position of the first point as the cluster center
-				this._cLatLng = child._cLatLng || child._latlng;
-			}
-		},
-
-		/**
-		 * Assigns impossible bounding values so that the next extend entirely determines the new bounds.
-		 * This method avoids having to trash the previous L.LatLngBounds object and to create a new one, which is much slower for this class.
-		 * As long as the bounds are not extended, most other methods would probably fail, as they would with bounds initialized but not extended.
-		 * @private
-		 */
-		_resetBounds: function () {
-			var bounds = this._bounds;
-
-			if (bounds._southWest) {
-				bounds._southWest.lat = Infinity;
-				bounds._southWest.lng = Infinity;
-			}
-			if (bounds._northEast) {
-				bounds._northEast.lat = -Infinity;
-				bounds._northEast.lng = -Infinity;
-			}
-		},
-
-		_recalculateBounds: function () {
-			var markers = this._markers,
-			    childClusters = this._childClusters,
-			    latSum = 0,
-			    lngSum = 0,
-			    totalCount = this._childCount,
-			    i, child, childLatLng, childCount;
-
-			// Case where all markers are removed from the map and we are left with just an empty _topClusterLevel.
-			if (totalCount === 0) {
-				return;
-			}
-
-			// Reset rather than creating a new object, for performance.
-			this._resetBounds();
-
-			// Child markers.
-			for (i = 0; i < markers.length; i++) {
-				childLatLng = markers[i]._latlng;
-
-				this._bounds.extend(childLatLng);
-
-				latSum += childLatLng.lat;
-				lngSum += childLatLng.lng;
-			}
-
-			// Child clusters.
-			for (i = 0; i < childClusters.length; i++) {
-				child = childClusters[i];
-
-				// Re-compute child bounds and weighted position first if necessary.
-				if (child._boundsNeedUpdate) {
-					child._recalculateBounds();
-				}
-
-				this._bounds.extend(child._bounds);
-
-				childLatLng = child._wLatLng;
-				childCount = child._childCount;
-
-				latSum += childLatLng.lat * childCount;
-				lngSum += childLatLng.lng * childCount;
-			}
-
-			this._latlng = this._wLatLng = new L.LatLng(latSum / totalCount, lngSum / totalCount);
-
-			// Reset dirty flag.
-			this._boundsNeedUpdate = false;
-		},
-
-		//Set our markers position as given and add it to the map
-		_addToMap: function (startPos) {
-			if (startPos) {
-				this._backupLatlng = this._latlng;
-				this.setLatLng(startPos);
-			}
-			this._group._featureGroup.addLayer(this);
-		},
-
-		_recursivelyAnimateChildrenIn: function (bounds, center, maxZoom) {
-			this._recursively(bounds, this._group._map.getMinZoom(), maxZoom - 1,
-				function (c) {
-					var markers = c._markers,
-						i, m;
-					for (i = markers.length - 1; i >= 0; i--) {
-						m = markers[i];
-
-						//Only do it if the icon is still on the map
-						if (m._icon) {
-							m._setPos(center);
-							m.clusterHide();
-						}
-					}
-				},
-				function (c) {
-					var childClusters = c._childClusters,
-						j, cm;
-					for (j = childClusters.length - 1; j >= 0; j--) {
-						cm = childClusters[j];
-						if (cm._icon) {
-							cm._setPos(center);
-							cm.clusterHide();
-						}
-					}
-				}
-			);
-		},
-
-		_recursivelyAnimateChildrenInAndAddSelfToMap: function (bounds, mapMinZoom, previousZoomLevel, newZoomLevel) {
-			this._recursively(bounds, newZoomLevel, mapMinZoom,
-				function (c) {
-					c._recursivelyAnimateChildrenIn(bounds, c._group._map.latLngToLayerPoint(c.getLatLng()).round(), previousZoomLevel);
-
-					//TODO: depthToAnimateIn affects _isSingleParent, if there is a multizoom we may/may not be.
-					//As a hack we only do a animation free zoom on a single level zoom, if someone does multiple levels then we always animate
-					if (c._isSingleParent() && previousZoomLevel - 1 === newZoomLevel) {
-						c.clusterShow();
-						c._recursivelyRemoveChildrenFromMap(bounds, mapMinZoom, previousZoomLevel); //Immediately remove our children as we are replacing them. TODO previousBounds not bounds
-					} else {
-						c.clusterHide();
-					}
-
-					c._addToMap();
-				}
-			);
-		},
-
-		_recursivelyBecomeVisible: function (bounds, zoomLevel) {
-			this._recursively(bounds, this._group._map.getMinZoom(), zoomLevel, null, function (c) {
-				c.clusterShow();
-			});
-		},
-
-		_recursivelyAddChildrenToMap: function (startPos, zoomLevel, bounds) {
-			this._recursively(bounds, this._group._map.getMinZoom() - 1, zoomLevel,
-				function (c) {
-					if (zoomLevel === c._zoom) {
-						return;
-					}
-
-					//Add our child markers at startPos (so they can be animated out)
-					for (var i = c._markers.length - 1; i >= 0; i--) {
-						var nm = c._markers[i];
-
-						if (!bounds.contains(nm._latlng)) {
-							continue;
-						}
-
-						if (startPos) {
-							nm._backupLatlng = nm.getLatLng();
-
-							nm.setLatLng(startPos);
-							if (nm.clusterHide) {
-								nm.clusterHide();
-							}
-						}
-
-						c._group._featureGroup.addLayer(nm);
-					}
-				},
-				function (c) {
-					c._addToMap(startPos);
-				}
-			);
-		},
-
-		_recursivelyRestoreChildPositions: function (zoomLevel) {
-			//Fix positions of child markers
-			for (var i = this._markers.length - 1; i >= 0; i--) {
-				var nm = this._markers[i];
-				if (nm._backupLatlng) {
-					nm.setLatLng(nm._backupLatlng);
-					delete nm._backupLatlng;
-				}
-			}
-
-			if (zoomLevel - 1 === this._zoom) {
-				//Reposition child clusters
-				for (var j = this._childClusters.length - 1; j >= 0; j--) {
-					this._childClusters[j]._restorePosition();
-				}
-			} else {
-				for (var k = this._childClusters.length - 1; k >= 0; k--) {
-					this._childClusters[k]._recursivelyRestoreChildPositions(zoomLevel);
-				}
-			}
-		},
-
-		_restorePosition: function () {
-			if (this._backupLatlng) {
-				this.setLatLng(this._backupLatlng);
-				delete this._backupLatlng;
-			}
-		},
-
-		//exceptBounds: If set, don't remove any markers/clusters in it
-		_recursivelyRemoveChildrenFromMap: function (previousBounds, mapMinZoom, zoomLevel, exceptBounds) {
-			var m, i;
-			this._recursively(previousBounds, mapMinZoom - 1, zoomLevel - 1,
-				function (c) {
-					//Remove markers at every level
-					for (i = c._markers.length - 1; i >= 0; i--) {
-						m = c._markers[i];
-						if (!exceptBounds || !exceptBounds.contains(m._latlng)) {
-							c._group._featureGroup.removeLayer(m);
-							if (m.clusterShow) {
-								m.clusterShow();
-							}
-						}
-					}
-				},
-				function (c) {
-					//Remove child clusters at just the bottom level
-					for (i = c._childClusters.length - 1; i >= 0; i--) {
-						m = c._childClusters[i];
-						if (!exceptBounds || !exceptBounds.contains(m._latlng)) {
-							c._group._featureGroup.removeLayer(m);
-							if (m.clusterShow) {
-								m.clusterShow();
-							}
-						}
-					}
-				}
-			);
-		},
-
-		//Run the given functions recursively to this and child clusters
-		// boundsToApplyTo: a L.LatLngBounds representing the bounds of what clusters to recurse in to
-		// zoomLevelToStart: zoom level to start running functions (inclusive)
-		// zoomLevelToStop: zoom level to stop running functions (inclusive)
-		// runAtEveryLevel: function that takes an L.MarkerCluster as an argument that should be applied on every level
-		// runAtBottomLevel: function that takes an L.MarkerCluster as an argument that should be applied at only the bottom level
-		_recursively: function (boundsToApplyTo, zoomLevelToStart, zoomLevelToStop, runAtEveryLevel, runAtBottomLevel) {
-			var childClusters = this._childClusters,
-			    zoom = this._zoom,
-			    i, c;
-
-			if (zoomLevelToStart <= zoom) {
-				if (runAtEveryLevel) {
-					runAtEveryLevel(this);
-				}
-				if (runAtBottomLevel && zoom === zoomLevelToStop) {
-					runAtBottomLevel(this);
-				}
-			}
-
-			if (zoom < zoomLevelToStart || zoom < zoomLevelToStop) {
-				for (i = childClusters.length - 1; i >= 0; i--) {
-					c = childClusters[i];
-					if (c._boundsNeedUpdate) {
-						c._recalculateBounds();
-					}
-					if (boundsToApplyTo.intersects(c._bounds)) {
-						c._recursively(boundsToApplyTo, zoomLevelToStart, zoomLevelToStop, runAtEveryLevel, runAtBottomLevel);
-					}
-				}
-			}
-		},
-
-		//Returns true if we are the parent of only one cluster and that cluster is the same as us
-		_isSingleParent: function () {
-			//Don't need to check this._markers as the rest won't work if there are any
-			return this._childClusters.length > 0 && this._childClusters[0]._childCount === this._childCount;
-		}
-	});
-
-	/*
-	* Extends L.Marker to include two extra methods: clusterHide and clusterShow.
-	* 
-	* They work as setOpacity(0) and setOpacity(1) respectively, but
-	* don't overwrite the options.opacity
-	* 
-	*/
-
-	L.Marker.include({
-		clusterHide: function () {
-			var backup = this.options.opacity;
-			this.setOpacity(0);
-			this.options.opacity = backup;
-			return this;
-		},
-		
-		clusterShow: function () {
-			return this.setOpacity(this.options.opacity);
-		}
-	});
-
-	L.DistanceGrid = function (cellSize) {
-		this._cellSize = cellSize;
-		this._sqCellSize = cellSize * cellSize;
-		this._grid = {};
-		this._objectPoint = { };
-	};
-
-	L.DistanceGrid.prototype = {
-
-		addObject: function (obj, point) {
-			var x = this._getCoord(point.x),
-			    y = this._getCoord(point.y),
-			    grid = this._grid,
-			    row = grid[y] = grid[y] || {},
-			    cell = row[x] = row[x] || [],
-			    stamp = L.Util.stamp(obj);
-
-			this._objectPoint[stamp] = point;
-
-			cell.push(obj);
-		},
-
-		updateObject: function (obj, point) {
-			this.removeObject(obj);
-			this.addObject(obj, point);
-		},
-
-		//Returns true if the object was found
-		removeObject: function (obj, point) {
-			var x = this._getCoord(point.x),
-			    y = this._getCoord(point.y),
-			    grid = this._grid,
-			    row = grid[y] = grid[y] || {},
-			    cell = row[x] = row[x] || [],
-			    i, len;
-
-			delete this._objectPoint[L.Util.stamp(obj)];
-
-			for (i = 0, len = cell.length; i < len; i++) {
-				if (cell[i] === obj) {
-
-					cell.splice(i, 1);
-
-					if (len === 1) {
-						delete row[x];
-					}
-
-					return true;
-				}
-			}
-
-		},
-
-		eachObject: function (fn, context) {
-			var i, j, k, len, row, cell, removed,
-			    grid = this._grid;
-
-			for (i in grid) {
-				row = grid[i];
-
-				for (j in row) {
-					cell = row[j];
-
-					for (k = 0, len = cell.length; k < len; k++) {
-						removed = fn.call(context, cell[k]);
-						if (removed) {
-							k--;
-							len--;
-						}
-					}
-				}
-			}
-		},
-
-		getNearObject: function (point) {
-			var x = this._getCoord(point.x),
-			    y = this._getCoord(point.y),
-			    i, j, k, row, cell, len, obj, dist,
-			    objectPoint = this._objectPoint,
-			    closestDistSq = this._sqCellSize,
-			    closest = null;
-
-			for (i = y - 1; i <= y + 1; i++) {
-				row = this._grid[i];
-				if (row) {
-
-					for (j = x - 1; j <= x + 1; j++) {
-						cell = row[j];
-						if (cell) {
-
-							for (k = 0, len = cell.length; k < len; k++) {
-								obj = cell[k];
-								dist = this._sqDist(objectPoint[L.Util.stamp(obj)], point);
-								if (dist < closestDistSq ||
-									dist <= closestDistSq && closest === null) {
-									closestDistSq = dist;
-									closest = obj;
-								}
-							}
-						}
-					}
-				}
-			}
-			return closest;
-		},
-
-		_getCoord: function (x) {
-			var coord = Math.floor(x / this._cellSize);
-			return isFinite(coord) ? coord : x;
-		},
-
-		_sqDist: function (p, p2) {
-			var dx = p2.x - p.x,
-			    dy = p2.y - p.y;
-			return dx * dx + dy * dy;
-		}
-	};
-
-	/* Copyright (c) 2012 the authors listed at the following URL, and/or
-	the authors of referenced articles or incorporated external code:
-	http://en.literateprograms.org/Quickhull_(Javascript)?action=history&offset=20120410175256
-
-	Permission is hereby granted, free of charge, to any person obtaining
-	a copy of this software and associated documentation files (the
-	"Software"), to deal in the Software without restriction, including
-	without limitation the rights to use, copy, modify, merge, publish,
-	distribute, sublicense, and/or sell copies of the Software, and to
-	permit persons to whom the Software is furnished to do so, subject to
-	the following conditions:
-
-	The above copyright notice and this permission notice shall be
-	included in all copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-	EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-	CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	Retrieved from: http://en.literateprograms.org/Quickhull_(Javascript)?oldid=18434
-	*/
-
-	(function () {
-		L.QuickHull = {
-
-			/*
-			 * @param {Object} cpt a point to be measured from the baseline
-			 * @param {Array} bl the baseline, as represented by a two-element
-			 *   array of latlng objects.
-			 * @returns {Number} an approximate distance measure
-			 */
-			getDistant: function (cpt, bl) {
-				var vY = bl[1].lat - bl[0].lat,
-					vX = bl[0].lng - bl[1].lng;
-				return (vX * (cpt.lat - bl[0].lat) + vY * (cpt.lng - bl[0].lng));
-			},
-
-			/*
-			 * @param {Array} baseLine a two-element array of latlng objects
-			 *   representing the baseline to project from
-			 * @param {Array} latLngs an array of latlng objects
-			 * @returns {Object} the maximum point and all new points to stay
-			 *   in consideration for the hull.
-			 */
-			findMostDistantPointFromBaseLine: function (baseLine, latLngs) {
-				var maxD = 0,
-					maxPt = null,
-					newPoints = [],
-					i, pt, d;
-
-				for (i = latLngs.length - 1; i >= 0; i--) {
-					pt = latLngs[i];
-					d = this.getDistant(pt, baseLine);
-
-					if (d > 0) {
-						newPoints.push(pt);
-					} else {
-						continue;
-					}
-
-					if (d > maxD) {
-						maxD = d;
-						maxPt = pt;
-					}
-				}
-
-				return { maxPoint: maxPt, newPoints: newPoints };
-			},
-
-
-			/*
-			 * Given a baseline, compute the convex hull of latLngs as an array
-			 * of latLngs.
-			 *
-			 * @param {Array} latLngs
-			 * @returns {Array}
-			 */
-			buildConvexHull: function (baseLine, latLngs) {
-				var convexHullBaseLines = [],
-					t = this.findMostDistantPointFromBaseLine(baseLine, latLngs);
-
-				if (t.maxPoint) { // if there is still a point "outside" the base line
-					convexHullBaseLines =
-						convexHullBaseLines.concat(
-							this.buildConvexHull([baseLine[0], t.maxPoint], t.newPoints)
-						);
-					convexHullBaseLines =
-						convexHullBaseLines.concat(
-							this.buildConvexHull([t.maxPoint, baseLine[1]], t.newPoints)
-						);
-					return convexHullBaseLines;
-				} else {  // if there is no more point "outside" the base line, the current base line is part of the convex hull
-					return [baseLine[0]];
-				}
-			},
-
-			/*
-			 * Given an array of latlngs, compute a convex hull as an array
-			 * of latlngs
-			 *
-			 * @param {Array} latLngs
-			 * @returns {Array}
-			 */
-			getConvexHull: function (latLngs) {
-				// find first baseline
-				var maxLat = false, minLat = false,
-					maxLng = false, minLng = false,
-					maxLatPt = null, minLatPt = null,
-					maxLngPt = null, minLngPt = null,
-					maxPt = null, minPt = null,
-					i;
-
-				for (i = latLngs.length - 1; i >= 0; i--) {
-					var pt = latLngs[i];
-					if (maxLat === false || pt.lat > maxLat) {
-						maxLatPt = pt;
-						maxLat = pt.lat;
-					}
-					if (minLat === false || pt.lat < minLat) {
-						minLatPt = pt;
-						minLat = pt.lat;
-					}
-					if (maxLng === false || pt.lng > maxLng) {
-						maxLngPt = pt;
-						maxLng = pt.lng;
-					}
-					if (minLng === false || pt.lng < minLng) {
-						minLngPt = pt;
-						minLng = pt.lng;
-					}
-				}
-				
-				if (minLat !== maxLat) {
-					minPt = minLatPt;
-					maxPt = maxLatPt;
-				} else {
-					minPt = minLngPt;
-					maxPt = maxLngPt;
-				}
-
-				var ch = [].concat(this.buildConvexHull([minPt, maxPt], latLngs),
-									this.buildConvexHull([maxPt, minPt], latLngs));
-				return ch;
-			}
-		};
-	}());
-
-	L.MarkerCluster.include({
-		getConvexHull: function () {
-			var childMarkers = this.getAllChildMarkers(),
-				points = [],
-				p, i;
-
-			for (i = childMarkers.length - 1; i >= 0; i--) {
-				p = childMarkers[i].getLatLng();
-				points.push(p);
-			}
-
-			return L.QuickHull.getConvexHull(points);
-		}
-	});
-
-	//This code is 100% based on https://github.com/jawj/OverlappingMarkerSpiderfier-Leaflet
-	//Huge thanks to jawj for implementing it first to make my job easy :-)
-
-	L.MarkerCluster.include({
-
-		_2PI: Math.PI * 2,
-		_circleFootSeparation: 25, //related to circumference of circle
-		_circleStartAngle: 0,
-
-		_spiralFootSeparation:  28, //related to size of spiral (experiment!)
-		_spiralLengthStart: 11,
-		_spiralLengthFactor: 5,
-
-		_circleSpiralSwitchover: 9, //show spiral instead of circle from this marker count upwards.
-									// 0 -> always spiral; Infinity -> always circle
-
-		spiderfy: function () {
-			if (this._group._spiderfied === this || this._group._inZoomAnimation) {
-				return;
-			}
-
-			var childMarkers = this.getAllChildMarkers(null, true),
-				group = this._group,
-				map = group._map,
-				center = map.latLngToLayerPoint(this._latlng),
-				positions;
-
-			this._group._unspiderfy();
-			this._group._spiderfied = this;
-
-			//TODO Maybe: childMarkers order by distance to center
-
-			if (this._group.options.spiderfyShapePositions) {
-				positions = this._group.options.spiderfyShapePositions(childMarkers.length, center);
-			} else if (childMarkers.length >= this._circleSpiralSwitchover) {
-				positions = this._generatePointsSpiral(childMarkers.length, center);
-			} else {
-				center.y += 10; // Otherwise circles look wrong => hack for standard blue icon, renders differently for other icons.
-				positions = this._generatePointsCircle(childMarkers.length, center);
-			}
-
-			this._animationSpiderfy(childMarkers, positions);
-		},
-
-		unspiderfy: function (zoomDetails) {
-			/// <param Name="zoomDetails">Argument from zoomanim if being called in a zoom animation or null otherwise</param>
-			if (this._group._inZoomAnimation) {
-				return;
-			}
-			this._animationUnspiderfy(zoomDetails);
-
-			this._group._spiderfied = null;
-		},
-
-		_generatePointsCircle: function (count, centerPt) {
-			var circumference = this._group.options.spiderfyDistanceMultiplier * this._circleFootSeparation * (2 + count),
-				legLength = circumference / this._2PI,  //radius from circumference
-				angleStep = this._2PI / count,
-				res = [],
-				i, angle;
-
-			legLength = Math.max(legLength, 35); // Minimum distance to get outside the cluster icon.
-
-			res.length = count;
-
-			for (i = 0; i < count; i++) { // Clockwise, like spiral.
-				angle = this._circleStartAngle + i * angleStep;
-				res[i] = new L.Point(centerPt.x + legLength * Math.cos(angle), centerPt.y + legLength * Math.sin(angle))._round();
-			}
-
-			return res;
-		},
-
-		_generatePointsSpiral: function (count, centerPt) {
-			var spiderfyDistanceMultiplier = this._group.options.spiderfyDistanceMultiplier,
-				legLength = spiderfyDistanceMultiplier * this._spiralLengthStart,
-				separation = spiderfyDistanceMultiplier * this._spiralFootSeparation,
-				lengthFactor = spiderfyDistanceMultiplier * this._spiralLengthFactor * this._2PI,
-				angle = 0,
-				res = [],
-				i;
-
-			res.length = count;
-
-			// Higher index, closer position to cluster center.
-			for (i = count; i >= 0; i--) {
-				// Skip the first position, so that we are already farther from center and we avoid
-				// being under the default cluster icon (especially important for Circle Markers).
-				if (i < count) {
-					res[i] = new L.Point(centerPt.x + legLength * Math.cos(angle), centerPt.y + legLength * Math.sin(angle))._round();
-				}
-				angle += separation / legLength + i * 0.0005;
-				legLength += lengthFactor / angle;
-			}
-			return res;
-		},
-
-		_noanimationUnspiderfy: function () {
-			var group = this._group,
-				map = group._map,
-				fg = group._featureGroup,
-				childMarkers = this.getAllChildMarkers(null, true),
-				m, i;
-
-			group._ignoreMove = true;
-
-			this.setOpacity(1);
-			for (i = childMarkers.length - 1; i >= 0; i--) {
-				m = childMarkers[i];
-
-				fg.removeLayer(m);
-
-				if (m._preSpiderfyLatlng) {
-					m.setLatLng(m._preSpiderfyLatlng);
-					delete m._preSpiderfyLatlng;
-				}
-				if (m.setZIndexOffset) {
-					m.setZIndexOffset(0);
-				}
-
-				if (m._spiderLeg) {
-					map.removeLayer(m._spiderLeg);
-					delete m._spiderLeg;
-				}
-			}
-
-			group.fire('unspiderfied', {
-				cluster: this,
-				markers: childMarkers
-			});
-			group._ignoreMove = false;
-			group._spiderfied = null;
-		}
-	});
-
-	//Non Animated versions of everything
-	L.MarkerClusterNonAnimated = L.MarkerCluster.extend({
-		_animationSpiderfy: function (childMarkers, positions) {
-			var group = this._group,
-				map = group._map,
-				fg = group._featureGroup,
-				legOptions = this._group.options.spiderLegPolylineOptions,
-				i, m, leg, newPos;
-
-			group._ignoreMove = true;
-
-			// Traverse in ascending order to make sure that inner circleMarkers are on top of further legs. Normal markers are re-ordered by newPosition.
-			// The reverse order trick no longer improves performance on modern browsers.
-			for (i = 0; i < childMarkers.length; i++) {
-				newPos = map.layerPointToLatLng(positions[i]);
-				m = childMarkers[i];
-
-				// Add the leg before the marker, so that in case the latter is a circleMarker, the leg is behind it.
-				leg = new L.Polyline([this._latlng, newPos], legOptions);
-				map.addLayer(leg);
-				m._spiderLeg = leg;
-
-				// Now add the marker.
-				m._preSpiderfyLatlng = m._latlng;
-				m.setLatLng(newPos);
-				if (m.setZIndexOffset) {
-					m.setZIndexOffset(1000000); //Make these appear on top of EVERYTHING
-				}
-
-				fg.addLayer(m);
-			}
-			this.setOpacity(0.3);
-
-			group._ignoreMove = false;
-			group.fire('spiderfied', {
-				cluster: this,
-				markers: childMarkers
-			});
-		},
-
-		_animationUnspiderfy: function () {
-			this._noanimationUnspiderfy();
-		}
-	});
-
-	//Animated versions here
-	L.MarkerCluster.include({
-
-		_animationSpiderfy: function (childMarkers, positions) {
-			var me = this,
-				group = this._group,
-				map = group._map,
-				fg = group._featureGroup,
-				thisLayerLatLng = this._latlng,
-				thisLayerPos = map.latLngToLayerPoint(thisLayerLatLng),
-				svg = L.Path.SVG,
-				legOptions = L.extend({}, this._group.options.spiderLegPolylineOptions), // Copy the options so that we can modify them for animation.
-				finalLegOpacity = legOptions.opacity,
-				i, m, leg, legPath, legLength, newPos;
-
-			if (finalLegOpacity === undefined) {
-				finalLegOpacity = L.MarkerClusterGroup.prototype.options.spiderLegPolylineOptions.opacity;
-			}
-
-			if (svg) {
-				// If the initial opacity of the spider leg is not 0 then it appears before the animation starts.
-				legOptions.opacity = 0;
-
-				// Add the class for CSS transitions.
-				legOptions.className = (legOptions.className || '') + ' leaflet-cluster-spider-leg';
-			} else {
-				// Make sure we have a defined opacity.
-				legOptions.opacity = finalLegOpacity;
-			}
-
-			group._ignoreMove = true;
-
-			// Add markers and spider legs to map, hidden at our center point.
-			// Traverse in ascending order to make sure that inner circleMarkers are on top of further legs. Normal markers are re-ordered by newPosition.
-			// The reverse order trick no longer improves performance on modern browsers.
-			for (i = 0; i < childMarkers.length; i++) {
-				m = childMarkers[i];
-
-				newPos = map.layerPointToLatLng(positions[i]);
-
-				// Add the leg before the marker, so that in case the latter is a circleMarker, the leg is behind it.
-				leg = new L.Polyline([thisLayerLatLng, newPos], legOptions);
-				map.addLayer(leg);
-				m._spiderLeg = leg;
-
-				// Explanations: https://jakearchibald.com/2013/animated-line-drawing-svg/
-				// In our case the transition property is declared in the CSS file.
-				if (svg) {
-					legPath = leg._path;
-					legLength = legPath.getTotalLength() + 0.1; // Need a small extra length to avoid remaining dot in Firefox.
-					legPath.style.strokeDasharray = legLength; // Just 1 length is enough, it will be duplicated.
-					legPath.style.strokeDashoffset = legLength;
-				}
-
-				// If it is a marker, add it now and we'll animate it out
-				if (m.setZIndexOffset) {
-					m.setZIndexOffset(1000000); // Make normal markers appear on top of EVERYTHING
-				}
-				if (m.clusterHide) {
-					m.clusterHide();
-				}
-				
-				// Vectors just get immediately added
-				fg.addLayer(m);
-
-				if (m._setPos) {
-					m._setPos(thisLayerPos);
-				}
-			}
-
-			group._forceLayout();
-			group._animationStart();
-
-			// Reveal markers and spider legs.
-			for (i = childMarkers.length - 1; i >= 0; i--) {
-				newPos = map.layerPointToLatLng(positions[i]);
-				m = childMarkers[i];
-
-				//Move marker to new position
-				m._preSpiderfyLatlng = m._latlng;
-				m.setLatLng(newPos);
-				
-				if (m.clusterShow) {
-					m.clusterShow();
-				}
-
-				// Animate leg (animation is actually delegated to CSS transition).
-				if (svg) {
-					leg = m._spiderLeg;
-					legPath = leg._path;
-					legPath.style.strokeDashoffset = 0;
-					//legPath.style.strokeOpacity = finalLegOpacity;
-					leg.setStyle({opacity: finalLegOpacity});
-				}
-			}
-			this.setOpacity(0.3);
-
-			group._ignoreMove = false;
-
-			setTimeout(function () {
-				group._animationEnd();
-				group.fire('spiderfied', {
-					cluster: me,
-					markers: childMarkers
-				});
-			}, 200);
-		},
-
-		_animationUnspiderfy: function (zoomDetails) {
-			var me = this,
-				group = this._group,
-				map = group._map,
-				fg = group._featureGroup,
-				thisLayerPos = zoomDetails ? map._latLngToNewLayerPoint(this._latlng, zoomDetails.zoom, zoomDetails.center) : map.latLngToLayerPoint(this._latlng),
-				childMarkers = this.getAllChildMarkers(null, true),
-				svg = L.Path.SVG,
-				m, i, leg, legPath, legLength, nonAnimatable;
-
-			group._ignoreMove = true;
-			group._animationStart();
-
-			//Make us visible and bring the child markers back in
-			this.setOpacity(1);
-			for (i = childMarkers.length - 1; i >= 0; i--) {
-				m = childMarkers[i];
-
-				//Marker was added to us after we were spiderfied
-				if (!m._preSpiderfyLatlng) {
-					continue;
-				}
-
-				//Close any popup on the marker first, otherwise setting the location of the marker will make the map scroll
-				m.closePopup();
-
-				//Fix up the location to the real one
-				m.setLatLng(m._preSpiderfyLatlng);
-				delete m._preSpiderfyLatlng;
-
-				//Hack override the location to be our center
-				nonAnimatable = true;
-				if (m._setPos) {
-					m._setPos(thisLayerPos);
-					nonAnimatable = false;
-				}
-				if (m.clusterHide) {
-					m.clusterHide();
-					nonAnimatable = false;
-				}
-				if (nonAnimatable) {
-					fg.removeLayer(m);
-				}
-
-				// Animate the spider leg back in (animation is actually delegated to CSS transition).
-				if (svg) {
-					leg = m._spiderLeg;
-					legPath = leg._path;
-					legLength = legPath.getTotalLength() + 0.1;
-					legPath.style.strokeDashoffset = legLength;
-					leg.setStyle({opacity: 0});
-				}
-			}
-
-			group._ignoreMove = false;
-
-			setTimeout(function () {
-				//If we have only <= one child left then that marker will be shown on the map so don't remove it!
-				var stillThereChildCount = 0;
-				for (i = childMarkers.length - 1; i >= 0; i--) {
-					m = childMarkers[i];
-					if (m._spiderLeg) {
-						stillThereChildCount++;
-					}
-				}
-
-
-				for (i = childMarkers.length - 1; i >= 0; i--) {
-					m = childMarkers[i];
-
-					if (!m._spiderLeg) { //Has already been unspiderfied
-						continue;
-					}
-
-					if (m.clusterShow) {
-						m.clusterShow();
-					}
-					if (m.setZIndexOffset) {
-						m.setZIndexOffset(0);
-					}
-
-					if (stillThereChildCount > 1) {
-						fg.removeLayer(m);
-					}
-
-					map.removeLayer(m._spiderLeg);
-					delete m._spiderLeg;
-				}
-				group._animationEnd();
-				group.fire('unspiderfied', {
-					cluster: me,
-					markers: childMarkers
-				});
-			}, 200);
-		}
-	});
-
-
-	L.MarkerClusterGroup.include({
-		//The MarkerCluster currently spiderfied (if any)
-		_spiderfied: null,
-
-		unspiderfy: function () {
-			this._unspiderfy.apply(this, arguments);
-		},
-
-		_spiderfierOnAdd: function () {
-			this._map.on('click', this._unspiderfyWrapper, this);
-
-			if (this._map.options.zoomAnimation) {
-				this._map.on('zoomstart', this._unspiderfyZoomStart, this);
-			}
-			//Browsers without zoomAnimation or a big zoom don't fire zoomstart
-			this._map.on('zoomend', this._noanimationUnspiderfy, this);
-
-			if (!L.Browser.touch) {
-				this._map.getRenderer(this);
-				//Needs to happen in the pageload, not after, or animations don't work in webkit
-				//  http://stackoverflow.com/questions/8455200/svg-animate-with-dynamically-added-elements
-				//Disable on touch browsers as the animation messes up on a touch zoom and isn't very noticable
-			}
-		},
-
-		_spiderfierOnRemove: function () {
-			this._map.off('click', this._unspiderfyWrapper, this);
-			this._map.off('zoomstart', this._unspiderfyZoomStart, this);
-			this._map.off('zoomanim', this._unspiderfyZoomAnim, this);
-			this._map.off('zoomend', this._noanimationUnspiderfy, this);
-
-			//Ensure that markers are back where they should be
-			// Use no animation to avoid a sticky leaflet-cluster-anim class on mapPane
-			this._noanimationUnspiderfy();
-		},
-
-		//On zoom start we add a zoomanim handler so that we are guaranteed to be last (after markers are animated)
-		//This means we can define the animation they do rather than Markers doing an animation to their actual location
-		_unspiderfyZoomStart: function () {
-			if (!this._map) { //May have been removed from the map by a zoomEnd handler
-				return;
-			}
-
-			this._map.on('zoomanim', this._unspiderfyZoomAnim, this);
-		},
-
-		_unspiderfyZoomAnim: function (zoomDetails) {
-			//Wait until the first zoomanim after the user has finished touch-zooming before running the animation
-			if (L.DomUtil.hasClass(this._map._mapPane, 'leaflet-touching')) {
-				return;
-			}
-
-			this._map.off('zoomanim', this._unspiderfyZoomAnim, this);
-			this._unspiderfy(zoomDetails);
-		},
-
-		_unspiderfyWrapper: function () {
-			/// <summary>_unspiderfy but passes no arguments</summary>
-			this._unspiderfy();
-		},
-
-		_unspiderfy: function (zoomDetails) {
-			if (this._spiderfied) {
-				this._spiderfied.unspiderfy(zoomDetails);
-			}
-		},
-
-		_noanimationUnspiderfy: function () {
-			if (this._spiderfied) {
-				this._spiderfied._noanimationUnspiderfy();
-			}
-		},
-
-		//If the given layer is currently being spiderfied then we unspiderfy it so it isn't on the map anymore etc
-		_unspiderfyLayer: function (layer) {
-			if (layer._spiderLeg) {
-				this._featureGroup.removeLayer(layer);
-
-				if (layer.clusterShow) {
-					layer.clusterShow();
-				}
-					//Position will be fixed up immediately in _animationUnspiderfy
-				if (layer.setZIndexOffset) {
-					layer.setZIndexOffset(0);
-				}
-
-				this._map.removeLayer(layer._spiderLeg);
-				delete layer._spiderLeg;
-			}
-		}
-	});
-
-	/**
-	 * Adds 1 public method to MCG and 1 to L.Marker to facilitate changing
-	 * markers' icon options and refreshing their icon and their parent clusters
-	 * accordingly (case where their iconCreateFunction uses data of childMarkers
-	 * to make up the cluster icon).
-	 */
-
-
-	L.MarkerClusterGroup.include({
-		/**
-		 * Updates the icon of all clusters which are parents of the given marker(s).
-		 * In singleMarkerMode, also updates the given marker(s) icon.
-		 * @param layers L.MarkerClusterGroup|L.LayerGroup|Array(L.Marker)|Map(L.Marker)|
-		 * L.MarkerCluster|L.Marker (optional) list of markers (or single marker) whose parent
-		 * clusters need to be updated. If not provided, retrieves all child markers of this.
-		 * @returns {L.MarkerClusterGroup}
-		 */
-		refreshClusters: function (layers) {
-			if (!layers) {
-				layers = this._topClusterLevel.getAllChildMarkers();
-			} else if (layers instanceof L.MarkerClusterGroup) {
-				layers = layers._topClusterLevel.getAllChildMarkers();
-			} else if (layers instanceof L.LayerGroup) {
-				layers = layers._layers;
-			} else if (layers instanceof L.MarkerCluster) {
-				layers = layers.getAllChildMarkers();
-			} else if (layers instanceof L.Marker) {
-				layers = [layers];
-			} // else: must be an Array(L.Marker)|Map(L.Marker)
-			this._flagParentsIconsNeedUpdate(layers);
-			this._refreshClustersIcons();
-
-			// In case of singleMarkerMode, also re-draw the markers.
-			if (this.options.singleMarkerMode) {
-				this._refreshSingleMarkerModeMarkers(layers);
-			}
-
-			return this;
-		},
-
-		/**
-		 * Simply flags all parent clusters of the given markers as having a "dirty" icon.
-		 * @param layers Array(L.Marker)|Map(L.Marker) list of markers.
-		 * @private
-		 */
-		_flagParentsIconsNeedUpdate: function (layers) {
-			var id, parent;
-
-			// Assumes layers is an Array or an Object whose prototype is non-enumerable.
-			for (id in layers) {
-				// Flag parent clusters' icon as "dirty", all the way up.
-				// Dumb process that flags multiple times upper parents, but still
-				// much more efficient than trying to be smart and make short lists,
-				// at least in the case of a hierarchy following a power law:
-				// http://jsperf.com/flag-nodes-in-power-hierarchy/2
-				parent = layers[id].__parent;
-				while (parent) {
-					parent._iconNeedsUpdate = true;
-					parent = parent.__parent;
-				}
-			}
-		},
-
-		/**
-		 * Re-draws the icon of the supplied markers.
-		 * To be used in singleMarkerMode only.
-		 * @param layers Array(L.Marker)|Map(L.Marker) list of markers.
-		 * @private
-		 */
-		_refreshSingleMarkerModeMarkers: function (layers) {
-			var id, layer;
-
-			for (id in layers) {
-				layer = layers[id];
-
-				// Make sure we do not override markers that do not belong to THIS group.
-				if (this.hasLayer(layer)) {
-					// Need to re-create the icon first, then re-draw the marker.
-					layer.setIcon(this._overrideMarkerIcon(layer));
-				}
-			}
-		}
-	});
-
-	L.Marker.include({
-		/**
-		 * Updates the given options in the marker's icon and refreshes the marker.
-		 * @param options map object of icon options.
-		 * @param directlyRefreshClusters boolean (optional) true to trigger
-		 * MCG.refreshClustersOf() right away with this single marker.
-		 * @returns {L.Marker}
-		 */
-		refreshIconOptions: function (options, directlyRefreshClusters) {
-			var icon = this.options.icon;
-
-			L.setOptions(icon, options);
-
-			this.setIcon(icon);
-
-			// Shortcut to refresh the associated MCG clusters right away.
-			// To be used when refreshing a single marker.
-			// Otherwise, better use MCG.refreshClusters() once at the end with
-			// the list of modified markers.
-			if (directlyRefreshClusters && this.__parent) {
-				this.__parent._group.refreshClusters(this);
-			}
-
-			return this;
-		}
-	});
-
-	exports.MarkerClusterGroup = MarkerClusterGroup;
-	exports.MarkerCluster = MarkerCluster;
-
-	Object.defineProperty(exports, '__esModule', { value: true });
-
-}));
-//# sourceMappingURL=leaflet.markercluster-src.js.map
-
 
 /***/ },
 
@@ -18819,9 +18922,14 @@ var __webpack_exports__ = {};
   \************************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LandmarkLayer: () => (/* reexport safe */ _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   ListingMap: () => (/* reexport safe */ _ListingMap__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   MapModalFilters: () => (/* reexport safe */ _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   MapModalRail: () => (/* reexport safe */ _MapModalRail__WEBPACK_IMPORTED_MODULE_5__["default"]),
 /* harmony export */   ProductMap: () => (/* reexport safe */ _ProductMap__WEBPACK_IMPORTED_MODULE_2__["default"]),
 /* harmony export */   bootAll: () => (/* binding */ bootAll),
+/* harmony export */   clusterCellKey: () => (/* reexport safe */ _MapsManager__WEBPACK_IMPORTED_MODULE_0__.clusterCellKey),
+/* harmony export */   clusterRadiusForZoom: () => (/* reexport safe */ _MapsManager__WEBPACK_IMPORTED_MODULE_0__.clusterRadiusForZoom),
 /* harmony export */   mapsManager: () => (/* reexport safe */ _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"]),
 /* harmony export */   markerFactory: () => (/* reexport safe */ _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"]),
 /* harmony export */   placesAutocompleteService: () => (/* reexport safe */ _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_4__["default"])
@@ -18831,6 +18939,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ProductMap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ProductMap */ "./resources/js/maps/ProductMap.js");
 /* harmony import */ var _ListingMap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ListingMap */ "./resources/js/maps/ListingMap.js");
 /* harmony import */ var _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./PlacesAutocompleteService */ "./resources/js/maps/PlacesAutocompleteService.js");
+/* harmony import */ var _MapModalRail__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./MapModalRail */ "./resources/js/maps/MapModalRail.js");
+/* harmony import */ var _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./MapModalFilters */ "./resources/js/maps/MapModalFilters.js");
+/* harmony import */ var _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./LandmarkLayer */ "./resources/js/maps/LandmarkLayer.js");
 /**
  * CAG Maps bundle — Leaflet product/listing maps + deferred Places shim
  */
@@ -18839,11 +18950,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
 window.CAGMaps = {
   MapsManager: _MapsManager__WEBPACK_IMPORTED_MODULE_0__["default"],
+  clusterRadiusForZoom: _MapsManager__WEBPACK_IMPORTED_MODULE_0__.clusterRadiusForZoom,
+  clusterCellKey: _MapsManager__WEBPACK_IMPORTED_MODULE_0__.clusterCellKey,
   MarkerFactory: _MarkerFactory__WEBPACK_IMPORTED_MODULE_1__["default"],
   ProductMap: _ProductMap__WEBPACK_IMPORTED_MODULE_2__["default"],
   ListingMap: _ListingMap__WEBPACK_IMPORTED_MODULE_3__["default"],
+  MapModalRail: _MapModalRail__WEBPACK_IMPORTED_MODULE_5__["default"],
+  MapModalFilters: _MapModalFilters__WEBPACK_IMPORTED_MODULE_6__["default"],
+  LandmarkLayer: _LandmarkLayer__WEBPACK_IMPORTED_MODULE_7__["default"],
   Places: _PlacesAutocompleteService__WEBPACK_IMPORTED_MODULE_4__["default"]
 };
 

@@ -9,11 +9,10 @@ use App\Services\Translation\ListingViewTranslationService;
 class CampCardPresenter
 {
     public function __construct(
-        private CampTrustSignalResolver $trust,
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
-    public function present(Camp $camp): array
+    public function present(Camp $camp, array $query = []): array
     {
         $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
 
@@ -29,7 +28,7 @@ class CampCardPresenter
             'id' => $camp->id,
             'title' => $camp->title,
             'slug' => $camp->slug,
-            'url' => route('vacations.camps.show', $camp->slug),
+            'url' => route('vacations.camps.show', array_merge(['slug' => $camp->slug], $this->filterQuery($query))),
             'image' => media_url($camp->thumbnail_path),
             'gallery_images' => get_galleries_image_link($camp, 0),
             'badge' => __('vacations.badge_camp'),
@@ -41,6 +40,7 @@ class CampCardPresenter
             'facilities' => $facilities,
             'addon_pills' => $addons,
             'duration_pill' => null,
+            'guests_label' => $this->guestsLabel($camp),
             'price' => $price,
             'price_label' => $price !== null
                 ? __('vacations.price_from_per_night', ['price' => '€' . number_format($price, 0)])
@@ -56,18 +56,21 @@ class CampCardPresenter
             'slider_cta' => __('vacations.book_now'),
             'cta' => __('vacations.book_now'),
             'cta_class' => 'camp',
-            'trust' => $this->trust->resolve($camp),
+            // Camps have no guest review flow; do not borrow guiding Review scores onto cards.
+            'trust' => null,
+            'rating' => null,
+            'review_count' => 0,
         ];
     }
 
-    public function presentListRow(Camp $camp, ?int $destinationId = null): array
+    public function presentListRow(Camp $camp, ?int $destinationId = null, array $query = []): array
     {
-        $card = $this->present($camp);
+        $card = $this->present($camp, $query);
         $facilities = $this->facilityLabels($camp);
         $price = $camp->getLowestAccommodationOrOfferPrice();
         $card['layout'] = 'row';
         $card['destination_id'] = $destinationId;
-        $card['image_badge'] = $this->imageBadge($camp);
+        $card['image_badge'] = null;
         $card['target_fish_tags'] = $this->targetFishTags($camp);
         $card['facilities_extra'] = max(0, $camp->facilities->count() - count($facilities));
         $card['listing_price_prefix'] = __('vacations.starting_from_label');
@@ -79,8 +82,25 @@ class CampCardPresenter
         $card['listing_included'] = $facilities;
         $card['target_fish_tags_extra'] = max(0, count($card['target_fish_tags']) - 3);
         $card['duration_pill'] = $this->minimumStayPill($camp);
+        $card['duration_label'] = $card['duration_pill'];
+        $card['methods_label'] = ($methods = $this->methodLabels($camp)) !== []
+            ? implode(', ', $methods)
+            : null;
+        $card['listing_cta'] = __('vacations.see_more');
+        $card['verified'] = true;
+        $card['whats_included_title'] = __('offers.included_heading');
 
         return $card;
+    }
+
+    private function guestsLabel(Camp $camp): ?string
+    {
+        $capacity = (int) ($camp->accommodations->first()?->max_occupancy ?? 0);
+        if ($capacity < 1) {
+            return null;
+        }
+
+        return 'Max '.$capacity.' '.($capacity === 1 ? __('vacations.person') : __('vacations.persons'));
     }
 
     /**
@@ -273,19 +293,6 @@ class CampCardPresenter
         return implode(' · ', $parts);
     }
 
-    private function imageBadge(Camp $camp): ?string
-    {
-        if ($camp->guidings->isNotEmpty()) {
-            return 'top';
-        }
-
-        if ($camp->rentalBoats->where('status', 'active')->isNotEmpty()) {
-            return 'limited';
-        }
-
-        return null;
-    }
-
     private function minimumStayPill(Camp $camp): ?string
     {
         $accommodation = $camp->accommodations->first();
@@ -296,5 +303,14 @@ class CampCardPresenter
         $nights = (int) $accommodation->minimum_stay_nights;
 
         return $nights . ' ' . ($nights === 1 ? __('vacations.night') : __('vacations.nights'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function filterQuery(array $query): array
+    {
+        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 }

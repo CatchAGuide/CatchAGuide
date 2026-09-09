@@ -51,6 +51,8 @@ return [
     'data-protection' => 'Data Protection',
     'conditions' => 'Conditions',
     'notice-takedown' => 'Notice & Takedown',
+    'faq' => 'FAQ',
+    'for_agents' => 'For AI agents & developers',
     'product-reports' => 'Product reports',
     'term-conditions' => 'Terms and conditions',
     'accept-policy' => 'Privacy Policy',
@@ -61,7 +63,7 @@ return [
     *
     */
     // hero
-    'hero-title' => 'Fishing Trips',
+    'hero-title' => 'All inclusive fishing trips',
     'FindAGiude' => 'Find your fishing guide',
     'find-your-guide' => 'Find & book with Catch A Guide!',
     'catchYourFish' => 'Catch your favorite fish',
@@ -115,7 +117,7 @@ return [
     'successfulMsg' => 'Are you on a fishing vacation, going on a fishing trip, or just want to fish successfully in a new body of water? Our platform enables you to book the right fishing guide online, who is extremely familiar with the local waters and will go out with you.',
 
     // recently added
-    'newOffers' => 'New offers',
+    'newOffers' => 'New Experiences',
     'recentlyAddedGuides' => 'Recently added guidings',
 
     // become a guide
@@ -250,6 +252,7 @@ return [
 
     //sort
     'sortby' => 'Sort by',
+    'recommended' => 'Recommended',
     'newest' => 'Newest',
     'lowprice' => 'Low to High Price',
     'shortduration' => 'Short to Long Duration',
@@ -311,4 +314,6 @@ Important note: If you provide personal contact details such as your email addre
     'reject-form-step-done' => 'Done',
     'reject-form-step-pending' => 'Next',
 
+    'faq-page-title' => 'Frequently Asked Questions for Catch A Guide',
+    'accept_the' => 'I accept the',
 ];

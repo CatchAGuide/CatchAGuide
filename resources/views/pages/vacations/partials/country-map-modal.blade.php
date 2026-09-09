@@ -44,6 +44,10 @@
             :lazy-modal="true"
             :updatable="false"
             :interactive-preview="true"
+            :show-rail="true"
+            :show-filter-chips="false"
+            :price-chips="true"
+            :landmarks="false"
         />
     @endif
 @endif

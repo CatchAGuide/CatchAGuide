@@ -14,17 +14,14 @@ final class SeoRobotsPolicy
      * @var list<string>
      */
     private const GUIDING_NOINDEX_PARAMS = [
-        'target_fish',
+        'species',
         'methods',
         'water',
         'duration_types',
-        'num_persons',
-        'price_min',
-        'price_max',
+        'num_guests',
         'place',
         'city',
         'region',
-        'radius',
         'placeLat',
         'placeLng',
         'sortby',

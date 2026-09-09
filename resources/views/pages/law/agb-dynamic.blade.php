@@ -1,6 +1,6 @@
 @extends('layouts.app-v2-1')
 
-@section('title', $translation->title . ' - ' . ucwords(translate('Allgemeine Geschäftsbedingungen')))
+@section('title', $translation->title . ' - ' . ucwords(__('terms.title')))
 @section('meta_robots')
     <meta name="robots" content="noindex, nofollow">
 @endsection

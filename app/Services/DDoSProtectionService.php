@@ -8,22 +8,19 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DDoSNotificationService;
 use App\Services\ThreatIntelligenceService;
 use App\Services\HoneypotService;
+use App\Services\Security\CrawlerClassification;
+use App\Services\Security\KnownCrawlerClassifier;
+use App\Services\Security\RequestExploitScanner;
 
 class DDoSProtectionService
 {
-    private DDoSNotificationService $notificationService;
-    private ThreatIntelligenceService $threatIntelligence;
-    private HoneypotService $honeypotService;
-    
     public function __construct(
-        DDoSNotificationService $notificationService,
-        ThreatIntelligenceService $threatIntelligence,
-        HoneypotService $honeypotService
-    ) {
-        $this->notificationService = $notificationService;
-        $this->threatIntelligence = $threatIntelligence;
-        $this->honeypotService = $honeypotService;
-    }
+        private DDoSNotificationService $notificationService,
+        private ThreatIntelligenceService $threatIntelligence,
+        private HoneypotService $honeypotService,
+        private KnownCrawlerClassifier $crawlerClassifier,
+        private RequestExploitScanner $exploitScanner,
+    ) {}
 
     /**
      * Check if request should be blocked based on rate limits and violations
@@ -32,81 +29,75 @@ class DDoSProtectionService
     {
         $identifier = $this->getIdentifier($request);
         $context = $config['context'] ?? 'general';
-        
-        // Enhanced threat intelligence collection
-        $threatData = $this->threatIntelligence->collectThreatData($request, $context);
-        
-        // Advanced security checks
-        $advancedSecurity = $this->checkAdvancedSecurity($request, $identifier, $context);
-        if ($advancedSecurity['blocked']) {
-            return $advancedSecurity;
+        $classification = $this->crawlerClassifier->classify($request);
+        $trustedCrawler = $classification->isTrusted();
+
+        $exploit = $this->exploitScanner->scan($request);
+        if ($exploit !== null) {
+            return $this->blockExploit($request, $identifier, $context, $config, $classification, $exploit);
         }
-        
-        // Check honeypot triggers
-        $honeypotTriggers = $this->honeypotService->checkHoneypotTriggers($request);
-        if (!empty($honeypotTriggers)) {
-            $this->logHoneypotViolation($request, $honeypotTriggers);
-            return [
-                'blocked' => true,
-                'reason' => 'honeypot_triggered',
-                'retry_after' => 300, // 5 minutes
-                'threat_data' => $threatData,
-                'honeypot_triggers' => $honeypotTriggers
-            ];
+
+        if (! $trustedCrawler) {
+            $advancedSecurity = $this->checkAdvancedSecurity($request, $identifier, $context);
+            if ($advancedSecurity['blocked']) {
+                return $advancedSecurity;
+            }
+
+            $honeypotTriggers = $this->honeypotService->checkHoneypotTriggers($request);
+            if (! empty($honeypotTriggers)) {
+                $this->logHoneypotViolation($request, $honeypotTriggers);
+                $this->persistThreat($request, $context, [
+                    'type' => 'honeypot',
+                    'triggers' => $honeypotTriggers,
+                    'lane' => $classification->lane->value,
+                ]);
+
+                return [
+                    'blocked' => true,
+                    'reason' => 'honeypot_triggered',
+                    'retry_after' => 300,
+                    'honeypot_triggers' => $honeypotTriggers,
+                ];
+            }
         }
-        
-        // Check if already blocked
+
         if ($this->isBlocked($identifier, $context)) {
             $this->logBlockedAttempt($request, $identifier, $context);
+
             return [
                 'blocked' => true,
                 'reason' => 'already_blocked',
                 'retry_after' => $this->getRetryAfter($identifier, $context),
-                'threat_data' => $threatData
             ];
         }
 
-        // Check rate limits
-        if (!$this->checkRateLimit($identifier, $context, $config['limits'])) {
-            $this->recordViolation($identifier, $context, $config);
+        $limits = $this->crawlerClassifier->limitsFor($classification, $config['limits'] ?? []);
+        if (! $this->checkRateLimit($identifier, $context, $limits)) {
             $this->logRateLimitViolation($request, $identifier, $context);
-            
+
+            if (! $trustedCrawler) {
+                $violations = $this->recordViolation($identifier, $context, $config);
+                $this->persistThreat($request, $context, [
+                    'type' => 'rate_limit',
+                    'lane' => $classification->lane->value,
+                    'crawler' => $classification->name,
+                    'violations' => $violations,
+                ]);
+                $this->notificationService->sendRateLimitAlert(
+                    $identifier,
+                    $violations,
+                    $request->fullUrl(),
+                    $context,
+                    $classification
+                );
+            }
+
             return [
                 'blocked' => true,
                 'reason' => 'rate_limit_exceeded',
                 'retry_after' => 60,
-                'threat_data' => $threatData
+                'crawler_lane' => $classification->lane->value,
             ];
-        }
-
-        // High threat score blocking
-        if ($threatData['threat_score'] > 80) {
-            $this->logHighThreatBlock($request, $threatData);
-            $this->blockIdentifier($identifier, $context, 1800, 0); // Block for 30 minutes
-            return [
-                'blocked' => true,
-                'reason' => 'high_threat_score',
-                'retry_after' => 1800,
-                'threat_data' => $threatData
-            ];
-        }
-
-        // Validate input if required
-        if (isset($config['validate_input']) && $config['validate_input']) {
-            if (!$this->validateInput($request, $config['input_patterns'] ?? [])) {
-                $this->logSuspiciousInput($request, $identifier, $context);
-                $this->notificationService->sendSuspiciousInputAlert(
-                    $identifier, 
-                    json_encode($request->all()), 
-                    "Malicious {$context} pattern detected"
-                );
-                
-                return [
-                    'blocked' => true,
-                    'reason' => 'suspicious_input',
-                    'retry_after' => 0
-                ];
-            }
         }
 
         return ['blocked' => false];
@@ -122,6 +113,56 @@ class DDoSProtectionService
         }
         
         return 'ip_' . $request->ip();
+    }
+
+    /**
+     * @param  array{type: string, matched: string}  $exploit
+     */
+    private function blockExploit(
+        Request $request,
+        string $identifier,
+        string $context,
+        array $config,
+        CrawlerClassification $classification,
+        array $exploit
+    ): array {
+        $this->logSuspiciousInput($request, $identifier, $context);
+        $this->persistThreat($request, $context, [
+            'type' => $exploit['type'],
+            'matched' => $exploit['matched'],
+            'lane' => $classification->lane->value,
+            'crawler' => $classification->name,
+        ]);
+
+        if (! $classification->isTrusted()) {
+            $violations = $this->recordViolation($identifier, $context, $config);
+            $this->notificationService->sendExploitAlert(
+                $identifier,
+                $exploit['type'],
+                $request->fullUrl(),
+                $violations
+            );
+        }
+
+        return [
+            'blocked' => true,
+            'reason' => 'suspicious_input',
+            'retry_after' => 0,
+            'exploit_type' => $exploit['type'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $attackData
+     */
+    private function persistThreat(Request $request, string $context, array $attackData): void
+    {
+        if (! config('ddos.threat_intelligence.enabled', true)) {
+            return;
+        }
+
+        $attackData['url'] = substr($request->fullUrl(), 0, 500);
+        $this->threatIntelligence->collectThreatData($request, $context, $attackData, true);
     }
 
     /**
@@ -216,36 +257,32 @@ class DDoSProtectionService
     }
 
     /**
-     * Record violation and potentially block identifier
+     * Record violation and potentially block identifier.
+     *
+     * @return int Current 24h violation count
      */
-    private function recordViolation(string $identifier, string $context, array $config): void
+    private function recordViolation(string $identifier, string $context, array $config): int
     {
         $violationKey = "{$context}_violations_{$identifier}";
         $violations = Cache::get($violationKey, 0) + 1;
-        
-        // Store violations for 24 hours
+
         Cache::put($violationKey, $violations, 86400);
-        
-        // Enhanced progressive blocking for stubborn attackers
+
         $blockThreshold = $config['block_threshold'] ?? 10;
-        $stubbornThreshold = $config['stubborn_threshold'] ?? 50; // New threshold for stubborn attackers
-        
+        $stubbornThreshold = $config['stubborn_threshold'] ?? 50;
+
         if ($violations >= $blockThreshold) {
-            // Calculate block duration based on violation count
             if ($violations >= $stubbornThreshold) {
-                // Stubborn attacker - much longer blocks
                 $blockDuration = $this->calculateStubbornBlockDuration($violations, $config);
                 $this->logStubbornAttacker($identifier, $context, $violations);
             } else {
-                // Regular progressive blocking
                 $blockDuration = min($violations * ($config['block_multiplier'] ?? 30), $config['max_block_duration'] ?? 1800);
             }
-            
+
             $this->blockIdentifier($identifier, $context, $blockDuration, $violations);
         }
 
-        // Send notification
-        $this->notificationService->sendRateLimitAlert($identifier, $violations, request()->fullUrl());
+        return $violations;
     }
 
     /**

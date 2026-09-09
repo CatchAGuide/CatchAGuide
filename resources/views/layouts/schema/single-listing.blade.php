@@ -20,6 +20,6 @@
         "@@type": "Person",
         "name": @json($guiding->user->firstname)
       },
-      "url": @json(route('guidings.show', [$guiding->id,$guiding->slug]))
+      "url": @json($guiding->publicShowUrl())
     }
 </script>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Traits\MethodTraits;
@@ -134,10 +135,23 @@ class Guiding extends Model
 
     public $translated = null;
 
+    /**
+     * List fields whose translation is a set of id-keyed rows (checkbox
+     * selections / priced extras), not free text — id (+ name for the
+     * checkbox fields) identifies the row, only "value"/"name" is ever
+     * translated. A translation run rarely covers every id at once (see
+     * GuidingTranslationService::getTranslatableFields, and admin edits made
+     * one row at a time via the details modal), so the translated side is
+     * usually a partial list. Returning it as-is would silently drop every
+     * id that hasn't been translated yet instead of showing the
+     * main-language row for it.
+     */
+    private const TRANSLATABLE_LIST_FIELDS = ['requirements', 'recommendations', 'other_information', 'pricing_extra'];
+
     public function __get($key)
     {
         if ($this->translated !== null && isset($this->translated[$key])) {
-            return $this->translated[$key];
+            return $this->mergeTranslatedListField($key, $this->translated[$key]);
         }
         // When translationForCurrentLocale is eager-loaded, use its json_data for translated attributes
         if ($this->relationLoaded('translationForCurrentLocale')) {
@@ -146,11 +160,56 @@ class Guiding extends Model
             if ($translation && $sourceLanguage !== app()->getLocale()) {
                 $data = $translation->json_data ?? null;
                 if (is_array($data) && array_key_exists($key, $data)) {
-                    return $data[$key];
+                    return $this->mergeTranslatedListField($key, $data[$key]);
                 }
             }
         }
         return parent::__get($key);
+    }
+
+    /**
+     * For a TRANSLATABLE_LIST_FIELDS key, merge the translated rows over the
+     * main-language rows by id — a translated row wins for its id, any id
+     * missing from the translation falls back to the main-language row.
+     * Non-list keys (and non-array translated values) pass through untouched.
+     */
+    private function mergeTranslatedListField(string $key, $translatedValue)
+    {
+        if (! in_array($key, self::TRANSLATABLE_LIST_FIELDS, true) || ! is_array($translatedValue)) {
+            return $translatedValue;
+        }
+
+        $mainList = parent::__get($key);
+        if ($mainList instanceof Collection) {
+            $mainList = $mainList->values()->all();
+        } elseif (! is_array($mainList)) {
+            $mainList = [];
+        }
+
+        if (empty($mainList)) {
+            return $translatedValue;
+        }
+
+        $translatedById = [];
+        foreach ($translatedValue as $item) {
+            if (is_array($item) && isset($item['id'])) {
+                $translatedById[(string) $item['id']] = $item;
+            }
+        }
+
+        return array_map(function ($mainItem) use ($translatedById) {
+            if (! is_array($mainItem) || ! isset($mainItem['id'])) {
+                return $mainItem;
+            }
+
+            $translatedItem = $translatedById[(string) $mainItem['id']] ?? null;
+
+            // array_merge (not a straight replace) so a translated row that only
+            // carries id/value — e.g. the requirements/recommendations/other_information
+            // reconstruction, which never stores `name` — doesn't drop the display
+            // name that only the main-language row has.
+            return $translatedItem !== null ? array_merge($mainItem, $translatedItem) : $mainItem;
+        }, $mainList);
     }
 
     /**
@@ -466,6 +525,101 @@ class Guiding extends Model
         } else {
             return $this->price / $person;
         }
+    }
+
+    /**
+     * Resolve a listing/booking style total for a guest count.
+     *
+     * For per-person tiers, `amount` is the tour total for that person count.
+     * For fixed/per-boat pricing, `price` is the tour total regardless of guests.
+     *
+     * @return array{total: int, per_person: int, guests: int, is_fixed: bool}|null
+     */
+    public function resolvePriceForGuests(int $guests): ?array
+    {
+        $guests = max(1, $guests);
+
+        if ($this->price_type === 'per_person') {
+            $prices = collect(decode_if_json($this->prices, true) ?: [])
+                ->filter(fn ($price) => is_array($price)
+                    && isset($price['person'], $price['amount'])
+                    && (int) $price['person'] > 0
+                    && (float) $price['amount'] > 0)
+                ->map(fn (array $price) => [
+                    'person' => (int) $price['person'],
+                    'amount' => (float) $price['amount'],
+                ])
+                ->sortBy('person')
+                ->values();
+
+            if ($prices->isEmpty()) {
+                return null;
+            }
+
+            $entry = $prices->firstWhere('person', $guests)
+                ?? $prices->first(fn (array $price) => $price['person'] >= $guests)
+                ?? $prices->last();
+
+            $personCount = max(1, (int) $entry['person']);
+            $total = (int) round((float) $entry['amount']);
+
+            return [
+                'total' => $total,
+                'per_person' => (int) round($total / $personCount),
+                'guests' => $personCount,
+                'is_fixed' => false,
+            ];
+        }
+
+        $total = (float) $this->price;
+        if ($total <= 0) {
+            return null;
+        }
+
+        $roundedTotal = (int) round($total);
+
+        return [
+            'total' => $roundedTotal,
+            'per_person' => (int) round($roundedTotal / $guests),
+            'guests' => $guests,
+            'is_fixed' => true,
+        ];
+    }
+
+    /**
+     * Guest count to pre-select on the product booking widget.
+     * Clamps to min/max guests and, for per-person tiers, the nearest priced option.
+     */
+    public function resolveBookingGuestCount(?int $requestedGuests): ?int
+    {
+        if ($requestedGuests === null || $requestedGuests < 1) {
+            return null;
+        }
+
+        $max = (int) ($this->max_guests ?: 0);
+        $min = max(1, (int) ($this->min_guests ?: 1));
+        $guests = $requestedGuests;
+
+        if ($max > 0) {
+            $guests = min($max, $guests);
+        }
+        $guests = max($min, $guests);
+
+        if ($this->price_type === 'per_person') {
+            $resolved = $this->resolvePriceForGuests($guests);
+            if ($resolved === null) {
+                return null;
+            }
+
+            $tier = (int) $resolved['guests'];
+            if ($max > 0) {
+                $tier = min($max, $tier);
+            }
+
+            return max($min, $tier);
+        }
+
+        return $guests;
     }
 
     public function ratings(){
@@ -972,6 +1126,23 @@ class Guiding extends Model
     }
 
     /**
+     * Normalize a TRANSLATABLE_LIST_FIELDS raw column value into an id-keyed
+     * collection. Storage has used two shapes over time: an id-keyed dict
+     * (legacy save path, e.g. {"3": "text"}) and a list of rows that carry
+     * their own `id` (current save path, e.g. [{"id":3,"value":"text"}]) —
+     * keying by the raw array's own list index (the previous behavior)
+     * silently paired each row with the wrong GuidingRequirements /
+     * GuidingRecommendations / GuidingAdditionalInformation record.
+     */
+    private function keyListFieldById($rawValue)
+    {
+        return collect(decode_if_json($rawValue, true))->mapWithKeys(function ($item, $key) {
+            $id = is_array($item) && isset($item['id']) ? $item['id'] : $key;
+            return [$id => $item];
+        });
+    }
+
+    /**
      * Get the requirements associated with the guiding.
      *
      * @return \Illuminate\Support\Collection
@@ -982,12 +1153,12 @@ class Guiding extends Model
             return collect();
         }
 
-        $requirementsData = collect(decode_if_json($this->attributes['requirements'], true));
-        return GuidingRequirements::whereIn('id', array_keys($requirementsData->all()))
+        $requirementsData = $this->keyListFieldById($this->attributes['requirements']);
+        return GuidingRequirements::whereIn('id', $requirementsData->keys())
             ->get()
             ->map(function ($requirement) use ($requirementsData) {
                 $data = $requirementsData[$requirement->id];
-                
+
                 return [
                     'id' => $requirement->id,
                     'value' => is_array($data) && isset($data['value']) ? $data['value'] : $data,
@@ -1002,9 +1173,9 @@ class Guiding extends Model
             return collect();
         }
 
-        $otherInformationData = collect(decode_if_json($this->attributes['other_information'], true));
-        
-        return GuidingAdditionalInformation::whereIn('id', array_keys($otherInformationData->all()))
+        $otherInformationData = $this->keyListFieldById($this->attributes['other_information']);
+
+        return GuidingAdditionalInformation::whereIn('id', $otherInformationData->keys())
             ->get()
             ->map(function ($otherInformation) use ($otherInformationData) {
                 $data = $otherInformationData[$otherInformation->id];
@@ -1022,9 +1193,9 @@ class Guiding extends Model
             return collect();
         }
 
-        $recommendationsData = collect(decode_if_json($this->attributes['recommendations'], true));
+        $recommendationsData = $this->keyListFieldById($this->attributes['recommendations']);
 
-        return GuidingRecommendations::whereIn('id', array_keys($recommendationsData->all()))
+        return GuidingRecommendations::whereIn('id', $recommendationsData->keys())
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
                 $data = $recommendationsData[$recommendation->id];
@@ -1090,6 +1261,14 @@ class Guiding extends Model
             $counter++;
             return $result;
         });
+    }
+
+    /**
+     * Canonical public URL for this tour offer.
+     */
+    public function publicShowUrl(array $query = []): string
+    {
+        return route('guidings.show', array_merge(['slug' => $this->slug], $query));
     }
 
     /**

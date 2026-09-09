@@ -51,17 +51,17 @@
 					<div class="vacations-item-row-top">
 					</div>
 						<div class="vacations-info-container"> 
-							<span class="fw-bold">{{translate('Boat Available')}}:</span>
-							<span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? translate('Available') : translate('Unavailable') }}</span>
+							<span class="fw-bold">{{__('vacations.boat_available')}}:</span>
+							<span class="text-regular">{{ count($vacation->boats) || $vacation->has_boat > 0 ? __('profile.available') : __('profile.unavailable') }}</span>
 						</div>
 						<div class="vacations-info-container"> 
-							<span class="fw-bold">{{translate('Distance to the water')}}:</span>
+							<span class="fw-bold">{{__('vacations.distance_to_water')}}:</span>
 							<div class="">
 								{{ $vacation->water_distance }}
 							</div>
 						</div>
 					<div class="vacations-info-container"> 
-						<span class="fw-bold">{{translate('Target Fish')}}:</span>
+						<span class="fw-bold">{{__('camps.target_fish_title')}}:</span>
 						<div class="d-flex">
 							@php
 								$target_fish = $vacation->target_fish;

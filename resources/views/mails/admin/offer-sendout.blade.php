@@ -335,7 +335,7 @@
                                                             @foreach($offer['guiding_items'] as $item)
                                                             @php
                                                                 $g = $item['model'] ?? null;
-                                                                $guidingUrl = $g ? route('guidings.show', [$g->id, $g->slug]) : route('guidings.index');
+                                                                $guidingUrl = $g ? $g->publicShowUrl() : route('guidings.index');
                                                                 $gDuration = $g->duration_hours ?? $g->duration ?? null;
                                                                 $gType = $g->fishing_from ?? $g->type ?? ($g->fishing_type ?? 'Shore');
                                                                 $gThumb = $g && !empty($g->thumbnail_path) ? (strpos($g->thumbnail_path, 'http') === 0 ? $g->thumbnail_path : asset(ltrim($g->thumbnail_path, '/'))) : null;
@@ -410,7 +410,7 @@
                                                         <td style="padding: 0 0 8px;">
                                                             @foreach($offer['guidings'] as $guiding)
                                                             @php
-                                                                $guidingUrl = route('guidings.show', [$guiding->id, $guiding->slug]);
+                                                                $guidingUrl = $guiding->publicShowUrl();
                                                                 $gDuration = $guiding->duration_hours ?? $guiding->duration ?? null;
                                                                 $gType = $guiding->fishing_from ?? $guiding->type ?? ($guiding->fishing_type ?? 'Shore');
                                                                 $gPrice = is_numeric($guiding->price ?? null) ? (float)$guiding->price : (is_array($guiding->price ?? null) ? ($guiding->price['amount'] ?? 0) : 0);

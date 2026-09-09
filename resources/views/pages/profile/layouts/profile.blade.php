@@ -256,7 +256,7 @@
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                     @endunless
                                     @if(Request::routeIs('guidings.edit'))
-                                        <li><a href="{{route('profile.myguidings')}}">{{translate('Meine Guidings')}}</a></li>
+                                        <li><a href="{{route('profile.myguidings')}}">{{__('message.my-guiding')}}</a></li>
                                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
                                     @endif
                                     <li class="active">@yield('title')</li>

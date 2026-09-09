@@ -213,13 +213,13 @@
                                     @lang('mailing.infoBooking'):
                                     <ul>
                                         @if($guiding->user->bar_allowed == 0 && $guiding->user->banktransfer_allowed == 0 && $guiding->user->paypal_allowed == 0)
-                                            <li>{{ translate('Kontaktiere bitten den Guide!') }} </li>
+                                            <li>{{ __('emails.contact_guide_please') }} </li>
                                         @endif
                                         @if($guiding->user->bar_allowed == 1)
-                                            <li><strong>{{ translate('Barzahlung vor Ort') }}</strong></li>
+                                            <li><strong>{{ __('emails.cash_on_site') }}</strong></li>
                                         @endif
                                         @if($guiding->user->banktransfer_allowed == 1 && $guiding->user->banktransferdetails)
-                                            <li><strong>{{ translate('Überweisung') }}:</strong> {{$guiding->user->banktransferdetails}}</li>
+                                            <li><strong>{{ __('profile.transfer') }}:</strong> {{$guiding->user->banktransferdetails}}</li>
                                         @endif
                                         @if($guiding->user->paypal_allowed == 1 && $guiding->user->paypaldetails)
                                             <li><strong>PayPal:</strong> {{$guiding->user->paypaldetails}}</li>

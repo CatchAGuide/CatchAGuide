@@ -1,4 +1,5 @@
 @import "../settings/variables";
+@import "./vacations-header";
 #vacations-category {
     #map-placeholder button {
         position: absolute;
@@ -1132,11 +1133,11 @@
         }
 
         &--trip {
-            background: linear-gradient(145deg, #E8604C 0%, #c94a32 100%);
+            background: linear-gradient(145deg, $category-trip 0%, $category-trip-end 100%);
         }
 
         &--camp {
-            background: linear-gradient(145deg, #4a4860 0%, #313041 100%);
+            background: linear-gradient(145deg, $category-camp 0%, $category-camp-end 100%);
         }
     }
 
@@ -1169,13 +1170,13 @@
             background: rgba(255, 255, 255, 0.95);
             color: #d97706;
             border: 1px solid rgba(217, 119, 6, 0.25);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+            @include badge-metallic-glare(4.2s, 0.3s);
         }
 
         &--limited {
-            background: #E8604C;
+            background: linear-gradient(145deg, #E8604C 0%, #c94a32 100%);
             color: #fff;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+            @include badge-metallic-glare(3.7s, 0.5s);
         }
     }
 
@@ -1501,3 +1502,4 @@
 }
 
 @import "./vacations-two-pillar";
+@import "./vacations-hub-extras";

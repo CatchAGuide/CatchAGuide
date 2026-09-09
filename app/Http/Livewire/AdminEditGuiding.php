@@ -21,6 +21,7 @@ use App\Models\FishingType;
 use App\Models\FishingFrom;
 use App\Models\EquipmentStatus;
 use App\Services\Media\ListingImageUploadService;
+use App\Services\Media\MediaTrashService;
 
 
 use Livewire\WithFileUploads;
@@ -657,12 +658,12 @@ class AdminEditGuiding extends Component
 
         $galleries = []; 
         $galleries = $this->userPhotos;
- 
+        $pendingTrash = [];
 
         if(count($this->imagesToDelete)){
 
             foreach($this->imagesToDelete as $index => $deleteImage){
-                app(ListingImageUploadService::class)->deleteGuiding($deleteImage);
+                $pendingTrash[] = $deleteImage;
             }
 
             foreach($this->userPhotos as $usp){
@@ -696,6 +697,13 @@ class AdminEditGuiding extends Component
 
 
         $this->guiding->save();
+
+        $keep = array_merge(
+            json_decode($this->guiding->galleries ?? '[]', true) ?? [],
+            json_decode($this->guiding->gallery_images ?? '[]', true) ?? [],
+            array_filter([$this->guiding->thumbnail_path])
+        );
+        app(MediaTrashService::class)->trashMany($pendingTrash, $keep);
 
 
         $this->photos = [];

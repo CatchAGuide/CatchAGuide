@@ -17,7 +17,7 @@ use App\Models\Rating;
 use App\Models\Thread;
 use App\Models\Faq;
 use App\Models\PageAttribute;
-
+use App\Support\SitePrimaryNav;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -58,6 +58,17 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('myCurrentLocale', $mylocale);
         });
 
+        View::composer([
+            'layouts.partials.site-nav',
+            'layouts.partials.site-mobile-menu',
+            'layouts.partials.site-chrome',
+            'layouts.partials.site-bottom-nav',
+            'pages.home.partials.mobile-bottom-nav',
+        ], function ($view) {
+            $view->with('sitePrimaryNavLinks', SitePrimaryNav::links());
+            $view->with('siteBrowseNavLinks', SitePrimaryNav::browseLinks());
+            $view->with('siteBottomNavLinks', SitePrimaryNav::bottomNavLinks());
+        });
 
         View::composer('*', function ($view) {
             $authUser = web_guide_user();

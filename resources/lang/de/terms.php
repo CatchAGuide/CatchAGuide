@@ -16,4 +16,5 @@ return [
     'next' => 'Weiter',
     'results_count' => ':count von :total Abschnitten',
     'min_read' => 'Min. Lesezeit',
+    'title' => 'Allgemeine Geschäftsbedingungen',
 ];

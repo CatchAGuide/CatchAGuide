@@ -27,7 +27,7 @@
     <div class="order-details" style="border: 1px solid rgb(132, 132, 132); padding: 10px; border-radius: 12px; margin: 20px;">
         <h4 style="margin-top: 0;">{{ __('emails.guide_booking_accepted_text_2') }}</h4>
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_booking_accepted_text_10') }}</strong>
-            <a href="{{ route('guidings.show', [$guiding->id, $guiding->slug]) }}" target="_blank" style="text-decoration: none; font-weight: bold;">{{ translate($guiding->title) }}</a>
+            <a href="{{ $guiding->publicShowUrl() }}" target="_blank" style="text-decoration: none; font-weight: bold;">{{ translate($guiding->title) }}</a>
         </p>
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_booking_accepted_text_11') }}</strong> {{ $guiding->location }}</p>
         <p style="font-size: 14px;"><strong>{{ __('emails.guide_booking_accepted_text_12') }}</strong> {{ date('d F Y', strtotime($booking->book_date)) }}</p>

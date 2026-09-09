@@ -416,4 +416,6 @@ return [
     'guide_application_rejected_no_reason' => 'No additional details were provided.',
     'guide_application_rejected_reapply' => 'You are welcome to submit a new application with updated information at any time.',
     'guide_application_rejected_cta' => 'Submit a new application',
+    'cash_on_site' => 'Cash on site',
+    'contact_guide_please' => 'Please contact the guide!',
 ];

@@ -19,6 +19,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Shared hosting has no persistent queue worker process — the cron job that used to
+        // hit the now-removed /api/queue/run-worker route was the only thing draining the
+        // "database" queue. Drain it here instead, riding the existing per-minute schedule:run cron.
+        $schedule->command('queue:work --queue=default --stop-when-empty --tries=3 --max-time=50')
+                ->everyMinute()
+                ->withoutOverlapping();
+
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
         $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');
@@ -26,17 +33,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('bookings:send-guide-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();
       
-        // Generate guiding filter mappings every hour
-        $schedule->command('guidings:generate-filters')
+        // Precompute catalog filter maps (guidings listing + offers tours/trips/camps)
+        $schedule->command('catalog:generate-filters --dump')
                 ->hourly()
                 ->withoutOverlapping()
                 ->runInBackground();
                 
         // Warm file existence cache every 2 hours
-        $schedule->command('cache:warm-files')
-                ->everyTwoHours()
-                ->withoutOverlapping()
-                ->runInBackground();
+        // $schedule->command('cache:warm-files')
+        //         ->everyTwoHours()
+        //         ->withoutOverlapping()
+        //         ->runInBackground();
                 
         // Image cleanup: report + fix DB refs to missing files (no orphan deletion by default)
         // $schedule->command('images:cleanup --report-only')
@@ -53,6 +60,12 @@ class Kernel extends ConsoleKernel
                 ->runInBackground()
                 ->appendOutputTo(storage_path('logs/threat-intelligence-cleanup.log'));
         
+        $schedule->command('media:purge-trash')
+                ->dailyAt('04:15')
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/media-trash-purge.log'));
+
         // Process vacation translations for admin changes daily (defaults to EN and DE languages)
         // $schedule->command('vacation:translate --admin-changes --relations')
         //         ->daily()

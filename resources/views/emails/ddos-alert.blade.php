@@ -53,6 +53,20 @@
                 </div>
                 @endif
                 
+                @if(isset($details['classification']))
+                <div class="detail-row">
+                    <span class="label">Classification:</span>
+                    <span class="value">{{ $details['classification'] }}</span>
+                </div>
+                @endif
+
+                @if(isset($details['detected_pattern']))
+                <div class="detail-row">
+                    <span class="label">Detected Pattern:</span>
+                    <span class="value">{{ $details['detected_pattern'] }}</span>
+                </div>
+                @endif
+
                 @if(isset($details['endpoint']))
                 <div class="detail-row">
                     <span class="label">Endpoint:</span>

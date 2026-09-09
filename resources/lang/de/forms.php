@@ -8,15 +8,21 @@ return [
     // login
     'user' => 'Dein Vorname*',
     'pass' => 'Dein passwort*',
-    
+    'login_title' => 'Willkommen zurück',
+    'login_sub' => 'Melde dich an, um Guides zu buchen und deine Touren zu verwalten.',
+    'remember_me' => 'Angemeldet bleiben',
+    'not_a_member' => 'Noch kein Mitglied?',
+    'loading' => 'Wird geladen...',
 
     // register
     'fname' => "Dein Vorname*",
     'lname' => "Dein Nachname*",
     'email' => "Deine Email*",
-    'pass' => "Dein Passwort*",
     'rpass' => "Neues Passwort*",
     'agree' => 'Ich akzeptiere die AGB und Datenschutzbestimmungen.*',
+    'signup_title' => 'Konto erstellen',
+    'signup_sub' => 'Werde Teil von Catch A Guide und entdecke Touren und Urlaube.',
+    'already_have_account' => 'Bereits ein Konto?',
 
     //forgaot pass word
     'forgotPass' => 'Passwort vergessen?',

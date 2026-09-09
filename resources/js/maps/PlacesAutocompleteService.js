@@ -118,8 +118,9 @@ class PlacesAutocompleteService {
       const options = {
         fields: PLACE_FIELDS,
       };
-      if (opts.types) {
-        options.types = opts.types;
+      const types = this.normalizePlaceTypes(opts.types);
+      if (types) {
+        options.types = types;
       }
 
       const autocomplete = new google.maps.places.Autocomplete(input, options);
@@ -261,10 +262,23 @@ class PlacesAutocompleteService {
   }
 
   /**
+   * Normalize Places Autocomplete `types`. Empty / missing means unrestricted
+   * (same as navbar and public search).
+   * @param {*} types
+   * @returns {string[]|null}
+   */
+  normalizePlaceTypes(types) {
+    if (!Array.isArray(types) || types.length === 0) {
+      return null;
+    }
+    return types;
+  }
+
+  /**
    * Bind a form location input: deferred Places load + fill linked hidden fields.
    * Supports data attributes on the input:
    *   data-places-location
-   *   data-places-types='["geocode"]'
+   *   data-places-types='["geocode"]'  (omit for unrestricted, matching navbar)
    *   data-places-lat / lng / country / city / region / postal
    *   data-places-fill-input="formatted_address|name|keep"
    *
@@ -297,6 +311,7 @@ class PlacesAutocompleteService {
         types = null;
       }
     }
+    types = this.normalizePlaceTypes(types);
 
     const fieldMap = {
       lat: readOpt('lat', 'placesLat', '#latitude'),

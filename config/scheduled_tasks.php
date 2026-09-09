@@ -101,10 +101,10 @@ return [
             ],
         ],
 
-        'guidings_generate_filters' => [
-            'label' => 'Generate guiding filter mappings',
-            'description' => 'Rebuilds filter mappings (guidings:generate-filters).',
-            'command' => 'guidings:generate-filters',
+        'catalog_generate_filters' => [
+            'label' => 'Generate catalog filter mappings',
+            'description' => 'Rebuilds guidings + offers filter maps (catalog:generate-filters). Use --only=guidings|offers to scope.',
+            'command' => 'catalog:generate-filters --dump',
             'default' => [
                 'enabled' => true,
                 'frequency' => 'hourly',

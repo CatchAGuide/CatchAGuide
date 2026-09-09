@@ -24,9 +24,12 @@
 
 <body class="app sidebar-mini ltr">
 
+    @include('layouts.partials.page-loader')
+
     @yield('content')
 
     @include('admin.auth.layouts.includes.scripts')
+    <script src="{{ mix('js/app.js') }}"></script>
 </body>
 
 </html>

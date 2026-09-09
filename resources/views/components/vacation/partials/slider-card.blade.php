@@ -23,6 +23,7 @@
             :url="$card['url']"
             :show-nav="false"
             gallery-class="vacation-slider-card__gallery"
+            :lazy="false"
         />
         <x-vacation.partials.image-pillar-badge
             :pillar="$pillar"
@@ -88,6 +89,13 @@
                         </span>
                     @endforeach
                 </div>
+            </div>
+        @endif
+
+        @if(!empty($card['guests_label']))
+            <div class="vacation-slider-card__guests">
+                <i class="fas fa-user-friends" aria-hidden="true"></i>
+                <span>{{ $card['guests_label'] }}</span>
             </div>
         @endif
 

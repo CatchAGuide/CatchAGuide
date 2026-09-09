@@ -1,0 +1,154 @@
+// Listing category identity (tour / camp / trip)
+// Coral stays the global action color for CTAs; these tokens drive badges,
+// accents, filters, and map pins so each product type reads at a glance.
+
+$category-tour: #313041;
+$category-tour-end: #1f1e2a;
+$category-tour-soft: rgba(49, 48, 65, 0.09);
+$category-tour-glow: rgba(49, 48, 65, 0.28);
+
+// Lagoon — camps / lodges on the water
+$category-camp: #0c8a7f;
+$category-camp-end: #086b63;
+$category-camp-soft: rgba(12, 138, 127, 0.11);
+$category-camp-glow: rgba(12, 138, 127, 0.32);
+
+// Fjord blue — multi-day trips / horizon travel
+$category-trip: #1f6fa8;
+$category-trip-end: #165887;
+$category-trip-soft: rgba(31, 111, 168, 0.11);
+$category-trip-glow: rgba(31, 111, 168, 0.32);
+
+$category-colors: (
+  "tour": (
+    "base": $category-tour,
+    "end": $category-tour-end,
+    "soft": $category-tour-soft,
+    "glow": $category-tour-glow,
+  ),
+  "camp": (
+    "base": $category-camp,
+    "end": $category-camp-end,
+    "soft": $category-camp-soft,
+    "glow": $category-camp-glow,
+  ),
+  "trip": (
+    "base": $category-trip,
+    "end": $category-trip-end,
+    "soft": $category-trip-soft,
+    "glow": $category-trip-glow,
+  ),
+);
+
+@function category-color($type, $shade: "base") {
+  @return map-get(map-get($category-colors, $type), $shade);
+}
+
+@mixin category-vars($type) {
+  --category-color: #{category-color($type, "base")};
+  --category-color-end: #{category-color($type, "end")};
+  --category-soft: #{category-color($type, "soft")};
+  --category-glow: #{category-color($type, "glow")};
+}
+
+// Left rail — frames list cards without competing with the top media/badge stack
+@mixin category-card-accent {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    z-index: 5;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      var(--category-color) 0%,
+      var(--category-color-end) 100%
+    );
+    pointer-events: none;
+  }
+}
+
+@keyframes cag-badge-glare {
+  0% {
+    transform: translateX(-70%) skewX(-16deg);
+  }
+
+  42% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+
+  100% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+
+// Running metallic shine for marketplace badges (type, ribbons, active filters)
+// Host must already establish a containing block (position: absolute|relative|fixed).
+@mixin badge-metallic-glare($duration: 3.8s, $delay: 0s) {
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 4px 12px rgba(17, 24, 39, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: -35%;
+    bottom: -35%;
+    left: 0;
+    width: 48%;
+    z-index: 1;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 32%,
+      rgba(255, 255, 255, 0.58) 48%,
+      rgba(255, 255, 255, 0.18) 58%,
+      transparent 78%
+    );
+    transform: translateX(-70%) skewX(-16deg);
+    animation: cag-badge-glare $duration ease-in-out infinite;
+    animation-delay: $delay;
+    pointer-events: none;
+    mix-blend-mode: soft-light;
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+      display: none;
+    }
+  }
+}
+
+@mixin category-badge-fill {
+  background: linear-gradient(
+    145deg,
+    var(--category-color) 0%,
+    var(--category-color-end) 100%
+  );
+  color: #fff;
+  @include badge-metallic-glare;
+}
+
+@mixin category-type-modifiers($selector: "&") {
+  @each $type, $shades in $category-colors {
+    #{$selector}--#{$type} {
+      @include category-vars($type);
+    }
+  }
+}
+
+// Utility for badges that set their own solid/gradient fill
+.cag-badge-glare {
+  position: relative;
+  @include badge-metallic-glare;
+}
