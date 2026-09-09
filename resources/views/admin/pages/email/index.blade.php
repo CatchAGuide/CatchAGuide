@@ -108,7 +108,7 @@
                         Showing a live re-render with the real booking/recipient data from this log (exact HTML was not stored when this email was sent). New emails store the exact sent body.
                     </div>
                     <div id="emailLogPreviewLoading" class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
+                        <x-loading.inline />
                         <p class="mt-2 text-muted mb-0">Loading email…</p>
                     </div>
                     <div id="emailLogPreviewError" class="alert alert-danger m-3 d-none"></div>

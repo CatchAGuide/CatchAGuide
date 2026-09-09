@@ -112,6 +112,10 @@ return [
     'saving_draft' => 'Entwurf wird gespeichert...',
     'uploading_guiding' => 'Dein Guiding wird hochgeladen...',
     'keep_tab_open' => 'Bitte diesen Tab geöffnet lassen',
+    'preparing_adventure' => 'Wir bereiten dein Angelabenteuer vor...',
+    'setting_up_experience' => 'Wir richten dein Guide-Erlebnis ein...',
+    'uploading_your_images' => 'Deine Bilder werden hochgeladen...',
+    'please_wait_a_moment' => 'Bitte warte einen Moment',
 
     // Additional text
     'extra_input_placeholder' => 'Füge einen Kommentar oder zusätzliche Informationen für deine Gäste hinzu.',

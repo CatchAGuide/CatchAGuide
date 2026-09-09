@@ -437,7 +437,7 @@
         }
         
         // Show loading state
-        cardsContainer.html('<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        cardsContainer.html(`<div class="col-12 text-center"><x-loading.inline label="Loading..." /></div>`);
         container.show();
         
         // For now, just show a placeholder - you'll need to create routes/controllers for accommodations cards
@@ -463,7 +463,7 @@
         }
         
         // Show loading state
-        cardsContainer.html('<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        cardsContainer.html(`<div class="col-12 text-center"><x-loading.inline label="Loading..." /></div>`);
         container.show();
         
         // For now, just show a placeholder - you'll need to create routes/controllers for rental boats cards
@@ -489,7 +489,7 @@
         }
         
         // Show loading state
-        cardsContainer.html('<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+        cardsContainer.html(`<div class="col-12 text-center"><x-loading.inline label="Loading..." /></div>`);
         container.show();
         
         // Fetch guiding data and display cards (using existing route from camps)

@@ -562,8 +562,9 @@ class CategoryPagesAdminTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('admin.category.country.index'));
         $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('success');
 
         $country = CategoryEntity::countries()->where('name', $name)->firstOrFail();
 
@@ -581,6 +582,13 @@ class CategoryPagesAdminTest extends TestCase
             'language' => 'de',
             'question' => 'Legacy Q?',
         ]);
+
+        // A newly created country must actually be visible on the (redirected-to) list, not
+        // just present in the DB — the index previously had no explicit ordering, so a fresh
+        // row could silently land past page 1 and look like creation had failed.
+        $this->followingRedirects()
+            ->get(route('admin.category.country.index'))
+            ->assertSee($name);
     }
 
     public function test_admin_can_create_region_via_legacy_form(): void

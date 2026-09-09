@@ -520,7 +520,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="guidingDetailsLoading" class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ __('admin.guidings.modal_loading') }}</span></div>
+                        <x-loading.inline :label="__('admin.guidings.modal_loading')" />
                         <p class="mt-2 text-muted mb-0">{{ __('admin.guidings.modal_loading_text') }}</p>
                     </div>
                     <div id="guidingDetailsContent" class="d-none">

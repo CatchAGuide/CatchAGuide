@@ -1568,7 +1568,7 @@
         z-index: 1080;
     }
 
-    .spinner-border {
+    .loading-inline {
         position: relative;
         z-index: 1081;
     }
@@ -1663,9 +1663,7 @@
 <!-- Add loading overlay div -->
 <div class="loading-overlay">
     <div class="loading-spinner">
-        <div class="spinner-border text-orange" role="status">
-            <span class="visually-hidden">{{ __('checkout.loading') }}</span>
-        </div>
+        <x-loading.inline :label="__('checkout.loading')" />
         <span>{{ __('vacations-booking.processing_your_booking') }}</span>
     </div>
 </div>

@@ -582,7 +582,7 @@ $admin-shell-gradient-strong: #4f46e5;
 @import "./reviews";
 
 // Site-wide loading overlay (navigation, forms, redirects)
-@import "../components/page-loader";
+@import "../components/loader";
 
 @keyframes admin-shell-pulse {
   0% {

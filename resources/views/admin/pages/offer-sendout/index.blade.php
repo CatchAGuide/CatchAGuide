@@ -799,7 +799,7 @@
             const btn = document.getElementById('offer-send-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending…';
+                btn.innerHTML = `<x-loading.inline style="width:1rem;height:1rem;" class="me-2" />Sending…`;
             }
             if (confirmBtn) confirmBtn.disabled = true;
             fetch(sendUrl, {

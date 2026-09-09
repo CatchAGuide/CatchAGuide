@@ -43,7 +43,7 @@ class GuideThread extends Model
     {
         $thumbnail_path = \Str::replace('public', 'storage', $this->thumbnail_path);
 
-        return '/'.$thumbnail_path;
+        return url('/'.$thumbnail_path);
     }
 
 }

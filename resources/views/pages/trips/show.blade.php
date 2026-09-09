@@ -86,6 +86,13 @@
 @endsection
 
 @section('share_tags')
+    <meta property="og:title" content="{{ $tripView['title'] ?? __('trips.page_title_fallback') }}" />
+    <meta property="og:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($tripView['description']['full'] ?? ''), 200) }}" />
+    <meta property="og:type" content="product" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    @if(!empty($primaryImage))
+        <meta property="og:image" content="{{ $primaryImage }}" />
+    @endif
 @endsection
 
 @section('content')
@@ -1075,9 +1082,7 @@
 
                         <div id="tripContactLoadingOverlay" style="display: none;">
                             <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                                <div class="spinner-border text-orange mb-3" role="status">
-                                    <span class="visually-hidden">{{ __('vacations.loading') }}</span>
-                                </div>
+                                <x-loading.inline class="mb-3" :label="__('vacations.loading')" />
                                 <p class="text-center">{{ __('contact.submitting') }}</p>
                             </div>
                         </div>
@@ -1146,9 +1151,7 @@
 
                         <div id="tripGeneralContactLoadingOverlay" style="display: none;">
                             <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                                <div class="spinner-border text-orange mb-3" role="status">
-                                    <span class="visually-hidden">{{ __('vacations.loading') }}</span>
-                                </div>
+                                <x-loading.inline class="mb-3" :label="__('vacations.loading')" />
                                 <p class="text-center">{{ __('contact.submitting') }}</p>
                             </div>
                         </div>

@@ -59,8 +59,8 @@
         {!! json_encode($orgJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
     </script>
     
-    @if(count($attributes))
-        @foreach($attributes as $attribute)
+    @if(count($pageAttributes))
+        @foreach($pageAttributes as $attribute)
             @if($attribute->meta_type == 'title')
                 <title>{{$attribute->content}}</title>
             @else

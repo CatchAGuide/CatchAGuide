@@ -284,7 +284,7 @@
             </div>
             <div class="modal-body">
                 <div id="reviewDetailLoading" class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
+                    <x-loading.inline />
                     <p class="mt-2 text-muted mb-0">{{ __('admin.reviews.modal_loading') }}</p>
                 </div>
                 <div id="reviewDetailError" class="alert alert-danger d-none"></div>
