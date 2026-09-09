@@ -172,6 +172,10 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
         $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
 
+        $this->bindNamedRequest('/vacations/targets', 'vacations.targets.index');
+        $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
+
         $this->bindNamedRequest('/trips/sweden-trip', 'trips.show');
         $this->assertTrue(SitePrimaryNav::usesOverlayHeader());
         $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
