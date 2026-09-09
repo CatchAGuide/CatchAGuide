@@ -69,6 +69,7 @@ package-lock.json
 .env.local
 .env.strato
 .phpunit.result.cache
+.phpunit.cache/
 docker-compose.override.yml
 Homestead.json
 Homestead.yaml

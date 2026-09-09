@@ -112,9 +112,19 @@ class VacationsController extends Controller
         return $othervacations;
     }
 
-    private function otherVacationsBasedByLocation(float $latitude, float $longitude){
+    private function otherVacationsBasedByLocation($latitude, $longitude){
+        if (! is_numeric($latitude) || ! is_numeric($longitude)) {
+            return $this->otherVacations();
+        }
+
+        $latitude = max(-90, min(90, (float) $latitude));
+        $longitude = max(-180, min(180, (float) $longitude));
+
         $nearestlisting = Vacation::select(['vacations.*']) // Include necessary attributes here
-        ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance', [$latitude, $longitude, $latitude])
+        ->selectRaw(
+            '(6371 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance',
+            [$latitude, $longitude, $latitude]
+        )
         ->orderBy('distance')
         ->where('status',1)
         ->limit(10)

@@ -19,21 +19,18 @@ class SearchController extends Controller
         $latitude = $request->get('placeLat');
         $longitude = $request->get('placeLng');
 
-        if (!is_numeric($latitude) || !is_numeric($longitude)) {
-            return view('pages.search.search');
+        if (! is_numeric($latitude) || ! is_numeric($longitude)) {
+            $latitude = 0;
+            $longitude = 0;
         }
 
-        $latitude = (float) $latitude;
-        $longitude = (float) $longitude;
-
-        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
-            return view('pages.search.search');
-        }
+        $latitude = max(-90, min(90, (float) $latitude));
+        $longitude = max(-180, min(180, (float) $longitude));
 
         $radius = 500;
 
-        if($request->has('radius') && !empty($request->get('radius'))){
-            $radius = $request->get('radius');
+        if($request->has('radius') && is_numeric($request->get('radius'))){
+            $radius = (float) $request->get('radius');
         }
         if($request->has('methods') && !empty($request->get('methods'))){
             $methods = $request->get('methods');
@@ -61,7 +58,10 @@ class SearchController extends Controller
         }
 
 
-        $query->selectRaw('(3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance', [$latitude, $longitude, $latitude])
+        $query->selectRaw(
+            '(3959 * acos(cos(radians(?)) * cos(radians(lat)) * cos(radians(lng) - radians(?)) + sin(radians(?)) * sin(radians(lat)))) AS distance',
+            [$latitude, $longitude, $latitude]
+        )
         ->having('distance', '<=', $radius)
         ->orderBy('distance');
 
