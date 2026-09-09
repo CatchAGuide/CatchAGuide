@@ -21,6 +21,7 @@ class GuidingTranslationCommand extends Command
                             {--detect-language : Audit/fix guidings.language from main content (EN/DE heuristic); alone = language only, no translate}
                             {--mismatches-only : With --detect-language, only show/update rows where detected differs from current}
                             {--force : Force retranslation even if translations exist}
+                            {--engine= : Translation engine to use: google (default, free) or gemini (paid, higher quality)}
                             {--admin-changes : Only process guidings with admin changes}
                             {--missing-only : Only process guidings that have no translation for at least one target language}
                             {--report-missing : List guidings missing translations (no translation performed)}
@@ -133,7 +134,7 @@ class GuidingTranslationCommand extends Command
                     }
 
                     // Perform translation
-                    $success = $this->translationService->translateGuiding($guiding, $targetLanguage);
+                    $success = $this->translationService->translateGuiding($guiding, $targetLanguage, $this->option('engine') ?: null);
                     
                     if ($success) {                        
                         // Update content timestamp

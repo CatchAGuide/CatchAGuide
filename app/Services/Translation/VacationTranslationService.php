@@ -4,14 +4,45 @@ namespace App\Services\Translation;
 
 use App\Models\Vacation;
 use App\Models\Language;
-use App\Helpers\TranslationHelper;
 use App\Services\AdminChangeTracker;
+use App\Services\Translation\Concerns\HandlesTranslatableListFields;
+use App\Services\Translation\Support\FishingCopyGoogleTranslator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class VacationTranslationService
 {
+    use HandlesTranslatableListFields;
+
+    /**
+     * Scalar (plain string) translatable fields. NOTE: AdminChangeTracker's field list
+     * (accommodation_description, boat_description, basic_fishing_description, catering_info,
+     * amenities, equipment) is stale — migration 2025_01_13_135643_remove_fields_to_t_vations
+     * dropped every one of those columns from `vacations`. This list matches the columns that
+     * actually exist today.
+     */
+    private const SCALAR_FIELDS = [
+        'title',
+        'surroundings_description',
+        'water_distance',
+        'shopping_distance',
+        'travel_included',
+        'airport_distance',
+    ];
+
+    /**
+     * JSON-array translatable fields (flattened into indexed keys for translation, then
+     * reconstructed).
+     */
+    private const LIST_FIELDS = [
+        'best_travel_times',
+        'target_fish',
+        'travel_options',
+        'included_services',
+        'additional_services',
+    ];
+
     private GeminiTranslationService $translator;
 
     public function __construct()
@@ -62,141 +93,157 @@ class VacationTranslationService
     }
 
     /**
-     * Check if vacation content has changed significantly using change tracking
+     * Check if the vacation's translatable content has changed since the stored translation was
+     * generated, using the same content-hash approach as ListingTranslationService/
+     * GuidingTranslationService rather than the admin change-history log.
      */
     public function hasSignificantChanges(Vacation $vacation, string $targetLanguage): bool
     {
-        $changeTracker = new AdminChangeTracker();
-        $changedFields = $changeTracker->getChangedFieldsForVacation($vacation);
-        
-        // If there are any changed fields, it has significant changes
-        return !empty($changedFields);
+        $translation = Language::where([
+            'source_id' => $vacation->id,
+            'type' => 'vacations',
+            'language' => $targetLanguage,
+        ])->first();
+
+        if (! $translation) {
+            return true;
+        }
+
+        $currentHash = md5(serialize($this->getTranslatableFields($vacation)));
+
+        return $translation->content !== $currentHash;
     }
 
     /**
-     * Get only the fields that have changed since the last translation
+     * Whether this vacation needs translation work for a target language (missing or outdated).
      */
-    public function getChangedTranslatableFields(Vacation $vacation, string $targetLanguage): array
+    public function needsTranslationUpdate(Vacation $vacation, string $targetLanguage, ?string $fromLanguage = null): bool
     {
-        $changeTracker = new AdminChangeTracker();
-        return $changeTracker->getChangedFieldsForVacation($vacation);
+        $fromLanguage ??= $vacation->language ?: 'de';
+
+        if ($fromLanguage === $targetLanguage) {
+            return false;
+        }
+
+        return $this->hasSignificantChanges($vacation, $targetLanguage);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function getTranslatableFields(Vacation $vacation): array
+    {
+        $fields = $this->collectScalarFields($vacation, self::SCALAR_FIELDS);
 
+        foreach (self::LIST_FIELDS as $listField) {
+            $fields = array_merge($fields, $this->collectListField($vacation, $listField));
+        }
+
+        return $fields;
+    }
 
     /**
-     * Translate vacation to target language and save to Language table
+     * @param  array<string, string>  $translatedFields
+     * @return array<string, mixed>
      */
-    public function translateVacation(Vacation $vacation, string $targetLanguage, bool $force = false): bool
+    private function reconstructFields(Vacation $vacation, array $translatedFields): array
+    {
+        $reconstructed = [];
+
+        foreach (self::LIST_FIELDS as $listField) {
+            $decoded = $this->decodeValue($vacation->{$listField} ?? null);
+
+            if (! is_array($decoded)) {
+                continue;
+            }
+
+            $reconstructed[$listField] = $this->reconstructIndexedArray($decoded, $listField, $translatedFields);
+        }
+
+        foreach ($translatedFields as $key => $value) {
+            if (! preg_match('/_\d+$/', $key)) {
+                $reconstructed[$key] = $value;
+            }
+        }
+
+        return $reconstructed;
+    }
+
+    /**
+     * Translate vacation to target language and save to Language table. Uses the free Google
+     * engine by default; pass $engine = 'gemini' to force the paid engine for a one-off
+     * higher-quality re-translation.
+     */
+    public function translateVacation(Vacation $vacation, string $targetLanguage, bool $force = false, ?string $engine = null): bool
     {
         try {
-            // Don't translate if target language is same as source
-            if ($vacation->language === $targetLanguage) {
+            $sourceLanguage = $vacation->language ?: 'de';
+
+            if ($sourceLanguage === $targetLanguage) {
                 return true;
             }
 
-            // Check if translation already exists and is up to date
-            $existingTranslation = Language::where([
-                'source_id' => $vacation->id,
-                'type' => 'vacations',
-                'language' => $targetLanguage
-            ])->first();
-
-            if ($existingTranslation && 
-                $vacation->content_updated_at &&
-                $existingTranslation->updated_at >= $vacation->content_updated_at &&
-                !$this->hasSignificantChanges($vacation, $targetLanguage)) {
-                return true; // Translation is up to date
+            if (! $force && ! $this->hasSignificantChanges($vacation, $targetLanguage)) {
+                return true;
             }
 
-            // Also check if translation is recent (within 24 hours) and content hasn't changed
-            if ($existingTranslation && 
-                $existingTranslation->updated_at >= now()->subHours(24) &&
-                !$this->hasSignificantChanges($vacation, $targetLanguage)) {
-                return true; // Recent translation, no need to retranslate
+            $fields = $this->getTranslatableFields($vacation);
+
+            if ($fields === []) {
+                return true;
             }
 
-            // Get fields to translate
-            if ($force || !$existingTranslation) {
-                // For force mode or initial translation, translate all translatable fields
-                $translatableFields = [
-                    'title', 'surroundings_description', 'best_travel_times',
-                    'target_fish', 'water_distance', 'shopping_distance', 'travel_included', 'travel_options', 'included_services', 'airport_distance', 'additional_services'
-                ];
-                $fieldsToProcess = $translatableFields;
-            } else {
-                // Only translate changed fields
-                $fieldsToProcess = $this->getChangedTranslatableFields($vacation, $targetLanguage);
-            }
-            
-            // Prepare data for translation
-            $dataToTranslate = [];
-            foreach ($fieldsToProcess as $field) {
-                $value = $vacation->$field;
-                if (!empty($value)) {
-                    if (is_array($value) || $this->isJsonString($value)) {
-                        // Handle JSON arrays
-                        $decoded = is_array($value) ? $value : json_decode($value, true);
-                        if (is_array($decoded)) {
-                            $dataToTranslate[$field] = $decoded;
-                        } else {
-                            $dataToTranslate[$field] = $value;
-                        }
-                    } else {
-                        $dataToTranslate[$field] = $value;
-                    }
-                }
-            }
+            $translatedFields = $engine === 'gemini'
+                ? $this->translateFieldsWithGemini($fields, $targetLanguage, $sourceLanguage)
+                : (new FishingCopyGoogleTranslator())->batchTranslate($fields, $targetLanguage, $sourceLanguage);
 
-            if (empty($dataToTranslate)) {
-                return false;
-            }
+            $storedFields = $this->reconstructFields($vacation, $translatedFields);
 
-            // Translate using batch translation
-            // $translatedData = TranslationHelper::batchTranslate(
-            //     $dataToTranslate,
-            //     $targetLanguage,
-            //     $vacation->language,
-            //     'vacations'
-            // );
-
-            // Save or update translation
-            if ($existingTranslation) {
-                // Merge with existing translation data
-                $existingData = json_decode($existingTranslation->json_data, true) ?? [];
-                // $mergedData = array_merge($existingData, $translatedData);
-                
-                $existingTranslation->update([
-                    'title' => $translatedData['title'] ?? $existingTranslation->title,
-                    'json_data' => json_encode($mergedData),
-                    'updated_at' => now()
-                ]);
-            } else {
-                Language::create([
+            Language::updateOrCreate(
+                [
                     'source_id' => $vacation->id,
                     'type' => 'vacations',
                     'language' => $targetLanguage,
-                    'title' => $translatedData['title'] ?? null,
-                    // 'json_data' => json_encode($translatedData)
-                ]);
-            }
+                ],
+                [
+                    'title' => $storedFields['title'] ?? $vacation->title ?? null,
+                    'json_data' => $storedFields,
+                    'content' => md5(serialize($fields)),
+                    'updated_at' => now(),
+                ]
+            );
 
-            // Mark the vacation as translated to this language
-            $changeTracker = new AdminChangeTracker();
-            $changeTracker->markVacationTranslated($vacation, $targetLanguage);
+            // Mark the vacation as translated to this language (kept for the existing
+            // AdminChangeTracker-backed stats dashboard; no longer used as the translation gate).
+            (new AdminChangeTracker())->markVacationTranslated($vacation, $targetLanguage);
 
-            // Clear relevant caches
             Cache::forget('vacation_translation_' . $vacation->id . '_' . $targetLanguage);
 
             return true;
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Vacation translation failed', [
                 'vacation_id' => $vacation->id,
                 'target_language' => $targetLanguage,
                 'error' => $e->getMessage()
             ]);
             return false;
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $fields
+     * @return array<string, string>
+     */
+    private function translateFieldsWithGemini(array $fields, string $toLanguage, string $fromLanguage): array
+    {
+        try {
+            return TranslationEngineFactory::make('gemini')->batchTranslate($fields, $toLanguage, $fromLanguage);
+        } catch (\Throwable $e) {
+            Log::error('Gemini vacation translation failed, falling back to Google Translate', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return (new FishingCopyGoogleTranslator())->batchTranslate($fields, $toLanguage, $fromLanguage);
         }
     }
 
@@ -358,15 +405,6 @@ class VacationTranslationService
         }
 
         return $dataToTranslate;
-    }
-
-    /**
-     * Check if string is valid JSON
-     */
-    private function isJsonString(string $string): bool
-    {
-        json_decode($string);
-        return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
