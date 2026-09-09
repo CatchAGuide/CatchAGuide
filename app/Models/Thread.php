@@ -39,6 +39,13 @@ class Thread extends Model
         return '/'.$thumbnail_path;
     }
 
+    public function estimatedReadingMinutes(): int
+    {
+        $words = str_word_count(strip_tags((string) $this->body));
+
+        return max(1, (int) ceil($words / 200));
+    }
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
