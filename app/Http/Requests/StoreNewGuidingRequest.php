@@ -126,9 +126,6 @@ class StoreNewGuidingRequest extends FormRequest
             'title' => mb_convert_encoding($s($this->input('title')), 'UTF-8', 'auto'),
             'location' => mb_convert_encoding($s($this->input('location')), 'UTF-8', 'auto'),
             'boat_type' => mb_convert_encoding($s($this->input('boat_type')), 'UTF-8', 'auto'),
-            'course_of_action' => mb_convert_encoding($s($this->input('desc_course_of_action')), 'UTF-8', 'auto'),
-            'meeting_point' => mb_convert_encoding($s($this->input('desc_meeting_point')), 'UTF-8', 'auto'),
-            'tour_unique' => mb_convert_encoding($s($this->input('desc_tour_unique')), 'UTF-8', 'auto'),
         ]);
 
         $this->merge($trimmedData);

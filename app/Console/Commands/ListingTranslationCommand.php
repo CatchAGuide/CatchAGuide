@@ -19,6 +19,7 @@ class ListingTranslationCommand extends Command
                             {--accommodation=* : Specific accommodation IDs}
                             {--language=* : Target languages (e.g. en,de)}
                             {--from= : Source language (default: de)}
+                            {--engine= : Translation engine to use: google (default, free) or gemini (paid, higher quality)}
                             {--force : Force retranslation even if translations exist}
                             {--recent-only : Only process listings updated in the last 7 days}
                             {--missing-only : Only process listings missing at least one target translation}
@@ -117,7 +118,8 @@ class ListingTranslationCommand extends Command
           $listingType,
           $targetLanguage,
           $fromLanguage,
-          $force
+          $force,
+          $this->option('engine') ?: null
         );
 
         if ($success) {

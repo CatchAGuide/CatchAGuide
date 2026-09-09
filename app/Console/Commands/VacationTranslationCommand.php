@@ -20,6 +20,7 @@ class VacationTranslationCommand extends Command
                             {--language=* : Target languages to translate to (e.g., en,es,fr)}
                             {--detect-language : Detect and update source language for all vacations}
                             {--force : Force retranslation even if translations exist}
+                            {--engine= : Translation engine to use: google (default, free) or gemini (paid, higher quality)}
                             {--relations : Also translate related models (accommodations, boats, etc.) - enabled by default}
                             {--no-relations : Skip translating related models}
                             {--admin-changes : Only process vacations with admin changes}
@@ -30,7 +31,7 @@ class VacationTranslationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Translate vacation content using Gemini AI. Defaults to EN and DE languages. Relations (accommodations, boats, etc.) are translated by default. Use --admin-changes to only process vacations with admin changes, or --vacation=1,2,3 for specific IDs.';
+    protected $description = 'Translate vacation content (free Google engine by default; --engine=gemini for the paid engine). Defaults to EN and DE languages. Use --admin-changes to only process vacations with admin changes, or --vacation=1,2,3 for specific IDs.';
 
     private VacationTranslationService $translationService;
     private AdminChangeTracker $changeTracker;
@@ -125,7 +126,7 @@ class VacationTranslationCommand extends Command
                     }
 
                     // Perform translation
-                    $success = $this->translationService->translateVacation($vacation, $targetLanguage, $force);
+                    $success = $this->translationService->translateVacation($vacation, $targetLanguage, $force, $this->option('engine') ?: null);
                     
                     if ($success) {
                         // Translate relations if requested
