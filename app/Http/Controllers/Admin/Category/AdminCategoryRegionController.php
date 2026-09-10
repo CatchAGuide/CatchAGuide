@@ -459,6 +459,10 @@ class AdminCategoryRegionController extends Controller
         $imagePath = Storage::disk()->path($thumbnail_path);
 
         $image = Image::make($imagePath);
+        $image->resize(1600, 1200, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
         $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME) . '.webp';
         $webpImage = $image->encode('webp', 75);
 

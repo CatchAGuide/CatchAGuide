@@ -8,6 +8,7 @@ use App\Models\Guiding;
 use App\Models\Method;
 use App\Presenters\Guiding\GuidingCardPresenter;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
@@ -34,6 +35,7 @@ class GuidingsLandingService
         private FavoriteTargetSpeciesResolver $favoriteTargetSpecies,
         private GuidingCardPresenter $cardPresenter,
         private GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private CategoryListingThumbnailFallback $thumbnails,
     ) {}
 
     /**
@@ -156,7 +158,7 @@ class GuidingsLandingService
      */
     private function methodTiles(string $locale): Collection
     {
-        return Cache::remember("guidings_landing_methods_v3_{$locale}", now()->addMinutes(30), function () {
+        return Cache::remember("guidings_landing_methods_v4_{$locale}", now()->addMinutes(30), function () {
             $pages = $this->favoriteCategoryPages(
                 'Methods',
                 $this->guidingAvailability->methodIdsWithGuidings(),
@@ -173,7 +175,11 @@ class GuidingsLandingService
                 return [
                     'name' => $method?->name ?? $page->name,
                     'slug' => $page->slug,
-                    'thumbnail' => $page->getThumbnailPath(),
+                    'thumbnail' => $this->thumbnails->url(
+                        $page->thumbnail_path,
+                        CategoryListingThumbnailFallback::KIND_METHOD,
+                        (int) $page->source_id,
+                    ),
                     'count' => 1,
                     'url' => route('guidings.methods.show', ['slug' => $page->slug]),
                 ];
@@ -186,7 +192,7 @@ class GuidingsLandingService
      */
     private function speciesTiles(string $locale): Collection
     {
-        return Cache::remember("guidings_landing_species_v3_{$locale}", now()->addMinutes(30), function () {
+        return Cache::remember("guidings_landing_species_v4_{$locale}", now()->addMinutes(30), function () {
             return $this->favoriteTargetSpecies
                 ->resolve(self::TILE_RAIL_LIMIT, $this->guidingAvailability->targetIdsWithGuidings())
                 ->map(function (array $card) {

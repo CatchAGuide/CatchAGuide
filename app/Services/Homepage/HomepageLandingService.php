@@ -13,6 +13,7 @@ use App\Models\Target;
 use App\Models\Thread;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Reviews\TestimonialSelector;
 use App\Services\Vacation\VacationTargetFishSelector;
@@ -27,7 +28,7 @@ class HomepageLandingService
     /** Marketing floor for countries shown on the homepage trust band. */
     public const TRUST_COUNTRIES_FLOOR = 24;
 
-    public const SEASON_CACHE_PREFIX = 'homepage_season_v7';
+    public const SEASON_CACHE_PREFIX = 'homepage_season_v8';
 
     public function __construct(
         private HomepageCountrySelector $countries,
@@ -37,6 +38,7 @@ class HomepageLandingService
         private GuidingCategoryAvailabilityRepository $guidingAvailability,
         private VacationDestinationRepository $vacationDestinations,
         private VacationTargetFishSelector $vacationTargetAvailability,
+        private CategoryListingThumbnailFallback $thumbnails,
     ) {}
 
     /**
@@ -88,7 +90,7 @@ class HomepageLandingService
 
     private function targetSpecies(string $locale): Collection
     {
-        return Cache::remember("homepage_target_species_v5_{$locale}", now()->addMinutes(30), function () {
+        return Cache::remember("homepage_target_species_v6_{$locale}", now()->addMinutes(30), function () {
             return $this->favoriteTargetSpecies->resolve(10)
                 ->filter(fn (array $card) => $this->guidingAvailability->hasGuidingsForTarget((int) $card['source_id'])
                     || $this->vacationTargetAvailability->hasActiveListings((int) $card['source_id'], (string) $card['name']))
@@ -230,7 +232,11 @@ class HomepageLandingService
                         'country' => $countryName,
                     ]),
                     'slug' => $page->slug,
-                    'thumbnail' => $page->getThumbnailPath(),
+                    'thumbnail' => $this->thumbnails->url(
+                        $page->thumbnail_path,
+                        CategoryListingThumbnailFallback::KIND_TARGET,
+                        (int) $page->source_id,
+                    ),
                     'url' => $this->offersCatalogUrl($country, $target, $page),
                 ];
             }
@@ -248,7 +254,12 @@ class HomepageLandingService
                     'name' => $countryName,
                     'country' => $countryName,
                     'slug' => $country->slug,
-                    'thumbnail' => $country->getThumbnailPath(),
+                    'thumbnail' => $this->thumbnails->url(
+                        $country->thumbnail_path,
+                        CategoryListingThumbnailFallback::KIND_COUNTRY,
+                        (string) $country->slug,
+                        $country->countrycode,
+                    ),
                     'url' => $this->offersCatalogUrl($country),
                 ];
             }
@@ -265,7 +276,11 @@ class HomepageLandingService
                 'name' => $target?->name ?? $page->name,
                 'country' => null,
                 'slug' => $page->slug,
-                'thumbnail' => $page->getThumbnailPath(),
+                'thumbnail' => $this->thumbnails->url(
+                    $page->thumbnail_path,
+                    CategoryListingThumbnailFallback::KIND_TARGET,
+                    (int) $page->source_id,
+                ),
                 'url' => $this->offersCatalogUrl(null, $target, $page),
             ];
         })->filter()->values();

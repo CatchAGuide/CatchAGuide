@@ -138,5 +138,10 @@ These apply to all new/changed code in this repo, not just Cursor sessions.
   services/traits/pure logic, Feature for HTTP/Livewire/auth flows) — run the relevant filtered suite and fix
   failures before calling something done. Use Playwright E2E sparingly, only for critical happy paths. New
   user-facing copy needs both `en` and `de` keys. Watch for N+1s and unbounded payloads (page-speed regressions).
+- **Browser checks (DO/SiteGround)**: when checking or changing DigitalOcean (Spaces, CDN, droplets, etc.) or
+  SiteGround (DNS, hosting panel) config via Chrome browser automation, use the connected Chrome instance named
+  **"Work Chrome"** (logged in as `info.catchaguide@gmail.com`) — not the personal/default browser. If no browser
+  is named "Work Chrome" yet, use `switch_browser` and ask the user to connect the right one and name it that.
+  Never enter a DigitalOcean/SiteGround password on the user's behalf.
 - When requirements, edge cases, or the correct reuse target are unclear, ask before implementing rather than
   guessing.

@@ -199,7 +199,8 @@
             if (bestSeasonTo) formData.set('best_season_to', bestSeasonTo.value || '');
 
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
-                const croppedImages = window.imageManagerLoaded.getCroppedImages();
+                // onlyUnsaved=true: existing images stay via existing_images retention.
+                const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
                 if (croppedImages.length > 0) {
                     formData.delete('title_image[]');
                     croppedImages.forEach((imgObj, idx) => {
@@ -211,7 +212,7 @@
             }
 
             if (window.providerImageManager && typeof window.providerImageManager.getCroppedImages === 'function') {
-                const providerImages = window.providerImageManager.getCroppedImages();
+                const providerImages = window.providerImageManager.getCroppedImages(true);
                 if (providerImages.length > 0) {
                     formData.delete('provider_photo');
                     const first = providerImages[0];

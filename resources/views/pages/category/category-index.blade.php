@@ -352,7 +352,7 @@
                                     <a href="{{ $categoryItemUrl($fav->slug) }}">
                                         <div class="card">
                                             <div class="card-img">
-                                                <img src="{{ $fav->getThumbnailPath() }}" class="dimg-fluid" alt="{{ $fav->language->title }}">
+                                                <img src="{{ category_page_tile_thumbnail($fav) }}" class="dimg-fluid" alt="{{ $fav->language->title }}">
                                             </div>
                                             <div class="card-img-overlay">
                                                 <h5>{{ $fav->source->name }}</h5>
@@ -374,7 +374,7 @@
                                 <div class="trending-card">
                                     <a href="{{ $categoryItemUrl($targets->slug) }}"> 
                                         <div class="trending-card-wrapper">
-                                            <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{ media_url($targets->thumbnail_path) }}">
+                                            <img alt="{{$targets->language->title}}" class="trending-card-background" src="{{ category_page_tile_thumbnail($targets) }}">
 
                                             <div class="trending-card-wrapper-content">
                                                 <div class="overlay-wrapper"></div>

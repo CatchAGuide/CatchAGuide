@@ -39,6 +39,19 @@ class SiteChromePagesTest extends TestCase
         }
     }
 
+    public function test_public_layouts_enable_ios_viewport_fit_cover(): void
+    {
+        foreach ([
+            resource_path('views/layouts/app.blade.php'),
+            resource_path('views/layouts/app-v2.blade.php'),
+            resource_path('views/layouts/app-v2-1.blade.php'),
+        ] as $layout) {
+            $source = (string) file_get_contents($layout);
+            $this->assertStringContainsString('viewport-fit=cover', $source);
+            $this->assertStringContainsString('theme-color', $source);
+        }
+    }
+
     public function test_bottom_nav_is_outside_page_wrapper(): void
     {
         foreach ([

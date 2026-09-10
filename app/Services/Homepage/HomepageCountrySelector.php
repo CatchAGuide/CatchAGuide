@@ -5,6 +5,7 @@ namespace App\Services\Homepage;
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\CategoryPageContentService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +14,7 @@ class HomepageCountrySelector
 {
     public function __construct(
         private CategoryPageContentService $categoryContent,
+        private CategoryListingThumbnailFallback $thumbnails,
     ) {}
 
     /**
@@ -24,7 +26,7 @@ class HomepageCountrySelector
     public function featured(?int $limit = null, ?string $categoryScope = null): Collection
     {
         $locale = app()->getLocale();
-        $cacheKey = 'homepage_featured_countries_v8_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
+        $cacheKey = 'homepage_featured_countries_v9_'.$locale.'_'.($limit ?? 'all').'_'.($categoryScope ?? 'all');
 
         return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($limit, $locale, $categoryScope) {
             $unique = $categoryScope !== null
@@ -43,7 +45,12 @@ class HomepageCountrySelector
                 return [
                     'slug' => $country->slug,
                     'name' => $this->displayName($country, $locale),
-                    'thumbnail' => $country->getThumbnailPath(),
+                    'thumbnail' => $this->thumbnails->url(
+                        $country->thumbnail_path,
+                        CategoryListingThumbnailFallback::KIND_COUNTRY,
+                        (string) $country->slug,
+                        $country->countrycode,
+                    ),
                     'countrycode' => $country->countrycode,
                 ];
             })->values();

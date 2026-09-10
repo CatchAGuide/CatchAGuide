@@ -8,6 +8,10 @@ use Illuminate\Support\Collection;
 
 class FavoriteTargetSpeciesResolver
 {
+    public function __construct(
+        private CategoryListingThumbnailFallback $thumbnails,
+    ) {}
+
     /**
      * Favorite-first list of "Targets" category pages, topped up with the next
      * alphabetical pages if there aren't enough favorites.
@@ -57,7 +61,11 @@ class FavoriteTargetSpeciesResolver
             return [
                 'name' => $target?->name ?? $page->name,
                 'slug' => $page->slug,
-                'thumbnail' => $page->getThumbnailPath(),
+                    'thumbnail' => $this->thumbnails->url(
+                        $page->thumbnail_path,
+                        CategoryListingThumbnailFallback::KIND_TARGET,
+                        (int) $page->source_id,
+                    ),
                 'source_id' => (int) $page->source_id,
             ];
         })->values();

@@ -1,3 +1,14 @@
+@php
+    $mediaCdnHost = null;
+    $mediaCdnUrl = config('filesystems.disks.'.config('media_storage.disk', 'do_spaces').'.url');
+    if ($mediaCdnUrl) {
+        $mediaCdnHost = parse_url($mediaCdnUrl, PHP_URL_SCHEME).'://'.parse_url($mediaCdnUrl, PHP_URL_HOST);
+    }
+@endphp
+@if($mediaCdnHost)
+    <link rel="preconnect" href="{{ $mediaCdnHost }}" crossorigin>
+    <link rel="dns-prefetch" href="{{ $mediaCdnHost }}">
+@endif
 <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap/css/bootstrap.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/animate/animate.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/animate/custom-animate.css') }}" />

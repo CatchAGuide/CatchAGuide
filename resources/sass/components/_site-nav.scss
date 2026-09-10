@@ -32,6 +32,7 @@ $cag-site-nav-tracking: -0.02em;
   border-bottom: 1px solid var(--cag-border);
   font-family: $cag-site-font;
   -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .cag-site-nav-shell .cag-site-nav {
@@ -745,6 +746,10 @@ $cag-site-nav-tracking: -0.02em;
 
 .shake {
   animation: cag-site-nav-shake 0.5s ease-in-out;
+}
+
+html {
+  background-color: #fff;
 }
 
 .has-cag-bottom-nav {

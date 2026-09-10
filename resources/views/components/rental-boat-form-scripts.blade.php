@@ -379,7 +379,8 @@
                     window.imageManagerLoaded.syncImageListFromDom();
                     formData.set('image_list', document.getElementById('image_list')?.value || '[]');
                 }
-                const croppedImages = window.imageManagerLoaded.getCroppedImages();
+                // onlyUnsaved=true: existing images stay via existing_images retention.
+                const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
                 if (croppedImages.length > 0) {
                     // Remove any existing title_image[] from FormData
                     formData.delete('title_image[]');
@@ -456,7 +457,8 @@
                 window.imageManagerLoaded.syncImageListFromDom();
                 formData.set('image_list', document.getElementById('image_list')?.value || '[]');
             }
-            const croppedImages = window.imageManagerLoaded.getCroppedImages();
+            // onlyUnsaved=true: existing images stay via existing_images retention.
+            const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData
                 formData.delete('title_image[]');

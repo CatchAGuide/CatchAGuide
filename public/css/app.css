@@ -3189,6 +3189,7 @@ body .main-menu .main-menu-wrapper__nav {
   --cag-gray: #787780;
   --cag-coral: #E8604C;
   --cag-border: #ece8e0;
+  --cag-bottom-nav-top: auto;
   position: fixed;
   left: 0;
   right: 0;
@@ -3202,16 +3203,11 @@ body .main-menu .main-menu-wrapper__nav {
   height: auto;
   overflow: visible;
   padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 80px 0 80px #fff;
 }
-.cag-home-bottom-nav::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 100vh;
-  background: #fff;
-  pointer-events: none;
+.cag-home-bottom-nav.is-vv-pinned {
+  top: var(--cag-bottom-nav-top);
+  bottom: auto;
 }
 
 .cag-home-bottom-nav__item {
@@ -23442,6 +23438,7 @@ input:-webkit-autofill:active {
   border-bottom: 1px solid var(--cag-border);
   font-family: var(--thm-font, "DM Sans", sans-serif);
   -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .cag-site-nav-shell .cag-site-nav {
@@ -24105,6 +24102,10 @@ input:-webkit-autofill:active {
 }
 .shake {
   animation: cag-site-nav-shake 0.5s ease-in-out;
+}
+
+html {
+  background-color: #fff;
 }
 
 .has-cag-bottom-nav {

@@ -37,8 +37,11 @@
     <meta property="og:title" content="{{$row_data->title}}" />
     <meta property="og:description" content="{{$row_data->introduction ?? ""}}" />
     
-    @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
-        <meta property="og:image" content="{{ media_url($row_data->thumbnail_path) }}"/>
+    @php
+        $ogImage = category_entity_tile_thumbnail($row_data);
+    @endphp
+    @if(! str_contains($ogImage, '300x300.png'))
+        <meta property="og:image" content="{{ $ogImage }}"/>
     @endif
 @endsection
 
@@ -585,7 +588,7 @@
                                 'region' => $region->slug,
                             ]),
                             'name' => $region->name,
-                            'thumbnail' => $region->getThumbnailPath(),
+                            'thumbnail' => category_entity_tile_thumbnail($region),
                         ])
                         ->values();
                     $cityItems = $cities
@@ -600,7 +603,7 @@
                                 'city' => $city->slug,
                             ]),
                             'name' => $city->name,
-                            'thumbnail' => $city->getThumbnailPath(),
+                            'thumbnail' => category_entity_tile_thumbnail($city),
                         ])
                         ->values();
                     @endphp

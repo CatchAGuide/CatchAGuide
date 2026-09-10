@@ -80,12 +80,27 @@ class ListingGalleryImageProcessor
         if ($request->hasFile($fileField)) {
             $imageCount = count($galleryImages);
             $tempSlug = $slug ?: $options['temp_slug'];
+            $retainedBasenames = $this->basenameLookup($galleryImages);
+            // When ImageManager synced image_list, only allow enough new uploads to fill
+            // slots beyond retained paths. Prevents re-exports of existing previews from
+            // appending a second full set of hashed files on every save.
+            $maxNewUploads = $imageListSynced
+                ? max(0, count($imageList) - $imageCount)
+                : null;
+            $newUploadCount = 0;
 
             foreach ($request->file($fileField) as $index => $image) {
                 try {
                     $originalFilename = $image->getClientOriginalName();
 
                     if (in_array($originalFilename, $processedFilenames, true)) {
+                        continue;
+                    }
+
+                    if (isset($retainedBasenames[basename($originalFilename)])) {
+                        Log::info("ListingGalleryImageProcessor [{$listingKey}] skipped upload already retained by basename", [
+                            'filename' => $originalFilename,
+                        ]);
                         continue;
                     }
 
@@ -97,10 +112,20 @@ class ListingGalleryImageProcessor
                         continue;
                     }
 
-                    $index = $index + $imageCount;
+                    if ($maxNewUploads !== null && $newUploadCount >= $maxNewUploads) {
+                        Log::info("ListingGalleryImageProcessor [{$listingKey}] skipped surplus re-upload", [
+                            'filename' => $originalFilename,
+                            'max_new_uploads' => $maxNewUploads,
+                        ]);
+                        continue;
+                    }
+
+                    $index = $index + $imageCount + $newUploadCount;
                     $filename = $tempSlug . '-' . $index . '-' . time();
                     $galleryImages[] = media_upload($image, $directory, $filename, 75, $entityId);
                     $processedFilenames[] = $originalFilename;
+                    $newUploadCount++;
+                    $retainedBasenames[basename($originalFilename)] = true;
                 } catch (\Exception $e) {
                     Log::error("ListingGalleryImageProcessor [{$listingKey}] upload failed", [
                         'error' => $e->getMessage(),
@@ -113,8 +138,14 @@ class ListingGalleryImageProcessor
         if ($options['cropped'] && $request->hasFile('cropped_image')) {
             foreach ($request->file('cropped_image') as $image) {
                 try {
+                    $originalFilename = $image->getClientOriginalName();
+                    if (in_array($originalFilename, $processedFilenames, true)) {
+                        continue;
+                    }
+
                     $filename = ($slug ?: $options['temp_slug']) . '-cropped-' . count($galleryImages) . '-' . time();
                     $galleryImages[] = media_upload($image, $directory, $filename, 75, $entityId);
+                    $processedFilenames[] = $originalFilename;
                 } catch (\Exception $e) {
                     Log::error("ListingGalleryImageProcessor [{$listingKey}] cropped upload failed", [
                         'error' => $e->getMessage(),
@@ -123,6 +154,7 @@ class ListingGalleryImageProcessor
             }
         }
 
+        $galleryImages = array_values(array_unique($galleryImages));
         $thumbnailPath = $this->resolveThumbnail($request, $galleryImages, $options['thumbnail']);
 
         if ($options['empty_returns_null'] && empty($galleryImages) && empty($request->input('thumbnail_path'))) {
@@ -183,6 +215,25 @@ class ListingGalleryImageProcessor
         $this->pendingDeletes = array_merge($this->pendingDeletes, $result['to_delete']);
 
         return $result['kept'];
+    }
+
+    /**
+     * @param  array<int, string>  $paths
+     * @return array<string, true>
+     */
+    private function basenameLookup(array $paths): array
+    {
+        $lookup = [];
+
+        foreach ($paths as $path) {
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+
+            $lookup[basename(str_replace('\\', '/', $path))] = true;
+        }
+
+        return $lookup;
     }
 
     /**

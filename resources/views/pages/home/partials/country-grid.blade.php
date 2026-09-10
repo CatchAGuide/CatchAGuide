@@ -56,7 +56,13 @@
                                 src="{{ $country['thumbnail'] }}"
                                 alt="{{ $isClone ? '' : $country['name'] }}"
                                 class="cag-home-destinations__img"
-                                loading="lazy"
+                                @if(!$isClone && $loop->index < 3)
+                                    loading="eager"
+                                    @if($loop->index === 0) fetchpriority="high" @endif
+                                @else
+                                    loading="lazy"
+                                @endif
+                                decoding="async"
                                 draggable="false"
                                 width="320"
                                 height="240"

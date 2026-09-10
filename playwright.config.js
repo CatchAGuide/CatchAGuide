@@ -2,7 +2,8 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 /**
- * Lean E2E config: Chromium only, smoke-level coverage.
+ * Lean E2E config.
+ * Chromium: general smoke. iPhone WebKit: listing-image clip on Safari-like mobile.
  * Set PLAYWRIGHT_BASE_URL if the app is not on the default Laragon host.
  */
 module.exports = defineConfig({
@@ -23,6 +24,12 @@ module.exports = defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /listing-images-mobile/,
+    },
+    {
+      name: 'iphone-webkit',
+      use: { ...devices['iPhone 13'] },
+      testMatch: /listing-images-mobile/,
     },
   ],
 });

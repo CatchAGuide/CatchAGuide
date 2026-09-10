@@ -17,6 +17,7 @@
             alt="{{ $clone ? '' : $tile['name'] }}"
             class="vacation-fish-rail__img"
             loading="lazy"
+            decoding="async"
             width="240"
             height="180"
         >

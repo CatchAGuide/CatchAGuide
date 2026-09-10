@@ -139,7 +139,7 @@
                         <div class="trending-card">
                             <a href="{{ route($destinationRoute, $country->slug) }}">
                                 <div class="trending-card-wrapper">
-                                    <img alt="{{$country->name}}" class="trending-card-background" src="{{media_url($country->thumbnail_path)}}">
+                                    <img alt="{{$country->name}}" class="trending-card-background" src="{{ category_entity_tile_thumbnail($country) }}">
 
                                     <div class="trending-card-wrapper-content">
                                         <div class="overlay-wrapper"></div>

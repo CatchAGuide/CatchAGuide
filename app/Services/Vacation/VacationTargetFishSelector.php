@@ -31,7 +31,7 @@ class VacationTargetFishSelector
     public function forHub(int $limit): Collection
     {
         return Cache::remember(
-            "vacation_hub_target_fish_v2_{$limit}_".app()->getLocale(),
+            "vacation_hub_target_fish_v3_{$limit}_".app()->getLocale(),
             now()->addMinutes(30),
             function () use ($limit) {
                 return $this->favoriteTargetSpecies->resolve($limit)

@@ -9,6 +9,7 @@ use App\Models\Guiding;
 use App\Models\User;
 use App\Presenters\Guiding\GuidingCardPresenter;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Guidings\GuidingsLandingService;
 use App\Services\Homepage\HomepageCountrySelector;
@@ -88,6 +89,7 @@ class GuidingsLandingServiceMostBookedTest extends TestCase
             $favoriteTargetSpecies,
             new GuidingCardPresenter(),
             app(GuidingCategoryAvailabilityRepository::class),
+            app(CategoryListingThumbnailFallback::class),
         );
 
         $method = new ReflectionMethod(GuidingsLandingService::class, 'mostBooked');
