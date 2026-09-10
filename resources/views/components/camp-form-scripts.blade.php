@@ -362,6 +362,18 @@ function setupFormSubmission() {
         
         // Collect tagify data properly
         collectTagifyData(formData);
+
+        // Sync image_list from live previews before save. Empty means "not synced"
+        // (retain all existing). Never send "[]" unless the user truly cleared the gallery.
+        if (window.imageManagerLoaded && typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
+            window.imageManagerLoaded.syncImageListFromDom();
+            const syncedImageList = document.getElementById('image_list')?.value;
+            if (typeof syncedImageList === 'string' && syncedImageList.trim() !== '') {
+                formData.set('image_list', syncedImageList);
+            } else {
+                formData.set('image_list', '');
+            }
+        }
         
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
             // onlyUnsaved=true: keep existing gallery paths via existing_images;

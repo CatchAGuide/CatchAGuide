@@ -251,6 +251,25 @@ class SiteNavTest extends TestCase
         $this->assertStringNotContainsString('cag-home-bottom-nav', $html);
     }
 
+    public function test_bottom_nav_inlines_visual_viewport_pin_for_safari(): void
+    {
+        $this->bindNamedRequest('/offers', 'offers.index');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+
+        $this->assertStringContainsString('visualViewport', $html);
+        $this->assertStringContainsString('is-vv-pinned', $html);
+        $this->assertStringContainsString('--cag-bottom-nav-top', $html);
+    }
+
+    public function test_offer_card_gallery_uses_padding_bottom_aspect_on_mobile(): void
+    {
+        $scss = (string) file_get_contents(resource_path('sass/page/offers.scss'));
+
+        $this->assertStringContainsString('padding-bottom: 75%', $scss);
+        $this->assertStringContainsString('padding-bottom: 62.5%', $scss);
+        $this->assertStringContainsString('aspect-ratio: unset', $scss);
+    }
+
     public function test_overlay_nav_styles_keep_active_link_visible(): void
     {
         $scss = (string) file_get_contents(resource_path('sass/components/_site-nav.scss'));

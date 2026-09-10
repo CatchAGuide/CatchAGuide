@@ -134,6 +134,7 @@ async function assertImagesStayInMedia(page, { media, img, aspectHeightOverWidth
     const imgBox = await imgEl.boundingBox();
     expect(mediaBox, `card ${i} media box`).toBeTruthy();
     expect(imgBox, `card ${i} image box`).toBeTruthy();
+    expect(mediaBox.height, `card ${i} media collapsed`).toBeGreaterThan(80);
 
     expect(imgBox.width, `card ${i} image wider than media`).toBeLessThanOrEqual(mediaBox.width + SLACK_PX);
     expect(imgBox.height, `card ${i} image taller than media`).toBeLessThanOrEqual(mediaBox.height + SLACK_PX);

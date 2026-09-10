@@ -7,11 +7,15 @@ namespace App\Services\Media;
  *
  * Typical pattern: older paths under `{folder}/{id}/gallery/` plus a newer re-upload
  * set under `{folder}/{id}/`. Exact path duplicates are removed first.
+ *
+ * When both families are present, prefer the family that still exists on storage.
+ * Never drop a live family in favor of missing paths.
  */
 class ListingGalleryDeduplicator
 {
     public function __construct(
         private readonly ListingGalleryRetention $retention,
+        private readonly ?\Closure $existsChecker = null,
     ) {}
 
     /**
@@ -110,6 +114,21 @@ class ListingGalleryDeduplicator
             return $paths;
         }
 
+        $legacyLive = $this->countExisting($legacy);
+        $preferredLive = $this->countExisting($preferred);
+
+        // If only one family still exists on storage, keep that family.
+        if ($preferredLive === 0 && $legacyLive > 0) {
+            return array_values(array_merge($legacy, $other));
+        }
+        if ($legacyLive === 0 && $preferredLive > 0) {
+            return array_values(array_merge($preferred, $other));
+        }
+        // If neither family resolves, do not collapse — leave paths for manual restore.
+        if ($preferredLive === 0 && $legacyLive === 0) {
+            return $paths;
+        }
+
         $legacyCount = count($legacy);
         $preferredCount = count($preferred);
 
@@ -128,7 +147,29 @@ class ListingGalleryDeduplicator
             $keptPreferred = $preferred;
         }
 
+        // Final safety: never drop a live family for a mostly-missing preferred slice.
+        if ($this->countExisting($keptPreferred) === 0 && $legacyLive > 0) {
+            return array_values(array_merge($legacy, $other));
+        }
+
         return array_values(array_merge($keptPreferred, $other));
+    }
+
+    /**
+     * @param  array<int, string>  $paths
+     */
+    private function countExisting(array $paths): int
+    {
+        $checker = $this->existsChecker ?? static fn (string $path): bool => media_exists($path);
+        $count = 0;
+
+        foreach ($paths as $path) {
+            if ($checker($path)) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     private function isLegacyGallerySubdirPath(string $path): bool

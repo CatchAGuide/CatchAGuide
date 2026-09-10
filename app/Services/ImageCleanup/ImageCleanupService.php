@@ -541,8 +541,19 @@ class ImageCleanupService
 
             if (!$dryRun) {
                 try {
-                    if (function_exists('media_delete')) {
+                    // Prefer Spaces `_trash` backup+remove over hard delete.
+                    if (function_exists('media_trash_paths')) {
+                        $trashed = media_trash_paths([$normalized]);
+                        if ($trashed !== []) {
+                            $deleted[] = $normalized;
+                        } elseif (function_exists('media_delete')) {
+                            // Already missing live or not a managed path — fall through carefully.
+                            media_delete($normalized);
+                            $deleted[] = $normalized;
+                        }
+                    } elseif (function_exists('media_delete')) {
                         media_delete($normalized);
+                        $deleted[] = $normalized;
                     } else {
                         if (Storage::disk('public')->exists($normalized)) {
                             Storage::disk('public')->delete($normalized);
@@ -551,8 +562,8 @@ class ImageCleanupService
                         if (is_file($pub)) {
                             @unlink($pub);
                         }
+                        $deleted[] = $normalized;
                     }
-                    $deleted[] = $normalized;
                 } catch (\Throwable $e) {
                     $errors[] = "Failed to delete {$normalized}: " . $e->getMessage();
                     Log::warning('ImageCleanup: delete orphan', ['path' => $normalized, 'error' => $e->getMessage()]);

@@ -112,3 +112,4 @@ storage/debugbar/
 /blob-report/
 /playwright/.cache/
 .cursor/
+public/production/

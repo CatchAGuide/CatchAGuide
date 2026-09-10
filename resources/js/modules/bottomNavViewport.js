@@ -35,9 +35,11 @@ export function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
 
 export function initBottomNavViewport() {
   const nav = document.querySelector('.cag-home-bottom-nav');
-  if (!nav || !window.visualViewport) {
+  if (!nav || !window.visualViewport || nav.getAttribute('data-cag-vv') === '1') {
     return;
   }
+
+  nav.setAttribute('data-cag-vv', '1');
 
   const hideNavMq = window.matchMedia(HIDE_NAV_MQ);
 

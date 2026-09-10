@@ -30,6 +30,7 @@ class BottomNavViewportTest extends TestCase
         $this->assertStringContainsString('export function visualViewportNavTop', $source);
         $this->assertStringContainsString('offsetTop + visualHeight - navHeight', $source);
         $this->assertStringContainsString('visualViewport', $source);
+        $this->assertStringContainsString('data-cag-vv', $source);
         $this->assertStringContainsString('is-vv-pinned', $source);
         $this->assertStringContainsString('--cag-bottom-nav-top', $source);
         $this->assertStringContainsString("addEventListener('resize'", $source);

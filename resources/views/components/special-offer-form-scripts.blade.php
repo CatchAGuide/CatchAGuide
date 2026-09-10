@@ -729,14 +729,20 @@
             // Collect tagify data properly
             collectTagifyData(formData);
             
-            // Collect image list for tracking
+            // Collect image list for tracking — only overwrite when previews are present.
+            // Writing "[]" while ImageManager is still loading would delete the whole gallery.
             const imageList = [];
             document.querySelectorAll('#croppedImagesContainer .image-preview-wrapper').forEach(wrapper => {
-                if (wrapper.dataset.filename) {
-                    imageList.push(wrapper.dataset.filename);
+                const path = wrapper.dataset.storagePath || wrapper.dataset.filename;
+                if (path) {
+                    imageList.push(path);
                 }
             });
-            $('#image_list').val(JSON.stringify(imageList));
+            if (imageList.length > 0) {
+                $('#image_list').val(JSON.stringify(imageList));
+            } else {
+                $('#image_list').val('');
+            }
             
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
                 // onlyUnsaved=true: existing images stay via existing_images retention.

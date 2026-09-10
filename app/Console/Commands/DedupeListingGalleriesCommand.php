@@ -11,6 +11,7 @@ use App\Models\Trip;
 use App\Services\Accommodation\AccommodationCacheService;
 use App\Services\Camp\CampCacheService;
 use App\Services\Media\ListingGalleryDeduplicator;
+use App\Services\Media\MediaTrashService;
 use App\Services\RentalBoat\RentalBoatCacheService;
 use App\Services\SpecialOffer\SpecialOfferCacheService;
 use App\Services\Trip\TripCacheService;
@@ -23,7 +24,7 @@ class DedupeListingGalleriesCommand extends Command
         {--listing= : Limit to one listing key (camp, trip, accommodation, rental_boat, special_offer, guiding)}
         {--id= : Limit to one entity id}
         {--dry-run : Show changes without writing}
-        {--trash : Move removed gallery files to media trash after DB update}';
+        {--trash : After backing up the current gallery, move removed live files into `_trash` (never deletes without a backup copy)}';
 
     protected $description = 'Remove duplicate listing gallery_images entries caused by re-saving existing previews';
 
@@ -37,7 +38,7 @@ class DedupeListingGalleriesCommand extends Command
         'guiding' => ['model' => Guiding::class, 'attribute' => 'gallery_images', 'encode_json' => true],
     ];
 
-    public function handle(ListingGalleryDeduplicator $deduplicator): int
+    public function handle(ListingGalleryDeduplicator $deduplicator, MediaTrashService $trashService): int
     {
         $listingFilter = $this->option('listing');
         $idFilter = $this->option('id') !== null ? (int) $this->option('id') : null;
@@ -68,6 +69,7 @@ class DedupeListingGalleriesCommand extends Command
 
             $query->chunkById(50, function ($rows) use (
                 $deduplicator,
+                $trashService,
                 $listingKey,
                 $config,
                 $dryRun,
@@ -101,6 +103,13 @@ class DedupeListingGalleriesCommand extends Command
                         continue;
                     }
 
+                    // Always snapshot the current gallery into `_trash` before changing DB.
+                    $snapshotPaths = array_values(array_filter([
+                        ...(is_array($rawGallery) ? $rawGallery : (json_decode((string) $rawGallery, true) ?: [])),
+                        $row->thumbnail_path ?? null,
+                    ], static fn ($path) => is_string($path) && $path !== ''));
+                    $trashService->backupMany($snapshotPaths);
+
                     $galleryValue = $config['encode_json']
                         ? json_encode(array_values($result['gallery']))
                         : array_values($result['gallery']);
@@ -111,10 +120,24 @@ class DedupeListingGalleriesCommand extends Command
                     ])->save();
 
                     if ($trash && $result['removed'] !== []) {
-                        media_trash_paths($result['removed'], array_filter([
-                            ...$result['gallery'],
-                            $result['thumbnail'],
-                        ]));
+                        $keptLive = array_values(array_filter(
+                            [...$result['gallery'], $result['thumbnail']],
+                            static fn ($path) => is_string($path) && $path !== '' && media_exists($path)
+                        ));
+
+                        // Refuse to remove live files when the kept gallery is not actually live.
+                        if ($keptLive === [] && $result['gallery'] !== []) {
+                            $this->warn(sprintf(
+                                '%s#%d: skipped --trash because kept gallery files are missing on storage (backup already saved)',
+                                $listingKey,
+                                $row->getKey()
+                            ));
+                        } else {
+                            media_trash_paths($result['removed'], $keptLive !== [] ? $keptLive : array_filter([
+                                ...$result['gallery'],
+                                $result['thumbnail'],
+                            ]));
+                        }
                     }
 
                     $this->clearListingCache($listingKey, (int) $row->getKey());
@@ -123,7 +146,7 @@ class DedupeListingGalleriesCommand extends Command
         }
 
         $this->info(sprintf(
-            'Done. Listings changed: %d. Gallery paths removed: %d.%s',
+            'Done. Listings changed: %d. Gallery paths removed from DB: %d.%s',
             $changedCount,
             $removedFiles,
             $dryRun ? ' (dry-run)' : ''

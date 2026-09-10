@@ -79,6 +79,7 @@ class FooterAccordionTest extends TestCase
         $this->assertStringContainsString('box-shadow: 0 80px 0 80px #fff', $home);
         $this->assertStringContainsString('&.is-vv-pinned', $home);
         $this->assertStringContainsString('--cag-bottom-nav-top', $home);
+        $this->assertStringContainsString('z-index: 400', $home);
     }
 
     public function test_footer_mobile_styles_hide_duplicate_contact_and_scroll_top(): void

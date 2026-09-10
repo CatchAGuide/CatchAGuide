@@ -6,8 +6,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Recycle-bin for listing media. Files are moved to `_trash/{folder}/{id}/{Y-m-d}/`
- * instead of being hard-deleted, then purged after the configured retention.
+ * Recycle-bin / backup for listing media.
+ *
+ * Live removals always copy into `_trash/{folder}/{id}/{Y-m-d}/` before the
+ * live object is deleted. Gallery updates can snapshot the previous gallery
+ * into the same tree without deleting live files.
+ *
+ * Purge keeps at least the last N backup dates per entity.
  */
 class MediaTrashService
 {
@@ -31,7 +36,26 @@ class MediaTrashService
     }
 
     /**
-     * Relative trash destination for a live media path.
+     * Always keep at least this many newest Y-m-d backup folders per entity.
+     * Floor is 2 so a single bad day cannot wipe the only remaining backup.
+     */
+    public function keepDates(): int
+    {
+        return max(2, (int) config('media_storage.trash.keep_dates', 2));
+    }
+
+    public function backupBeforeGalleryUpdateEnabled(): bool
+    {
+        return (bool) config('media_storage.trash.backup_before_gallery_update', true);
+    }
+
+    public function deleteLiveAfterBackupEnabled(): bool
+    {
+        return (bool) config('media_storage.trash.delete_live_after_backup', true);
+    }
+
+    /**
+     * Relative trash/backup destination for a live media path.
      */
     public function trashRelativePath(string $originalPath, ?\DateTimeInterface $when = null): string
     {
@@ -54,6 +78,69 @@ class MediaTrashService
     }
 
     /**
+     * Copy a live file into `_trash` without deleting the live object.
+     */
+    public function backup(string $path, ?\DateTimeInterface $when = null): ?string
+    {
+        $from = $this->pathResolver->normalizePath($path);
+        if ($from === '' || $this->isTrashPath($from)) {
+            return null;
+        }
+
+        if (! $this->pathResolver->exists($from)) {
+            return null;
+        }
+
+        $to = $this->uniqueTrashPath($this->trashRelativePath($from, $when));
+        $contents = $this->pathResolver->read($from);
+        if ($contents === '') {
+            Log::warning('MediaTrashService backup skipped empty source', ['path' => $from]);
+
+            return null;
+        }
+
+        $written = $this->writeStorageResolver->forUploads()->write($to, $contents, [
+            'visibility' => config('media_storage.object_visibility', 'public'),
+        ]);
+
+        if (! $written) {
+            Log::error('MediaTrashService failed to write backup copy; live file untouched', [
+                'from' => $from,
+                'to' => $to,
+            ]);
+
+            return null;
+        }
+
+        $this->pathResolver->forgetExistsCache($to);
+
+        return $to;
+    }
+
+    /**
+     * Snapshot live gallery/thumbnail paths into `_trash` (no live deletes).
+     *
+     * @param  array<int, mixed>  $paths
+     * @return array<int, string> Backup destinations written
+     */
+    public function backupMany(array $paths, ?\DateTimeInterface $when = null): array
+    {
+        $backedUp = [];
+
+        foreach (array_unique($this->retention->stringifyPaths($paths)) as $path) {
+            $destination = $this->backup($path, $when);
+            if ($destination !== null) {
+                $backedUp[] = $destination;
+            }
+        }
+
+        return $backedUp;
+    }
+
+    /**
+     * Move a live file to trash: backup copy first, then delete live only if
+     * the backup succeeded and delete_live_after_backup is enabled.
+     *
      * @param  array<int, mixed>  $keepPaths  Still-referenced live gallery paths
      */
     public function trash(string $path, array $keepPaths = []): ?string
@@ -68,33 +155,15 @@ class MediaTrashService
             return null;
         }
 
-        if (! $this->pathResolver->exists($from)) {
+        $to = $this->backup($from);
+        if ($to === null) {
+            // Never delete live media without a successful backup copy.
             return null;
         }
 
-        $to = $this->uniqueTrashPath($this->trashRelativePath($from));
-        $contents = $this->pathResolver->read($from);
-        if ($contents === '') {
-            Log::warning('MediaTrashService skipped empty source', ['path' => $from]);
-
-            return null;
+        if ($this->deleteLiveAfterBackupEnabled()) {
+            media_delete($from);
         }
-
-        $written = $this->writeStorageResolver->forUploads()->write($to, $contents, [
-            'visibility' => config('media_storage.object_visibility', 'public'),
-        ]);
-
-        if (! $written) {
-            Log::error('MediaTrashService failed to write trash copy; live file kept', [
-                'from' => $from,
-                'to' => $to,
-            ]);
-
-            return null;
-        }
-
-        $this->pathResolver->forgetExistsCache($to);
-        media_delete($from);
 
         return $to;
     }
@@ -247,14 +316,100 @@ class MediaTrashService
         return $fileDate < \DateTimeImmutable::createFromInterface($cutoff)->setTime(0, 0);
     }
 
-    public function purgeExpired(?int $days = null): int
+    /**
+     * Whether a trash file may be purged.
+     * Always protects the newest `keepDates` backup days for that entity.
+     */
+    public function shouldPurgeTrashPath(
+        string $relativePath,
+        \DateTimeInterface $cutoff,
+        array $protectedDatesByEntity,
+    ): bool {
+        if (! $this->isTrashPath($relativePath)) {
+            return false;
+        }
+
+        $entityKey = $this->entityKeyFromTrashPath($relativePath);
+        $date = $this->dateFromTrashPath($relativePath);
+        if ($entityKey === null || $date === null) {
+            return false;
+        }
+
+        $protected = $protectedDatesByEntity[$entityKey] ?? [];
+        if (in_array($date, $protected, true)) {
+            return false;
+        }
+
+        return $this->isExpiredTrashPath($relativePath, $cutoff);
+    }
+
+    /**
+     * Build map of entityKey => newest keepDates date strings.
+     *
+     * @param  array<int, string>  $trashPaths
+     * @return array<string, array<int, string>>
+     */
+    public function protectedDatesByEntity(array $trashPaths, ?int $keepDates = null): array
+    {
+        $keepDates ??= $this->keepDates();
+        $datesByEntity = [];
+
+        foreach ($trashPaths as $path) {
+            $entityKey = $this->entityKeyFromTrashPath($path);
+            $date = $this->dateFromTrashPath($path);
+            if ($entityKey === null || $date === null) {
+                continue;
+            }
+            $datesByEntity[$entityKey][$date] = true;
+        }
+
+        $protected = [];
+        foreach ($datesByEntity as $entityKey => $dateSet) {
+            $dates = array_keys($dateSet);
+            rsort($dates, SORT_STRING);
+            $protected[$entityKey] = array_values(array_slice($dates, 0, $keepDates));
+        }
+
+        return $protected;
+    }
+
+    /**
+     * Permanently delete expired trash backups while always keeping the last
+     * `keep_dates` backup days per entity.
+     *
+     * @return array{purged: int, skipped_protected: int, skipped_retention: int}
+     */
+    public function purgeExpired(?int $days = null, ?int $keepDates = null, bool $dryRun = false): array
     {
         $days ??= $this->retentionDays();
+        $keepDates ??= $this->keepDates();
         $cutoff = now()->subDays($days);
-        $purged = 0;
+        $allTrashPaths = $this->listRelativeFiles($this->trashRoot());
+        $protected = $this->protectedDatesByEntity($allTrashPaths, $keepDates);
 
-        foreach ($this->listRelativeFiles($this->trashRoot()) as $path) {
+        $purged = 0;
+        $skippedProtected = 0;
+        $skippedRetention = 0;
+
+        foreach ($allTrashPaths as $path) {
+            $entityKey = $this->entityKeyFromTrashPath($path);
+            $date = $this->dateFromTrashPath($path);
+            if ($entityKey === null || $date === null) {
+                continue;
+            }
+
+            if (in_array($date, $protected[$entityKey] ?? [], true)) {
+                $skippedProtected++;
+                continue;
+            }
+
             if (! $this->isExpiredTrashPath($path, $cutoff)) {
+                $skippedRetention++;
+                continue;
+            }
+
+            if ($dryRun) {
+                $purged++;
                 continue;
             }
 
@@ -263,7 +418,11 @@ class MediaTrashService
             }
         }
 
-        return $purged;
+        return [
+            'purged' => $purged,
+            'skipped_protected' => $skippedProtected,
+            'skipped_retention' => $skippedRetention,
+        ];
     }
 
     private function uniqueTrashPath(string $desired): string
@@ -281,11 +440,25 @@ class MediaTrashService
         return $candidate;
     }
 
-    private function dateFromTrashPath(string $path): ?string
+    public function dateFromTrashPath(string $path): ?string
     {
         $normalized = $this->pathResolver->normalizePath($path);
         $root = preg_quote($this->trashRoot(), '/');
         if (preg_match('/^' . $root . '\/[^\/]+\/[^\/]+\/(\d{4}-\d{2}-\d{2})\//', $normalized, $matches) !== 1) {
+            return null;
+        }
+
+        return $matches[1];
+    }
+
+    /**
+     * Entity key like "camps/28" from `_trash/camps/28/2026-09-10/file.webp`.
+     */
+    public function entityKeyFromTrashPath(string $path): ?string
+    {
+        $normalized = $this->pathResolver->normalizePath($path);
+        $root = preg_quote($this->trashRoot(), '/');
+        if (preg_match('/^' . $root . '\/([^\/]+\/[^\/]+)\//', $normalized, $matches) !== 1) {
             return null;
         }
 

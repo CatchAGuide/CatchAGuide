@@ -30,12 +30,17 @@ return [
     'object_visibility' => env('MEDIA_OBJECT_VISIBILITY', 'public'),
 
     /*
-    | Recycle bin for removed listing images. Files are moved here after a
-    | successful DB commit (never during a failed update) and purged later.
+    | Recycle bin / backup for listing images. Live removals always copy into
+    | `_trash/{folder}/{id}/{Y-m-d}/` before the live object is deleted.
+    | Gallery updates also snapshot the previous gallery into the same tree.
+    | Purge keeps at least the last `keep_dates` backup days per entity.
     */
     'trash' => [
         'root' => env('MEDIA_TRASH_ROOT', '_trash'),
         'retention_days' => (int) env('MEDIA_TRASH_RETENTION_DAYS', 14),
+        'keep_dates' => (int) env('MEDIA_TRASH_KEEP_DATES', 2),
+        'backup_before_gallery_update' => env('MEDIA_BACKUP_BEFORE_GALLERY_UPDATE', true),
+        'delete_live_after_backup' => env('MEDIA_DELETE_LIVE_AFTER_BACKUP', true),
     ],
 
     /*
