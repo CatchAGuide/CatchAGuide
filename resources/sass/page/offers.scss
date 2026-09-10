@@ -1691,7 +1691,24 @@ $muted: #787780;
 
     &__media {
       min-height: 0;
-      aspect-ratio: 4 / 3;
+      aspect-ratio: unset;
+    }
+
+    // iOS Safari collapses aspect-ratio boxes whose only child is
+    // position:absolute, so the listing photo vanishes. Padding-bottom %
+    // is width-based and keeps the box on every WebKit version we ship to.
+    &__gallery {
+      position: relative;
+      inset: auto;
+      height: 0;
+      padding-bottom: 75%;
+    }
+
+    &__img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
 
     &__aside {
@@ -1756,7 +1773,11 @@ $muted: #787780;
     grid-template-columns: 1fr;
 
     &__media {
-      aspect-ratio: 16 / 10;
+      aspect-ratio: unset;
+    }
+
+    &__gallery {
+      padding-bottom: 62.5%;
     }
 
     &__main {
