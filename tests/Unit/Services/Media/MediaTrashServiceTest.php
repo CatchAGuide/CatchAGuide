@@ -41,6 +41,46 @@ class MediaTrashServiceTest extends TestCase
         $this->assertFalse($service->isExpiredTrashPath('_trash/guidings/42/broken/a.webp', $cutoff));
     }
 
+    public function test_protected_dates_keep_newest_two_per_entity(): void
+    {
+        $service = app(MediaTrashService::class);
+        $paths = [
+            '_trash/camps/28/2026-09-10/a.webp',
+            '_trash/camps/28/2026-09-09/b.webp',
+            '_trash/camps/28/2026-09-01/c.webp',
+            '_trash/camps/28/2026-08-01/d.webp',
+            '_trash/trips/1/2026-09-10/e.webp',
+            '_trash/trips/1/2026-08-01/f.webp',
+        ];
+
+        $protected = $service->protectedDatesByEntity($paths, 2);
+
+        $this->assertSame(['2026-09-10', '2026-09-09'], $protected['camps/28']);
+        $this->assertSame(['2026-09-10', '2026-08-01'], $protected['trips/1']);
+    }
+
+    public function test_should_purge_never_removes_protected_dates(): void
+    {
+        $service = app(MediaTrashService::class);
+        $paths = [
+            '_trash/camps/28/2026-09-10/a.webp',
+            '_trash/camps/28/2026-09-09/b.webp',
+            '_trash/camps/28/2026-08-01/c.webp',
+        ];
+        $protected = $service->protectedDatesByEntity($paths, 2);
+        $cutoff = new \DateTimeImmutable('2026-09-20');
+
+        $this->assertFalse($service->shouldPurgeTrashPath('_trash/camps/28/2026-09-10/a.webp', $cutoff, $protected));
+        $this->assertFalse($service->shouldPurgeTrashPath('_trash/camps/28/2026-09-09/b.webp', $cutoff, $protected));
+        $this->assertTrue($service->shouldPurgeTrashPath('_trash/camps/28/2026-08-01/c.webp', $cutoff, $protected));
+    }
+
+    public function test_keep_dates_defaults_to_at_least_two_from_config(): void
+    {
+        config(['media_storage.trash.keep_dates' => 2]);
+        $this->assertSame(2, app(MediaTrashService::class)->keepDates());
+    }
+
     public function test_unsynced_listing_update_does_not_queue_deletes(): void
     {
         $processor = app(ListingGalleryImageProcessor::class);
@@ -71,5 +111,22 @@ class MediaTrashServiceTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame(['guidings/1/photo.webp'], $result['gallery_images']);
         $this->assertSame([], $processor->takePendingDeletes());
+    }
+
+    public function test_gallery_update_captures_pre_update_snapshot_for_backup(): void
+    {
+        $processor = app(ListingGalleryImageProcessor::class);
+        $request = Request::create('/test', 'POST', [
+            'is_update' => '1',
+            'existing_images' => json_encode(['camps/28/a.webp', 'camps/28/b.webp']),
+            'image_list' => json_encode(['camps/28/a.webp']),
+            'thumbnail_path' => 'camps/28/a.webp',
+        ]);
+
+        $processor->process($request, 'camp', 'camp-slug', 28);
+        $snapshot = $processor->takePreUpdateGallerySnapshot();
+
+        $this->assertContains('camps/28/a.webp', $snapshot);
+        $this->assertContains('camps/28/b.webp', $snapshot);
     }
 }

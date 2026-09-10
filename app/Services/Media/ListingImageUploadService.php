@@ -47,15 +47,15 @@ class ListingImageUploadService
             return false;
         }
 
-        if (str_contains($path, '/')) {
-            return media_delete($path);
+        $target = $path;
+        if (! str_contains($path, '/') && $legacyDirectory !== null) {
+            $target = rtrim($legacyDirectory, '/') . '/' . ltrim($path, '/');
         }
 
-        if ($legacyDirectory !== null) {
-            return media_delete(rtrim($legacyDirectory, '/') . '/' . ltrim($path, '/'));
-        }
+        // Never hard-delete live listing media. Backup to `_trash` first.
+        $trashed = media_trash_paths([$target]);
 
-        return media_delete($path);
+        return $trashed !== [];
     }
 
     public function deleteGuiding(string $path): bool

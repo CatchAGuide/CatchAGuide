@@ -10,17 +10,21 @@ class ListingGalleryImageProcessor
     /** @var array<int, string> */
     private array $pendingDeletes = [];
 
+    /** @var array<int, string> Gallery/thumbnail paths present before this update. */
+    private array $preUpdateGallerySnapshot = [];
+
     public function __construct(
         private readonly ListingMediaPathBuilder $paths,
         private readonly ListingGalleryRetention $retention,
+        private readonly MediaTrashService $trash,
     ) {}
 
     /**
-     * Move queued removals to trash after a successful save.
-     * Files still referenced by the saved gallery/thumbnail are skipped.
+     * After a successful save: snapshot the previous gallery into `_trash`, then
+     * move queued removals (backup copy first, then delete live).
      *
      * @param  array<int, string>|string|null  $gallery
-     * @return array<int, string>
+     * @return array{backed_up: array<int, string>, trashed: array<int, string>}
      */
     public function trashPendingDeletesForGallery(array|string|null $gallery, ?string $thumbnail = null): array
     {
@@ -32,7 +36,18 @@ class ListingGalleryImageProcessor
             $keep[] = $thumbnail;
         }
 
-        return media_trash_paths($this->takePendingDeletes(), $keep);
+        $backedUp = [];
+        if ($this->trash->backupBeforeGalleryUpdateEnabled() && $this->preUpdateGallerySnapshot !== []) {
+            $backedUp = $this->trash->backupMany($this->preUpdateGallerySnapshot);
+        }
+
+        $trashed = media_trash_paths($this->takePendingDeletes(), $keep);
+        $this->preUpdateGallerySnapshot = [];
+
+        return [
+            'backed_up' => $backedUp,
+            'trashed' => $trashed,
+        ];
     }
 
     /**
@@ -44,6 +59,17 @@ class ListingGalleryImageProcessor
     {
         $paths = $this->pendingDeletes;
         $this->pendingDeletes = [];
+
+        return $paths;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function takePreUpdateGallerySnapshot(): array
+    {
+        $paths = $this->preUpdateGallerySnapshot;
+        $this->preUpdateGallerySnapshot = [];
 
         return $paths;
     }
@@ -61,6 +87,7 @@ class ListingGalleryImageProcessor
         string $fileField = 'title_image',
     ): ?array {
         $this->pendingDeletes = [];
+        $this->preUpdateGallerySnapshot = [];
         $options = $this->options($listingKey);
         $galleryImages = [];
         $imageListRaw = $request->input('image_list');
@@ -74,6 +101,16 @@ class ListingGalleryImageProcessor
         $directory = $this->paths->entityDirectory($listingKey, $entityId);
 
         if ($request->input('is_update') == '1' && $entityId) {
+            $existingImages = json_decode($request->input('existing_images', '[]'), true) ?? [];
+            $existingImages = array_values(array_filter($existingImages, static fn ($path) => is_string($path) && $path !== ''));
+            $requestedThumbnail = $request->input('thumbnail_path');
+            $this->preUpdateGallerySnapshot = $existingImages;
+            if (is_string($requestedThumbnail) && $requestedThumbnail !== '') {
+                $this->preUpdateGallerySnapshot[] = $requestedThumbnail;
+            }
+            $this->preUpdateGallerySnapshot = array_values(array_unique(
+                $this->retention->stringifyPaths($this->preUpdateGallerySnapshot)
+            ));
             $galleryImages = $this->retainExistingImages($request);
         }
 

@@ -771,7 +771,11 @@
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
                 if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
                     window.imageManagerLoaded.syncImageListFromDom();
-                    formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+                    // Never default to "[]" — that means "synced empty gallery" and deletes all images.
+                    const syncedImageList = document.getElementById('image_list')?.value;
+                    if (typeof syncedImageList === 'string' && syncedImageList.trim() !== '') {
+                        formData.set('image_list', syncedImageList);
+                    }
                 }
                 // onlyUnsaved=true: existing images stay via existing_images retention.
                 const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
@@ -832,7 +836,11 @@
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
             if (typeof window.imageManagerLoaded.syncImageListFromDom === 'function') {
                 window.imageManagerLoaded.syncImageListFromDom();
-                formData.set('image_list', document.getElementById('image_list')?.value || '[]');
+                // Never default to "[]" — that means "synced empty gallery" and deletes all images.
+                const syncedImageList = document.getElementById('image_list')?.value;
+                if (typeof syncedImageList === 'string' && syncedImageList.trim() !== '') {
+                    formData.set('image_list', syncedImageList);
+                }
             }
             // onlyUnsaved=true: existing images stay via existing_images retention.
             const croppedImages = window.imageManagerLoaded.getCroppedImages(true);

@@ -8,32 +8,48 @@ use Illuminate\Console\Command;
 class PurgeMediaTrashCommand extends Command
 {
     protected $signature = 'media:purge-trash
-        {--days= : Days to keep trashed images (defaults to config media_storage.trash.retention_days)}
+        {--days= : Days to keep trashed/backup images beyond the protected dates (defaults to config)}
+        {--keep-dates= : Always keep this many newest backup dates per entity (default from config, usually 2)}
         {--dry-run : Show how many trash files would be deleted without deleting}';
 
-    protected $description = 'Permanently delete listing images from the media trash folder after the retention window';
+    protected $description = 'Permanently delete old media trash/backups while always keeping the last N backup dates per entity';
 
     public function handle(MediaTrashService $trash): int
     {
         $days = (int) ($this->option('days') ?: $trash->retentionDays());
+        $keepDates = (int) ($this->option('keep-dates') ?: $trash->keepDates());
+        $dryRun = (bool) $this->option('dry-run');
+
         if ($days < 1) {
             $this->error('Days must be at least 1.');
 
             return self::FAILURE;
         }
 
-        $this->info('Media trash purge');
-        $this->line("  Retention: keep last {$days} day(s)");
-        $this->line('  Cutoff:    ' . now()->subDays($days)->toDateString());
+        if ($keepDates < 1) {
+            $this->error('keep-dates must be at least 1.');
 
-        if ($this->option('dry-run')) {
-            $this->warn('DRY RUN: no files will be deleted. Remove --dry-run to purge.');
-
-            return self::SUCCESS;
+            return self::FAILURE;
         }
 
-        $purged = $trash->purgeExpired($days);
-        $this->info("Done. Purged {$purged} file(s).");
+        $this->info('Media trash / backup purge');
+        $this->line("  Always keep last {$keepDates} backup date(s) per entity");
+        $this->line("  Also keep files newer than {$days} day(s)");
+        $this->line('  Cutoff:    ' . now()->subDays($days)->toDateString());
+
+        $result = $trash->purgeExpired($days, $keepDates, $dryRun);
+
+        if ($dryRun) {
+            $this->warn('DRY RUN: no files deleted.');
+        }
+
+        $this->info(sprintf(
+            'Done. %s %d file(s). Protected-date skips: %d. Retention skips: %d.',
+            $dryRun ? 'Would purge' : 'Purged',
+            $result['purged'],
+            $result['skipped_protected'],
+            $result['skipped_retention']
+        ));
 
         return self::SUCCESS;
     }

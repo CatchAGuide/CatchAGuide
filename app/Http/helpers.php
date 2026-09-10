@@ -227,6 +227,20 @@ if (!function_exists('media_delete')) {
     }
 }
 
+if (!function_exists('media_backup_paths')) {
+    /**
+     * Copy live listing media into `_trash` without deleting the live objects.
+     * Use before gallery DB updates so Spaces always has a recoverable snapshot.
+     *
+     * @param  array<int, mixed>  $paths
+     * @return array<int, string>
+     */
+    function media_backup_paths(array $paths): array
+    {
+        return app(MediaTrashService::class)->backupMany($paths);
+    }
+}
+
 if (!function_exists('media_trash_paths')) {
     /**
      * Move listing media into the recycle bin after a successful DB commit.
