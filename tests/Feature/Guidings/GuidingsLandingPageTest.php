@@ -98,7 +98,7 @@ class GuidingsLandingPageTest extends TestCase
             $mock->shouldIgnoreMissing();
         });
 
-        Cache::forget('guidings_landing_methods_v3_de');
+        Cache::forget('guidings_landing_methods_v4_de');
 
         $response = $this->get(route('guidings.landing'));
 

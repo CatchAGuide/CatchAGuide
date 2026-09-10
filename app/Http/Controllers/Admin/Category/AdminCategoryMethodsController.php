@@ -238,6 +238,10 @@ class AdminCategoryMethodsController extends Controller
         $thumbnail_path = $thumbnailImage->store('public');
         $imagePath = Storage::disk()->path($thumbnail_path);
         $image = Image::make($imagePath);
+        $image->resize(1600, 1200, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
         $webpImageName = pathinfo($thumbnail_path, PATHINFO_FILENAME).'.webp';
         $webpImage = $image->encode('webp', 75);
         $webp_path = 'category/methods/';

@@ -739,7 +739,8 @@
             $('#image_list').val(JSON.stringify(imageList));
             
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
-                const croppedImages = window.imageManagerLoaded.getCroppedImages();
+                // onlyUnsaved=true: existing images stay via existing_images retention.
+                const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
                 
                 if (croppedImages.length > 0) {
                     // Remove any existing title_image[] from FormData

@@ -2073,6 +2073,7 @@ $white: #ffffff;
   --cag-gray: #{$gray};
   --cag-coral: #{$coral};
   --cag-border: #{$border};
+  --cag-bottom-nav-top: auto;
   position: fixed;
   left: 0;
   right: 0;
@@ -2086,19 +2087,14 @@ $white: #ffffff;
   height: auto;
   overflow: visible;
   padding: 0.3rem 0 calc(0.3rem + env(safe-area-inset-bottom, 0px));
+  // Safari clips overflow of position:fixed, so a pseudo-element fill can
+  // fail. A box-shadow is painted with the bar and covers the home-indicator
+  // / toolbar gap without using overflow.
+  box-shadow: 0 80px 0 80px #fff;
 
-  // iOS Safari collapses its browser chrome while scrolling. position:fixed;
-  // bottom:0 often lags, leaving a gap where listing cards show through.
-  // This fill sits under the bar so that gap stays the nav color.
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 100vh;
-    background: #fff;
-    pointer-events: none;
+  &.is-vv-pinned {
+    top: var(--cag-bottom-nav-top);
+    bottom: auto;
   }
 }
 

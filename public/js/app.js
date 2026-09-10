@@ -13,9 +13,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_vacationCardGallery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/vacationCardGallery */ "./resources/js/modules/vacationCardGallery.js");
 /* harmony import */ var _modules_vacationCampFishTags__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/vacationCampFishTags */ "./resources/js/modules/vacationCampFishTags.js");
 /* harmony import */ var _modules_pageLoader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/pageLoader */ "./resources/js/modules/pageLoader.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
+/* harmony import */ var _modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/bottomNavViewport */ "./resources/js/modules/bottomNavViewport.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
 // require("./bootstrap");
+
 
 
 
@@ -28,10 +30,85 @@ document.addEventListener('DOMContentLoaded', function () {
   (0,_modules_vacationCardGallery__WEBPACK_IMPORTED_MODULE_1__.initVacationCardGalleries)();
   (0,_modules_vacationCampFishTags__WEBPACK_IMPORTED_MODULE_2__.initVacationCampFishTags)();
   (0,_modules_pageLoader__WEBPACK_IMPORTED_MODULE_3__.initPageLoader)();
-  (0,lucide__WEBPACK_IMPORTED_MODULE_4__.createIcons)({
-    icons: lucide__WEBPACK_IMPORTED_MODULE_5__
+  (0,_modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_4__.initBottomNavViewport)();
+  (0,lucide__WEBPACK_IMPORTED_MODULE_5__.createIcons)({
+    icons: lucide__WEBPACK_IMPORTED_MODULE_6__
   });
 });
+
+/***/ },
+
+/***/ "./resources/js/modules/bottomNavViewport.js"
+/*!***************************************************!*\
+  !*** ./resources/js/modules/bottomNavViewport.js ***!
+  \***************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initBottomNavViewport: () => (/* binding */ initBottomNavViewport),
+/* harmony export */   syncBottomNavToVisualViewport: () => (/* binding */ syncBottomNavToVisualViewport),
+/* harmony export */   visualViewportNavTop: () => (/* binding */ visualViewportNavTop)
+/* harmony export */ });
+var HIDE_NAV_MQ = '(min-width: 768px)';
+
+/**
+ * Pin the mobile tab bar to the visual viewport bottom.
+ * iOS Safari keeps position:fixed; bottom:0 at a stale Y when its toolbar
+ * collapses, so listing cards show through the gap. CSS overflow fills are
+ * also clipped on some iOS versions, so this uses visualViewport coordinates.
+ */
+function visualViewportNavTop(offsetTop, visualHeight, navHeight) {
+  return Math.round(offsetTop + visualHeight - navHeight);
+}
+function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
+  if (!nav) {
+    return;
+  }
+  if (hideNav) {
+    nav.classList.remove('is-vv-pinned');
+    nav.style.removeProperty('--cag-bottom-nav-top');
+    return;
+  }
+  var navHeight = nav.offsetHeight;
+  if (!viewport || navHeight <= 0) {
+    return;
+  }
+  nav.style.setProperty('--cag-bottom-nav-top', "".concat(visualViewportNavTop(viewport.offsetTop, viewport.height, navHeight), "px"));
+  nav.classList.add('is-vv-pinned');
+}
+function initBottomNavViewport() {
+  var nav = document.querySelector('.cag-home-bottom-nav');
+  if (!nav || !window.visualViewport) {
+    return;
+  }
+  var hideNavMq = window.matchMedia(HIDE_NAV_MQ);
+  var sync = function sync() {
+    syncBottomNavToVisualViewport(nav, window.visualViewport, hideNavMq.matches);
+  };
+  var frame = 0;
+  var requestSync = function requestSync() {
+    if (frame) {
+      return;
+    }
+    frame = window.requestAnimationFrame(function () {
+      frame = 0;
+      sync();
+    });
+  };
+  sync();
+  window.visualViewport.addEventListener('resize', requestSync);
+  window.visualViewport.addEventListener('scroll', requestSync);
+  window.addEventListener('scroll', requestSync, {
+    passive: true
+  });
+  window.addEventListener('orientationchange', requestSync);
+  if (typeof hideNavMq.addEventListener === 'function') {
+    hideNavMq.addEventListener('change', sync);
+  } else if (typeof hideNavMq.addListener === 'function') {
+    hideNavMq.addListener(sync);
+  }
+}
 
 /***/ },
 

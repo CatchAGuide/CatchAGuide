@@ -9,7 +9,8 @@
         "prod": "npm run production",
         "production": "mix --production",
         "test:e2e": "playwright test",
-        "test:e2e:ui": "playwright test --ui"
+        "test:e2e:ui": "playwright test --ui",
+        "test:e2e:listing-images": "playwright install webkit && playwright test e2e/listing-images-mobile.spec.js --project=iphone-webkit"
     },
     "devDependencies": {
         "@playwright/test": "^1.54.2",

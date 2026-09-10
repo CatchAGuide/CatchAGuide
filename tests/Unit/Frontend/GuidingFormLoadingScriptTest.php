@@ -78,9 +78,9 @@ class GuidingFormLoadingScriptTest extends TestCase
                 "{$relative} should load ImageManager.js"
             );
             $this->assertStringContainsString(
-                'getCroppedImages(',
+                'getCroppedImages(true)',
                 $source,
-                "{$relative} should call getCroppedImages()"
+                "{$relative} should only upload unsaved cropped images"
             );
             $this->assertStringNotContainsString(
                 'guiding-form-loading.js',
@@ -93,7 +93,7 @@ class GuidingFormLoadingScriptTest extends TestCase
             'resources/views/pages/guidings/includes/scripts/multi-step-form-script.blade.php'
         ));
         $this->assertStringContainsString('assets/js/ImageManager.js', $guiding);
-        $this->assertStringContainsString('getCroppedImages(', $guiding);
+        $this->assertStringContainsString('getCroppedImages(true)', $guiding);
         $this->assertStringContainsString('guiding-form-loading.js', $guiding);
     }
 }

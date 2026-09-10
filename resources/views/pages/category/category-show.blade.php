@@ -31,8 +31,11 @@
     <meta property="og:title" content="{{ $row_data->source->name ?? $row_data->name }}" />
     <meta property="og:description" content="{{$row_data->language->introduction ?? ""}}" />
     
-    @if(isset($row_data->thumbnail_path) && media_path_usable($row_data->thumbnail_path))
-        <meta property="og:image" content="{{ media_url($row_data->thumbnail_path) }}"/>
+    @php
+        $ogImage = category_page_tile_thumbnail($row_data);
+    @endphp
+    @if(! str_contains($ogImage, '300x300.png'))
+        <meta property="og:image" content="{{ $ogImage }}"/>
     @endif
 @endsection
 

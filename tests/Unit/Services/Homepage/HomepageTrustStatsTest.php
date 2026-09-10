@@ -4,6 +4,7 @@ namespace Tests\Unit\Services\Homepage;
 
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Homepage\HomepageLandingService;
@@ -40,6 +41,7 @@ class HomepageTrustStatsTest extends TestCase
             app(GuidingCategoryAvailabilityRepository::class),
             app(VacationDestinationRepository::class),
             app(VacationTargetFishSelector::class),
+            app(CategoryListingThumbnailFallback::class),
         );
 
         $method = new ReflectionMethod(HomepageLandingService::class, 'trustStats');
@@ -77,6 +79,7 @@ class HomepageTrustStatsTest extends TestCase
             app(GuidingCategoryAvailabilityRepository::class),
             app(VacationDestinationRepository::class),
             app(VacationTargetFishSelector::class),
+            app(CategoryListingThumbnailFallback::class),
         );
 
         $method = new ReflectionMethod(HomepageLandingService::class, 'trustStats');

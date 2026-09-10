@@ -364,7 +364,9 @@ function setupFormSubmission() {
         collectTagifyData(formData);
         
         if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {
-            const croppedImages = window.imageManagerLoaded.getCroppedImages();
+            // onlyUnsaved=true: keep existing gallery paths via existing_images;
+            // re-uploading every preview would append duplicate hashed files each save.
+            const croppedImages = window.imageManagerLoaded.getCroppedImages(true);
             
             if (croppedImages.length > 0) {
                 // Remove any existing title_image[] from FormData

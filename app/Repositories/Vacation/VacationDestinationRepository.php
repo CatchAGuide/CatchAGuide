@@ -6,6 +6,7 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Domain\Vacation\CountrySlug;
 use App\Models\CategoryEntity;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
@@ -18,6 +19,7 @@ class VacationDestinationRepository
         private TripListingRepository $trips,
         private HomepageCountrySelector $homepageCountries,
         private CategoryPageContentService $categoryContent,
+        private CategoryListingThumbnailFallback $thumbnails,
     ) {}
 
     public function findCountryForLocale(string $slug, ?string $locale = null): ?CategoryEntity
@@ -207,11 +209,12 @@ class VacationDestinationRepository
     ): array {
         $camps = (int) ($campCounts[$slug] ?? 0);
         $trips = (int) ($tripCounts[$slug] ?? 0);
-        $thumbnailPath = $country?->thumbnail_path;
-
-        if (empty($thumbnailPath) && ($camps + $trips) > 0) {
-            $thumbnailPath = $this->listingThumbnailForCountry($slug);
-        }
+        $thumbnailPath = $this->thumbnails->path(
+            $country?->thumbnail_path,
+            CategoryListingThumbnailFallback::KIND_COUNTRY,
+            $slug,
+            $country?->countrycode,
+        );
 
         $translation = $country !== null
             ? $this->categoryContent->findForEntity(CategoryPageEntityType::GEO_COUNTRY, $country->id, CategoryPageScope::VACATIONS, $locale)
@@ -253,39 +256,6 @@ class VacationDestinationRepository
 
                 return $counts;
             }, collect());
-    }
-
-    private function listingThumbnailForCountry(string $slug): ?string
-    {
-        $variants = CountrySlug::storageVariants($slug);
-
-        $campThumb = DB::table('camps')
-            ->where('status', 'active')
-            ->where(function ($q) use ($variants) {
-                foreach ($variants as $variant) {
-                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
-                }
-            })
-            ->whereNotNull('thumbnail_path')
-            ->where('thumbnail_path', '!=', '')
-            ->orderByDesc('id')
-            ->value('thumbnail_path');
-
-        if (! empty($campThumb)) {
-            return $campThumb;
-        }
-
-        return DB::table('trips')
-            ->where('status', 'active')
-            ->where(function ($q) use ($variants) {
-                foreach ($variants as $variant) {
-                    $q->orWhereRaw('LOWER(country) = ?', [mb_strtolower($variant, 'UTF-8')]);
-                }
-            })
-            ->whereNotNull('thumbnail_path')
-            ->where('thumbnail_path', '!=', '')
-            ->orderByDesc('id')
-            ->value('thumbnail_path');
     }
 
     public function campRepository(): CampListingRepository

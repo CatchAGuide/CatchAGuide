@@ -6,6 +6,7 @@ use App\Models\CategoryPage;
 use App\Models\Method;
 use App\Presenters\Guiding\GuidingCardPresenter;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
 use App\Services\Guidings\GuidingsLandingService;
 use App\Services\Homepage\HomepageCountrySelector;
@@ -85,6 +86,7 @@ class GuidingsLandingServiceMethodTilesTest extends TestCase
             Mockery::mock(FavoriteTargetSpeciesResolver::class),
             new GuidingCardPresenter(),
             $availability,
+            app(CategoryListingThumbnailFallback::class),
         );
 
         $method = new ReflectionMethod(GuidingsLandingService::class, 'methodTiles');

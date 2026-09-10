@@ -1,6 +1,9 @@
 <?php
 
 use App\Contracts\Media\MediaProcessorInterface;
+use App\Models\CategoryEntity;
+use App\Models\CategoryPage;
+use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\ListingMediaStorageRegistry;
 use App\Services\Media\ManagedMediaPathMatcher;
@@ -277,6 +280,34 @@ if (!function_exists('media_url')) {
     function media_url(?string $path, ?string $placeholder = 'images/placeholder_guide.jpg'): string
     {
         return app(MediaUrlResolver::class)->resolve($path, $placeholder);
+    }
+}
+
+if (! function_exists('category_tile_thumbnail')) {
+    /**
+     * CMS thumbnail when present, otherwise one listing photo for that category.
+     */
+    function category_tile_thumbnail(
+        ?string $ownPath,
+        string $kind,
+        string|int $identifier,
+        ?string $countryIso = null,
+    ): string {
+        return app(CategoryListingThumbnailFallback::class)->url($ownPath, $kind, $identifier, $countryIso);
+    }
+}
+
+if (! function_exists('category_entity_tile_thumbnail')) {
+    function category_entity_tile_thumbnail(CategoryEntity $entity): string
+    {
+        return app(CategoryListingThumbnailFallback::class)->forEntity($entity);
+    }
+}
+
+if (! function_exists('category_page_tile_thumbnail')) {
+    function category_page_tile_thumbnail(CategoryPage $page): string
+    {
+        return app(CategoryListingThumbnailFallback::class)->forPage($page);
     }
 }
 
