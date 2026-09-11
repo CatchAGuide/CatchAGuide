@@ -70,68 +70,82 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('siteBottomNavLinks', SitePrimaryNav::bottomNavLinks());
         });
 
+        // NOTE: View::composer('*', ...) runs on EVERY view/partial/component composed,
+        // not once per request - a single page can compose 100+ views (icons, cards,
+        // modals, etc.), so each closure below re-ran its Cache::remember() that many
+        // times per request (measured: 111 view compositions -> 2000+ redundant cache
+        // reads/unserializations on the homepage alone). Each closure below is memoized
+        // with a `static` local so the expensive lookup runs once per request (the
+        // static resets naturally on the next request/process) and every other view
+        // composition just reuses the already-fetched value.
         View::composer('*', function ($view) {
-            $authUser = web_guide_user();
+            static $bookings;
 
-            if ($authUser && $authUser->canAccessGuideDashboard()) {
+            if ($bookings === null) {
                 $bookings = collect();
+                $authUser = web_guide_user();
 
-                if ($authUser->guidings) {
+                if ($authUser && $authUser->canAccessGuideDashboard() && $authUser->guidings) {
                     $bookings = $authUser->guidings->flatMap(function ($guiding) {
                         return $guiding->bookings;
                     })->sortByDesc('created_at');
                 }
-
-                $view->with('guideBookings', $bookings);
-
-
             }
+
+            $view->with('guideBookings', $bookings);
         });
 
         View::composer('*', function ($view) {
-            $allguidings = \Cache::remember('all_guidings', now()->addHours(1), function () {
+            static $allguidings;
+            $allguidings ??= Cache::remember('all_guidings', now()->addHours(1), function () {
                 return Guiding::orderBy('title','asc')->get();
             });
             $view->with('allguidings', $allguidings);
         });
 
         View::composer('*', function ($view) {
-            $allwaters = Cache::remember('all_waters', now()->addHours(1), function () {
+            static $allwaters;
+            $allwaters ??= Cache::remember('all_waters', now()->addHours(1), function () {
                 return Water::orderBy(app()->getLocale() == 'en' ? 'name_en' : 'name', 'asc')->get();
             });
             $view->with('allwaters', $allwaters);
         });
 
         View::composer('*', function ($view) {
-            $alltargets = Cache::remember('all_targets', now()->addHours(1), function () {
+            static $alltargets;
+            $alltargets ??= Cache::remember('all_targets', now()->addHours(1), function () {
                 return Target::orderBy(app()->getLocale() == 'en' ? 'name_en' : 'name', 'asc')->get();
             });
             $view->with('alltargets', $alltargets);
         });
 
         View::composer('*', function ($view) {
-            $allmethods = Cache::remember('all_methods', now()->addHours(1), function () {
+            static $allmethods;
+            $allmethods ??= Cache::remember('all_methods', now()->addHours(1), function () {
                 return Method::orderBy(app()->getLocale() == 'en' ? 'name_en' : 'name', 'asc')->get();
             });
             $view->with('allmethods', $allmethods);
         });
 
         View::composer('*', function ($view) {
-            $allfishingfrom = Cache::remember('all_fishingFrom', now()->addHours(1), function () {
+            static $allfishingfrom;
+            $allfishingfrom ??= Cache::remember('all_fishingFrom', now()->addHours(1), function () {
                 return FishingFrom::orderBy(app()->getLocale() == 'en' ? 'name_en' : 'name', 'asc')->get();
             });
             $view->with('allfishingfrom', $allfishingfrom );
         });
 
         View::composer('*', function ($view) {
-            $FishingEquipment = Cache::remember('all_FishingEquipment', now()->addHours(1), function () {
+            static $FishingEquipment;
+            $FishingEquipment ??= Cache::remember('all_FishingEquipment', now()->addHours(1), function () {
                 return FishingEquipment::orderBy(app()->getLocale() == 'en' ? 'name_en' : 'name', 'asc')->get();
             });
             $view->with('allfishingequipment', $FishingEquipment );
         });
 
         View::composer('*', function ($view) {
-            $activeFishing = Cache::remember('active_fishing', now()->addHours(1), function () {
+            static $activeFishing;
+            $activeFishing ??= Cache::remember('active_fishing', now()->addHours(1), function () {
                 return Guiding::whereHas('fishingTypes',function($query){
                     $query->where('id',1);
                 })
@@ -144,7 +158,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $seaFishing = Cache::remember('sea_fishing', now()->addHours(1), function () {
+            static $seaFishing;
+            $seaFishing ??= Cache::remember('sea_fishing', now()->addHours(1), function () {
                 return Guiding::whereHas('guidingWaters', function ($query) {
                     $query->where('water_id', 2);
                 })
@@ -158,7 +173,8 @@ class ViewServiceProvider extends ServiceProvider
 
 
         View::composer('*', function ($view) {
-            $boatFishing = Cache::remember('boat_fishing', now()->addHours(1), function () {
+            static $boatFishing;
+            $boatFishing ??= Cache::remember('boat_fishing', now()->addHours(1), function () {
                 return Guiding::whereHas('guidingMethods', function ($query) {
                     $query->where('method_id', 3);
                 })
@@ -171,7 +187,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $familyAdventures = Cache::remember('family_adventures', now()->addHours(1), function () {
+            static $familyAdventures;
+            $familyAdventures ??= Cache::remember('family_adventures', now()->addHours(1), function () {
                 return Guiding::where('max_guests','>=', 4)
                 ->where('status', 1)
                 ->inRandomOrder()
@@ -182,7 +199,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $flyshings = Cache::remember('flyshings', now()->addHours(1), function () {
+            static $flyshings;
+            $flyshings ??= Cache::remember('flyshings', now()->addHours(1), function () {
                 return Guiding::whereHas('guidingMethods', function ($query) {
                     $query->where('method_id', 4);
                 })
@@ -196,7 +214,8 @@ class ViewServiceProvider extends ServiceProvider
 
 
         View::composer('*', function ($view) {
-            $shoreFishings = Cache::remember('shore_fishings', now()->addHours(1), function () {
+            static $shoreFishings;
+            $shoreFishings ??= Cache::remember('shore_fishings', now()->addHours(1), function () {
                 return Guiding::whereHas('fishingFrom', function ($query) {
                     $query->where('id', 2);
                 })
@@ -209,7 +228,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $multidayfishings = Cache::remember('multiday_fishings', now()->addHours(1), function () {
+            static $multidayfishings;
+            $multidayfishings ??= Cache::remember('multiday_fishings', now()->addHours(1), function () {
                 return Guiding::where('duration','>=', 24)
                 ->where('status', 1)
                 ->inRandomOrder()
@@ -220,7 +240,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $ratedGuidings = Cache::remember('rated_guidings', now()->addMinutes(30), function () {
+            static $ratedGuidings;
+            $ratedGuidings ??= Cache::remember('rated_guidings', now()->addMinutes(30), function () {
                 $filterRated = Rating::where('rating','>',1)->groupBy('guide_id')->pluck('guide_id');
                 return Guiding::whereIn('user_id', $filterRated)->limit(6)->get();
             });
@@ -228,14 +249,16 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $latestThreads = Cache::remember('latest_threads_' . app()->getLocale(), now()->addMinutes(15), function () {
+            static $latestThreads;
+            $latestThreads ??= Cache::remember('latest_threads_' . app()->getLocale(), now()->addMinutes(15), function () {
                 return Thread::where('language', app()->getLocale())->limit(3)->latest()->get();
             });
             $view->with('latestThreads', $latestThreads);
         });
 
         View::composer('*', function ($view) {
-            $bookedGuidings = Cache::remember('booked_guidings', now()->addMinutes(30), function () {
+            static $bookedGuidings;
+            $bookedGuidings ??= Cache::remember('booked_guidings', now()->addMinutes(30), function () {
                 return Guiding::withCount('bookings')
                 ->where('status', 1)
                 ->orderBy('bookings_count', 'desc')
@@ -246,7 +269,8 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $newGuidings = Cache::remember('new_guidings', now()->addMinutes(15), function () {
+            static $newGuidings;
+            $newGuidings ??= Cache::remember('new_guidings', now()->addMinutes(15), function () {
                 return Guiding::where('status', 1)
                     ->orderBy('created_at', 'desc')
                     ->limit(8)
@@ -256,27 +280,31 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $faqs = Cache::remember('faqs', now()->addHours(24), function () {
+            static $faqs;
+            $faqs ??= Cache::remember('faqs', now()->addHours(24), function () {
                 return Faq::all();
             });
             $view->with('faqs', $faqs);
         });
 
         View::composer('*', function ($view) {
-            $locale = app()->getLocale();
-            $host = request()->getHost();
-            $path = request()->path();
-            $cacheKey = "page_attributes_{$host}_{$path}";
+            static $pageAttributes;
+
+            if ($pageAttributes === null) {
+                $host = request()->getHost();
+                $path = request()->path();
+                $cacheKey = "page_attributes_{$host}_{$path}";
+
+                $pageAttributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
+                    return PageAttribute::where('domain', '=', $host)
+                        ->where('uri', $path)
+                        ->get();
+                });
+            }
 
             // Named "pageAttributes", not "attributes" - the latter is Blade's reserved
             // variable for a component's HTML attribute bag, and sharing it to every
             // view clobbers $attributes inside any <x-...> component in the app.
-            $pageAttributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
-                return PageAttribute::where('domain', '=', $host)
-                    ->where('uri', $path)
-                    ->get();
-            });
-
             $view->with('pageAttributes', $pageAttributes);
         });
 

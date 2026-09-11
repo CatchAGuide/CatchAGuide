@@ -5,8 +5,28 @@ use Stichoza\GoogleTranslate\GoogleTranslate;
 
 use App\Models\Faq;
 use App\Models\EmailLog;
+use App\Services\Translation\TranslationCircuitBreaker;
+
+if (! function_exists('translation_cache_key')) {
+    /**
+     * Shared with the translations:warm command so it checks/primes exactly the
+     * key translate() will look up — any drift here would make warming a no-op.
+     */
+    function translation_cache_key(string $string, string $locale): string
+    {
+        return 'translation_'.$locale.'_'.md5($string);
+    }
+}
 
 if (! function_exists('translate')) {
+    /**
+     * Live-translates $string via Google Translate's free endpoint, cached forever on success.
+     *
+     * A page can call this dozens of times (one per card/field), and each cache miss is a live
+     * ~10s HTTP call — with no guard, a single degraded/rate-limited window turns into a full
+     * page timeout instead of one fast fallback. TranslationCircuitBreaker trips after repeated
+     * failures and skips live calls for a cooldown period, returning the original string instead.
+     */
     function translate($string, $language = '')
     {
         if ($string === null || trim($string) === '') {
@@ -14,34 +34,50 @@ if (! function_exists('translate')) {
         }
 
         $currentLocale = ($language != '' || $language != null) ? $language : app()->getLocale();
-        $cacheKey = 'translation_'.$currentLocale.'_'.md5($string);
+        $cacheKey = translation_cache_key($string, $currentLocale);
 
-        $translation = Cache::rememberForever($cacheKey, function () use ($string, $currentLocale) {
-            try {
-                $translate = GoogleTranslate::trans($string, $currentLocale, null, [
-                    'timeout' => 10,
-                    'connect_timeout' => 5,
-                ]);
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
 
-                if (strpos($translate, 'Führungen')) {
-                    $translate = str_replace('Führungen', 'Angelguidings', $translate);
-                }
+        if (TranslationCircuitBreaker::isOpen()) {
+            return $string;
+        }
 
-                if (strpos($translate, 'Führung')) {
-                    $translate = str_replace('Führung', 'guiding', $translate);
-                }
+        try {
+            $translate = GoogleTranslate::trans($string, $currentLocale, null, [
+                'timeout' => 10,
+                'connect_timeout' => 5,
+            ]);
 
-                return ucfirst($translate);
-            } catch (\Throwable $e) {
-                Log::error('Translation failed: ' . $e->getMessage(), [
-                    'string' => $string,
-                    'locale' => $currentLocale
-                ]);
-                return $string;
+            if (strpos($translate, 'Führungen')) {
+                $translate = str_replace('Führungen', 'Angelguidings', $translate);
             }
-        });
 
-        return $translation;
+            if (strpos($translate, 'Führung')) {
+                $translate = str_replace('Führung', 'guiding', $translate);
+            }
+
+            $result = ucfirst($translate);
+
+            Cache::forever($cacheKey, $result);
+            TranslationCircuitBreaker::recordSuccess();
+
+            return $result;
+        } catch (\Throwable $e) {
+            Log::error('Translation failed: ' . $e->getMessage(), [
+                'string' => $string,
+                'locale' => $currentLocale
+            ]);
+            TranslationCircuitBreaker::recordFailure();
+
+            // Cache the fallback briefly (not forever) so a single bad string doesn't retry on
+            // every request, but still gets picked up again once the endpoint recovers.
+            Cache::put($cacheKey, $string, now()->addHour());
+
+            return $string;
+        }
     }
 }
 

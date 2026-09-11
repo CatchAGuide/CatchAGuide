@@ -18,9 +18,11 @@ class GuideThread extends Component
 {
     use WithPagination;
 
+    private const BASE_PER_PAGE = 5;
+
     public $filt;
-    public $perPage = 5;
-    
+    public $perPage = self::BASE_PER_PAGE;
+
     // Filter properties
     public $sortBy;
     public $targetFish = [];
@@ -30,7 +32,7 @@ class GuideThread extends Component
     public $priceMin;
     public $priceMax;
     public $numPersons;
-    
+
     // Location properties
     public $country;
     public $city;
@@ -40,14 +42,14 @@ class GuideThread extends Component
     public $radius;
 
     protected $listeners = ['load_more', 'updateFilters'];
-    
+
     protected $filterService;
     protected $imageOptimizationService;
 
     public function mount()
     {
         $this->imageOptimizationService = app(ImageOptimizationService::class);
-        
+
         // Initialize filters from the $filt property if provided
         if ($this->filt) {
             $filter = json_decode($this->filt, true);
@@ -72,65 +74,61 @@ class GuideThread extends Component
         $randomSeed = Session::get('random_seed', rand());
         Session::put('random_seed', $randomSeed);
 
-        // Build the query with advanced filtering logic
-        $guidings = $this->buildFilteredQuery();
-        
+        $guidings = $this->buildFilteredQuery()->paginate($this->perPage);
+
         return view('livewire.guide-thread', [
             'guidings' => $guidings,
+            'targetsMap' => $this->buildLookupMap($guidings->items(), 'target_fish', Target::class),
+            'inclussionsMap' => $this->buildLookupMap($guidings->items(), 'inclusions', Inclussion::class),
         ]);
     }
 
     private function buildFilteredQuery()
     {
-        // Check if we have active checkbox filters
-        $hasCheckboxFilters = $this->hasActiveCheckboxFilters();
-        
-        if ($hasCheckboxFilters) {
-            return $this->buildQueryWithFilterService();
-        } else {
-            return $this->buildQueryWithDirectFiltering();
-        }
-    }
-
-    private function buildQueryWithFilterService()
-    {
-        // Create a request-like object for the filter service
-        $filterData = $this->prepareFilterData();
-        $checkboxFilteredIds = $this->getFilterService()->getFilteredGuidingIds($filterData);
-        
-        if (empty($checkboxFilteredIds)) {
-            // Return empty paginated collection
-            return new \Illuminate\Pagination\LengthAwarePaginator(
-                collect(), 0, $this->perPage, 1, 
-                ['path' => request()->url(), 'pageName' => 'page']
-            );
-        }
-
-        $query = Guiding::with(['boatType', 'user.reviews'])
-            ->whereIn('id', $checkboxFilteredIds)
-            ->where('status', 1);
-
-        $this->applyLocationFilter($query);
+        $query = $this->buildFilteredBaseQuery();
         $this->applySorting($query);
-        
-        $guidings = $query->paginate($this->perPage);
-        $this->preComputeGuidingData($guidings->items());
-        
-        return $guidings;
+
+        return $query;
     }
 
-    private function buildQueryWithDirectFiltering()
+    private function buildFilteredBaseQuery()
     {
-        $query = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
+        if ($this->hasActiveCheckboxFilters()) {
+            $filterData = $this->prepareFilterData();
+            $checkboxFilteredIds = $this->getFilterService()->getFilteredGuidingIds($filterData);
 
+            $query = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
+
+            if (empty($checkboxFilteredIds)) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            $query->whereIn('id', $checkboxFilteredIds);
+            $this->applyLocationFilter($query);
+
+            return $query;
+        }
+
+        $query = Guiding::with(['boatType', 'user.reviews'])->where('status', 1);
         $this->applyLocationFilter($query);
         $this->applyBasicFilters($query);
-        $this->applySorting($query);
 
-        $guidings = $query->paginate($this->perPage);
-        $this->preComputeGuidingData($guidings->items());
-        
-        return $guidings;
+        return $query;
+    }
+
+    /**
+     * Batch id -> model lookup for the guidings on the current page, so the view's
+     * getTargetFishNames()/getInclusionNames() calls don't fall back to a find()-per-item query.
+     */
+    private function buildLookupMap(array $guidings, string $jsonField, string $modelClass)
+    {
+        $ids = collect($guidings)
+            ->flatMap(fn ($g) => json_decode($g->{$jsonField}, true) ?: [])
+            ->unique()
+            ->filter()
+            ->values();
+
+        return $ids->isNotEmpty() ? $modelClass::whereIn('id', $ids)->get()->keyBy('id') : collect();
     }
 
     private function applyLocationFilter($query)
@@ -253,47 +251,21 @@ class GuideThread extends Component
         return $request;
     }
 
-    /**
-     * Pre-compute expensive view data to avoid N+1 queries
-     */
-    private function preComputeGuidingData($guidings)
-    {
-        if (empty($guidings)) {
-            return;
-        }
-
-        // Batch fetch all needed related models
-        $allTargetIds = collect($guidings)->flatMap(function($g) { 
-            return json_decode($g->target_fish, true) ?: []; 
-        })->unique()->filter()->values();
-        
-        $allMethodIds = collect($guidings)->flatMap(function($g) { 
-            return json_decode($g->fishing_methods, true) ?: []; 
-        })->unique()->filter()->values();
-        
-        $allWaterIds = collect($guidings)->flatMap(function($g) { 
-            return json_decode($g->water_types, true) ?: []; 
-        })->unique()->filter()->values();
-        
-        $allInclussionIds = collect($guidings)->flatMap(function($g) { 
-            return json_decode($g->inclusions, true) ?: []; 
-        })->unique()->filter()->values();
-
-        $targetsMap = $allTargetIds->isNotEmpty() ? Target::whereIn('id', $allTargetIds)->get()->keyBy('id') : collect();
-        $methodsMap = $allMethodIds->isNotEmpty() ? Method::whereIn('id', $allMethodIds)->get()->keyBy('id') : collect();
-        $watersMap = $allWaterIds->isNotEmpty() ? Water::whereIn('id', $allWaterIds)->get()->keyBy('id') : collect();
-        $inclussionsMap = $allInclussionIds->isNotEmpty() ? Inclussion::whereIn('id', $allInclussionIds)->get()->keyBy('id') : collect();
-
-        // Just pre-load the relationships, don't cache them
-        foreach ($guidings as $guiding) {
-            // Load the relationships
-            $guiding->load(['boatType', 'user.reviews']);
-        }
-    }
-
     public function loadMore()
     {
-        $this->perPage += 5;
+        $this->perPage += self::BASE_PER_PAGE;
+    }
+
+    /**
+     * A changed filter/sort must start back at a fresh first page — resetPage()
+     * alone only resets Livewire's page-number pointer, not the window size
+     * "Load More" grew, so without this a filter change kept showing however
+     * many rows had accumulated under the previous filter.
+     */
+    private function resetPagination(): void
+    {
+        $this->perPage = self::BASE_PER_PAGE;
+        $this->resetPage();
     }
 
     public function updateFilters($filters)
@@ -315,47 +287,47 @@ class GuideThread extends Component
         $this->radius = $filters['radius'] ?? null;
         
         // Reset pagination when filters change
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedSortBy()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedTargetFish()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedMethods()
     {
-        $this->resetPage();  
+        $this->resetPagination();  
     }
 
     public function updatedWaterTypes()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedDurationTypes()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedNumPersons()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedPriceMin()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function updatedPriceMax()
     {
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function removeFilter($filterType, $filterId)
@@ -382,7 +354,7 @@ class GuideThread extends Component
                 break;
         }
         
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     public function resetFilters()
@@ -396,7 +368,7 @@ class GuideThread extends Component
         $this->priceMax = null;
         $this->sortBy = null;
         
-        $this->resetPage();
+        $this->resetPagination();
     }
 
     /**
