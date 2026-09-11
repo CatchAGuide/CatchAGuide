@@ -352,24 +352,18 @@ class CampsController extends Controller
             }
         }
 
-        // Sync accommodations
-        if ($request->has('accommodations')) {
-            $camp->accommodations()->sync($request->input('accommodations'));
-        }
+        // Sync accommodations - always sync (not `has()`-gated) since the multi-select
+        // sends no field at all when the user deselects every option, which previously
+        // left stale pivot rows in place.
+        $camp->accommodations()->sync($request->input('accommodations', []));
 
         // Sync rental boats
-        if ($request->has('rental_boats')) {
-            $camp->rentalBoats()->sync($request->input('rental_boats'));
-        }
+        $camp->rentalBoats()->sync($request->input('rental_boats', []));
 
         // Sync guidings
-        if ($request->has('guidings')) {
-            $camp->guidings()->sync($request->input('guidings'));
-        }
+        $camp->guidings()->sync($request->input('guidings', []));
 
         // Sync special offers
-        if ($request->has('special_offers')) {
-            $camp->specialOffers()->sync($request->input('special_offers'));
-        }
+        $camp->specialOffers()->sync($request->input('special_offers', []));
     }
 }
