@@ -38,6 +38,14 @@ class Kernel extends ConsoleKernel
                 ->hourly()
                 ->withoutOverlapping()
                 ->runInBackground();
+
+        // Pre-translate listing titles/locations so live page renders never wait on a
+        // cache-miss Google Translate call. No-ops (zero API calls) once everything is warm.
+        $schedule->command('translations:warm')
+                ->everyFifteenMinutes()
+                ->withoutOverlapping()
+                ->runInBackground()
+                ->appendOutputTo(storage_path('logs/translations-warm.log'));
                 
         // Warm file existence cache every 2 hours
         // $schedule->command('cache:warm-files')

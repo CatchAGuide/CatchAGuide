@@ -56,6 +56,11 @@
   gap: 0.75rem;
   background: rgba(15, 23, 42, 0.92); // dark, slightly see-through scrim
   animation: cag-overlay-in 0.3s ease-out;
+  // Visual feedback only: clicks must pass through to the page underneath.
+  // Otherwise, on a slow navigation, a click on another link lands on this
+  // overlay instead of the link, and the original (slow) navigation "wins"
+  // once it finally completes - which looks like the page jumping randomly.
+  pointer-events: none;
 
   &[hidden] {
     display: none !important;

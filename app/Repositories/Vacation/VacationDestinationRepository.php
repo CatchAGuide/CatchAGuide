@@ -10,10 +10,14 @@ use App\Services\CategoryPage\CategoryListingThumbnailFallback;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class VacationDestinationRepository
 {
+    /** Per-request memo so repeated calls (middleware + controller + nav) don't even hit the cache store. */
+    private static array $hubGridMemo = [];
+
     public function __construct(
         private CampListingRepository $camps,
         private TripListingRepository $trips,
@@ -136,63 +140,76 @@ class VacationDestinationRepository
     {
         $locale = $locale ?? app()->getLocale();
 
-        $campCounts = $this->canonicalCountryCounts('camps');
-        $tripCounts = $this->canonicalCountryCounts('trips');
-
-        $allCountries = CategoryEntity::countries()->get();
-        $bySlug = $allCountries->keyBy(
-            fn (CategoryEntity $c) => CountrySlug::canonicalize($c->slug) ?? strtolower((string) $c->slug)
-        );
-        $uniqueCountries = $this->homepageCountries->uniqueModels($locale, $allCountries);
-
-        $seenSlugs = [];
-        $seenIsos = [];
-        $rows = collect();
-
-        foreach ($uniqueCountries as $country) {
-            $slug = CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug);
-            $iso = strtoupper((string) ($country->countrycode ?? ''));
-            $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
-            $seenSlugs[$slug] = true;
-            if ($iso !== '') {
-                $seenIsos[$iso] = true;
-            }
+        if (isset(self::$hubGridMemo[$locale])) {
+            return self::$hubGridMemo[$locale];
         }
 
-        foreach ($campCounts->keys()->merge($tripCounts->keys())->unique() as $slug) {
-            if (isset($seenSlugs[$slug])) {
-                continue;
-            }
+        // This aggregate (country counts + per-country translation lookups) costs 100+ queries.
+        // It backs isKnownCountrySlug(), which the redirect middleware, the pillar controller, and
+        // the nav both call per request, so it must be cached rather than rebuilt each time.
+        return self::$hubGridMemo[$locale] = Cache::remember(
+            'vacation_hub_grid_countries_v1_'.$locale,
+            now()->addMinutes(30),
+            function () use ($locale) {
+                $campCounts = $this->canonicalCountryCounts('camps');
+                $tripCounts = $this->canonicalCountryCounts('trips');
 
-            $country = $bySlug->get($slug);
-            $iso = strtoupper((string) ($country?->countrycode ?? ''));
+                $allCountries = CategoryEntity::countries()->get();
+                $bySlug = $allCountries->keyBy(
+                    fn (CategoryEntity $c) => CountrySlug::canonicalize($c->slug) ?? strtolower((string) $c->slug)
+                );
+                $uniqueCountries = $this->homepageCountries->uniqueModels($locale, $allCountries);
 
-            if ($iso !== '' && isset($seenIsos[$iso])) {
-                $rows = $rows->map(function (array $row) use ($iso, $slug, $campCounts, $tripCounts) {
-                    if (strtoupper((string) ($row['countrycode'] ?? '')) !== $iso) {
-                        return $row;
+                $seenSlugs = [];
+                $seenIsos = [];
+                $rows = collect();
+
+                foreach ($uniqueCountries as $country) {
+                    $slug = CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug);
+                    $iso = strtoupper((string) ($country->countrycode ?? ''));
+                    $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
+                    $seenSlugs[$slug] = true;
+                    if ($iso !== '') {
+                        $seenIsos[$iso] = true;
+                    }
+                }
+
+                foreach ($campCounts->keys()->merge($tripCounts->keys())->unique() as $slug) {
+                    if (isset($seenSlugs[$slug])) {
+                        continue;
                     }
 
-                    $row['camps'] += (int) ($campCounts[$slug] ?? 0);
-                    $row['trips'] += (int) ($tripCounts[$slug] ?? 0);
+                    $country = $bySlug->get($slug);
+                    $iso = strtoupper((string) ($country?->countrycode ?? ''));
 
-                    return $row;
-                });
+                    if ($iso !== '' && isset($seenIsos[$iso])) {
+                        $rows = $rows->map(function (array $row) use ($iso, $slug, $campCounts, $tripCounts) {
+                            if (strtoupper((string) ($row['countrycode'] ?? '')) !== $iso) {
+                                return $row;
+                            }
 
-                continue;
+                            $row['camps'] += (int) ($campCounts[$slug] ?? 0);
+                            $row['trips'] += (int) ($tripCounts[$slug] ?? 0);
+
+                            return $row;
+                        });
+
+                        continue;
+                    }
+
+                    $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
+                    $seenSlugs[$slug] = true;
+                    if ($iso !== '') {
+                        $seenIsos[$iso] = true;
+                    }
+                }
+
+                return $rows
+                    ->reject(fn (array $row) => ($row['camps'] + $row['trips']) === 0)
+                    ->sortByDesc(fn (array $row) => $row['camps'] + $row['trips'])
+                    ->values();
             }
-
-            $rows->push($this->hubGridRow($country, $slug, $campCounts, $tripCounts, $locale));
-            $seenSlugs[$slug] = true;
-            if ($iso !== '') {
-                $seenIsos[$iso] = true;
-            }
-        }
-
-        return $rows
-            ->reject(fn (array $row) => ($row['camps'] + $row['trips']) === 0)
-            ->sortByDesc(fn (array $row) => $row['camps'] + $row['trips'])
-            ->values();
+        );
     }
 
     /**

@@ -299,7 +299,7 @@
                                                                 <small class="text-dark d-flex align-items-center" style="font-size: 0.8rem;">
                                                                     <i class="fas fa-fish me-1" style="color: #666;"></i>
                                                                     @php
-                                                                        $guidingTargets = $guiding->getTargetFishNames();
+                                                                        $guidingTargets = $guiding->getTargetFishNames($targetsMap);
                                                                         $targetNames = collect($guidingTargets)->pluck('name')->toArray();
                                                                     @endphp
                                                                     {{ implode(', ', array_slice($targetNames, 0, 1)) }}
@@ -314,7 +314,7 @@
                                                         </div>
 
                                                         @php
-                                                            $inclusions = $guiding->getInclusionNames();
+                                                            $inclusions = $guiding->getInclusionNames($inclussionsMap);
                                                         @endphp
                                                         @if(!empty($inclusions))
                                                         <div class="mb-1">

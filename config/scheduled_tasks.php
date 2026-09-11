@@ -116,6 +116,21 @@ return [
             'run_in_background' => true,
         ],
 
+        'translations_warm' => [
+            'label' => 'Warm translation cache',
+            'description' => 'Pre-translates active guiding/vacation/camp/trip titles & locations (translations:warm) so live pages never wait on a Google Translate cache miss.',
+            'command' => 'translations:warm',
+            'default' => [
+                'enabled' => true,
+                'frequency' => 'every_fifteen_minutes',
+                'schedule_time' => null,
+                'day_of_week' => null,
+                'cron_expression' => null,
+            ],
+            'without_overlapping' => true,
+            'run_in_background' => true,
+        ],
+
         'cache_warm_files' => [
             'label' => 'Warm file existence cache',
             'description' => 'File cache warmup (cache:warm-files).',

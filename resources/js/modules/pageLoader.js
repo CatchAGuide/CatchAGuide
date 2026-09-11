@@ -1,6 +1,8 @@
 const OVERLAY_ID = "page-loading-overlay";
+const SHOW_DELAY_MS = 250;
 const WATCHDOG_MS = 8000;
 
+let showTimer = null;
 let watchdogTimer = null;
 
 function getOverlay() {
@@ -13,8 +15,11 @@ function show() {
     return;
   }
 
-  overlay.hidden = false;
-  document.body.style.overflow = "hidden";
+  clearTimeout(showTimer);
+  showTimer = setTimeout(() => {
+    overlay.hidden = false;
+    document.body.style.overflow = "hidden";
+  }, SHOW_DELAY_MS);
 
   clearTimeout(watchdogTimer);
   watchdogTimer = setTimeout(hide, WATCHDOG_MS);
@@ -26,6 +31,7 @@ function hide() {
     return;
   }
 
+  clearTimeout(showTimer);
   clearTimeout(watchdogTimer);
   overlay.hidden = true;
   document.body.style.overflow = "";
