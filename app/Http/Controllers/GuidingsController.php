@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Guiding\GuidingSeoService;
 use App\Services\Media\ListingGalleryRetention;
 use App\Services\Media\ListingMediaRelocator;
 use App\Services\Media\MediaTrashService;
@@ -457,13 +458,23 @@ class GuidingsController extends Controller
             $originalStatus = $isUpdate ? $guiding->status : null;
 
             // Slug must exist before image uploads for new guidings
+            $guidingSeo = app(GuidingSeoService::class);
             if (!$isUpdate) {
-                $guiding->slug = slugify(
-                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+                $guiding->slug = $guidingSeo->generateSlug(
+                    (string) ($request->input('title') ?? 'temp'),
+                    (string) ($request->input('location') ?? 'location')
                 );
             }
 
             $pathsToDelete = $this->fillGuidingFromRequest($guiding, $request, $isDraft);
+
+            if ($isUpdate) {
+                $guiding->slug = $guidingSeo->ensureUniqueSlug(
+                    $guiding,
+                    (string) ($request->input('title') ?? $guiding->title),
+                    (string) ($request->input('location') ?? $guiding->location)
+                );
+            }
 
             // Only enforce strict requirements if not draft
             // Count images based on the guiding's final gallery state
@@ -624,13 +635,24 @@ class GuidingsController extends Controller
                 }
             }
 
+            $guidingSeo = app(GuidingSeoService::class);
             if (!$isUpdate) {
-                $guiding->slug = slugify(
-                    ($request->input('title') ?? 'temp') . '-in-' . ($request->input('location') ?? 'location')
+                $guiding->slug = $guidingSeo->generateSlug(
+                    (string) ($request->input('title') ?? 'temp'),
+                    (string) ($request->input('location') ?? 'location'),
+                    $guiding->id
                 );
             }
 
             $pathsToDelete = $this->fillGuidingFromRequest($guiding, $request, true);
+
+            if ($isUpdate || filled($guiding->id)) {
+                $guiding->slug = $guidingSeo->ensureUniqueSlug(
+                    $guiding,
+                    (string) ($request->input('title') ?? $guiding->title),
+                    (string) ($request->input('location') ?? $guiding->location)
+                );
+            }
 
             $guiding->is_newguiding = 1;
 
@@ -1455,7 +1477,10 @@ class GuidingsController extends Controller
         $data = $request->validated();
 
         $data['user_id'] = auth()->id();
-        $data['slug'] = slugify($data['title'] . "-in-" . $data['location']);
+        $data['slug'] = app(GuidingSeoService::class)->generateSlug(
+            (string) $data['title'],
+            (string) $data['location']
+        );
         // TODO Hier muss mehr abgefangen werden und umgebaut werden!
         $waters = $request->water;
         array_unshift($waters, 'alle');
@@ -1709,7 +1734,11 @@ class GuidingsController extends Controller
 
         $guiding->update([
             'title' => $request->title,
-            'slug' => slugify($request->title),
+            'slug' => app(GuidingSeoService::class)->ensureUniqueSlug(
+                $guiding,
+                (string) $request->title,
+                (string) $request->location
+            ),
             'location' => $request->location,
             'lat' => $request->lat,
             'lng' => $request->lng,

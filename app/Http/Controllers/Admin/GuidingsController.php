@@ -19,6 +19,7 @@ use App\Models\GuidingRequirements;
 use App\Models\GuidingRecommendations;
 use App\Models\Language;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Guiding\GuidingSeoService;
 use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\MediaTrashService;
 use Illuminate\Support\Collection;
@@ -162,11 +163,11 @@ class GuidingsController extends Controller
      */
     public function show(Guiding $guiding)
     {
-        // Legacy guidings may have no slug, which makes the public URL unreachable.
-        if (empty($guiding->slug)) {
-            $guiding->slug = slugify(
-                ($guiding->title ?: 'guiding-' . $guiding->id) . '-in-' . ($guiding->location ?: 'location')
-            );
+        // Legacy / colliding slugs make the public offer URL unreachable or ambiguous.
+        $guidingSeo = app(GuidingSeoService::class);
+        $uniqueSlug = $guidingSeo->ensureUniqueSlug($guiding);
+        if ($guiding->slug !== $uniqueSlug) {
+            $guiding->slug = $uniqueSlug;
             $guiding->save();
         }
 
