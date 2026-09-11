@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Guiding;
 use App\Services\CalendarScheduleService;
+use App\Services\Guiding\GuidingSeoService;
 use App\Services\Media\ListingMediaRelocator;
 use App\Services\Media\MediaTrashService;
 use Illuminate\Bus\Queueable;
@@ -64,9 +65,15 @@ class SaveGuidingDraftJob implements ShouldQueue
             // Fill guiding with data
             $this->fillGuidingFromData($guiding);
 
-            // Generate slug for new guidings
+            $guidingSeo = app(GuidingSeoService::class);
             if (!$this->isUpdate) {
-                $guiding->slug = slugify($guiding->title . "-in-" . $guiding->location);
+                $guiding->slug = $guidingSeo->generateSlug(
+                    (string) ($guiding->title ?: 'temp'),
+                    (string) ($guiding->location ?: 'location'),
+                    $guiding->id
+                );
+            } else {
+                $guiding->slug = $guidingSeo->ensureUniqueSlug($guiding);
             }
 
             $guiding->is_newguiding = 1;

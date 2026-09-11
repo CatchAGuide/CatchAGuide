@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Guiding;
+use App\Services\Guiding\GuidingSeoService;
 use Illuminate\Console\Command;
 
 class SlugifyCommand extends Command
@@ -22,26 +23,22 @@ class SlugifyCommand extends Command
     protected $description = 'Slugified alle Titel';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return int
      */
-    public function handle()
+    public function handle(GuidingSeoService $seo): int
     {
         $guidings = Guiding::all();
-        foreach($guidings as $guiding) {
-            $guiding->slug = slugify($guiding->title . "-in-" .$guiding->location);
+        foreach ($guidings as $guiding) {
+            $guiding->slug = $seo->generateSlug(
+                (string) ($guiding->title ?: 'guiding-' . $guiding->id),
+                (string) ($guiding->location ?: 'location'),
+                $guiding->id
+            );
             $guiding->save();
         }
+
+        return self::SUCCESS;
     }
 }
