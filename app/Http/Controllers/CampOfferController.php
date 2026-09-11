@@ -762,12 +762,27 @@ class CampOfferController extends Controller
             'start_times' => $guiding->desc_starting_time ? explode(',', $guiding->desc_starting_time) : [],
             'inclusives' => $inclusions,
             'price' => [
-                'amount' => $guiding->price,
+                'amount' => $this->guidingDisplayPrice($guiding),
                 'currency' => 'EUR',
                 'type' => $priceType,
                 'display_type' => $this->humanizeEnumLabel($priceType, 'newguidings')
             ]
         ];
+    }
+
+    /**
+     * Total price to display for a guiding card/dropdown option. The flat `price`
+     * column only holds the tour total for per_boat/fixed pricing - per_person
+     * guidings store their guest-count tiers in `prices` instead and leave `price`
+     * empty, so the raw column can't be used directly for those.
+     */
+    private function guidingDisplayPrice(Guiding $guiding): float
+    {
+        if ($guiding->price_type === 'per_person') {
+            return (float) $guiding->getLowestPrice();
+        }
+
+        return (float) $guiding->price;
     }
 
     /**
@@ -813,7 +828,7 @@ class CampOfferController extends Controller
             'id' => $guiding->id,
             'title' => $guiding->title,
             'group_size' => $guiding->max_guests,
-            'price' => $guiding->price,
+            'price' => $this->guidingDisplayPrice($guiding),
             'currency' => 'EUR',
             'img' => $this->getImageUrl($guiding->thumbnail_path),
         ];
