@@ -323,115 +323,96 @@
         </div>
     </div>
     <!-- Image Gallery -->
-    <div class="guidings-gallery row mx-0 mb-3">
-        <div class="left-image">
-            @if(isset($vacation->gallery) && is_array($vacation->gallery) && !empty($vacation->gallery[0]) && media_path_usable($vacation->gallery[0]))
-                <img data-bs-toggle="modal" data-bs-target="#galleryModal" src="{{media_url($vacation->gallery[0])}}" class="img-fluid" alt="Main Image">
+    @php
+        $vacationGalleryId = 'vacation-detail-'.($vacation->id ?? 'page');
+        $galleryImagesRaw = is_array($vacation->gallery ?? null) ? $vacation->gallery : [];
+        $thumbnailPath = $galleryImagesRaw[0] ?? null;
+        $overallImages = [];
+
+        foreach ($galleryImagesRaw as $image) {
+            if (media_path_usable($image)) {
+                $overallImages[] = media_url($image);
+            }
+        }
+        $overallImages = array_values(array_unique($overallImages));
+
+        $galleryOnly = array_values(array_filter(
+            $overallImages,
+            fn ($url) => ! $thumbnailPath || ! media_path_usable($thumbnailPath) || $url !== media_url($thumbnailPath)
+        ));
+        $desktopHiddenCount = max(0, count($galleryOnly) - 4);
+        $desktopThumbs = array_slice($galleryOnly, 0, 4);
+        if (count($desktopThumbs) < 4 && $thumbnailPath && media_path_usable($thumbnailPath)) {
+            $padUrl = media_url($thumbnailPath);
+            while (count($desktopThumbs) < 4) {
+                $desktopThumbs[] = $padUrl;
+            }
+        }
+
+        $mobileHiddenCount = max(0, count($galleryOnly) - 2);
+        $mobileThumbs = array_slice($galleryOnly, 0, 2);
+        if (count($mobileThumbs) > 3) {
+            $mobileThumbs = array_slice($mobileThumbs, 0, 2);
+        }
+
+        $vacationGalleryIndex = function (string $url) use ($overallImages): int {
+            $idx = array_search($url, $overallImages, true);
+            return $idx === false ? 0 : (int) $idx;
+        };
+
+        $vacationModalTitle = translate($vacation->title ?? null)
+            ?: ($translatedVacation->title ?? $vacation->title ?? '');
+        $vacationPriceDisplay = isset($vacation->price_from) && $vacation->price_from !== null
+            ? '€'.number_format((float) $vacation->price_from, 0, ',', '.')
+            : null;
+    @endphp
+    <div
+        class="guidings-gallery row mx-0 mb-3"
+        data-vacation-gallery="{{ $vacationGalleryId }}"
+        data-gallery-images='@json($overallImages)'
+    >
+        <div class="left-image" @if(!empty($overallImages)) data-gallery-index="0" style="cursor: pointer;" @endif>
+            @if(!empty($overallImages))
+                <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ $vacationModalTitle }}">
             @else
                 <div class="text-center p-4">
-                    <p>No image found</p>
+                    <p>{{ __('guidings.No_image_found') }}</p>
                 </div>
             @endif
         </div>
         <div class="right-images">
             <div class="gallery">
-                @php
-                $galleryImages = $vacation->gallery ?? [];
-                $thumbnailPath = $vacation->gallery[0] ?? 'images/placeholder_guide.jpg';
-                $finalImages = [];
-                $overallImages = [];
-                $hiddenCount = 0;
-
-                // Filter and validate gallery images
-                if ($galleryImages) {
-                    foreach ($galleryImages as $image) {
-                        if (media_path_usable($image)) 
-                            && $image !== $thumbnailPath) {
-                            $finalImages[] = media_url($image);
-                            $overallImages[] = media_url($image);
-                        }
-                    }
-                }
-
-                // Calculate hidden count if more than 4 valid images
-                if (count($finalImages) > 4) {
-                    $hiddenCount = count($finalImages) - 4;
-                    $finalImages = array_slice($finalImages, 0, 4);
-                }
-
-                // If less than 4 images and thumbnail exists, pad with thumbnail
-                if (count($finalImages) < 4 && media_path_usable($thumbnailPath)) {
-                    while (count($finalImages) < 4) {
-                        $finalImages[] = media_url($thumbnailPath);
-                    }
-                }
-                
-                // Remove duplicates from overallImages while preserving order
-                $overallImages = array_values(array_unique($overallImages));
-                @endphp
-
-                @foreach ($finalImages as $index => $image)
+                @foreach ($desktopThumbs as $index => $image)
+                    @php $thumbIndex = $vacationGalleryIndex($image); @endphp
                     @if ($index < 3)
-                        <div class="gallery-item">
-                            <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ $image }}">
+                        <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
+                            <img src="{{ $image }}" class="img-fluid" alt="{{ $vacationModalTitle }} - {{ $index + 1 }}">
                         </div>
-                    @elseif ($index == 3 && $hiddenCount !== 0)
-                        <div class="gallery-item">
-                            <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ $image }}">
-                            <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
+                    @elseif ($index == 3 && $desktopHiddenCount > 0)
+                        <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
+                            <img src="{{ $image }}" class="img-fluid" alt="{{ $vacationModalTitle }} - {{ $index + 1 }}">
+                            <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $desktopHiddenCount }} more</span>
                         </div>
                     @elseif ($index == 3)
-                        <div class="gallery-item">
-                            <img src="{{$image}}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)"  data-image="{{ $image }}">
+                        <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
+                            <img src="{{ $image }}" class="img-fluid" alt="{{ $vacationModalTitle }} - {{ $index + 1 }}">
                         </div>
                     @endif
                 @endforeach
             </div>
             <div class="gallery-mobile">
-                @php
-                $galleryImages = $vacation->gallery ?? '[]';
-                $thumbnailPath = $vacation->gallery[0] ?? 'images/placeholder_guide.jpg';
-                $finalImages = [];
-                $overallImages = [];
-                
-                // Filter gallery images that exist
-                if ($galleryImages) {
-                    foreach ($galleryImages as $image) {
-                        if (media_path_usable($image)) {
-                            $overallImages[] = media_url($image);
-                            if ($image !== $thumbnailPath) {
-                                $finalImages[] = media_url($image);
-                            }   
-                        }
-                    }
-                }
-                
-                $hiddenCount = count($finalImages) > 2 ? count($finalImages) - 2 : 0;
-
-                if (count($finalImages) > 3) {
-                    // More than 3 valid gallery images
-                    $finalImages = array_slice($finalImages, 0, 2);
-                } else {
-                    // 3 or fewer valid gallery images
-                    if (count($finalImages) < 3) {
-                        $finalImages = $finalImages;
-                    } else {
-                        $finalImages = array_slice($finalImages, 0, 2);
-                    }
-                }
-
-                // Remove duplicates from overallImages while preserving order
-                $overallImages = array_values(array_unique($overallImages));
-                @endphp
-                @foreach ($finalImages as $index => $image)
+                @foreach ($mobileThumbs as $index => $image)
+                    @php $thumbIndex = $vacationGalleryIndex($image); @endphp
                     @if ($index < 1)
-                        <div class="gallery-item">
-                            <img src="{{ $image }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }}" data-bs-toggle="modal" data-bs-target="#galleryModal" data-image="{{ $image }}">
+                        <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
+                            <img src="{{ $image }}" class="img-fluid" alt="{{ $vacationModalTitle }} - {{ $index + 1 }}">
                         </div>
                     @elseif ($index == 1)
-                        <div class="gallery-item">
-                            <img src="{{ $image }}" class="img-fluid" alt="Gallery Image {{ $index + 1 }} (and {{ $hiddenCount }} more)" data-image="{{ $image }}">
-                            <span data-bs-toggle="modal" data-bs-target="#galleryModal" class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">+{{ $hiddenCount }} more</span>
+                        <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
+                            <img src="{{ $image }}" class="img-fluid" alt="{{ $vacationModalTitle }} - {{ $index + 1 }}">
+                            @if($mobileHiddenCount > 0)
+                                <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $mobileHiddenCount }} more</span>
+                            @endif
                         </div>
                     @endif
                 @endforeach
@@ -439,26 +420,18 @@
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="galleryModal" tabindex="-1" aria-labelledby="galleryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="galleryModalLabel">Gallery</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="masonry-grid" class="row">
-                        @foreach ($overallImages as $image)
-                            <div class="col-12 mb-2">
-                                <img src="{{ $image }}" class="img-fluid" alt="Gallery Image" />
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$vacationGalleryId"
+        :images="$overallImages"
+        :title="$vacationModalTitle"
+        type="camp"
+        :badge="__('offers.badge_camp')"
+        :location="$vacation->location ?? null"
+        :price-prefix="$vacationPriceDisplay ? __('message.from') : null"
+        :price-display="$vacationPriceDisplay"
+        cta-url="#book-now"
+        :cta-label="__('message.reservation')"
+    />
 
     <section class="guidings-description-container mb-5">
         <div class="guidings-descriptions">

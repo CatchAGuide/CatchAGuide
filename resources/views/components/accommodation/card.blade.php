@@ -1,7 +1,12 @@
 <div class="accommodation-card" id="accommodation-{{ $accommodation['id'] ?? '' }}" data-accommodation-card data-accommodation-id="{{ $accommodation['id'] ?? '' }}">
     @php
-        $galleryImages = $accommodation['gallery_images'] ?? [];
-        $galleryTotal = $accommodation['gallery_total'] ?? max(count($galleryImages), 1);
+        $accommodationThumbnail = $accommodation['thumbnail_path']
+            ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop';
+        $galleryImages = array_values(array_unique(array_filter(
+            array_merge([$accommodationThumbnail], $accommodation['gallery_images'] ?? [])
+        )));
+        $galleryTotal = count($galleryImages);
+        $accommodationGalleryId = 'accommodation-card-'.($accommodation['id'] ?? uniqid());
         $stats = $accommodation['stats'] ?? [];
         $bedSummary = $accommodation['bed_summary'] ?? 'Keine Angaben zur Bettenanzahl';
         $occupancyLabel = $accommodation['occupancy_label'] ?? null;
@@ -21,13 +26,21 @@
             ? ((int) $bathroomChipDisplay === 1 ? ' Bath' : ' Baths')
             : '';
         $livingAreaChipSuffix = is_numeric($livingAreaChipDisplay) ? ' m²' : '';
+        $accommodationModalTitle = translate($accommodation['title'] ?? null) ?? ($accommodation['title'] ?? 'Apartment');
+        $accommodationModalSpecs = array_values(array_filter([
+            $occupancyLabel,
+            is_numeric($bathroomChipDisplay) ? ($bathroomChipDisplay.$bathroomChipSuffix) : null,
+            is_numeric($livingAreaChipDisplay) ? ($livingAreaChipDisplay.$livingAreaChipSuffix) : null,
+        ]));
+        $accommodationPriceDisplay = '€'.number_format((float) ($accommodation['price']['amount'] ?? 0), 2);
     @endphp
 
     <div class="accommodation-card__grid">
         <div class="accommodation-card__media">
-            <div class="accommodation-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" loading="lazy" decoding="async" data-gallery-image data-open-modal style="cursor: pointer;" />
+            <div class="accommodation-gallery" data-vacation-gallery="{{ $accommodationGalleryId }}" data-gallery-images='@json($galleryImages)'>
+                <img src="{{ $accommodationThumbnail }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" loading="lazy" decoding="async" data-vacation-gallery-image data-vacation-open-modal style="cursor: pointer;" />
 
+                @if($galleryTotal > 1)
                 <div>
                     <button
                         type="button"
@@ -49,6 +62,7 @@
                         1/{{ $galleryTotal }}
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Title and Summary right after gallery - Mobile version --}}
@@ -306,17 +320,16 @@
     </div>
 
     <!-- Accommodation Gallery Modal -->
-    <div class="accommodation-gallery-modal" data-accommodation-modal>
-        <div class="accommodation-gallery-modal__content">
-            <button class="accommodation-gallery-modal__close">&times;</button>
-            <button class="accommodation-gallery-modal__prev">&#10094;</button>
-            <button class="accommodation-gallery-modal__next">&#10095;</button>
-            <img class="accommodation-gallery-modal__image" src="" alt="{{ $accommodation['title'] ?? 'Apartment' }}">
-            <div class="accommodation-gallery-modal__counter">
-                <span class="accommodation-gallery-modal__current">1</span> / <span class="accommodation-gallery-modal__total">{{ $galleryTotal }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$accommodationGalleryId"
+        :images="$galleryImages"
+        :title="$accommodationModalTitle"
+        type="camp"
+        :badge="__('vacations.accommodation')"
+        :specs="$accommodationModalSpecs"
+        :price-prefix="__('rental_boats.per_day')"
+        :price-display="$accommodationPriceDisplay"
+    />
 </div>
 
 @once

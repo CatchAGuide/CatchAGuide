@@ -1,7 +1,12 @@
 <div class="rental-boat-card" id="rental-boat-{{ $boat['id'] ?? '' }}" data-rental-boat-card data-rental-boat-id="{{ $boat['id'] ?? '' }}">
     @php
-        $galleryImages = $boat['gallery_images'] ?? [];
-        $galleryCount = $boat['gallery_count'] ?? count($galleryImages);
+        $boatThumbnail = $boat['thumbnail_path']
+            ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop';
+        $galleryImages = array_values(array_unique(array_filter(
+            array_merge([$boatThumbnail], $boat['gallery_images'] ?? [])
+        )));
+        $galleryCount = count($galleryImages);
+        $boatGalleryId = 'rental-boat-card-'.($boat['id'] ?? uniqid());
         $price = $boat['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
         $displayPriceType = $price['display_type'] ?? __('rental_boats.per_day');
@@ -10,18 +15,25 @@
         $requirementItems = $boat['requirements'] ?? [];
         $specs = $boat['specs'] ?? [];
         $boatInfoList = $boat['boat_info'] ?? [];
+        $boatModalTitle = translate($boat['title'] ?? null) ?? ($boat['title'] ?? 'Boat');
+        $boatModalSpecs = array_values(array_filter([
+            isset($specs['length']) ? $specs['length'] : null,
+            isset($specs['capacity']) ? $specs['capacity'] : null,
+            isset($specs['engine']) ? $specs['engine'] : null,
+        ]));
+        $boatPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
     <div class="rental-boat-card__grid">
         <div class="rental-boat-card__media">
-            <div class="rental-boat-card__gallery" data-gallery-images='@json($galleryImages)'>
+            <div class="rental-boat-card__gallery" data-vacation-gallery="{{ $boatGalleryId }}" data-gallery-images='@json($galleryImages)'>
                 <img
-                    src="{{ $boat['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop' }}"
+                    src="{{ $boatThumbnail }}"
                     alt="{{ $boat['title'] ?? 'Boat' }}"
                     loading="lazy"
                     decoding="async"
-                    data-gallery-image
-                    data-open-modal
+                    data-vacation-gallery-image
+                    data-vacation-open-modal
                     style="cursor: pointer;"
                 />
 
@@ -189,17 +201,16 @@
     </div>
 
     <!-- Rental Boat Gallery Modal -->
-    <div class="rental-boat-gallery-modal" data-rental-boat-modal>
-        <div class="rental-boat-gallery-modal__content">
-            <button class="rental-boat-gallery-modal__close">&times;</button>
-            <button class="rental-boat-gallery-modal__prev">&#10094;</button>
-            <button class="rental-boat-gallery-modal__next">&#10095;</button>
-            <img class="rental-boat-gallery-modal__image" src="" alt="{{ translate($boat['title']) ?? 'Boat' }}">
-            <div class="rental-boat-gallery-modal__counter">
-                <span class="rental-boat-gallery-modal__current">1</span> / <span class="rental-boat-gallery-modal__total">{{ $galleryCount }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$boatGalleryId"
+        :images="$galleryImages"
+        :title="$boatModalTitle"
+        type="tour"
+        :badge="__('vacations.rental_boat')"
+        :specs="$boatModalSpecs"
+        :price-prefix="$displayPriceType"
+        :price-display="$boatPriceDisplay"
+    />
 </div>
 
 @once

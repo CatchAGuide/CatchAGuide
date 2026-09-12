@@ -7,23 +7,31 @@
             array_merge([$guidingThumbnail], $guiding['gallery_images'] ?? [])
         )));
         $guidingGalleryCount = count($guidingGalleryImages);
+        $guidingGalleryId = 'guiding-card-'.($guiding['id'] ?? uniqid());
         $durationLabel = $guiding['duration_label'] ?? ($guiding['duration_hours'] ?? null);
         $maxPersons = $guiding['max_persons'] ?? null;
         $tourType = $guiding['type'] ?? null;
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
+        $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
+        $guidingModalSpecs = array_values(array_filter([
+            $durationLabel ? (translate($durationLabel) ?: $durationLabel) : null,
+            $maxPersons ? ($maxPersons.' '.__('vacations.pers_short')) : null,
+            $tourType ? (translate($tourType) ?: $tourType) : null,
+        ]));
+        $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
     <div class="guiding-card__grid">
         <div class="guiding-card__media">
-            <div class="guiding-card__gallery" data-gallery-images='@json($guidingGalleryImages)'>
+            <div class="guiding-card__gallery" data-vacation-gallery="{{ $guidingGalleryId }}" data-gallery-images='@json($guidingGalleryImages)'>
                 <img
                     src="{{ $guidingThumbnail }}"
                     alt="{{ $guiding['title'] ?? 'Guiding' }}"
                     loading="lazy"
                     decoding="async"
-                    data-gallery-image
-                    data-open-modal
+                    data-vacation-gallery-image
+                    data-vacation-open-modal
                     style="cursor: pointer;"
                 />
 
@@ -273,17 +281,16 @@
     </div>
 
     <!-- Guiding Gallery Modal -->
-    <div class="guiding-gallery-modal" data-guiding-modal>
-        <div class="guiding-gallery-modal__content">
-            <button class="guiding-gallery-modal__close">&times;</button>
-            <button class="guiding-gallery-modal__prev">&#10094;</button>
-            <button class="guiding-gallery-modal__next">&#10095;</button>
-            <img class="guiding-gallery-modal__image" src="" alt="{{ translate($guiding['title']) ?? 'Guiding' }}">
-            <div class="guiding-gallery-modal__counter">
-                <span class="guiding-gallery-modal__current">1</span> / <span class="guiding-gallery-modal__total">{{ max($guidingGalleryCount, 1) }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$guidingGalleryId"
+        :images="$guidingGalleryImages"
+        :title="$guidingModalTitle"
+        type="tour"
+        :badge="__('offers.badge_tour')"
+        :specs="$guidingModalSpecs"
+        :price-prefix="$displayPriceType"
+        :price-display="$guidingPriceDisplay"
+    />
 </div>
 
 @once

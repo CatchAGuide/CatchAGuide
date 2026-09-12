@@ -21,7 +21,6 @@
 
 @section('js_after')
 @include('layouts.partials.offers-persons-stepper-script')
-@include('components.offers.partials.gallery-script')
 <script>
 (function () {
     var page = document.querySelector('[data-offers-page]');
