@@ -1,7 +1,12 @@
 <div class="special-offer-card" data-special-offer-card>
     @php
-        $galleryImages = $specialOffer['gallery_images'] ?? [];
-        $galleryTotal = $specialOffer['gallery_count'] ?? max(count($galleryImages), 1);
+        $offerThumbnail = $specialOffer['thumbnail_path']
+            ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop';
+        $galleryImages = array_values(array_unique(array_filter(
+            array_merge([$offerThumbnail], $specialOffer['gallery_images'] ?? [])
+        )));
+        $galleryTotal = count($galleryImages);
+        $specialOfferGalleryId = 'special-offer-card-'.($specialOffer['id'] ?? uniqid());
         $whatsIncluded = $specialOffer['whats_included'] ?? [];
         $pricingExtras = $specialOffer['pricing_extras'] ?? [];
         $accommodations = $specialOffer['accommodations'] ?? [];
@@ -10,13 +15,16 @@
         $price = $specialOffer['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
         $currency = $price['currency'] ?? 'EUR';
+        $specialOfferModalTitle = translate($specialOffer['title'] ?? null) ?: __('vacations.special_offer_singular');
+        $specialOfferPriceDisplay = ($currency === 'EUR' ? '€' : $currency).number_format($priceAmount, 2, ',', '.');
     @endphp
 
     <div class="special-offer-card__grid">
         <div class="special-offer-card__media">
-            <div class="special-offer-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $specialOffer['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ translate($specialOffer['title'] ?? '') ?: __('vacations.special_offer_singular') }}" loading="lazy" decoding="async" data-gallery-image data-open-modal style="cursor: pointer;" />
+            <div class="special-offer-gallery" data-vacation-gallery="{{ $specialOfferGalleryId }}" data-gallery-images='@json($galleryImages)'>
+                <img src="{{ $offerThumbnail }}" alt="{{ translate($specialOffer['title'] ?? '') ?: __('vacations.special_offer_singular') }}" loading="lazy" decoding="async" data-vacation-gallery-image data-vacation-open-modal style="cursor: pointer;" />
 
+                @if($galleryTotal > 1)
                 <div>
                     <button
                         type="button"
@@ -38,6 +46,7 @@
                         1/{{ $galleryTotal }}
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Title and Summary right after gallery - Mobile version --}}
@@ -147,11 +156,13 @@
             @endif
         </div>
 
-        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="special-offer-card__summary">
-            <div class="special-offer-card__summary-header">
-                <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
-            </div>
+        <div class="special-offer-card__content">
+            <div class="special-offer-card__content-header">
+                {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="special-offer-card__summary">
+                    <div class="special-offer-card__summary-header">
+                        <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
+                    </div>
 
             <div class="special-offer-card__anchor-points">
                 @if(count($accommodations) > 0)
@@ -220,7 +231,21 @@
                     </div>
                 @endif
             </div>
-        </div>
+                </div>
+
+                <div class="special-offer-card__actions">
+                    <div class="special-offer-card__actions-column">
+                        <div class="special-offer-card__pricing">
+                            <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
+                            <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
+                        </div>
+                        <button class="special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
         @php
             $accommodationsFull = $specialOffer['accommodations_full'] ?? [];
@@ -306,34 +331,19 @@
                 @endforeach
             </div>
         @endif
-
-
-        <div class="special-offer-card__actions">
-            <div class="special-offer-card__actions-column">
-                <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
-                <div class="special-offer-card__pricing">
-                    <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
-                </div>
-                <button class="special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Special Offer Gallery Modal -->
-    <div class="special-offer-gallery-modal" data-special-offer-modal>
-        <div class="special-offer-gallery-modal__content">
-            <button class="special-offer-gallery-modal__close">&times;</button>
-            <button class="special-offer-gallery-modal__prev">&#10094;</button>
-            <button class="special-offer-gallery-modal__next">&#10095;</button>
-            <img class="special-offer-gallery-modal__image" src="" alt="{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}">
-            <div class="special-offer-gallery-modal__counter">
-                <span class="special-offer-gallery-modal__current">1</span> / <span class="special-offer-gallery-modal__total">{{ $galleryTotal }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$specialOfferGalleryId"
+        :images="$galleryImages"
+        :title="$specialOfferModalTitle"
+        type="tour"
+        :badge="__('vacations.special_offer_singular')"
+        :price-prefix="__('vacations.per_person')"
+        :price-display="$specialOfferPriceDisplay"
+    />
 </div>
 
 @once

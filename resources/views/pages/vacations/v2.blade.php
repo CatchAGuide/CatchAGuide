@@ -81,8 +81,18 @@
     </header>
 
     <!-- Gallery -->
+    @php
+        $campGalleryId = 'camp-detail-'.($camp['id'] ?? 'page');
+        $campLocation = trim(implode(', ', array_filter([
+            translate($camp['city'] ?? null) ?: ($camp['city'] ?? null),
+            translate($camp['region'] ?? null) ?: ($camp['region'] ?? null),
+            translate($camp['country'] ?? null) ?: ($camp['country'] ?? null),
+        ])));
+        $campModalTitle = translate($camp['title'] ?? null) ?: ($camp['title'] ?? '');
+        $mobileCarouselImages = array_slice($galleryImages, 1);
+    @endphp
     <div class="camp-container">
-        <div class="camp-gallery">
+        <div class="camp-gallery" data-vacation-gallery="{{ $campGalleryId }}" data-gallery-images='@json($galleryImages)'>
             <div class="camp-gallery__main" data-gallery-index="0">
                 <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}" fetchpriority="high" decoding="async">
             </div>
@@ -103,37 +113,29 @@
                     </div>
                 @endforeach
             </div>
-        </div>
-        
-        <!-- Mobile Horizontal Scrollable Gallery (hidden on desktop) -->
-        @php
-            $mobileCarouselImages = array_slice($galleryImages, 1); // All images except the first (primary)
-        @endphp
-        @if(count($mobileCarouselImages) > 0)
-        <div class="camp-gallery__mobile-carousel">
-            <div class="camp-gallery__mobile-carousel-scroll">
-                @foreach($mobileCarouselImages as $index => $image)
-                    <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
-                        <img src="{{ $image }}" alt="{{ $camp['title'] }} - Image {{ $index + 2 }}" loading="lazy" decoding="async">
-                    </div>
-                @endforeach
+
+            @if(count($mobileCarouselImages) > 0)
+            <div class="camp-gallery__mobile-carousel">
+                <div class="camp-gallery__mobile-carousel-scroll">
+                    @foreach($mobileCarouselImages as $index => $image)
+                        <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
+                            <img src="{{ $image }}" alt="{{ $camp['title'] }} - Image {{ $index + 2 }}" loading="lazy" decoding="async">
+                        </div>
+                    @endforeach
+                </div>
             </div>
+            @endif
         </div>
-        @endif
     </div>
 
-    <!-- Gallery Modal -->
-    <div id="galleryModal" class="gallery-modal">
-        <div class="gallery-modal__content">
-            <button class="gallery-modal__close">&times;</button>
-            <button class="gallery-modal__prev">&#10094;</button>
-            <button class="gallery-modal__next">&#10095;</button>
-            <img id="galleryModalImage" src="" alt="{{ $camp['title'] }}">
-            <div class="gallery-modal__counter">
-                <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$campGalleryId"
+        :images="$galleryImages"
+        :title="$campModalTitle"
+        type="camp"
+        :badge="__('offers.badge_camp')"
+        :location="$campLocation"
+    />
 
     <!-- Main Content with Sidebar -->
     <div class="camp-container camp-layout" style="grid-template-columns: 1fr;">
@@ -518,10 +520,10 @@
 
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
-        <section id="special-offers" class="camp-section mb-3">
+        <section id="special-offers" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-special-offer.card :specialOffer="$specialOffer" />
                 </div>
             @endforeach
@@ -530,10 +532,10 @@
 
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
-        <section id="accommodations" class="camp-section mb-3">
+        <section id="accommodations" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.accommodations') }}</h2>
             @foreach($accommodations as $accommodation)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-accommodation.card :accommodation="$accommodation" />
                 </div>
             @endforeach
@@ -542,10 +544,10 @@
 
         <!-- Guidings Section -->
         @if (isset($guidings) && count($guidings) > 0)
-        <section id="guidings" class="camp-section mb-3">
+        <section id="guidings" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-guiding.card :guiding="$guiding" />
                 </div>
             @endforeach
@@ -554,10 +556,10 @@
 
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)
-        <section id="boats" class="camp-section mb-3">
+        <section id="boats" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.rental_boats') }}</h2>
             @foreach($boats as $boat)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-rental-boat.card :boat="$boat" />
                 </div>
             @endforeach
@@ -565,109 +567,6 @@
         @endif
     </div>
 </div>
-
-<!-- Gallery Modal Script -->
-<script>
-    // Gallery Modal Functions
-    (function() {
-        const galleryImages = @json($galleryImages);
-        let currentGalleryIndex = 0;
-
-            function openGalleryModal(index) {
-                currentGalleryIndex = index;
-                updateGalleryModal();
-                document.getElementById('galleryModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeGalleryModal() {
-                document.getElementById('galleryModal').style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-
-            function changeGalleryImage(direction) {
-                currentGalleryIndex += direction;
-                if (currentGalleryIndex < 0) currentGalleryIndex = galleryImages.length - 1;
-                if (currentGalleryIndex >= galleryImages.length) currentGalleryIndex = 0;
-                updateGalleryModal();
-            }
-
-            function updateGalleryModal() {
-                document.getElementById('galleryModalImage').src = galleryImages[currentGalleryIndex];
-                document.getElementById('galleryCurrentIndex').textContent = currentGalleryIndex + 1;
-            }
-
-            function initGallery() {
-                // Add click handlers to all gallery items
-                const galleryItems = document.querySelectorAll('[data-gallery-index]');
-                
-                galleryItems.forEach(function(item) {
-                    item.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-gallery-index'));
-                        openGalleryModal(index);
-                    });
-                });
-
-                // Modal close button
-                const closeBtn = document.querySelector('.gallery-modal__close');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        closeGalleryModal();
-                    });
-                }
-
-                // Click outside to close
-                const modal = document.getElementById('galleryModal');
-                if (modal) {
-                    modal.addEventListener('click', function(e) {
-                        if (e.target.id === 'galleryModal') {
-                            closeGalleryModal();
-                        }
-                    });
-                }
-
-                // Navigation buttons
-                const prevBtn = document.querySelector('.gallery-modal__prev');
-                const nextBtn = document.querySelector('.gallery-modal__next');
-                
-                if (prevBtn) {
-                    prevBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        changeGalleryImage(-1);
-                    });
-                }
-                
-                if (nextBtn) {
-                    nextBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        changeGalleryImage(1);
-                    });
-                }
-
-                // Keyboard navigation
-                document.addEventListener('keydown', function(event) {
-                    if (modal && modal.style.display === 'flex') {
-                        if (event.key === 'Escape') {
-                            closeGalleryModal();
-                        } else if (event.key === 'ArrowLeft') {
-                            changeGalleryImage(-1);
-                        } else if (event.key === 'ArrowRight') {
-                            changeGalleryImage(1);
-                        }
-                    }
-                });
-            }
-
-            // Initialize when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initGallery);
-            } else {
-                // DOM is already ready
-                initGallery();
-        }
-    })();
-</script>
 
 <script>
     document.addEventListener('alpine:init', () => {

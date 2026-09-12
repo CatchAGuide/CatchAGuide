@@ -1,7 +1,12 @@
 <div class="accommodation-card" id="accommodation-{{ $accommodation['id'] ?? '' }}" data-accommodation-card data-accommodation-id="{{ $accommodation['id'] ?? '' }}">
     @php
-        $galleryImages = $accommodation['gallery_images'] ?? [];
-        $galleryTotal = $accommodation['gallery_total'] ?? max(count($galleryImages), 1);
+        $accommodationThumbnail = $accommodation['thumbnail_path']
+            ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop';
+        $galleryImages = array_values(array_unique(array_filter(
+            array_merge([$accommodationThumbnail], $accommodation['gallery_images'] ?? [])
+        )));
+        $galleryTotal = count($galleryImages);
+        $accommodationGalleryId = 'accommodation-card-'.($accommodation['id'] ?? uniqid());
         $stats = $accommodation['stats'] ?? [];
         $bedSummary = $accommodation['bed_summary'] ?? 'Keine Angaben zur Bettenanzahl';
         $occupancyLabel = $accommodation['occupancy_label'] ?? null;
@@ -21,13 +26,21 @@
             ? ((int) $bathroomChipDisplay === 1 ? ' Bath' : ' Baths')
             : '';
         $livingAreaChipSuffix = is_numeric($livingAreaChipDisplay) ? ' m²' : '';
+        $accommodationModalTitle = translate($accommodation['title'] ?? null) ?? ($accommodation['title'] ?? 'Apartment');
+        $accommodationModalSpecs = array_values(array_filter([
+            $occupancyLabel,
+            is_numeric($bathroomChipDisplay) ? ($bathroomChipDisplay.$bathroomChipSuffix) : null,
+            is_numeric($livingAreaChipDisplay) ? ($livingAreaChipDisplay.$livingAreaChipSuffix) : null,
+        ]));
+        $accommodationPriceDisplay = '€'.number_format((float) ($accommodation['price']['amount'] ?? 0), 2);
     @endphp
 
     <div class="accommodation-card__grid">
         <div class="accommodation-card__media">
-            <div class="accommodation-gallery" data-gallery-images='@json($galleryImages)'>
-                <img src="{{ $accommodation['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop' }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" loading="lazy" decoding="async" data-gallery-image data-open-modal style="cursor: pointer;" />
+            <div class="accommodation-gallery" data-vacation-gallery="{{ $accommodationGalleryId }}" data-gallery-images='@json($galleryImages)'>
+                <img src="{{ $accommodationThumbnail }}" alt="{{ $accommodation['title'] ?? 'Apartment' }}" loading="lazy" decoding="async" data-vacation-gallery-image data-vacation-open-modal style="cursor: pointer;" />
 
+                @if($galleryTotal > 1)
                 <div>
                     <button
                         type="button"
@@ -49,6 +62,7 @@
                         1/{{ $galleryTotal }}
                     </div>
                 </div>
+                @endif
             </div>
 
             {{-- Title and Summary right after gallery - Mobile version --}}
@@ -131,62 +145,90 @@
             </div>
         </div>
 
-        {{-- Summary section - Desktop: right column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="accommodation-card__summary">
-            <div class="accommodation-card__summary-header">
-                <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
-            </div>
+        <div class="accommodation-card__content">
+            <div class="accommodation-card__content-header">
+                {{-- Summary section - Desktop: right column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="accommodation-card__summary">
+                    <div class="accommodation-card__summary-header">
+                        <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
+                        <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
+                    </div>
 
-            <div class="accommodation-card__stats">
-                @if(!empty($accommodation['max_occupancy']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">👥</span>
-                    <span>{{ $accommodation['max_occupancy'] }}</span>
-                </span>
-                @endif
-                @if(!empty($accommodation['number_of_bathrooms']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">🛁</span>
-                    <span>{{ $accommodation['number_of_bathrooms'] }}</span>
-                </span>
-                @endif
-                @if(!empty($accommodation['living_area_sqm']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">📐</span>
-                    <span>{{ $accommodation['living_area_sqm'] }}</span>
-                </span>
-                @endif
-            </div>
+                    <div class="accommodation-card__stats">
+                        @if(!empty($accommodation['max_occupancy']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">👥</span>
+                            <span>{{ $accommodation['max_occupancy'] }}</span>
+                        </span>
+                        @endif
+                        @if(!empty($accommodation['number_of_bathrooms']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">🛁</span>
+                            <span>{{ $accommodation['number_of_bathrooms'] }}</span>
+                        </span>
+                        @endif
+                        @if(!empty($accommodation['living_area_sqm']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">📐</span>
+                            <span>{{ $accommodation['living_area_sqm'] }}</span>
+                        </span>
+                        @endif
+                    </div>
 
-            <div class="accommodation-card__beds">
-                <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
-                <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
-            </div>
+                    <div class="accommodation-card__beds">
+                        <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
+                        <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
+                    </div>
 
-            <div class="accommodation-card__distance-row">
-                <div class="accommodation-card__distance-group">
-                    @if(!empty($accommodation['distances']['to_water_m']))
-                        <span class="accommodation-card__distance-chip">
-                            🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
-                        </span>
-                    @endif
-                    @if(!empty($accommodation['distances']['to_berth_m']))
-                        <span class="accommodation-card__distance-chip">
-                            ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
-                        </span>
-                    @endif
-                    @if(!empty($accommodation['distances']['to_parking_m']))
-                        <span class="accommodation-card__distance-chip">
-                            🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
-                        </span>
-                    @endif
+                    <div class="accommodation-card__distance-row">
+                        <div class="accommodation-card__distance-group">
+                            @if(!empty($accommodation['distances']['to_water_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
+                                </span>
+                            @endif
+                            @if(!empty($accommodation['distances']['to_berth_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
+                                </span>
+                            @endif
+                            @if(!empty($accommodation['distances']['to_parking_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="accommodation-card__actions">
+                    <div class="accommodation-card__actions-column">
+                        <div class="accommodation-card__pricing">
+                            @php
+                                $priceType = $accommodation['price']['type'] ?? 'per_night';
+                                $translatedPriceType = match($priceType) {
+                                    'per_person' => __('vacations.per_person'),
+                                    'per_night' => __('accommodations.per_night'),
+                                    default => ucfirst(str_replace('_', ' ', $priceType))
+                                };
+                            @endphp
+                            {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
+                            <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
+                            <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
+                        </div>
+                        {{-- <button class="accommodation-card__select-btn">
+                            Select Accommodation
+                        </button> --}}
+                        <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-        </div>
-
-        <div class="accommodation-card__feature-grid" data-expanded-only>
+            <div class="accommodation-card__feature-grid" data-expanded-only>
             {{-- Mobile-only Details panel (appears before Amenities on mobile) --}}
             <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-details">
                 <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
@@ -274,45 +316,20 @@
                 </div>
             @endif
         </div>
-
-        <div class="accommodation-card__actions">
-            <div class="accommodation-card__actions-column">
-                <div class="accommodation-card__pricing">
-                    @php
-                        $priceType = $accommodation['price']['type'] ?? 'per_night';
-                        $translatedPriceType = match($priceType) {
-                            'per_person' => __('vacations.per_person'),
-                            'per_night' => __('accommodations.per_night'),
-                            default => ucfirst(str_replace('_', ' ', $priceType))
-                        };
-                    @endphp
-                    {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
-                    <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
-                    <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
-                </div>
-                {{-- <button class="accommodation-card__select-btn">
-                    Select Accommodation
-                </button> --}}
-                <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Accommodation Gallery Modal -->
-    <div class="accommodation-gallery-modal" data-accommodation-modal>
-        <div class="accommodation-gallery-modal__content">
-            <button class="accommodation-gallery-modal__close">&times;</button>
-            <button class="accommodation-gallery-modal__prev">&#10094;</button>
-            <button class="accommodation-gallery-modal__next">&#10095;</button>
-            <img class="accommodation-gallery-modal__image" src="" alt="{{ $accommodation['title'] ?? 'Apartment' }}">
-            <div class="accommodation-gallery-modal__counter">
-                <span class="accommodation-gallery-modal__current">1</span> / <span class="accommodation-gallery-modal__total">{{ $galleryTotal }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$accommodationGalleryId"
+        :images="$galleryImages"
+        :title="$accommodationModalTitle"
+        type="camp"
+        :badge="__('vacations.accommodation')"
+        :specs="$accommodationModalSpecs"
+        :price-prefix="__('rental_boats.per_day')"
+        :price-display="$accommodationPriceDisplay"
+    />
 </div>
 
 @once

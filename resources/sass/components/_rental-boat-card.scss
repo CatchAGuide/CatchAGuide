@@ -12,38 +12,54 @@
         transform: translateY(-2px);
     }
 
+
     &__grid {
         display: grid;
-        grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-        grid-template-areas:
-            "media summary actions"
-            "media info-matrix info-matrix";
+        grid-template-columns: 320px minmax(0, 1fr);
+        grid-template-areas: "media content";
         gap: 16px;
         padding: 16px;
-        align-items: flex-start;
+        align-items: start;
 
         @media (max-width: 1200px) {
-            grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+            grid-template-columns: 280px minmax(0, 1fr);
         }
 
         @media (max-width: 1024px) {
             grid-template-columns: 260px minmax(0, 1fr);
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "info-matrix info-matrix"
-                "actions actions";
         }
 
         @media (max-width: 768px) {
             grid-template-columns: 1fr;
             grid-template-areas:
                 "media"
-                "summary"
-                "info-matrix"
-                "actions";
+                "content";
             gap: 12px;
             padding: 12px;
+        }
+    }
+
+    // Content wraps summary+actions (header row) and the expandable info-matrix.
+    // Kept as its own grid item (not spanning media's rows) so its height is
+    // never inflated by media's independent height (image + side panels).
+    &__content {
+        grid-area: content;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    &__content-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+
+        @media (max-width: 768px) {
+            // Summary is hidden on mobile (title-after-gallery is used instead),
+            // so only actions remains — let it act as the price/CTA footer.
+            order: 2;
         }
     }
 
@@ -107,12 +123,12 @@
     }
 
     &__summary {
-        grid-area: summary;
         display: flex;
         flex-direction: column;
         gap: 12px;
         min-width: 0;
-        
+        flex: 1 1 auto;
+
         // Hide on mobile since we use title-after-gallery instead
         @media (max-width: 768px) {
             display: none !important;
@@ -247,12 +263,22 @@
     }
 
     &__actions {
-        grid-area: actions;
         display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
         gap: 16px;
+
+        @media (max-width: 768px) {
+            // Acts as the card's price/CTA footer on mobile, matching the
+            // reference: a divider above it, price left / button right.
+            // content-header is a flex row whose only visible child this is
+            // (summary is hidden) — without an explicit width the divider
+            // only spans the price+button content, not the full card.
+            width: 100%;
+            border-top: 1px solid rgba(15, 23, 42, .08);
+            padding-top: 12px;
+        }
     }
 
     &__actions-column {
@@ -265,6 +291,14 @@
         @media (max-width: 1024px) {
             align-items: flex-start;
             align-self: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
         }
     }
 
@@ -346,15 +380,17 @@
         display: none !important;
     }
 
-    &__info-matrix[data-expanded-only] {
-        grid-area: auto !important; // Remove from grid layout when hidden
+    @media (max-width: 768px) {
+        // Expanded info sits above the price/CTA footer (content-header order:2).
+        &__info-matrix[data-expanded-only] {
+            order: 1;
+        }
     }
-    
+
     // Show expandable content when card is expanded
     &--expanded {
         .rental-boat-card__info-matrix[data-expanded-only] {
             display: grid !important;
-            grid-area: info-matrix !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
         }
 
@@ -364,42 +400,26 @@
         }
     }
 
-    // When info-matrix is hidden, adjust grid layout
-    &:not(&--expanded) &__grid {
-        grid-template-areas:
-            "media summary actions"
-            "media . .";
-    }
-
-    &:not(&--expanded) &__grid {
-        @media (max-width: 1024px) {
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "actions actions";
-        }
-
-        @media (max-width: 768px) {
-            grid-template-areas:
-                "media"
-                "summary"
-                "actions";
-        }
-    }
-
     &__expand-btn--secondary {
         align-self: flex-end;
 
         @media (max-width: 920px) {
             align-self: flex-start;
         }
+
+        @media (max-width: 768px) {
+            // actions-column is a row here (price left / button right) —
+            // reset the column-layout align-self so the button centers
+            // against the full price block instead of pinning to its top.
+            align-self: center;
+        }
     }
 
     &__info-matrix {
-        grid-area: info-matrix;
         margin-top: 0;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
         gap: 12px;
         width: 100%;
 
@@ -416,6 +436,23 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+
+        @media (max-width: 768px) {
+            // Flatten the nested "card in a card" look on mobile — the outer
+            // card already provides the boundary, so these become plain
+            // sections separated by a divider instead of boxed panels,
+            // freeing up horizontal space for tags and text.
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0 0 16px;
+            border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+            &:last-child {
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+        }
     }
 
     &__info-box-title {
@@ -525,151 +562,3 @@
 }
 
 // Rental Boat Gallery Modal
-.rental-boat-gallery-modal {
-    display: none;
-    position: fixed !important;
-    z-index: 99999 !important;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.95);
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease;
-    margin: 0;
-    padding: 0;
-
-    &__content {
-        position: relative;
-        width: 90%;
-        max-width: 1200px;
-        height: 90vh;
-        max-height: 90vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: zoomIn 0.2s ease;
-    }
-
-    &__image {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 90vh;
-        object-fit: contain;
-        border-radius: 8px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    &__close {
-        position: absolute;
-        top: -50px;
-        right: 0;
-        font-size: 40px;
-        font-weight: 300;
-        color: #fff;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease;
-        z-index: 10000;
-
-        &:hover {
-            transform: scale(1.1);
-        }
-    }
-
-    &__prev,
-    &__next {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 30px;
-        font-weight: bold;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        cursor: pointer;
-        padding: 16px 20px;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        backdrop-filter: blur(10px);
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-    }
-
-    &__prev {
-        left: 20px;
-    }
-
-    &__next {
-        right: 20px;
-    }
-
-    &__counter {
-        position: absolute;
-        bottom: -50px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #fff;
-        font-size: 16px;
-        font-weight: 500;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 8px 16px;
-        border-radius: 20px;
-        backdrop-filter: blur(10px);
-    }
-
-    @media (max-width: 768px) {
-        &__prev,
-        &__next {
-            font-size: 24px;
-            padding: 12px 16px;
-        }
-
-        &__prev {
-            left: 10px;
-        }
-
-        &__next {
-            right: 10px;
-        }
-
-        &__close {
-            top: 10px;
-            right: 10px;
-            font-size: 32px;
-        }
-
-        &__counter {
-            bottom: 20px;
-        }
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes zoomIn {
-    from { 
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to { 
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-

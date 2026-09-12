@@ -392,6 +392,21 @@
         border-top: 2px solid rgba(232, 96, 76, .2);
     }
 
+    // Sections that only wrap a list of attachment cards (accommodations,
+    // rental boats, guidings, special offers). On mobile the section's own
+    // card chrome is dropped — each attachment card already draws its own
+    // border — so the heading floats free and listings get the reclaimed
+    // width instead of being inset twice.
+    &--listings {
+        @media (max-width: 768px) {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+    }
+
     &__title {
         margin-bottom: 18px;
         font-size: 1.2rem;

@@ -7,23 +7,31 @@
             array_merge([$guidingThumbnail], $guiding['gallery_images'] ?? [])
         )));
         $guidingGalleryCount = count($guidingGalleryImages);
+        $guidingGalleryId = 'guiding-card-'.($guiding['id'] ?? uniqid());
         $durationLabel = $guiding['duration_label'] ?? ($guiding['duration_hours'] ?? null);
         $maxPersons = $guiding['max_persons'] ?? null;
         $tourType = $guiding['type'] ?? null;
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
+        $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
+        $guidingModalSpecs = array_values(array_filter([
+            $durationLabel ? (translate($durationLabel) ?: $durationLabel) : null,
+            $maxPersons ? ($maxPersons.' '.__('vacations.pers_short')) : null,
+            $tourType ? (translate($tourType) ?: $tourType) : null,
+        ]));
+        $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
     <div class="guiding-card__grid">
         <div class="guiding-card__media">
-            <div class="guiding-card__gallery" data-gallery-images='@json($guidingGalleryImages)'>
+            <div class="guiding-card__gallery" data-vacation-gallery="{{ $guidingGalleryId }}" data-gallery-images='@json($guidingGalleryImages)'>
                 <img
                     src="{{ $guidingThumbnail }}"
                     alt="{{ $guiding['title'] ?? 'Guiding' }}"
                     loading="lazy"
                     decoding="async"
-                    data-gallery-image
-                    data-open-modal
+                    data-vacation-gallery-image
+                    data-vacation-open-modal
                     style="cursor: pointer;"
                 />
 
@@ -109,58 +117,61 @@
             </div>
         </div>
 
-        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="guiding-card__summary">
-            <div class="guiding-card__summary-header">
-                <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
-                <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
-            </div>
+        <div class="guiding-card__content">
+            <div class="guiding-card__content-header">
+                {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="guiding-card__summary">
+                    <div class="guiding-card__summary-header">
+                        <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
+                        <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
+                    </div>
 
-            <div class="guiding-card__spec-row">
-                @if($durationLabel)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span>{{ translate($durationLabel) }}</span>
-                </span>
-                @endif
-                @if($maxPersons)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
-                </span>
-                @endif
-                @if($tourType)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
-                    </svg>
-                    <span>{{ translate($tourType) }}</span>
-                </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="guiding-card__actions">
-            <div class="guiding-card__actions-column">
-                <div class="guiding-card__pricing">
-                    <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
-                    <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                    <div class="guiding-card__spec-row">
+                        @if($durationLabel)
+                        <span class="guiding-card__spec-item">
+                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <span>{{ translate($durationLabel) }}</span>
+                        </span>
+                        @endif
+                        @if($maxPersons)
+                        <span class="guiding-card__spec-item">
+                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
+                        </span>
+                        @endif
+                        @if($tourType)
+                        <span class="guiding-card__spec-item">
+                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
+                            </svg>
+                            <span>{{ translate($tourType) }}</span>
+                        </span>
+                        @endif
+                    </div>
                 </div>
-                {{-- <button class="guiding-card__select-btn">
-                    {{ __('Select This Guiding') }}
-                </button> --}}
-                <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
+
+                <div class="guiding-card__actions">
+                    <div class="guiding-card__actions-column">
+                        <div class="guiding-card__pricing">
+                            <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
+                            <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                        </div>
+                        {{-- <button class="guiding-card__select-btn">
+                            {{ __('Select This Guiding') }}
+                        </button> --}}
+                        <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
 
         <div class="guiding-card__info-matrix" data-expanded-only>
             <div class="guiding-card__info-box">
@@ -266,20 +277,20 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Guiding Gallery Modal -->
-    <div class="guiding-gallery-modal" data-guiding-modal>
-        <div class="guiding-gallery-modal__content">
-            <button class="guiding-gallery-modal__close">&times;</button>
-            <button class="guiding-gallery-modal__prev">&#10094;</button>
-            <button class="guiding-gallery-modal__next">&#10095;</button>
-            <img class="guiding-gallery-modal__image" src="" alt="{{ translate($guiding['title']) ?? 'Guiding' }}">
-            <div class="guiding-gallery-modal__counter">
-                <span class="guiding-gallery-modal__current">1</span> / <span class="guiding-gallery-modal__total">{{ max($guidingGalleryCount, 1) }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$guidingGalleryId"
+        :images="$guidingGalleryImages"
+        :title="$guidingModalTitle"
+        type="tour"
+        :badge="__('offers.badge_tour')"
+        :specs="$guidingModalSpecs"
+        :price-prefix="$displayPriceType"
+        :price-display="$guidingPriceDisplay"
+    />
 </div>
 
 @once

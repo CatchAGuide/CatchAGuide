@@ -114,5 +114,4 @@
 
 @section('js_after')
 @include('layouts.partials.category-hero-header-script')
-@include('components.offers.partials.gallery-script')
 @endsection

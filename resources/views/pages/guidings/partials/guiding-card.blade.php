@@ -16,6 +16,10 @@
     ));
 
     $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
+    $galleryFull = array_values(array_filter(array_map(function ($img) {
+        $img = (string) $img;
+        return str_starts_with($img, 'http') ? $img : media_url($img);
+    }, (array) $galleryImages)));
     $averageRating = $guiding->cached_average_rating ?? $guiding->user->average_rating();
     $reviewCount   = $guiding->cached_review_count ?? $guiding->user->reviews->count();
     $guidingTargets = $guiding->cached_target_fish_names ?? $guiding->getTargetFishNames($targetsMap);
@@ -23,8 +27,18 @@
     $guidingWaters  = $guiding->getWaterNames();
     $waterNames     = collect($guidingWaters)->pluck('name')->toArray();
     $inclussions    = $guiding->cached_inclusion_names ?? $guiding->getInclusionNames();
-    $totalImages    = count($galleryImages);
+    $totalImages    = count($galleryFull);
     $lowestPrice    = number_format($guiding->getLowestPrice(), 0, ',', '.');
+    $guidingGalleryId = 'guiding-list-'.$guiding->id;
+    $guidingDurationLabel = $guiding->duration.' '.($guiding->duration_type == 'multi_day' ? __('guidings.days') : __('guidings.hours'));
+    $guidingGuestsLabel = 'Max '.$guiding->max_guests.' '.($guiding->max_guests != 1 ? __('booking.people') : __('booking.person'));
+    $guidingModalSpecs = array_values(array_filter([
+        $guidingDurationLabel,
+        $guidingGuestsLabel,
+        !empty($waterNames) ? implode(', ', $waterNames) : null,
+    ]));
+    $guidingPriceDisplay = $lowestPrice.'€';
+    $guidingPriceSuffix = __('vacations.per_person_short');
 @endphp
 <div class="row m-0 mb-3 guiding-list-item {{ $collapseShowMore ? ($loop->index < 2 ? 'show' : '') : 'show' }}">
     <div class="col-md-12">
@@ -34,19 +48,20 @@
                      class="carousel slide gc-carousel"
                      data-bs-ride="carousel"
                      data-bs-interval="false"
-                     data-guiding-gallery="{{ $guiding->id }}"
-                     data-gallery-images='@json((array)$galleryImages)'>
+                     data-vacation-gallery="{{ $guidingGalleryId }}"
+                     data-gallery-images='@json($galleryFull)'>
                     <div class="carousel-inner">
                         @if($totalImages)
-                            @foreach($galleryImages as $index => $gallery_image_link)
+                            @foreach($galleryFull as $index => $gallery_image_link)
                                 <div class="carousel-item @if($index == 0) active @endif">
                                     <img class="d-block"
-                                         src="{{ (strpos($gallery_image_link, 'http') === 0) ? $gallery_image_link : media_url($gallery_image_link) }}"
+                                         src="{{ $gallery_image_link }}"
                                          alt="{{ $guiding->title }}"
                                          loading="lazy"
                                          width="800"
                                          height="600"
-                                         data-guiding-open-modal
+                                         data-vacation-gallery-image
+                                         data-vacation-open-modal
                                          style="aspect-ratio: 4/3; object-fit: cover; cursor: pointer;">
                                 </div>
                             @endforeach
@@ -85,18 +100,22 @@
                     @endif
                 </div>
 
-                {{-- Gallery lightbox modal --}}
-                <div class="guiding-gallery-modal" data-guiding-modal="{{ $guiding->id }}">
-                    <div class="guiding-gallery-modal__content">
-                        <button class="guiding-gallery-modal__close">&times;</button>
-                        <button class="guiding-gallery-modal__prev">&#10094;</button>
-                        <button class="guiding-gallery-modal__next">&#10095;</button>
-                        <img class="guiding-gallery-modal__image" src="" alt="{{ $guiding->title }}">
-                        <div class="guiding-gallery-modal__counter">
-                            <span class="guiding-gallery-modal__current">1</span> / <span class="guiding-gallery-modal__total">{{ $totalImages }}</span>
-                        </div>
-                    </div>
-                </div>
+                <x-gallery.modal
+                    :id="$guidingGalleryId"
+                    :images="$galleryFull"
+                    :title="$guiding->title"
+                    type="tour"
+                    :badge="__('offers.badge_tour')"
+                    :location="$guiding->location"
+                    :rating="$averageRating"
+                    :review-count="$reviewCount"
+                    :specs="$guidingModalSpecs"
+                    :price-prefix="__('message.from')"
+                    :price-display="$guidingPriceDisplay"
+                    :price-suffix="$guidingPriceSuffix"
+                    :cta-url="$showUrl"
+                    :cta-label="__('vacations.see_more')"
+                />
 
             </div>
             <div class="guiding-item-desc col-12 col-sm-12 col-md-8 col-lg-8 col-xl-8 col-xxl-8 p-2 px-md-3 pt-md-2">

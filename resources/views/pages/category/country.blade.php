@@ -778,7 +778,6 @@
 @include('layouts.partials.category-hero-header-script')
 @endif
 @if($showOffersCatalog)
-@include('components.offers.partials.gallery-script')
 @else
 @include('pages.category.partials.destination-offers-script')
 @endif
