@@ -147,11 +147,13 @@
             @endif
         </div>
 
-        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="special-offer-card__summary">
-            <div class="special-offer-card__summary-header">
-                <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
-            </div>
+        <div class="special-offer-card__content">
+            <div class="special-offer-card__content-header">
+                {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="special-offer-card__summary">
+                    <div class="special-offer-card__summary-header">
+                        <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
+                    </div>
 
             <div class="special-offer-card__anchor-points">
                 @if(count($accommodations) > 0)
@@ -220,7 +222,21 @@
                     </div>
                 @endif
             </div>
-        </div>
+                </div>
+
+                <div class="special-offer-card__actions">
+                    <div class="special-offer-card__actions-column">
+                        <div class="special-offer-card__pricing">
+                            <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
+                            <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
+                        </div>
+                        <button class="special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
         @php
             $accommodationsFull = $specialOffer['accommodations_full'] ?? [];
@@ -306,19 +322,6 @@
                 @endforeach
             </div>
         @endif
-
-
-        <div class="special-offer-card__actions">
-            <div class="special-offer-card__actions-column">
-                <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
-                <div class="special-offer-card__pricing">
-                    <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
-                </div>
-                <button class="special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
         </div>
     </div>
 

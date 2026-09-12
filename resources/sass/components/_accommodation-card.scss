@@ -18,57 +18,54 @@
 
     &__grid {
         display: grid;
-        grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-        grid-template-areas:
-            "media summary actions"
-            "media features features";
+        grid-template-columns: 320px minmax(0, 1fr);
+        grid-template-areas: "media content";
         gap: 16px;
         padding: 16px;
-        align-items: flex-start;
+        align-items: start;
 
         @media (max-width: 1200px) {
-            grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+            grid-template-columns: 280px minmax(0, 1fr);
         }
 
         @media (max-width: 1024px) {
             grid-template-columns: 260px minmax(0, 1fr);
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "features features"
-                "actions actions";
         }
 
         @media (max-width: 768px) {
             grid-template-columns: 1fr;
             grid-template-areas:
                 "media"
-                "features"
-                "actions";
+                "content";
             gap: 12px;
             padding: 12px;
         }
     }
 
-    // When feature-grid is hidden, adjust grid layout
-    &:not(&--expanded) &__grid {
-        grid-template-areas:
-            "media summary actions"
-            "media . .";
+    // Content wraps the header row (summary+actions) and the expandable
+    // feature-grid. Kept as its own grid item (not spanning media's rows) so
+    // its height is never inflated by media's independent height (image +
+    // side panels) — that inflation was the source of the excess white space
+    // when a card expanded.
+    &__content {
+        grid-area: content;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
     }
 
-    &:not(&--expanded) &__grid {
-        @media (max-width: 1024px) {
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "actions actions";
-        }
+    &__content-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
 
         @media (max-width: 768px) {
-            grid-template-areas:
-                "media"
-                "actions";
+            // Summary is hidden on mobile (title-after-gallery is used instead),
+            // so only actions remains — let it act as the price/CTA footer,
+            // ordered after the feature-grid below.
+            order: 2;
         }
     }
 
@@ -101,12 +98,12 @@
     }
 
     &__summary {
-        grid-area: summary;
         display: flex;
         flex-direction: column;
         gap: 12px;
         min-width: 0;
-        
+        flex: 1 1 auto;
+
         // Hide on mobile since we use title-after-gallery instead
         @media (max-width: 768px) {
             display: none !important;
@@ -114,12 +111,22 @@
     }
 
     &__actions {
-        grid-area: actions;
         display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
         gap: 16px;
+
+        @media (max-width: 768px) {
+            // Acts as the card's price/CTA footer on mobile, matching the
+            // reference: a divider above it, price left / button right.
+            // content-header is a flex row whose only visible child this is
+            // (summary is hidden) — without an explicit width the divider
+            // only spans the price+button content, not the full card.
+            width: 100%;
+            border-top: 1px solid rgba(15, 23, 42, .08);
+            padding-top: 12px;
+        }
     }
 
     // Hide expandable content by default
@@ -127,17 +134,17 @@
         display: none !important;
     }
 
-    // Feature grid needs special handling - remove from grid when hidden
-    &__feature-grid[data-expanded-only] {
-        display: none !important;
-        grid-area: auto !important; // Remove from grid layout when hidden
+    @media (max-width: 768px) {
+        // Expanded feature-grid sits above the price/CTA footer (order:2).
+        &__feature-grid[data-expanded-only] {
+            order: 1;
+        }
     }
-    
+
     // Show expandable content when card is expanded
     &--expanded {
         .accommodation-card__feature-grid[data-expanded-only] {
             display: grid !important;
-            grid-area: features !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
 
             // On mobile, use flexbox to enable CSS order property
@@ -243,6 +250,14 @@
             align-items: flex-start;
             align-self: flex-start;
         }
+
+        @media (max-width: 768px) {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
+        }
     }
 
     &__pricing {
@@ -330,10 +345,10 @@
     }
 
     &__feature-grid {
-        grid-area: features;
         margin-top: 0;
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
         gap: 12px;
         width: 100%;
 
@@ -418,6 +433,13 @@
         @media (max-width: 1024px) {
             align-self: flex-start;
         }
+
+        @media (max-width: 768px) {
+            // actions-column is a row here (price left / button right) —
+            // reset the column-layout align-self so the button centers
+            // against the full price block instead of pinning to its top.
+            align-self: center;
+        }
     }
 
     &__expanded {
@@ -458,6 +480,23 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+
+        @media (max-width: 768px) {
+            // Flatten the nested "card in a card" look on mobile — the outer
+            // card already provides the boundary, so these become plain
+            // sections separated by a divider instead of boxed panels,
+            // freeing up horizontal space for tags and text.
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0 0 16px;
+            border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+            &:last-child {
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+        }
     }
 
     &__panel-title {
@@ -518,6 +557,7 @@
     &__panel-columns {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        align-items: start;
         gap: 12px;
     }
 

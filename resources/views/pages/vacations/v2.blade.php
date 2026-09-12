@@ -518,10 +518,10 @@
 
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
-        <section id="special-offers" class="camp-section mb-3">
+        <section id="special-offers" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-special-offer.card :specialOffer="$specialOffer" />
                 </div>
             @endforeach
@@ -530,10 +530,10 @@
 
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
-        <section id="accommodations" class="camp-section mb-3">
+        <section id="accommodations" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.accommodations') }}</h2>
             @foreach($accommodations as $accommodation)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-accommodation.card :accommodation="$accommodation" />
                 </div>
             @endforeach
@@ -542,10 +542,10 @@
 
         <!-- Guidings Section -->
         @if (isset($guidings) && count($guidings) > 0)
-        <section id="guidings" class="camp-section mb-3">
+        <section id="guidings" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-guiding.card :guiding="$guiding" />
                 </div>
             @endforeach
@@ -554,10 +554,10 @@
 
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)
-        <section id="boats" class="camp-section mb-3">
+        <section id="boats" class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.rental_boats') }}</h2>
             @foreach($boats as $boat)
-                <div class="mb-4">
+                <div class="camp-section__item mb-4">
                     <x-rental-boat.card :boat="$boat" />
                 </div>
             @endforeach

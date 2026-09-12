@@ -18435,6 +18435,15 @@ div#masonry-grid img {
 .camp-section.section-card {
   border-top: 2px solid rgba(232, 96, 76, 0.2);
 }
+@media (max-width: 768px) {
+  .camp-section--listings {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+}
 .camp-section__title {
   margin-bottom: 18px;
   font-size: 1.2rem;
@@ -30202,42 +30211,46 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .accommodation-card__grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-  grid-template-areas: "media summary actions" "media features features";
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-areas: "media content";
   gap: 16px;
   padding: 16px;
-  align-items: flex-start;
+  align-items: start;
 }
 @media (max-width: 1200px) {
   .accommodation-card__grid {
-    grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 @media (max-width: 1024px) {
   .accommodation-card__grid {
     grid-template-columns: 260px minmax(0, 1fr);
-    grid-template-areas: "media summary" "media summary" "features features" "actions actions";
   }
 }
 @media (max-width: 768px) {
   .accommodation-card__grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "media" "features" "actions";
+    grid-template-areas: "media" "content";
     gap: 12px;
     padding: 12px;
   }
 }
-.accommodation-card:not(.accommodation-card--expanded) .accommodation-card__grid {
-  grid-template-areas: "media summary actions" "media . .";
+.accommodation-card__content {
+  grid-area: content;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
-@media (max-width: 1024px) {
-  .accommodation-card:not(.accommodation-card--expanded) .accommodation-card__grid {
-    grid-template-areas: "media summary" "media summary" "actions actions";
-  }
+.accommodation-card__content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 @media (max-width: 768px) {
-  .accommodation-card:not(.accommodation-card--expanded) .accommodation-card__grid {
-    grid-template-areas: "media" "actions";
+  .accommodation-card__content-header {
+    order: 2;
   }
 }
 .accommodation-card__media {
@@ -30263,11 +30276,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   display: none !important;
 }
 .accommodation-card__summary {
-  grid-area: summary;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 @media (max-width: 768px) {
   .accommodation-card__summary {
@@ -30275,23 +30288,29 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   }
 }
 .accommodation-card__actions {
-  grid-area: actions;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 16px;
 }
+@media (max-width: 768px) {
+  .accommodation-card__actions {
+    width: 100%;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 12px;
+  }
+}
 .accommodation-card [data-expanded-only] {
   display: none !important;
 }
-.accommodation-card__feature-grid[data-expanded-only] {
-  display: none !important;
-  grid-area: auto !important;
+@media (max-width: 768px) {
+  .accommodation-card__feature-grid[data-expanded-only] {
+    order: 1;
+  }
 }
 .accommodation-card--expanded .accommodation-card__feature-grid[data-expanded-only] {
   display: grid !important;
-  grid-area: features !important;
   animation: fadeInUp 0.4s ease forwards;
 }
 @media (max-width: 768px) {
@@ -30383,6 +30402,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .accommodation-card__actions-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+  }
+}
 .accommodation-card__pricing {
   text-align: right;
   display: flex;
@@ -30462,10 +30490,10 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   flex-shrink: 0;
 }
 .accommodation-card__feature-grid {
-  grid-area: features;
   margin-top: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   gap: 12px;
   width: 100%;
 }
@@ -30533,6 +30561,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .accommodation-card__expand-btn--secondary {
+    align-self: center;
+  }
+}
 .accommodation-card__expanded {
   margin-top: 16px;
   display: block;
@@ -30566,6 +30599,19 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+@media (max-width: 768px) {
+  .accommodation-card__panel {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .accommodation-card__panel:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
 }
 .accommodation-card__panel-title {
   color: #64748b;
@@ -30617,6 +30663,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .accommodation-card__panel-columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: start;
   gap: 12px;
 }
 .accommodation-card__inclusive-extras {
@@ -30882,42 +30929,46 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .guiding-card__grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-  grid-template-areas: "media summary actions" "media info-matrix info-matrix";
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-areas: "media content";
   gap: 16px;
   padding: 16px;
-  align-items: flex-start;
+  align-items: start;
 }
 @media (max-width: 1200px) {
   .guiding-card__grid {
-    grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 @media (max-width: 1024px) {
   .guiding-card__grid {
     grid-template-columns: 260px minmax(0, 1fr);
-    grid-template-areas: "media summary" "media summary" "info-matrix info-matrix" "actions actions";
   }
 }
 @media (max-width: 768px) {
   .guiding-card__grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "media" "summary" "info-matrix" "actions";
+    grid-template-areas: "media" "content";
     gap: 12px;
     padding: 12px;
   }
 }
-.guiding-card:not(.guiding-card--expanded) .guiding-card__grid {
-  grid-template-areas: "media summary actions" "media . .";
+.guiding-card__content {
+  grid-area: content;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
-@media (max-width: 1024px) {
-  .guiding-card:not(.guiding-card--expanded) .guiding-card__grid {
-    grid-template-areas: "media summary" "media summary" "actions actions";
-  }
+.guiding-card__content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 @media (max-width: 768px) {
-  .guiding-card:not(.guiding-card--expanded) .guiding-card__grid {
-    grid-template-areas: "media" "summary" "actions";
+  .guiding-card__content-header {
+    order: 2;
   }
 }
 .guiding-card__media {
@@ -30946,11 +30997,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   gap: 12px;
 }
 .guiding-card__summary {
-  grid-area: summary;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 @media (max-width: 768px) {
   .guiding-card__summary {
@@ -31007,12 +31058,18 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   color: #64748b;
 }
 .guiding-card__actions {
-  grid-area: actions;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 16px;
+}
+@media (max-width: 768px) {
+  .guiding-card__actions {
+    width: 100%;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 12px;
+  }
 }
 .guiding-card__actions-column {
   display: flex;
@@ -31025,6 +31082,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   .guiding-card__actions-column {
     align-items: flex-start;
     align-self: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .guiding-card__actions-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
   }
 }
 .guiding-card__pricing {
@@ -31098,15 +31164,21 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .guiding-card__expand-btn--secondary {
+    align-self: center;
+  }
+}
 .guiding-card__info-matrix[data-expanded-only], .guiding-card__left-panels[data-expanded-only] {
   display: none !important;
 }
-.guiding-card__info-matrix[data-expanded-only] {
-  grid-area: auto !important;
+@media (max-width: 768px) {
+  .guiding-card__info-matrix[data-expanded-only] {
+    order: 1;
+  }
 }
 .guiding-card--expanded .guiding-card__info-matrix[data-expanded-only] {
   display: grid !important;
-  grid-area: info-matrix !important;
   animation: fadeInUp 0.4s ease forwards;
 }
 .guiding-card--expanded .guiding-card__left-panels[data-expanded-only] {
@@ -31114,10 +31186,10 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   animation: fadeInUp 0.4s ease forwards;
 }
 .guiding-card__info-matrix {
-  grid-area: info-matrix;
   margin-top: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   gap: 12px;
   width: 100%;
 }
@@ -31139,6 +31211,19 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+@media (max-width: 768px) {
+  .guiding-card__panel, .guiding-card__info-box {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .guiding-card__panel:last-child, .guiding-card__info-box:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
 }
 .guiding-card__panel-title, .guiding-card__info-box-title {
   color: #64748b;
@@ -31733,29 +31818,46 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .rental-boat-card__grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-  grid-template-areas: "media summary actions" "media info-matrix info-matrix";
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-areas: "media content";
   gap: 16px;
   padding: 16px;
-  align-items: flex-start;
+  align-items: start;
 }
 @media (max-width: 1200px) {
   .rental-boat-card__grid {
-    grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 @media (max-width: 1024px) {
   .rental-boat-card__grid {
     grid-template-columns: 260px minmax(0, 1fr);
-    grid-template-areas: "media summary" "media summary" "info-matrix info-matrix" "actions actions";
   }
 }
 @media (max-width: 768px) {
   .rental-boat-card__grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "media" "summary" "info-matrix" "actions";
+    grid-template-areas: "media" "content";
     gap: 12px;
     padding: 12px;
+  }
+}
+.rental-boat-card__content {
+  grid-area: content;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.rental-boat-card__content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+@media (max-width: 768px) {
+  .rental-boat-card__content-header {
+    order: 2;
   }
 }
 .rental-boat-card__media {
@@ -31810,11 +31912,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   -moz-osx-font-smoothing: grayscale;
 }
 .rental-boat-card__summary {
-  grid-area: summary;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 @media (max-width: 768px) {
   .rental-boat-card__summary {
@@ -31932,12 +32034,18 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   color: #16a34a;
 }
 .rental-boat-card__actions {
-  grid-area: actions;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 16px;
+}
+@media (max-width: 768px) {
+  .rental-boat-card__actions {
+    width: 100%;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 12px;
+  }
 }
 .rental-boat-card__actions-column {
   display: flex;
@@ -31950,6 +32058,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   .rental-boat-card__actions-column {
     align-items: flex-start;
     align-self: flex-start;
+  }
+}
+@media (max-width: 768px) {
+  .rental-boat-card__actions-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
   }
 }
 .rental-boat-card__price {
@@ -32020,30 +32137,18 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .rental-boat-card__info-matrix[data-expanded-only], .rental-boat-card__extras-inclusives[data-expanded-only] {
   display: none !important;
 }
-.rental-boat-card__info-matrix[data-expanded-only] {
-  grid-area: auto !important;
+@media (max-width: 768px) {
+  .rental-boat-card__info-matrix[data-expanded-only] {
+    order: 1;
+  }
 }
 .rental-boat-card--expanded .rental-boat-card__info-matrix[data-expanded-only] {
   display: grid !important;
-  grid-area: info-matrix !important;
   animation: fadeInUp 0.4s ease forwards;
 }
 .rental-boat-card--expanded .rental-boat-card__extras-inclusives[data-expanded-only] {
   display: flex !important;
   animation: fadeInUp 0.4s ease forwards;
-}
-.rental-boat-card:not(.rental-boat-card--expanded) .rental-boat-card__grid {
-  grid-template-areas: "media summary actions" "media . .";
-}
-@media (max-width: 1024px) {
-  .rental-boat-card:not(.rental-boat-card--expanded) .rental-boat-card__grid {
-    grid-template-areas: "media summary" "media summary" "actions actions";
-  }
-}
-@media (max-width: 768px) {
-  .rental-boat-card:not(.rental-boat-card--expanded) .rental-boat-card__grid {
-    grid-template-areas: "media" "summary" "actions";
-  }
 }
 .rental-boat-card__expand-btn--secondary {
   align-self: flex-end;
@@ -32053,11 +32158,16 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .rental-boat-card__expand-btn--secondary {
+    align-self: center;
+  }
+}
 .rental-boat-card__info-matrix {
-  grid-area: info-matrix;
   margin-top: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 12px;
   width: 100%;
 }
@@ -32074,6 +32184,19 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+@media (max-width: 768px) {
+  .rental-boat-card__info-box {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .rental-boat-card__info-box:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
 }
 .rental-boat-card__info-box-title {
   color: #64748b;
@@ -32321,46 +32444,47 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .special-offer-card__grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-  grid-template-areas: "media summary actions" "media features features" "media components components";
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-areas: "media content";
   gap: 16px;
   padding: 16px;
-  align-items: flex-start;
+  align-items: start;
 }
 @media (max-width: 1200px) {
   .special-offer-card__grid {
-    grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 }
 @media (max-width: 1024px) {
   .special-offer-card__grid {
     grid-template-columns: 260px minmax(0, 1fr);
-    grid-template-areas: "media summary" "media summary" "features features" "components components" "actions actions";
   }
 }
 @media (max-width: 768px) {
   .special-offer-card__grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "media" "summary" "features" "components" "actions";
+    grid-template-areas: "media" "content";
     gap: 12px;
     padding: 12px;
   }
 }
-.special-offer-card:not(.special-offer-card--expanded) .special-offer-card__grid {
-  grid-template-areas: "media summary actions" "media . .";
+.special-offer-card__content {
+  grid-area: content;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
-@media (max-width: 1024px) {
-  .special-offer-card:not(.special-offer-card--expanded) .special-offer-card__grid {
-    grid-template-areas: "media summary" "media summary" "actions actions";
-  }
+.special-offer-card__content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 @media (max-width: 768px) {
-  .special-offer-card:not(.special-offer-card--expanded) .special-offer-card__grid {
-    grid-template-areas: "media" "summary" "actions";
+  .special-offer-card__content-header {
+    order: 2;
   }
-}
-.special-offer-card__component-cards {
-  grid-area: components;
 }
 .special-offer-card__media {
   grid-area: media;
@@ -32388,11 +32512,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   margin-top: 0;
 }
 .special-offer-card__summary {
-  grid-area: summary;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 @media (max-width: 768px) {
   .special-offer-card__summary {
@@ -32400,33 +32524,25 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   }
 }
 .special-offer-card__actions {
-  grid-area: actions;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 16px;
 }
+@media (max-width: 768px) {
+  .special-offer-card__actions {
+    width: 100%;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 12px;
+  }
+}
 .special-offer-card [data-expanded-only] {
   display: none !important;
 }
-.special-offer-card__feature-grid[data-expanded-only] {
-  display: none !important;
-  grid-area: auto !important;
-}
-.special-offer-card__component-cards[data-expanded-only] {
-  display: none !important;
-  grid-area: auto !important;
-}
-.special-offer-card--expanded .special-offer-card__feature-grid[data-expanded-only] {
-  display: grid !important;
-  grid-area: features !important;
-  animation: fadeInUp 0.4s ease forwards;
-}
 @media (max-width: 768px) {
-  .special-offer-card--expanded .special-offer-card__feature-grid[data-expanded-only] {
-    display: flex !important;
-    flex-direction: column;
+  .special-offer-card__component-cards[data-expanded-only] {
+    order: 1;
   }
 }
 .special-offer-card--expanded .special-offer-card__expanded[data-expanded-only] {
@@ -32439,7 +32555,6 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .special-offer-card--expanded .special-offer-card__component-cards[data-expanded-only] {
   display: grid !important;
-  grid-area: components !important;
   animation: fadeInUp 0.4s ease forwards;
 }
 @keyframes fadeInUp {
@@ -32694,6 +32809,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .special-offer-card__actions-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+  }
+}
 .special-offer-card__pricing {
   text-align: right;
   display: flex;
@@ -32756,6 +32880,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: flex-start;
   }
 }
+@media (max-width: 768px) {
+  .special-offer-card__expand-btn--secondary {
+    align-self: center;
+  }
+}
 .special-offer-card__panel {
   background: rgba(241, 245, 249, 0.6);
   border: 1px solid rgba(15, 23, 42, 0.08);
@@ -32764,6 +32893,19 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+@media (max-width: 768px) {
+  .special-offer-card__panel {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 16px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+  .special-offer-card__panel:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
 }
 .special-offer-card__panel-title {
   color: #64748b;
@@ -32834,10 +32976,10 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   margin-left: 12px;
 }
 .special-offer-card__feature-grid {
-  grid-area: features;
   margin-top: 0;
   display: grid;
   grid-template-columns: 1fr;
+  align-items: start;
   gap: 12px;
   width: 100%;
 }
@@ -32850,6 +32992,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .special-offer-card__component-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  align-items: start;
   gap: 12px;
   margin-top: 16px;
   width: 100%;

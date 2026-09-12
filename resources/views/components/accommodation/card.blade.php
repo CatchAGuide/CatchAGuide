@@ -131,62 +131,90 @@
             </div>
         </div>
 
-        {{-- Summary section - Desktop: right column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="accommodation-card__summary">
-            <div class="accommodation-card__summary-header">
-                <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
-            </div>
+        <div class="accommodation-card__content">
+            <div class="accommodation-card__content-header">
+                {{-- Summary section - Desktop: right column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="accommodation-card__summary">
+                    <div class="accommodation-card__summary-header">
+                        <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
+                        <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
+                    </div>
 
-            <div class="accommodation-card__stats">
-                @if(!empty($accommodation['max_occupancy']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">👥</span>
-                    <span>{{ $accommodation['max_occupancy'] }}</span>
-                </span>
-                @endif
-                @if(!empty($accommodation['number_of_bathrooms']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">🛁</span>
-                    <span>{{ $accommodation['number_of_bathrooms'] }}</span>
-                </span>
-                @endif
-                @if(!empty($accommodation['living_area_sqm']))
-                <span class="accommodation-card__stat">
-                    <span class="accommodation-card__stat-icon">📐</span>
-                    <span>{{ $accommodation['living_area_sqm'] }}</span>
-                </span>
-                @endif
-            </div>
+                    <div class="accommodation-card__stats">
+                        @if(!empty($accommodation['max_occupancy']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">👥</span>
+                            <span>{{ $accommodation['max_occupancy'] }}</span>
+                        </span>
+                        @endif
+                        @if(!empty($accommodation['number_of_bathrooms']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">🛁</span>
+                            <span>{{ $accommodation['number_of_bathrooms'] }}</span>
+                        </span>
+                        @endif
+                        @if(!empty($accommodation['living_area_sqm']))
+                        <span class="accommodation-card__stat">
+                            <span class="accommodation-card__stat-icon">📐</span>
+                            <span>{{ $accommodation['living_area_sqm'] }}</span>
+                        </span>
+                        @endif
+                    </div>
 
-            <div class="accommodation-card__beds">
-                <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
-                <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
-            </div>
+                    <div class="accommodation-card__beds">
+                        <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
+                        <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
+                    </div>
 
-            <div class="accommodation-card__distance-row">
-                <div class="accommodation-card__distance-group">
-                    @if(!empty($accommodation['distances']['to_water_m']))
-                        <span class="accommodation-card__distance-chip">
-                            🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
-                        </span>
-                    @endif
-                    @if(!empty($accommodation['distances']['to_berth_m']))
-                        <span class="accommodation-card__distance-chip">
-                            ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
-                        </span>
-                    @endif
-                    @if(!empty($accommodation['distances']['to_parking_m']))
-                        <span class="accommodation-card__distance-chip">
-                            🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
-                        </span>
-                    @endif
+                    <div class="accommodation-card__distance-row">
+                        <div class="accommodation-card__distance-group">
+                            @if(!empty($accommodation['distances']['to_water_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
+                                </span>
+                            @endif
+                            @if(!empty($accommodation['distances']['to_berth_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
+                                </span>
+                            @endif
+                            @if(!empty($accommodation['distances']['to_parking_m']))
+                                <span class="accommodation-card__distance-chip">
+                                    🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="accommodation-card__actions">
+                    <div class="accommodation-card__actions-column">
+                        <div class="accommodation-card__pricing">
+                            @php
+                                $priceType = $accommodation['price']['type'] ?? 'per_night';
+                                $translatedPriceType = match($priceType) {
+                                    'per_person' => __('vacations.per_person'),
+                                    'per_night' => __('accommodations.per_night'),
+                                    default => ucfirst(str_replace('_', ' ', $priceType))
+                                };
+                            @endphp
+                            {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
+                            <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
+                            <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
+                        </div>
+                        {{-- <button class="accommodation-card__select-btn">
+                            Select Accommodation
+                        </button> --}}
+                        <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-        </div>
-
-        <div class="accommodation-card__feature-grid" data-expanded-only>
+            <div class="accommodation-card__feature-grid" data-expanded-only>
             {{-- Mobile-only Details panel (appears before Amenities on mobile) --}}
             <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-details">
                 <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
@@ -274,30 +302,6 @@
                 </div>
             @endif
         </div>
-
-        <div class="accommodation-card__actions">
-            <div class="accommodation-card__actions-column">
-                <div class="accommodation-card__pricing">
-                    @php
-                        $priceType = $accommodation['price']['type'] ?? 'per_night';
-                        $translatedPriceType = match($priceType) {
-                            'per_person' => __('vacations.per_person'),
-                            'per_night' => __('accommodations.per_night'),
-                            default => ucfirst(str_replace('_', ' ', $priceType))
-                        };
-                    @endphp
-                    {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
-                    <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
-                    <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
-                </div>
-                {{-- <button class="accommodation-card__select-btn">
-                    Select Accommodation
-                </button> --}}
-                <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
         </div>
     </div>
 
