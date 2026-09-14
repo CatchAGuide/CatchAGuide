@@ -81,6 +81,55 @@ if (! function_exists('translate')) {
     }
 }
 
+if (! function_exists('translated_catalog_label')) {
+    /**
+     * Display label for listing/attachment chips.
+     *
+     * Rows resolved from locale-aware master data (Target, Method, Facility, …)
+     * already expose the correct name for the current locale — do not send those
+     * through translate(). Custom host-entered strings use translate() so they
+     * share the forever cache used on guidings, trips, and other pages.
+     *
+     * @param  mixed  $item  string|{id?: mixed, name?: mixed, value?: mixed}
+     */
+    function translated_catalog_label(mixed $item): string
+    {
+        if (is_array($item)) {
+            $id = $item['id'] ?? null;
+            $name = trim((string) ($item['name'] ?? ''));
+            $value = trim((string) ($item['value'] ?? ''));
+            $label = $name !== '' ? $name : $value;
+
+            if ($label === '') {
+                return '';
+            }
+
+            $nameEn = trim((string) ($item['name_en'] ?? ''));
+            $locale = app()->getLocale();
+
+            if ($locale === 'en' && $nameEn !== '') {
+                return $nameEn;
+            }
+
+            // Table-backed German `name` is already correct on de. On en, missing
+            // name_en must still go through translate() — an id alone is not enough.
+            if ($locale !== 'en' && $id !== null && $id !== '' && $name !== '') {
+                return $name;
+            }
+
+            return translate($label);
+        }
+
+        $label = trim((string) $item);
+
+        if ($label === '' || is_numeric($label)) {
+            return $label;
+        }
+
+        return translate($label);
+    }
+}
+
 if (! function_exists('translateVacationField')) {
     /**
      * Get translated field from vacation data with fallback to original

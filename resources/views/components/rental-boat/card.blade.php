@@ -67,7 +67,7 @@
                 <div class="rental-boat-card__summary-header">
                     <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
                     @if(!empty($boat['type']))
-                        <div class="rental-boat-card__category">{{ $boat['type'] }}</div>
+                        <div class="rental-boat-card__category">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
                     @endif
                 </div>
 
@@ -79,7 +79,7 @@
                         <div class="rental-boat-card__included-chips">
                             @foreach($inclusiveItems as $inclusive)
                                 <span class="rental-boat-card__included-chip">
-                                    ✅ {{ translate($inclusive) }}
+                                    ✅ {{ translated_catalog_label($inclusive) }}
                                 </span>
                             @endforeach
                         </div>
@@ -94,7 +94,12 @@
                         <div class="rental-boat-card__info-box-content">
                             <ul class="rental-boat-card__info-list">
                                 @foreach($extraItems as $extra)
-                                    <li>{{ translate($extra) }}</li>
+                                    <li>
+                                        {{ translated_catalog_label($extra) }}
+                                        @if(is_array($extra) && filled($extra['price'] ?? null))
+                                            : {{ $extra['price'] }}
+                                        @endif
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>
@@ -110,7 +115,7 @@
                     <div class="rental-boat-card__summary-header">
                         <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
                         @if(!empty($boat['type']))
-                            <div class="rental-boat-card__category">{{ translate($boat['type']) }}</div>
+                            <div class="rental-boat-card__category">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
                         @endif
                     </div>
 
@@ -122,7 +127,7 @@
                             <div class="rental-boat-card__included-chips">
                                 @foreach($inclusiveItems as $inclusive)
                                     <span class="rental-boat-card__included-chip">
-                                        ✅ {{ translate($inclusive) }}
+                                        ✅ {{ translated_catalog_label($inclusive) }}
                                     </span>
                                 @endforeach
                             </div>
@@ -156,8 +161,8 @@
                             <ul class="rental-boat-card__info-list">
                                 @foreach($boatInfoList as $info)
                                     <li>
-                                        <span>{{ translate($info['name']) }}:</span>
-                                        <strong>{{ translate($info['value']) }}</strong>
+                                        <span>{{ translated_catalog_label($info) }}:</span>
+                                        <strong>{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</strong>
                                     </li>
                                 @endforeach
                             </ul>
@@ -173,7 +178,12 @@
                         @if(count($requirementItems) > 0)
                             <ul class="rental-boat-card__info-list">
                                 @foreach($requirementItems as $requirement)
-                                    <li>{{ translate($requirement) }}</li>
+                                    <li>
+                                        {{ translated_catalog_label($requirement) }}
+                                        @if(is_array($requirement) && filled($requirement['value'] ?? null) && ($requirement['value'] ?? null) !== ($requirement['name'] ?? null))
+                                            : {{ is_numeric($requirement['value']) ? $requirement['value'] : translate($requirement['value']) }}
+                                        @endif
+                                    </li>
                                 @endforeach
                             </ul>
                         @else

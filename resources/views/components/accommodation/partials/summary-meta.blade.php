@@ -13,6 +13,13 @@
     $areaChip = CampAttachmentChipPresenter::areaValue(
         $accommodation['living_area_sqm'] ?? ($accommodation['living_area_value'] ?? null)
     );
+    $bedroomsChip = CampAttachmentChipPresenter::bedroomsValue(
+        $accommodation['number_of_bedrooms'] ?? null
+    );
+    $bedChips = CampAttachmentChipPresenter::bedChips(
+        $accommodation['bed_items'] ?? [],
+        $accommodation['bed_summary'] ?? ($bedSummary ?? null)
+    );
 
     $distanceValue = function ($raw) {
         if ($raw === null || $raw === '') {
@@ -39,12 +46,18 @@
     @if($areaChip)
         <x-vacation.attachment-chip type="area" :value="$areaChip" />
     @endif
+    @if($bedroomsChip)
+        <x-vacation.attachment-chip type="bedrooms" :value="$bedroomsChip" />
+    @endif
 </div>
 
-<div class="accommodation-card__beds">
-    <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
-    <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
-</div>
+@if(count($bedChips) > 0)
+    <div class="accommodation-card__beds">
+        @foreach($bedChips as $bedChip)
+            <x-vacation.attachment-chip type="bed" :value="$bedChip['value']" />
+        @endforeach
+    </div>
+@endif
 
 <div class="accommodation-card__distance-row">
     <div class="accommodation-card__distance-group">

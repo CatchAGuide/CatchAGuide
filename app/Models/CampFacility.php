@@ -21,6 +21,21 @@ class CampFacility extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getNameAttribute(): string
+    {
+        $locale = app()->getLocale();
+
+        if ($locale === 'en' && ! empty($this->attributes['name_en'])) {
+            return (string) $this->attributes['name_en'];
+        }
+
+        if ($locale === 'de' && ! empty($this->attributes['name_de'])) {
+            return (string) $this->attributes['name_de'];
+        }
+
+        return (string) ($this->attributes['name'] ?? '');
+    }
+
     public function camps(): BelongsToMany
     {
         return $this->belongsToMany(Camp::class, 'camp_facility_camp');

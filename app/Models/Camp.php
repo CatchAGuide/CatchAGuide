@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\Vacation\TargetFishNameResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 
 class Camp extends Model
 {
@@ -197,6 +199,20 @@ class Camp extends Model
     public function facilities(): BelongsToMany
     {
         return $this->belongsToMany(CampFacility::class, 'camp_facility_camp');
+    }
+
+    /**
+     * Resolve stored target fish IDs/names to localized {id, name} rows.
+     * Mirrors Guiding::getTargetFishNames() / Trip::getTargetSpeciesNames().
+     *
+     * @param  Collection<int, \App\Models\Target>|null  $targetsMap
+     * @return array<int, array{id: int|null, name: string}>
+     */
+    public function getTargetFishNames(?Collection $targetsMap = null): array
+    {
+        $raw = $this->getRawOriginal('target_fish') ?? $this->target_fish;
+
+        return app(TargetFishNameResolver::class)->resolve($raw, $targetsMap);
     }
 
     public function accommodations(): BelongsToMany

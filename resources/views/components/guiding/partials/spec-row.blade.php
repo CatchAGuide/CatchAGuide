@@ -2,8 +2,8 @@
     use App\Presenters\Vacation\CampAttachmentChipPresenter;
 
     $personsChip = CampAttachmentChipPresenter::personsValue($maxPersons ?? null);
-    $durationChip = $durationLabel ? (translate($durationLabel) ?: $durationLabel) : null;
-    $tourChip = $tourType ? (translate($tourType) ?: $tourType) : null;
+    $durationChip = $durationLabel ?: null;
+    $tourChip = $tourType ?: null;
 @endphp
 
 <div class="guiding-card__spec-row">

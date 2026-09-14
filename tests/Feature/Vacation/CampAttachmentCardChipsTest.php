@@ -9,6 +9,7 @@ class CampAttachmentCardChipsTest extends TestCase
 {
     public function test_accommodation_card_uses_the_shared_persons_icon_not_an_emoji(): void
     {
+        app()->setLocale('de');
         $html = $this->renderAccommodationCard();
 
         $this->assertStringContainsString('user-new.svg', $html);
@@ -17,6 +18,15 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('attachment-chip--persons', $html);
         $this->assertStringContainsString('attachment-chip--bath', $html);
         $this->assertStringContainsString('attachment-chip--area', $html);
+        $this->assertStringContainsString('attachment-chip--bedrooms', $html);
+        $this->assertStringContainsString('attachment-chip--bed"', $html);
+        $this->assertGreaterThanOrEqual(4, substr_count($html, 'attachment-chip--bed"'));
+        $this->assertStringContainsString('(5) Einzelbett', $html);
+        $this->assertStringContainsString('(1) Sofabett', $html);
+        $this->assertStringContainsString('(1) Kinderbett', $html);
+        $this->assertStringContainsString('(1) Klappbett', $html);
+        $this->assertStringNotContainsString(__('accommodations.bedrooms').':', $html);
+        $this->assertStringNotContainsString('Schlafzimmer:', $html);
         $this->assertStringContainsString('attachment-chip--water', $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
@@ -53,6 +63,7 @@ class CampAttachmentCardChipsTest extends TestCase
 
     public function test_special_offer_nested_cards_reuse_the_same_persons_chip(): void
     {
+        app()->setLocale('de');
         $html = View::make('components.special-offer.card', [
             'specialOffer' => [
                 'id' => 9,
@@ -71,7 +82,12 @@ class CampAttachmentCardChipsTest extends TestCase
                     'accommodation_type' => 'Cabin',
                     'max_occupancy' => 6,
                     'living_area_sqm' => 70,
-                    'bed_summary' => '1 double',
+                    'number_of_bathrooms' => 1,
+                    'number_of_bedrooms' => 2,
+                    'bed_summary' => '(1) double',
+                    'bed_items' => [
+                        ['count' => 1, 'name' => 'Doppelbett', 'name_en' => 'Double Bed'],
+                    ],
                     'distances' => ['to_water_m' => 20, 'to_parking_m' => 40],
                 ]],
                 'rental_boats_full' => [[
@@ -100,15 +116,42 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('4 '.__('vacations.pers_short'), $html);
         $this->assertStringNotContainsString(__('rental_boats.capacity').':', $html);
         $this->assertStringNotContainsString(__('vacations.max_persons').':', $html);
+        $this->assertStringNotContainsString(__('accommodations.bedrooms').':', $html);
+        $this->assertStringContainsString('attachment-chip--bath', $html);
+        $this->assertStringContainsString('attachment-chip--bed"', $html);
+        $this->assertStringContainsString('(1) Doppelbett', $html);
+        $this->assertStringNotContainsString('Schlafzimmer:', $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
         $this->assertStringContainsString('attachment-expand-btn', $html);
     }
 
-    private function renderAccommodationCard(): string
+    public function test_accommodation_extras_use_a_red_x_instead_of_the_included_check(): void
+    {
+        app()->setLocale('de');
+        $html = $this->renderAccommodationCard([
+            'extras_inclusives' => [
+                'inclusives' => ['WLAN'],
+                'extras' => ['Endreinigung'],
+            ],
+        ]);
+
+        $this->assertStringContainsString(__('vacations.excluded'), $html);
+        $this->assertStringContainsString('accommodation-card__panel-title">'.__('vacations.excluded'), $html);
+        $this->assertStringContainsString('accommodation-card__check-icon', $html);
+        $this->assertStringContainsString('WLAN', $html);
+        $this->assertStringContainsString('accommodation-card__inclusive-chip--extra', $html);
+        $this->assertStringContainsString('accommodation-card__extra-icon', $html);
+        $this->assertStringContainsString(__('vacations.extra_addon_hint'), $html);
+        $this->assertStringContainsString('Endreinigung', $html);
+        $this->assertStringNotContainsString('✅ Endreinigung', $html);
+        $this->assertStringNotContainsString('✅ WLAN', $html);
+    }
+
+    private function renderAccommodationCard(array $overrides = []): string
     {
         return View::make('components.accommodation.card', [
-            'accommodation' => [
+            'accommodation' => array_merge([
                 'id' => 11,
                 'title' => 'Apartment 3',
                 'accommodation_type' => 'Apartment',
@@ -117,7 +160,14 @@ class CampAttachmentCardChipsTest extends TestCase
                 'max_occupancy' => 4,
                 'number_of_bathrooms' => 1,
                 'living_area_sqm' => 80,
-                'bed_summary' => '2 bedrooms',
+                'number_of_bedrooms' => 3,
+                'bed_summary' => '(5) Einzelbett, (1) Sofabett, (1) Kinderbett, (1) Klappbett',
+                'bed_items' => [
+                    ['count' => 5, 'name' => 'Einzelbett', 'name_en' => 'Single Bed'],
+                    ['count' => 1, 'name' => 'Sofabett', 'name_en' => 'Sofa Bed'],
+                    ['count' => 1, 'name' => 'Kinderbett', 'name_en' => 'Cot'],
+                    ['count' => 1, 'name' => 'Klappbett', 'name_en' => 'Folding Bed'],
+                ],
                 'distances' => [
                     'to_water_m' => 15,
                     'to_berth_m' => 40,
@@ -130,7 +180,7 @@ class CampAttachmentCardChipsTest extends TestCase
                 'bathroom_laundry' => [],
                 'extras_inclusives' => [],
                 'price' => ['amount' => 120, 'type' => 'per_night'],
-            ],
+            ], $overrides),
         ])->render();
     }
 

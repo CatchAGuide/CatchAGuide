@@ -52,6 +52,12 @@
                         <path d="M6 12V7a2 2 0 0 1 2-2h1"/>
                         <path d="M7 19v1M17 19v1"/>
                         @break
+                    @case('bedrooms')
+                    @case('bed')
+                        <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/>
+                        <path d="M2 14h20"/>
+                        <path d="M4 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/>
+                        @break
                     @case('parking')
                         <rect x="4" y="3" width="16" height="18" rx="2"/>
                         <path d="M9 17V7h4.5a3.5 3.5 0 0 1 0 7H9"/>

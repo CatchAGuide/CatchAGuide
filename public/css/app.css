@@ -29855,14 +29855,11 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .accommodation-card__beds {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  align-items: baseline;
-  font-size: 12px;
-  color: #334155;
-}
-.accommodation-card__beds-label {
-  font-weight: 500;
-  color: #475569;
+  gap: 10px;
+  align-items: center;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
 }
 .accommodation-card__actions-column {
   display: flex;
@@ -30133,6 +30130,19 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   padding: 4px 8px;
   font-size: 11px;
   color: #334155;
+  line-height: 1;
+}
+.accommodation-card__check-icon {
+  flex-shrink: 0;
+  color: #16a34a;
+}
+.accommodation-card__inclusive-chip--extra {
+  border-color: rgba(232, 96, 76, 0.22);
+  background: rgba(232, 96, 76, 0.06);
+}
+.accommodation-card__extra-icon {
+  flex-shrink: 0;
+  color: #e8604c;
 }
 .accommodation-card__empty {
   font-size: 12px;

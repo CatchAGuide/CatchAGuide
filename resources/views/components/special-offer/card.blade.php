@@ -262,21 +262,34 @@
                 @foreach($accommodationsFull as $acc)
                     @php
                         $accPersons = $chipPresenter::personsValue($acc['max_occupancy'] ?? null);
+                        $accBathroomRaw = $acc['number_of_bathrooms'] ?? ($acc['bathroom_count'] ?? ($acc['bathrooms'] ?? null));
+                        $accBathroom = $chipPresenter::bedroomsValue($accBathroomRaw);
                         $accArea = $chipPresenter::areaValue($acc['living_area_sqm'] ?? null);
+                        $accBedrooms = $chipPresenter::bedroomsValue($acc['number_of_bedrooms'] ?? null);
+                        $accBedChips = $chipPresenter::bedChips($acc['bed_items'] ?? [], $acc['bed_summary'] ?? null);
                         $accWater = $acc['distances']['to_water_m'] ?? null;
                         $accParking = $acc['distances']['to_parking_m'] ?? null;
                     @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--accommodation" id="accommodation-{{ $acc['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($acc['title']) ?? '' }}</h4>
-                        <div class="special-offer-card__component-subtitle">{{ translate($acc['accommodation_type'] ?? '') }}</div>
+                        <div class="special-offer-card__component-subtitle">{{ translated_catalog_label(['id' => $acc['accommodation_type_id'] ?? null, 'name' => $acc['accommodation_type'] ?? '']) }}</div>
 
                         <div class="special-offer-card__component-badges">
                             @if($accPersons)
                                 <x-vacation.attachment-chip type="persons" :value="$accPersons" />
                             @endif
+                            @if($accBathroom)
+                                <x-vacation.attachment-chip type="bath" :value="$accBathroom" />
+                            @endif
                             @if($accArea)
                                 <x-vacation.attachment-chip type="area" :value="$accArea" />
                             @endif
+                            @if($accBedrooms)
+                                <x-vacation.attachment-chip type="bedrooms" :value="$accBedrooms" />
+                            @endif
+                            @foreach($accBedChips as $bedChip)
+                                <x-vacation.attachment-chip type="bed" :value="$bedChip['value']" />
+                            @endforeach
                             @if(!empty($accWater))
                                 <x-vacation.attachment-chip
                                     type="water"
@@ -292,12 +305,6 @@
                                 />
                             @endif
                         </div>
-
-                        @if(!empty($acc['bed_summary']))
-                            <div class="special-offer-card__component-text">
-                                {{ __('accommodations.bedrooms') }}: {{ translate($acc['bed_summary']) }}
-                            </div>
-                        @endif
                     </div>
                 @endforeach
 
@@ -306,8 +313,8 @@
                         $nestedBoatChips = $chipPresenter::boatChips($boat['specs'] ?? []);
                     @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--boat" id="rental-boat-{{ $boat['id'] }}">
-                        <h4 class="special-offer-card__component-title">{{ $boat['title'] ?? '' }}</h4>
-                        <div class="special-offer-card__component-subtitle">{{ translate($boat['type'] ?? '') }}</div>
+                        <h4 class="special-offer-card__component-title">{{ translate($boat['title'] ?? '') }}</h4>
+                        <div class="special-offer-card__component-subtitle">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
 
                         @if(count($nestedBoatChips) > 0)
                             <div class="special-offer-card__component-badges">
@@ -333,12 +340,12 @@
                     <div class="special-offer-card__component-card special-offer-card__component-card--guiding" id="guiding-{{ $guiding['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($guiding['title']) ?? '' }}</h4>
                         @if(!empty($guiding['guiding_info']['art']))
-                            <div class="special-offer-card__component-subtitle">{{ translate($guiding['guiding_info']['art'] ?? '') }}</div>
+                            <div class="special-offer-card__component-subtitle">{{ $guiding['guiding_info']['art'] ?? '' }}</div>
                         @endif
 
                         <div class="special-offer-card__component-badges">
                             @if(!empty($nestedDuration))
-                                <x-vacation.attachment-chip type="duration" :value="translate($nestedDuration) ?: $nestedDuration" />
+                                <x-vacation.attachment-chip type="duration" :value="$nestedDuration" />
                             @endif
                             @if($nestedPersons)
                                 <x-vacation.attachment-chip type="persons" :value="$nestedPersons" />

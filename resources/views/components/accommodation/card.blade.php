@@ -8,7 +8,7 @@
         $galleryTotal = count($galleryImages);
         $accommodationGalleryId = 'accommodation-card-'.($accommodation['id'] ?? uniqid());
         $stats = $accommodation['stats'] ?? [];
-        $bedSummary = $accommodation['bed_summary'] ?? 'Keine Angaben zur Bettenanzahl';
+        $bedSummary = $accommodation['bed_summary'] ?? '';
         $occupancyLabel = $accommodation['occupancy_label'] ?? null;
         $bathroomChipValue = $accommodation['number_of_bathrooms'] ?? ($accommodation['bathroom_count'] ?? ($accommodation['bathrooms'] ?? null));
         $livingAreaChipValue = $accommodation['living_area_value'] ?? ($accommodation['living_area_sqm'] ?? null);
@@ -69,7 +69,7 @@
             <div class="accommodation-card__title-after-gallery accommodation-card__title-after-gallery--mobile">
                 <div class="accommodation-card__summary-header">
                     <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                    <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
+                    <div class="accommodation-card__type">{{ translated_catalog_label(['id' => $accommodation['accommodation_type_id'] ?? null, 'name' => $accommodation['accommodation_type'] ?? __('vacations.accommodation')]) }}</div>
                 </div>
 
                 @include('components.accommodation.partials.summary-meta')
@@ -81,7 +81,7 @@
                     <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['accommodation_details'] as $detail)
-                            <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
+                            <li>{{ translated_catalog_label($detail) }}: <span class="font-medium">{{ is_numeric($detail['value'] ?? null) ? $detail['value'] : translate($detail['value'] ?? '') }}</span></li>
                         @endforeach
                     </ul>
                 </div>
@@ -92,7 +92,7 @@
                         @if(!empty($accommodation['policies']))
                             <ul class="accommodation-card__bullet-list">
                                 @foreach ($accommodation['policies'] as $policy)
-                                    <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
+                                    <li>{{ translated_catalog_label($policy) }}@if(filled($policy['value'] ?? null)): {{ is_numeric($policy['value']) ? $policy['value'] : translate($policy['value']) }}@endif</li>
                                 @endforeach
                             </ul>
                         @endif
@@ -107,7 +107,7 @@
                 <div class="accommodation-card__summary">
                     <div class="accommodation-card__summary-header">
                         <h3 class="accommodation-card__title">{{ translate($accommodation['title']) ?? 'Apartment Title' }}</h3>
-                        <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
+                        <div class="accommodation-card__type">{{ translated_catalog_label(['id' => $accommodation['accommodation_type_id'] ?? null, 'name' => $accommodation['accommodation_type'] ?? __('vacations.accommodation')]) }}</div>
                     </div>
 
                     @include('components.accommodation.partials.summary-meta')
@@ -146,7 +146,7 @@
                 <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
                 <ul class="accommodation-card__bullet-list">
                     @foreach($accommodation['accommodation_details'] as $detail)
-                        <li>{{ translate($detail['name']) }}: <span class="font-medium">{{ translate($detail['value']) }}</span></li>
+                        <li>{{ translated_catalog_label($detail) }}: <span class="font-medium">{{ is_numeric($detail['value'] ?? null) ? $detail['value'] : translate($detail['value'] ?? '') }}</span></li>
                     @endforeach
                 </ul>
             </div>
@@ -156,7 +156,7 @@
                 <ul class="accommodation-card__chip-list">
                     @if(isset($accommodation['amenities']) && is_array($accommodation['amenities']) && count($accommodation['amenities']) > 0)
                         @foreach($accommodation['amenities'] as $amenity)
-                            <li class="accommodation-card__chip">{{ is_array($amenity) ? ($amenity['name'] ?? $amenity['value'] ?? '') : $amenity }}</li>
+                            <li class="accommodation-card__chip">{{ translated_catalog_label($amenity) }}</li>
                         @endforeach
                     @endif
                 </ul>
@@ -168,7 +168,7 @@
                     <div class="accommodation-card__panel-title">{{ __('accommodations.policies') }}</div>
                     <ul class="accommodation-card__bullet-list">
                         @foreach ($accommodation['policies'] as $policy)
-                            <li>{{ translate($policy['name']) }}: {{ translate($policy['value']) }}</li>
+                            <li>{{ translated_catalog_label($policy) }}@if(filled($policy['value'] ?? null)): {{ is_numeric($policy['value']) ? $policy['value'] : translate($policy['value']) }}@endif</li>
                         @endforeach
                     </ul>
                 </div>
@@ -179,7 +179,7 @@
                 @if(!empty($accommodation['kitchen']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['kitchen'] as $kitchen)
-                            <li class="accommodation-card__chip">{{ is_array($kitchen) ? ($kitchen['name'] ?? $kitchen['value'] ?? '') : $kitchen }}</li>
+                            <li class="accommodation-card__chip">{{ translated_catalog_label($kitchen) }}</li>
                         @endforeach
                     </ul>
                 @else
@@ -192,7 +192,7 @@
                 @if(!empty($accommodation['bathroom_laundry']))
                     <ul class="accommodation-card__bullet-list">
                         @foreach($accommodation['bathroom_laundry'] as $bathroom_laundry)
-                            <li class="accommodation-card__chip">{{ is_array($bathroom_laundry) ? ($bathroom_laundry['name'] ?? $bathroom_laundry['value'] ?? '') : $bathroom_laundry }}</li>
+                            <li class="accommodation-card__chip">{{ translated_catalog_label($bathroom_laundry) }}</li>
                         @endforeach
                     </ul>
                 @else
@@ -208,7 +208,12 @@
                                 <div class="accommodation-card__panel-title">{{ __('vacations.included_services') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['inclusives'] as $inclusive)
-                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($inclusive) ? ($inclusive['name'] ?? $inclusive['value'] ?? '') : $inclusive }}</span>
+                                        <span class="accommodation-card__inclusive-chip">
+                                            <svg class="accommodation-card__check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                            <span>{{ translated_catalog_label($inclusive) }}</span>
+                                        </span>
                                     @endforeach
                                 </div>
                             </div>
@@ -216,10 +221,16 @@
 
                         @if(!empty($accommodation['extras_inclusives']['extras']))
                             <div>
-                                <div class="accommodation-card__panel-title">{{ __('vacations.extras') }}</div>
+                                <div class="accommodation-card__panel-title">{{ __('vacations.excluded') }}</div>
                                 <div class="accommodation-card__inclusive-extras">
                                     @foreach($accommodation['extras_inclusives']['extras'] as $extra)
-                                        <span class="accommodation-card__inclusive-chip">✅ {{ is_array($extra) ? ($extra['name'] ?? $extra['value'] ?? '') : $extra }}</span>
+                                        <span class="accommodation-card__inclusive-chip accommodation-card__inclusive-chip--extra" title="{{ __('vacations.extra_addon_hint') }}">
+                                            <svg class="accommodation-card__extra-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                            <span>{{ translated_catalog_label($extra) }}</span>
+                                        </span>
                                     @endforeach
                                 </div>
                             </div>

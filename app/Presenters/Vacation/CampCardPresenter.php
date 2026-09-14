@@ -230,19 +230,12 @@ class CampCardPresenter
      */
     private function facilityLabels(Camp $camp): array
     {
-        return $camp->facilities->map(function ($facility) {
-            $locale = app()->getLocale();
-
-            if ($locale === 'en' && ! empty($facility->name_en)) {
-                return $facility->name_en;
-            }
-
-            if ($locale === 'de' && ! empty($facility->name_de)) {
-                return $facility->name_de;
-            }
-
-            return $facility->name;
-        })->filter()->take(3)->values()->all();
+        return $camp->facilities
+            ->map(fn ($facility) => $facility->name)
+            ->filter()
+            ->take(3)
+            ->values()
+            ->all();
     }
 
     /**
@@ -250,14 +243,10 @@ class CampCardPresenter
      */
     private function targetFishTags(Camp $camp): array
     {
-        $raw = $camp->target_fish ?? [];
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            $raw = is_array($decoded) ? $decoded : array_map('trim', explode(',', $raw));
-        }
-
-        return vacation_fish_tags(is_array($raw) ? $raw : []);
+        return vacation_fish_tags(array_map(
+            fn ($fish) => translated_catalog_label($fish),
+            $camp->getTargetFishNames()
+        ));
     }
 
     /**

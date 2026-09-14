@@ -18,9 +18,9 @@
         $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
         $guidingPersonsChip = CampAttachmentChipPresenter::personsValue($maxPersons);
         $guidingModalSpecs = array_values(array_filter([
-            $durationLabel ? (translate($durationLabel) ?: $durationLabel) : null,
+            $durationLabel,
             $guidingPersonsChip,
-            $tourType ? (translate($tourType) ?: $tourType) : null,
+            $tourType,
         ]));
         $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
@@ -82,7 +82,7 @@
                                     <svg class="guiding-card__check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <polyline points="20 6 9 17 4 12"/>
                                     </svg>
-                                    <span>{{ translate($inclusive['name']) ?? $inclusive }}</span>
+                                    <span>{{ translated_catalog_label($inclusive) }}</span>
                                 </span>
                             @endforeach
                         @else
@@ -150,7 +150,7 @@
                                         <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/>
                                         <path d="M18 5L22 9M18 19L22 15M6 9L2 5M6 15L2 19"/>
                                     </svg>
-                                    <span>{{ translate($fish['name']) ?? $fish }}</span>
+                                    <span>{{ translated_catalog_label($fish) }}</span>
                                 </span>
                             @endforeach
                         </div>
@@ -164,7 +164,7 @@
                     <div class="guiding-card__info-box-content">
                         <div class="guiding-card__chip-row">
                             @foreach($guiding['methods'] as $method)
-                                <span class="guiding-card__method-chip">{{ translate($method['name']) ?? $method }}</span>
+                                <span class="guiding-card__method-chip">{{ translated_catalog_label($method) }}</span>
                             @endforeach
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                 <div class="guiding-card__info-box-content">
                     @if(!empty($guiding['meeting_point']))
                         <ul class="guiding-card__info-list">
-                            <li><span>{{ __('guidings.Meeting_Point') }}:</span> <strong>{{ $guiding['meeting_point'] }}</strong></li>
+                            <li><span>{{ __('guidings.Meeting_Point') }}:</span> <strong>{{ translate($guiding['meeting_point']) }}</strong></li>
                         </ul>
                     @endif
 
@@ -206,7 +206,7 @@
                                             <polyline points="12 6 12 12 16 14"/>
                                         </svg>
                                     @endif
-                                    <span>{{ trim($time) }}</span>
+                                    <span>{{ translate(trim($time)) }}</span>
                                 </span>
                             @endforeach
                         </div>

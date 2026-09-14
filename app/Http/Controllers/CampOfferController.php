@@ -131,10 +131,13 @@ class CampOfferController extends Controller
         // Fetch camp from database with relationships
         $camp = Camp::with([
             'accommodations.accommodationType',
-            'rentalBoats',
+            'rentalBoats.boatType',
             'guidings.fishingFrom',
             'facilities',
-            'specialOffers'
+            'specialOffers' => fn ($query) => $query->where('status', 'active'),
+            'specialOffers.accommodations.accommodationType',
+            'specialOffers.rentalBoats.boatType',
+            'specialOffers.guidings.fishingFrom',
         ])->where('slug', $slug)
         ->whereIn('status', ['active', 'draft'])
         ->firstOrFail();
@@ -146,8 +149,17 @@ class CampOfferController extends Controller
         $this->viewTranslation->applyToCollection($camp->rentalBoats, ListingTranslationService::TYPE_RENTAL_BOAT);
         $this->viewTranslation->applyToGuidings($camp->guidings);
 
-        $activeSpecialOffers = $camp->specialOffers()->where('status', 'active')->get();
+        $activeSpecialOffers = $camp->specialOffers;
         $this->viewTranslation->applyToCollection($activeSpecialOffers, ListingTranslationService::TYPE_SPECIAL_OFFER);
+        $this->viewTranslation->applyToCollection(
+            $activeSpecialOffers->flatMap->accommodations,
+            ListingTranslationService::TYPE_ACCOMMODATION
+        );
+        $this->viewTranslation->applyToCollection(
+            $activeSpecialOffers->flatMap->rentalBoats,
+            ListingTranslationService::TYPE_RENTAL_BOAT
+        );
+        $this->viewTranslation->applyToGuidings($activeSpecialOffers->flatMap->guidings);
         
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
@@ -291,22 +303,7 @@ class CampOfferController extends Controller
      */
     private function mapCampData(Camp $camp)
     {
-        // Process target fish - could be comma-separated string or JSON array
-        $targetFish = [];
-        if (!empty($camp->target_fish)) {
-            if (is_string($camp->target_fish)) {
-                // Try JSON decode first
-                $decoded = json_decode($camp->target_fish, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $targetFish = $decoded;
-                } else {
-                    // Fall back to comma-separated
-                    $targetFish = array_map('trim', explode(',', $camp->target_fish));
-                }
-            } elseif (is_array($camp->target_fish)) {
-                $targetFish = $camp->target_fish;
-            }
-        }
+        $targetFish = $camp->getTargetFishNames();
         
         // Process best travel times - currently stored as text, not structured data
         $bestTravelTimes = [];
@@ -334,8 +331,6 @@ class CampOfferController extends Controller
             $amenities[] = [
                 'id' => $facility->id,
                 'name' => $facility->name,
-                'name_en' => $facility->name_en ?? $facility->name,
-                'name_de' => $facility->name_de ?? $facility->name,
             ];
         }
         
@@ -485,44 +480,25 @@ class CampOfferController extends Controller
         $galleryImages = $this->getImageUrls($boat->gallery_images ?? []);
         $galleryCount = count($galleryImages);
 
-        // Process inclusives
         $inclusiveItems = collect(is_array($boat->boat_extras) ? $boat->boat_extras : [])
-            ->map(function ($item) {
-                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
-        // Process extras
         $extraItems = collect(is_array($boat->pricing_extra) ? $boat->pricing_extra : [])
-            ->map(function ($item) {
-                return $item['name']. ": ". $item['price'];
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
-        // Process requirements: pair the (locale-aware) label with the
-        // host-entered detail, since the detail alone loses context and the
-        // label alone loses the actual requirement content.
         $requirementsRaw = $boat->requirements ?? [];
         $requirementItems = collect(is_array($requirementsRaw) ? $requirementsRaw : [])
-            ->map(function ($item) {
-                if (!is_array($item)) {
-                    return $item;
-                }
-
-                $label = $item['name'] ?? null;
-                $detail = $item['value'] ?? null;
-
-                if ($label && $detail) {
-                    return "{$label}: {$detail}";
-                }
-
-                return $detail ?? $label;
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
@@ -591,7 +567,8 @@ class CampOfferController extends Controller
         return [
             'id' => $boat->id,
             'title' => $boat->title,
-            'type' => $boat->boatType->name ?? 'Boat',
+            'type' => $boat->boatType?->name,
+            'type_id' => $boat->boatType?->id,
             'location' => $boat->location,
             'description' => $boat->desc_of_boat,
             'thumbnail_path' => $this->getImageUrl($boat->thumbnail_path),
@@ -681,9 +658,25 @@ class CampOfferController extends Controller
 
         $bedConfig = $accommodation->bed_types ?? [];
 
+        $bedItems = [];
         $bedSummaryParts = [];
-        foreach ($accommodation->room_configurations as $roomConfig) {
-            array_push( $bedSummaryParts, "(" . $roomConfig['value'] . ") " . $roomConfig['name'] );
+        foreach ($accommodation->room_configurations ?? [] as $roomConfig) {
+            if (! is_array($roomConfig)) {
+                continue;
+            }
+
+            $count = $roomConfig['value'] ?? null;
+            $name = $roomConfig['name'] ?? ($roomConfig['name_en'] ?? null);
+            if ($count === null || $count === '' || ! filled($name)) {
+                continue;
+            }
+
+            $bedItems[] = [
+                'count' => $count,
+                'name' => $roomConfig['name'] ?? null,
+                'name_en' => $roomConfig['name_en'] ?? null,
+            ];
+            $bedSummaryParts[] = '('.$count.') '.$name;
         }
 
         $galleryTotal = max(count($galleryImages), 1);
@@ -711,7 +704,8 @@ class CampOfferController extends Controller
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
-            'accommodation_type' => $accommodation->accommodationType->name ?? 'Accommodation',
+            'accommodation_type' => $accommodation->accommodationType?->name ?? __('vacations.accommodation'),
+            'accommodation_type_id' => $accommodation->accommodationType?->id,
             'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
             'gallery_images' => $galleryImages,
             'gallery_total' => $galleryTotal,
@@ -726,7 +720,8 @@ class CampOfferController extends Controller
             'number_of_bedrooms' => $number_of_bedrooms,
             'number_of_bathrooms' => $number_of_bathrooms,
             'bathroom_count' => $number_of_bathrooms ?: ($accommodation->number_of_bathrooms ?? null),
-            'bed_summary' => implode(', ',$bedSummaryParts),
+            'bed_summary' => implode(', ', $bedSummaryParts),
+            'bed_items' => $bedItems,
             'bed_config' => $bedConfig,
             'location_description' => $accommodation->location_description,
             'distances' => [
@@ -778,9 +773,10 @@ class CampOfferController extends Controller
             'duration_type' => $guiding->duration_type,
             'duration_label' => $durationLabel,
             'max_persons' => $guiding->max_guests,
-            'type' => $guiding->tour_type,
+            'type' => $guiding->fishingFrom?->name ?? $guiding->tour_type,
+            'type_id' => $guiding->fishingFrom?->id,
             'guiding_info' => [
-                'art' => $guiding->fishingFrom->name ?? 'Tour',
+                'art' => $guiding->fishingFrom?->name,
                 'dauer' => $durationLabel,
                 'max_personen' => $guiding->max_guests,
                 'gewaesser' => $guiding->water_name ?? 'Water'
