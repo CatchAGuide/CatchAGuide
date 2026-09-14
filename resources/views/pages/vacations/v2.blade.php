@@ -177,12 +177,11 @@
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
-                    <!-- Booking + Contact Us - Mobile only, positioned before description -->
+                    <!-- Contact Us - Mobile only; booking uses the floating bar -->
                     @unless($isDraft)
                     <div class="camp-cta-stack camp-cta-stack--mobile-top">
-                        @include('pages.vacations.partials.camp-booking-card', ['instance' => 'mobile'])
                         @include('pages.trips.partials.contact-card', [
-                            'wrapperClass' => 'mb-0 mt-3',
+                            'wrapperClass' => 'mb-0',
                             'modalTarget' => '#campGeneralContactModal',
                             'title' => __('vacations.general_contact_title'),
                             'message' => __('vacations.general_contact_message'),
@@ -566,6 +565,21 @@
         </section>
         @endif
     </div>
+
+    @unless($isDraft)
+        @php
+            $campFromPrice = $camp['from_price'] ?? null;
+            $campFromPriceDisplay = $campFromPrice !== null
+                ? '€'.number_format((float) $campFromPrice, 0, ',', '.')
+                : null;
+        @endphp
+        <x-vacation.mobile-book-bar
+            :price-display="$campFromPriceDisplay"
+            :price-suffix="__('vacations.per_night')"
+            :cta-label="__('vacations.contact_us_button')"
+            data-camp-mobile-book
+        />
+    @endunless
 </div>
 
 <script>
@@ -824,7 +838,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const bookingModal = document.getElementById('contactModal');
     const modalDateInput = document.getElementById('preferred_date');
     const modalGuestsInput = document.getElementById('number_of_persons');
-    let bookingGuests = 1;
+    const mobileBookButtons = document.querySelectorAll('[data-camp-mobile-book]');
+    let bookingGuests = {{ (int) ($preselectedGuests ?? 1) }} || 1;
 
     function updateBookingGuests(value) {
         bookingGuests = Math.max(1, Math.min(20, parseInt(value, 10) || 1));
@@ -875,6 +890,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     : new bootstrap.Modal(bookingModal);
                 modal.show();
             }
+        });
+    });
+
+    function openCampBookingModal() {
+        prefillBookingModal();
+
+        if (bookingModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getOrCreateInstance
+                ? bootstrap.Modal.getOrCreateInstance(bookingModal)
+                : new bootstrap.Modal(bookingModal);
+            modal.show();
+        }
+    }
+
+    mobileBookButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            openCampBookingModal();
         });
     });
 

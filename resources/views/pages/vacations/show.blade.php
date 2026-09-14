@@ -1056,10 +1056,12 @@
     </section>
     @endif
 </div>
-<div class="vacations-book-mobile">
-<button type="button" class="btn btn-orange w-100" data-bs-toggle="modal" data-bs-target="#vacationModalLabel">
-@lang('vacations.book_vacations')
-</button>
+<x-vacation.mobile-book-bar
+    :price-display="$vacationPriceDisplay"
+    :cta-label="__('vacations.book_vacations')"
+    data-bs-toggle="modal"
+    data-bs-target="#vacationModalLabel"
+/>
 <div class="modal fade" id="vacationModalLabel" tabindex="-1" aria-labelledby="vacationModalLabel" aria-hidden="true">
 <div class="modal-dialog">
     <div class="modal-content">
@@ -1072,8 +1074,6 @@
       </div>
     </div>
   </div>
-   
-</div>
 </div>
 
 <!-- Contact Modal -->

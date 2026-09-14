@@ -382,6 +382,7 @@ class CampOfferController extends Controller
             ],
             'thumbnail_path' => $this->getImageUrl($camp->thumbnail_path),
             'manual_gallery_images' => $this->getImageUrls($camp->gallery_images ?? []),
+            'from_price' => $camp->getLowestAccommodationOrOfferPrice(),
         ];
     }
     
