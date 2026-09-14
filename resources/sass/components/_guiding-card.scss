@@ -148,6 +148,9 @@
         gap: 10px;
         font-size: 12px;
         color: #334155;
+        overflow: visible;
+        position: relative;
+        z-index: 2;
     }
 
     &__spec-item {
@@ -254,29 +257,8 @@
     }
 
     &__expand-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: rgba(22, 163, 74, 0.1);
-        color: #16a34a;
-        border: 1px solid rgba(22, 163, 74, 0.2);
-        border-radius: 12px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-
-        &:hover {
-            background: rgba(22, 163, 74, 0.15);
-            border-color: rgba(22, 163, 74, 0.3);
-        }
-
-        span:last-child {
-            font-size: 10px;
-        }
+        // Color, padding and hover come from the shared .attachment-expand-btn
+        // so every camp attachment uses the same Show more control.
     }
 
     &__expand-btn--secondary {

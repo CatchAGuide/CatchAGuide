@@ -494,29 +494,8 @@
     }
 
     &__expand-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
-        border: 1px solid rgba(37, 99, 235, 0.2);
-        border-radius: 12px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-
-        &:hover {
-            background: rgba(37, 99, 235, 0.15);
-            border-color: rgba(37, 99, 235, 0.3);
-        }
-
-        span:last-child {
-            font-size: 10px;
-        }
+        // Color, padding and hover come from the shared .attachment-expand-btn
+        // so every camp attachment uses the same Show more control.
     }
 
     &__expand-btn--secondary {
@@ -715,8 +694,12 @@
     &__component-badges {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
+        gap: 8px;
+        margin-top: 8px;
+        align-items: center;
+        overflow: visible;
+        position: relative;
+        z-index: 2;
     }
 
     &__component-badge {

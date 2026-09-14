@@ -1,5 +1,7 @@
 <div class="guiding-card" id="guiding-{{ $guiding['id'] ?? '' }}" data-guiding-card data-guiding-id="{{ $guiding['id'] ?? '' }}">
     @php
+        use App\Presenters\Vacation\CampAttachmentChipPresenter;
+
         $guidingThumbnail = $guiding['thumbnail_path']
             ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop';
         // The thumbnail leads the gallery so the counter and the arrows match what is on screen
@@ -14,9 +16,10 @@
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
         $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
+        $guidingPersonsChip = CampAttachmentChipPresenter::personsValue($maxPersons);
         $guidingModalSpecs = array_values(array_filter([
             $durationLabel ? (translate($durationLabel) ?: $durationLabel) : null,
-            $maxPersons ? ($maxPersons.' '.__('vacations.pers_short')) : null,
+            $guidingPersonsChip,
             $tourType ? (translate($tourType) ?: $tourType) : null,
         ]));
         $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
@@ -65,34 +68,7 @@
                     <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
                 </div>
 
-                <div class="guiding-card__spec-row">
-                    @if($durationLabel)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>{{ translate($durationLabel) }}</span>
-                    </span>
-                    @endif
-                    @if($maxPersons)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
-                    </span>
-                    @endif
-                    @if($tourType)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
-                        </svg>
-                        <span>{{ translate($tourType) }}</span>
-                    </span>
-                    @endif
-                </div>
+                @include('components.guiding.partials.spec-row')
             </div>
 
             {{-- Inclusives panel appears after gallery (expanded only) --}}
@@ -126,34 +102,7 @@
                         <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
                     </div>
 
-                    <div class="guiding-card__spec-row">
-                        @if($durationLabel)
-                        <span class="guiding-card__spec-item">
-                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            <span>{{ translate($durationLabel) }}</span>
-                        </span>
-                        @endif
-                        @if($maxPersons)
-                        <span class="guiding-card__spec-item">
-                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                <circle cx="12" cy="7" r="4"/>
-                            </svg>
-                            <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
-                        </span>
-                        @endif
-                        @if($tourType)
-                        <span class="guiding-card__spec-item">
-                            <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
-                            </svg>
-                            <span>{{ translate($tourType) }}</span>
-                        </span>
-                        @endif
-                    </div>
+                    @include('components.guiding.partials.spec-row')
                 </div>
 
                 <div class="guiding-card__actions">
@@ -165,7 +114,7 @@
                         {{-- <button class="guiding-card__select-btn">
                             {{ __('Select This Guiding') }}
                         </button> --}}
-                        <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                        <button class="attachment-expand-btn guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
                         </button>
@@ -178,20 +127,12 @@
                 <div class="guiding-card__info-box-title">{{ __('vacations.guiding_information') }}</div>
                 <div class="guiding-card__info-box-content">
                     @if(!empty($guiding['guiding_info']))
-                        <ul class="guiding-card__info-list">
-                            @if(!empty($guiding['guiding_info']['art']))
-                                <li><span>{{ __('vacations.type_label') }}:</span> <strong>{{ translate($guiding['guiding_info']['art']) }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['dauer']))
-                                <li><span>{{ __('guidings.Duration') }}:</span> <strong>{{ translate($guiding['guiding_info']['dauer']) }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['max_personen']))
-                                <li><span>{{ __('vacations.max_persons') }}:</span> <strong>{{ $guiding['guiding_info']['max_personen'] }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['gewaesser']))
+                        @include('components.guiding.partials.spec-row')
+                        @if(!empty($guiding['guiding_info']['gewaesser']))
+                            <ul class="guiding-card__info-list">
                                 <li><span>{{ __('guidings.Water') }}:</span> <strong>{{ translate($guiding['guiding_info']['gewaesser']) }}</strong></li>
-                            @endif
-                        </ul>
+                            </ul>
+                        @endif
                     @else
                         <p class="guiding-card__empty">{{ __('vacations.no_guiding_details') }}</p>
                     @endif

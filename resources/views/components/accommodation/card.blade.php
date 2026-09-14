@@ -10,7 +10,7 @@
         $stats = $accommodation['stats'] ?? [];
         $bedSummary = $accommodation['bed_summary'] ?? 'Keine Angaben zur Bettenanzahl';
         $occupancyLabel = $accommodation['occupancy_label'] ?? null;
-        $bathroomChipValue = $accommodation['bathroom_count'] ?? ($accommodation['bathrooms'] ?? null);
+        $bathroomChipValue = $accommodation['number_of_bathrooms'] ?? ($accommodation['bathroom_count'] ?? ($accommodation['bathrooms'] ?? null));
         $livingAreaChipValue = $accommodation['living_area_value'] ?? ($accommodation['living_area_sqm'] ?? null);
         $bathroomChipDisplay = is_numeric($bathroomChipValue)
             ? $bathroomChipValue
@@ -72,51 +72,7 @@
                     <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
                 </div>
 
-                <div class="accommodation-card__stats">
-                    @if(!empty($accommodation['max_occupancy']))
-                    <span class="accommodation-card__stat">
-                        <span class="accommodation-card__stat-icon">👥</span>
-                        <span>{{ $accommodation['max_occupancy'] }}</span>
-                    </span>
-                    @endif
-                    @if(!empty($accommodation['number_of_bathrooms']))
-                    <span class="accommodation-card__stat">
-                        <span class="accommodation-card__stat-icon">🛁</span>
-                        <span>{{ $accommodation['number_of_bathrooms'] }}</span>
-                    </span>
-                    @endif
-                    @if(!empty($accommodation['living_area_sqm']))
-                    <span class="accommodation-card__stat">
-                        <span class="accommodation-card__stat-icon">📐</span>
-                        <span>{{ $accommodation['living_area_sqm'] }}</span>
-                    </span>
-                    @endif
-                </div>
-
-                <div class="accommodation-card__beds">
-                    <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
-                    <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
-                </div>
-
-                <div class="accommodation-card__distance-row">
-                    <div class="accommodation-card__distance-group">
-                        @if(!empty($accommodation['distances']['to_water_m']))
-                            <span class="accommodation-card__distance-chip">
-                                🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
-                            </span>
-                        @endif
-                        @if(!empty($accommodation['distances']['to_berth_m']))
-                            <span class="accommodation-card__distance-chip">
-                                ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
-                            </span>
-                        @endif
-                        @if(!empty($accommodation['distances']['to_parking_m']))
-                            <span class="accommodation-card__distance-chip">
-                                🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
-                            </span>
-                        @endif
-                    </div>
-                </div>
+                @include('components.accommodation.partials.summary-meta')
             </div>
 
             {{-- Details panel appears after gallery (desktop expanded only) --}}
@@ -154,51 +110,7 @@
                         <div class="accommodation-card__type">{{ translate($accommodation['accommodation_type'] ?? 'Apartment / Holiday Home') }}</div>
                     </div>
 
-                    <div class="accommodation-card__stats">
-                        @if(!empty($accommodation['max_occupancy']))
-                        <span class="accommodation-card__stat">
-                            <span class="accommodation-card__stat-icon">👥</span>
-                            <span>{{ $accommodation['max_occupancy'] }}</span>
-                        </span>
-                        @endif
-                        @if(!empty($accommodation['number_of_bathrooms']))
-                        <span class="accommodation-card__stat">
-                            <span class="accommodation-card__stat-icon">🛁</span>
-                            <span>{{ $accommodation['number_of_bathrooms'] }}</span>
-                        </span>
-                        @endif
-                        @if(!empty($accommodation['living_area_sqm']))
-                        <span class="accommodation-card__stat">
-                            <span class="accommodation-card__stat-icon">📐</span>
-                            <span>{{ $accommodation['living_area_sqm'] }}</span>
-                        </span>
-                        @endif
-                    </div>
-
-                    <div class="accommodation-card__beds">
-                        <span class="accommodation-card__beds-label">{{ __('accommodations.bedrooms') }}:</span>
-                        <span class="accommodation-card__beds-value">{{ translate($bedSummary) }}</span>
-                    </div>
-
-                    <div class="accommodation-card__distance-row">
-                        <div class="accommodation-card__distance-group">
-                            @if(!empty($accommodation['distances']['to_water_m']))
-                                <span class="accommodation-card__distance-chip">
-                                    🌊 {{ __('vacations.label_water') }}: <span>{{ is_numeric($accommodation['distances']['to_water_m']) ? $accommodation['distances']['to_water_m'] . ' m' : translate($accommodation['distances']['to_water_m']) }}</span>
-                                </span>
-                            @endif
-                            @if(!empty($accommodation['distances']['to_berth_m']))
-                                <span class="accommodation-card__distance-chip">
-                                    ⚓ {{ __('vacations.label_jetty') }}: <span>{{ is_numeric($accommodation['distances']['to_berth_m']) ? $accommodation['distances']['to_berth_m'] . ' m' : translate($accommodation['distances']['to_berth_m']) }}</span>
-                                </span>
-                            @endif
-                            @if(!empty($accommodation['distances']['to_parking_m']))
-                                <span class="accommodation-card__distance-chip">
-                                    🚗 {{ __('vacations.label_parking') }}: <span>{{ is_numeric($accommodation['distances']['to_parking_m']) ? $accommodation['distances']['to_parking_m'] . ' m' : translate($accommodation['distances']['to_parking_m']) }}</span>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
+                    @include('components.accommodation.partials.summary-meta')
 
                 </div>
 
@@ -220,7 +132,7 @@
                         {{-- <button class="accommodation-card__select-btn">
                             Select Accommodation
                         </button> --}}
-                        <button class="accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                        <button class="attachment-expand-btn accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
                         </button>

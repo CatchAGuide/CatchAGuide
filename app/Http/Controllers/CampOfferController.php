@@ -540,30 +540,48 @@ class CampOfferController extends Controller
             }
         }
 
-        // Build specs array
+        // Build specs array. Keys drive the shared attachment chips so
+        // capacity uses the same persons icon as guidings / special offers.
         $specs = [];
+        $hasCapacitySpec = false;
         foreach ($boatInfo as $boatIn) {
-            if ($boatIn['id'] == 1) {
+            if (! is_array($boatIn)) {
+                continue;
+            }
+
+            if (($boatIn['id'] ?? null) == 1) {
                 // Use max_persons for Capacity if available, otherwise fall back to boat_info value
                 $capacityValue = $boat->max_persons ?? ($boatIn['value'] ?? '');
                 if ($capacityValue != "") {
+                    $hasCapacitySpec = true;
                     $specs[] = [
+                        'key' => 'capacity',
                         'label' => __('rental_boats.capacity'),
                         'value' => $capacityValue,
                     ];
                 }
             }
-            if ($boatIn['id'] == 6 && $boatIn['value'] != "") {
+            if (($boatIn['id'] ?? null) == 6 && ($boatIn['value'] ?? '') != "") {
                 $specs[] = [
+                    'key' => 'engine',
                     'label' => __('rental_boats.engine'),
                     'value' => $boatIn['value'],
                 ];
             }
         }
 
+        if (! $hasCapacitySpec && filled($boat->max_persons)) {
+            $specs[] = [
+                'key' => 'capacity',
+                'label' => __('rental_boats.capacity'),
+                'value' => $boat->max_persons,
+            ];
+        }
+
         // License requirement
         if ($licenseRequirement) {
             $specs[] = [
+                'key' => 'license',
                 'label' => __('rental_boats.license'),
                 'value' => $licenseRequirement,
             ];
@@ -671,12 +689,21 @@ class CampOfferController extends Controller
         
         $number_of_bedrooms = "";
         $living_area_sqm = "";
-        foreach ($accommodation->accommodation_details as $accommodation_detail) {
-            if ($accommodation_detail['id'] == 4 && $accommodation_detail['value'] != "") {
-                $number_of_bedrooms = $accommodation_detail['value'];
+        $number_of_bathrooms = "";
+        foreach ($accommodation->accommodation_details ?? [] as $accommodation_detail) {
+            $detailId = $accommodation_detail['id'] ?? null;
+            $detailValue = $accommodation_detail['value'] ?? '';
+            if ($detailValue === '' || $detailValue === null) {
+                continue;
             }
-            if ($accommodation_detail['id'] == 1 && $accommodation_detail['value'] != "") {
-                $living_area_sqm = $accommodation_detail['value'];
+            if ($detailId == 3) {
+                $number_of_bedrooms = $detailValue;
+            }
+            if ($detailId == 4) {
+                $number_of_bathrooms = $detailValue;
+            }
+            if ($detailId == 1) {
+                $living_area_sqm = $detailValue;
             }
         }
         
@@ -696,7 +723,8 @@ class CampOfferController extends Controller
             'description' => $accommodation->description,
             'living_area_sqm' => $living_area_sqm,
             'number_of_bedrooms' => $number_of_bedrooms,
-            'bathroom_count' => $accommodation->number_of_bathrooms,
+            'number_of_bathrooms' => $number_of_bathrooms,
+            'bathroom_count' => $number_of_bathrooms ?: ($accommodation->number_of_bathrooms ?? null),
             'bed_summary' => implode(', ',$bedSummaryParts),
             'bed_config' => $bedConfig,
             'location_description' => $accommodation->location_description,

@@ -65,7 +65,7 @@ var HIDE_NAV_MQ = '(min-width: 768px)';
 function visualViewportNavTop(offsetTop, visualHeight, navHeight) {
   return Math.round(offsetTop + visualHeight - navHeight);
 }
-function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
+function syncBottomNavToVisualViewport(nav, viewport, hideNav, navHeight) {
   if (!nav) {
     return;
   }
@@ -74,11 +74,11 @@ function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
     nav.style.removeProperty('--cag-bottom-nav-top');
     return;
   }
-  var navHeight = nav.offsetHeight;
-  if (!viewport || navHeight <= 0) {
+  var height = navHeight !== null && navHeight !== void 0 ? navHeight : nav.offsetHeight;
+  if (!viewport || height <= 0) {
     return;
   }
-  nav.style.setProperty('--cag-bottom-nav-top', "".concat(visualViewportNavTop(viewport.offsetTop, viewport.height, navHeight), "px"));
+  nav.style.setProperty('--cag-bottom-nav-top', "".concat(visualViewportNavTop(viewport.offsetTop, viewport.height, height), "px"));
   nav.classList.add('is-vv-pinned');
 }
 function initBottomNavViewport() {
@@ -88,8 +88,19 @@ function initBottomNavViewport() {
   }
   nav.setAttribute('data-cag-vv', '1');
   var hideNavMq = window.matchMedia(HIDE_NAV_MQ);
+
+  // nav.offsetHeight forces a synchronous layout read. Doing that on every
+  // visualViewport scroll/resize tick fights the browser's own layout pass
+  // while it animates the toolbar collapse on the first scroll, which is
+  // what made the nav flash/disappear on real devices. The nav's height only
+  // changes on breakpoint/orientation changes, so measure it once and cache
+  // it instead of re-reading it on plain scroll ticks.
+  var navHeight = nav.offsetHeight;
+  var measure = function measure() {
+    navHeight = nav.offsetHeight;
+  };
   var sync = function sync() {
-    syncBottomNavToVisualViewport(nav, window.visualViewport, hideNavMq.matches);
+    syncBottomNavToVisualViewport(nav, window.visualViewport, hideNavMq.matches, navHeight);
   };
   var frame = 0;
   var requestSync = function requestSync() {
@@ -101,17 +112,21 @@ function initBottomNavViewport() {
       sync();
     });
   };
+  var requestRemeasureAndSync = function requestRemeasureAndSync() {
+    measure();
+    requestSync();
+  };
   sync();
-  window.visualViewport.addEventListener('resize', requestSync);
+  window.visualViewport.addEventListener('resize', requestRemeasureAndSync);
   window.visualViewport.addEventListener('scroll', requestSync);
   window.addEventListener('scroll', requestSync, {
     passive: true
   });
-  window.addEventListener('orientationchange', requestSync);
+  window.addEventListener('orientationchange', requestRemeasureAndSync);
   if (typeof hideNavMq.addEventListener === 'function') {
-    hideNavMq.addEventListener('change', sync);
+    hideNavMq.addEventListener('change', requestRemeasureAndSync);
   } else if (typeof hideNavMq.addListener === 'function') {
-    hideNavMq.addListener(sync);
+    hideNavMq.addListener(requestRemeasureAndSync);
   }
 }
 

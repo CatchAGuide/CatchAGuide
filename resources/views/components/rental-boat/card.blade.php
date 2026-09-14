@@ -1,5 +1,7 @@
 <div class="rental-boat-card" id="rental-boat-{{ $boat['id'] ?? '' }}" data-rental-boat-card data-rental-boat-id="{{ $boat['id'] ?? '' }}">
     @php
+        use App\Presenters\Vacation\CampAttachmentChipPresenter;
+
         $boatThumbnail = $boat['thumbnail_path']
             ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop';
         $galleryImages = array_values(array_unique(array_filter(
@@ -16,11 +18,11 @@
         $specs = $boat['specs'] ?? [];
         $boatInfoList = $boat['boat_info'] ?? [];
         $boatModalTitle = translate($boat['title'] ?? null) ?? ($boat['title'] ?? 'Boat');
-        $boatModalSpecs = array_values(array_filter([
-            isset($specs['length']) ? $specs['length'] : null,
-            isset($specs['capacity']) ? $specs['capacity'] : null,
-            isset($specs['engine']) ? $specs['engine'] : null,
-        ]));
+        $boatChips = CampAttachmentChipPresenter::boatChips($specs);
+        $boatModalSpecs = array_values(array_filter(array_map(
+            fn ($chip) => $chip['value'] ?? null,
+            $boatChips
+        )));
         $boatPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
@@ -69,16 +71,7 @@
                     @endif
                 </div>
 
-                @if(count($specs) > 0)
-                    <div class="rental-boat-card__spec-row">
-                        @foreach($specs as $spec)
-                            <span class="rental-boat-card__spec-item">
-                                <span class="rental-boat-card__spec-label">{{ $spec['label'] }}:</span>
-                                <span class="rental-boat-card__spec-value">{{ $spec['value'] }}</span>
-                            </span>
-                        @endforeach
-                    </div>
-                @endif
+                @include('components.rental-boat.partials.spec-row')
 
                 @if (count($inclusiveItems) > 0 )
                     <div class="rental-boat-card__included">
@@ -121,16 +114,7 @@
                         @endif
                     </div>
 
-                    @if(count($specs) > 0)
-                        <div class="rental-boat-card__spec-row">
-                            @foreach($specs as $spec)
-                                <span class="rental-boat-card__spec-item">
-                                    <span class="rental-boat-card__spec-label">{{ translate($spec['label']) }}:</span>
-                                    <span class="rental-boat-card__spec-value">{{ translate($spec['value']) }}</span>
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
+                    @include('components.rental-boat.partials.spec-row')
 
                     @if (count($inclusiveItems) > 0 )
                         <div class="rental-boat-card__included">
@@ -155,7 +139,7 @@
                         {{-- <button class="rental-boat-card__select-btn">
                             {{ __('Select Boat') }}
                         </button> --}}
-                        <button class="rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                        <button class="attachment-expand-btn rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
                         </button>
@@ -167,6 +151,7 @@
                 <div class="rental-boat-card__info-box">
                     <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
                     <div class="rental-boat-card__info-box-content">
+                        @include('components.rental-boat.partials.spec-row')
                         @if(count($boatInfoList) > 0)
                             <ul class="rental-boat-card__info-list">
                                 @foreach($boatInfoList as $info)

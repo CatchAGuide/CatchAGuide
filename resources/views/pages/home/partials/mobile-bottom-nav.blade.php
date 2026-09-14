@@ -29,6 +29,17 @@
 
     var hideNav = window.matchMedia('(min-width: 768px)');
     var frame = 0;
+    // nav.offsetHeight forces a synchronous layout read. Re-reading it on
+    // every visualViewport scroll/resize tick fights the browser's own
+    // layout pass while it animates the toolbar collapse during the first
+    // scroll, which caused the nav to flash/disappear on real devices. The
+    // nav's height only changes on breakpoint/orientation changes, so
+    // measure it once and cache it instead.
+    var navHeight = nav.offsetHeight;
+
+    function measure() {
+        navHeight = nav.offsetHeight;
+    }
 
     function pin() {
         if (hideNav.matches) {
@@ -36,14 +47,13 @@
             nav.style.removeProperty('--cag-bottom-nav-top');
             return;
         }
-        var height = nav.offsetHeight;
-        if (height <= 0) {
+        if (navHeight <= 0) {
             return;
         }
         var vv = window.visualViewport;
         nav.style.setProperty(
             '--cag-bottom-nav-top',
-            Math.round(vv.offsetTop + vv.height - height) + 'px'
+            Math.round(vv.offsetTop + vv.height - navHeight) + 'px'
         );
         nav.classList.add('is-vv-pinned');
     }
@@ -58,10 +68,15 @@
         });
     }
 
+    function requestRemeasureAndPin() {
+        measure();
+        requestPin();
+    }
+
     pin();
-    window.visualViewport.addEventListener('resize', requestPin);
+    window.visualViewport.addEventListener('resize', requestRemeasureAndPin);
     window.visualViewport.addEventListener('scroll', requestPin);
     window.addEventListener('scroll', requestPin, { passive: true });
-    window.addEventListener('orientationchange', requestPin);
+    window.addEventListener('orientationchange', requestRemeasureAndPin);
 })();
 </script>

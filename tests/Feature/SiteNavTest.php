@@ -261,6 +261,21 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString('--cag-bottom-nav-top', $html);
     }
 
+    public function test_bottom_nav_inline_script_caches_height_instead_of_remeasuring_on_scroll(): void
+    {
+        $this->bindNamedRequest('/offers', 'offers.index');
+        $html = View::make('layouts.partials.site-bottom-nav')->render();
+
+        // nav.offsetHeight must be measured once (and re-measured only on
+        // resize/orientation), not read again on every visualViewport/window
+        // scroll tick — that layout thrash caused the nav to flash on the
+        // first real-device scroll while iOS animates the toolbar collapse.
+        $this->assertStringContainsString('var navHeight = nav.offsetHeight;', $html);
+        $this->assertStringContainsString('function measure() {', $html);
+        $this->assertStringContainsString("addEventListener('scroll', requestPin)", $html);
+        $this->assertStringNotContainsString("addEventListener('scroll', requestRemeasureAndPin)", $html);
+    }
+
     public function test_offer_card_gallery_uses_padding_bottom_aspect_on_mobile(): void
     {
         $scss = (string) file_get_contents(resource_path('sass/page/offers.scss'));

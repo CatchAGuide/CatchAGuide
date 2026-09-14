@@ -74,6 +74,37 @@ test.describe('listing images stay in their media box (iPhone WebKit)', () => {
     expect(productGallery, 'product page should expose a gallery media box').toBeTruthy();
     await assertImagesStayInMedia(page, productGallery);
   });
+
+  test('camp product gallery clips photos', async ({ page }) => {
+    await openListingPage(page, '/vacations/camps');
+    const cta = page.locator('.vacation-camp-list-card__cta').first();
+    await expect(cta).toBeVisible({ timeout: 20_000 });
+    await Promise.all([
+      page.waitForURL(
+        (url) => url.pathname.includes('/vacations/camps/') && !url.pathname.endsWith('/camps'),
+        { timeout: 45_000 }
+      ),
+      cta.click(),
+    ]);
+    await dismissCookieBanner(page);
+
+    await assertImagesStayInMedia(page, {
+      media: '.camp-gallery__main',
+      img: 'img',
+      aspectHeightOverWidth: 10 / 16,
+    });
+
+    const gallery = page.locator('.camp-gallery').first();
+    await expect(gallery).toBeVisible();
+    const galleryBox = await gallery.boundingBox();
+    const viewport = page.viewportSize();
+    expect(galleryBox, 'camp gallery box').toBeTruthy();
+    expect(viewport, 'viewport size').toBeTruthy();
+    expect(galleryBox.width, 'camp gallery wider than viewport').toBeLessThanOrEqual(
+      viewport.width + SLACK_PX
+    );
+    expect(galleryBox.x, 'camp gallery offset off-screen').toBeGreaterThanOrEqual(-SLACK_PX);
+  });
 });
 
 async function openListingPage(page, path) {
@@ -98,7 +129,7 @@ async function dismissCookieBanner(page) {
 async function firstVisibleGallery(page) {
   const candidates = [
     { media: '.guidings-gallery .left-image', img: 'img', aspectHeightOverWidth: 2 / 3 },
-    { media: '.camp-gallery__main', img: 'img' },
+    { media: '.camp-gallery__main', img: 'img', aspectHeightOverWidth: 10 / 16 },
     { media: '.gc-carousel', img: '.carousel-item.active img' },
     { media: '.guiding-card__gallery', img: 'img' },
     { media: '.offers-card__media', img: '.offers-card__img', aspectHeightOverWidth: 10 / 16 },
