@@ -72,7 +72,8 @@
         }
     }
 
-    &--water &__icon img {
+    &--water &__icon img,
+    &--water-type &__icon img {
         filter: none;
         opacity: 0.85;
     }

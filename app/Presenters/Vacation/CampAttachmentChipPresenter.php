@@ -2,8 +2,27 @@
 
 namespace App\Presenters\Vacation;
 
+use App\Models\Guiding;
+
 class CampAttachmentChipPresenter
 {
+    /**
+     * Shore/Boat chip for guiding cards. Drops leftover private/shared tour types.
+     */
+    public static function fishingFromChipValue(mixed $type): ?string
+    {
+        $trimmed = trim((string) $type);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (Guiding::looksLikeTourPrivacy($trimmed)) {
+            return null;
+        }
+
+        return $trimmed;
+    }
+
     /**
      * Shared persons/capacity label for camp attachment cards.
      * Numeric values become "4 Pers"; non-numeric strings are kept as-is.
@@ -192,6 +211,34 @@ class CampAttachmentChipPresenter
     }
 
     /**
+     * One chip per catalog water type, e.g. "See" / "Lake".
+     *
+     * @param  array<int, array<string, mixed>|string>  $items
+     * @return array<int, array{type: string, value: string, label: ?string}>
+     */
+    public static function waterTypeChips(array $items): array
+    {
+        $chips = [];
+
+        foreach ($items as $item) {
+            $value = is_array($item)
+                ? translated_catalog_label($item)
+                : trim((string) $item);
+            if ($value === '') {
+                continue;
+            }
+
+            $chips[] = [
+                'type' => 'water-type',
+                'value' => $value,
+                'label' => null,
+            ];
+        }
+
+        return $chips;
+    }
+
+    /**
      * Hover tooltip naming the fact behind a chip icon.
      */
     public static function tooltipFor(string $type, ?string $label = null): string
@@ -206,6 +253,7 @@ class CampAttachmentChipPresenter
             'bedrooms' => __('vacations.chip_bedrooms'),
             'bed' => __('vacations.chip_beds'),
             'water' => __('vacations.label_water'),
+            'water-type' => __('vacations.chip_water_type'),
             'parking' => __('vacations.label_parking'),
             'jetty' => __('vacations.label_jetty'),
             'engine' => __('rental_boats.engine'),

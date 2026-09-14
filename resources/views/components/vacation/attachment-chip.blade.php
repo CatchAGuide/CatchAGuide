@@ -26,6 +26,7 @@
         'tour' => asset('assets/images/icons/fishing-tool-new.svg'),
         'boat' => asset('assets/images/icons/fishing-tool-new.svg'),
         'water' => asset('assets/images/icons/water-waves.png'),
+        'water-type' => asset('assets/images/icons/water-waves.png'),
     ];
     $assetSrc = $assetIcons[$type] ?? null;
 @endphp

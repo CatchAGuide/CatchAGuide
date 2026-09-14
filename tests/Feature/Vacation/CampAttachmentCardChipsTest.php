@@ -42,9 +42,38 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('attachment-chip--persons', $html);
         $this->assertStringContainsString('attachment-chip--duration', $html);
         $this->assertStringContainsString('clock-new.svg', $html);
+        $this->assertStringContainsString('attachment-chip--water-type', $html);
+        $this->assertStringContainsString('See', $html);
+        $this->assertStringContainsString(__('vacations.chip_water_type'), $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
         $this->assertStringContainsString('attachment-expand-btn', $html);
+    }
+
+    public function test_guiding_card_shows_shore_or_boat_instead_of_private(): void
+    {
+        $html = View::make('components.guiding.card', [
+            'guiding' => [
+                'id' => 22,
+                'title' => 'Pike tour',
+                'description' => 'Morning session',
+                'thumbnail_path' => '/images/placeholder.jpg',
+                'gallery_images' => [],
+                'duration_label' => '8 hours',
+                'max_persons' => 3,
+                'type' => 'private',
+                'inclusives' => [],
+                'guiding_info' => [],
+                'target_fish' => [],
+                'methods' => [],
+                'start_times' => [],
+                'price' => ['amount' => 250, 'display_type' => 'Per tour'],
+            ],
+        ])->render();
+
+        $this->assertStringNotContainsString('Private', $html);
+        $this->assertStringNotContainsString('private', $html);
+        $this->assertStringNotContainsString('attachment-chip--tour', $html);
     }
 
     public function test_rental_boat_card_shows_capacity_as_the_shared_persons_chip(): void
@@ -106,6 +135,9 @@ class CampAttachmentCardChipsTest extends TestCase
                         'dauer' => '8 hours',
                         'max_personen' => 4,
                     ],
+                    'water_types' => [
+                        ['id' => 2, 'name' => 'See', 'name_en' => 'Lake'],
+                    ],
                 ]],
             ],
         ])->render();
@@ -120,6 +152,8 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('attachment-chip--bath', $html);
         $this->assertStringContainsString('attachment-chip--bed"', $html);
         $this->assertStringContainsString('(1) Doppelbett', $html);
+        $this->assertStringContainsString('attachment-chip--water-type', $html);
+        $this->assertStringContainsString('See', $html);
         $this->assertStringNotContainsString('Schlafzimmer:', $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
@@ -184,6 +218,36 @@ class CampAttachmentCardChipsTest extends TestCase
         ])->render();
     }
 
+    public function test_guiding_card_location_schedule_shows_desc_meeting_point_not_legacy_column(): void
+    {
+        $html = View::make('components.guiding.card', [
+            'guiding' => [
+                'id' => 22,
+                'title' => 'Pike tour',
+                'description' => 'Morning session',
+                'thumbnail_path' => '/images/placeholder.jpg',
+                'gallery_images' => [],
+                'duration_label' => '8 hours',
+                'max_persons' => 3,
+                'type' => 'Boat',
+                'inclusives' => [],
+                'guiding_info' => [],
+                'target_fish' => [],
+                'methods' => [],
+                'meeting_point' => 'Bucht Nord - Riba Roja',
+                'desc_meeting_point' => 'Meet at the harbour office, gate 3.',
+                'start_times' => ['06:00'],
+                'price' => ['amount' => 250, 'display_type' => 'Per tour'],
+            ],
+        ])->render();
+
+        $this->assertStringContainsString(e(__('vacations.location_schedule')), $html);
+        $this->assertStringContainsString(__('guidings.Meeting_Point'), $html);
+        $this->assertStringContainsString('Meet at the harbour office, gate 3.', $html);
+        $this->assertStringNotContainsString('Bucht Nord - Riba Roja', $html);
+        $this->assertStringContainsString('06:00', $html);
+    }
+
     private function renderGuidingCard(): string
     {
         return View::make('components.guiding.card', [
@@ -200,7 +264,9 @@ class CampAttachmentCardChipsTest extends TestCase
                 'guiding_info' => [],
                 'target_fish' => [],
                 'methods' => [],
-                'meeting_point' => null,
+                'water_types' => [
+                    ['id' => 2, 'name' => 'See', 'name_en' => 'Lake'],
+                ],
                 'start_times' => [],
                 'price' => ['amount' => 250, 'display_type' => 'Per tour'],
             ],

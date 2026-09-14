@@ -12,7 +12,8 @@
         $guidingGalleryId = 'guiding-card-'.($guiding['id'] ?? uniqid());
         $durationLabel = $guiding['duration_label'] ?? ($guiding['duration_hours'] ?? null);
         $maxPersons = $guiding['max_persons'] ?? null;
-        $tourType = $guiding['type'] ?? null;
+        $tourType = CampAttachmentChipPresenter::fishingFromChipValue($guiding['type'] ?? null);
+        $waterTypes = $guiding['water_types'] ?? [];
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
         $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
@@ -174,13 +175,12 @@
             <div class="guiding-card__info-box">
                 <div class="guiding-card__info-box-title">{{ __('vacations.location_schedule') }}</div>
                 <div class="guiding-card__info-box-content">
-                    @if(!empty($guiding['meeting_point']))
-                        <ul class="guiding-card__info-list">
-                            <li><span>{{ __('guidings.Meeting_Point') }}:</span> <strong>{{ translate($guiding['meeting_point']) }}</strong></li>
-                        </ul>
-                    @endif
-
-                    @if(!empty($guiding['start_times']) && is_array($guiding['start_times']))
+                    @php
+                        $hasStartTimes = !empty($guiding['start_times']) && is_array($guiding['start_times']);
+                        $meetingPoint = trim((string) ($guiding['desc_meeting_point'] ?? ''));
+                        $hasMeetingPoint = $meetingPoint !== '';
+                    @endphp
+                    @if($hasStartTimes)
                         <div class="guiding-card__chip-row">
                             @foreach($guiding['start_times'] as $time)
                                 <span class="guiding-card__start-time-chip">
@@ -211,8 +211,13 @@
                             @endforeach
                         </div>
                     @endif
-
-                    @if(empty($guiding['meeting_point']) && empty($guiding['start_times']))
+                    @if($hasMeetingPoint)
+                        <div class="guiding-card__meeting-point">
+                            <div class="guiding-card__meeting-point-label">{{ __('guidings.Meeting_Point') }}</div>
+                            <div class="guiding-card__meeting-point-text">{!! clean_html($meetingPoint) !!}</div>
+                        </div>
+                    @endif
+                    @if(!$hasStartTimes && !$hasMeetingPoint)
                         <p class="guiding-card__empty">{{ __('vacations.no_schedule_details') }}</p>
                     @endif
                 </div>

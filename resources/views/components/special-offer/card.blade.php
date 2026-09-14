@@ -336,6 +336,7 @@
                         $nestedPersons = $chipPresenter::personsValue(
                             $guiding['guiding_info']['max_personen'] ?? ($guiding['max_persons'] ?? null)
                         );
+                        $nestedWaterChips = $chipPresenter::waterTypeChips($guiding['water_types'] ?? []);
                     @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--guiding" id="guiding-{{ $guiding['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($guiding['title']) ?? '' }}</h4>
@@ -350,6 +351,9 @@
                             @if($nestedPersons)
                                 <x-vacation.attachment-chip type="persons" :value="$nestedPersons" />
                             @endif
+                            @foreach($nestedWaterChips as $waterChip)
+                                <x-vacation.attachment-chip type="water-type" :value="$waterChip['value']" />
+                            @endforeach
                         </div>
                     </div>
                 @endforeach

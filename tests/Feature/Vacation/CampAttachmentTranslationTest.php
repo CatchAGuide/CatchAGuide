@@ -6,6 +6,7 @@ use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Target;
 use App\Models\User;
+use App\Models\Water;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
@@ -87,6 +88,71 @@ class CampAttachmentTranslationTest extends TestCase
         if (filled($otherLocaleName) && $otherLocaleName !== $target->name) {
             $response->assertDontSee($otherLocaleName, false);
         }
+    }
+
+    public function test_attached_guiding_shows_catalog_water_types(): void
+    {
+        $water = Water::query()->first();
+        if (! $water) {
+            $this->markTestSkipped('No water type catalog row available.');
+        }
+
+        $camp = $this->makeCamp();
+        $guiding = $this->makeGuiding([
+            'water_types' => json_encode([$water->id]),
+        ]);
+        $camp->guidings()->sync([$guiding->id]);
+
+        $response = $this->get(route('vacations.camps.show', $camp->slug));
+
+        $response->assertOk();
+        $response->assertSee('attachment-chip--water-type', false);
+        $response->assertSee($water->name, false);
+        $otherLocaleName = app()->getLocale() === 'en'
+            ? $water->getAttributes()['name']
+            : $water->getAttributes()['name_en'];
+        if (filled($otherLocaleName) && $otherLocaleName !== $water->name) {
+            $response->assertDontSee($otherLocaleName, false);
+        }
+        $response->assertDontSee('gewaesser">Water', false);
+    }
+
+    public function test_attached_guiding_shows_desc_meeting_point_not_the_legacy_column(): void
+    {
+        $meetingDescription = 'Harbour office gate 3 '.uniqid();
+        $legacyMeetingPoint = 'Legacy short meeting '.uniqid();
+
+        $camp = $this->makeCamp();
+        $guiding = $this->makeGuiding([
+            'desc_meeting_point' => $meetingDescription,
+            'meeting_point' => $legacyMeetingPoint,
+        ]);
+        $camp->guidings()->sync([$guiding->id]);
+
+        $response = $this->get(route('vacations.camps.show', $camp->slug));
+
+        $response->assertOk();
+        $response->assertSee($meetingDescription, false);
+        $response->assertSee(__('guidings.Meeting_Point'), false);
+        $response->assertDontSee($legacyMeetingPoint, false);
+    }
+
+    public function test_attached_guiding_shows_shore_or_boat_instead_of_private(): void
+    {
+        $camp = $this->makeCamp();
+        $guiding = $this->makeGuiding([
+            'tour_type' => 'private',
+            'is_boat' => 1,
+            'fishing_from_id' => null,
+        ]);
+        $camp->guidings()->sync([$guiding->id]);
+
+        $response = $this->get(route('vacations.camps.show', $camp->slug));
+
+        $response->assertOk();
+        $response->assertSee(__('guidings.boat'), false);
+        $response->assertDontSee('>private<', false);
+        $response->assertDontSee('>Private<', false);
     }
 
     /**

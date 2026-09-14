@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\RentalBoat;
 use App\Models\Accommodation;
 use App\Models\Guiding;
+use App\Models\Water;
 use App\Models\Camp;
+use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
 use App\Services\Translation\ListingTranslationService;
@@ -160,7 +162,9 @@ class CampOfferController extends Controller
             ListingTranslationService::TYPE_RENTAL_BOAT
         );
         $this->viewTranslation->applyToGuidings($activeSpecialOffers->flatMap->guidings);
-        
+
+        $watersMap = Water::query()->get()->keyBy('id');
+
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
         
@@ -172,7 +176,7 @@ class CampOfferController extends Controller
         }
             
         if ($camp->guidings->first()) {
-            $guiding = $this->mapGuidingData($camp->guidings->first());
+            $guiding = $this->mapGuidingData($camp->guidings->first(), $watersMap);
         } else {
             $guiding = null;
         }
@@ -213,8 +217,8 @@ class CampOfferController extends Controller
         })->toArray();
     
         // Map all guidings with full data for display
-        $guidings = $camp->guidings->map(function($guiding) {
-            return $this->mapGuidingData($guiding);
+        $guidings = $camp->guidings->map(function($guiding) use ($watersMap) {
+            return $this->mapGuidingData($guiding, $watersMap);
         })->toArray();
         
         // For dropdown - simplified version
@@ -224,8 +228,8 @@ class CampOfferController extends Controller
         
         // Map all special offers with full data for display
         $specialOffers = $activeSpecialOffers
-            ->map(function($specialOffer) {
-                return $this->mapSpecialOfferData($specialOffer);
+            ->map(function($specialOffer) use ($watersMap) {
+                return $this->mapSpecialOfferData($specialOffer, $watersMap);
             })->toArray();
         
         $showCategories = true;
@@ -747,7 +751,7 @@ class CampOfferController extends Controller
     /**
      * Map Guiding model to view format
      */
-    private function mapGuidingData(Guiding $guiding)
+    private function mapGuidingData(Guiding $guiding, ?Collection $watersMap = null)
     {
         // Decode gallery_images if it's a JSON string
         $galleryImages = is_string($guiding->gallery_images) 
@@ -758,9 +762,11 @@ class CampOfferController extends Controller
         $targetFish = $guiding->getTargetFishNames();
         $fishingMethods = $guiding->getFishingMethodNames();
         $inclusions = $guiding->getInclusionNames();
+        $waterTypes = $guiding->getWaterNames($watersMap);
 
         $durationLabel = $this->guidingDurationLabel($guiding);
         $priceType = $guiding->price_type ?: 'per_boat';
+        $waterName = filled($guiding->water_name) ? $guiding->water_name : null;
 
         return [
             'id' => $guiding->id,
@@ -773,18 +779,19 @@ class CampOfferController extends Controller
             'duration_type' => $guiding->duration_type,
             'duration_label' => $durationLabel,
             'max_persons' => $guiding->max_guests,
-            'type' => $guiding->fishingFrom?->name ?? $guiding->tour_type,
+            'type' => $guiding->shoreOrBoatLabel(),
             'type_id' => $guiding->fishingFrom?->id,
+            'water_types' => $waterTypes,
             'guiding_info' => [
-                'art' => $guiding->fishingFrom?->name,
+                'art' => $guiding->shoreOrBoatLabel(),
                 'dauer' => $durationLabel,
                 'max_personen' => $guiding->max_guests,
-                'gewaesser' => $guiding->water_name ?? 'Water'
+                'gewaesser' => $waterName,
             ],
             'target_fish' => $targetFish,
             'methods' => $fishingMethods,
-            'meeting_point' => $guiding->meeting_point,
             'start_times' => $guiding->desc_starting_time ? explode(',', $guiding->desc_starting_time) : [],
+            'desc_meeting_point' => $guiding->desc_meeting_point,
             'inclusives' => $inclusions,
             'price' => [
                 'amount' => $this->guidingDisplayPrice($guiding),
@@ -862,7 +869,7 @@ class CampOfferController extends Controller
     /**
      * Map SpecialOffer model to view format
      */
-    private function mapSpecialOfferData(SpecialOffer $specialOffer)
+    private function mapSpecialOfferData(SpecialOffer $specialOffer, ?Collection $watersMap = null)
     {
         $galleryImages = $this->getImageUrls($specialOffer->gallery_images ?? []);
         $galleryCount = max(count($galleryImages), 1);
@@ -918,8 +925,8 @@ class CampOfferController extends Controller
         $guidingNames = $specialOffer->guidings->pluck('title')->toArray();
         
         // Map full guiding data for minimized cards
-        $guidingsFull = $specialOffer->guidings->map(function($guiding) {
-            return $this->mapGuidingData($guiding);
+        $guidingsFull = $specialOffer->guidings->map(function($guiding) use ($watersMap) {
+            return $this->mapGuidingData($guiding, $watersMap);
         })->toArray();
         
         // Process whats_included - normalize to array of strings

@@ -279,6 +279,39 @@ class Guiding extends Model
         return $this->belongsTo(FishingFrom::class,'fishing_from_id','id');
     }
 
+    /**
+     * Guest-facing Shore/Boat label. Never use tour_type (private/shared).
+     */
+    public function shoreOrBoatLabel(): string
+    {
+        $fromName = trim((string) ($this->fishingFrom?->name ?? ''));
+        if ($fromName !== '' && ! self::looksLikeTourPrivacy($fromName)) {
+            return $fromName;
+        }
+
+        if ((int) $this->is_boat === 1 || (int) $this->fishing_from_id === 1) {
+            return __('guidings.boat');
+        }
+
+        return __('guidings.shore');
+    }
+
+    public static function looksLikeTourPrivacy(string $value): bool
+    {
+        $normalized = mb_strtolower(trim($value));
+
+        return in_array($normalized, [
+            'private',
+            'shared',
+            'privat',
+            'geteilt',
+            'private tours only',
+            'shared tours possible',
+            'nur private touren',
+            'geteilte touren möglich',
+        ], true);
+    }
+
     public function guidingTargets()
     {
         return $this->belongsToMany(Target::class,'guiding_targets')->withTimestamps();
@@ -1067,21 +1100,25 @@ class Guiding extends Model
      */
     public function getWaterNames($watersMap = null): array
     {
-        $waterIds = decode_if_json($this->water_types) ?? [];
+        $waterIds = decode_if_json($this->getAttribute('water_types')) ?? [];
         if (empty($waterIds)) {
             return [];
         }
         return collect($waterIds)->map(function($item) use ($watersMap) {
             if (is_numeric($item)) {
-                if ($watersMap && $watersMap->has($item)) {
-                    $water = $watersMap[$item];
+                $waterId = (int) $item;
+                if ($watersMap && $watersMap->has($waterId)) {
+                    $water = $watersMap[$waterId];
                 } else {
-                    $water = Water::find($item);
+                    $water = Water::find($waterId);
                 }
                 if ($water && $water->name) {
+                    $attributes = $water->getAttributes();
+
                     return [
                         'id' => $water->id,
-                        'name' => $water->name
+                        'name' => $water->name,
+                        'name_en' => $attributes['name_en'] ?? null,
                     ];
                 }
             }

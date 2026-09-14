@@ -327,6 +327,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'chip_bathrooms' => 'Badezimmer',
     'chip_bedrooms' => 'Schlafzimmer',
     'chip_beds' => 'Betten',
+    'chip_water_type' => 'Gewässertyp',
     'chip_details' => 'Details',
     'guiding_information' => 'Guiding-Informationen',
     'type_label' => 'Art',

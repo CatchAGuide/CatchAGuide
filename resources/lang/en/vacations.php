@@ -327,6 +327,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'chip_bathrooms' => 'Bathrooms',
     'chip_bedrooms' => 'Bedrooms',
     'chip_beds' => 'Beds',
+    'chip_water_type' => 'Water type',
     'chip_details' => 'Details',
     'guiding_information' => 'Guiding Information',
     'type_label' => 'Type',
