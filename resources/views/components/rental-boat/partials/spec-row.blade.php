@@ -11,6 +11,7 @@
                 :type="$chip['type']"
                 :value="$chip['value']"
                 :label="$chip['label']"
+                class="attachment-chip--flat"
             />
         @endforeach
     </div>

@@ -564,6 +564,47 @@
         }
     }
 
+    &__panel--facts {
+        // Nested inside a component-card that already has its own background
+        // and border, so flatten this one into a simple section instead of
+        // stacking box-in-a-box.
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    &__fact-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+    }
+
+    &__fact-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__fact-label {
+        color: #64748b;
+    }
+
+    &__fact-value {
+        color: #334155;
+        font-weight: 600;
+        text-align: right;
+    }
+
     &__panel--extras {
         grid-column: 1 / -1;
     }

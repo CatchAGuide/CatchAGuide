@@ -506,21 +506,6 @@ class CampOfferController extends Controller
             ->values()
             ->toArray();
 
-        // Find license requirement: match by label (name), but display the
-        // host-entered detail (value) rather than the generic label itself.
-        $licenseRequirement = null;
-        if (!empty($requirementsRaw) && is_array($requirementsRaw)) {
-            foreach ($requirementsRaw as $requirement) {
-                $label = is_array($requirement) ? ($requirement['name'] ?? ($requirement['value'] ?? null)) : $requirement;
-                if ($label && (stripos($label, 'license') !== false || stripos($label, 'führerschein') !== false)) {
-                    $licenseRequirement = is_array($requirement)
-                        ? ($requirement['value'] ?? $requirement['name'] ?? null)
-                        : $requirement;
-                    break;
-                }
-            }
-        }
-
         // Build specs array. Keys drive the shared attachment chips so
         // capacity uses the same persons icon as guidings / special offers.
         $specs = [];
@@ -559,15 +544,6 @@ class CampOfferController extends Controller
             ];
         }
 
-        // License requirement
-        if ($licenseRequirement) {
-            $specs[] = [
-                'key' => 'license',
-                'label' => __('rental_boats.license'),
-                'value' => $licenseRequirement,
-            ];
-        }
-        
         return [
             'id' => $boat->id,
             'title' => $boat->title,

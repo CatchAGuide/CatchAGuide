@@ -73,16 +73,39 @@
 
                 @include('components.rental-boat.partials.spec-row')
 
+                <div class="rental-boat-card__boat-info" data-expanded-only>
+                    <div class="rental-boat-card__info-box">
+                        <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
+                        <div class="rental-boat-card__info-box-content">
+                            @if(count($boatInfoList) > 0)
+                                <ul class="rental-boat-card__fact-table">
+                                    @foreach($boatInfoList as $info)
+                                        <li class="rental-boat-card__fact-row">
+                                            <span class="rental-boat-card__fact-label">{{ translated_catalog_label($info) }}</span>
+                                            <span class="rental-boat-card__fact-value">{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
                 @if (count($inclusiveItems) > 0 )
                     <div class="rental-boat-card__included">
                         <div class="rental-boat-card__included-title">{{ __('vacations.included_in_price') }}</div>
-                        <div class="rental-boat-card__included-chips">
+                        <ul class="rental-boat-card__checklist">
                             @foreach($inclusiveItems as $inclusive)
-                                <span class="rental-boat-card__included-chip">
-                                    ✅ {{ translated_catalog_label($inclusive) }}
-                                </span>
+                                <li>
+                                    <svg class="rental-boat-card__check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    <span>{{ translated_catalog_label($inclusive) }}</span>
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     </div>
                 @endif
             </div>
@@ -121,16 +144,39 @@
 
                     @include('components.rental-boat.partials.spec-row')
 
+                    <div class="rental-boat-card__boat-info" data-expanded-only>
+                        <div class="rental-boat-card__info-box">
+                            <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
+                            <div class="rental-boat-card__info-box-content">
+                                @if(count($boatInfoList) > 0)
+                                    <ul class="rental-boat-card__fact-table">
+                                        @foreach($boatInfoList as $info)
+                                            <li class="rental-boat-card__fact-row">
+                                                <span class="rental-boat-card__fact-label">{{ translated_catalog_label($info) }}</span>
+                                                <span class="rental-boat-card__fact-value">{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     @if (count($inclusiveItems) > 0 )
                         <div class="rental-boat-card__included">
                             <div class="rental-boat-card__included-title">{{ __('vacations.included_in_price') }}</div>
-                            <div class="rental-boat-card__included-chips">
+                            <ul class="rental-boat-card__checklist">
                                 @foreach($inclusiveItems as $inclusive)
-                                    <span class="rental-boat-card__included-chip">
-                                        ✅ {{ translated_catalog_label($inclusive) }}
-                                    </span>
+                                    <li>
+                                        <svg class="rental-boat-card__check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        <span>{{ translated_catalog_label($inclusive) }}</span>
+                                    </li>
                                 @endforeach
-                            </div>
+                            </ul>
                         </div>
                     @endif
                 </div>
@@ -154,34 +200,20 @@
 
             <div class="rental-boat-card__info-matrix" data-expanded-only>
                 <div class="rental-boat-card__info-box">
-                    <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
-                    <div class="rental-boat-card__info-box-content">
-                        @include('components.rental-boat.partials.spec-row')
-                        @if(count($boatInfoList) > 0)
-                            <ul class="rental-boat-card__info-list">
-                                @foreach($boatInfoList as $info)
-                                    <li>
-                                        <span>{{ translated_catalog_label($info) }}:</span>
-                                        <strong>{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</strong>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="rental-boat-card__info-box">
                     <div class="rental-boat-card__info-box-title">{{ __('guidings.Requirements') }}</div>
                     <div class="rental-boat-card__info-box-content">
                         @if(count($requirementItems) > 0)
-                            <ul class="rental-boat-card__info-list">
+                            <ul class="rental-boat-card__requirement-list">
                                 @foreach($requirementItems as $requirement)
-                                    <li>
-                                        {{ translated_catalog_label($requirement) }}
-                                        @if(is_array($requirement) && filled($requirement['value'] ?? null) && ($requirement['value'] ?? null) !== ($requirement['name'] ?? null))
-                                            : {{ is_numeric($requirement['value']) ? $requirement['value'] : translate($requirement['value']) }}
+                                    @php
+                                        $requirementDetail = is_array($requirement) && filled($requirement['value'] ?? null) && ($requirement['value'] ?? null) !== ($requirement['name'] ?? null)
+                                            ? (is_numeric($requirement['value']) ? $requirement['value'] : translate($requirement['value']))
+                                            : null;
+                                    @endphp
+                                    <li class="rental-boat-card__requirement-row">
+                                        <div class="rental-boat-card__requirement-label">{{ translated_catalog_label($requirement) }}</div>
+                                        @if($requirementDetail)
+                                            <div class="rental-boat-card__requirement-value">{{ $requirementDetail }}</div>
                                         @endif
                                     </li>
                                 @endforeach

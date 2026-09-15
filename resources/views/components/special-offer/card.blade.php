@@ -11,9 +11,6 @@
         $specialOfferGalleryId = 'special-offer-card-'.($specialOffer['id'] ?? uniqid());
         $whatsIncluded = $specialOffer['whats_included'] ?? [];
         $pricingExtras = $specialOffer['pricing_extras'] ?? [];
-        $accommodations = $specialOffer['accommodations'] ?? [];
-        $rentalBoats = $specialOffer['rental_boats'] ?? [];
-        $guidings = $specialOffer['guidings'] ?? [];
         $price = $specialOffer['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
         $currency = $price['currency'] ?? 'EUR';
@@ -57,104 +54,36 @@
                 <div class="special-offer-card__summary-header">
                     <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
                 </div>
-
-                <div class="special-offer-card__anchor-points">
-                    @if(count($accommodations) > 0)
-                        <div class="special-offer-card__anchor-category" data-category-type="accommodation">
-                            <span class="special-offer-card__anchor-category-label">{{ __('vacations.accommodation') }}</span>
-                            <div class="special-offer-card__anchor-buttons">
-                                @foreach($accommodations as $index => $accommodation)
-                                    <a href="#accommodation-{{ $accommodation['id'] }}" 
-                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--accommodation {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                       data-anchor-type="accommodation"
-                                       data-anchor-id="{{ $accommodation['id'] }}"
-                                       data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title']) ?? '{Title}' }}</span>
-                                    </a>
-                                @endforeach
-                                @if(count($accommodations) > 3)
-                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="accommodation" aria-label="{{ __('vacations.show_more') }}">
-                                        <span class="special-offer-card__anchor-toggle-text">...</span>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-
-                    @if(count($rentalBoats) > 0)
-                        <div class="special-offer-card__anchor-category" data-category-type="boat">
-                            <span class="special-offer-card__anchor-category-label">{{ __('vacations.rental_boat') }}</span>
-                            <div class="special-offer-card__anchor-buttons">
-                                @foreach($rentalBoats as $index => $boat)
-                                    <a href="#rental-boat-{{ $boat['id'] }}" 
-                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--boat {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                       data-anchor-type="boat"
-                                       data-anchor-id="{{ $boat['id'] }}"
-                                       data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ translate($boat['title']) ?? '{Title}' }}</span>
-                                    </a>
-                                @endforeach
-                                @if(count($rentalBoats) > 3)
-                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="boat" aria-label="{{ __('vacations.show_more') }}">
-                                        <span class="special-offer-card__anchor-toggle-text">...</span>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-
-                    @if(count($guidings) > 0)
-                        <div class="special-offer-card__anchor-category" data-category-type="guiding">
-                            <span class="special-offer-card__anchor-category-label">{{ __('vacations.guidings') }}</span>
-                            <div class="special-offer-card__anchor-buttons">
-                                @foreach($guidings as $index => $guiding)
-                                    <a href="#guiding-{{ $guiding['id'] }}" 
-                                       class="special-offer-card__anchor-box special-offer-card__anchor-box--guiding {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                       data-anchor-type="guiding"
-                                       data-anchor-id="{{ $guiding['id'] }}"
-                                       data-anchor-scroll>
-                                        <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title']) ?? '{Title}' }}</span>
-                                    </a>
-                                @endforeach
-                                @if(count($guidings) > 3)
-                                    <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="guiding" aria-label="{{ __('vacations.show_more') }}">
-                                        <span class="special-offer-card__anchor-toggle-text">...</span>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    @endif
-                </div>
             </div>
 
-            @if(count($whatsIncluded) > 0 || count($pricingExtras) > 0)
-                <div class="special-offer-card__media-extras" data-expanded-only>
-                    @if(count($whatsIncluded) > 0)
-                        <div class="special-offer-card__panel special-offer-card__panel--inclusives">
-                            <div class="special-offer-card__panel-title">{{ __('vacations.included_services') }}</div>
-                            <div class="special-offer-card__inclusive-extras">
-                                @foreach($whatsIncluded as $item)
-                                    <span class="special-offer-card__inclusive-chip">✔ {{ translate($item) }}</span>
-                                @endforeach
-                            </div>
+            @if(count($whatsIncluded) > 0)
+                <div class="special-offer-card__media-extras">
+                    <div class="special-offer-card__panel special-offer-card__panel--inclusives">
+                        <div class="special-offer-card__panel-title">{{ __('vacations.included_services') }}</div>
+                        <div class="special-offer-card__inclusive-extras">
+                            @foreach($whatsIncluded as $item)
+                                <span class="special-offer-card__inclusive-chip">✔ {{ translate($item) }}</span>
+                            @endforeach
                         </div>
-                    @endif
+                    </div>
+                </div>
+            @endif
 
-                    @if(count($pricingExtras) > 0)
-                        <div class="special-offer-card__panel special-offer-card__panel--pricing-extras">
-                            <div class="special-offer-card__panel-title">{{ __('vacations.pricing_extras') }}</div>
-                            <div class="special-offer-card__pricing-extras-list">
-                                @foreach($pricingExtras as $extra)
-                                    <div class="special-offer-card__pricing-extra-item">
-                                        <span class="special-offer-card__pricing-extra-name">{{ translate($extra['name'] ?? '') }}</span>
-                                        <span class="special-offer-card__pricing-extra-price">
-                                            {{ $currency === 'EUR' ? '€' : $currency }}{{ number_format((float)($extra['price'] ?? 0), 2, ',', '.') }}
-                                        </span>
-                                    </div>
-                                @endforeach
-                            </div>
+            @if(count($pricingExtras) > 0)
+                <div class="special-offer-card__media-extras" data-expanded-only>
+                    <div class="special-offer-card__panel special-offer-card__panel--pricing-extras">
+                        <div class="special-offer-card__panel-title">{{ __('vacations.pricing_extras') }}</div>
+                        <div class="special-offer-card__pricing-extras-list">
+                            @foreach($pricingExtras as $extra)
+                                <div class="special-offer-card__pricing-extra-item">
+                                    <span class="special-offer-card__pricing-extra-name">{{ translate($extra['name'] ?? '') }}</span>
+                                    <span class="special-offer-card__pricing-extra-price">
+                                        {{ $currency === 'EUR' ? '€' : $currency }}{{ number_format((float)($extra['price'] ?? 0), 2, ',', '.') }}
+                                    </span>
+                                </div>
+                            @endforeach
                         </div>
-                    @endif
+                    </div>
                 </div>
             @endif
         </div>
@@ -166,74 +95,6 @@
                     <div class="special-offer-card__summary-header">
                         <h3 class="special-offer-card__title">{{ translate($specialOffer['title']) ?? __('vacations.special_offer_singular') }}</h3>
                     </div>
-
-            <div class="special-offer-card__anchor-points">
-                @if(count($accommodations) > 0)
-                    <div class="special-offer-card__anchor-category" data-category-type="accommodation">
-                        <span class="special-offer-card__anchor-category-label">{{ __('vacations.accommodation') }}</span>
-                        <div class="special-offer-card__anchor-buttons">
-                            @foreach($accommodations as $index => $accommodation)
-                                <a href="#accommodation-{{ $accommodation['id'] }}" 
-                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--accommodation {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                   data-anchor-type="accommodation"
-                                   data-anchor-id="{{ $accommodation['id'] }}"
-                                   data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($accommodation['title']) ?? '{Title}' }}</span>
-                                </a>
-                            @endforeach
-                            @if(count($accommodations) > 3)
-                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="accommodation" aria-label="{{ __('vacations.show_more') }}">
-                                    <span class="special-offer-card__anchor-toggle-text">...</span>
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                @if(count($rentalBoats) > 0)
-                    <div class="special-offer-card__anchor-category" data-category-type="boat">
-                        <span class="special-offer-card__anchor-category-label">{{ __('vacations.rental_boat') }}</span>
-                        <div class="special-offer-card__anchor-buttons">
-                            @foreach($rentalBoats as $index => $boat)
-                                <a href="#rental-boat-{{ $boat['id'] }}" 
-                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--boat {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                   data-anchor-type="boat"
-                                   data-anchor-id="{{ $boat['id'] }}"
-                                   data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($boat['title']) ?? '{Title}' }}</span>
-                                </a>
-                            @endforeach
-                            @if(count($rentalBoats) > 3)
-                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="boat" aria-label="{{ __('vacations.show_more') }}">
-                                    <span class="special-offer-card__anchor-toggle-text">...</span>
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-
-                @if(count($guidings) > 0)
-                    <div class="special-offer-card__anchor-category" data-category-type="guiding">
-                        <span class="special-offer-card__anchor-category-label">{{ __('vacations.guidings') }}</span>
-                        <div class="special-offer-card__anchor-buttons">
-                            @foreach($guidings as $index => $guiding)
-                                <a href="#guiding-{{ $guiding['id'] }}" 
-                                   class="special-offer-card__anchor-box special-offer-card__anchor-box--guiding {{ $index >= 3 ? 'special-offer-card__anchor-box--hidden' : '' }}" 
-                                   data-anchor-type="guiding"
-                                   data-anchor-id="{{ $guiding['id'] }}"
-                                   data-anchor-scroll>
-                                    <span class="special-offer-card__anchor-box-text">{{ translate($guiding['title']) ?? '{Title}' }}</span>
-                                </a>
-                            @endforeach
-                            @if(count($guidings) > 3)
-                                <button type="button" class="special-offer-card__anchor-toggle" data-toggle-category="guiding" aria-label="{{ __('vacations.show_more') }}">
-                                    <span class="special-offer-card__anchor-toggle-text">...</span>
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-            </div>
                 </div>
 
                 <div class="special-offer-card__actions">
@@ -260,71 +121,42 @@
         @if(count($allComponents) > 0)
             <div class="special-offer-card__component-cards" data-expanded-only>
                 @foreach($accommodationsFull as $acc)
-                    @php
-                        $accPersons = $chipPresenter::personsValue($acc['max_occupancy'] ?? null);
-                        $accBathroomRaw = $acc['number_of_bathrooms'] ?? ($acc['bathroom_count'] ?? ($acc['bathrooms'] ?? null));
-                        $accBathroom = $chipPresenter::bedroomsValue($accBathroomRaw);
-                        $accArea = $chipPresenter::areaValue($acc['living_area_sqm'] ?? null);
-                        $accBedrooms = $chipPresenter::bedroomsValue($acc['number_of_bedrooms'] ?? null);
-                        $accBedChips = $chipPresenter::bedChips($acc['bed_items'] ?? [], $acc['bed_summary'] ?? null);
-                        $accWater = $acc['distances']['to_water_m'] ?? null;
-                        $accParking = $acc['distances']['to_parking_m'] ?? null;
-                    @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--accommodation" id="accommodation-{{ $acc['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($acc['title']) ?? '' }}</h4>
                         <div class="special-offer-card__component-subtitle">{{ translated_catalog_label(['id' => $acc['accommodation_type_id'] ?? null, 'name' => $acc['accommodation_type'] ?? '']) }}</div>
 
-                        <div class="special-offer-card__component-badges">
-                            @if($accPersons)
-                                <x-vacation.attachment-chip type="persons" :value="$accPersons" />
-                            @endif
-                            @if($accBathroom)
-                                <x-vacation.attachment-chip type="bath" :value="$accBathroom" />
-                            @endif
-                            @if($accArea)
-                                <x-vacation.attachment-chip type="area" :value="$accArea" />
-                            @endif
-                            @if($accBedrooms)
-                                <x-vacation.attachment-chip type="bedrooms" :value="$accBedrooms" />
-                            @endif
-                            @foreach($accBedChips as $bedChip)
-                                <x-vacation.attachment-chip type="bed" :value="$bedChip['value']" />
-                            @endforeach
-                            @if(!empty($accWater))
-                                <x-vacation.attachment-chip
-                                    type="water"
-                                    :label="__('vacations.label_water')"
-                                    :value="is_numeric($accWater) ? $accWater.' m' : (translate($accWater) ?: $accWater)"
-                                />
-                            @endif
-                            @if(!empty($accParking))
-                                <x-vacation.attachment-chip
-                                    type="parking"
-                                    :label="__('vacations.label_parking')"
-                                    :value="is_numeric($accParking) ? $accParking.' m' : (translate($accParking) ?: $accParking)"
-                                />
-                            @endif
-                        </div>
+                        @if(!empty($acc['accommodation_details']))
+                            <div class="special-offer-card__panel special-offer-card__panel--facts">
+                                <div class="special-offer-card__panel-title">{{ __('vacations.details') }}</div>
+                                <ul class="special-offer-card__fact-list">
+                                    @foreach($acc['accommodation_details'] as $detail)
+                                        <li class="special-offer-card__fact-row">
+                                            <span class="special-offer-card__fact-label">{{ translated_catalog_label($detail) }}</span>
+                                            <span class="special-offer-card__fact-value">{{ is_numeric($detail['value'] ?? null) ? $detail['value'] : translate($detail['value'] ?? '') }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
 
                 @foreach($rentalBoatsFull as $boat)
-                    @php
-                        $nestedBoatChips = $chipPresenter::boatChips($boat['specs'] ?? []);
-                    @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--boat" id="rental-boat-{{ $boat['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($boat['title'] ?? '') }}</h4>
                         <div class="special-offer-card__component-subtitle">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
 
-                        @if(count($nestedBoatChips) > 0)
-                            <div class="special-offer-card__component-badges">
-                                @foreach($nestedBoatChips as $chip)
-                                    <x-vacation.attachment-chip
-                                        :type="$chip['type']"
-                                        :value="$chip['value']"
-                                        :label="$chip['label']"
-                                    />
-                                @endforeach
+                        @if(!empty($boat['boat_info']))
+                            <div class="special-offer-card__panel special-offer-card__panel--facts">
+                                <div class="special-offer-card__panel-title">{{ __('vacations.boat_information') }}</div>
+                                <ul class="special-offer-card__fact-list">
+                                    @foreach($boat['boat_info'] as $info)
+                                        <li class="special-offer-card__fact-row">
+                                            <span class="special-offer-card__fact-label">{{ translated_catalog_label($info) }}</span>
+                                            <span class="special-offer-card__fact-value">{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
                             </div>
                         @endif
                     </div>
@@ -336,7 +168,25 @@
                         $nestedPersons = $chipPresenter::personsValue(
                             $guiding['guiding_info']['max_personen'] ?? ($guiding['max_persons'] ?? null)
                         );
+                        $nestedFishingType = $guiding['guiding_info']['art'] ?? null;
                         $nestedWaterChips = $chipPresenter::waterTypeChips($guiding['water_types'] ?? []);
+                        $nestedWaterValue = count($nestedWaterChips) > 0
+                            ? implode(' · ', array_column($nestedWaterChips, 'value'))
+                            : (!empty($guiding['guiding_info']['gewaesser']) ? translate($guiding['guiding_info']['gewaesser']) : null);
+                        $resolvedCatalogLabels = fn (array $items) => array_values(array_filter(
+                            array_map(fn ($item) => translated_catalog_label($item), $items),
+                            fn ($label) => $label !== '' && ! is_numeric($label)
+                        ));
+                        $nestedMethodsValue = implode(' · ', $resolvedCatalogLabels($guiding['methods'] ?? []));
+                        $nestedTargetFishValue = implode(', ', $resolvedCatalogLabels($guiding['target_fish'] ?? []));
+                        $guidingFacts = array_filter([
+                            __('guidings.Duration') => $nestedDuration,
+                            __('guidings.persons') => $nestedPersons,
+                            __('guidings.Fishing_Type') => $nestedFishingType,
+                            __('guidings.Water') => $nestedWaterValue,
+                            __('vacations.fishing_methods') => $nestedMethodsValue ?: null,
+                            __('guidings.Target_Fish') => $nestedTargetFishValue ?: null,
+                        ]);
                     @endphp
                     <div class="special-offer-card__component-card special-offer-card__component-card--guiding" id="guiding-{{ $guiding['id'] }}">
                         <h4 class="special-offer-card__component-title">{{ translate($guiding['title']) ?? '' }}</h4>
@@ -344,17 +194,19 @@
                             <div class="special-offer-card__component-subtitle">{{ $guiding['guiding_info']['art'] ?? '' }}</div>
                         @endif
 
-                        <div class="special-offer-card__component-badges">
-                            @if(!empty($nestedDuration))
-                                <x-vacation.attachment-chip type="duration" :value="$nestedDuration" />
-                            @endif
-                            @if($nestedPersons)
-                                <x-vacation.attachment-chip type="persons" :value="$nestedPersons" />
-                            @endif
-                            @foreach($nestedWaterChips as $waterChip)
-                                <x-vacation.attachment-chip type="water-type" :value="$waterChip['value']" />
-                            @endforeach
-                        </div>
+                        @if(count($guidingFacts) > 0)
+                            <div class="special-offer-card__panel special-offer-card__panel--facts">
+                                <div class="special-offer-card__panel-title">{{ __('vacations.guiding_information') }}</div>
+                                <ul class="special-offer-card__fact-list">
+                                    @foreach($guidingFacts as $factLabel => $factValue)
+                                        <li class="special-offer-card__fact-row">
+                                            <span class="special-offer-card__fact-label">{{ $factLabel }}</span>
+                                            <span class="special-offer-card__fact-value">{{ $factValue }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>

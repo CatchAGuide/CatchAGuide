@@ -187,6 +187,16 @@
         overflow: visible;
         position: relative;
         z-index: 2;
+
+        // Match the accommodation card's guests/bedrooms row on mobile: a
+        // boxed, centered divider row instead of the plain left-aligned line.
+        @media (max-width: 768px) {
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            justify-content: center;
+        }
     }
 
     &__spec-item {
@@ -241,28 +251,95 @@
         letter-spacing: 0.02em;
     }
 
-    &__included-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
+    // Included-in-price checklist: check + text, matching the guiding/
+    // accommodation cards (plain list, no chip background/border).
+    &__checklist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px 16px;
 
-    &__included-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-        line-height: 1;
+        li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #334155;
+        }
     }
 
     &__check-icon {
         flex-shrink: 0;
         color: #16a34a;
+    }
+
+    // Boat information table: bold label / muted value in bordered rows,
+    // matching the approved boat detail panel mockup.
+    &__fact-table {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__fact-row {
+        display: grid;
+        grid-template-columns: minmax(100px, 45%) 1fr;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__fact-label {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    &__fact-value {
+        color: #64748b;
+    }
+
+    // Requirements: bold label with the description below, divided by a
+    // border between rows — matching the mockup's "Voraussetzungen" list.
+    &__requirement-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__requirement-row {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__requirement-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    &__requirement-value {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.6;
     }
 
     &__actions {
@@ -359,7 +436,8 @@
     // Hide expandable content by default - scoped to rental-boat-card only
     // Using specific class selectors to prevent affecting accommodation cards
     &__info-matrix[data-expanded-only],
-    &__extras-inclusives[data-expanded-only] {
+    &__extras-inclusives[data-expanded-only],
+    &__boat-info[data-expanded-only] {
         display: none !important;
     }
 
@@ -381,6 +459,15 @@
             display: flex !important;
             animation: fadeInUp 0.4s ease forwards;
         }
+
+        .rental-boat-card__boat-info[data-expanded-only] {
+            display: block !important;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+    }
+
+    &__boat-info {
+        width: 100%;
     }
 
     &__expand-btn--secondary {
@@ -398,17 +485,15 @@
         }
     }
 
+    // Requirements is now the only box in the matrix (boat info moved up
+    // next to the spec chips), so it gets the full width to itself.
     &__info-matrix {
         margin-top: 0;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         align-items: start;
         gap: 12px;
         width: 100%;
-
-        @media (max-width: 640px) {
-            grid-template-columns: 1fr;
-        }
     }
 
     &__info-box {

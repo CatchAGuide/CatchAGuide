@@ -31255,6 +31255,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   position: relative;
   z-index: 2;
 }
+@media (max-width: 768px) {
+  .rental-boat-card__spec-row {
+    background: rgba(241, 245, 249, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    padding: 10px 12px;
+    justify-content: center;
+  }
+}
 .rental-boat-card__spec-item {
   display: inline-flex;
   align-items: center;
@@ -31300,26 +31309,77 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
-.rental-boat-card__included-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.rental-boat-card__checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px 16px;
 }
-.rental-boat-card__included-chip {
-  display: inline-flex;
+.rental-boat-card__checklist li {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
   color: #334155;
-  line-height: 1;
 }
 .rental-boat-card__check-icon {
   flex-shrink: 0;
   color: #16a34a;
+}
+.rental-boat-card__fact-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rental-boat-card__fact-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 45%) 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.rental-boat-card__fact-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.rental-boat-card__fact-label {
+  font-weight: 700;
+  color: #1e293b;
+}
+.rental-boat-card__fact-value {
+  color: #64748b;
+}
+.rental-boat-card__requirement-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rental-boat-card__requirement-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.rental-boat-card__requirement-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.rental-boat-card__requirement-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.rental-boat-card__requirement-value {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
 }
 .rental-boat-card__actions {
   display: flex;
@@ -31400,7 +31460,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .rental-boat-card__select-btn:hover {
   background: #1d4ed8;
 }
-.rental-boat-card__info-matrix[data-expanded-only], .rental-boat-card__extras-inclusives[data-expanded-only] {
+.rental-boat-card__info-matrix[data-expanded-only], .rental-boat-card__extras-inclusives[data-expanded-only], .rental-boat-card__boat-info[data-expanded-only] {
   display: none !important;
 }
 @media (max-width: 768px) {
@@ -31415,6 +31475,13 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .rental-boat-card--expanded .rental-boat-card__extras-inclusives[data-expanded-only] {
   display: flex !important;
   animation: fadeInUp 0.4s ease forwards;
+}
+.rental-boat-card--expanded .rental-boat-card__boat-info[data-expanded-only] {
+  display: block !important;
+  animation: fadeInUp 0.4s ease forwards;
+}
+.rental-boat-card__boat-info {
+  width: 100%;
 }
 .rental-boat-card__expand-btn--secondary {
   align-self: flex-end;
@@ -31432,15 +31499,10 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 .rental-boat-card__info-matrix {
   margin-top: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   align-items: start;
   gap: 12px;
   width: 100%;
-}
-@media (max-width: 640px) {
-  .rental-boat-card__info-matrix {
-    grid-template-columns: 1fr;
-  }
 }
 .rental-boat-card__info-box {
   background: rgba(241, 245, 249, 0.6);
@@ -32037,6 +32099,38 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .special-offer-card__bullet-list li:last-child {
   margin-bottom: 0;
+}
+.special-offer-card__panel--facts {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+.special-offer-card__fact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.special-offer-card__fact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.special-offer-card__fact-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.special-offer-card__fact-label {
+  color: #64748b;
+}
+.special-offer-card__fact-value {
+  color: #334155;
+  font-weight: 600;
+  text-align: right;
 }
 .special-offer-card__panel--extras {
   grid-column: 1/-1;
