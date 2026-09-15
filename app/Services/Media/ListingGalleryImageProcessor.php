@@ -20,8 +20,10 @@ class ListingGalleryImageProcessor
     ) {}
 
     /**
-     * After a successful save: snapshot the previous gallery into `_trash`, then
-     * move queued removals (backup copy first, then delete live).
+     * After a successful save, move queued gallery removals into `_trash`
+     * (backup copy first, then delete live). Unchanged files stay put — a full
+     * live-gallery snapshot would copy every image through object storage on
+     * every admin save (e.g. attaching a tour) and can hang the request.
      *
      * @param  array<int, string>|string|null  $gallery
      * @return array{backed_up: array<int, string>, trashed: array<int, string>}
@@ -37,10 +39,6 @@ class ListingGalleryImageProcessor
         }
 
         $backedUp = [];
-        if ($this->trash->backupBeforeGalleryUpdateEnabled() && $this->preUpdateGallerySnapshot !== []) {
-            $backedUp = $this->trash->backupMany($this->preUpdateGallerySnapshot);
-        }
-
         $trashed = media_trash_paths($this->takePendingDeletes(), $keep);
         $this->preUpdateGallerySnapshot = [];
 

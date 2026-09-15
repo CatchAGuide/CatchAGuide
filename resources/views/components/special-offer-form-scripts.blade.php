@@ -731,6 +731,7 @@
             
             // Collect image list for tracking — only overwrite when previews are present.
             // Writing "[]" while ImageManager is still loading would delete the whole gallery.
+            // FormData is already built, so also set() the field on the payload.
             const imageList = [];
             document.querySelectorAll('#croppedImagesContainer .image-preview-wrapper').forEach(wrapper => {
                 const path = wrapper.dataset.storagePath || wrapper.dataset.filename;
@@ -739,9 +740,12 @@
                 }
             });
             if (imageList.length > 0) {
-                $('#image_list').val(JSON.stringify(imageList));
+                const imageListJson = JSON.stringify(imageList);
+                $('#image_list').val(imageListJson);
+                formData.set('image_list', imageListJson);
             } else {
                 $('#image_list').val('');
+                formData.set('image_list', '');
             }
             
             if (window.imageManagerLoaded && typeof window.imageManagerLoaded.getCroppedImages === 'function') {

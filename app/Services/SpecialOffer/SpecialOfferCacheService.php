@@ -13,7 +13,7 @@ class SpecialOfferCacheService
     private const CACHE_TTL = 300; // 5 minutes
     private const SPECIAL_OFFERS_LIST_CACHE_KEY = 'special_offers_list';
     private const SPECIAL_OFFER_CACHE_KEY = 'special_offer_';
-    private const FORM_DATA_CACHE_KEY = 'special_offer_form_data';
+    private const FORM_DATA_CACHE_KEY = 'special_offer_form_data_v2';
 
     /**
      * Get paginated special offers list with caching
@@ -49,9 +49,18 @@ class SpecialOfferCacheService
     {
         return Cache::remember(self::FORM_DATA_CACHE_KEY, self::CACHE_TTL, function () {
             return [
-                'accommodations' => Accommodation::where('status', 'active')->orderBy('title')->get(),
-                'rentalBoats' => RentalBoat::where('status', 'active')->orderBy('title')->get(),
-                'guidings' => Guiding::where('status', 1)->orderBy('title')->get(),
+                'accommodations' => Accommodation::query()
+                    ->where('status', 'active')
+                    ->orderBy('title')
+                    ->get(['id', 'title']),
+                'rentalBoats' => RentalBoat::query()
+                    ->where('status', 'active')
+                    ->orderBy('title')
+                    ->get(['id', 'title']),
+                'guidings' => Guiding::query()
+                    ->where('status', 1)
+                    ->orderBy('title')
+                    ->get(['id', 'title']),
             ];
         });
     }

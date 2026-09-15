@@ -98,6 +98,60 @@
         margin-top: 0;
     }
 
+    // Desktop collapsed only: inclusive services sit under the offer title.
+    // Expanded desktop keeps them under the photo. Mobile is not changed here.
+    @media (min-width: 769px) {
+        &:not(.special-offer-card--expanded) {
+            .special-offer-card__grid {
+                grid-template-columns: 320px minmax(0, 1fr) auto;
+                grid-template-rows: min-content 1fr;
+                grid-template-areas:
+                    "gallery title actions"
+                    "gallery inclusives actions";
+                align-content: start;
+            }
+
+            @media (max-width: 1200px) {
+                .special-offer-card__grid {
+                    grid-template-columns: 280px minmax(0, 1fr) auto;
+                }
+            }
+
+            @media (max-width: 1024px) {
+                .special-offer-card__grid {
+                    grid-template-columns: 260px minmax(0, 1fr) auto;
+                }
+            }
+
+            .special-offer-card__media,
+            .special-offer-card__content,
+            .special-offer-card__content-header {
+                display: contents;
+            }
+
+            .special-offer-gallery {
+                grid-area: gallery;
+                align-self: start;
+            }
+
+            .special-offer-card__summary {
+                grid-area: title;
+                flex: 0 1 auto;
+            }
+
+            .special-offer-card__media-extras--inclusives {
+                grid-area: inclusives;
+                min-width: 0;
+                align-self: start;
+            }
+
+            .special-offer-card__actions {
+                grid-area: actions;
+                align-self: start;
+            }
+        }
+    }
+
     &__summary {
         display: flex;
         flex-direction: column;
@@ -157,6 +211,44 @@
         .special-offer-card__component-cards[data-expanded-only] {
             display: grid !important;
             animation: fadeInUp 0.4s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .special-offer-card__grid {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .special-offer-card__media,
+            .special-offer-card__content {
+                display: contents;
+            }
+
+            .special-offer-gallery {
+                order: 1;
+            }
+
+            .special-offer-card__title-after-gallery {
+                order: 2;
+            }
+
+            .special-offer-card__media-extras {
+                order: 3;
+            }
+
+            .special-offer-card__component-cards[data-expanded-only] {
+                order: 4;
+            }
+
+            .special-offer-card__media-extras--pricing[data-expanded-only] {
+                order: 5;
+            }
+
+            .special-offer-card__content-header {
+                order: 6;
+                width: 100%;
+            }
         }
     }
 

@@ -57,7 +57,7 @@
             </div>
 
             @if(count($whatsIncluded) > 0)
-                <div class="special-offer-card__media-extras">
+                <div class="special-offer-card__media-extras special-offer-card__media-extras--inclusives">
                     <div class="special-offer-card__panel special-offer-card__panel--inclusives">
                         <div class="special-offer-card__panel-title">{{ __('vacations.included_services') }}</div>
                         <div class="special-offer-card__inclusive-extras">
@@ -70,20 +70,8 @@
             @endif
 
             @if(count($pricingExtras) > 0)
-                <div class="special-offer-card__media-extras" data-expanded-only>
-                    <div class="special-offer-card__panel special-offer-card__panel--pricing-extras">
-                        <div class="special-offer-card__panel-title">{{ __('vacations.pricing_extras') }}</div>
-                        <div class="special-offer-card__pricing-extras-list">
-                            @foreach($pricingExtras as $extra)
-                                <div class="special-offer-card__pricing-extra-item">
-                                    <span class="special-offer-card__pricing-extra-name">{{ translate($extra['name'] ?? '') }}</span>
-                                    <span class="special-offer-card__pricing-extra-price">
-                                        {{ $currency === 'EUR' ? '€' : $currency }}{{ number_format((float)($extra['price'] ?? 0), 2, ',', '.') }}
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+                <div class="special-offer-card__media-extras special-offer-card__media-extras--pricing" data-expanded-only>
+                    @include('components.special-offer.partials.pricing-extras')
                 </div>
             @endif
         </div>

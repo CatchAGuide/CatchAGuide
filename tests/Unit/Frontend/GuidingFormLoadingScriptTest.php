@@ -96,4 +96,14 @@ class GuidingFormLoadingScriptTest extends TestCase
         $this->assertStringContainsString('getCroppedImages(true)', $guiding);
         $this->assertStringContainsString('guiding-form-loading.js', $guiding);
     }
+
+    public function test_special_offer_form_sets_image_list_on_form_data_payload(): void
+    {
+        $source = file_get_contents($this->projectPath(
+            'resources/views/components/special-offer-form-scripts.blade.php'
+        ));
+
+        $this->assertStringContainsString("formData.set('image_list'", $source);
+        $this->assertStringContainsString('getCroppedImages(true)', $source);
+    }
 }

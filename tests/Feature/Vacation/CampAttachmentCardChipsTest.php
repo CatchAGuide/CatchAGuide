@@ -160,6 +160,76 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('attachment-expand-btn', $html);
     }
 
+    public function test_special_offer_pricing_extras_render_once_under_the_gallery(): void
+    {
+        $html = View::make('components.special-offer.card', [
+            'specialOffer' => [
+                'id' => 9,
+                'title' => 'Camp package',
+                'thumbnail_path' => '/images/placeholder.jpg',
+                'gallery_images' => [],
+                'whats_included' => [],
+                'pricing_extras' => [
+                    ['name' => 'Lunch package', 'price' => 25],
+                ],
+                'accommodations' => [],
+                'rental_boats' => [],
+                'guidings' => [],
+                'price' => ['amount' => 199, 'currency' => 'EUR'],
+                'accommodations_full' => [],
+                'rental_boats_full' => [],
+                'guidings_full' => [[
+                    'id' => 3,
+                    'title' => 'Dawn tour',
+                    'guiding_info' => [
+                        'art' => 'Boat',
+                        'dauer' => '8 hours',
+                        'max_personen' => 4,
+                    ],
+                    'water_types' => [],
+                ]],
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('special-offer-card__media-extras--pricing', $html);
+        $this->assertStringNotContainsString('special-offer-card__media-extras--desktop', $html);
+        $this->assertStringNotContainsString('special-offer-card__media-extras--mobile', $html);
+        $this->assertSame(1, substr_count($html, 'special-offer-card__media-extras--pricing'));
+        $this->assertSame(1, substr_count($html, __('vacations.pricing_extras')));
+        $this->assertSame(1, substr_count($html, '25,00'));
+        $this->assertNotFalse(strpos($html, 'id="guiding-3"'));
+    }
+
+    public function test_special_offer_inclusives_stay_a_single_block_for_desktop_css_placement(): void
+    {
+        $html = View::make('components.special-offer.card', [
+            'specialOffer' => [
+                'id' => 9,
+                'title' => 'Camp package',
+                'thumbnail_path' => '/images/placeholder.jpg',
+                'gallery_images' => [],
+                'whats_included' => ['Boat for 7 days'],
+                'pricing_extras' => [],
+                'accommodations' => [],
+                'rental_boats' => [],
+                'guidings' => [],
+                'price' => ['amount' => 199, 'currency' => 'EUR'],
+                'accommodations_full' => [],
+                'rental_boats_full' => [],
+                'guidings_full' => [],
+            ],
+        ])->render();
+
+        $this->assertSame(1, substr_count($html, 'special-offer-card__media-extras--inclusives'));
+        $this->assertSame(1, substr_count($html, __('vacations.included_services')));
+
+        $scss = file_get_contents(resource_path('sass/components/_special-offer-card.scss'));
+        $this->assertStringContainsString('@media (min-width: 769px)', $scss);
+        $this->assertStringContainsString('"gallery title actions"', $scss);
+        $this->assertStringContainsString('"gallery inclusives actions"', $scss);
+        $this->assertStringContainsString('media-extras--inclusives', $scss);
+    }
+
     public function test_accommodation_extras_use_a_red_x_instead_of_the_included_check(): void
     {
         app()->setLocale('de');
