@@ -215,28 +215,46 @@
                 </li>
 
                 <li class="sub-category">
-                    <h3>Guiding setup</h3>
+                    <h3>{{ __('admin.listing_attributes.section') }}</h3>
                 </li>
-                <li class="slide {{ request()->routeIs('admin.settings.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
-                        <i class="side-menu__icon fe fe-settings"></i>
-                        <span class="side-menu__label">Guiding attributes</span>
-                        <i class="angle fe fe-chevron-right"></i>
+                @foreach(\App\Services\Admin\ListingAttributeRegistry::groups() as $group)
+                    @php
+                        $groupTypes = \App\Services\Admin\ListingAttributeRegistry::forGroup($group);
+                        $groupTypeSlugs = array_keys($groupTypes);
+                        $groupActive = request()->routeIs('admin.settings.attributes.*')
+                            && in_array(request()->route('type'), $groupTypeSlugs, true);
+                        // Also expand when hitting a legacy alias that maps into this group
+                        if (! $groupActive && request()->routeIs('admin.settings.*') && ! request()->routeIs('admin.settings.scheduled-tasks.*') && ! request()->routeIs('admin.settings.email*') && ! request()->routeIs('admin.settings.attributes.*')) {
+                            $legacyPath = trim(str_replace(url('/admin/settings'), '', request()->url()), '/');
+                            $legacyKey = explode('/', $legacyPath)[0] ?? '';
+                            $resolved = \App\Services\Admin\ListingAttributeRegistry::resolveLegacySlug($legacyKey);
+                            $groupActive = $resolved && isset($groupTypes[$resolved]);
+                        }
+                    @endphp
+                    <li class="slide {{ $groupActive ? 'is-expanded' : '' }}">
+                        <a class="side-menu__item {{ $groupActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                            <i class="side-menu__icon fe fe-settings"></i>
+                            <span class="side-menu__label">{{ __('admin.listing_attributes.groups.'.$group) }}</span>
+                            <i class="angle fe fe-chevron-right"></i>
+                        </a>
+                        <ul class="slide-menu">
+                            @foreach($groupTypes as $slug => $typeConfig)
+                                <li>
+                                    <a href="{{ route('admin.settings.attributes.index', $slug) }}"
+                                       class="slide-item {{ request()->routeIs('admin.settings.attributes.*') && request()->route('type') === $slug ? 'active' : '' }}">
+                                        {{ __('admin.listing_attributes.types.'.$typeConfig['label_key']) }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </li>
+                @endforeach
+                <li class="slide {{ request()->routeIs('admin.settings.scheduled-tasks.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.settings.scheduled-tasks.*') ? 'active' : '' }}"
+                       href="{{ route('admin.settings.scheduled-tasks.index') }}">
+                        <i class="side-menu__icon fe fe-clock"></i>
+                        <span class="side-menu__label">{{ __('admin.listing_attributes.scheduled_tasks') }}</span>
                     </a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('admin.settings.levelindex') }}" class="slide-item {{ request()->routeIs('admin.settings.levelindex') ? 'active' : '' }}">Fishing level</a></li>
-                        <li><a href="{{ route('admin.settings.fishingtypeindex') }}" class="slide-item {{ request()->routeIs('admin.settings.fishingtypeindex') ? 'active' : '' }}">Fishing type</a></li>
-                        <li><a href="{{ route('admin.settings.equipmentindex') }}" class="slide-item {{ request()->routeIs('admin.settings.equipmentindex') ? 'active' : '' }}">Fishing equipment</a></li>
-                        <li><a href="{{ route('admin.settings.fishingfromindex') }}" class="slide-item {{ request()->routeIs('admin.settings.fishingfromindex') ? 'active' : '' }}">Fishing from</a></li>
-                        <li><a href="{{ route('admin.settings.inclussionindex') }}" class="slide-item {{ request()->routeIs('admin.settings.inclussionindex') ? 'active' : '' }}">Included</a></li>
-                        <li><a href="{{ route('admin.settings.methodindex') }}" class="slide-item {{ request()->routeIs('admin.settings.methodindex') ? 'active' : '' }}">Method</a></li>
-                        <li><a href="{{ route('admin.settings.waterindex') }}" class="slide-item {{ request()->routeIs('admin.settings.waterindex') ? 'active' : '' }}">Water types</a></li>
-                        <li><a href="{{ route('admin.settings.targetindex') }}" class="slide-item {{ request()->routeIs('admin.settings.targetindex') ? 'active' : '' }}">Target fish</a></li>
-                        <li><a href="{{ route('admin.settings.boat-extras.index') }}" class="slide-item {{ request()->routeIs('admin.settings.boat-extras.*') ? 'active' : '' }}">Boat extras</a></li>
-                        <li><a href="{{ route('admin.settings.facilities.index') }}" class="slide-item {{ request()->routeIs('admin.settings.facilities.*') ? 'active' : '' }}">Facilities</a></li>
-                        <li><a href="{{ route('admin.settings.kitchen-equipment.index') }}" class="slide-item {{ request()->routeIs('admin.settings.kitchen-equipment.*') ? 'active' : '' }}">Kitchen equipment</a></li>
-                        <li><a href="{{ route('admin.settings.scheduled-tasks.index') }}" class="slide-item {{ request()->routeIs('admin.settings.scheduled-tasks.*') ? 'active' : '' }}">Scheduled tasks</a></li>
-                    </ul>
                 </li>
             </ul>
             <div class="slide-right" id="slide-right"><svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24"><path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z"/></svg></div>

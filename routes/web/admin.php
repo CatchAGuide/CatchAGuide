@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\GuideRequestReviewController;
 use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Admin\GuidingsController as AdminGuidingsController;
 use App\Http\Controllers\Admin\GuidingsSettingController;
+use App\Http\Controllers\Admin\ListingAttributeController;
 use App\Http\Controllers\Admin\MonthlyHighlightController;
 use App\Http\Controllers\Admin\NewsletterSubscribersController;
 use App\Http\Controllers\Admin\OfferSendoutController;
@@ -200,60 +201,67 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('vacations/{id}/{slug}', [VacationsController::class, 'show'])->name('vacations.show');
 
         Route::prefix('settings')->name('settings.')->group(function () {
-            Route::get('/targets', [GuidingsSettingController::class, 'targetIndex'])->name('targetindex');
-            Route::post('/storetarget', [GuidingsSettingController::class, 'storetarget'])->name('storetarget');
-            Route::put('/updatetarget/{id}', [GuidingsSettingController::class, 'updatetarget'])->name('updatetarget');
-            Route::get('/deletetarget/{id}', [GuidingsSettingController::class, 'deletetarget'])->name('deletetarget');
+            // Canonical listing-attribute CRUD
+            Route::get('/attributes/{type}', [ListingAttributeController::class, 'index'])->name('attributes.index');
+            Route::post('/attributes/{type}', [ListingAttributeController::class, 'store'])->name('attributes.store');
+            Route::put('/attributes/{type}/{id}', [ListingAttributeController::class, 'update'])->name('attributes.update');
+            Route::delete('/attributes/{type}/{id}', [ListingAttributeController::class, 'destroy'])->name('attributes.destroy');
 
-            Route::get('/methods', [GuidingsSettingController::class, 'methodIndex'])->name('methodindex');
-            Route::post('/storemethod', [GuidingsSettingController::class, 'storemethod'])->name('storemethod');
-            Route::put('/updatemethod/{id}', [GuidingsSettingController::class, 'updatemethod'])->name('updatemethod');
-            Route::get('/deletemethod/{id}', [GuidingsSettingController::class, 'deletemethod'])->name('deletemethod');
+            // Legacy bookmarks — same controller, old route names preserved
+            Route::get('/targets', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'targets')->name('targetindex');
+            Route::post('/storetarget', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'targets')->name('storetarget');
+            Route::put('/updatetarget/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'targets')->name('updatetarget');
+            Route::get('/deletetarget/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'targets')->name('deletetarget');
 
-            Route::get('/waters', [GuidingsSettingController::class, 'waterIndex'])->name('waterindex');
-            Route::post('/storewater', [GuidingsSettingController::class, 'storewater'])->name('storewater');
-            Route::put('/updatewater/{id}', [GuidingsSettingController::class, 'updatewater'])->name('updatewater');
-            Route::get('/deletewater/{id}', [GuidingsSettingController::class, 'deletewater'])->name('deletewater');
+            Route::get('/methods', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'methods')->name('methodindex');
+            Route::post('/storemethod', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'methods')->name('storemethod');
+            Route::put('/updatemethod/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'methods')->name('updatemethod');
+            Route::get('/deletemethod/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'methods')->name('deletemethod');
 
-            Route::get('/inclussions', [GuidingsSettingController::class, 'inclussionIndex'])->name('inclussionindex');
-            Route::post('/storeinclussion', [GuidingsSettingController::class, 'storeinclussion'])->name('storeinclussion');
-            Route::put('/updateinclussion/{id}', [GuidingsSettingController::class, 'updateinclussion'])->name('updateinclussion');
-            Route::get('/deleteinclussion/{id}', [GuidingsSettingController::class, 'deleteinclussion'])->name('deleteinclussion');
+            Route::get('/waters', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'waters')->name('waterindex');
+            Route::post('/storewater', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'waters')->name('storewater');
+            Route::put('/updatewater/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'waters')->name('updatewater');
+            Route::get('/deletewater/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'waters')->name('deletewater');
 
-            Route::get('/fishingfrom', [GuidingsSettingController::class, 'fishingfromIndex'])->name('fishingfromindex');
-            Route::post('/storefishingfrom', [GuidingsSettingController::class, 'storefishingfrom'])->name('storefishingfrom');
-            Route::put('/updatefishingfrom/{id}', [GuidingsSettingController::class, 'updatefishingfrom'])->name('updatefishingfrom');
-            Route::get('/deletefishingfrom/{id}', [GuidingsSettingController::class, 'deletefishingfrom'])->name('deletefishingfrom');
+            Route::get('/inclussions', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'inclussions')->name('inclussionindex');
+            Route::post('/storeinclussion', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'inclussions')->name('storeinclussion');
+            Route::put('/updateinclussion/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'inclussions')->name('updateinclussion');
+            Route::get('/deleteinclussion/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'inclussions')->name('deleteinclussion');
 
-            Route::get('/fishingtype', [GuidingsSettingController::class, 'fishingtypeIndex'])->name('fishingtypeindex');
-            Route::post('/storefishingtype', [GuidingsSettingController::class, 'storefishingtype'])->name('storefishingtype');
-            Route::put('/updatefishingtype/{id}', [GuidingsSettingController::class, 'updatefishingtype'])->name('updatefishingtype');
-            Route::get('/deletefishingtype/{id}', [GuidingsSettingController::class, 'deletefishingtype'])->name('deletefishingtype');
+            Route::get('/fishingfrom', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'fishingfrom')->name('fishingfromindex');
+            Route::post('/storefishingfrom', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'fishingfrom')->name('storefishingfrom');
+            Route::put('/updatefishingfrom/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'fishingfrom')->name('updatefishingfrom');
+            Route::get('/deletefishingfrom/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'fishingfrom')->name('deletefishingfrom');
 
-            Route::get('/equipment', [GuidingsSettingController::class, 'equipmentIndex'])->name('equipmentindex');
-            Route::post('/storeequipment', [GuidingsSettingController::class, 'storeequipment'])->name('storeequipment');
-            Route::put('/updateequipment/{id}', [GuidingsSettingController::class, 'updatefishingequipment'])->name('updatefishingequipment');
-            Route::get('/deleteequipment/{id}', [GuidingsSettingController::class, 'deleteequipment'])->name('deleteequipment');
+            Route::get('/fishingtype', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'fishingtype')->name('fishingtypeindex');
+            Route::post('/storefishingtype', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'fishingtype')->name('storefishingtype');
+            Route::put('/updatefishingtype/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'fishingtype')->name('updatefishingtype');
+            Route::get('/deletefishingtype/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'fishingtype')->name('deletefishingtype');
 
-            Route::get('/levels', [GuidingsSettingController::class, 'levelIndex'])->name('levelindex');
-            Route::post('/storelevel', [GuidingsSettingController::class, 'storelevel'])->name('storelevel');
-            Route::put('/updatelevel/{id}', [GuidingsSettingController::class, 'updatelevel'])->name('updatelevel');
-            Route::get('/deletelevel/{id}', [GuidingsSettingController::class, 'deletelevel'])->name('deletelevel');
+            Route::get('/equipment', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'equipment')->name('equipmentindex');
+            Route::post('/storeequipment', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'equipment')->name('storeequipment');
+            Route::put('/updateequipment/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'equipment')->name('updatefishingequipment');
+            Route::get('/deleteequipment/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'equipment')->name('deleteequipment');
 
-            Route::get('/boat-extras', [GuidingsSettingController::class, 'boatExtrasIndex'])->name('boat-extras.index');
-            Route::post('/boat-extras', [GuidingsSettingController::class, 'storeBoatExtra'])->name('boat-extras.store');
-            Route::put('/boat-extras/{id}', [GuidingsSettingController::class, 'updateBoatExtra'])->name('boat-extras.update');
-            Route::delete('/boat-extras/{id}', [GuidingsSettingController::class, 'deleteBoatExtra'])->name('boat-extras.destroy');
+            Route::get('/levels', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'levels')->name('levelindex');
+            Route::post('/storelevel', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'levels')->name('storelevel');
+            Route::put('/updatelevel/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'levels')->name('updatelevel');
+            Route::get('/deletelevel/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'levels')->name('deletelevel');
 
-            Route::get('/facilities', [GuidingsSettingController::class, 'facilitiesIndex'])->name('facilities.index');
-            Route::post('/facilities', [GuidingsSettingController::class, 'storeFacility'])->name('facilities.store');
-            Route::put('/facilities/{id}', [GuidingsSettingController::class, 'updateFacility'])->name('facilities.update');
-            Route::delete('/facilities/{id}', [GuidingsSettingController::class, 'deleteFacility'])->name('facilities.destroy');
+            Route::get('/boat-extras', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'boat-extras')->name('boat-extras.index');
+            Route::post('/boat-extras', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'boat-extras')->name('boat-extras.store');
+            Route::put('/boat-extras/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'boat-extras')->name('boat-extras.update');
+            Route::delete('/boat-extras/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'boat-extras')->name('boat-extras.destroy');
 
-            Route::get('/kitchen-equipment', [GuidingsSettingController::class, 'kitchenEquipmentIndex'])->name('kitchen-equipment.index');
-            Route::post('/kitchen-equipment', [GuidingsSettingController::class, 'storeKitchenEquipment'])->name('kitchen-equipment.store');
-            Route::put('/kitchen-equipment/{id}', [GuidingsSettingController::class, 'updateKitchenEquipment'])->name('kitchen-equipment.update');
-            Route::delete('/kitchen-equipment/{id}', [GuidingsSettingController::class, 'deleteKitchenEquipment'])->name('kitchen-equipment.destroy');
+            Route::get('/facilities', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'facilities')->name('facilities.index');
+            Route::post('/facilities', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'facilities')->name('facilities.store');
+            Route::put('/facilities/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'facilities')->name('facilities.update');
+            Route::delete('/facilities/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'facilities')->name('facilities.destroy');
+
+            Route::get('/kitchen-equipment', [ListingAttributeController::class, 'legacyIndex'])->defaults('legacySlug', 'kitchen-equipment')->name('kitchen-equipment.index');
+            Route::post('/kitchen-equipment', [ListingAttributeController::class, 'legacyStore'])->defaults('legacySlug', 'kitchen-equipment')->name('kitchen-equipment.store');
+            Route::put('/kitchen-equipment/{id}', [ListingAttributeController::class, 'legacyUpdate'])->defaults('legacySlug', 'kitchen-equipment')->name('kitchen-equipment.update');
+            Route::delete('/kitchen-equipment/{id}', [ListingAttributeController::class, 'legacyDestroy'])->defaults('legacySlug', 'kitchen-equipment')->name('kitchen-equipment.destroy');
 
             Route::post('/scheduled-tasks/custom', [ScheduledTasksController::class, 'storeCustom'])->name('scheduled-tasks.custom.store');
             Route::put('/scheduled-tasks/custom/{customScheduledTask}', [ScheduledTasksController::class, 'updateCustom'])->name('scheduled-tasks.custom.update');
