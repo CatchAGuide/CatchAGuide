@@ -14,6 +14,7 @@ class RentalBoatRequirement extends Model
         'name_en',
         'input_type',
         'placeholder',
+        'placeholder_en',
         'is_active',
         'sort_order',
     ];

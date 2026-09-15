@@ -10,6 +10,11 @@ class Target extends Model
 {
     use HasFactory, Cacheable;
 
+    protected $fillable = [
+        'name',
+        'name_en',
+    ];
+
     public function guidings()
     {
         return $this->belongsToMany(Guiding::class, 'guiding_targets')->withTimestamps();;

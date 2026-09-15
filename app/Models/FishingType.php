@@ -10,7 +10,12 @@ use App\Models\FishingType;
 class FishingType extends Model
 {
     use HasFactory;
-    
+
+    protected $fillable = [
+        'name',
+        'name_en',
+    ];
+
     public function guidings()
     {
         return $this->belongsToMany(FishingType::class,'guiding_fishing_types')->withTimestamps();

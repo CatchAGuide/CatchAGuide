@@ -9,6 +9,11 @@ class FishingFrom extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'name_en',
+    ];
+
     public function getNameAttribute(): string
     {
         if (app()->getLocale() === 'en' && ! empty($this->attributes['name_en'])) {
