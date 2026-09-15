@@ -929,7 +929,6 @@
 @if(isset($offerModules))
 @include('pages.category.partials.destination-offers-script')
 @else
-@include('components.offers.partials.gallery-script')
 @endif
 <script>
     $(function() {

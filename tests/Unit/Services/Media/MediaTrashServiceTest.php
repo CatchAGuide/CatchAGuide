@@ -129,4 +129,67 @@ class MediaTrashServiceTest extends TestCase
         $this->assertContains('camps/28/a.webp', $snapshot);
         $this->assertContains('camps/28/b.webp', $snapshot);
     }
+
+    public function test_unchanged_gallery_save_does_not_copy_live_files_to_trash(): void
+    {
+        $trash = \Mockery::mock(MediaTrashService::class)->makePartial();
+        $trash->shouldReceive('backupMany')->never();
+        $trash->shouldReceive('trashMany')->once()->with([], \Mockery::on(function ($keep) {
+            return in_array('special-offers/1/a.webp', $keep, true)
+                && in_array('special-offers/1/b.webp', $keep, true);
+        }))->andReturn([]);
+
+        $this->app->instance(MediaTrashService::class, $trash);
+
+        $processor = $this->app->make(ListingGalleryImageProcessor::class);
+        $request = Request::create('/test', 'POST', [
+            'is_update' => '1',
+            'existing_images' => json_encode(['special-offers/1/a.webp', 'special-offers/1/b.webp']),
+            'image_list' => '',
+            'thumbnail_path' => 'special-offers/1/a.webp',
+        ]);
+
+        $result = $processor->process($request, 'special_offer', 'offer-slug', 1);
+        $this->assertNotNull($result);
+        $this->assertSame(['special-offers/1/a.webp', 'special-offers/1/b.webp'], $result['gallery_images']);
+
+        $trashed = $processor->trashPendingDeletesForGallery(
+            $result['gallery_images'],
+            $result['thumbnail_path']
+        );
+
+        $this->assertSame([], $trashed['backed_up']);
+        $this->assertSame([], $trashed['trashed']);
+    }
+
+    public function test_removed_gallery_file_is_trashed_without_copying_kept_files(): void
+    {
+        $trash = \Mockery::mock(MediaTrashService::class)->makePartial();
+        $trash->shouldReceive('backupMany')->never();
+        $trash->shouldReceive('trashMany')
+            ->once()
+            ->with(['special-offers/1/b.webp'], \Mockery::type('array'))
+            ->andReturn(['_trash/special-offers/1/2026-09-15/b.webp']);
+
+        $this->app->instance(MediaTrashService::class, $trash);
+
+        $processor = $this->app->make(ListingGalleryImageProcessor::class);
+        $request = Request::create('/test', 'POST', [
+            'is_update' => '1',
+            'existing_images' => json_encode(['special-offers/1/a.webp', 'special-offers/1/b.webp']),
+            'image_list' => json_encode(['special-offers/1/a.webp']),
+            'thumbnail_path' => 'special-offers/1/a.webp',
+        ]);
+
+        $result = $processor->process($request, 'special_offer', 'offer-slug', 1);
+        $this->assertSame(['special-offers/1/a.webp'], $result['gallery_images']);
+
+        $trashed = $processor->trashPendingDeletesForGallery(
+            $result['gallery_images'],
+            $result['thumbnail_path']
+        );
+
+        $this->assertSame([], $trashed['backed_up']);
+        $this->assertSame(['_trash/special-offers/1/2026-09-15/b.webp'], $trashed['trashed']);
+    }
 }

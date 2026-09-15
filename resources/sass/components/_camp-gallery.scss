@@ -4,16 +4,23 @@
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 12px;
     margin: 24px auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 
     @media (max-width: 900px) {
-        grid-template-columns: 1fr;
-        gap: 0;
+        // `1fr` is minmax(auto, 1fr) — the mobile thumb strip's intrinsic
+        // width (200px × N) blows the grid out and the hero image follows.
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
         padding: 0;
+        margin: 16px auto;
+        overflow-x: hidden;
     }
 
     &:not(:has(.camp-gallery__thumb)) {
         @media (min-width: 901px) {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
         }
     }
 
@@ -32,37 +39,56 @@
             box-shadow: 0 24px 48px -32px rgba(17, 24, 39, .4);
         }
 
-        @media (min-width: 768px) {
-            min-height: 240px;
-        }
-
-        @media (max-width: 900px) {
-            margin-bottom: 0;
-            min-height: 250px;
-            width: 100%;
-            grid-column: 1 / -1;
-        }
-
         img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-    }
 
-    // Single-image galleries (common on trip pages): constrain height
-    &:not(:has(.camp-gallery__thumb)) &__main {
-        aspect-ratio: 16 / 10;
-        max-height: 420px;
-
-        @media (max-width: 900px) {
-            max-height: 320px;
+        @media (min-width: 768px) {
+            min-height: 240px;
         }
 
-        img {
-            position: absolute;
-            inset: 0;
+        @media (max-width: 900px) {
+            // iOS Safari collapses aspect-ratio boxes whose only child is
+            // position:absolute (see .offers-card__gallery). Padding-bottom %
+            // is width-based and keeps a 16:10 hero on every WebKit we ship.
+            grid-column: 1 / -1;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            min-height: 0;
+            height: auto;
+            padding-bottom: 62.5%;
+            margin-bottom: 0;
+            border-radius: 12px;
+
+            &:hover {
+                transform: none;
+            }
+
+            img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+
+    // Single-image galleries (common on trip pages): constrain desktop height.
+    // Mobile uses the padding-bottom box on &__main above.
+    &:not(:has(.camp-gallery__thumb)) &__main {
+        @media (min-width: 901px) {
+            aspect-ratio: 16 / 10;
+            max-height: 420px;
+
+            img {
+                position: absolute;
+                inset: 0;
+            }
         }
     }
 
@@ -146,7 +172,8 @@
 
     &__mobile-carousel {
         display: none;
-        margin-top: 16px;
+        min-width: 0;
+        max-width: 100%;
 
         @media (min-width: 901px) {
             display: none !important;
@@ -154,6 +181,7 @@
 
         @media (max-width: 900px) {
             display: block;
+            grid-column: 1 / -1;
         }
 
         &-scroll {
@@ -161,6 +189,9 @@
             gap: 10px;
             overflow-x: auto;
             overflow-y: hidden;
+            min-width: 0;
+            max-width: 100%;
+            overscroll-behavior-x: contain;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;

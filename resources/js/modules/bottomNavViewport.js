@@ -10,7 +10,7 @@ export function visualViewportNavTop(offsetTop, visualHeight, navHeight) {
   return Math.round(offsetTop + visualHeight - navHeight);
 }
 
-export function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
+export function syncBottomNavToVisualViewport(nav, viewport, hideNav, navHeight) {
   if (!nav) {
     return;
   }
@@ -21,14 +21,14 @@ export function syncBottomNavToVisualViewport(nav, viewport, hideNav) {
     return;
   }
 
-  const navHeight = nav.offsetHeight;
-  if (!viewport || navHeight <= 0) {
+  const height = navHeight ?? nav.offsetHeight;
+  if (!viewport || height <= 0) {
     return;
   }
 
   nav.style.setProperty(
     '--cag-bottom-nav-top',
-    `${visualViewportNavTop(viewport.offsetTop, viewport.height, navHeight)}px`
+    `${visualViewportNavTop(viewport.offsetTop, viewport.height, height)}px`
   );
   nav.classList.add('is-vv-pinned');
 }
@@ -43,8 +43,19 @@ export function initBottomNavViewport() {
 
   const hideNavMq = window.matchMedia(HIDE_NAV_MQ);
 
+  // nav.offsetHeight forces a synchronous layout read. Doing that on every
+  // visualViewport scroll/resize tick fights the browser's own layout pass
+  // while it animates the toolbar collapse on the first scroll, which is
+  // what made the nav flash/disappear on real devices. The nav's height only
+  // changes on breakpoint/orientation changes, so measure it once and cache
+  // it instead of re-reading it on plain scroll ticks.
+  let navHeight = nav.offsetHeight;
+  const measure = () => {
+    navHeight = nav.offsetHeight;
+  };
+
   const sync = () => {
-    syncBottomNavToVisualViewport(nav, window.visualViewport, hideNavMq.matches);
+    syncBottomNavToVisualViewport(nav, window.visualViewport, hideNavMq.matches, navHeight);
   };
 
   let frame = 0;
@@ -58,14 +69,19 @@ export function initBottomNavViewport() {
     });
   };
 
+  const requestRemeasureAndSync = () => {
+    measure();
+    requestSync();
+  };
+
   sync();
-  window.visualViewport.addEventListener('resize', requestSync);
+  window.visualViewport.addEventListener('resize', requestRemeasureAndSync);
   window.visualViewport.addEventListener('scroll', requestSync);
   window.addEventListener('scroll', requestSync, { passive: true });
-  window.addEventListener('orientationchange', requestSync);
+  window.addEventListener('orientationchange', requestRemeasureAndSync);
   if (typeof hideNavMq.addEventListener === 'function') {
-    hideNavMq.addEventListener('change', sync);
+    hideNavMq.addEventListener('change', requestRemeasureAndSync);
   } else if (typeof hideNavMq.addListener === 'function') {
-    hideNavMq.addListener(sync);
+    hideNavMq.addListener(requestRemeasureAndSync);
   }
 }

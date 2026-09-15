@@ -397,7 +397,7 @@
                                     <div class="vacation-card__gallery" data-vacation-gallery="{{ $vacation->id }}" data-gallery-images='@json($gallery_images_full)'>
                                         @if($gallery_count > 0)
                                             <img
-                                                src="{{ $gallery_images[0] }}"
+                                                src="{{ $gallery_images_full[0] }}"
                                                 alt="{{ translate($vacation->title) }}"
                                                 data-vacation-gallery-image
                                                 data-vacation-open-modal
@@ -552,18 +552,16 @@
                                     </form>
                                 </div>
                             </div>
-                            {{-- Gallery modal --}}
-                            <div class="vacation-gallery-modal" data-vacation-modal="{{ $vacation->id }}">
-                                <div class="vacation-gallery-modal__content">
-                                    <button class="vacation-gallery-modal__close">&times;</button>
-                                    <button class="vacation-gallery-modal__prev">&#10094;</button>
-                                    <button class="vacation-gallery-modal__next">&#10095;</button>
-                                    <img class="vacation-gallery-modal__image" src="" alt="{{ translate($vacation->title) }}">
-                                    <div class="vacation-gallery-modal__counter">
-                                        <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $gallery_count }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <x-gallery.modal
+                                :id="(string) $vacation->id"
+                                :images="$gallery_images_full"
+                                :title="translate($vacation->title)"
+                                type="camp"
+                                :badge="__('offers.badge_camp')"
+                                :location="$vacation->location"
+                                :cta-url="route('vacations.camps.show', [$vacation->slug])"
+                                :cta-label="__('vacations.view_details')"
+                            />
                         </div>
                         @endforeach
                         {!! $vacations->links('vendor.pagination.default') !!}
@@ -1018,103 +1016,6 @@
         // Trigger change event to update Select2 display
         selectMethod.trigger('change');
     }
-    
-    // Vacation Gallery Navigation
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('[data-vacation-gallery]').forEach(function(gallery) {
-            const galleryId = gallery.getAttribute('data-vacation-gallery');
-            const images = JSON.parse(gallery.getAttribute('data-gallery-images') || '[]');
-            const imageEl = gallery.querySelector('[data-vacation-gallery-image]');
-            const prevBtn = gallery.querySelector('[data-vacation-prev-image]');
-            const nextBtn = gallery.querySelector('[data-vacation-next-image]');
-            const counter = gallery.querySelector('[data-vacation-image-counter]');
-            const modal = document.querySelector(`[data-vacation-modal="${galleryId}"]`);
-            const modalImage = modal ? modal.querySelector('.vacation-gallery-modal__image') : null;
-            const modalPrev = modal ? modal.querySelector('.vacation-gallery-modal__prev') : null;
-            const modalNext = modal ? modal.querySelector('.vacation-gallery-modal__next') : null;
-            const modalClose = modal ? modal.querySelector('.vacation-gallery-modal__close') : null;
-            const modalCurrent = modal ? modal.querySelector('.vacation-gallery-modal__current') : null;
-            const modalTotal = modal ? modal.querySelector('.vacation-gallery-modal__total') : null;
-            
-            if (images.length === 0) return;
-            
-            let currentIndex = 0;
-            
-            function updateImage(index) {
-                if (index < 0) index = images.length - 1;
-                if (index >= images.length) index = 0;
-                currentIndex = index;
-                
-                if (imageEl) {
-                    imageEl.src = images[currentIndex];
-                }
-                if (counter) {
-                    counter.textContent = (currentIndex + 1) + '/' + images.length;
-                }
-                if (modalImage) {
-                    modalImage.src = images[currentIndex];
-                }
-                if (modalCurrent) {
-                    modalCurrent.textContent = currentIndex + 1;
-                }
-            }
-            
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    updateImage(currentIndex - 1);
-                });
-            }
-            
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    updateImage(currentIndex + 1);
-                });
-            }
-            
-            if (imageEl && modal) {
-                imageEl.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (modal) {
-                        modal.classList.add('show');
-                        updateImage(currentIndex);
-                    }
-                });
-            }
-            
-            if (modalPrev) {
-                modalPrev.addEventListener('click', function() {
-                    updateImage(currentIndex - 1);
-                });
-            }
-            
-            if (modalNext) {
-                modalNext.addEventListener('click', function() {
-                    updateImage(currentIndex + 1);
-                });
-            }
-            
-            if (modalClose) {
-                modalClose.addEventListener('click', function() {
-                    if (modal) {
-                        modal.classList.remove('show');
-                    }
-                });
-            }
-            
-            if (modal) {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.classList.remove('show');
-                    }
-                });
-            }
-        });
-    });
     
     // Handle See More/Less for Target Fish and Amenities
     document.addEventListener('DOMContentLoaded', function() {

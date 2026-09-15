@@ -1,0 +1,100 @@
+// Shared mobile book bar (tours/trips pattern) for camp + vacation PDPs.
+// Desktop keeps the in-page booking card; this bar is phones/tablets only.
+.listing-mobile-book {
+    display: none;
+
+    @media (max-width: 991.98px) {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1050;
+        padding: 0;
+        background: transparent;
+        pointer-events: none;
+    }
+
+    &__inner {
+        pointer-events: auto;
+        width: 100%;
+        padding: 0.6rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    &__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.85rem;
+        min-width: 0;
+        background: #fff;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        border-radius: 1.25rem;
+        padding: 0.85rem 0.9rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+
+        @media (max-width: 380px) {
+            padding: 0.75rem 0.8rem;
+            gap: 0.7rem;
+        }
+    }
+
+    &__price {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: baseline;
+        gap: 0.35rem;
+    }
+
+    &__amount {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #222133;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+
+    &__unit {
+        font-size: 0.9rem;
+        color: #6b7280;
+        white-space: nowrap;
+    }
+
+    &__cta {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        width: 10.75rem;
+        max-width: 55vw;
+        height: 3.15rem;
+        margin: 0;
+        padding: 0.9rem 1.15rem;
+        border: 0;
+        border-radius: 1.05rem;
+        background: #e8604c;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        box-shadow: 0 6px 18px rgba(232, 96, 76, 0.28);
+        cursor: pointer;
+
+        @media (max-width: 380px) {
+            height: 3rem;
+            padding: 0.8rem 1rem;
+        }
+
+        &:hover,
+        &:focus-visible {
+            box-shadow: 0 8px 24px rgba(232, 96, 76, 0.34);
+        }
+    }
+
+    &__cta-arrow {
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+}

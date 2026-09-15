@@ -15,6 +15,10 @@
     $targetFishExtra = (int) ($card['target_fish_tags_extra'] ?? max(0, count($targetFishTags) - count($visibleFishTags)));
 
     $included = $card['listing_included'] ?? ($card['facilities'] ?? []);
+    $modalSpecs = array_values(array_filter([
+        $card['duration_pill'] ?? null,
+        $card['guests_label'] ?? null,
+    ]));
 @endphp
 
 <article class="vacation-trip-list-card guiding-list-item" data-analytics-vacation-card data-pillar="trip">
@@ -27,7 +31,7 @@
             >
                 @if($galleryCount > 0)
                     <img
-                        src="{{ $galleryImages[0] }}"
+                        src="{{ $galleryFull[0] }}"
                         alt="{{ $card['title'] }}"
                         data-vacation-gallery-image
                         data-vacation-open-modal
@@ -130,17 +134,18 @@
         </div>
     </div>
 
-    @if($galleryCount > 1)
-        <div class="vacation-gallery-modal" data-vacation-modal="{{ $galleryId }}">
-            <div class="vacation-gallery-modal__content">
-                <button type="button" class="vacation-gallery-modal__close" aria-label="{{ __('vacations.gallery_close') }}">&times;</button>
-                <button type="button" class="vacation-gallery-modal__prev" aria-label="{{ __('vacations.gallery_prev') }}">&#10094;</button>
-                <button type="button" class="vacation-gallery-modal__next" aria-label="{{ __('vacations.gallery_next') }}">&#10095;</button>
-                <img class="vacation-gallery-modal__image" src="" alt="{{ $card['title'] }}">
-                <div class="vacation-gallery-modal__counter">
-                    <span class="vacation-gallery-modal__current">1</span> / <span class="vacation-gallery-modal__total">{{ $galleryCount }}</span>
-                </div>
-            </div>
-        </div>
-    @endif
+    <x-gallery.modal
+        :id="$galleryId"
+        :images="$galleryFull"
+        :title="$card['title'] ?? ''"
+        type="trip"
+        :badge="$card['badge'] ?? __('offers.badge_trip')"
+        :location="$card['location'] ?? null"
+        :specs="$modalSpecs"
+        :price-prefix="$card['listing_price_prefix'] ?? __('vacations.starting_from_label')"
+        :price-display="$card['listing_price_display'] ?? null"
+        :price-suffix="$card['listing_price_suffix'] ?? __('vacations.per_person_short')"
+        :cta-url="$card['url'] ?? null"
+        :cta-label="__('vacations.see_more')"
+    />
 </article>

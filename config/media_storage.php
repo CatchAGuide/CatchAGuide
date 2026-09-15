@@ -32,8 +32,9 @@ return [
     /*
     | Recycle bin / backup for listing images. Live removals always copy into
     | `_trash/{folder}/{id}/{Y-m-d}/` before the live object is deleted.
-    | Gallery updates also snapshot the previous gallery into the same tree.
-    | Purge keeps at least the last `keep_dates` backup days per entity.
+    | Unchanged gallery saves do not snapshot every live file (that would stall
+    | admin updates on object-storage round-trips). Purge keeps at least the last
+    | `keep_dates` backup days per entity.
     */
     'trash' => [
         'root' => env('MEDIA_TRASH_ROOT', '_trash'),

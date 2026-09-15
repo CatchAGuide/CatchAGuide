@@ -2095,6 +2095,10 @@ $white: #ffffff;
   &.is-vv-pinned {
     top: var(--cag-bottom-nav-top);
     bottom: auto;
+    // `top` starts at `auto` (not animatable) so the first pin never slides;
+    // subsequent corrections during the iOS toolbar collapse glide instead
+    // of snapping, which is what read as a flicker/disappear on real devices.
+    transition: top 120ms ease-out;
   }
 }
 
@@ -2139,7 +2143,8 @@ $white: #ffffff;
   .cag-home-hero__door,
   .cag-home-hero__door-icon,
   .cag-home-destinations__img,
-  .cag-home-hero__image {
+  .cag-home-hero__image,
+  .cag-home-bottom-nav.is-vv-pinned {
     transition: none !important;
   }
 

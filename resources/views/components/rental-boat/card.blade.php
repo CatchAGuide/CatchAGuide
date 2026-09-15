@@ -1,7 +1,14 @@
 <div class="rental-boat-card" id="rental-boat-{{ $boat['id'] ?? '' }}" data-rental-boat-card data-rental-boat-id="{{ $boat['id'] ?? '' }}">
     @php
-        $galleryImages = $boat['gallery_images'] ?? [];
-        $galleryCount = $boat['gallery_count'] ?? count($galleryImages);
+        use App\Presenters\Vacation\CampAttachmentChipPresenter;
+
+        $boatThumbnail = $boat['thumbnail_path']
+            ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop';
+        $galleryImages = array_values(array_unique(array_filter(
+            array_merge([$boatThumbnail], $boat['gallery_images'] ?? [])
+        )));
+        $galleryCount = count($galleryImages);
+        $boatGalleryId = 'rental-boat-card-'.($boat['id'] ?? uniqid());
         $price = $boat['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
         $displayPriceType = $price['display_type'] ?? __('rental_boats.per_day');
@@ -10,18 +17,25 @@
         $requirementItems = $boat['requirements'] ?? [];
         $specs = $boat['specs'] ?? [];
         $boatInfoList = $boat['boat_info'] ?? [];
+        $boatModalTitle = translate($boat['title'] ?? null) ?? ($boat['title'] ?? 'Boat');
+        $boatChips = CampAttachmentChipPresenter::boatChips($specs);
+        $boatModalSpecs = array_values(array_filter(array_map(
+            fn ($chip) => $chip['value'] ?? null,
+            $boatChips
+        )));
+        $boatPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
     <div class="rental-boat-card__grid">
         <div class="rental-boat-card__media">
-            <div class="rental-boat-card__gallery" data-gallery-images='@json($galleryImages)'>
+            <div class="rental-boat-card__gallery" data-vacation-gallery="{{ $boatGalleryId }}" data-gallery-images='@json($galleryImages)'>
                 <img
-                    src="{{ $boat['thumbnail_path'] ?? 'https://images.unsplash.com/photo-1520440229-84f3865cf003?q=80&w=1600&auto=format&fit=crop' }}"
+                    src="{{ $boatThumbnail }}"
                     alt="{{ $boat['title'] ?? 'Boat' }}"
                     loading="lazy"
                     decoding="async"
-                    data-gallery-image
-                    data-open-modal
+                    data-vacation-gallery-image
+                    data-vacation-open-modal
                     style="cursor: pointer;"
                 />
 
@@ -53,31 +67,45 @@
                 <div class="rental-boat-card__summary-header">
                     <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
                     @if(!empty($boat['type']))
-                        <div class="rental-boat-card__category">{{ $boat['type'] }}</div>
+                        <div class="rental-boat-card__category">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
                     @endif
                 </div>
 
-                @if(count($specs) > 0)
-                    <div class="rental-boat-card__spec-row">
-                        @foreach($specs as $spec)
-                            <span class="rental-boat-card__spec-item">
-                                <span class="rental-boat-card__spec-label">{{ $spec['label'] }}:</span>
-                                <span class="rental-boat-card__spec-value">{{ $spec['value'] }}</span>
-                            </span>
-                        @endforeach
+                @include('components.rental-boat.partials.spec-row')
+
+                <div class="rental-boat-card__boat-info" data-expanded-only>
+                    <div class="rental-boat-card__info-box">
+                        <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
+                        <div class="rental-boat-card__info-box-content">
+                            @if(count($boatInfoList) > 0)
+                                <ul class="rental-boat-card__fact-table">
+                                    @foreach($boatInfoList as $info)
+                                        <li class="rental-boat-card__fact-row">
+                                            <span class="rental-boat-card__fact-label">{{ translated_catalog_label($info) }}</span>
+                                            <span class="rental-boat-card__fact-value">{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
+                            @endif
+                        </div>
                     </div>
-                @endif
+                </div>
 
                 @if (count($inclusiveItems) > 0 )
                     <div class="rental-boat-card__included">
                         <div class="rental-boat-card__included-title">{{ __('vacations.included_in_price') }}</div>
-                        <div class="rental-boat-card__included-chips">
+                        <ul class="rental-boat-card__checklist">
                             @foreach($inclusiveItems as $inclusive)
-                                <span class="rental-boat-card__included-chip">
-                                    ✅ {{ translate($inclusive) }}
-                                </span>
+                                <li>
+                                    <svg class="rental-boat-card__check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    <span>{{ translated_catalog_label($inclusive) }}</span>
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     </div>
                 @endif
             </div>
@@ -89,7 +117,12 @@
                         <div class="rental-boat-card__info-box-content">
                             <ul class="rental-boat-card__info-list">
                                 @foreach($extraItems as $extra)
-                                    <li>{{ translate($extra) }}</li>
+                                    <li>
+                                        {{ translated_catalog_label($extra) }}
+                                        @if(is_array($extra) && filled($extra['price'] ?? null))
+                                            : {{ $extra['price'] }}
+                                        @endif
+                                    </li>
                                 @endforeach
                             </ul>
                         </div>
@@ -98,104 +131,113 @@
             @endif
         </div>
 
-        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="rental-boat-card__summary">
-            <div class="rental-boat-card__summary-header">
-                <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
-                @if(!empty($boat['type']))
-                    <div class="rental-boat-card__category">{{ translate($boat['type']) }}</div>
-                @endif
-            </div>
+        <div class="rental-boat-card__content">
+            <div class="rental-boat-card__content-header">
+                {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="rental-boat-card__summary">
+                    <div class="rental-boat-card__summary-header">
+                        <h3 class="rental-boat-card__title">{{ translate($boat['title']) ?? __('Boat Title') }}</h3>
+                        @if(!empty($boat['type']))
+                            <div class="rental-boat-card__category">{{ translated_catalog_label(['id' => $boat['type_id'] ?? null, 'name' => $boat['type'] ?? '']) }}</div>
+                        @endif
+                    </div>
 
-            @if(count($specs) > 0)
-                <div class="rental-boat-card__spec-row">
-                    @foreach($specs as $spec)
-                        <span class="rental-boat-card__spec-item">
-                            <span class="rental-boat-card__spec-label">{{ translate($spec['label']) }}:</span>
-                            <span class="rental-boat-card__spec-value">{{ translate($spec['value']) }}</span>
-                        </span>
-                    @endforeach
+                    @include('components.rental-boat.partials.spec-row')
+
+                    <div class="rental-boat-card__boat-info" data-expanded-only>
+                        <div class="rental-boat-card__info-box">
+                            <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
+                            <div class="rental-boat-card__info-box-content">
+                                @if(count($boatInfoList) > 0)
+                                    <ul class="rental-boat-card__fact-table">
+                                        @foreach($boatInfoList as $info)
+                                            <li class="rental-boat-card__fact-row">
+                                                <span class="rental-boat-card__fact-label">{{ translated_catalog_label($info) }}</span>
+                                                <span class="rental-boat-card__fact-value">{{ is_numeric($info['value'] ?? null) ? $info['value'] : translate($info['value'] ?? '') }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (count($inclusiveItems) > 0 )
+                        <div class="rental-boat-card__included">
+                            <div class="rental-boat-card__included-title">{{ __('vacations.included_in_price') }}</div>
+                            <ul class="rental-boat-card__checklist">
+                                @foreach($inclusiveItems as $inclusive)
+                                    <li>
+                                        <svg class="rental-boat-card__check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="20 6 9 17 4 12"/>
+                                        </svg>
+                                        <span>{{ translated_catalog_label($inclusive) }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
-            @endif
 
-            @if (count($inclusiveItems) > 0 )
-                <div class="rental-boat-card__included">
-                    <div class="rental-boat-card__included-title">{{ __('vacations.included_in_price') }}</div>
-                    <div class="rental-boat-card__included-chips">
-                        @foreach($inclusiveItems as $inclusive)
-                            <span class="rental-boat-card__included-chip">
-                                ✅ {{ translate($inclusive) }}
-                            </span>
-                        @endforeach
+                <div class="rental-boat-card__actions">
+                    <div class="rental-boat-card__actions-column">
+                        <div class="rental-boat-card__price">
+                            <div class="rental-boat-card__price-type">{{ __('rental_boats.per_day') }}</div>
+                            <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                        </div>
+                        {{-- <button class="rental-boat-card__select-btn">
+                            {{ __('Select Boat') }}
+                        </button> --}}
+                        <button class="attachment-expand-btn rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
                     </div>
                 </div>
-            @endif
-        </div>
-
-        <div class="rental-boat-card__actions">
-            <div class="rental-boat-card__actions-column">
-                <div class="rental-boat-card__price">
-                    <div class="rental-boat-card__price-type">{{ __('rental_boats.per_day') }}</div>
-                    <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
-                </div>
-                {{-- <button class="rental-boat-card__select-btn">
-                    {{ __('Select Boat') }}
-                </button> --}}
-                <button class="rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="rental-boat-card__info-matrix" data-expanded-only>
-            <div class="rental-boat-card__info-box">
-                <div class="rental-boat-card__info-box-title">{{ __('vacations.boat_information') }}</div>
-                <div class="rental-boat-card__info-box-content">
-                    @if(count($boatInfoList) > 0)
-                        <ul class="rental-boat-card__info-list">
-                            @foreach($boatInfoList as $info)
-                                <li>
-                                    <span>{{ translate($info['name']) }}:</span>
-                                    <strong>{{ translate($info['value']) }}</strong>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="rental-boat-card__info-empty">{{ __('vacations.no_boat_information') }}</p>
-                    @endif
-                </div>
             </div>
 
-            <div class="rental-boat-card__info-box">
-                <div class="rental-boat-card__info-box-title">{{ __('guidings.Requirements') }}</div>
-                <div class="rental-boat-card__info-box-content">
-                    @if(count($requirementItems) > 0)
-                        <ul class="rental-boat-card__info-list">
-                            @foreach($requirementItems as $requirement)
-                                <li>{{ translate($requirement) }}</li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="rental-boat-card__info-empty">{{ __('vacations.no_special_requirements') }}</p>
-                    @endif
+            <div class="rental-boat-card__info-matrix" data-expanded-only>
+                <div class="rental-boat-card__info-box">
+                    <div class="rental-boat-card__info-box-title">{{ __('guidings.Requirements') }}</div>
+                    <div class="rental-boat-card__info-box-content">
+                        @if(count($requirementItems) > 0)
+                            <ul class="rental-boat-card__requirement-list">
+                                @foreach($requirementItems as $requirement)
+                                    @php
+                                        $requirementDetail = is_array($requirement) && filled($requirement['value'] ?? null) && ($requirement['value'] ?? null) !== ($requirement['name'] ?? null)
+                                            ? (is_numeric($requirement['value']) ? $requirement['value'] : translate($requirement['value']))
+                                            : null;
+                                    @endphp
+                                    <li class="rental-boat-card__requirement-row">
+                                        <div class="rental-boat-card__requirement-label">{{ translated_catalog_label($requirement) }}</div>
+                                        @if($requirementDetail)
+                                            <div class="rental-boat-card__requirement-value">{{ $requirementDetail }}</div>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="rental-boat-card__info-empty">{{ __('vacations.no_special_requirements') }}</p>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Rental Boat Gallery Modal -->
-    <div class="rental-boat-gallery-modal" data-rental-boat-modal>
-        <div class="rental-boat-gallery-modal__content">
-            <button class="rental-boat-gallery-modal__close">&times;</button>
-            <button class="rental-boat-gallery-modal__prev">&#10094;</button>
-            <button class="rental-boat-gallery-modal__next">&#10095;</button>
-            <img class="rental-boat-gallery-modal__image" src="" alt="{{ translate($boat['title']) ?? 'Boat' }}">
-            <div class="rental-boat-gallery-modal__counter">
-                <span class="rental-boat-gallery-modal__current">1</span> / <span class="rental-boat-gallery-modal__total">{{ $galleryCount }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$boatGalleryId"
+        :images="$galleryImages"
+        :title="$boatModalTitle"
+        type="tour"
+        :badge="__('vacations.rental_boat')"
+        :specs="$boatModalSpecs"
+        :price-prefix="$displayPriceType"
+        :price-display="$boatPriceDisplay"
+    />
 </div>
 
 @once

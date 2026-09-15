@@ -820,6 +820,7 @@ class OffersCatalogTest extends TestCase
                 array_merge($this->card('tour', 'Tour Card'), [
                     'whats_included_title' => __('offers.included_heading'),
                     'listing_cta' => __('offers.cta_tour'),
+                    'verified' => true,
                 ]),
                 array_merge($this->card('trip', 'Trip Card'), [
                     'water_label' => null,

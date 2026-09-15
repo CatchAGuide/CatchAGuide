@@ -1,5 +1,7 @@
 <div class="guiding-card" id="guiding-{{ $guiding['id'] ?? '' }}" data-guiding-card data-guiding-id="{{ $guiding['id'] ?? '' }}">
     @php
+        use App\Presenters\Vacation\CampAttachmentChipPresenter;
+
         $guidingThumbnail = $guiding['thumbnail_path']
             ?? 'https://images.unsplash.com/photo-1474843148229-3163319fcc00?q=80&w=1600&auto=format&fit=crop';
         // The thumbnail leads the gallery so the counter and the arrows match what is on screen
@@ -7,23 +9,37 @@
             array_merge([$guidingThumbnail], $guiding['gallery_images'] ?? [])
         )));
         $guidingGalleryCount = count($guidingGalleryImages);
+        $guidingGalleryId = 'guiding-card-'.($guiding['id'] ?? uniqid());
         $durationLabel = $guiding['duration_label'] ?? ($guiding['duration_hours'] ?? null);
         $maxPersons = $guiding['max_persons'] ?? null;
-        $tourType = $guiding['type'] ?? null;
+        $tourType = CampAttachmentChipPresenter::fishingFromChipValue($guiding['type'] ?? null);
+        $waterTypes = $guiding['water_types'] ?? [];
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
+        $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
+        $guidingPersonsChip = CampAttachmentChipPresenter::personsValue($maxPersons);
+        $waterTypeChips = CampAttachmentChipPresenter::waterTypeChips($waterTypes);
+        $guidingModalSpecs = array_values(array_filter(array_merge(
+            [
+                $durationLabel,
+                $guidingPersonsChip,
+                $tourType,
+            ],
+            array_column($waterTypeChips, 'value')
+        )));
+        $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
     @endphp
 
     <div class="guiding-card__grid">
         <div class="guiding-card__media">
-            <div class="guiding-card__gallery" data-gallery-images='@json($guidingGalleryImages)'>
+            <div class="guiding-card__gallery" data-vacation-gallery="{{ $guidingGalleryId }}" data-gallery-images='@json($guidingGalleryImages)'>
                 <img
                     src="{{ $guidingThumbnail }}"
                     alt="{{ $guiding['title'] ?? 'Guiding' }}"
                     loading="lazy"
                     decoding="async"
-                    data-gallery-image
-                    data-open-modal
+                    data-vacation-gallery-image
+                    data-vacation-open-modal
                     style="cursor: pointer;"
                 />
 
@@ -57,229 +73,184 @@
                     <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
                 </div>
 
-                <div class="guiding-card__spec-row">
-                    @if($durationLabel)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>{{ translate($durationLabel) }}</span>
-                    </span>
-                    @endif
-                    @if($maxPersons)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
-                    </span>
-                    @endif
-                    @if($tourType)
-                    <span class="guiding-card__spec-item">
-                        <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
-                        </svg>
-                        <span>{{ translate($tourType) }}</span>
-                    </span>
-                    @endif
-                </div>
+                @include('components.guiding.partials.spec-row')
             </div>
+        </div>
 
-            {{-- Inclusives panel appears after gallery (expanded only) --}}
-            <div class="guiding-card__left-panels" data-expanded-only>
-                <div class="guiding-card__panel">
-                    <div class="guiding-card__panel-title">{{ __('vacations.included_in_price') }}</div>
-                    <div class="guiding-card__chip-row">
-                        @if(!empty($guiding['inclusives']) && is_array($guiding['inclusives']))
-                            @foreach($guiding['inclusives'] as $inclusive)
-                                <span class="guiding-card__inclusive-chip">
-                                    <svg class="guiding-card__check-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <polyline points="20 6 9 17 4 12"/>
-                                    </svg>
-                                    <span>{{ translate($inclusive['name']) ?? $inclusive }}</span>
-                                </span>
-                            @endforeach
-                        @else
-                            <p class="guiding-card__empty">{{ __('vacations.no_inclusives_listed') }}</p>
-                        @endif
+        <div class="guiding-card__content">
+            <div class="guiding-card__content-header">
+                {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
+                <div class="guiding-card__summary">
+                    <div class="guiding-card__summary-header">
+                        <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
+                        <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
+                    </div>
+
+                    @include('components.guiding.partials.spec-row')
+                </div>
+
+                <div class="guiding-card__actions">
+                    <div class="guiding-card__actions-column">
+                        <div class="guiding-card__pricing">
+                            <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
+                            <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                        </div>
+                        {{-- <button class="guiding-card__select-btn">
+                            {{ __('Select This Guiding') }}
+                        </button> --}}
+                        <button class="attachment-expand-btn guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
+                            <span data-toggle-text>{{ __('vacations.show_more') }}</span>
+                            <span data-toggle-icon>▼</span>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        {{-- Summary section - Desktop: middle column, Mobile: hidden (uses title-after-gallery instead) --}}
-        <div class="guiding-card__summary">
-            <div class="guiding-card__summary-header">
-                <h3 class="guiding-card__title">{{ translate($guiding['title']) ?? 'Guiding Title' }}</h3>
-                <p class="guiding-card__description">{{ translate($guiding['description']) ?? 'Description' }}</p>
-            </div>
-
-            <div class="guiding-card__spec-row">
-                @if($durationLabel)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span>{{ translate($durationLabel) }}</span>
-                </span>
-                @endif
-                @if($maxPersons)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <span>{{ $maxPersons }} {{ __('vacations.pers_short') }}</span>
-                </span>
-                @endif
-                @if($tourType)
-                <span class="guiding-card__spec-item">
-                    <svg class="guiding-card__spec-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 6s1.5-2 5-2 5 2 5 2 1.5-2 5-2 5 2 5 2v14s-1.5-2-5-2-5 2-5 2-1.5-2-5-2-5 2-5 2V6z"/>
-                    </svg>
-                    <span>{{ translate($tourType) }}</span>
-                </span>
-                @endif
-            </div>
-        </div>
-
-        <div class="guiding-card__actions">
-            <div class="guiding-card__actions-column">
-                <div class="guiding-card__pricing">
-                    <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
-                    <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
-                </div>
-                {{-- <button class="guiding-card__select-btn">
-                    {{ __('Select This Guiding') }}
-                </button> --}}
-                <button class="guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
-                    <span data-toggle-text>{{ __('vacations.show_more') }}</span>
-                    <span data-toggle-icon>▼</span>
-                </button>
-            </div>
-        </div>
 
         <div class="guiding-card__info-matrix" data-expanded-only>
-            <div class="guiding-card__info-box">
+            @php
+                $factWaterValue = count($waterTypeChips) > 0
+                    ? implode(' · ', array_column($waterTypeChips, 'value'))
+                    : (!empty($guiding['guiding_info']['gewaesser']) ? translate($guiding['guiding_info']['gewaesser']) : null);
+                // Catalog IDs that no longer resolve to a real name fall back to the
+                // raw id (see translated_catalog_label()) — drop those instead of
+                // showing a meaningless number.
+                $resolvedCatalogLabels = fn (array $items) => array_values(array_filter(
+                    array_map(fn ($item) => translated_catalog_label($item), $items),
+                    fn ($label) => $label !== '' && ! is_numeric($label)
+                ));
+                $methodLabels = $resolvedCatalogLabels($guiding['methods'] ?? []);
+                $factMethodsValue = count($methodLabels) > 0 ? implode(' · ', $methodLabels) : null;
+                $targetFishLabels = $resolvedCatalogLabels($guiding['target_fish'] ?? []);
+                $factTargetFishValue = count($targetFishLabels) > 0 ? implode(', ', $targetFishLabels) : null;
+                $hasAnyFact = $durationLabel || $guidingPersonsChip || $tourType || $factWaterValue || $factMethodsValue || $factTargetFishValue;
+            @endphp
+            <div class="guiding-card__info-box guiding-card__info-box--facts">
                 <div class="guiding-card__info-box-title">{{ __('vacations.guiding_information') }}</div>
-                <div class="guiding-card__info-box-content">
-                    @if(!empty($guiding['guiding_info']))
-                        <ul class="guiding-card__info-list">
-                            @if(!empty($guiding['guiding_info']['art']))
-                                <li><span>{{ __('vacations.type_label') }}:</span> <strong>{{ translate($guiding['guiding_info']['art']) }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['dauer']))
-                                <li><span>{{ __('guidings.Duration') }}:</span> <strong>{{ translate($guiding['guiding_info']['dauer']) }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['max_personen']))
-                                <li><span>{{ __('vacations.max_persons') }}:</span> <strong>{{ $guiding['guiding_info']['max_personen'] }}</strong></li>
-                            @endif
-                            @if(!empty($guiding['guiding_info']['gewaesser']))
-                                <li><span>{{ __('guidings.Water') }}:</span> <strong>{{ translate($guiding['guiding_info']['gewaesser']) }}</strong></li>
-                            @endif
-                        </ul>
-                    @else
-                        <p class="guiding-card__empty">{{ __('vacations.no_guiding_details') }}</p>
-                    @endif
-                </div>
-            </div>
-
-            <div class="guiding-card__info-box">
-                <div class="guiding-card__info-box-title">{{ __('guidings.Target_Fish') }}</div>
-                <div class="guiding-card__info-box-content">
-                    @if(!empty($guiding['target_fish']) && is_array($guiding['target_fish']))
-                        <div class="guiding-card__chip-row">
-                            @foreach($guiding['target_fish'] as $fish)
-                                <span class="guiding-card__target-fish-chip">
-                                    <svg class="guiding-card__chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                @if($hasAnyFact)
+                    <div class="guiding-card__fact-grid">
+                        @if($durationLabel)
+                            <div class="guiding-card__fact-cell">
+                                <div class="guiding-card__fact-label">
+                                    <img src="{{ asset('assets/images/icons/clock-new.svg') }}" width="12" height="12" alt="">
+                                    {{ __('guidings.Duration') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $durationLabel }}</div>
+                            </div>
+                        @endif
+                        @if($guidingPersonsChip)
+                            <div class="guiding-card__fact-cell">
+                                <div class="guiding-card__fact-label">
+                                    <img src="{{ asset('assets/images/icons/user-new.svg') }}" width="12" height="12" alt="">
+                                    {{ __('guidings.persons') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $guidingPersonsChip }}</div>
+                            </div>
+                        @endif
+                        @if($tourType)
+                            <div class="guiding-card__fact-cell">
+                                <div class="guiding-card__fact-label">
+                                    <img src="{{ asset('assets/images/icons/fishing-tool-new.svg') }}" width="12" height="12" alt="">
+                                    {{ __('guidings.Fishing_Type') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $tourType }}</div>
+                            </div>
+                        @endif
+                        @if($factWaterValue)
+                            <div class="guiding-card__fact-cell">
+                                <div class="guiding-card__fact-label">
+                                    <img src="{{ asset('assets/images/icons/water-waves.png') }}" width="12" height="12" alt="">
+                                    {{ __('guidings.Water') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $factWaterValue }}</div>
+                            </div>
+                        @endif
+                        @if($factMethodsValue)
+                            <div class="guiding-card__fact-cell guiding-card__fact-cell--full">
+                                <div class="guiding-card__fact-label">
+                                    <img src="{{ asset('assets/images/icons/fishing-tool-new.svg') }}" width="12" height="12" alt="">
+                                    {{ __('vacations.fishing_methods') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $factMethodsValue }}</div>
+                            </div>
+                        @endif
+                        @if($factTargetFishValue)
+                            <div class="guiding-card__fact-cell guiding-card__fact-cell--full">
+                                <div class="guiding-card__fact-label">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-1 3.46-3.44 6-7 6s-7.56-2.54-8.5-6z"/>
                                         <path d="M18 5L22 9M18 19L22 15M6 9L2 5M6 15L2 19"/>
                                     </svg>
-                                    <span>{{ translate($fish['name']) ?? $fish }}</span>
-                                </span>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="guiding-card__empty">{{ __('vacations.no_target_fish') }}</p>
-                    @endif
-                </div>
-
-                @if(!empty($guiding['methods']) && is_array($guiding['methods']) && count($guiding['methods']) > 0)
-                    <div class="guiding-card__info-box-title">{{ __('vacations.fishing_methods') }}</div>
-                    <div class="guiding-card__info-box-content">
-                        <div class="guiding-card__chip-row">
-                            @foreach($guiding['methods'] as $method)
-                                <span class="guiding-card__method-chip">{{ translate($method['name']) ?? $method }}</span>
-                            @endforeach
-                        </div>
+                                    {{ __('guidings.Target_Fish') }}
+                                </div>
+                                <div class="guiding-card__fact-value">{{ $factTargetFishValue }}</div>
+                            </div>
+                        @endif
                     </div>
+                @else
+                    <p class="guiding-card__empty">{{ __('vacations.no_guiding_details') }}</p>
                 @endif
             </div>
 
             <div class="guiding-card__info-box">
-                <div class="guiding-card__info-box-title">{{ __('vacations.location_schedule') }}</div>
-                <div class="guiding-card__info-box-content">
-                    @if(!empty($guiding['meeting_point']))
-                        <ul class="guiding-card__info-list">
-                            <li><span>{{ __('guidings.Meeting_Point') }}:</span> <strong>{{ $guiding['meeting_point'] }}</strong></li>
-                        </ul>
-                    @endif
+                <div class="guiding-card__info-box-title">{{ __('vacations.included_in_price') }}</div>
+                @if(!empty($guiding['inclusives']) && is_array($guiding['inclusives']))
+                    <ul class="guiding-card__checklist">
+                        @foreach($guiding['inclusives'] as $inclusive)
+                            <li>
+                                <svg class="guiding-card__check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                <span>{{ translated_catalog_label($inclusive) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="guiding-card__empty">{{ __('vacations.no_inclusives_listed') }}</p>
+                @endif
+            </div>
 
-                    @if(!empty($guiding['start_times']) && is_array($guiding['start_times']))
-                        <div class="guiding-card__chip-row">
-                            @foreach($guiding['start_times'] as $time)
-                                <span class="guiding-card__start-time-chip">
-                                    @if(stripos($time, 'evening') !== false || stripos($time, 'abends') !== false)
-                                        <svg class="guiding-card__chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="5"/>
-                                            <line x1="12" y1="1" x2="12" y2="3"/>
-                                            <line x1="12" y1="21" x2="12" y2="23"/>
-                                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                                            <line x1="1" y1="12" x2="3" y2="12"/>
-                                            <line x1="21" y1="12" x2="23" y2="12"/>
-                                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                                        </svg>
-                                    @elseif(stripos($time, 'night') !== false || stripos($time, 'nachts') !== false)
-                                        <svg class="guiding-card__chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                                        </svg>
-                                    @else
-                                        <svg class="guiding-card__chip-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="10"/>
-                                            <polyline points="12 6 12 12 16 14"/>
-                                        </svg>
-                                    @endif
-                                    <span>{{ trim($time) }}</span>
-                                </span>
-                            @endforeach
+            <div class="guiding-card__info-box">
+                <div class="guiding-card__info-box-content">
+                    @php
+                        $hasStartTimes = !empty($guiding['start_times']) && is_array($guiding['start_times']);
+                        $startTimesValue = $hasStartTimes
+                            ? implode(' · ', array_map(fn ($time) => translate(trim($time)), $guiding['start_times']))
+                            : null;
+                        $meetingPoint = trim((string) ($guiding['desc_meeting_point'] ?? ''));
+                        $hasMeetingPoint = $meetingPoint !== '';
+                    @endphp
+                    @if($startTimesValue)
+                        <div class="guiding-card__schedule-item">
+                            <div class="guiding-card__schedule-label">{{ __('guidings.Starting_Time') }}</div>
+                            <div class="guiding-card__schedule-value">{{ $startTimesValue }}</div>
                         </div>
                     @endif
-
-                    @if(empty($guiding['meeting_point']) && empty($guiding['start_times']))
+                    @if($hasMeetingPoint)
+                        <div class="guiding-card__schedule-item">
+                            <div class="guiding-card__schedule-label">{{ __('guidings.Meeting_Point') }}</div>
+                            <div class="guiding-card__schedule-value">{!! clean_html($meetingPoint) !!}</div>
+                        </div>
+                    @endif
+                    @if(!$startTimesValue && !$hasMeetingPoint)
                         <p class="guiding-card__empty">{{ __('vacations.no_schedule_details') }}</p>
                     @endif
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Guiding Gallery Modal -->
-    <div class="guiding-gallery-modal" data-guiding-modal>
-        <div class="guiding-gallery-modal__content">
-            <button class="guiding-gallery-modal__close">&times;</button>
-            <button class="guiding-gallery-modal__prev">&#10094;</button>
-            <button class="guiding-gallery-modal__next">&#10095;</button>
-            <img class="guiding-gallery-modal__image" src="" alt="{{ translate($guiding['title']) ?? 'Guiding' }}">
-            <div class="guiding-gallery-modal__counter">
-                <span class="guiding-gallery-modal__current">1</span> / <span class="guiding-gallery-modal__total">{{ max($guidingGalleryCount, 1) }}</span>
-            </div>
-        </div>
-    </div>
+    <x-gallery.modal
+        :id="$guidingGalleryId"
+        :images="$guidingGalleryImages"
+        :title="$guidingModalTitle"
+        type="tour"
+        :badge="__('offers.badge_tour')"
+        :specs="$guidingModalSpecs"
+        :price-prefix="$displayPriceType"
+        :price-display="$guidingPriceDisplay"
+    />
 </div>
 
 @once

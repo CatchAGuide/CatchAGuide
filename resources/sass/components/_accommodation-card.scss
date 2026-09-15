@@ -18,57 +18,54 @@
 
     &__grid {
         display: grid;
-        grid-template-columns: 320px minmax(0, 1fr) minmax(220px, 260px);
-        grid-template-areas:
-            "media summary actions"
-            "media features features";
+        grid-template-columns: 320px minmax(0, 1fr);
+        grid-template-areas: "media content";
         gap: 16px;
         padding: 16px;
-        align-items: flex-start;
+        align-items: start;
 
         @media (max-width: 1200px) {
-            grid-template-columns: 280px minmax(0, 1fr) minmax(200px, 240px);
+            grid-template-columns: 280px minmax(0, 1fr);
         }
 
         @media (max-width: 1024px) {
             grid-template-columns: 260px minmax(0, 1fr);
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "features features"
-                "actions actions";
         }
 
         @media (max-width: 768px) {
             grid-template-columns: 1fr;
             grid-template-areas:
                 "media"
-                "features"
-                "actions";
+                "content";
             gap: 12px;
             padding: 12px;
         }
     }
 
-    // When feature-grid is hidden, adjust grid layout
-    &:not(&--expanded) &__grid {
-        grid-template-areas:
-            "media summary actions"
-            "media . .";
+    // Content wraps the header row (summary+actions) and the expandable
+    // feature-grid. Kept as its own grid item (not spanning media's rows) so
+    // its height is never inflated by media's independent height (image +
+    // side panels) — that inflation was the source of the excess white space
+    // when a card expanded.
+    &__content {
+        grid-area: content;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
     }
 
-    &:not(&--expanded) &__grid {
-        @media (max-width: 1024px) {
-            grid-template-areas:
-                "media summary"
-                "media summary"
-                "actions actions";
-        }
+    &__content-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
 
         @media (max-width: 768px) {
-            grid-template-areas:
-                "media"
-                "actions";
+            // Summary is hidden on mobile (title-after-gallery is used instead),
+            // so only actions remains — let it act as the price/CTA footer,
+            // ordered after the feature-grid below.
+            order: 2;
         }
     }
 
@@ -101,12 +98,12 @@
     }
 
     &__summary {
-        grid-area: summary;
         display: flex;
         flex-direction: column;
         gap: 12px;
         min-width: 0;
-        
+        flex: 1 1 auto;
+
         // Hide on mobile since we use title-after-gallery instead
         @media (max-width: 768px) {
             display: none !important;
@@ -114,12 +111,22 @@
     }
 
     &__actions {
-        grid-area: actions;
         display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
         gap: 16px;
+
+        @media (max-width: 768px) {
+            // Acts as the card's price/CTA footer on mobile, matching the
+            // reference: a divider above it, price left / button right.
+            // content-header is a flex row whose only visible child this is
+            // (summary is hidden) — without an explicit width the divider
+            // only spans the price+button content, not the full card.
+            width: 100%;
+            border-top: 1px solid rgba(15, 23, 42, .08);
+            padding-top: 12px;
+        }
     }
 
     // Hide expandable content by default
@@ -127,17 +134,17 @@
         display: none !important;
     }
 
-    // Feature grid needs special handling - remove from grid when hidden
-    &__feature-grid[data-expanded-only] {
-        display: none !important;
-        grid-area: auto !important; // Remove from grid layout when hidden
+    @media (max-width: 768px) {
+        // Expanded feature-grid sits above the price/CTA footer (order:2).
+        &__feature-grid[data-expanded-only] {
+            order: 1;
+        }
     }
-    
+
     // Show expandable content when card is expanded
     &--expanded {
         .accommodation-card__feature-grid[data-expanded-only] {
             display: grid !important;
-            grid-area: features !important; // Restore grid area when shown
             animation: fadeInUp 0.4s ease forwards;
 
             // On mobile, use flexbox to enable CSS order property
@@ -199,6 +206,9 @@
         gap: 10px;
         font-size: 12px;
         color: #334155;
+        overflow: visible;
+        position: relative;
+        z-index: 2;
     }
 
     &__stat {
@@ -217,18 +227,33 @@
         line-height: 1;
     }
 
-    &__beds {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        align-items: baseline;
-        font-size: 12px;
-        color: #334155;
+    // Guests/bathrooms/bedrooms row: on mobile it gets the same boxed,
+    // full-width treatment as the Details panel below it (desktop is
+    // untouched — the flat divider row already sits inline with the title).
+    &__hard-facts {
+        @media (max-width: 768px) {
+            width: 100%;
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 10px 12px;
+
+            .accommodation-card__stats {
+                justify-content: center;
+            }
+        }
     }
 
-    &__beds-label {
-        font-weight: 500;
-        color: #475569;
+    &__bed-summary {
+        margin: 0;
+        font-size: 12px;
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    &__bed-summary-label {
+        color: #64748b;
+        font-weight: 600;
     }
 
     &__actions-column {
@@ -242,6 +267,14 @@
         @media (max-width: 1024px) {
             align-items: flex-start;
             align-self: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
         }
     }
 
@@ -306,8 +339,8 @@
     &__distance-group {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        flex-wrap: nowrap;
+        gap: 8px;
+        flex-wrap: wrap;
         overflow: visible;
 
         @media (max-width: 640px) {
@@ -330,10 +363,10 @@
     }
 
     &__feature-grid {
-        grid-area: features;
         margin-top: 0;
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
         gap: 12px;
         width: 100%;
 
@@ -387,29 +420,8 @@
     }
 
     &__expand-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
-        border: 1px solid rgba(37, 99, 235, 0.2);
-        border-radius: 12px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-
-        &:hover {
-            background: rgba(37, 99, 235, 0.15);
-            border-color: rgba(37, 99, 235, 0.3);
-        }
-
-        span:last-child {
-            font-size: 10px;
-        }
+        // Color, padding and hover come from the shared .attachment-expand-btn
+        // so every camp attachment uses the same Show more control.
     }
 
     &__expand-btn--secondary {
@@ -417,6 +429,13 @@
 
         @media (max-width: 1024px) {
             align-self: flex-start;
+        }
+
+        @media (max-width: 768px) {
+            // actions-column is a row here (price left / button right) —
+            // reset the column-layout align-self so the button centers
+            // against the full price block instead of pinning to its top.
+            align-self: center;
         }
     }
 
@@ -458,6 +477,53 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+
+        @media (max-width: 768px) {
+            // Flatten the nested "card in a card" look on mobile — the outer
+            // card already provides the boundary, so these become plain
+            // sections separated by a divider instead of boxed panels,
+            // freeing up horizontal space for tags and text.
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0 0 16px;
+            border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+            &:last-child {
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+        }
+    }
+
+    // Details keeps its boxed look on mobile too (unlike the other panels,
+    // which flatten to divider-only sections above), full width.
+    &__panel--mobile-details {
+        @media (max-width: 768px) {
+            width: 100%;
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 12px;
+            border-bottom: none;
+
+            &:last-child {
+                padding-bottom: 12px;
+            }
+        }
+    }
+
+    // Policies (order: 1, see the mobile reorder rules above) always renders
+    // visually last when present — but flex `order` doesn't change DOM
+    // position, so the plain CSS `:last-child` border-strip on &__panel above
+    // only ever catches the actual last DOM node (Extras/Bathroom), not this
+    // one. Left alone, Policies kept its own bottom divider AND the price
+    // footer added its own top divider right after it — a doubled line.
+    &__panel--mobile-policies {
+        @media (max-width: 768px) {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
     }
 
     &__panel-title {
@@ -490,6 +556,37 @@
         }
     }
 
+    &__fact-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+    }
+
+    &__fact-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__fact-label {
+        color: #64748b;
+    }
+
+    &__fact-value {
+        color: #334155;
+        font-weight: 600;
+        text-align: right;
+    }
+
     &__chip-list {
         margin: 0;
         padding: 0;
@@ -518,6 +615,7 @@
     &__panel-columns {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        align-items: start;
         gap: 12px;
     }
 
@@ -537,6 +635,22 @@
         padding: 4px 8px;
         font-size: 11px;
         color: #334155;
+        line-height: 1;
+    }
+
+    &__check-icon {
+        flex-shrink: 0;
+        color: #16a34a;
+    }
+
+    &__inclusive-chip--extra {
+        border-color: rgba(232, 96, 76, .22);
+        background: rgba(232, 96, 76, .06);
+    }
+
+    &__extra-icon {
+        flex-shrink: 0;
+        color: #e8604c;
     }
 
     &__empty {
@@ -642,155 +756,3 @@
 }
 
 // Accommodation Gallery Modal
-.accommodation-gallery-modal {
-    display: none;
-    position: fixed !important;
-    z-index: 99999 !important;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.95);
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s ease;
-    margin: 0;
-    padding: 0;
-
-    &__content {
-        position: relative;
-        width: 90%;
-        max-width: 1200px;
-        height: 90vh;
-        max-height: 90vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: zoomIn 0.2s ease;
-    }
-
-    &__image {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 90vh;
-        object-fit: contain;
-        border-radius: 8px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    &__close {
-        position: absolute;
-        top: -50px;
-        right: 0;
-        font-size: 40px;
-        font-weight: 300;
-        color: #fff;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s ease;
-        z-index: 10000;
-
-        &:hover {
-            transform: scale(1.1);
-        }
-    }
-
-    &__prev,
-    &__next {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 30px;
-        font-weight: bold;
-        color: #fff;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        cursor: pointer;
-        padding: 16px 20px;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        backdrop-filter: blur(10px);
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-    }
-
-    &__prev {
-        left: 20px;
-    }
-
-    &__next {
-        right: 20px;
-    }
-
-    &__counter {
-        position: absolute;
-        bottom: -50px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #fff;
-        font-size: 16px;
-        font-weight: 500;
-        background: rgba(0, 0, 0, 0.5);
-        padding: 8px 16px;
-        border-radius: 20px;
-        backdrop-filter: blur(10px);
-    }
-
-    @media (max-width: 768px) {
-        &__prev,
-        &__next {
-            font-size: 24px;
-            padding: 12px 16px;
-        }
-
-        &__prev {
-            left: 10px;
-        }
-
-        &__next {
-            right: 10px;
-        }
-
-        &__close {
-            top: 10px;
-            right: 10px;
-            font-size: 32px;
-        }
-
-        &__counter {
-            bottom: 20px;
-        }
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes zoomIn {
-    from { 
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to { 
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-// Alpine.js x-cloak
-[x-cloak] {
-    display: none !important;
-}

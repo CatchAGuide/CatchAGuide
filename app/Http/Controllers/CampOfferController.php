@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\RentalBoat;
 use App\Models\Accommodation;
 use App\Models\Guiding;
+use App\Models\Water;
 use App\Models\Camp;
+use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
 use App\Services\Translation\ListingTranslationService;
@@ -131,10 +133,13 @@ class CampOfferController extends Controller
         // Fetch camp from database with relationships
         $camp = Camp::with([
             'accommodations.accommodationType',
-            'rentalBoats',
+            'rentalBoats.boatType',
             'guidings.fishingFrom',
             'facilities',
-            'specialOffers'
+            'specialOffers' => fn ($query) => $query->where('status', 'active'),
+            'specialOffers.accommodations.accommodationType',
+            'specialOffers.rentalBoats.boatType',
+            'specialOffers.guidings.fishingFrom',
         ])->where('slug', $slug)
         ->whereIn('status', ['active', 'draft'])
         ->firstOrFail();
@@ -146,9 +151,20 @@ class CampOfferController extends Controller
         $this->viewTranslation->applyToCollection($camp->rentalBoats, ListingTranslationService::TYPE_RENTAL_BOAT);
         $this->viewTranslation->applyToGuidings($camp->guidings);
 
-        $activeSpecialOffers = $camp->specialOffers()->where('status', 'active')->get();
+        $activeSpecialOffers = $camp->specialOffers;
         $this->viewTranslation->applyToCollection($activeSpecialOffers, ListingTranslationService::TYPE_SPECIAL_OFFER);
-        
+        $this->viewTranslation->applyToCollection(
+            $activeSpecialOffers->flatMap->accommodations,
+            ListingTranslationService::TYPE_ACCOMMODATION
+        );
+        $this->viewTranslation->applyToCollection(
+            $activeSpecialOffers->flatMap->rentalBoats,
+            ListingTranslationService::TYPE_RENTAL_BOAT
+        );
+        $this->viewTranslation->applyToGuidings($activeSpecialOffers->flatMap->guidings);
+
+        $watersMap = Water::query()->get()->keyBy('id');
+
         // Map camp data to view format
         $campData = $this->mapCampData($camp);
         
@@ -160,7 +176,7 @@ class CampOfferController extends Controller
         }
             
         if ($camp->guidings->first()) {
-            $guiding = $this->mapGuidingData($camp->guidings->first());
+            $guiding = $this->mapGuidingData($camp->guidings->first(), $watersMap);
         } else {
             $guiding = null;
         }
@@ -201,8 +217,8 @@ class CampOfferController extends Controller
         })->toArray();
     
         // Map all guidings with full data for display
-        $guidings = $camp->guidings->map(function($guiding) {
-            return $this->mapGuidingData($guiding);
+        $guidings = $camp->guidings->map(function($guiding) use ($watersMap) {
+            return $this->mapGuidingData($guiding, $watersMap);
         })->toArray();
         
         // For dropdown - simplified version
@@ -212,8 +228,8 @@ class CampOfferController extends Controller
         
         // Map all special offers with full data for display
         $specialOffers = $activeSpecialOffers
-            ->map(function($specialOffer) {
-                return $this->mapSpecialOfferData($specialOffer);
+            ->map(function($specialOffer) use ($watersMap) {
+                return $this->mapSpecialOfferData($specialOffer, $watersMap);
             })->toArray();
         
         $showCategories = true;
@@ -291,22 +307,7 @@ class CampOfferController extends Controller
      */
     private function mapCampData(Camp $camp)
     {
-        // Process target fish - could be comma-separated string or JSON array
-        $targetFish = [];
-        if (!empty($camp->target_fish)) {
-            if (is_string($camp->target_fish)) {
-                // Try JSON decode first
-                $decoded = json_decode($camp->target_fish, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $targetFish = $decoded;
-                } else {
-                    // Fall back to comma-separated
-                    $targetFish = array_map('trim', explode(',', $camp->target_fish));
-                }
-            } elseif (is_array($camp->target_fish)) {
-                $targetFish = $camp->target_fish;
-            }
-        }
+        $targetFish = $camp->getTargetFishNames();
         
         // Process best travel times - currently stored as text, not structured data
         $bestTravelTimes = [];
@@ -334,8 +335,6 @@ class CampOfferController extends Controller
             $amenities[] = [
                 'id' => $facility->id,
                 'name' => $facility->name,
-                'name_en' => $facility->name_en ?? $facility->name,
-                'name_de' => $facility->name_de ?? $facility->name,
             ];
         }
         
@@ -382,6 +381,7 @@ class CampOfferController extends Controller
             ],
             'thumbnail_path' => $this->getImageUrl($camp->thumbnail_path),
             'manual_gallery_images' => $this->getImageUrls($camp->gallery_images ?? []),
+            'from_price' => $camp->getLowestAccommodationOrOfferPrice(),
         ];
     }
     
@@ -484,95 +484,71 @@ class CampOfferController extends Controller
         $galleryImages = $this->getImageUrls($boat->gallery_images ?? []);
         $galleryCount = count($galleryImages);
 
-        // Process inclusives
         $inclusiveItems = collect(is_array($boat->boat_extras) ? $boat->boat_extras : [])
-            ->map(function ($item) {
-                return is_array($item) ? ($item['name'] ?? ($item['value'] ?? json_encode($item))) : $item;
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
-        // Process extras
         $extraItems = collect(is_array($boat->pricing_extra) ? $boat->pricing_extra : [])
-            ->map(function ($item) {
-                return $item['name']. ": ". $item['price'];
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
-        // Process requirements: pair the (locale-aware) label with the
-        // host-entered detail, since the detail alone loses context and the
-        // label alone loses the actual requirement content.
         $requirementsRaw = $boat->requirements ?? [];
         $requirementItems = collect(is_array($requirementsRaw) ? $requirementsRaw : [])
-            ->map(function ($item) {
-                if (!is_array($item)) {
-                    return $item;
-                }
-
-                $label = $item['name'] ?? null;
-                $detail = $item['value'] ?? null;
-
-                if ($label && $detail) {
-                    return "{$label}: {$detail}";
-                }
-
-                return $detail ?? $label;
-            })
-            ->filter(fn ($value) => filled($value))
+            ->filter(fn ($item) => is_array($item)
+                ? filled($item['name'] ?? $item['value'] ?? null)
+                : filled($item))
             ->values()
             ->toArray();
 
-        // Find license requirement: match by label (name), but display the
-        // host-entered detail (value) rather than the generic label itself.
-        $licenseRequirement = null;
-        if (!empty($requirementsRaw) && is_array($requirementsRaw)) {
-            foreach ($requirementsRaw as $requirement) {
-                $label = is_array($requirement) ? ($requirement['name'] ?? ($requirement['value'] ?? null)) : $requirement;
-                if ($label && (stripos($label, 'license') !== false || stripos($label, 'führerschein') !== false)) {
-                    $licenseRequirement = is_array($requirement)
-                        ? ($requirement['value'] ?? $requirement['name'] ?? null)
-                        : $requirement;
-                    break;
-                }
-            }
-        }
-
-        // Build specs array
+        // Build specs array. Keys drive the shared attachment chips so
+        // capacity uses the same persons icon as guidings / special offers.
         $specs = [];
+        $hasCapacitySpec = false;
         foreach ($boatInfo as $boatIn) {
-            if ($boatIn['id'] == 1) {
+            if (! is_array($boatIn)) {
+                continue;
+            }
+
+            if (($boatIn['id'] ?? null) == 1) {
                 // Use max_persons for Capacity if available, otherwise fall back to boat_info value
                 $capacityValue = $boat->max_persons ?? ($boatIn['value'] ?? '');
                 if ($capacityValue != "") {
+                    $hasCapacitySpec = true;
                     $specs[] = [
+                        'key' => 'capacity',
                         'label' => __('rental_boats.capacity'),
                         'value' => $capacityValue,
                     ];
                 }
             }
-            if ($boatIn['id'] == 6 && $boatIn['value'] != "") {
+            if (($boatIn['id'] ?? null) == 6 && ($boatIn['value'] ?? '') != "") {
                 $specs[] = [
+                    'key' => 'engine',
                     'label' => __('rental_boats.engine'),
                     'value' => $boatIn['value'],
                 ];
             }
         }
 
-        // License requirement
-        if ($licenseRequirement) {
+        if (! $hasCapacitySpec && filled($boat->max_persons)) {
             $specs[] = [
-                'label' => __('rental_boats.license'),
-                'value' => $licenseRequirement,
+                'key' => 'capacity',
+                'label' => __('rental_boats.capacity'),
+                'value' => $boat->max_persons,
             ];
         }
-        
+
         return [
             'id' => $boat->id,
             'title' => $boat->title,
-            'type' => $boat->boatType->name ?? 'Boat',
+            'type' => $boat->boatType?->name,
+            'type_id' => $boat->boatType?->id,
             'location' => $boat->location,
             'description' => $boat->desc_of_boat,
             'thumbnail_path' => $this->getImageUrl($boat->thumbnail_path),
@@ -662,28 +638,54 @@ class CampOfferController extends Controller
 
         $bedConfig = $accommodation->bed_types ?? [];
 
+        $bedItems = [];
         $bedSummaryParts = [];
-        foreach ($accommodation->room_configurations as $roomConfig) {
-            array_push( $bedSummaryParts, "(" . $roomConfig['value'] . ") " . $roomConfig['name'] );
+        foreach ($accommodation->room_configurations ?? [] as $roomConfig) {
+            if (! is_array($roomConfig)) {
+                continue;
+            }
+
+            $count = $roomConfig['value'] ?? null;
+            $name = $roomConfig['name'] ?? ($roomConfig['name_en'] ?? null);
+            if ($count === null || $count === '' || ! filled($name)) {
+                continue;
+            }
+
+            $bedItems[] = [
+                'count' => $count,
+                'name' => $roomConfig['name'] ?? null,
+                'name_en' => $roomConfig['name_en'] ?? null,
+            ];
+            $bedSummaryParts[] = '('.$count.') '.$name;
         }
 
         $galleryTotal = max(count($galleryImages), 1);
         
         $number_of_bedrooms = "";
         $living_area_sqm = "";
-        foreach ($accommodation->accommodation_details as $accommodation_detail) {
-            if ($accommodation_detail['id'] == 4 && $accommodation_detail['value'] != "") {
-                $number_of_bedrooms = $accommodation_detail['value'];
+        $number_of_bathrooms = "";
+        foreach ($accommodation->accommodation_details ?? [] as $accommodation_detail) {
+            $detailId = $accommodation_detail['id'] ?? null;
+            $detailValue = $accommodation_detail['value'] ?? '';
+            if ($detailValue === '' || $detailValue === null) {
+                continue;
             }
-            if ($accommodation_detail['id'] == 1 && $accommodation_detail['value'] != "") {
-                $living_area_sqm = $accommodation_detail['value'];
+            if ($detailId == 3) {
+                $number_of_bedrooms = $detailValue;
+            }
+            if ($detailId == 4) {
+                $number_of_bathrooms = $detailValue;
+            }
+            if ($detailId == 1) {
+                $living_area_sqm = $detailValue;
             }
         }
         
         return [
             'id' => $accommodation->id,
             'title' => $accommodation->title,
-            'accommodation_type' => $accommodation->accommodationType->name ?? 'Accommodation',
+            'accommodation_type' => $accommodation->accommodationType?->name ?? __('vacations.accommodation'),
+            'accommodation_type_id' => $accommodation->accommodationType?->id,
             'thumbnail_path' => $this->getImageUrl($accommodation->thumbnail_path),
             'gallery_images' => $galleryImages,
             'gallery_total' => $galleryTotal,
@@ -696,8 +698,10 @@ class CampOfferController extends Controller
             'description' => $accommodation->description,
             'living_area_sqm' => $living_area_sqm,
             'number_of_bedrooms' => $number_of_bedrooms,
-            'bathroom_count' => $accommodation->number_of_bathrooms,
-            'bed_summary' => implode(', ',$bedSummaryParts),
+            'number_of_bathrooms' => $number_of_bathrooms,
+            'bathroom_count' => $number_of_bathrooms ?: ($accommodation->number_of_bathrooms ?? null),
+            'bed_summary' => implode(', ', $bedSummaryParts),
+            'bed_items' => $bedItems,
             'bed_config' => $bedConfig,
             'location_description' => $accommodation->location_description,
             'distances' => [
@@ -723,7 +727,7 @@ class CampOfferController extends Controller
     /**
      * Map Guiding model to view format
      */
-    private function mapGuidingData(Guiding $guiding)
+    private function mapGuidingData(Guiding $guiding, ?Collection $watersMap = null)
     {
         // Decode gallery_images if it's a JSON string
         $galleryImages = is_string($guiding->gallery_images) 
@@ -734,9 +738,11 @@ class CampOfferController extends Controller
         $targetFish = $guiding->getTargetFishNames();
         $fishingMethods = $guiding->getFishingMethodNames();
         $inclusions = $guiding->getInclusionNames();
+        $waterTypes = $guiding->getWaterNames($watersMap);
 
         $durationLabel = $this->guidingDurationLabel($guiding);
         $priceType = $guiding->price_type ?: 'per_boat';
+        $waterName = filled($guiding->water_name) ? $guiding->water_name : null;
 
         return [
             'id' => $guiding->id,
@@ -749,17 +755,19 @@ class CampOfferController extends Controller
             'duration_type' => $guiding->duration_type,
             'duration_label' => $durationLabel,
             'max_persons' => $guiding->max_guests,
-            'type' => $guiding->tour_type,
+            'type' => $guiding->shoreOrBoatLabel(),
+            'type_id' => $guiding->fishingFrom?->id,
+            'water_types' => $waterTypes,
             'guiding_info' => [
-                'art' => $guiding->fishingFrom->name ?? 'Tour',
+                'art' => $guiding->shoreOrBoatLabel(),
                 'dauer' => $durationLabel,
                 'max_personen' => $guiding->max_guests,
-                'gewaesser' => $guiding->water_name ?? 'Water'
+                'gewaesser' => $waterName,
             ],
             'target_fish' => $targetFish,
             'methods' => $fishingMethods,
-            'meeting_point' => $guiding->meeting_point,
             'start_times' => $guiding->desc_starting_time ? explode(',', $guiding->desc_starting_time) : [],
+            'desc_meeting_point' => $guiding->desc_meeting_point,
             'inclusives' => $inclusions,
             'price' => [
                 'amount' => $this->guidingDisplayPrice($guiding),
@@ -837,7 +845,7 @@ class CampOfferController extends Controller
     /**
      * Map SpecialOffer model to view format
      */
-    private function mapSpecialOfferData(SpecialOffer $specialOffer)
+    private function mapSpecialOfferData(SpecialOffer $specialOffer, ?Collection $watersMap = null)
     {
         $galleryImages = $this->getImageUrls($specialOffer->gallery_images ?? []);
         $galleryCount = max(count($galleryImages), 1);
@@ -893,8 +901,8 @@ class CampOfferController extends Controller
         $guidingNames = $specialOffer->guidings->pluck('title')->toArray();
         
         // Map full guiding data for minimized cards
-        $guidingsFull = $specialOffer->guidings->map(function($guiding) {
-            return $this->mapGuidingData($guiding);
+        $guidingsFull = $specialOffer->guidings->map(function($guiding) use ($watersMap) {
+            return $this->mapGuidingData($guiding, $watersMap);
         })->toArray();
         
         // Process whats_included - normalize to array of strings

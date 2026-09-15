@@ -23,7 +23,11 @@ class BathroomAmenity extends Model
     // Get name based on current locale
     public function getNameAttribute()
     {
-        return app()->getLocale() == 'en' ? $this->attributes['name_en'] : $this->attributes['name'];
+        if (app()->getLocale() == 'en' && ! empty($this->attributes['name_en'])) {
+            return $this->attributes['name_en'];
+        }
+
+        return $this->attributes['name'] ?? '';
     }
 
     // Scope for active amenities

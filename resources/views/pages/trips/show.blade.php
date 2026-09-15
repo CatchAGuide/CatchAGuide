@@ -133,8 +133,16 @@
                 </div>
             </div>
 
+            @php
+                $tripGalleryId = 'trip-detail-'.($tripView['id'] ?? 'page');
+                $tripLocation = implode(', ', array_filter([$tripView['city'] ?? null, $tripView['region'] ?? null, $tripView['country'] ?? null]));
+                $tripPriceDisplay = !empty($tripView['price']['per_person'])
+                    ? '€'.number_format($tripView['price']['per_person'], 0)
+                    : null;
+                $mobileCarouselImages = array_slice($galleryImages, 1);
+            @endphp
             <div class="trip-offer-page__gallery-container">
-                <div class="camp-gallery">
+                <div class="camp-gallery" data-vacation-gallery="{{ $tripGalleryId }}" data-gallery-images='@json($galleryImages)'>
                     <div class="camp-gallery__main" data-gallery-index="0">
                         @if($primaryImage)
                             <img src="{{ $primaryImage }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}" fetchpriority="high" decoding="async">
@@ -157,23 +165,31 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
 
-                @php
-                    $mobileCarouselImages = array_slice($galleryImages, 1);
-                @endphp
-                @if(count($mobileCarouselImages) > 0)
-                <div class="camp-gallery__mobile-carousel">
-                    <div class="camp-gallery__mobile-carousel-scroll">
-                        @foreach($mobileCarouselImages as $index => $image)
-                            <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
-                                <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}" loading="lazy" decoding="async">
-                            </div>
-                        @endforeach
+                    @if(count($mobileCarouselImages) > 0)
+                    <div class="camp-gallery__mobile-carousel">
+                        <div class="camp-gallery__mobile-carousel-scroll">
+                            @foreach($mobileCarouselImages as $index => $image)
+                                <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
+                                    <img src="{{ $image }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => $index + 2]) }}" loading="lazy" decoding="async">
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
+                    @endif
                 </div>
-                @endif
             </div>
+
+            <x-gallery.modal
+                :id="$tripGalleryId"
+                :images="$galleryImages"
+                :title="$tripView['title'] ?? ''"
+                type="trip"
+                :badge="__('offers.badge_trip')"
+                :location="$tripLocation"
+                :price-display="$tripPriceDisplay"
+                :price-suffix="$tripPriceDisplay ? __('trips.per_person_suffix') : null"
+            />
 
             {{-- Feature cards: full-width row below gallery; two-column layout starts below --}}
             <div class="trip-offer-page__feature-cards">
@@ -944,19 +960,6 @@
         </div>
         @endunless
 
-        <!-- Gallery Modal (matches Camp offer page) -->
-        <div id="galleryModal" class="gallery-modal">
-            <div class="gallery-modal__content">
-                <button type="button" class="gallery-modal__close" aria-label="{{ __('cookie.close-btn') }}">&times;</button>
-                <button type="button" class="gallery-modal__prev" aria-label="{{ __('vacations.previous') }}">&#10094;</button>
-                <button type="button" class="gallery-modal__next" aria-label="{{ __('vacations.next') }}">&#10095;</button>
-                <img id="galleryModalImage" src="" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}">
-                <div class="gallery-modal__counter">
-                    <span id="galleryCurrentIndex">1</span> / <span id="galleryTotalCount">{{ count($galleryImages) }}</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Contact Modal (Trips) -->
         <div class="modal fade" id="tripContactModal" tabindex="-1" aria-labelledby="tripContactModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1183,100 +1186,6 @@
                 var dataEl = document.getElementById('trip-offer-data');
                 if (dataEl && dataEl.textContent) tripOfferData = JSON.parse(dataEl.textContent);
             } catch (e) {}
-
-            // Gallery modal (matches Camp offer page)
-            (function() {
-                const galleryImages = tripOfferData.gallery || [];
-                let currentGalleryIndex = 0;
-                const modal = document.getElementById('galleryModal');
-
-                function openGalleryModal(index) {
-                    currentGalleryIndex = index;
-                    updateGalleryModal();
-                    if (modal) {
-                        modal.style.display = 'flex';
-                        document.body.style.overflow = 'hidden';
-                    }
-                }
-
-                function closeGalleryModal() {
-                    if (modal) {
-                        modal.style.display = 'none';
-                    }
-                    document.body.style.overflow = 'auto';
-                }
-
-                function changeGalleryImage(direction) {
-                    currentGalleryIndex += direction;
-                    if (currentGalleryIndex < 0) currentGalleryIndex = galleryImages.length - 1;
-                    if (currentGalleryIndex >= galleryImages.length) currentGalleryIndex = 0;
-                    updateGalleryModal();
-                }
-
-                function updateGalleryModal() {
-                    const imgEl = document.getElementById('galleryModalImage');
-                    const idxEl = document.getElementById('galleryCurrentIndex');
-                    if (imgEl && galleryImages[currentGalleryIndex]) {
-                        imgEl.src = galleryImages[currentGalleryIndex];
-                    }
-                    if (idxEl) {
-                        idxEl.textContent = currentGalleryIndex + 1;
-                    }
-                }
-
-                const galleryItems = page.querySelectorAll('[data-gallery-index]');
-                galleryItems.forEach(function(item) {
-                    item.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-gallery-index'), 10);
-                        if (!isNaN(index) && index >= 0 && index < galleryImages.length) {
-                            openGalleryModal(index);
-                        }
-                    });
-                });
-
-                const closeBtn = page.querySelector('.gallery-modal__close');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        closeGalleryModal();
-                    });
-                }
-
-                if (modal) {
-                    modal.addEventListener('click', function(e) {
-                        if (e.target.id === 'galleryModal') {
-                            closeGalleryModal();
-                        }
-                    });
-                }
-
-                const prevBtn = page.querySelector('.gallery-modal__prev');
-                const nextBtn = page.querySelector('.gallery-modal__next');
-                if (prevBtn) {
-                    prevBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        changeGalleryImage(-1);
-                    });
-                }
-                if (nextBtn) {
-                    nextBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        changeGalleryImage(1);
-                    });
-                }
-
-                document.addEventListener('keydown', function(event) {
-                    if (modal && modal.style.display === 'flex') {
-                        if (event.key === 'Escape') {
-                            closeGalleryModal();
-                        } else if (event.key === 'ArrowLeft') {
-                            changeGalleryImage(-1);
-                        } else if (event.key === 'ArrowRight') {
-                            changeGalleryImage(1);
-                        }
-                    }
-                });
-            })();
 
             const descEl = page.querySelector('[data-trip-description]');
             const descToggle = page.querySelector('[data-trip-description-toggle]');

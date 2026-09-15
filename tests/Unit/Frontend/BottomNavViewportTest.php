@@ -37,6 +37,22 @@ class BottomNavViewportTest extends TestCase
         $this->assertStringContainsString("addEventListener('scroll'", $source);
     }
 
+    public function test_module_caches_nav_height_instead_of_remeasuring_on_every_scroll_tick(): void
+    {
+        $path = $this->projectPath('resources/js/modules/bottomNavViewport.js');
+        $source = (string) file_get_contents($path);
+
+        // Re-reading nav.offsetHeight on every plain scroll tick forces a
+        // synchronous layout while iOS is animating its own toolbar-collapse
+        // layout, which caused the nav to flash/disappear on real devices.
+        $this->assertMatchesRegularExpression(
+            "/let navHeight = nav\\.offsetHeight;[\\s\\S]*const measure = \\(\\) => \\{[\\s\\S]*navHeight = nav\\.offsetHeight;/",
+            $source
+        );
+        $this->assertStringContainsString("addEventListener('scroll', requestSync)", $source);
+        $this->assertStringNotContainsString("addEventListener('scroll', requestRemeasureAndSync)", $source);
+    }
+
     public function test_app_bundle_initializes_bottom_nav_viewport_sync(): void
     {
         $path = $this->projectPath('resources/js/app.js');

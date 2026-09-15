@@ -15,6 +15,10 @@
     background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
     padding-bottom: 40px;
     font-size: 15px;
+
+    @media (max-width: 991.98px) {
+        padding-bottom: 8rem;
+    }
 }
 .brand-btn {
     background: var(--brand);
@@ -392,6 +396,21 @@
         border-top: 2px solid rgba(232, 96, 76, .2);
     }
 
+    // Sections that only wrap a list of attachment cards (accommodations,
+    // rental boats, guidings, special offers). On mobile the section's own
+    // card chrome is dropped — each attachment card already draws its own
+    // border — so the heading floats free and listings get the reclaimed
+    // width instead of being inset twice.
+    &--listings {
+        @media (max-width: 768px) {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+    }
+
     &__title {
         margin-bottom: 18px;
         font-size: 1.2rem;
@@ -535,6 +554,17 @@
         @media (min-width: 768px) {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+    }
+}
+
+.camp-amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &__icon {
+        flex-shrink: 0;
+        color: #16a34a;
     }
 }
 
@@ -726,7 +756,7 @@
         display: none;
         margin-bottom: 1rem;
 
-        @media (max-width: 767px) {
+        @media (max-width: 991.98px) {
             display: block;
         }
     }
@@ -740,7 +770,7 @@
         margin: 0 0 1rem 1.5rem;
         clear: right;
 
-        @media (max-width: 767px) {
+        @media (max-width: 991.98px) {
             display: none;
         }
     }
