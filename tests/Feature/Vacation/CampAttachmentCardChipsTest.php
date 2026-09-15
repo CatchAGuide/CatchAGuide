@@ -241,7 +241,6 @@ class CampAttachmentCardChipsTest extends TestCase
             ],
         ])->render();
 
-        $this->assertStringContainsString(e(__('vacations.location_schedule')), $html);
         $this->assertStringContainsString(__('guidings.Meeting_Point'), $html);
         $this->assertStringContainsString('Meet at the harbour office, gate 3.', $html);
         $this->assertStringNotContainsString('Bucht Nord - Riba Roja', $html);

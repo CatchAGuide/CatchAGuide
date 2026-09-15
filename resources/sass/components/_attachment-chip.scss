@@ -98,6 +98,29 @@
         color: #1e293b;
         font-weight: 600;
     }
+
+    // Flat variant: hard-facts row (guests / bathrooms / bedrooms) — icon +
+    // text with a divider line instead of a pill background/border.
+    &.attachment-chip--flat {
+        padding: 0 12px 0 0;
+        border: none;
+        background: none;
+        border-radius: 0;
+
+        &:not(:first-child) {
+            padding-left: 12px;
+            border-left: 1px solid rgba(15, 23, 42, .15);
+        }
+    }
+
+    // Plain pill variant: distance facts (water / jetty / parking) — flat
+    // gray pill, text only, no icon.
+    &.attachment-chip--plain-pill {
+        background: #eef1f6;
+        border: none;
+        border-radius: 999px;
+        padding: 6px 12px;
+    }
 }
 
 // Shared "Show more" control for every camp attachment card.

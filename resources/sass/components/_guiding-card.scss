@@ -91,13 +91,6 @@
         }
     }
 
-    &__left-panels {
-        margin-top: 4px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
     &__summary {
         display: flex;
         flex-direction: column;
@@ -151,6 +144,16 @@
         overflow: visible;
         position: relative;
         z-index: 2;
+
+        // Match the accommodation card's guests/bedrooms row on mobile: a
+        // boxed, centered divider row instead of the plain left-aligned line.
+        @media (max-width: 768px) {
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            justify-content: center;
+        }
     }
 
     &__spec-item {
@@ -277,8 +280,7 @@
     }
 
     // Hide expandable content by default
-    &__info-matrix[data-expanded-only],
-    &__left-panels[data-expanded-only] {
+    &__info-matrix[data-expanded-only] {
         display: none !important;
     }
 
@@ -293,11 +295,6 @@
     &--expanded {
         .guiding-card__info-matrix[data-expanded-only] {
             display: grid !important;
-            animation: fadeInUp 0.4s ease forwards;
-        }
-
-        .guiding-card__left-panels[data-expanded-only] {
-            display: flex !important;
             animation: fadeInUp 0.4s ease forwards;
         }
     }
@@ -366,41 +363,103 @@
         gap: 8px;
     }
 
-    &__info-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
+    // Guiding-Informationen data grid: icon + uppercase label on top,
+    // value below, cells divided by thin lines like a compact spec table.
+    &__fact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-        li {
-            font-size: 12px;
-            color: #334155;
-            line-height: 1.6;
+    &__fact-cell {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
 
-            strong {
-                font-weight: 500;
-                color: #334155;
-            }
+        &:nth-child(odd) {
+            border-right: 1px solid rgba(15, 23, 42, .08);
+        }
+
+        &--full {
+            grid-column: 1 / -1;
+        }
+
+        &:last-child {
+            border-bottom: none;
         }
     }
 
-    &__meeting-point {
+    &__fact-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        margin-bottom: 4px;
+
+        svg {
+            flex-shrink: 0;
+            color: #e8604c;
+        }
+
+        // Icon assets (clock-new.svg, user-new.svg, fishing-tool-new.svg,
+        // water-waves.png) are loaded as <img>, so `color` can't tint them —
+        // tint toward the same brand coral used everywhere else so every
+        // fact icon (water/Gewässer included) matches.
+        img {
+            flex-shrink: 0;
+            filter: invert(46%) sepia(58%) saturate(1800%) hue-rotate(330deg) brightness(97%) contrast(92%);
+        }
+    }
+
+    &__fact-value {
+        font-size: 12px;
+        font-weight: 400;
+        color: #64748b;
+    }
+
+    // Included-in-price checklist: check + text, matching the target
+    // reference design. Columns auto-fit the box's actual width (it now
+    // lives in the 3-up info-matrix, so a hardcoded 2-col count would
+    // overflow at the narrower matrix breakpoints) — two columns when
+    // there's room for a second, one column otherwise.
+    &__checklist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px 16px;
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #334155;
+        }
+    }
+
+    // Starting time / meeting point: bold label with the value below,
+    // no icons or chips — matches the flat text-pair treatment from the
+    // approved mockup rather than the boxed fact cells above.
+    &__schedule-item {
         display: flex;
         flex-direction: column;
         gap: 2px;
     }
 
-    &__meeting-point-label {
-        font-size: 12px;
-        font-weight: 600;
-        color: #64748b;
+    &__schedule-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
     }
 
-    &__meeting-point-text {
+    &__schedule-value {
         font-size: 12px;
-        color: #334155;
+        font-weight: 400;
+        color: #64748b;
         line-height: 1.6;
 
         p {
@@ -418,57 +477,7 @@
         color: #64748b;
     }
 
-    // Chip rows shared by inclusives, target fish, methods and start times
-    &__chip-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-
-    &__inclusive-chip,
-    &__method-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, .8);
-        border: 1px solid rgba(15, 23, 42, .1);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #334155;
-        line-height: 1;
-    }
-
-    &__target-fish-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(22, 163, 74, 0.1);
-        border: 1px solid rgba(22, 163, 74, 0.2);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #15803d;
-        font-weight: 500;
-        line-height: 1;
-    }
-
-    &__start-time-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 12px;
-        padding: 4px 8px;
-        font-size: 11px;
-        color: #1e40af;
-        font-weight: 500;
-        line-height: 1;
-    }
-
-    &__check-icon,
-    &__chip-icon {
+    &__check-icon {
         flex-shrink: 0;
         color: #16a34a;
     }

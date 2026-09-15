@@ -78,12 +78,7 @@
             {{-- Details panel appears after gallery (desktop expanded only) --}}
             <div class="accommodation-card__left-panels" data-expanded-only>
                 <div class="accommodation-card__panel">
-                    <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
-                    <ul class="accommodation-card__bullet-list">
-                        @foreach($accommodation['accommodation_details'] as $detail)
-                            <li>{{ translated_catalog_label($detail) }}: <span class="font-medium">{{ is_numeric($detail['value'] ?? null) ? $detail['value'] : translate($detail['value'] ?? '') }}</span></li>
-                        @endforeach
-                    </ul>
+                    @include('components.accommodation.partials.details-fact-table')
                 </div>
 
                 @if(!empty($accommodation['policies']))
@@ -143,12 +138,7 @@
             <div class="accommodation-card__feature-grid" data-expanded-only>
             {{-- Mobile-only Details panel (appears before Amenities on mobile) --}}
             <div class="accommodation-card__panel accommodation-card__panel--mobile-only accommodation-card__panel--mobile-details">
-                <div class="accommodation-card__panel-title">{{ __('vacations.details') }}</div>
-                <ul class="accommodation-card__bullet-list">
-                    @foreach($accommodation['accommodation_details'] as $detail)
-                        <li>{{ translated_catalog_label($detail) }}: <span class="font-medium">{{ is_numeric($detail['value'] ?? null) ? $detail['value'] : translate($detail['value'] ?? '') }}</span></li>
-                    @endforeach
-                </ul>
+                @include('components.accommodation.partials.details-fact-table')
             </div>
 
             <div class="accommodation-card__panel">
@@ -177,7 +167,7 @@
             <div class="accommodation-card__panel">
                 <div class="accommodation-card__panel-title">{{ __('vacations.kitchen_equipment') }}</div>
                 @if(!empty($accommodation['kitchen']))
-                    <ul class="accommodation-card__bullet-list">
+                    <ul class="accommodation-card__chip-list">
                         @foreach($accommodation['kitchen'] as $kitchen)
                             <li class="accommodation-card__chip">{{ translated_catalog_label($kitchen) }}</li>
                         @endforeach
@@ -190,7 +180,7 @@
             <div class="accommodation-card__panel">
                 <div class="accommodation-card__panel-title">{{ __('vacations.bathroom_equipment') }}</div>
                 @if(!empty($accommodation['bathroom_laundry']))
-                    <ul class="accommodation-card__bullet-list">
+                    <ul class="accommodation-card__chip-list">
                         @foreach($accommodation['bathroom_laundry'] as $bathroom_laundry)
                             <li class="accommodation-card__chip">{{ translated_catalog_label($bathroom_laundry) }}</li>
                         @endforeach

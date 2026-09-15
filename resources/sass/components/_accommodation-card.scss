@@ -227,14 +227,33 @@
         line-height: 1;
     }
 
-    &__beds {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: center;
-        overflow: visible;
-        position: relative;
-        z-index: 2;
+    // Guests/bathrooms/bedrooms row: on mobile it gets the same boxed,
+    // full-width treatment as the Details panel below it (desktop is
+    // untouched — the flat divider row already sits inline with the title).
+    &__hard-facts {
+        @media (max-width: 768px) {
+            width: 100%;
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 10px 12px;
+
+            .accommodation-card__stats {
+                justify-content: center;
+            }
+        }
+    }
+
+    &__bed-summary {
+        margin: 0;
+        font-size: 12px;
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    &__bed-summary-label {
+        color: #64748b;
+        font-weight: 600;
     }
 
     &__actions-column {
@@ -477,6 +496,36 @@
         }
     }
 
+    // Details keeps its boxed look on mobile too (unlike the other panels,
+    // which flatten to divider-only sections above), full width.
+    &__panel--mobile-details {
+        @media (max-width: 768px) {
+            width: 100%;
+            background: rgba(241, 245, 249, .6);
+            border: 1px solid rgba(15, 23, 42, .08);
+            border-radius: 12px;
+            padding: 12px;
+            border-bottom: none;
+
+            &:last-child {
+                padding-bottom: 12px;
+            }
+        }
+    }
+
+    // Policies (order: 1, see the mobile reorder rules above) always renders
+    // visually last when present — but flex `order` doesn't change DOM
+    // position, so the plain CSS `:last-child` border-strip on &__panel above
+    // only ever catches the actual last DOM node (Extras/Bathroom), not this
+    // one. Left alone, Policies kept its own bottom divider AND the price
+    // footer added its own top divider right after it — a doubled line.
+    &__panel--mobile-policies {
+        @media (max-width: 768px) {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
     &__panel-title {
         color: #64748b;
         font-size: 12px;
@@ -505,6 +554,37 @@
                 margin-bottom: 0;
             }
         }
+    }
+
+    &__fact-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12px;
+    }
+
+    &__fact-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+
+        &:last-child {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    &__fact-label {
+        color: #64748b;
+    }
+
+    &__fact-value {
+        color: #334155;
+        font-weight: 600;
+        text-align: right;
     }
 
     &__chip-list {

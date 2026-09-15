@@ -557,6 +557,17 @@
     }
 }
 
+.camp-amenity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &__icon {
+        flex-shrink: 0;
+        color: #16a34a;
+    }
+}
+
 // Camp Pills
 .camp-pill-row {
     display: flex;

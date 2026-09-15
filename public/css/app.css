@@ -17924,6 +17924,16 @@ div#masonry-grid img {
   }
 }
 
+.camp-amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camp-amenity-item__icon {
+  flex-shrink: 0;
+  color: #16a34a;
+}
+
 .camp-pill-row {
   display: flex;
   flex-wrap: wrap;
@@ -29640,6 +29650,22 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   color: #1e293b;
   font-weight: 600;
 }
+.attachment-chip.attachment-chip--flat {
+  padding: 0 12px 0 0;
+  border: none;
+  background: none;
+  border-radius: 0;
+}
+.attachment-chip.attachment-chip--flat:not(:first-child) {
+  padding-left: 12px;
+  border-left: 1px solid rgba(15, 23, 42, 0.15);
+}
+.attachment-chip.attachment-chip--plain-pill {
+  background: #eef1f6;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
 
 .attachment-expand-btn {
   display: inline-flex;
@@ -29852,14 +29878,27 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   font-size: 14px;
   line-height: 1;
 }
-.accommodation-card__beds {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  overflow: visible;
-  position: relative;
-  z-index: 2;
+@media (max-width: 768px) {
+  .accommodation-card__hard-facts {
+    width: 100%;
+    background: rgba(241, 245, 249, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .accommodation-card__hard-facts .accommodation-card__stats {
+    justify-content: center;
+  }
+}
+.accommodation-card__bed-summary {
+  margin: 0;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+}
+.accommodation-card__bed-summary-label {
+  color: #64748b;
+  font-weight: 600;
 }
 .accommodation-card__actions-column {
   display: flex;
@@ -30062,6 +30101,25 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     border-bottom: none;
   }
 }
+@media (max-width: 768px) {
+  .accommodation-card__panel--mobile-details {
+    width: 100%;
+    background: rgba(241, 245, 249, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    border-bottom: none;
+  }
+  .accommodation-card__panel--mobile-details:last-child {
+    padding-bottom: 12px;
+  }
+}
+@media (max-width: 768px) {
+  .accommodation-card__panel--mobile-policies {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
 .accommodation-card__panel-title {
   color: #64748b;
   font-size: 12px;
@@ -30086,6 +30144,32 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .accommodation-card__bullet-list li:last-child {
   margin-bottom: 0;
+}
+.accommodation-card__fact-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.accommodation-card__fact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.accommodation-card__fact-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.accommodation-card__fact-label {
+  color: #64748b;
+}
+.accommodation-card__fact-value {
+  color: #334155;
+  font-weight: 600;
+  text-align: right;
 }
 .accommodation-card__chip-list {
   margin: 0;
@@ -30313,12 +30397,6 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     display: none !important;
   }
 }
-.guiding-card__left-panels {
-  margin-top: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 .guiding-card__summary {
   display: flex;
   flex-direction: column;
@@ -30366,6 +30444,15 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   overflow: visible;
   position: relative;
   z-index: 2;
+}
+@media (max-width: 768px) {
+  .guiding-card__spec-row {
+    background: rgba(241, 245, 249, 0.6);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 12px;
+    padding: 10px 12px;
+    justify-content: center;
+  }
 }
 .guiding-card__spec-item {
   display: inline-flex;
@@ -30472,7 +30559,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
     align-self: center;
   }
 }
-.guiding-card__info-matrix[data-expanded-only], .guiding-card__left-panels[data-expanded-only] {
+.guiding-card__info-matrix[data-expanded-only] {
   display: none !important;
 }
 @media (max-width: 768px) {
@@ -30482,10 +30569,6 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
 }
 .guiding-card--expanded .guiding-card__info-matrix[data-expanded-only] {
   display: grid !important;
-  animation: fadeInUp 0.4s ease forwards;
-}
-.guiding-card--expanded .guiding-card__left-panels[data-expanded-only] {
-  display: flex !important;
   animation: fadeInUp 0.4s ease forwards;
 }
 .guiding-card__info-matrix {
@@ -30544,42 +30627,82 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   flex-direction: column;
   gap: 8px;
 }
-.guiding-card__info-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.guiding-card__fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.guiding-card__info-list li {
+.guiding-card__fact-cell {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+.guiding-card__fact-cell:nth-child(odd) {
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+}
+.guiding-card__fact-cell--full {
+  grid-column: 1/-1;
+}
+.guiding-card__fact-cell:last-child {
+  border-bottom: none;
+}
+.guiding-card__fact-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.guiding-card__fact-label svg {
+  flex-shrink: 0;
+  color: #e8604c;
+}
+.guiding-card__fact-label img {
+  flex-shrink: 0;
+  filter: invert(46%) sepia(58%) saturate(1800%) hue-rotate(330deg) brightness(97%) contrast(92%);
+}
+.guiding-card__fact-value {
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+}
+.guiding-card__checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px 16px;
+}
+.guiding-card__checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 12px;
   color: #334155;
-  line-height: 1.6;
 }
-.guiding-card__info-list li strong {
-  font-weight: 500;
-  color: #334155;
-}
-.guiding-card__meeting-point {
+.guiding-card__schedule-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.guiding-card__meeting-point-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
+.guiding-card__schedule-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
 }
-.guiding-card__meeting-point-text {
+.guiding-card__schedule-value {
   font-size: 12px;
-  color: #334155;
+  font-weight: 400;
+  color: #64748b;
   line-height: 1.6;
 }
-.guiding-card__meeting-point-text p {
+.guiding-card__schedule-value p {
   margin: 0;
 }
-.guiding-card__meeting-point-text p + p {
+.guiding-card__schedule-value p + p {
   margin-top: 6px;
 }
 .guiding-card__empty {
@@ -30587,50 +30710,7 @@ input[type=checkbox]:checked + [data-accommodation-form] .btn-checkbox {
   font-size: 12px;
   color: #64748b;
 }
-.guiding-card__chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.guiding-card__inclusive-chip, .guiding-card__method-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 11px;
-  color: #334155;
-  line-height: 1;
-}
-.guiding-card__target-fish-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(22, 163, 74, 0.1);
-  border: 1px solid rgba(22, 163, 74, 0.2);
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 11px;
-  color: #15803d;
-  font-weight: 500;
-  line-height: 1;
-}
-.guiding-card__start-time-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 12px;
-  padding: 4px 8px;
-  font-size: 11px;
-  color: #1e40af;
-  font-weight: 500;
-  line-height: 1;
-}
-.guiding-card__check-icon, .guiding-card__chip-icon {
+.guiding-card__check-icon {
   flex-shrink: 0;
   color: #16a34a;
 }

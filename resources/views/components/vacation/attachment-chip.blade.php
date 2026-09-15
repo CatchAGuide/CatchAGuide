@@ -3,6 +3,7 @@
     'value' => '',
     'label' => null,
     'tooltip' => null,
+    'showIcon' => true,
 ])
 
 @php
@@ -38,6 +39,7 @@
     aria-label="{{ $tooltip }} — {{ $value }}"
 >
     <span class="attachment-chip__tooltip" role="tooltip">{{ $tooltip }}</span>
+    @if($showIcon)
     <span class="attachment-chip__icon" aria-hidden="true">
         @if($assetSrc)
             <img src="{{ $assetSrc }}" width="14" height="14" alt="">
@@ -89,6 +91,7 @@
             </svg>
         @endif
     </span>
+    @endif
     <span class="attachment-chip__text">
         @if($label)
             <span class="attachment-chip__label">{{ $label }}</span>

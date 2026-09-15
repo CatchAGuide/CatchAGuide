@@ -286,9 +286,9 @@
                         <div class="camp-section__cols">
                             {{-- Dynamic amenities from camp_facility_camp pivot table --}}
                             @foreach($camp['amenities'] as $amenity)
-                                <div class="flex items-center gap-2">
+                                <div class="camp-amenity-item">
+                                    <i class="fa fa-check camp-amenity-item__icon"></i>
                                     <span>{{ translated_catalog_label($amenity) }}</span>
-                                    <i class="fa fa-check text-green-600"></i>
                                 </div>
                             @endforeach
                         </div>
