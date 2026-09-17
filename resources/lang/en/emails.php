@@ -141,6 +141,12 @@ return [
     'guest_booking_request_cancelled_text_7' => 'We appreciate your understanding and hope to help you find the perfect fishing experience soon.',
     'guest_booking_request_processing' => 'Thank you for your booking request. We have received it and are processing it.',
 
+    'guest_booking_confirmed_cancelled_title' => 'Your Confirmed Booking Has Been Cancelled',
+    'guest_booking_confirmed_cancelled_text_1' => 'We\'re writing to let you know that your confirmed booking with [Guide Name] for [Date] at [Location] has been cancelled by our team.',
+    'guest_booking_confirmed_cancelled_text_2' => 'We understand this may be disappointing, and we apologize for any inconvenience this may cause.',
+    'guest_booking_confirmed_cancelled_text_3' => 'If you have already made a payment towards this booking, please contact us so we can assist you.',
+    'guest_booking_confirmed_cancelled_text_4' => 'If you have any questions or would like help finding another guide or date, please don\'t hesitate to contact us.',
+
     'guest_booking_request_reminder_title' => 'Your Fishing Adventure with Catch A Guide is 3 Days Away!',
     'guest_booking_request_reminder_text_1' => 'Just a friendly reminder that your fishing tour with [Guide Name] at [Location] is scheduled for [Date] at [Time]!',
     'guest_booking_request_reminder_text_2' => 'We\'re sure you\'re getting excited to hit the water. To ensure you\'re fully prepared, here are a few things to keep in mind:',

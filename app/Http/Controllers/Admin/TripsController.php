@@ -151,8 +151,10 @@ class TripsController extends Controller
             $tripData = $this->dataProcessor->processRequestData($request, $trip);
             $tripData['status'] = $isDraft ? 'draft' : 'active';
 
-            if ($trip->title !== $request->title && $request->title) {
-                $tripData['slug'] = $this->seoService->generateSlug($request->title, $trip->id);
+            // Slug is set once at creation and must stay stable afterward for SEO —
+            // only backfill it here if a legacy record is missing one.
+            if (blank($trip->slug)) {
+                $tripData['slug'] = $this->seoService->generateSlug($request->title ?: $trip->title, $trip->id);
             }
 
             $imageData = $this->galleryProcessor->process($request, 'trip', $trip->slug, $trip->id);

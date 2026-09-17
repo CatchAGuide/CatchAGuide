@@ -200,6 +200,16 @@
                                                                     <i class="fa fa-times-circle"></i>
                                                                 </a>
                                                             @endif
+                                                            @if($booking->status === 'accepted')
+                                                                @if(!$booking->isBookingOver())
+                                                                    <a href="javascript:void(0)" class="btn btn-danger btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Reject booking" onclick="adminChangeBookingStatus({{ $booking->id }}, 'rejected', 'Reject this accepted booking? The guest and guide will be notified by email.')">
+                                                                        <i class="fa fa-times-circle"></i>
+                                                                    </a>
+                                                                @endif
+                                                                <a href="javascript:void(0)" class="btn btn-dark btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Cancel booking" onclick="adminChangeBookingStatus({{ $booking->id }}, 'cancelled', 'Cancel this accepted booking? The guest and guide will be notified by email and any pending booking-confirmation emails will be cancelled.')">
+                                                                    <i class="fa fa-ban"></i>
+                                                                </a>
+                                                            @endif
                                                             <a href="javascript:void(0)" class="btn btn-secondary btn-compact-icon" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit booking" onclick="showEditBookingModal({{ $booking->id }})">
                                                                 <i class="fa fa-pen"></i>
                                                             </a>
@@ -325,6 +335,9 @@
                                     <button class="nav-link" id="rejected-booking-tab" data-bs-toggle="tab" data-bs-target="#guest-rejected-booking" type="button" role="tab" aria-controls="guest-rejected-booking" aria-selected="false">Rejected Booking</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="cancelled-booking-tab" data-bs-toggle="tab" data-bs-target="#guest-cancelled-booking" type="button" role="tab" aria-controls="guest-cancelled-booking" aria-selected="false">Cancelled Booking</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="tour-reminder-tab" data-bs-toggle="tab" data-bs-target="#guest-tour-reminder" type="button" role="tab" aria-controls="guest-tour-reminder" aria-selected="false">Tour Reminder</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
@@ -365,7 +378,15 @@
                                         Rejected booking email template is not available.
                                     </div>
                                 </div>
-                                
+
+                                <!-- Cancelled Booking Email -->
+                                <div class="tab-pane fade" id="guest-cancelled-booking" role="tabpanel" aria-labelledby="cancelled-booking-tab">
+                                    <iframe id="cancelled-booking-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
+                                    <div id="cancelled-booking-not-available" class="alert alert-warning d-none">
+                                        Cancelled booking email template is not available.
+                                    </div>
+                                </div>
+
                                 <!-- Tour Reminder Email -->
                                 <div class="tab-pane fade" id="guest-tour-reminder" role="tabpanel" aria-labelledby="tour-reminder-tab">
                                     <iframe id="tour-reminder-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
@@ -396,6 +417,9 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="guide-accepted-booking-tab" data-bs-toggle="tab" data-bs-target="#guide-accepted-booking" type="button" role="tab" aria-controls="guide-accepted-booking" aria-selected="false">Accepted Booking</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="guide-cancelled-booking-tab" data-bs-toggle="tab" data-bs-target="#guide-cancelled-booking" type="button" role="tab" aria-controls="guide-cancelled-booking" aria-selected="false">Cancelled Booking</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="guide-reminder-tab" data-bs-toggle="tab" data-bs-target="#guide-reminder" type="button" role="tab" aria-controls="guide-reminder" aria-selected="false">24h Reminder</button>
@@ -436,7 +460,15 @@
                                         Guide accepted booking email template is not available.
                                     </div>
                                 </div>
-                                
+
+                                <!-- Guide Cancelled Booking Email -->
+                                <div class="tab-pane fade" id="guide-cancelled-booking" role="tabpanel" aria-labelledby="guide-cancelled-booking-tab">
+                                    <iframe id="guide-cancelled-booking-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
+                                    <div id="guide-cancelled-booking-not-available" class="alert alert-warning d-none">
+                                        Guide cancelled booking email template is not available.
+                                    </div>
+                                </div>
+
                                 <!-- Guide Reminder Email -->
                                 <div class="tab-pane fade" id="guide-reminder" role="tabpanel" aria-labelledby="guide-reminder-tab">
                                     <iframe id="guide-reminder-iframe" style="width: 100%; height: 500px; border: none;"></iframe>
@@ -1253,7 +1285,15 @@
                         document.getElementById('rejected-booking-iframe').srcdoc = '';
                         document.getElementById('rejected-booking-not-available').classList.remove('d-none');
                     }
-                    
+
+                    if (data.cancelledBookingEmail) {
+                        document.getElementById('cancelled-booking-iframe').srcdoc = data.cancelledBookingEmail;
+                        document.getElementById('cancelled-booking-not-available').classList.add('d-none');
+                    } else {
+                        document.getElementById('cancelled-booking-iframe').srcdoc = '';
+                        document.getElementById('cancelled-booking-not-available').classList.remove('d-none');
+                    }
+
                     if (data.tourReminderEmail) {
                         document.getElementById('tour-reminder-iframe').srcdoc = data.tourReminderEmail;
                         document.getElementById('tour-reminder-not-available').classList.add('d-none');
@@ -1294,7 +1334,15 @@
                         document.getElementById('guide-accepted-booking-iframe').srcdoc = '';
                         document.getElementById('guide-accepted-booking-not-available').classList.remove('d-none');
                     }
-                    
+
+                    if (data.guideCancelledBookingEmail) {
+                        document.getElementById('guide-cancelled-booking-iframe').srcdoc = data.guideCancelledBookingEmail;
+                        document.getElementById('guide-cancelled-booking-not-available').classList.add('d-none');
+                    } else {
+                        document.getElementById('guide-cancelled-booking-iframe').srcdoc = '';
+                        document.getElementById('guide-cancelled-booking-not-available').classList.remove('d-none');
+                    }
+
                     if (data.guideReminderEmail) {
                         document.getElementById('guide-reminder-iframe').srcdoc = data.guideReminderEmail;
                         document.getElementById('guide-reminder-not-available').classList.add('d-none');
@@ -1412,7 +1460,14 @@
                     document.getElementById('edit-booking-email').value = data.email || '';
                     document.getElementById('edit-booking-phone').value = data.phone || '';
                     editBookingModalIsHydrating = true;
-                    document.getElementById('edit-booking-status').value = data.status;
+
+                    const statusSelect = document.getElementById('edit-booking-status');
+                    const allowedOptions = data.allowed_status_options || [];
+                    Array.from(statusSelect.options).forEach(option => {
+                        option.hidden = !allowedOptions.includes(option.value);
+                    });
+                    statusSelect.value = data.status;
+
                     if (data.allowed_status_edit) {
                         document.getElementById('edit-booking-status-group').style.display = '';
                     } else {
@@ -1425,6 +1480,41 @@
                 .catch(error => {
                     alert('Failed to load booking data.');
                 });
+        }
+
+        function adminChangeBookingStatus(bookingId, newStatus, confirmMessage) {
+            if (!confirm(confirmMessage)) return;
+
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('CSRF token not found.');
+                return;
+            }
+            const csrfToken = csrfTokenElement.getAttribute('content');
+            fetch(adminBookingSaveUrl(bookingId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => {
+                if (!response.ok) return response.text().then(t => { throw new Error(t || response.status); });
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to update booking: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Error updating booking status.');
+            });
         }
 
         function saveBookingEdit() {

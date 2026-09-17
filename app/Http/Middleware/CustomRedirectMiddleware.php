@@ -16,27 +16,25 @@ class CustomRedirectMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        // Redirect URLs that start with /public to remove the /public segment
-        // Check both the path() and the full request URI to catch all cases
-        $path = $request->path();
+        // Redirect URLs that start with /public to remove the /public segment.
+        // Built as an absolute URL (scheme + host) rather than passed through the
+        // relative redirect() helper: this host's document root serves public_html
+        // and internally rewrites to public/index.php, so Laravel's base URL
+        // detection resolves to /public — a relative redirect() call re-prepends
+        // it and creates an infinite 301 loop back to the same /public/... URL.
         $requestUri = $request->getRequestUri();
-        
-        // Check if /public appears in the path or request URI
-        if (str_starts_with($path, 'public') || 
-            str_starts_with($path, 'public/') ||
-            preg_match('#^/public(/|$)#', $requestUri)) {
-            
-            // Remove 'public' or 'public/' from the beginning
-            $newPath = preg_replace('#^public/?#', '', $path);
-            
-            // If the new path is empty, redirect to root
-            $newPath = $newPath ?: '/';
-            
-            // Build the full URL with query string if present
+
+        if (preg_match('#^/public(?:/(.*))?$#', $requestUri, $matches)) {
+            $cleanPath = '/' . ltrim($matches[1] ?? '', '/');
+
+            // preg_match on the URI already includes the query string in $matches[1];
+            // strip it here and re-append via getQueryString() to avoid duplicating it.
+            $cleanPath = strtok($cleanPath, '?');
+
             $queryString = $request->getQueryString();
-            $redirectUrl = $newPath . ($queryString ? '?' . $queryString : '');
-            
-            return redirect($redirectUrl, 301);
+            $redirectUrl = $request->getSchemeAndHttpHost() . $cleanPath . ($queryString ? '?' . $queryString : '');
+
+            return redirect()->to($redirectUrl, 301);
         }
 
         $urls = [

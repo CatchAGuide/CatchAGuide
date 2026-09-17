@@ -165,9 +165,10 @@ class AccommodationsController extends Controller
             $accommodationData = $this->dataProcessor->processRequestData($request, $accommodation);
             $accommodationData['status'] = $isDraft ? 'draft' : 'active';
             
-            // Generate slug from title if title changed
-            if ($accommodation->title !== $request->title && $request->title) {
-                $accommodationData['slug'] = $this->seoService->generateSlug($request->title, $accommodation->id);
+            // Slug is set once at creation and must stay stable afterward for SEO —
+            // only backfill it here if a legacy record is missing one.
+            if (blank($accommodation->slug)) {
+                $accommodationData['slug'] = $this->seoService->generateSlug($request->title ?: $accommodation->title, $accommodation->id);
             }
 
             // Process images

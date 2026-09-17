@@ -17,6 +17,9 @@
     .js-status-dropdown-btn.btn-status-done { background-color: #198754; border-color: #198754; color: #fff; }
     .js-status-dropdown-btn.btn-status-done:hover { background-color: #157347; border-color: #146c43; color: #fff; }
 
+    #trip-bookings-datatable {
+        table-layout: fixed;
+    }
     #trip-bookings-datatable thead th {
         font-weight: 600;
         font-size: 0.75rem;
@@ -25,15 +28,94 @@
         color: #6c757d;
         border-bottom: 1px solid #dee2e6;
         padding: 0.85rem 1rem;
-        white-space: nowrap;
+        white-space: normal;
     }
     #trip-bookings-datatable tbody td {
         padding: 0.85rem 1rem;
         vertical-align: middle;
         border-bottom: 1px solid #eee;
         font-size: 0.9rem;
+        overflow: hidden;
     }
     #trip-bookings-datatable tbody tr:hover { background-color: #f8f9fa; }
+
+    /* Column widths sum to 100% and are enforced via table-layout: fixed
+       above so cells truncate instead of overflowing the card / page. */
+    #trip-bookings-datatable .col-id { width: 4%; }
+    #trip-bookings-datatable .col-guest { width: 12%; }
+    #trip-bookings-datatable .col-contact { width: 12%; }
+    #trip-bookings-datatable .col-source { width: 22%; }
+    #trip-bookings-datatable .col-preferred-date { width: 9%; }
+    #trip-bookings-datatable .col-persons { width: 6%; }
+    #trip-bookings-datatable .col-created { width: 10%; }
+    #trip-bookings-datatable .col-status { width: 9%; }
+    #trip-bookings-datatable .col-actions { width: 16%; }
+
+    /* Mobile: collapse the table into stacked cards instead of a
+       9-column horizontal-scroll table that overlaps surrounding content. */
+    @media (max-width: 767.98px) {
+        #trip-bookings-datatable {
+            table-layout: auto;
+        }
+        #trip-bookings-datatable thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        #trip-bookings-datatable,
+        #trip-bookings-datatable tbody,
+        #trip-bookings-datatable tr,
+        #trip-bookings-datatable td {
+            display: block;
+            width: 100% !important;
+        }
+        #trip-bookings-datatable tr {
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        #trip-bookings-datatable td {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.6rem 0.1rem;
+            border-bottom: 1px solid #f1f3f5;
+            text-align: right;
+            overflow: visible;
+        }
+        #trip-bookings-datatable tr td:last-child { border-bottom: none; }
+        #trip-bookings-datatable td::before {
+            content: attr(data-label);
+            flex-shrink: 0;
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6c757d;
+            text-align: left;
+        }
+        #trip-bookings-datatable td.cr-td-source {
+            display: block;
+            text-align: left;
+        }
+        #trip-bookings-datatable td.cr-td-source::before {
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+        #trip-bookings-datatable td.cr-td-actions {
+            justify-content: flex-start;
+        }
+        #trip-bookings-datatable td.cr-td-actions::before {
+            display: none;
+        }
+    }
 
     .cr-source-cell { display: flex; align-items: center; gap: 0.75rem; min-height: 3rem; }
     .cr-source-cell__thumb { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; background: #e9ecef; }
@@ -130,15 +212,15 @@
                             <table class="table table-hover mb-0" id="trip-bookings-datatable">
                                 <thead>
                                     <tr>
-                                        <th width="6%">ID</th>
-                                        <th width="18%">Guest</th>
-                                        <th width="18%">Contact</th>
-                                        <th width="26%">Trip</th>
-                                        <th width="10%">Preferred tour date</th>
-                                        <th width="8%">Persons</th>
-                                        <th width="10%">Request created</th>
-                                        <th width="10%">Status</th>
-                                        <th width="8%" class="text-end">Actions</th>
+                                        <th class="col-id">ID</th>
+                                        <th class="col-guest">Guest</th>
+                                        <th class="col-contact">Contact</th>
+                                        <th class="col-source">Trip</th>
+                                        <th class="col-preferred-date">Preferred tour date</th>
+                                        <th class="col-persons">Persons</th>
+                                        <th class="col-created">Request created</th>
+                                        <th class="col-status">Status</th>
+                                        <th class="col-actions text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -160,13 +242,13 @@
                                             }
                                         @endphp
                                         <tr>
-                                            <td class="fw-semibold">#{{ $request->id }}</td>
-                                            <td><span class="cr-row-contact" title="{{ e($request->name) }}">{{ $request->name ?: '—' }}</span></td>
-                                            <td>
+                                            <td class="col-id fw-semibold" data-label="ID">#{{ $request->id }}</td>
+                                            <td class="col-guest" data-label="Guest"><span class="cr-row-contact" title="{{ e($request->name) }}">{{ $request->name ?: '—' }}</span></td>
+                                            <td class="col-contact" data-label="Contact">
                                                 <div class="cr-row-contact" title="{{ e($request->email) }}">{{ $request->email ?: '—' }}</div>
                                                 <div class="cr-row-contact text-muted" title="{{ e(($request->phone_country_code ?? '') . ' ' . ($request->phone ?? '')) }}">{{ trim(($request->phone_country_code ?? '') . ' ' . ($request->phone ?? '')) ?: '—' }}</div>
                                             </td>
-                                            <td>
+                                            <td class="col-source cr-td-source" data-label="Trip">
                                                 <div class="cr-source-cell" title="{{ $request->getSourceLabel() }}">
                                                     @if($thumbUrl)
                                                         <img src="{{ $thumbUrl }}" alt="" class="cr-source-cell__thumb cr-source-cell__thumb--img" loading="lazy" onerror="this.style.display='none';">
@@ -189,10 +271,10 @@
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td>{{ optional($request->preferred_date)->format('Y-m-d') ?: '—' }}</td>
-                                            <td>{{ $request->number_of_persons ?: '—' }}</td>
-                                            <td data-order="{{ optional($request->created_at)->timestamp }}" class="cr-created">{{ optional($request->created_at)->format('M j, Y g:i A') }}</td>
-                                            <td>
+                                            <td class="col-preferred-date" data-label="Preferred date">{{ optional($request->preferred_date)->format('Y-m-d') ?: '—' }}</td>
+                                            <td class="col-persons" data-label="Persons">{{ $request->number_of_persons ?: '—' }}</td>
+                                            <td class="col-created cr-created" data-order="{{ optional($request->created_at)->timestamp }}" data-label="Requested">{{ optional($request->created_at)->format('M j, Y g:i A') }}</td>
+                                            <td class="col-status" data-label="Status">
                                                 <div class="dropdown">
                                                     <button type="button"
                                                             class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}"
@@ -214,7 +296,7 @@
                                                     </ul>
                                                 </div>
                                             </td>
-                                            <td class="text-end">
+                                            <td class="col-actions cr-td-actions text-end" data-label="Actions">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button"
                                                             class="btn btn-outline-info js-view-message"

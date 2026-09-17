@@ -334,7 +334,11 @@ return [
     //Mail from Guide When Guest Cancel Booking
     'gdc-cancelled' => 'Booking Cancelled',
     'gdc-inform' => 'We regret to inform you that a recent booking request made by',
-    'gdc-inform2' => 'has been cancelled. Unfortunately, the guest decided to cancel the booking request.',   
+    'gdc-inform2' => 'has been cancelled. Unfortunately, the guest decided to cancel the booking request.',
+
+    //Mail to Guide when an already-confirmed booking is cancelled by the Catch A Guide team
+    'gdc-admin-inform' => "We're writing to let you know that the confirmed booking made by",
+    'gdc-admin-inform2' => 'has been cancelled by the Catch A Guide team.',
 
     //Mail from Guest when guide Accepted the booking
     'gt-accepted' => 'Booking Accepted',

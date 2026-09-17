@@ -334,7 +334,10 @@ return [
     //Mail from Guide When Guest Cancel Booking
     'gdc-cancelled' => 'Buchung storniert',
     'gdc-inform' => 'Wir bedauern, Ihnen mitteilen zu müssen, dass eine kürzlich von',
-    'gdc-inform2' => 'getätigte Buchungsanfrage storniert wurde. Leider hat der Gast beschlossen, die Buchungsanfrage zu stornieren.',   
+    'gdc-inform2' => 'getätigte Buchungsanfrage storniert wurde. Leider hat der Gast beschlossen, die Buchungsanfrage zu stornieren.',
+
+    'gdc-admin-inform' => 'Wir möchten Sie darüber informieren, dass die bestätigte Buchung von',
+    'gdc-admin-inform2' => 'vom Catch A Guide Team storniert wurde.',
 
     //Mail from Guest when guide Accepted the booking
     'gt-accepted' => 'Buchung angenommen',

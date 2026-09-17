@@ -191,9 +191,10 @@ class RentalBoatsController extends Controller
             $rentalBoatData = $this->dataProcessor->processRequestData($request, $rentalBoat);
             $rentalBoatData['status'] = $isDraft ? 'draft' : 'active';
             
-            // Generate slug from title if title changed
-            if ($rentalBoat->title !== $request->title && $request->title) {
-                $rentalBoatData['slug'] = $this->seoService->generateSlug($request->title, $rentalBoat->id);
+            // Slug is set once at creation and must stay stable afterward for SEO —
+            // only backfill it here if a legacy record is missing one.
+            if (blank($rentalBoat->slug)) {
+                $rentalBoatData['slug'] = $this->seoService->generateSlug($request->title ?: $rentalBoat->title, $rentalBoat->id);
             }
 
             
