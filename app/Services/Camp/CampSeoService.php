@@ -82,10 +82,10 @@ class CampSeoService
         if ($camp->country) $keywords[] = $camp->country;
         
         // Add fishing-related keywords
-        if ($camp->target_fish) {
-            $fishTypes = explode(',', $camp->target_fish);
-            foreach ($fishTypes as $fish) {
-                $keywords[] = trim($fish);
+        foreach ($camp->getTargetFishNames() as $fish) {
+            $name = trim((string) ($fish['name'] ?? ''));
+            if ($name !== '') {
+                $keywords[] = $name;
             }
         }
         

@@ -80,4 +80,39 @@ class TargetFishNameResolverTest extends TestCase
         $this->assertSame([], $resolver->resolve(''));
         $this->assertSame([], $resolver->resolve([]));
     }
+
+    public function test_unwraps_json_encoded_csv_with_unicode_escapes_and_wrapping_quotes(): void
+    {
+        app()->setLocale('de');
+
+        $raw = json_encode('Flussbarsch,Hecht,Äsche,Bachsaibling');
+        $this->assertStringContainsString('\\u', $raw);
+
+        $resolved = app(TargetFishNameResolver::class)->resolve($raw);
+        $names = array_column($resolved, 'name');
+
+        $this->assertSame(['Flussbarsch', 'Hecht', 'Äsche', 'Bachsaibling'], $names);
+        foreach ($names as $name) {
+            $this->assertStringStartsNotWith('"', $name);
+            $this->assertStringEndsNotWith('"', $name);
+            $this->assertStringNotContainsString('\\u', $name);
+        }
+        $this->assertNotNull($resolved[0]['id']);
+        $this->assertNotNull($resolved[2]['id']);
+    }
+
+    public function test_strips_html_entities_and_stray_quotes_from_names(): void
+    {
+        app()->setLocale('de');
+
+        $resolved = app(TargetFishNameResolver::class)->resolve([
+            '"Flussbarsch',
+            '&Auml;sche',
+            'Bachsaibling"',
+        ]);
+
+        $this->assertSame(['Flussbarsch', 'Äsche', 'Bachsaibling'], array_column($resolved, 'name'));
+        $this->assertNotNull($resolved[0]['id']);
+        $this->assertNotNull($resolved[1]['id']);
+    }
 }

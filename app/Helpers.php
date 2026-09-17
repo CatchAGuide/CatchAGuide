@@ -108,16 +108,16 @@ if (! function_exists('translated_catalog_label')) {
             $locale = app()->getLocale();
 
             if ($locale === 'en' && $nameEn !== '') {
-                return $nameEn;
+                return html_entity_decode($nameEn, ENT_QUOTES | ENT_HTML5, 'UTF-8');
             }
 
             // Table-backed German `name` is already correct on de. On en, missing
             // name_en must still go through translate() — an id alone is not enough.
             if ($locale !== 'en' && $id !== null && $id !== '' && $name !== '') {
-                return $name;
+                return html_entity_decode($name, ENT_QUOTES | ENT_HTML5, 'UTF-8');
             }
 
-            return translate($label);
+            return html_entity_decode(translate($label), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         }
 
         $label = trim((string) $item);
@@ -126,7 +126,7 @@ if (! function_exists('translated_catalog_label')) {
             return $label;
         }
 
-        return translate($label);
+        return html_entity_decode(translate($label), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }
 

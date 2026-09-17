@@ -66,4 +66,15 @@ class TranslatedCatalogLabelTest extends TestCase
         $this->assertSame('4', translated_catalog_label('4'));
         $this->assertSame('', translated_catalog_label(''));
     }
+
+    public function test_html_entities_from_translate_are_decoded_for_display(): void
+    {
+        Cache::forever(translation_cache_key('Äsche', 'en'), '&Auml;sche');
+
+        $this->assertSame('Äsche', translated_catalog_label('Äsche'));
+        $this->assertSame('Äsche', translated_catalog_label([
+            'id' => null,
+            'name' => 'Äsche',
+        ]));
+    }
 }

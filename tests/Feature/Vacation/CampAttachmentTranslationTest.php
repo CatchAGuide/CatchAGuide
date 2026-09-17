@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Water;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -46,6 +47,25 @@ class CampAttachmentTranslationTest extends TestCase
             $response->assertDontSee($otherLocaleName, false);
         }
         $response->assertDontSee('>'.$target->id.'<', false);
+    }
+
+    public function test_camp_page_decodes_json_encoded_target_fish_csv(): void
+    {
+        $camp = $this->makeCamp();
+        DB::table('camps')->where('id', $camp->id)->update([
+            'target_fish' => json_encode('Flussbarsch,Hecht,Äsche,Bachsaibling'),
+        ]);
+
+        $response = $this->get(route('vacations.camps.show', $camp->slug));
+
+        $response->assertOk();
+        $response->assertSee('camp-pill">Flussbarsch', false);
+        $response->assertSee('camp-pill">Äsche', false);
+        $response->assertSee('camp-pill">Hecht', false);
+        $response->assertSee('camp-pill">Bachsaibling', false);
+        $response->assertDontSee('camp-pill">"Flussbarsch', false);
+        $response->assertDontSee('camp-pill">Bachsaibling"', false);
+        $response->assertDontSee('&Auml;sche', false);
     }
 
     public function test_custom_camp_extras_use_the_cached_translate_helper(): void

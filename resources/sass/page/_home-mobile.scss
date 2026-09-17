@@ -607,8 +607,7 @@
     border-radius: 6px;
     font-size: 10px;
     letter-spacing: 0.06em;
-    background: rgba(19, 23, 33, 0.78);
-    box-shadow: none;
+    // Keep tour/camp/trip fills from home.scss ($category-colors).
   }
 
   .cag-home-offer__new-badge {

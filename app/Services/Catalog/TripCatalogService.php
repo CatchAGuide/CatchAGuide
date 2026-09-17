@@ -623,15 +623,11 @@ class TripCatalogService
                     $availability = $bestTimes;
                 }
 
-                $targetFish = $camp->target_fish;
-                $categories = [];
-                if (is_array($targetFish)) {
-                    foreach ($targetFish as $item) {
-                        if (!empty($item) && is_string($item)) {
-                            $categories[] = $item;
-                        }
-                    }
-                }
+                $categories = collect($camp->getTargetFishNames())
+                    ->pluck('name')
+                    ->filter()
+                    ->values()
+                    ->all();
 
                 return [
                     'type' => 'camp',
