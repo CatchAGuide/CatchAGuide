@@ -66,10 +66,8 @@ class PartnerHubPageTest extends TestCase
         $this->assertStringContainsString(route('additional.contact', [], false), $html);
         $this->assertStringContainsString(route('additional.partner', [], false), $html);
         $this->assertStringContainsString('id="guideApplicationModal"', $html);
-        $this->assertMatchesRegularExpression(
-            '/cag-partner-hub__inner[\s\S]*cag-partner-hub__quotes[\s\S]*cag-partner-hub__quote/',
-            $html
-        );
+        $this->assertStringNotContainsString('cag-partner-hub__quotes-section', $html);
+        $this->assertStringNotContainsString('cag-partner-hub__quote', $html);
     }
 
     public function test_desktop_styles_share_the_site_container_and_keep_mobile_stack(): void

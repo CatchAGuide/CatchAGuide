@@ -26,6 +26,13 @@ class Kernel extends ConsoleKernel
                 ->everyMinute()
                 ->withoutOverlapping();
 
+        // Alerts admins if queued jobs (booking confirmation emails, etc.) sit unprocessed
+        // past a reasonable threshold — e.g. the queue:work run above got stuck behind a
+        // stale withoutOverlapping() lock. See app/Console/Commands/MonitorQueueHealth.php.
+        $schedule->command('queue:monitor-health')
+                ->everyFifteenMinutes()
+                ->withoutOverlapping();
+
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
         $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');

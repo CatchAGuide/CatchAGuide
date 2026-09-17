@@ -230,7 +230,6 @@
         form.submit();
     }
 
-    select.addEventListener('change', goToCountry);
     form.addEventListener('submit', function (event) {
         event.preventDefault();
         goToCountry();

@@ -13,8 +13,10 @@ class CampDataProcessor
      */
     public function processRequestData(Request $request, $existingCamp = null): array
     {
-        // Process tagify data for target_fish and extras
-        $targetFish = $this->processTagifyData($request->target_fish);
+        // Process tagify data for target_fish and extras.
+        // target_fish is array-cast — store a real list, not a CSV string
+        // (CSV through the array cast JSON-encodes wrapping quotes + \uXXXX).
+        $targetFish = $this->processTargetFishData($request->target_fish);
         $extras = $this->processTagifyData($request->extras);
 
         return [
@@ -60,21 +62,75 @@ class CampDataProcessor
             return implode(',', array_filter($data));
         }
 
-        // If it's JSON, decode and convert to comma-separated string
-        if (is_string($data) && json_decode($data)) {
-            $decoded = json_decode($data, true);
-            if (is_array($decoded)) {
-                $values = array_map(function($item) {
-                    if (is_array($item) && isset($item['value'])) {
-                        return $item['value'];
-                    }
-                    return $item;
-                }, $decoded);
-                return implode(',', array_filter($values));
+        return '';
+    }
+
+    /**
+     * @return list<int|string>
+     */
+    private function processTargetFishData(mixed $data): array
+    {
+        if ($data === null || $data === '') {
+            return [];
+        }
+
+        if (is_array($data)) {
+            return $this->normalizeTagifyItems($data);
+        }
+
+        if (! is_string($data)) {
+            return [];
+        }
+
+        $decoded = json_decode($data, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $this->normalizeTagifyItems($decoded);
+        }
+
+        if (json_last_error() === JSON_ERROR_NONE && is_string($decoded) && $decoded !== '') {
+            $data = $decoded;
+        }
+
+        return $this->normalizeTagifyItems(array_map('trim', explode(',', $data)));
+    }
+
+    /**
+     * @param  list<mixed>  $items
+     * @return list<int|string>
+     */
+    private function normalizeTagifyItems(array $items): array
+    {
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                if (isset($item['id']) && is_numeric($item['id'])) {
+                    $normalized[] = (int) $item['id'];
+                    continue;
+                }
+
+                $value = $item['value'] ?? $item['name'] ?? null;
+                if (is_numeric($value)) {
+                    $normalized[] = (int) $value;
+                    continue;
+                }
+                if (is_string($value) && trim($value) !== '') {
+                    $normalized[] = trim($value);
+                }
+                continue;
+            }
+
+            if (is_numeric($item) && (is_int($item) || is_float($item) || ctype_digit(trim((string) $item)))) {
+                $normalized[] = (int) $item;
+                continue;
+            }
+
+            if (is_string($item) && trim($item) !== '') {
+                $normalized[] = trim($item);
             }
         }
 
-        return '';
+        return array_values(array_unique($normalized, SORT_REGULAR));
     }
 
     /**
@@ -102,7 +158,7 @@ class CampDataProcessor
             'distance_to_airport' => $camp->distance_to_airport,
             'distance_to_ferry_port' => $camp->distance_to_ferry_port,
             'policies_regulations' => $camp->policies_regulations,
-            'target_fish' => $camp->target_fish,
+            'target_fish' => collect($camp->getTargetFishNames())->pluck('name')->filter()->values()->all(),
             'best_travel_times' => $camp->best_travel_times,
             'travel_information' => $camp->travel_information,
             'extras' => $camp->extras,

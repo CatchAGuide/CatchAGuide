@@ -348,6 +348,26 @@ class HomepageLandingTest extends TestCase
         $this->assertMatchesRegularExpression('/data-offer-module="trip"[\s\S]{0,800}cag-icon--globe/', $html);
     }
 
+    public function test_homepage_offer_badges_keep_category_colors_on_mobile(): void
+    {
+        $desktop = (string) file_get_contents(resource_path('sass/page/home.scss'));
+        $mobile = (string) file_get_contents(resource_path('sass/page/_home-mobile.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.cag-home-offer__badge\s*\{[\s\S]*@include category-badge-fill[\s\S]*@each \$type[\s\S]*&--#\{\$type\}\s*\{[\s\S]*@include category-vars\(\$type\)[\s\S]*@include category-badge-fill/',
+            $desktop
+        );
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-offer__badge\s*\{[^}]*background:/',
+            $mobile
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.cag-home-offer__badge\s*\{[^}]*box-shadow:\s*none/',
+            $mobile
+        );
+    }
+
     public function test_homepage_reviews_rail_is_interactive(): void
     {
         $response = $this->get('/');

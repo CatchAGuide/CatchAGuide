@@ -713,7 +713,11 @@ function initializeTagify() {
     
     // Populate with existing data
     @if(isset($formData['target_fish']) && !empty($formData['target_fish']))
-    const existingTargetFish = {!! json_encode(explode(',', $formData['target_fish'])) !!};
+    const existingTargetFish = {!! json_encode(array_values(array_filter(
+        is_array($formData['target_fish'])
+            ? $formData['target_fish']
+            : explode(',', (string) $formData['target_fish'])
+    ))) !!};
     if (targetFishTagify && existingTargetFish && Array.isArray(existingTargetFish)) {
         targetFishTagify.addTags(existingTargetFish.filter(Boolean));
     }
@@ -797,8 +801,8 @@ function collectTagifyData(formData) {
     if (targetFishInput && targetFishInput.tagify) {
         const targetFishValue = targetFishInput.tagify.value;
         if (targetFishValue && targetFishValue.length > 0) {
-            const targetFishArray = targetFishValue.map(tag => tag.value || tag);
-            formData.set('target_fish', targetFishArray.join(','));
+            const targetFishArray = targetFishValue.map(tag => tag.id || tag.value || tag);
+            formData.set('target_fish', JSON.stringify(targetFishArray));
         }
     }
 
