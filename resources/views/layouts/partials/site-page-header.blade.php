@@ -8,6 +8,8 @@
     $sitePageSearchState = app(ListingSearchStateService::class)->resolveFromRequest(request());
     $placeValue = $sitePageSearchState['place'];
     $headerCarry = OfferListingFilter::headerCarryParams(request()->query());
+    // Profile pages don't benefit from the catalog search band on small screens — hide it there to free up space.
+    $hideSearchOnMobile = request()->routeIs('profile.*', 'guidings.edit');
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-site-page-header-shell>
     @include('layouts.partials.site-nav', [
@@ -30,7 +32,7 @@
             @endif
         </div>
 
-        <div class="offers-page-header__inner offers-page-header__inner--search">
+        <div class="offers-page-header__inner offers-page-header__inner--search {{ $hideSearchOnMobile ? 'd-none d-md-block' : '' }}">
             <form
                 class="offers-page-header__search"
                 action="{{ listing_search_action() }}"

@@ -167,10 +167,85 @@
                 padding-left: 0;
                 margin-top: 20px;
             }
-            
+
             .main-content-wrapper {
                 padding: 20px;
             }
+
+            .user-welcome-card {
+                padding: 20px;
+            }
+        }
+
+        /* Mobile profile menu — a grid of always-visible tappable tiles instead of the
+           desktop sidebar list, so there's nothing hidden behind a toggle to discover. */
+        .profile-mobile-menu {
+            border-top: 1px solid #eee;
+        }
+
+        .profile-mobile-menu__grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .profile-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 6px;
+            background: #f8f9fa;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            text-decoration: none;
+            color: #444;
+            text-align: center;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .profile-tile:hover,
+        .profile-tile:active {
+            background: #eef0f2;
+            color: #313041;
+            text-decoration: none;
+        }
+
+        .profile-tile__icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #313041;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .profile-tile__label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .profile-tile.active {
+            background: linear-gradient(135deg, rgba(49,48,65,0.12), rgba(49,48,65,0.05));
+            border-color: rgba(49,48,65,0.25);
+            color: #313041;
+        }
+
+        .profile-tile.active .profile-tile__icon {
+            background: #313041;
+            color: #fff;
+        }
+
+        .profile-tile--highlight .profile-tile__icon {
+            background: linear-gradient(135deg, #313041, #252238);
+            color: #fff;
         }
 
         /* Legacy styles for backwards compatibility */
@@ -320,7 +395,55 @@
 
                         <!-- Navigation Menu -->
                         @auth
-                        <nav class="profile-nav">
+                        @php
+                            $becomeGuideRoute = config('guide_onboarding.new_onboarding_enabled')
+                                ? 'guide.onboarding'
+                                : 'profile.becomeguide';
+
+                            $profileNavItems = collect([
+                                ['route' => 'profile.index', 'routeIs' => ['profile.index'], 'icon' => 'fas fa-home', 'label' => __('profile.dashboard')],
+                                ['route' => 'profile.settings', 'routeIs' => ['profile.settings'], 'icon' => 'fas fa-user-edit', 'label' => __('profile.personal_details')],
+                                ['route' => 'profile.password', 'routeIs' => ['profile.password'], 'icon' => 'fas fa-lock', 'label' => __('profile.password_security')],
+                            ]);
+
+                            if (Auth::user()->canViewGuideTools()) {
+                                $profileNavItems->push(['route' => 'profile.guide-profile', 'routeIs' => ['profile.guide-profile'], 'icon' => 'fas fa-fish', 'label' => __('profile.guide_profile')]);
+                            }
+
+                            $profileNavItems->push(['route' => 'profile.bookings', 'routeIs' => ['profile.bookings', 'profile.showbooking', 'profile.guidebookings'], 'icon' => 'fas fa-calendar-check', 'label' => __('profile.all_bookings')]);
+
+                            if (Auth::user()->canAccessGuideDashboard()) {
+                                $profileNavItems->push(['route' => 'profile.calendar', 'routeIs' => ['profile.calendar'], 'icon' => 'fas fa-calendar-alt', 'label' => __('profile.calendar')]);
+                            }
+
+                            if (Auth::user()->canViewGuideTools()) {
+                                $profileNavItems->push(['route' => 'profile.myguidings', 'routeIs' => ['profile.myguidings', 'guidings.edit'], 'icon' => 'fas fa-list-alt', 'label' => __('profile.all_guidings')]);
+
+                                if (Auth::user()->canAccessGuideDashboard()) {
+                                    $profileNavItems->push(['route' => 'profile.newguiding', 'routeIs' => ['profile.newguiding'], 'icon' => 'fas fa-plus-circle', 'label' => __('profile.create_new_guiding'), 'highlight' => true]);
+                                }
+                            }
+
+                            if (Auth::user()->canApplyAsGuide()) {
+                                $profileNavItems->push(['route' => $becomeGuideRoute, 'routeIs' => ['profile.becomeguide', 'guide.onboarding'], 'icon' => 'fas fa-certificate', 'label' => __('profile.become_a_guide'), 'highlight' => true]);
+                            }
+                        @endphp
+
+                        <!-- Mobile-only quick nav: an always-visible tile grid so there's no hidden/collapsed
+                             menu state for users to discover — everything is tappable on sight. -->
+                        <div class="profile-mobile-menu d-md-none">
+                            <div class="profile-mobile-menu__grid">
+                                @foreach($profileNavItems as $item)
+                                    <a href="{{ route($item['route']) }}"
+                                       class="profile-tile {{ Request::routeIs(...$item['routeIs']) ? 'active' : '' }} {{ !empty($item['highlight']) ? 'profile-tile--highlight' : '' }}">
+                                        <span class="profile-tile__icon"><i class="{{ $item['icon'] }}"></i></span>
+                                        <span class="profile-tile__label">{{ $item['label'] }}</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <nav class="profile-nav d-none d-md-block">
                             <div class="nav-section">
                                 <ul class="nav-list">
                                     <li class="nav-item">
@@ -410,11 +533,6 @@
                                 <h6 class="nav-section-title">{{ __('profile.upgrade') }}</h6>
                                 <ul class="nav-list">
                                     <li class="nav-item">
-                                        @php
-                                            $becomeGuideRoute = config('guide_onboarding.new_onboarding_enabled')
-                                                ? 'guide.onboarding'
-                                                : 'profile.becomeguide';
-                                        @endphp
                                         <a href="{{ route($becomeGuideRoute) }}" class="nav-link {{ Request::routeIs('profile.becomeguide', 'guide.onboarding') ? 'active' : '' }}">
                                             <i class="fas fa-certificate"></i>
                                             <span>{{ __('profile.become_a_guide') }}</span>

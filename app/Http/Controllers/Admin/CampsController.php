@@ -186,9 +186,10 @@ class CampsController extends Controller
             $campData = $this->dataProcessor->processRequestData($request, $camp);
             $campData['status'] = $isDraft ? 'draft' : 'active';
             
-            // Generate slug from title if title changed
-            if ($camp->title !== $request->title && $request->title) {
-                $campData['slug'] = $this->seoService->generateSlug($request->title, $camp->id);
+            // Slug is set once at creation and must stay stable afterward for SEO —
+            // only backfill it here if a legacy record is missing one.
+            if (blank($camp->slug)) {
+                $campData['slug'] = $this->seoService->generateSlug($request->title ?: $camp->title, $camp->id);
             }
 
             // Process images

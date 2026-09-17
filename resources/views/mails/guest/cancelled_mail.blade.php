@@ -1,139 +1,64 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Booking Request Cancelled</title>
-    <link href="https://fonts.cdnfonts.com/css/morrison" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Morrison', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #e8604c !important;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            text-align: center;
-            padding-bottom: 20px;
-        }
-        .logo {
-            max-width: 150px;
-        }
-        .content {
-            padding: 20px 0;
-        }
-        .booking-details {
-            /* padding: 10px 0; */
-        }
-        .overview {
-            text-align: center;
-            /* padding: 20px; */
+<body style="font-family: 'Morrison', sans-serif; margin: 0; padding: 0;">
 
-            margin-top: 20px;
-        }
-        .footer {
-            text-align: center;
-            padding-top: 20px;
-            color: #777777;
-        }
-        .price-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-        }
-        .price-label {
-            font-size: 16px;
-            color: #555555;
-            padding: 5px 0;
-        }
-        .price-value {
-            font-size: 18px;
-            color: #555555;
-            padding: 5px 0;
-        }
-        .heading-title{
-            
-        }
-        .btn-theme{
-            background-color: #e8604c;
-            padding:10px 20px;
-            color:#fff !important;
-            border:0;
-            text-decoration: none;
-            margin-top:30px;
-        }
-
-        .btn-reject{
-            background-color: #1668ab;
-            padding:10px 20px;
-            color:#fff !important;
-            border:0;
-            text-decoration: none;
-            margin-top:30px;
-        }
-        p{
-            font-size:14px;
-        }
-        .total-price{
-            color: #e8604c;
-            font-size: 18px;
-        }
-        h1{
-            margin:0;
-        }
-        .the-guide{
-            font-style: italic;
-        }
-        .text-primary{
-            color: #e8604c;
-        }
-        .header-title{
-            padding-top:10px;
-        }
-        .content-header{
-            padding-bottom: 10px;
-        }
-        .order-details{
-            border:1px solid rgb(132, 132, 132);
-            padding:10px;
-            border-radius: 12px;
-        }
-    </style>
-</head>
-<body bgcolor="#e8604c" style="background-color: #e8604c">
-
-<div class="container">
-    <div class="header">
-        <img class="logo" src="https://catchaguide.com/assets/images/logo_mobil.jpg" alt="Catchaguide Logo">
-        <h1 class="header-title">@lang('profile.gc-cancelled')</h1>
+<div class="container" style="width: 100%; max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1);">
+    <div class="header" style="text-align: center; padding: 20px;">
+        <a href="{{route('welcome')}}" target="_blank">
+            <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_JPEG.jpg" alt="Catchaguide Logo" style="max-width: 150px; padding-top: 10px;">
+        </a>
+        <h2 class="header-title" style="font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_confirmed_cancelled_title')</h2>
     </div>
-    <div class="content" style="padding-bottom:0px;">
-        <div class="content-header">
-            <p style="font-size:16px;">@lang('profile.booking-dear') <strong>{{$user->firstname}}</strong>,</p>
-            <p>We have received your request to cancel the booking you made with {{$guide->name}} for the {{ Carbon\Carbon::parse($booking->book_date)->format('F j, Y') }}. Your booking request has been successfully cancelled.</p>
-            <div style="margin-top:20px;">
-                <p>@lang('profile.gn-question')</p>
-                <div style="text-align:center">
-                    <a class="btn-theme" href="https://catchaguide.com/contact">@lang('profile.booking-contactus')</a>
-                </div>
-            </div>
+    <div class="content" style="padding-bottom: 0px;">
+        <div class="content-header" style="padding: 20px;">
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.dear') {{$user->firstname ?? __('emails.guest_name')}},</p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                {{ $textNote }}
+            </p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                @lang('emails.guest_booking_confirmed_cancelled_text_2')
+            </p>
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                @lang('emails.guest_booking_confirmed_cancelled_text_3')
+            </p>
+        </div>
+        <div style="padding: 0 20px;">
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.guest_booking_confirmed_cancelled_text_4')</p>
+        </div>
+        <div style="text-align: center; margin: 2rem 0;">
+            <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
         </div>
     </div>
-
-    <div class="content">
-
+    <div style="padding: 0 20px;">
+        <p style="margin-top: 2rem; margin-bottom: .5rem; font-size: 14px; font-family: 'Morrison', sans-serif;">
+        @lang('emails.best_regards')
+        </p>
+        <p style="margin-top: .5rem; font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.catchaguide_team')</p>
     </div>
 
-    <div class="footer">
-        <p style="font-style:italic">@lang('profile.booking-chossing')</p>
-        <p>@lang('profile.booking-regards'),<br>Catch A Guide</p>
+    <div class="footer" style="text-align: center; padding: 20px; color: #fff; background-color: #313041; margin-top: 2rem;">
+        <table width="100%">
+            <tr>
+                <td style="padding: 10px; text-align: left; width: 50%;">
+                    <img class="logo" src="https://catchaguide.com/assets/images/logo/CatchAGuide2_Logo_PNG.png" width="100px" alt="Catchaguide Logo">
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                        <a href="tel:+49 (0) {{config('cag.contact_num')}}" style="color: #fff; font-size: 14px; text-decoration: none;">+49 (0) {{config('cag.contact_num')}}</a>
+                    </p>
+                    <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
+                        <a href="mailto:{{config('mail.admin_email')}}" style="color: #fff; font-size: 14px; text-decoration: none;">{{config('mail.admin_email')}}</a>
+                    </p>
+                </td>
+                <td style="padding: 10px;">
+                    <a style="color: #fff; text-decoration: none;" href="{{route('additional.contact')}}" target="_blank">
+                        <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.contact_us')</p></a>
+                    <p style="margin: .5rem 0; font-size: 14px; font-family: 'Morrison', sans-serif;">@lang('emails.follow_us')</p>
+                </td>
+            </tr>
+        </table>
+        <hr>
+        <div style="text-align: center;">
+            <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">© Catchaguide {{date('Y')}}</p>
+        </div>
     </div>
 </div>
 

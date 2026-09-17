@@ -140,6 +140,12 @@ return [
     'guest_booking_request_cancelled_text_6' => 'Wir verstehen, dass Du Fragen haben könntest oder andere Optionen besprechen möchtest. Zögere nicht, uns zu kontaktieren.',
     'guest_booking_request_cancelled_text_7' => 'Wir danken Dir für Dein Verständnis und hoffen, Dir zu helfen, die perfekte Angeltour zu finden.',
     'guest_booking_request_processing' => 'Vielen Dank für Deine Buchungsanfrage. Wir haben sie erhalten und bearbeiten sie.',
+
+    'guest_booking_confirmed_cancelled_title' => 'Deine bestätigte Buchung wurde storniert',
+    'guest_booking_confirmed_cancelled_text_1' => 'Wir möchten Dich darüber informieren, dass Deine bestätigte Buchung mit [Guide Name] für [Date] in [Location] von unserem Team storniert wurde.',
+    'guest_booking_confirmed_cancelled_text_2' => 'Wir verstehen, dass das enttäuschend sein kann, und entschuldigen uns für etwaige Unannehmlichkeiten.',
+    'guest_booking_confirmed_cancelled_text_3' => 'Solltest Du für diese Buchung bereits eine Zahlung geleistet haben, kontaktiere uns bitte, damit wir Dir weiterhelfen können.',
+    'guest_booking_confirmed_cancelled_text_4' => 'Falls Du Fragen hast oder Hilfe bei der Suche nach einem anderen Guide oder Termin benötigst, zögere nicht, uns zu kontaktieren.',
     
     'guest_booking_request_reminder_title' => 'Deine Angeltour mit Catch A Guide ist in 3 Tagen!',
     'guest_booking_request_reminder_text_1' => 'Dies ist eine freundliche Erinnerung, dass Deine Angeltour mit [Guide Name] am [Location] für den [Date] um [Time] geplant ist! Wir sind sicher, dass Du dich auf das Wasser freust. Um sicherzustellen, dass Du bestens vorbereitet bist, hier einige Dinge, die Du beachten solltest:',

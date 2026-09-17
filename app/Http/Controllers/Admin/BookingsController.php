@@ -22,6 +22,7 @@ use App\Mail\Guide\GuideBookingRequestMail;
 use App\Mail\Guide\GuideInvoiceMail;
 use App\Events\BookingStatusChanged;
 use App\Services\BookingService;
+use App\Services\Booking\QueuedBookingJobPurger;
 
 class BookingsController extends Controller
 {
@@ -106,6 +107,8 @@ class BookingsController extends Controller
 
     public function edit(Booking $booking)
     {
+        $allowedStatusOptions = $this->allowedStatusTargets($booking);
+
         // Only return the necessary fields for editing
         return response()->json([
             'id' => $booking->id,
@@ -113,11 +116,34 @@ class BookingsController extends Controller
             'phone' => $booking->phone,
             'status' => $booking->status,
             'admin_comment' => $booking->admin_comment,
-            'allowed_status_edit' => in_array($booking->status, ['pending', 'cancelled', 'rejected']),
+            'allowed_status_edit' => !empty($allowedStatusOptions),
+            'allowed_status_options' => $allowedStatusOptions,
         ]);
     }
 
-    public function update(Request $request, Booking $booking)
+    /**
+     * Which target statuses an admin may move a booking to, given its current status.
+     * An already-accepted booking may only be rejected or cancelled from here (never
+     * silently reset to pending/accepted again). Once the tour date has passed,
+     * rejecting no longer makes sense (nothing left to decline), but the booking can
+     * still be cancelled — e.g. to correct billing/records after the fact.
+     */
+    private function allowedStatusTargets(Booking $booking): array
+    {
+        if (in_array($booking->status, ['pending', 'rejected', 'cancelled'], true)) {
+            return ['pending', 'accepted', 'rejected', 'cancelled'];
+        }
+
+        if ($booking->status === 'accepted') {
+            return $booking->isBookingOver()
+                ? ['accepted', 'cancelled']
+                : ['accepted', 'rejected', 'cancelled'];
+        }
+
+        return [];
+    }
+
+    public function update(Request $request, Booking $booking, QueuedBookingJobPurger $queuedJobPurger)
     {
         $data = $request->validate([
             'email' => 'nullable|email',
@@ -128,7 +154,8 @@ class BookingsController extends Controller
 
         $updated = false;
         $statusChanged = false;
-        
+        $previousStatus = $booking->status;
+
         if (isset($data['email'])) {
             $booking->email = $data['email'];
             $updated = true;
@@ -141,16 +168,18 @@ class BookingsController extends Controller
             $booking->admin_comment = $data['admin_comment'];
             $updated = true;
         }
-        if (isset($data['status']) && in_array($booking->status, ['pending', 'cancelled', 'rejected'])) {
-            $booking->status = $data['status'];
-            $statusChanged = true;
-            $updated = true;
+        if (isset($data['status'])) {
+            $allowedTargets = $this->allowedStatusTargets($booking);
+            if (in_array($data['status'], $allowedTargets, true)) {
+                $booking->status = $data['status'];
+                $statusChanged = $data['status'] !== $previousStatus;
+                $updated = true;
+            }
         }
-        
+
         if ($updated) {
             $booking->save();
-            
-            // If status changed to 'accepted', trigger the full acceptance flow
+
             if ($statusChanged && $booking->status === 'accepted') {
                 // Update blocked_event type to 'booking' (same as email acceptance flow)
                 $blockedEvent = BlockedEvent::find($booking->blocked_event_id);
@@ -158,12 +187,24 @@ class BookingsController extends Controller
                     $blockedEvent->type = 'booking';
                     $blockedEvent->save();
                 }
-                
+
                 // Fire the BookingStatusChanged event to trigger email notifications
                 event(new BookingStatusChanged($booking, 'accepted'));
             }
+
+            // Only an already-accepted booking moving to rejected/cancelled needs the
+            // full notification + queue-cleanup flow here: pending bookings are
+            // rejected through the guide/admin token flow (with its own emails), and
+            // this modal's other transitions are silent admin data corrections.
+            if ($statusChanged && $previousStatus === 'accepted' && in_array($booking->status, ['rejected', 'cancelled'], true)) {
+                event(new BookingStatusChanged($booking, $booking->status));
+
+                // The earlier acceptance may still have a queued listener/mail job
+                // sitting in the jobs table; make sure it never fires after this.
+                $queuedJobPurger->purge($booking);
+            }
         }
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Booking updated successfully.',
@@ -576,6 +617,7 @@ class BookingsController extends Controller
         // Initialize optional email templates as null
         $acceptedBookingEmail = null;
         $rejectedBookingEmail = null;
+        $cancelledBookingEmail = null;
         $tourReminderEmail = null;
         $guestReviewEmail = null;
         
@@ -610,7 +652,26 @@ class BookingsController extends Controller
                 \Log::error('Error rendering rejected booking email template: ' . $e->getMessage());
             }
         }
-        
+
+        if ($booking->status === 'cancelled') {
+            try {
+                $text = __('emails.guest_booking_confirmed_cancelled_text_1');
+                $text = str_replace('[Guide Name]', $guideName, $text);
+                $text = str_replace('[Date]', $formattedDate, $text);
+                $text = str_replace('[Location]', $guiding->location, $text);
+
+                $cancelledBookingEmail = view('mails.guest.cancelled_mail', [
+                    'user' => $user,
+                    'booking' => $booking,
+                    'guiding' => $guiding,
+                    'guide' => $guide,
+                    'textNote' => $text,
+                ])->render();
+            } catch (\Exception $e) {
+                \Log::error('Error rendering cancelled booking email template: ' . $e->getMessage());
+            }
+        }
+
         if ($booking->status === 'accepted') {
             try {
                 $acceptedBookingEmail = view('mails.guest.accepted_mail', compact(
@@ -659,6 +720,7 @@ class BookingsController extends Controller
         $guideBookingRequestEmail = null;
         $guideExpiredBookingEmail = null;
         $guideAcceptedBookingEmail = null;
+        $guideCancelledBookingEmail = null;
         $guideReminderEmail = null;
         $guideReminder12hrsEmail = null;
         $guideUpcomingTourEmail = null;
@@ -681,7 +743,18 @@ class BookingsController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error rendering guide expired booking email template: ' . $e->getMessage());
         }
-        
+
+        // Render guide cancelled booking email
+        if ($booking->status === 'cancelled') {
+            try {
+                $guideCancelledBookingEmail = view('mails.guide.guide_booking_cancelled_mail', compact(
+                    'user', 'guide', 'guiding', 'booking'
+                ))->render();
+            } catch (\Exception $e) {
+                \Log::error('Error rendering guide cancelled booking email template: ' . $e->getMessage());
+            }
+        }
+
         // Render guide 24h reminder email (always available for preview)
         try {
             $guideReminderEmail = view('mails.guide.guide_reminder', compact(
@@ -754,13 +827,15 @@ class BookingsController extends Controller
             'expiredBookingEmail' => $expiredBookingEmail,
             'acceptedBookingEmail' => $acceptedBookingEmail,
             'rejectedBookingEmail' => $rejectedBookingEmail,
+            'cancelledBookingEmail' => $cancelledBookingEmail,
             'tourReminderEmail' => $tourReminderEmail,
             'guestReviewEmail' => $guestReviewEmail,
-            
+
             // Guide emails
             'guideBookingRequestEmail' => $guideBookingRequestEmail,
             'guideExpiredBookingEmail' => $guideExpiredBookingEmail,
             'guideAcceptedBookingEmail' => $guideAcceptedBookingEmail,
+            'guideCancelledBookingEmail' => $guideCancelledBookingEmail,
             'guideReminderEmail' => $guideReminderEmail,
             'guideReminder12hrsEmail' => $guideReminder12hrsEmail,
             'guideUpcomingTourEmail' => $guideUpcomingTourEmail,

@@ -173,9 +173,10 @@ class SpecialOffersController extends Controller
             $specialOfferData = $this->dataProcessor->processRequestData($request, $specialOffer);
             $specialOfferData['status'] = $isDraft ? 'draft' : 'active';
             
-            // Generate slug from title if title changed
-            if ($specialOffer->title !== $request->title && $request->title) {
-                $specialOfferData['slug'] = $this->seoService->generateSlug($request->title, $specialOffer->id);
+            // Slug is set once at creation and must stay stable afterward for SEO —
+            // only backfill it here if a legacy record is missing one.
+            if (blank($specialOffer->slug)) {
+                $specialOfferData['slug'] = $this->seoService->generateSlug($request->title ?: $specialOffer->title, $specialOffer->id);
             }
 
             // Process images
