@@ -28,6 +28,11 @@ final class SitemapXmlWriter
             $xml .= "\t\t" . '<changefreq>' . htmlspecialchars($entry->changefreq, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</changefreq>' . "\n";
             $xml .= "\t\t" . '<priority>' . htmlspecialchars((string) $entry->priority, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</priority>' . "\n";
             $xml .= "\t\t" . '<lastmod>' . htmlspecialchars($lastmod, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</lastmod>' . "\n";
+            foreach ($entry->alternates as $hreflang => $href) {
+                $xml .= "\t\t" . '<xhtml:link rel="alternate" hreflang="'
+                    . htmlspecialchars((string) $hreflang, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" href="'
+                    . htmlspecialchars($href, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" />' . "\n";
+            }
             $xml .= "\t" . '</url>' . "\n";
             $count++;
         }

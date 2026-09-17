@@ -70,19 +70,21 @@ class VacationSitemapContributor implements SitemapContributorInterface
             ));
         }
 
-        foreach (Trip::query()->where('status', 'active')->whereNotNull('slug')->where('slug', '!=', '')->get(['slug']) as $trip) {
+        foreach (Trip::query()->where('status', 'active')->whereNotNull('slug')->where('slug', '!=', '')->get(['slug', 'updated_at']) as $trip) {
             $entries->push(SitemapEntry::make(
                 $this->encoder->join($context->baseUrl, ['vacations', 'trips', $trip->slug]),
                 'monthly',
                 0.7,
+                $trip->updated_at?->toAtomString(),
             ));
         }
 
-        foreach (Camp::query()->where('status', 'active')->whereNotNull('slug')->where('slug', '!=', '')->get(['slug']) as $camp) {
+        foreach (Camp::query()->where('status', 'active')->whereNotNull('slug')->where('slug', '!=', '')->get(['slug', 'updated_at']) as $camp) {
             $entries->push(SitemapEntry::make(
                 $this->encoder->join($context->baseUrl, ['vacations', 'camps', $camp->slug]),
                 'monthly',
                 0.7,
+                $camp->updated_at?->toAtomString(),
             ));
         }
 
