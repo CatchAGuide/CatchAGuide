@@ -42,13 +42,14 @@ final class MagazineSitemapContributor implements SitemapContributorInterface
             ->where('language', $context->lang)
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
-            ->get(['slug']);
+            ->get(['slug', 'updated_at']);
 
         foreach ($threads as $thread) {
             $entries->push(SitemapEntry::make(
                 $this->encoder->join($context->baseUrl, [$prefix, $thread->slug]),
                 'monthly',
                 0.6,
+                $thread->updated_at?->toAtomString(),
             ));
         }
 

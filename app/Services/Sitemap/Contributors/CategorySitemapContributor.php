@@ -43,7 +43,7 @@ final class CategorySitemapContributor implements SitemapContributorInterface
         $pages = CategoryPage::query()
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
-            ->get(['type', 'slug']);
+            ->get(['type', 'slug', 'updated_at']);
 
         foreach ($pages as $page) {
             $type = strtolower((string) $page->type);
@@ -56,6 +56,7 @@ final class CategorySitemapContributor implements SitemapContributorInterface
                 $this->encoder->join($context->baseUrl, $path),
                 'monthly',
                 0.6,
+                $page->updated_at?->toAtomString(),
             ));
         }
 

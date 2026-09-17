@@ -29,6 +29,40 @@ class SitemapXmlWriterAndMainContributorTest extends TestCase
         $this->assertStringNotContainsString('login', $xml);
     }
 
+    public function test_writer_emits_hreflang_alternate_links(): void
+    {
+        Storage::fake('sitemaps');
+
+        $writer = new SitemapXmlWriter();
+        $writer->writeUrlset('/sitemap_test_de.xml', [
+            SitemapEntry::make(
+                'https://www.catchaguide.de/guidings/offer/example',
+                'monthly',
+                0.7,
+                null,
+                [
+                    'en' => 'https://www.catchaguide.com/guidings/offer/example',
+                    'de' => 'https://www.catchaguide.de/guidings/offer/example',
+                    'x-default' => 'https://www.catchaguide.com/guidings/offer/example',
+                ]
+            ),
+        ]);
+
+        $xml = Storage::disk('sitemaps')->get('/sitemap_test_de.xml');
+        $this->assertStringContainsString(
+            '<xhtml:link rel="alternate" hreflang="en" href="https://www.catchaguide.com/guidings/offer/example" />',
+            $xml
+        );
+        $this->assertStringContainsString(
+            '<xhtml:link rel="alternate" hreflang="de" href="https://www.catchaguide.de/guidings/offer/example" />',
+            $xml
+        );
+        $this->assertStringContainsString(
+            '<xhtml:link rel="alternate" hreflang="x-default" href="https://www.catchaguide.com/guidings/offer/example" />',
+            $xml
+        );
+    }
+
     public function test_writer_persists_index(): void
     {
         Storage::fake('sitemaps');
