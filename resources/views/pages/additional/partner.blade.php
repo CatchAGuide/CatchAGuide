@@ -227,6 +227,8 @@
         </div>
     </section>
 
+    {{-- Reviews/testimonials section hidden per request (see partner.quotes_title). --}}
+    {{--
     <section class="cag-partner-hub__section cag-partner-hub__section--white cag-partner-hub__quotes-section">
         <div class="cag-partner-hub__inner">
             <h2 class="cag-partner-hub__title">{{ __('partner.quotes_title') }}</h2>
@@ -247,6 +249,7 @@
             </div>
         </div>
     </section>
+    --}}
 
     <section class="cag-partner-hub__section cag-partner-hub__section--muted">
         <div class="cag-partner-hub__inner">
