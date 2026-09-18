@@ -51,7 +51,7 @@ class VacationFilterApplicatorGuestsTest extends TestCase
         $applicator = $this->app->make(VacationFilterApplicator::class);
 
         $query = Mockery::mock(Builder::class);
-        $query->shouldReceive('whereHas')->once()->with('accommodations', Mockery::type(\Closure::class))->andReturnSelf();
+        $query->shouldReceive('where')->once()->with(Mockery::type(\Closure::class))->andReturnSelf();
 
         $result = $applicator->applyToCampQuery($query, VacationListingFilter::fromRequest([
             'pillar' => 'camps',

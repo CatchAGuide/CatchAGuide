@@ -666,17 +666,6 @@ class OfferCatalogPageService
             $this->applyOptimizedSpeciesFilter($query, $filter, 'camps', 'camps.id', 'target_fish');
         }
 
-        if ($filter->numGuests !== null) {
-            $guests = $filter->numGuests;
-            $query->whereHas('accommodations', function (Builder $q) use ($guests) {
-                $q->where('accommodations.status', 'active')
-                    ->where(function (Builder $capacity) use ($guests) {
-                        $capacity->whereNull('accommodations.max_occupancy')
-                            ->orWhere('accommodations.max_occupancy', '>=', $guests);
-                    });
-            });
-        }
-
         $this->applyCampFacets($query, $filter);
 
         return $this->applyListingGeo($query, $filter, 'latitude', 'longitude');
