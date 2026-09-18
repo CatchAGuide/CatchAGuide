@@ -27,13 +27,91 @@ class VacationFilterApplicator
             return $query;
         }
 
-        return $query->whereHas('accommodations', function (Builder $q) use ($numGuests) {
-            $q->where('accommodations.status', 'active')
-                ->where(function (Builder $capacity) use ($numGuests) {
-                    $capacity->whereNull('accommodations.max_occupancy')
-                        ->orWhere('accommodations.max_occupancy', '>=', $numGuests);
-                });
+        return $query->where(function (Builder $q) use ($numGuests) {
+            $q->where(fn (Builder $fits) => $this->campHasGuestCapacity($fits, $numGuests))
+                ->orWhere(fn (Builder $unknown) => $this->campHasNoRecordedCapacity($unknown));
         });
+    }
+
+    /**
+     * Location + persons search: a camp matches when any nested bookable can host
+     * the party — camp rooms first, then special-offer rooms, then guidings/boats.
+     */
+    private function campHasGuestCapacity(Builder $query, int $numGuests): Builder
+    {
+        return $query->where(function (Builder $q) use ($numGuests) {
+            $q->whereHas('accommodations', fn (Builder $acc) => $this->accommodationCanHost($acc, $numGuests))
+                ->orWhereHas('specialOffers', function (Builder $offer) use ($numGuests) {
+                    $this->activeSpecialOffer($offer)
+                        ->where(function (Builder $nested) use ($numGuests) {
+                            $nested->whereHas('accommodations', fn (Builder $acc) => $this->accommodationCanHost($acc, $numGuests))
+                                ->orWhereHas('guidings', fn (Builder $g) => $this->guidingCanHost($g, $numGuests))
+                                ->orWhereHas('rentalBoats', fn (Builder $b) => $this->boatCanHost($b, $numGuests));
+                        });
+                })
+                ->orWhereHas('guidings', fn (Builder $g) => $this->guidingCanHost($g, $numGuests))
+                ->orWhereHas('rentalBoats', fn (Builder $b) => $this->boatCanHost($b, $numGuests));
+        });
+    }
+
+    private function campHasNoRecordedCapacity(Builder $query): Builder
+    {
+        return $query
+            ->whereDoesntHave('accommodations', fn (Builder $acc) => $this->activeAccommodation($acc))
+            ->whereDoesntHave('specialOffers', function (Builder $offer) {
+                $this->activeSpecialOffer($offer)
+                    ->where(function (Builder $nested) {
+                        $nested->whereHas('accommodations', fn (Builder $acc) => $this->activeAccommodation($acc))
+                            ->orWhereHas('guidings', fn (Builder $g) => $this->publishedGuiding($g))
+                            ->orWhereHas('rentalBoats', fn (Builder $b) => $this->activeBoat($b));
+                    });
+            })
+            ->whereDoesntHave('guidings', fn (Builder $g) => $this->publishedGuiding($g))
+            ->whereDoesntHave('rentalBoats', fn (Builder $b) => $this->activeBoat($b));
+    }
+
+    private function accommodationCanHost(Builder $query, int $numGuests): Builder
+    {
+        return $this->activeAccommodation($query)
+            ->where(function (Builder $capacity) use ($numGuests) {
+                $capacity->whereNull('accommodations.max_occupancy')
+                    ->orWhere('accommodations.max_occupancy', '>=', $numGuests);
+            });
+    }
+
+    private function guidingCanHost(Builder $query, int $numGuests): Builder
+    {
+        return $this->publishedGuiding($query)
+            ->where('guidings.max_guests', '>=', $numGuests);
+    }
+
+    private function boatCanHost(Builder $query, int $numGuests): Builder
+    {
+        return $this->activeBoat($query)
+            ->where(function (Builder $capacity) use ($numGuests) {
+                $capacity->whereNull('rental_boats.max_persons')
+                    ->orWhere('rental_boats.max_persons', '>=', $numGuests);
+            });
+    }
+
+    private function activeAccommodation(Builder $query): Builder
+    {
+        return $query->where('accommodations.status', 'active');
+    }
+
+    private function activeSpecialOffer(Builder $query): Builder
+    {
+        return $query->where('special_offers.status', 'active');
+    }
+
+    private function publishedGuiding(Builder $query): Builder
+    {
+        return $query->where('guidings.status', 1);
+    }
+
+    private function activeBoat(Builder $query): Builder
+    {
+        return $query->where('rental_boats.status', 'active');
     }
 
     public function applyCampFacets(Builder $query, VacationListingFilter $filter): Builder
