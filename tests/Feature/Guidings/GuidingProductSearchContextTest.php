@@ -46,13 +46,13 @@ class GuidingProductSearchContextTest extends TestCase
         ])->render();
 
         $this->assertMatchesRegularExpression(
-            '/<option[^>]*value="3"[^>]*selected/i',
+            '/name="person"[^>]*value="3"|value="3"[^>]*name="person"/',
             $html
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/<option value=""[^>]*selected/i',
-            $html
-        );
+        $this->assertStringContainsString('data-guidings-book', $html);
+        $this->assertStringContainsString('guidings-book-card', $html);
+        $this->assertStringContainsString('data-guidings-book-stepper', $html);
+        $this->assertStringNotContainsString('id="personSelect"', $html);
     }
 
     public function test_product_page_keeps_search_place_and_preselects_guests(): void
@@ -79,9 +79,13 @@ class GuidingProductSearchContextTest extends TestCase
             $html
         );
         $this->assertMatchesRegularExpression(
-            '/<option[^>]*value="3"[^>]*selected/i',
+            '/name="person"[^>]*value="3"|value="3"[^>]*name="person"/',
             $html
         );
+        $this->assertStringContainsString('offers-page-header--product', $html);
+        $this->assertStringContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString($guiding->title, $html);
+        $this->assertStringContainsString(__('offers.search_change'), $html);
     }
 
     private function guiding(): Guiding

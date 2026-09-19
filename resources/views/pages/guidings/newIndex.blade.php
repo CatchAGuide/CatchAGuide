@@ -797,62 +797,30 @@
 @section('content')
 <div class="category-hero-page" data-category-hero-page>
     @include('pages.category.partials.product-hero-header', [
-        'listingTitle' => __('homepage.filter-fishing-near-me'),
+        'listingTitle' => $guiding->title,
         'searchAction' => listing_search_action(),
         'breadcrumbItems' => [
             ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
-            ['label' => $guiding->title, 'url' => null],
         ],
+        'locationLabel' => implode(', ', array_unique(array_filter([
+            $guiding->city ?: $guiding->location,
+            $guiding->region,
+        ]))),
+        'mapHref' => '#map',
+        'ratingScore' => $average_grandtotal_score ?? null,
+        'reviewsCount' => $reviews_count ?? 0,
     ])
 
- <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 4">
-    <div class="title-container">
+ <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 5">
+    <div class="title-container title-container--actions-only">
         <div class="title-wrapper">
-            {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
-            <div class="title-left-container">
-                <div class="col-24 col mb-1 guiding-title">
-                    <h1>
-                    {{ $guiding->title }}
-                    </h1>
-                    <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
-                </div>
-                <div class="col-12">
-                    <div class="location-row">
-                        <div class="location">
-                            <a href="#" class="fs-6 text-decoration-none text-muted">
-                                    <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{ $guiding->location }}</strong>
-                                </a>
-                        </div>
-                        <div class="location-map">
-                            <a href="#map" class="fs-6 text-decoration-none text-muted">
-                                <span class="text-primary">@lang('guidings.show_on_map')</span>
-                            </a>
-
-                        </div>
-                    </div>
-                </div>
-                @if ($average_grandtotal_score)
-                <div class="ave-reviews-row">
-                    <div class="ratings-score">
-                    <span class="rating-value rating-clickable" id="rating-score-link">{{one($average_grandtotal_score, 1)}}</span>
-                </div> 
-                    <span class="mb-1">
-                        (<a href="#" id="reviews-link" class="text-decoration-none text-muted">{{$reviews_count}} reviews</a>)
-                    </span>
-                </div>
-                @else
-                <span>@lang('guidings.no_reviews')</span>
-                @endif
-                <div class="col-auto p-0">
-                </div>
-            </div>
             <div class="title-right-container">
                 <div class="title-right-buttons">
                     <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
                     <a href="#book-now" class="btn btn-orange">@lang('message.reservation')</a>
                 </div>
                 <span>@lang('guidings.Best_price_guarantee')</span>
-                </div>
+            </div>
         </div>
         </div>
         

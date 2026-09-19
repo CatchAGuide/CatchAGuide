@@ -41,8 +41,18 @@
         'breadcrumbItems' => [
             ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
             ['label' => __('vacations.pillar_camps_title'), 'url' => route('vacations.camps.index')],
-            ['label' => translate($camp['title'] ?? ''), 'url' => null],
+            ['label' => translate($camp['region'] ?? $camp['city'] ?? $camp['title'] ?? ''), 'url' => null],
         ],
+        'enableMobileSearchSheet' => true,
+        'heroProductTitle' => translate($camp['title'] ?? ''),
+        'heroLocationLabel' => implode(', ', array_filter([
+            translate($camp['city'] ?? null),
+            translate($camp['region'] ?? null),
+            translate($camp['country'] ?? null),
+        ])),
+        'heroMapHref' => '#map',
+        'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_camp'),
+        'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_camp'),
     ])
 <div 
     x-data="campConfigurator({
@@ -90,11 +100,41 @@
         ])));
         $campModalTitle = translate($camp['title'] ?? null) ?: ($camp['title'] ?? '');
         $mobileCarouselImages = array_slice($galleryImages, 1);
+        $galleryCount = count($galleryImages);
+        $campTargetLabels = collect($camp['target_fish'] ?? [])
+            ->map(fn ($fish) => translated_catalog_label($fish))
+            ->filter()
+            ->values();
+        $campMaxGuests = collect($accommodations ?? [])
+            ->pluck('max_occupancy')
+            ->filter()
+            ->max();
+        $campProductSpecs = array_values(array_filter([
+            ! empty($camp['city']) ? [
+                'label' => __('vacations.product_spec_waters'),
+                'value' => translate($camp['city']),
+            ] : null,
+            $campTargetLabels->isNotEmpty() ? [
+                'label' => __('vacations.product_spec_target'),
+                'value' => $campTargetLabels->take(2)->implode(' & '),
+            ] : null,
+            $campMaxGuests ? [
+                'label' => __('vacations.product_spec_cabins'),
+                'value' => $campMaxGuests.' '.($campMaxGuests == 1 ? __('vacations.person') : __('vacations.persons')),
+            ] : null,
+            ! empty($boats) ? [
+                'label' => __('vacations.product_spec_boat'),
+                'value' => __('vacations.product_spec_included'),
+            ] : null,
+        ]));
     @endphp
     <div class="camp-container">
         <div class="camp-gallery" data-vacation-gallery="{{ $campGalleryId }}" data-gallery-images='@json($galleryImages)'>
             <div class="camp-gallery__main" data-gallery-index="0">
                 <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}" fetchpriority="high" decoding="async">
+                @if($galleryCount > 1)
+                    <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
+                @endif
             </div>
             <div class="camp-gallery__right">
                 @foreach ($topRightImages as $index => $image)
@@ -126,6 +166,17 @@
             </div>
             @endif
         </div>
+
+        @if(! empty($campProductSpecs))
+            <div class="camp-product-specs" aria-label="{{ __('vacations.general_information') }}">
+                @foreach($campProductSpecs as $spec)
+                    <span class="camp-product-spec">
+                        <span class="camp-product-spec__label">{{ $spec['label'] }}</span>
+                        <span class="camp-product-spec__value">{{ $spec['value'] }}</span>
+                    </span>
+                @endforeach
+            </div>
+        @endif
     </div>
 
     <x-gallery.modal
@@ -574,9 +625,10 @@
                 : null;
         @endphp
         <x-vacation.mobile-book-bar
+            variant="stacked"
             :price-display="$campFromPriceDisplay"
             :price-suffix="__('vacations.per_night')"
-            :cta-label="__('vacations.contact_us_button')"
+            :cta-label="__('vacations.request_holiday')"
             data-camp-mobile-book
         />
     @endunless

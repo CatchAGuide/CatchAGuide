@@ -2196,6 +2196,18 @@ $guidings-header-bg: #f7f9fb;
       width: calc(100% - 200px);
     }
 
+    &--actions-only {
+      justify-content: flex-end;
+
+      .title-wrapper {
+        justify-content: flex-end;
+      }
+
+      .title-right-container {
+        width: auto;
+      }
+    }
+
     .guiding-title {
       a {
         display: none;
@@ -3052,9 +3064,6 @@ div#masonry-grid {
   }
 }
 
-.guidings-book-mobile {
-  display: none;
-}
 .filter-sort-container{
   display: flex;
   gap: 8px;
@@ -3136,7 +3145,10 @@ div#masonry-grid {
       }
       .title-right-container {
         display: none;
+      }
 
+      &--actions-only {
+        display: none;
       }
     }
 
@@ -3399,54 +3411,6 @@ div#masonry-grid {
     }
   }
 
-  .guidings-book-mobile {
-    position: fixed;
-    bottom: 0;
-    z-index: 2;
-    width: 100%;
-    display: block;
-
-    .tour-details-two__book-tours {
-      padding: 0;
-    }
-
-    .booking-form-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-direction: column;
-      // gap: 16px;
-
-      .booking-select {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        align-items: center;
-      }
-
-      .booking-price {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        font-weight: 600;
-        font-size: 18px;
-        min-width: 150px;
-
-        #priceDisplay {
-          text-decoration: 2px $primary-color !important;
-        }
-      }
-    }
-
-    .booking-price-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }
-  }
 }
 
 @media screen and (max-width: 768px) {

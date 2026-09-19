@@ -105,8 +105,18 @@
             'breadcrumbItems' => [
                 ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
                 ['label' => __('vacations.pillar_trips_title'), 'url' => route('vacations.trips.index')],
-                ['label' => $tripView['title'] ?? __('trips.page_title_fallback'), 'url' => null],
+                ['label' => $tripView['region'] ?? $tripView['city'] ?? $tripView['title'] ?? __('trips.page_title_fallback'), 'url' => null],
             ],
+            'enableMobileSearchSheet' => true,
+            'heroProductTitle' => $tripView['title'] ?? __('trips.page_title_fallback'),
+            'heroLocationLabel' => implode(', ', array_filter([
+                $tripView['city'] ?? null,
+                $tripView['region'] ?? null,
+                $tripView['country'] ?? null,
+            ])),
+            'heroMapHref' => '#tripOfferMap',
+            'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_trip'),
+            'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_trip'),
         ])
         @if($isDraft)
             <div class="container py-3">
@@ -140,12 +150,42 @@
                     ? '€'.number_format($tripView['price']['per_person'], 0)
                     : null;
                 $mobileCarouselImages = array_slice($galleryImages, 1);
+                $galleryCount = count($galleryImages);
+                $tripDays = $tripView['duration']['days'] ?? null;
+                $tripNights = $tripView['duration']['nights'] ?? null;
+                $tripSpecies = collect($tripView['target_species'] ?? [])->filter()->first();
+                $tripGroupMax = $tripView['group_size']['max'] ?? null;
+                $tripCatering = collect($tripView['accommodation']['catering'] ?? [])->filter()->first();
+                $tripProductSpecs = array_values(array_filter([
+                    $tripDays ? [
+                        'label' => __('trips.duration'),
+                        'value' => $tripDays.' '.__('trips.duration_days'),
+                    ] : null,
+                    $tripSpecies ? [
+                        'label' => __('vacations.product_spec_target'),
+                        'value' => $tripSpecies,
+                    ] : null,
+                    $tripGroupMax ? [
+                        'label' => __('vacations.product_spec_group'),
+                        'value' => __('vacations.product_spec_max', ['count' => $tripGroupMax]),
+                    ] : null,
+                    $tripCatering ? [
+                        'label' => __('trips.catering'),
+                        'value' => $tripCatering,
+                    ] : null,
+                ]));
+                $tripPriceNote = ($tripDays && $tripNights)
+                    ? __('vacations.product_spec_duration_included', ['days' => $tripDays, 'nights' => $tripNights])
+                    : null;
             @endphp
             <div class="trip-offer-page__gallery-container">
                 <div class="camp-gallery" data-vacation-gallery="{{ $tripGalleryId }}" data-gallery-images='@json($galleryImages)'>
                     <div class="camp-gallery__main" data-gallery-index="0">
                         @if($primaryImage)
                             <img src="{{ $primaryImage }}" alt="{{ __('trips.gallery_image_alt', ['title' => $tripView['title'] ?? '', 'num' => 1]) }}" fetchpriority="high" decoding="async">
+                        @endif
+                        @if($galleryCount > 1)
+                            <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
                         @endif
                     </div>
                     <div class="camp-gallery__right">
@@ -178,6 +218,17 @@
                     </div>
                     @endif
                 </div>
+
+                @if(! empty($tripProductSpecs))
+                    <div class="camp-product-specs" aria-label="{{ __('trips.general_details_title') }}">
+                        @foreach($tripProductSpecs as $spec)
+                            <span class="camp-product-spec">
+                                <span class="camp-product-spec__label">{{ $spec['label'] }}</span>
+                                <span class="camp-product-spec__value">{{ $spec['value'] }}</span>
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             <x-gallery.modal
@@ -932,32 +983,15 @@
         @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
 
         @unless($isDraft)
-        <!-- Mobile Sticky Request Card (replaces the floating booking card) -->
-        <div class="trip-offer-page__mobile-sticky-footer" role="region" aria-label="{{ __('vacations.request_trip') }}">
-            <div class="trip-offer-page__mobile-sticky-inner">
-                <div class="trip-offer-page__mobile-sticky-simple">
-                    <div class="trip-offer-page__mobile-sticky-simple-left">
-                        <div class="trip-offer-page__mobile-sticky-simple-price-row">
-                            <span class="trip-offer-page__mobile-sticky-simple-amount">
-                                @if($tripView['price']['per_person'])
-                                    €{{ number_format($tripView['price']['per_person'], 0) }}
-                                @else
-                                    —
-                                @endif
-                            </span>
-                            <span class="trip-offer-page__mobile-sticky-simple-unit">
-                                {{ __('trips.per_person_suffix') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <button type="button" class="trip-offer-page__mobile-sticky-simple-cta trip-offer-page__booking-cta" data-analytics-trip-inquiry>
-                        <span class="trip-offer-page__mobile-sticky-simple-cta-text">{{ __('vacations.request_trip') }}</span>
-                        <span class="trip-offer-page__mobile-sticky-simple-cta-arrow" aria-hidden="true">→</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <x-vacation.mobile-book-bar
+            variant="stacked"
+            :price-display="$tripView['price']['per_person'] ? '€'.number_format((float) $tripView['price']['per_person'], 0, ',', '.') : null"
+            :price-suffix="__('vacations.per_person')"
+            :price-note="$tripPriceNote"
+            :cta-label="__('vacations.request_trip_bar')"
+            class="trip-offer-page__booking-cta"
+            data-analytics-trip-inquiry
+        />
         @endunless
 
         <!-- Contact Modal (Trips) -->
@@ -1385,7 +1419,7 @@
                     cta.addEventListener('click', function () {
                         // Dated trips (desktop only): require booking-card schedule first.
                         // Year-round / mobile sticky: open modal immediately (date chosen in modal).
-                        const fromMobileSticky = !!cta.closest('.trip-offer-page__mobile-sticky-footer');
+                        const fromMobileSticky = !!cta.closest('.listing-mobile-book, .trip-offer-page__mobile-sticky-footer');
                         if (!isYearRound && !fromMobileSticky) {
                             const bookingDateControl = page.querySelector(
                                 '.trip-offer-page__booking-select[data-trip-selected-date], .trip-offer-page__booking-date-input[data-trip-selected-date]'

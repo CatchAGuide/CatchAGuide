@@ -655,6 +655,55 @@ class Guiding extends Model
         return $guests;
     }
 
+    /**
+     * Person/price pairs for the product booking stepper.
+     *
+     * @return list<array{person: int, amount: float}>
+     */
+    public function bookingGuestOptions(): array
+    {
+        if ($this->price_type === 'per_person') {
+            return collect(decode_if_json($this->prices) ?: [])
+                ->filter(fn ($price) => is_array($price)
+                    && isset($price['person'], $price['amount'])
+                    && (int) $price['person'] > 0
+                    && (float) $price['amount'] > 0)
+                ->map(fn (array $price) => [
+                    'person' => (int) $price['person'],
+                    'amount' => (float) $price['amount'],
+                ])
+                ->sortBy('person')
+                ->values()
+                ->all();
+        }
+
+        $max = max(1, (int) $this->max_guests);
+        $min = max(1, (int) ($this->min_guests ?: 1));
+        if ($min > $max) {
+            $min = $max;
+        }
+
+        $amount = (float) $this->price;
+        $options = [];
+        for ($i = $min; $i <= $max; $i++) {
+            $options[] = [
+                'person' => $i,
+                'amount' => $amount,
+            ];
+        }
+
+        return $options;
+    }
+
+    public function defaultBookingGuestCount(?int $preselectedGuests): int
+    {
+        $options = $this->bookingGuestOptions();
+        $fallback = (int) ($options[0]['person'] ?? 1);
+        $requested = $preselectedGuests ?? $fallback;
+
+        return $this->resolveBookingGuestCount($requested) ?? $fallback;
+    }
+
     public function ratings(){
         return $this->hasMany(Rating::class,'guide_id','id');
     }

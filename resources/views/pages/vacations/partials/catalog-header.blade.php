@@ -59,6 +59,49 @@
         VacationListingFilter::MAX_GUESTS,
         (int) (request()->num_guests ?: VacationListingFilter::DEFAULT_GUESTS)
     ));
+
+    // Mobile-only pill + bottom-sheet search (see components/mobile-search-sheet.blade.php).
+    // Opt-in only: the calling PDP (Camp/Trip) passes these explicitly, so the generic
+    // vacations listing/hub pages -- and the legacy vacations/show.blade.php page, which
+    // never passes them -- are completely unaffected.
+    $enableMobileSearchSheet = (bool) ($enableMobileSearchSheet ?? false);
+    $heroProductTitle = trim((string) ($heroProductTitle ?? ''));
+    $heroLocationLabel = trim((string) ($heroLocationLabel ?? ''));
+    $heroMapHref = trim((string) ($heroMapHref ?? '#map'));
+    $showMobileProductHero = $enableMobileSearchSheet && $heroProductTitle !== '';
+    $mobileSearchTriggerLabel = trim((string) ($mobileSearchTriggerLabel ?? __('offers.search_mobile_trigger_label')));
+    $mobileSearchSheetTitle = trim((string) ($mobileSearchSheetTitle ?? __('offers.search_mobile_sheet_title')));
+
+    $vacationCountryLabel = '';
+    if (($currentVacationCountry ?? '') === 'all-offers') {
+        $vacationCountryLabel = __('vacations.all_offers_nav');
+    } elseif (is_string($currentVacationCountry ?? null) && $currentVacationCountry !== '') {
+        $matchedCountryName = optional($vacationCountryOptions->firstWhere('slug', $currentVacationCountry))->name;
+        $vacationCountryLabel = $matchedCountryName ? translate($matchedCountryName) : '';
+    }
+    $vacationMobileSearchSummary = trim(collect([
+        $vacationCountryLabel !== '' ? $vacationCountryLabel : __('offers.search_mobile_summary_empty'),
+        trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]),
+    ])->filter()->implode(' · '));
+
+    $searchSuggestionChips = collect();
+    if ($enableMobileSearchSheet) {
+        $searchSuggestionChips = collect($vacationCountryOptions)
+            ->map(fn ($country) => [
+                'label' => translate($country->name),
+                'value' => (string) $country->slug,
+            ])
+            ->filter(fn (array $chip) => $chip['label'] !== '' && $chip['value'] !== '')
+            ->unique(fn (array $chip) => mb_strtolower($chip['value']));
+
+        if (is_string($currentVacationCountry) && $currentVacationCountry !== '' && $currentVacationCountry !== 'all-offers') {
+            $searchSuggestionChips = $searchSuggestionChips
+                ->sortBy(fn (array $chip) => $chip['value'] === $currentVacationCountry ? 0 : 1)
+                ->values();
+        }
+
+        $searchSuggestionChips = $searchSuggestionChips->take(4)->values();
+    }
 @endphp
 <div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
@@ -66,7 +109,7 @@
         'idPrefix' => 'vacations',
     ])
 
-    <section class="vacations-page-header" data-vacations-page-header>
+    <section class="vacations-page-header @if($showMobileProductHero) vacations-page-header--product @endif" data-vacations-page-header>
         <div class="vacations-page-header__band" data-vacations-header-band>
             <div class="vacations-page-header__inner vacations-page-header__inner--copy">
                 <div class="vacations-page-header__copy">
@@ -78,11 +121,28 @@
                         <x-title-rule theme="dark" />
                         <p class="vacations-page-header__sub">{{ $listingSubtitle }}</p>
                     @endif
+
+                    @if($showMobileProductHero)
+                        <p class="vacations-page-header__product-title">{{ $heroProductTitle }}</p>
+                        @if($heroLocationLabel !== '')
+                            <p class="vacations-page-header__place">
+                                <span>{{ $heroLocationLabel }}</span>
+                                <a href="{{ $heroMapHref }}">{{ __('vacations.show_on_map') }}</a>
+                            </p>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>
 
         <div class="vacations-page-header__inner vacations-page-header__inner--search">
+            <x-mobile-search-sheet
+                :enabled="$enableMobileSearchSheet"
+                :trigger-label="$mobileSearchTriggerLabel"
+                :summary="$vacationMobileSearchSummary"
+                :sheet-title="$mobileSearchSheetTitle"
+                sheet-id="vacationsMobileSearchSheet"
+            >
             <form
                 id="vacations-catalog-search"
                 class="vacations-page-header__search"
@@ -94,7 +154,7 @@
                     <label class="vacations-page-header__segment vacations-page-header__segment--country" for="vacationsCatalogCountry">
                         <span class="vacations-page-header__segment-label">{{ __('offers.search_where') }}</span>
                         <span class="vacations-page-header__segment-control">
-                            <i class="fa fa-globe" aria-hidden="true"></i>
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                             <select
                                 id="vacationsCatalogCountry"
                                 class="form-select vacations-page-header__country-select"
@@ -135,12 +195,27 @@
                         </div>
                     </div>
 
+                    @if($searchSuggestionChips->isNotEmpty())
+                        <div class="mobile-search-sheet__chips">
+                            @foreach($searchSuggestionChips as $chip)
+                                <button
+                                    type="button"
+                                    class="mobile-search-sheet__chip"
+                                    data-mobile-search-chip="{{ $chip['label'] }}"
+                                    data-mobile-search-chip-value="{{ $chip['value'] }}"
+                                >{{ $chip['label'] }}</button>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <button type="submit" class="vacations-page-header__search-btn">
-                        <span>{{ __('homepage.searchbar-search') }}</span>
-                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        <span class="vacations-page-header__search-btn-label vacations-page-header__search-btn-label--compact">{{ __('homepage.searchbar-search') }}</span>
+                        <span class="vacations-page-header__search-btn-label vacations-page-header__search-btn-label--sheet">{{ __('offers.search_submit') }}</span>
+                        <i class="fas fa-arrow-right vacations-page-header__search-btn-arrow" aria-hidden="true"></i>
                     </button>
                 </div>
             </form>
+            </x-mobile-search-sheet>
         </div>
 
         <nav class="vacations-page-header__breadcrumbs" aria-label="Breadcrumb">
@@ -160,6 +235,10 @@
 </div>
 
 @include('layouts.partials.offers-persons-stepper-script')
+
+@if($enableMobileSearchSheet)
+    @include('layouts.partials.mobile-search-sheet-script')
+@endif
 
 @once
 <script>

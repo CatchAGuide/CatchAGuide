@@ -133,6 +133,10 @@ class HeaderTitleRuleTest extends TestCase
             $vacations
         );
         $this->assertStringContainsString('@include cag-desktop-nowrap;', $vacations);
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*\.cag-title-rule \{[\s\S]*display: none;/',
+            $vacations
+        );
 
         $offers = (string) file_get_contents(resource_path('sass/page/offers.scss'));
         $this->assertMatchesRegularExpression(

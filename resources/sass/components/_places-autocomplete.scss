@@ -16,6 +16,13 @@ $pac-muted: #787780;
   overflow: hidden;
 }
 
+// Tour/vacation mobile search sheets raise their header ancestor to 2100
+// (offers.scss / _vacations-header.scss). Google appends .pac-container to
+// body, so without this bump the suggestions render behind the sheet.
+body.is-mobile-search-open .pac-container {
+  z-index: 2200 !important;
+}
+
 .pac-item {
   display: flex;
   align-items: center;

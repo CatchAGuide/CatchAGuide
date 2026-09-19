@@ -30,12 +30,17 @@ class CampMobileBookBarTest extends TestCase
         $response->assertOk();
         $html = $response->getContent();
 
-        $this->assertStringContainsString('class="listing-mobile-book"', $html);
+        $this->assertStringContainsString('listing-mobile-book', $html);
         $this->assertStringContainsString('data-camp-mobile-book', $html);
-        $this->assertStringContainsString(__('vacations.contact_us_button'), $html);
+        $this->assertStringContainsString(__('vacations.request_holiday'), $html);
+        $this->assertStringContainsString('listing-mobile-book--stacked', $html);
         $this->assertStringContainsString('id="camp-booking-date-desktop"', $html);
         $this->assertStringNotContainsString('camp-booking-date-mobile', $html);
         $this->assertSame(1, substr_count($html, 'class="camp-booking-card"'));
+        $this->assertStringContainsString('camp-product-specs', $html);
+        $this->assertStringContainsString('Test Waters', $html);
+        $this->assertStringContainsString(__('vacations.catalog_header_mobile_trigger_camp'), $html);
+        $this->assertStringContainsString(__('vacations.product_spec_waters'), $html);
     }
 
     public function test_draft_camp_page_does_not_render_the_mobile_book_bar(): void
@@ -61,6 +66,18 @@ class CampMobileBookBarTest extends TestCase
         $this->assertStringContainsString('/ night', $html);
         $this->assertStringContainsString('Request Now', $html);
         $this->assertStringContainsString('listing-mobile-book__cta', $html);
+        $this->assertStringNotContainsString('listing-mobile-book--stacked', $html);
+    }
+
+    public function test_stacked_mobile_book_bar_uses_the_dark_card_layout(): void
+    {
+        $html = Blade::render(
+            '<x-vacation.mobile-book-bar variant="stacked" price-display="€100" price-suffix="pro Nacht" cta-label="Urlaub anfragen" />'
+        );
+
+        $this->assertStringContainsString('listing-mobile-book--stacked', $html);
+        $this->assertStringContainsString('€100', $html);
+        $this->assertStringContainsString('Urlaub anfragen', $html);
     }
 
     private function makeCamp(array $overrides = []): Camp
@@ -77,6 +94,9 @@ class CampMobileBookBarTest extends TestCase
             'description_area' => 'Area description',
             'description_fishing' => 'Fishing description',
             'location' => 'Test Location',
+            'city' => 'Test Waters',
+            'region' => 'Värmland',
+            'country' => 'Sweden',
             'status' => 'active',
             'user_id' => $user->id,
         ], $overrides));

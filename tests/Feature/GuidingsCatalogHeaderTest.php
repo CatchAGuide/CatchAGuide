@@ -95,26 +95,107 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString("@extends('layouts.app-v2')", $source);
         $this->assertStringContainsString('pages.category.partials.product-hero-header', $source);
         $this->assertStringContainsString('data-category-hero-page', $source);
+        $this->assertStringContainsString("'listingTitle' => \$guiding->title", $source);
         $this->assertStringNotContainsString('navbar-custom', $source);
+        $this->assertStringNotContainsString('<h1>', $source);
     }
 
-    public function test_product_hero_header_keeps_page_h1_and_submits_to_guidings_catalog(): void
+    public function test_product_hero_header_uses_listing_title_as_h1_with_compact_search(): void
     {
         $html = View::make('pages.category.partials.product-hero-header', [
-            'listingTitle' => 'Fishing Tours',
+            'listingTitle' => 'Pike guiding on Kummerow Lake',
             'searchAction' => route('guidings.index'),
             'breadcrumbItems' => [
                 ['label' => 'Fishing Tours', 'url' => route('guidings.index')],
-                ['label' => 'Brown trout in Spain', 'url' => null],
             ],
+            'locationLabel' => 'Kummerow, Mecklenburgische Seenplatte',
+            'mapHref' => '#map',
+            'ratingScore' => 10,
+            'reviewsCount' => 5,
         ])->render();
 
         $this->assertStringContainsString('cag-site-nav--overlay', $html);
+        $this->assertStringContainsString('offers-page-header--product', $html);
+        $this->assertStringContainsString('data-product-hero-header', $html);
         $this->assertStringContainsString('data-category-header-search', $html);
-        $this->assertStringContainsString('<p class="offers-page-header__title', $html);
-        $this->assertStringNotContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString('Pike guiding on Kummerow Lake', $html);
+        $this->assertStringNotContainsString('<p class="offers-page-header__title', $html);
+        $this->assertStringContainsString('Kummerow, Mecklenburgische Seenplatte', $html);
+        $this->assertStringContainsString('#map', $html);
+        $this->assertStringContainsString(__('guidings.show_on_map'), $html);
+        $this->assertStringContainsString('offers-page-header__rating', $html);
+        $this->assertStringContainsString('id="rating-score-link"', $html);
+        $this->assertStringContainsString(trans_choice('offers.reviews_count', 5, ['count' => 5]), $html);
+        $this->assertStringContainsString(__('offers.search_field'), $html);
+        $this->assertStringContainsString(__('offers.search_change'), $html);
+        $this->assertStringContainsString('fa-arrow-right', $html);
+        $this->assertStringContainsString('offers-page-header__search-btn-label--compact', $html);
         $this->assertStringContainsString(route('guidings.index', [], false), $html);
-        $this->assertStringContainsString('Brown trout in Spain', $html);
+        $this->assertStringContainsString('name="place"', $html);
+        $this->assertStringContainsString('name="num_guests"', $html);
+        $this->assertStringContainsString('data-offers-persons-popup', $html);
+        $this->assertStringContainsString('data-offers-persons-popup-toggle', $html);
+        $this->assertStringContainsString('data-offers-persons-popup-panel', $html);
+        $this->assertStringContainsString('offers-persons-stepper--popup', $html);
+        $this->assertStringContainsString('data-offers-persons-delta="-1"', $html);
+        $this->assertStringContainsString('data-offers-persons-delta="1"', $html);
+    }
+
+    public function test_product_hero_search_stays_a_single_row_when_opened(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/offers.scss'));
+
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;[\s\S]*?\.offers-page-header__segment \{/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[^}]*grid-template-columns:\s*1fr;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*?grid-template-areas:[\s\S]*?"title rating"[\s\S]*?"place place"/',
+            $source
+        );
+        $this->assertStringContainsString('offers-persons-stepper--popup', $source);
+        $this->assertStringContainsString('bottom: calc(100% + 0.45rem)', $source);
+        $this->assertStringContainsString('&:has(.offers-persons-stepper--popup.is-open)', $source);
+        $this->assertStringContainsString('[data-mobile-search-sheet].is-open', $source);
+        $this->assertStringContainsString('flex-direction: column', $source);
+        $this->assertStringContainsString('.mobile-search-sheet__chips', $source);
+    }
+
+    public function test_product_hero_header_renders_mobile_search_sheet_with_summary(): void
+    {
+        $html = View::make('pages.category.partials.product-hero-header', [
+            'listingTitle' => 'Pike guiding on Kummerow Lake',
+            'searchAction' => route('guidings.index'),
+            'breadcrumbItems' => [],
+            'placeValue' => 'Kummerow',
+        ])->render();
+
+        $this->assertStringContainsString('data-mobile-search-sheet-open', $html);
+        $this->assertStringContainsString('mobile-search-sheet__trigger-summary', $html);
+        $this->assertStringContainsString('Kummerow', $html);
+        $this->assertStringContainsString(trans_choice('offers.persons_count', 1, ['count' => 1]), $html);
+        $this->assertStringContainsString('data-mobile-search-sheet', $html);
+        $this->assertStringContainsString(__('offers.search_mobile_sheet_title_tours'), $html);
+        $this->assertStringContainsString(__('offers.search_where'), $html);
+        $this->assertStringContainsString(__('offers.search_who'), $html);
+        $this->assertStringContainsString(__('offers.search_submit'), $html);
+        $this->assertStringContainsString('data-mobile-search-chip', $html);
+        $this->assertStringContainsString('fa-map-marker-alt', $html);
+        $this->assertStringContainsString('id="categoryHeroSearchPlace"', $html);
+        $placesEntry = (string) file_get_contents(resource_path('js/maps/places-entry.js'));
+        $this->assertStringContainsString("'categoryHeroSearchPlace'", $placesEntry);
+        // The sheet wraps the same form/fields -- no duplicate place input or guest field.
+        $this->assertSame(1, substr_count($html, 'id="categoryHeroSearchPlace"'));
+        $this->assertSame(1, substr_count($html, '<input type="hidden" name="num_guests"'));
     }
 
     public function test_guidings_listing_does_not_cap_bootstrap_container_at_1200px(): void

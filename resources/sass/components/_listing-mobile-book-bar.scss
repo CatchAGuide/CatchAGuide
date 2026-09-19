@@ -47,6 +47,25 @@
         gap: 0.35rem;
     }
 
+    &__top {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    &__note {
+        flex: 0 1 auto;
+        min-width: 0;
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #6b7280;
+        line-height: 1.2;
+        text-align: right;
+    }
+
     &__amount {
         font-size: 1.6rem;
         font-weight: 800;
@@ -96,5 +115,84 @@
     &__cta-arrow {
         font-size: 1.1rem;
         line-height: 1;
+    }
+
+    &--stacked {
+        @media (max-width: 991.98px) {
+            padding: 0;
+        }
+
+        .listing-mobile-book__inner {
+            padding: 0.4rem 0.7rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        }
+
+        .listing-mobile-book__bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+            background: $category-tour;
+            border: 0;
+            border-radius: 1.15rem;
+            padding: 0.6rem 0.7rem 0.65rem;
+            box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
+        }
+
+        .listing-mobile-book__top {
+            width: 100%;
+        }
+
+        .listing-mobile-book__note {
+            color: rgba(255, 255, 255, 0.62);
+            white-space: nowrap;
+        }
+
+        .listing-mobile-book__amount {
+            font-size: 1.15rem;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .listing-mobile-book__unit {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.62);
+        }
+
+        .listing-mobile-book__cta {
+            width: 100%;
+            max-width: none;
+            height: auto;
+            min-height: 2.45rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            background: $primary-color;
+            font-size: 0.88rem;
+            box-shadow: none;
+
+            &:hover,
+            &:focus-visible {
+                background: darken($primary-color, 4%);
+                box-shadow: none;
+            }
+        }
+
+        .listing-mobile-book__cta-arrow {
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 380px) {
+            .listing-mobile-book__bar {
+                padding: 0.55rem 0.65rem 0.6rem;
+            }
+
+            .listing-mobile-book__amount {
+                font-size: 1.05rem;
+            }
+
+            .listing-mobile-book__cta {
+                min-height: 2.3rem;
+                font-size: 0.84rem;
+            }
+        }
     }
 }

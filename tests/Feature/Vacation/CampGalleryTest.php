@@ -40,6 +40,8 @@ class CampGalleryTest extends TestCase
         $response->assertSee('data-vacation-gallery="camp-detail-'.$camp->id.'"', false);
         $response->assertSee('data-gallery-index="0"', false);
         $response->assertSee('data-gallery-index="1"', false);
+        $response->assertSee('camp-gallery__counter', false);
+        $this->assertMatchesRegularExpression('/class="camp-gallery__counter">1\/\d+</', $response->getContent());
     }
 
     public function test_single_image_camp_page_does_not_render_the_mobile_thumb_strip(): void
