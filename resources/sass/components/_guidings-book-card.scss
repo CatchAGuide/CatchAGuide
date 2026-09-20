@@ -1,8 +1,8 @@
-// Compact dark booking card used on the guiding PDP (desktop sidebar + mobile floating bar).
+// Compact dark booking card used on the guiding PDP mobile floating bar.
 .guidings-book-card {
     background: $category-tour;
     border-radius: 1.15rem;
-        padding: 0.6rem 0.7rem 0.65rem;
+    padding: 0.6rem 0.7rem 0.65rem;
     box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
     color: #fff;
     text-align: left;
@@ -160,6 +160,74 @@
             min-height: 2.3rem;
             font-size: 0.84rem;
         }
+    }
+}
+
+#booking-tour {
+    background: $category-tour;
+    border: 0;
+    border-radius: 1.15rem;
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
+
+    .card-body {
+        padding: 1.25rem 1.35rem 1.15rem;
+    }
+
+    h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .from-text {
+        display: inline;
+        margin-right: 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.78);
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .per-guiding-text {
+        color: rgba(255, 255, 255, 0.62) !important;
+        font-size: 0.85rem !important;
+    }
+
+    hr {
+        border-color: rgba(255, 255, 255, 0.14);
+        opacity: 1;
+        margin: 1rem 0;
+    }
+
+    .price-item {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.88rem;
+        line-height: 1.45;
+    }
+
+    .booking-select .form-select {
+        min-height: 2.4rem;
+        padding: 0.4rem 2rem 0.4rem 0.85rem;
+        border-radius: 0.65rem;
+        background-color: #fff;
+        color: $category-tour;
+        font-weight: 600;
+    }
+
+    .reserve-now-btn {
+        margin-bottom: 0 !important;
+        border-radius: 0.75rem;
+        font-weight: 700;
+    }
+
+    small {
+        display: block;
+        margin: 0.35rem 0 0.75rem;
+        color: rgba(255, 255, 255, 0.62);
     }
 }
 

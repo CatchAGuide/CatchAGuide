@@ -27,11 +27,11 @@
     data-guidings-book-index="{{ $selectedIndex }}"
     data-guidings-book-person-singular="{{ __('booking.person') }}"
     data-guidings-book-person-plural="{{ __('booking.people') }}"
-    data-guidings-book-reserve-label="{{ __('booking.reserve_now') }}"
+    data-guidings-book-reserve-label="{{ __('booking.choose_date_and_reserve') }}"
     data-guidings-book-reserve-for="{{ __('booking.reserve_for_date') }}"
     data-guidings-book-locale="{{ str_replace('_', '-', app()->getLocale()) }}"
     role="region"
-    aria-label="{{ __('booking.reserve_now') }}"
+    aria-label="{{ __('booking.choose_date_and_reserve') }}"
 >
     <form action="{{ route('checkout') }}" method="POST" class="checkout-form guidings-book-card__form">
         @csrf
@@ -66,7 +66,7 @@
         <input type="hidden" name="selected_date" id="{{ $dateInputId }}" value="" data-guidings-book-date>
 
         <button type="submit" class="guidings-book-card__cta" id="{{ $ctaId }}" data-guidings-book-cta>
-            <span class="guidings-book-card__cta-text" data-guidings-book-cta-text>{{ __('booking.reserve_now') }}</span>
+            <span class="guidings-book-card__cta-text" data-guidings-book-cta-text>{{ __('booking.choose_date_and_reserve') }}</span>
             <span class="guidings-book-card__cta-arrow" aria-hidden="true">→</span>
         </button>
     </form>

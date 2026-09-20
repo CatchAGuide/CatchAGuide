@@ -8,28 +8,30 @@ use Tests\TestCase;
 
 class GuidingBookingWidgetTest extends TestCase
 {
-    public function test_desktop_widget_matches_dark_stepper_card(): void
+    public function test_desktop_widget_matches_classic_from_price_card(): void
     {
         $html = $this->renderWidget('pages.guidings.content.bookguiding', 3, false);
 
-        $this->assertStringContainsString('guidings-book-card', $html);
-        $this->assertStringContainsString('data-guidings-book-stepper', $html);
-        $this->assertStringContainsString('data-guidings-book-delta="-1"', $html);
-        $this->assertStringContainsString('data-guidings-book-delta="1"', $html);
-        $this->assertStringContainsString('guidings-book-card__cta-arrow', $html);
-        $this->assertStringContainsString(__('booking.per_guiding'), $html);
+        $this->assertStringContainsString('id="booking-tour"', $html);
+        $this->assertStringContainsString('id="personSelect"', $html);
+        $this->assertStringContainsString('form-select', $html);
+        $this->assertStringContainsString(__('booking.from'), $html);
+        $this->assertStringContainsString(__('booking.per_person_for_a_tour_of'), $html);
+        $this->assertStringContainsString(__('booking.contact_us'), $html);
         $this->assertStringContainsString(e(__('booking.reserve_now')), $html);
+        $this->assertStringNotContainsString(e(__('booking.choose_date_and_reserve')), $html);
+        $this->assertSame('Reserve now', trans('booking.reserve_now', [], 'en'));
+        $this->assertSame('Reservieren', trans('booking.reserve_now', [], 'de'));
+        $this->assertSame('Choose date & reserve', trans('booking.choose_date_and_reserve', [], 'en'));
+        $this->assertSame('Datum wählen & reservieren', trans('booking.choose_date_and_reserve', [], 'de'));
+        $this->assertStringContainsString('name="person"', $html);
         $this->assertMatchesRegularExpression(
-            '/name="person"[^>]*value="3"|value="3"[^>]*name="person"/',
+            '/value="3"[^>]*\bselected\b|\bselected\b[^>]*value="3"/',
             $html
         );
         $this->assertStringContainsString('369€', $html);
-        $this->assertStringContainsString('123€', $html);
-        $this->assertStringContainsString(__('booking.per_person'), $html);
-        $this->assertStringNotContainsString('data-guidings-book-breakdown hidden', $html);
-        $this->assertStringNotContainsString('id="personSelect"', $html);
-        $this->assertStringNotContainsString('form-select', $html);
-        $this->assertStringNotContainsString(__('booking.per_person_for_a_tour_of'), $html);
+        $this->assertStringNotContainsString('data-guidings-book-stepper', $html);
+        $this->assertStringNotContainsString('guidings-book-card__cta-arrow', $html);
     }
 
     public function test_mobile_widget_defaults_to_first_guest_tier(): void
@@ -49,6 +51,8 @@ class GuidingBookingWidgetTest extends TestCase
             $html
         );
         $this->assertStringContainsString('data-guidings-booking-widget-script', $html);
+        $this->assertStringContainsString(e(__('booking.choose_date_and_reserve')), $html);
+        $this->assertStringNotContainsString('>'.e(__('booking.reserve_now')).'<', $html);
     }
 
     private function renderWidget(string $view, ?int $preselectedGuests, bool $isMobile): string

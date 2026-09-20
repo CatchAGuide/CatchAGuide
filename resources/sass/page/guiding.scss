@@ -2187,6 +2187,10 @@ $guidings-header-bg: #f7f9fb;
     display: flex;
     margin-bottom: 16px;
 
+    @media (max-width: 767.98px) {
+      display: none;
+    }
+
     .title-wrapper {
       display: flex;
       justify-content: space-between;

@@ -3,6 +3,7 @@
     use App\Services\Search\ListingSearchStateService;
 
     $listingTitle = trim((string) ($listingTitle ?? ''));
+    $hubTitle = trim((string) ($hubTitle ?? __('homepage.filter-fishing-near-me')));
     $locationLabel = trim((string) ($locationLabel ?? ''));
     $mapHref = trim((string) ($mapHref ?? '#map'));
     $ratingScore = $ratingScore ?? null;
@@ -59,8 +60,11 @@
         <div class="offers-page-header__hero" data-category-hero>
             <div class="offers-page-header__inner offers-page-header__inner--hero">
                 <div class="offers-page-header__copy">
+                    @if($hubTitle !== '')
+                        <p class="offers-page-header__title offers-page-header__title--hub offers-page-header__anim" style="--offers-anim-i: 0">{{ $hubTitle }}</p>
+                    @endif
                     @if(count($breadcrumbItems) > 0)
-                        <nav class="offers-page-header__breadcrumbs offers-page-header__anim" style="--offers-anim-i: 0" aria-label="Breadcrumb">
+                        <nav class="offers-page-header__breadcrumbs offers-page-header__breadcrumbs--hero offers-page-header__anim" style="--offers-anim-i: 0" aria-label="Breadcrumb">
                             <ol class="offers-page-header__crumb-list">
                                 <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                                 @foreach($breadcrumbItems as $item)
@@ -75,7 +79,7 @@
                         </nav>
                     @endif
 
-                    <h1 class="offers-page-header__title offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingTitle }}</h1>
+                    <h1 class="offers-page-header__title offers-page-header__title--product offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingTitle }}</h1>
 
                     @if($locationLabel !== '')
                         <p class="offers-page-header__place offers-page-header__anim" style="--offers-anim-i: 2">
@@ -115,57 +119,54 @@
             >
                 @include('components.offers.partials.hidden-query-fields', ['query' => $headerCarry])
                 <div class="offers-page-header__search-box">
-                    <label class="offers-page-header__segment offers-page-header__segment--where" for="categoryHeroSearchPlace">
-                        <span class="offers-page-header__segment-label">{{ __('offers.search_where') }}</span>
-                        <span class="offers-page-header__segment-control">
-                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                            <input
-                                id="categoryHeroSearchPlace"
-                                name="place"
-                                type="text"
-                                class="form-control"
-                                placeholder="{{ __('offers.search_where_placeholder') }}"
-                                value="{{ $placeValue }}"
-                                autocomplete="off"
-                            >
-                        </span>
-                        <input type="hidden" id="LocationLatCategoryHero" name="placeLat" value="{{ $placeLat }}">
-                        <input type="hidden" id="LocationLngCategoryHero" name="placeLng" value="{{ $placeLng }}">
-                        <input type="hidden" id="LocationCityCategoryHero" name="city" value="{{ $placeCity }}">
-                        <input type="hidden" id="LocationCountryCategoryHero" name="country" value="{{ $placeCountry }}">
-                        <input type="hidden" id="LocationRegionCategoryHero" name="region" value="{{ $placeRegion }}">
-                        @include('layouts.partials.geosearch-hidden-fields')
-                    </label>
+                    <div class="offers-page-header__search-row">
+                        <label class="offers-page-header__segment offers-page-header__segment--where" for="categoryHeroSearchPlace">
+                            <span class="offers-page-header__segment-label">{{ __('offers.search_where') }}</span>
+                            <span class="offers-page-header__segment-control">
+                                <i class="fas fa-search offers-page-header__where-icon offers-page-header__where-icon--listing" aria-hidden="true"></i>
+                                <i class="fas fa-map-marker-alt offers-page-header__where-icon offers-page-header__where-icon--product" aria-hidden="true"></i>
+                                <input
+                                    id="categoryHeroSearchPlace"
+                                    name="place"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="{{ __('offers.search_where_placeholder') }}"
+                                    value="{{ $placeValue }}"
+                                    autocomplete="off"
+                                >
+                            </span>
+                            <input type="hidden" id="LocationLatCategoryHero" name="placeLat" value="{{ $placeLat }}">
+                            <input type="hidden" id="LocationLngCategoryHero" name="placeLng" value="{{ $placeLng }}">
+                            <input type="hidden" id="LocationCityCategoryHero" name="city" value="{{ $placeCity }}">
+                            <input type="hidden" id="LocationCountryCategoryHero" name="country" value="{{ $placeCountry }}">
+                            <input type="hidden" id="LocationRegionCategoryHero" name="region" value="{{ $placeRegion }}">
+                            @include('layouts.partials.geosearch-hidden-fields')
+                        </label>
 
-                    <div class="offers-page-header__segment offers-page-header__segment--who" data-offers-who>
-                        <span class="offers-page-header__segment-label" id="categoryHeroWhoLabel">{{ __('offers.search_who') }}</span>
-                        <div
-                            class="offers-persons-stepper offers-persons-stepper--catalog offers-persons-stepper--popup"
-                            data-offers-persons-stepper
-                            data-offers-persons-popup
-                            role="group"
-                            aria-labelledby="categoryHeroWhoLabel"
-                        >
-                            <button
-                                type="button"
-                                class="offers-persons-stepper__trigger"
-                                data-offers-persons-popup-toggle
-                                aria-expanded="false"
-                                aria-controls="categoryHeroPersonsPopup"
-                            >
-                                <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuests, ['count' => $offersGuests]) }}</span>
-                            </button>
+                        <div class="offers-page-header__segment offers-page-header__segment--who" data-offers-who>
+                            <span class="offers-page-header__segment-label" id="categoryHeroWhoLabel">{{ __('offers.search_who') }}</span>
                             <div
-                                id="categoryHeroPersonsPopup"
-                                class="offers-persons-stepper__popup"
-                                data-offers-persons-popup-panel
-                                hidden
+                                class="offers-persons-stepper offers-persons-stepper--catalog"
+                                data-offers-persons-stepper
+                                role="group"
+                                aria-labelledby="categoryHeroWhoLabel"
                             >
                                 <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="-1" aria-label="−">−</button>
+                                <div class="offers-persons-stepper__value">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span data-offers-persons-label>{{ trans_choice('offers.persons_count', $offersGuests, ['count' => $offersGuests]) }}</span>
+                                </div>
+                                <input type="hidden" name="num_guests" value="{{ $offersGuests }}" data-offers-persons-input>
                                 <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
                             </div>
-                            <input type="hidden" name="num_guests" value="{{ $offersGuests }}" data-offers-persons-input>
                         </div>
+
+                        <button type="submit" class="offers-page-header__search-btn">
+                            <span class="offers-page-header__search-btn-label offers-page-header__search-btn-label--listing">{{ __('offers.search_submit') }}</span>
+                            <span class="offers-page-header__search-btn-label offers-page-header__search-btn-label--compact">{{ __('offers.search_change') }}</span>
+                            <span class="offers-page-header__search-btn-label offers-page-header__search-btn-label--sheet">{{ __('offers.search_submit') }}</span>
+                            <i class="fas fa-arrow-right offers-page-header__search-btn-arrow" aria-hidden="true"></i>
+                        </button>
                     </div>
 
                     @if($searchSuggestionChips->isNotEmpty())
@@ -179,16 +180,26 @@
                             @endforeach
                         </div>
                     @endif
-
-                    <button type="submit" class="offers-page-header__search-btn">
-                        <span class="offers-page-header__search-btn-label offers-page-header__search-btn-label--compact">{{ __('offers.search_change') }}</span>
-                        <span class="offers-page-header__search-btn-label offers-page-header__search-btn-label--sheet">{{ __('offers.search_submit') }}</span>
-                        <i class="fas fa-arrow-right offers-page-header__search-btn-arrow" aria-hidden="true"></i>
-                    </button>
                 </div>
             </form>
             </x-mobile-search-sheet>
         </div>
+
+        @if(count($breadcrumbItems) > 0)
+            <nav class="offers-page-header__breadcrumbs offers-page-header__breadcrumbs--below offers-page-header__anim" style="--offers-anim-i: 3" aria-label="Breadcrumb">
+                <ol class="offers-page-header__crumb-list">
+                    <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
+                    @foreach($breadcrumbItems as $item)
+                        <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
+                        @if(! empty($item['url']))
+                            <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
+                        @else
+                            <li class="is-active" aria-current="page">{{ $item['label'] }}</li>
+                        @endif
+                    @endforeach
+                </ol>
+            </nav>
+        @endif
     </section>
 </div>
 

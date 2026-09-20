@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Services\Queue\QueueRecoveryService;
 use App\Services\ScheduledTaskService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -22,16 +23,18 @@ class Kernel extends ConsoleKernel
         // Shared hosting has no persistent queue worker process — the cron job that used to
         // hit the now-removed /api/queue/run-worker route was the only thing draining the
         // "database" queue. Drain it here instead, riding the existing per-minute schedule:run cron.
-        $schedule->command('queue:work --queue=default --stop-when-empty --tries=3 --max-time=50')
+        // The overlap lock expires after 5 minutes (default is 24h) so a killed run can't block
+        // the queue for a day — a healthy run finishes within --max-time=50 seconds.
+        $schedule->command(QueueRecoveryService::WORKER_COMMAND)
                 ->everyMinute()
-                ->withoutOverlapping();
+                ->withoutOverlapping(5);
 
-        // Alerts admins if queued jobs (booking confirmation emails, etc.) sit unprocessed
-        // past a reasonable threshold — e.g. the queue:work run above got stuck behind a
-        // stale withoutOverlapping() lock. See app/Console/Commands/MonitorQueueHealth.php.
+        // Self-heals a stalled queue (clears the stale queue:work lock and drains the queue),
+        // and only emails admins if jobs (booking confirmation emails, etc.) are still stuck
+        // afterwards. See app/Console/Commands/MonitorQueueHealth.php.
         $schedule->command('queue:monitor-health')
                 ->everyFifteenMinutes()
-                ->withoutOverlapping();
+                ->withoutOverlapping(30);
 
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();

@@ -96,8 +96,9 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('pages.category.partials.product-hero-header', $source);
         $this->assertStringContainsString('data-category-hero-page', $source);
         $this->assertStringContainsString("'listingTitle' => \$guiding->title", $source);
+        $this->assertStringContainsString("'hubTitle' => __('homepage.filter-fishing-near-me')", $source);
+        $this->assertStringContainsString('<h1>{{ $guiding->title }}</h1>', $source);
         $this->assertStringNotContainsString('navbar-custom', $source);
-        $this->assertStringNotContainsString('<h1>', $source);
     }
 
     public function test_product_hero_header_uses_listing_title_as_h1_with_compact_search(): void
@@ -119,8 +120,13 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('data-product-hero-header', $html);
         $this->assertStringContainsString('data-category-header-search', $html);
         $this->assertStringContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString('offers-page-header__title--product', $html);
+        $this->assertStringContainsString('offers-page-header__title--hub', $html);
         $this->assertStringContainsString('Pike guiding on Kummerow Lake', $html);
-        $this->assertStringNotContainsString('<p class="offers-page-header__title', $html);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $html);
+        $this->assertStringContainsString('offers-page-header__breadcrumbs--below', $html);
+        $this->assertStringContainsString('offers-page-header__breadcrumbs--hero', $html);
+        $this->assertStringNotContainsString('<p class="offers-page-header__title offers-page-header__anim"', $html);
         $this->assertStringContainsString('Kummerow, Mecklenburgische Seenplatte', $html);
         $this->assertStringContainsString('#map', $html);
         $this->assertStringContainsString(__('guidings.show_on_map'), $html);
@@ -129,45 +135,48 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString(trans_choice('offers.reviews_count', 5, ['count' => 5]), $html);
         $this->assertStringContainsString(__('offers.search_field'), $html);
         $this->assertStringContainsString(__('offers.search_change'), $html);
+        $this->assertStringContainsString(__('offers.search_submit'), $html);
         $this->assertStringContainsString('fa-arrow-right', $html);
         $this->assertStringContainsString('offers-page-header__search-btn-label--compact', $html);
+        $this->assertStringContainsString('offers-page-header__search-btn-label--listing', $html);
         $this->assertStringContainsString(route('guidings.index', [], false), $html);
         $this->assertStringContainsString('name="place"', $html);
         $this->assertStringContainsString('name="num_guests"', $html);
-        $this->assertStringContainsString('data-offers-persons-popup', $html);
-        $this->assertStringContainsString('data-offers-persons-popup-toggle', $html);
-        $this->assertStringContainsString('data-offers-persons-popup-panel', $html);
-        $this->assertStringContainsString('offers-persons-stepper--popup', $html);
+        $this->assertStringContainsString('offers-persons-stepper--catalog', $html);
+        $this->assertStringContainsString('offers-page-header__search-row', $html);
         $this->assertStringContainsString('data-offers-persons-delta="-1"', $html);
         $this->assertStringContainsString('data-offers-persons-delta="1"', $html);
+        $this->assertStringNotContainsString('data-offers-persons-popup', $html);
+        $this->assertMatchesRegularExpression(
+            '/offers-page-header__search-row[\s\S]*offers-page-header__search-btn[\s\S]*<\/div>\s*(?:<div class="mobile-search-sheet__chips">[\s\S]*?<\/div>\s*)?<\/div>/',
+            $html
+        );
     }
 
     public function test_product_hero_search_stays_a_single_row_when_opened(): void
     {
         $source = (string) file_get_contents(resource_path('sass/page/offers.scss'));
 
+        $this->assertStringContainsString('&--product {', $source);
+        $this->assertStringContainsString('.offers-page-header__title--hub', $source);
+        $this->assertStringContainsString('.offers-page-header__breadcrumbs--below', $source);
+        $this->assertStringContainsString('.offers-page-header__title--product', $source);
         $this->assertMatchesRegularExpression(
-            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;/',
+            '/@media \(max-width: 767\.98px\) \{[\s\S]*?grid-template-areas:[\s\S]*?"crumbs"[\s\S]*?"title"[\s\S]*?"place"[\s\S]*?"rating"/',
             $source
         );
-        $this->assertMatchesRegularExpression(
-            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+auto;[\s\S]*?\.offers-page-header__segment \{/',
-            $source
-        );
-        $this->assertDoesNotMatchRegularExpression(
-            '/&--product \{[\s\S]*?\.offers-page-header__search-box \{[^}]*grid-template-columns:\s*1fr;/',
-            $source
-        );
-        $this->assertMatchesRegularExpression(
-            '/&--product \{[\s\S]*?grid-template-areas:[\s\S]*?"title rating"[\s\S]*?"place place"/',
-            $source
-        );
-        $this->assertStringContainsString('offers-persons-stepper--popup', $source);
-        $this->assertStringContainsString('bottom: calc(100% + 0.45rem)', $source);
-        $this->assertStringContainsString('&:has(.offers-persons-stepper--popup.is-open)', $source);
         $this->assertStringContainsString('[data-mobile-search-sheet].is-open', $source);
         $this->assertStringContainsString('flex-direction: column', $source);
         $this->assertStringContainsString('.mobile-search-sheet__chips', $source);
+        $this->assertStringContainsString('.offers-page-header__search-row', $source);
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*?\.mobile-search-sheet__chips,[\s\S]*?\.offers-page-header__search-btn-label--sheet,[\s\S]*?\.offers-page-header__search-btn-label--compact \{[\s\S]*?display:\s*none;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width: 768px\) \{[\s\S]*?\.offers-page-header__search-row \{[\s\S]*?grid-template-columns:[\s\S]*?auto;/',
+            $source
+        );
     }
 
     public function test_product_hero_header_renders_mobile_search_sheet_with_summary(): void
