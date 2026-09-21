@@ -5,8 +5,8 @@
     $magazineActive = request()->routeIs('blog.*', 'blogde.*')
         || request()->is('angelmagazin*', 'fishing-magazine*');
     $siteNavUser = Auth::user();
-    $siteNavAvatar = $siteNavUser && $siteNavUser->profil_image
-        ? asset('images/'.$siteNavUser->profil_image)
+    $siteNavAvatar = $siteNavUser
+        ? guide_profile_photo_url($siteNavUser)
         : asset('images/placeholder_guide.jpg');
     $siteNavName = $siteNavUser
         ? trim($siteNavUser->firstname.' '.$siteNavUser->lastname)

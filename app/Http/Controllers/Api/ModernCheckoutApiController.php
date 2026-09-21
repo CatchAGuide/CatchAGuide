@@ -47,7 +47,7 @@ class ModernCheckoutApiController extends Controller
                     'blocked_events' => $guiding->getBlockedEvents(),
                     'guide' => [
                         'name' => $guiding->user->firstname . ' ' . $guiding->user->lastname,
-                        'profile_image' => $guiding->user->profil_image ? asset('images/' . $guiding->user->profil_image) : asset('images/placeholder_guide.jpg'),
+                        'profile_image' => guide_profile_photo_url($guiding->user, $guiding),
                         'payment_methods' => $this->getPaymentMethods($guiding->user)
                     ]
                 ]

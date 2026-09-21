@@ -353,13 +353,7 @@
                         <div class="user-welcome-card">
                             <a href="{{ route('profile.index') }}">
                                 <div class="user-avatar">
-                                    @if(Auth::user()->profil_image)
-                                        <img src="{{ asset('images/' . Auth::user()->profil_image) }}" alt="Profile" class="avatar-img">
-                                    @else
-                                        <div class="avatar-placeholder">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                    @endif
+                                    <img src="{{ guide_profile_photo_url(Auth::user()) }}" alt="{{ Auth::user()->firstname }}" class="avatar-img">
                                 </div>
                                 <div class="user-info">
                                     <h4>{{ Auth::user()->firstname ?? 'Welcome' }} {{ Auth::user()->lastname ?? 'Back' }}</h4>

@@ -63,7 +63,7 @@
                     @auth
                         <div class="header-desktop-profile dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                                <img src="{{ guide_profile_photo_url(Auth::user()) }}" 
                                      class="rounded-circle profile-image" 
                                      alt="Profile">
                                 <span>{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>
@@ -95,7 +95,7 @@
                 <div class="d-flex d-md-none align-items-center">
                     @auth
                         <a href="{{ route('profile.index') }}" class="me-3">
-                            <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                            <img src="{{ guide_profile_photo_url(Auth::user()) }}" 
                                  class="rounded-circle" 
                                  style="width: 32px; height: 32px;" 
                                  alt="Profile">
@@ -1092,7 +1092,7 @@ input[type=number] {
             <div class="modal-header mobile-menu-header">
                 <div class="d-flex align-items-center">
                     @auth
-                        <img src="{{ asset('images/'. Auth::user()->profil_image) ?? asset('images/placeholder_guide.jpg') }}" 
+                        <img src="{{ guide_profile_photo_url(Auth::user()) }}" 
                              class="rounded-circle mobile-menu-profile-image" 
                              alt="Profile">
                         <span class="mobile-menu-username">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</span>

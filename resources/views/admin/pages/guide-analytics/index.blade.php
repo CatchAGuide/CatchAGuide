@@ -145,7 +145,7 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    @php $guideImgSrc = $stat['guide']->profil_image ? asset('images/' . $stat['guide']->profil_image) : asset('images/placeholder_guide.jpg'); @endphp
+                                                    @php $guideImgSrc = guide_profile_photo_url($stat['guide']); @endphp
                                                     <img src="{{ $guideImgSrc }}" alt="{{ $stat['guide']->full_name }}" class="rounded-circle object-fit-cover flex-shrink-0" style="width: 40px; height: 40px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder_guide.jpg') }}';">
                                                     <div>
                                                         <strong>{{ $stat['guide']->full_name }}</strong>
@@ -231,7 +231,7 @@
                                         @foreach($guidesWithoutActiveOrDraftGuidings as $guide)
                                             <tr data-filter-status="{{ $guide->guidings_count == 0 ? 'none' : 'deactivated' }}">
                                                 <td>
-                                                    @php $imgSrc = $guide->profil_image ? asset('images/' . $guide->profil_image) : asset('images/placeholder_guide.jpg'); @endphp
+                                                    @php $imgSrc = guide_profile_photo_url($guide); @endphp
                                                     <img src="{{ $imgSrc }}" alt="{{ $guide->full_name }}" class="rounded-circle object-fit-cover" style="width: 40px; height: 40px;" onerror="this.onerror=null; this.src='{{ asset('images/placeholder_guide.jpg') }}';">
                                                 </td>
                                                 <td><strong>{{ $guide->full_name }}</strong></td>

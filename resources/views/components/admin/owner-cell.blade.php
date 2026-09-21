@@ -1,4 +1,4 @@
-@props(['user'])
+@props(['user', 'listing' => null])
 
 @php
     $fullName = $user->full_name ?? $user->name ?? '';
@@ -10,14 +10,16 @@
             $initials .= mb_substr(end($nameParts), 0, 1);
         }
     }
+    $photoUrl = $user ? guide_profile_photo_url($user, $listing) : null;
+    $isPlaceholder = $photoUrl && str_contains($photoUrl, 'placeholder_guide');
 @endphp
 
 @if($user)
     <a href="{{ route('admin.guides.edit', $user->id) }}" class="text-decoration-none">
         <div class="admin-listing-owner-cell">
-            @if(!empty($user->profil_image ?? null))
+            @if($photoUrl && ! $isPlaceholder)
                 <img
-                    src="{{ asset('uploads/profile_images/' . $user->profil_image) }}"
+                    src="{{ $photoUrl }}"
                     alt="{{ $fullName }}"
                     class="admin-listing-owner-avatar"
                     loading="lazy"

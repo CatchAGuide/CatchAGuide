@@ -59,11 +59,7 @@
                 </div>
                 <div class="p-3">
                     <div class="guide-info">
-                        @if($booking->guiding->user->profil_image)
-                            <img src="{{ asset('images/' . $booking->guiding->user->profil_image) }}" alt="Guide Photo" class="guide-avatar">
-                        @else
-                            <img src="{{ asset('images/placeholder_guide.jpg') }}" alt="Guide Photo" class="guide-avatar">
-                        @endif
+                        <img src="{{ guide_profile_photo_url($booking->guiding->user, $booking->guiding) }}" alt="{{ $booking->guiding->user->firstname }}" class="guide-avatar">
                         <div>
                             <h4 class="guide-name">{{ $booking->guiding->user->firstname }} {{ $booking->guiding->user->lastname }}</h4>
                             <p class="guide-title">{{ __('checkout.professional_fishing_guide') }}</p>

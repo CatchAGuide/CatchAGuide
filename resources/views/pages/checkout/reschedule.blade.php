@@ -267,11 +267,7 @@
                             <div class="col-12">
                                 <h5>{{ $guiding->title }}</h5>
                                 <div>
-                                  @if($guiding->user->profil_image)
-                                    <img class="rounded-circle" src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="24" height="24">
-                                  @else
-                                    <img class="rounded-circle" src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="24" height="24">
-                                  @endif
+                                  <img class="rounded-circle" src="{{ guide_profile_photo_url($guiding->user, $guiding) }}" alt="{{ $guiding->user->firstname }}" width="24" height="24">
                                 </div>
                                 <p class="text-muted">by {{ $guiding->user->firstname }}</p>
                             </div>

@@ -59,7 +59,7 @@
                                                 <span class="badge bg-info admin-listing-status-badge">{{ ucfirst(str_replace('_', ' ', $rentalBoat->boat_type)) }}</span>
                                             </td>
                                             <td>
-                                                <x-admin.owner-cell :user="$rentalBoat->user" />
+                                                <x-admin.owner-cell :user="$rentalBoat->user" :listing="$rentalBoat" />
                                             </td>
                                             <td class="text-center">
                                                 <x-admin.listing-image-count

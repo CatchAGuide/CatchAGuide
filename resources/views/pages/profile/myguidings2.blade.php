@@ -408,15 +408,9 @@
                                                         </div>
                                                         <div class="col-12">
                                                             <div class="mt-3">
-                                                                @if($guiding->user->profil_image)
                                                                 <img class="center-block rounded-circle"
-                                                                src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="20"
+                                                                src="{{ guide_profile_photo_url($guiding->user, $guiding) }}" alt="{{ $guiding->user->firstname }}" width="20"
                                                                 height="20">
-                                                                @else
-                                                                    <img class="center-block rounded-circle"
-                                                                        src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="20"
-                                                                        height="20">
-                                                                @endif
                                                                 <span class="color-primary" style="font-size:1rem">{{$guiding->user->firstname}}</span>
                                                             </div>
                                                         </div>

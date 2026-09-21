@@ -66,4 +66,12 @@ class Review extends Model
     {
         return $this->belongsTo(Guiding::class);
     }
+
+    /**
+     * Newest review first (created_at, then id as a tiebreaker).
+     */
+    public function scopeNewestFirst($query)
+    {
+        return $query->orderByDesc('created_at')->orderByDesc('id');
+    }
 }

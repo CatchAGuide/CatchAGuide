@@ -78,7 +78,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <x-admin.owner-cell :user="$camp->user" />
+                                                    <x-admin.owner-cell :user="$camp->user" :listing="$camp" />
                                                 </td>
                                                 <td>{{ $camp->created_at->format('M d, Y') }}</td>
                                                 <td class="text-center">
