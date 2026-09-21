@@ -15759,9 +15759,12 @@ div#masonry-grid img {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 767.98px) {
+@media (max-width: 576px) {
   .trip-offer-page__feature-cards {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
   }
 }
 .trip-offer-page__feature-card {
@@ -15925,16 +15928,9 @@ div#masonry-grid img {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(49, 48, 65, 0.12);
 }
-@media (max-width: 767.98px) {
+@media (max-width: 576px) {
   .trip-offer-page__about-card {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 0.35rem 0 0;
-  }
-  .trip-offer-page__about-card .trip-offer-page__section-title {
-    display: none;
+    padding: 1.15rem 1.1rem;
   }
 }
 .trip-offer-page__about-description {

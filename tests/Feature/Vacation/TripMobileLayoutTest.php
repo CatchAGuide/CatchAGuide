@@ -43,11 +43,13 @@ class TripMobileLayoutTest extends TestCase
             'days' => 7,
             'nights' => 6,
         ])), $html);
-        $this->assertStringContainsString('camp-product-specs', $html);
+        $this->assertStringNotContainsString('camp-product-specs', $html);
+        $this->assertStringContainsString('trip-offer-page__feature-cards', $html);
+        $this->assertStringContainsString('trip-offer-page__about-card', $html);
+        $this->assertStringContainsString(__('trips.about_this_trip'), $html);
         $this->assertStringContainsString(__('trips.duration'), $html);
-        $this->assertStringContainsString(__('vacations.product_spec_group'), $html);
-        $this->assertStringContainsString(__('vacations.product_spec_max', ['count' => 6]), $html);
-        $this->assertStringContainsString(__('trips.catering_full_board'), $html);
+        $this->assertStringContainsString(__('trips.group_size'), $html);
+        $this->assertStringContainsString(__('trips.people'), $html);
         $this->assertStringContainsString(__('vacations.catalog_header_mobile_trigger_trip'), $html);
         $this->assertStringContainsString(__('vacations.catalog_header_mobile_sheet_title_trip'), $html);
         $this->assertStringContainsString('data-mobile-search-sheet', $html);

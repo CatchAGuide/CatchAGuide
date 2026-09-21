@@ -170,17 +170,23 @@ class DDoSProtectionService
      */
     private function checkRateLimit(string $identifier, string $context, array $limits): bool
     {
+        $keys = [];
         foreach ($limits as $window => $limit) {
             $key = "{$context}_rate_limit_{$window}_{$identifier}";
-            $attempts = Cache::get($key, 0);
-            
-            if ($attempts >= $limit) {
+
+            if ((int) Cache::get($key, 0) >= $limit) {
                 return false;
             }
-            
-            // Increment counter
-            $ttl = $this->getWindowTtl($window);
-            Cache::put($key, $attempts + 1, $ttl);
+
+            $keys[$window] = $key;
+        }
+
+        // Fixed windows: add() sets the TTL only when the counter is created and
+        // increment() keeps it, so a steady client cannot keep a window alive forever.
+        // Counters are only consumed once every window has passed.
+        foreach ($keys as $window => $key) {
+            Cache::add($key, 0, $this->getWindowTtl($window));
+            Cache::increment($key);
         }
 
         return true;

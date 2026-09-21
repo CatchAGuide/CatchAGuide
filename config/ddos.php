@@ -437,7 +437,7 @@ return [
         'seo' => [
             'Ahrefs' => ['ua' => ['AhrefsBot']],
             'Semrush' => ['ua' => ['SemrushBot', 'Semrush']],
-            'DataForSEO' => ['ua' => ['DataForSEO', 'dataforseo']],
+            'DataForSEO' => ['ua' => ['DataForSEO', 'dataforseo', 'RSiteAuditor']],
             'PetalBot' => ['ua' => ['PetalBot']],
             'Baiduspider' => ['ua' => ['Baiduspider']],
             'Yandex' => ['ua' => ['YandexBot', 'Yandex']],

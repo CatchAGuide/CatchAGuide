@@ -158,27 +158,6 @@
                 $galleryCount = count($galleryImages);
                 $tripDays = $tripView['duration']['days'] ?? null;
                 $tripNights = $tripView['duration']['nights'] ?? null;
-                $tripSpecies = collect($tripView['target_species'] ?? [])->filter()->first();
-                $tripGroupMax = $tripView['group_size']['max'] ?? null;
-                $tripCatering = collect($tripView['accommodation']['catering'] ?? [])->filter()->first();
-                $tripProductSpecs = array_values(array_filter([
-                    $tripDays ? [
-                        'label' => __('trips.duration'),
-                        'value' => $tripDays.' '.__('trips.duration_days'),
-                    ] : null,
-                    $tripSpecies ? [
-                        'label' => __('vacations.product_spec_target'),
-                        'value' => $tripSpecies,
-                    ] : null,
-                    $tripGroupMax ? [
-                        'label' => __('vacations.product_spec_group'),
-                        'value' => __('vacations.product_spec_max', ['count' => $tripGroupMax]),
-                    ] : null,
-                    $tripCatering ? [
-                        'label' => __('trips.catering'),
-                        'value' => $tripCatering,
-                    ] : null,
-                ]));
                 $tripPriceNote = ($tripDays && $tripNights)
                     ? __('vacations.product_spec_duration_included', ['days' => $tripDays, 'nights' => $tripNights])
                     : null;
@@ -223,17 +202,6 @@
                     </div>
                     @endif
                 </div>
-
-                @if(! empty($tripProductSpecs))
-                    <div class="camp-product-specs" aria-label="{{ __('trips.general_details_title') }}">
-                        @foreach($tripProductSpecs as $spec)
-                            <span class="camp-product-spec">
-                                <span class="camp-product-spec__label">{{ $spec['label'] }}</span>
-                                <span class="camp-product-spec__value">{{ $spec['value'] }}</span>
-                            </span>
-                        @endforeach
-                    </div>
-                @endif
             </div>
 
             <x-gallery.modal
