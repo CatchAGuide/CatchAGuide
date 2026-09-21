@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\ProductReportsController;
 use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\Admin\ScheduledTasksController;
+use App\Http\Controllers\Admin\SecurityThreatsController;
 use App\Http\Controllers\Admin\SpecialOffersController;
 use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\AdminTermsSectionController;
@@ -69,6 +70,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('guides', GuidesController::class);
         Route::get('guides/change-status/{guide}', [GuidesController::class, 'changeGuideStatus'])->name('guides.change-status');
         Route::get('guide-analytics', [GuideAnalyticsController::class, 'index'])->name('guide-analytics.index');
+        Route::get('security/threats', [SecurityThreatsController::class, 'index'])->name('security.threats');
 
         Route::prefix('page-attribute')->name('page-attribute.')->group(function () {
             Route::get('/en', [PageAttributeController::class, 'index'])->name('en');

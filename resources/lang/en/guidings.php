@@ -127,6 +127,7 @@ return [
     'show_on_map' => 'Show on map',
     'Best_price_guarantee' => 'Best price guarantee',
     'No_image_found' => 'No image found',
+    'gallery_image_alt' => ':title — image :num',
     'Tour_Gallery' => 'Tour Gallery',
     'Number_of_guests' => 'Number of guests:',
     'Tour_Highlights' => 'Tour Highlights',

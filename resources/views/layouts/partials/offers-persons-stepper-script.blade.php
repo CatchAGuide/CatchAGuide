@@ -34,24 +34,69 @@
         }
     }
 
+    function setPersonPopupOpen(root, open) {
+        if (!root || !root.hasAttribute('data-offers-persons-popup')) {
+            return;
+        }
+        root.classList.toggle('is-open', open);
+        var toggle = root.querySelector('[data-offers-persons-popup-toggle]');
+        var panel = root.querySelector('[data-offers-persons-popup-panel]');
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+        if (panel) {
+            panel.hidden = !open;
+        }
+    }
+
+    function closePersonPopups(except) {
+        document.querySelectorAll('[data-offers-persons-popup].is-open').forEach(function (root) {
+            if (root !== except) {
+                setPersonPopupOpen(root, false);
+            }
+        });
+    }
+
     document.addEventListener('click', function (event) {
+        var toggle = event.target.closest('[data-offers-persons-popup-toggle]');
+        if (toggle) {
+            var popupRoot = toggle.closest('[data-offers-persons-popup]');
+            if (popupRoot) {
+                event.preventDefault();
+                var willOpen = !popupRoot.classList.contains('is-open');
+                closePersonPopups(willOpen ? popupRoot : null);
+                setPersonPopupOpen(popupRoot, willOpen);
+                return;
+            }
+        }
+
         var button = event.target.closest('[data-offers-persons-delta]');
-        if (!button) {
+        if (button) {
+            var root = button.closest('[data-offers-persons-stepper]');
+            if (!root) {
+                return;
+            }
+            event.preventDefault();
+            var input = root.querySelector('[data-offers-persons-input]');
+            if (!input) {
+                return;
+            }
+            var delta = parseInt(button.getAttribute('data-offers-persons-delta'), 10) || 0;
+            var next = Math.max(1, Math.min(20, (parseInt(input.value, 10) || 1) + delta));
+            input.value = String(next);
+            syncStepper(root);
             return;
         }
-        var root = button.closest('[data-offers-persons-stepper]');
-        if (!root) {
-            return;
+
+        if (!event.target.closest('[data-offers-persons-popup]')) {
+            closePersonPopups();
         }
-        event.preventDefault();
-        var input = root.querySelector('[data-offers-persons-input]');
-        if (!input) {
-            return;
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closePersonPopups();
         }
-        var delta = parseInt(button.getAttribute('data-offers-persons-delta'), 10) || 0;
-        var next = Math.max(1, Math.min(20, (parseInt(input.value, 10) || 1) + delta));
-        input.value = String(next);
-        syncStepper(root);
     });
 
     document.addEventListener('DOMContentLoaded', function () {

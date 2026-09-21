@@ -133,6 +133,22 @@
         }
     }
 
+    &__counter {
+        position: absolute;
+        right: 0.65rem;
+        bottom: 0.65rem;
+        z-index: 2;
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, 0.72);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+        pointer-events: none;
+    }
+
     &__more {
         position: absolute;
         inset: 0;
@@ -218,10 +234,11 @@
 
         &-item {
             flex: 0 0 auto;
-            width: 200px;
-            min-width: 200px;
-            height: 150px;
-            border-radius: 12px;
+            width: calc((100% - 1.5rem) / 3.35);
+            min-width: calc((100% - 1.5rem) / 3.35);
+            height: auto;
+            aspect-ratio: 1;
+            border-radius: 10px;
             overflow: hidden;
             background: #e2e8f0;
             cursor: pointer;

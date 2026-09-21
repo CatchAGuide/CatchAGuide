@@ -61,6 +61,56 @@ class DDoSProtectionServiceTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_rsiteauditor_uses_seo_lane_and_records_no_violations(): void
+    {
+        $config = $this->searchConfig();
+        $config['limits'] = ['minute' => 3, 'hour' => 100, 'day' => 100];
+        $service = $this->service();
+        $bot = $this->request('Mozilla/5.0 (compatible; RSiteAuditor)', '68.183.49.222');
+
+        for ($i = 0; $i < 10; $i++) {
+            $result = $service->shouldBlockRequest($bot, $config);
+        }
+
+        $this->assertFalse($result['blocked']);
+        $this->assertNull(Cache::get('search_violations_ip_68.183.49.222'));
+        Mail::assertNothingSent();
+    }
+
+    public function test_rate_limit_window_is_fixed_and_not_extended_by_steady_traffic(): void
+    {
+        $config = $this->searchConfig();
+        $config['limits'] = ['minute' => 2, 'hour' => 100, 'day' => 100];
+        $service = $this->service();
+        $user = $this->request('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', '84.132.124.162');
+
+        $this->assertFalse($service->shouldBlockRequest($user, $config)['blocked']);
+
+        $this->travel(30)->seconds();
+        $this->assertFalse($service->shouldBlockRequest($user, $config)['blocked']);
+        $this->assertTrue($service->shouldBlockRequest($user, $config)['blocked']);
+
+        // 61s after the first hit the minute window has ended, even though traffic never paused.
+        $this->travel(31)->seconds();
+        $this->assertFalse($service->shouldBlockRequest($user, $config)['blocked']);
+    }
+
+    public function test_requests_denied_by_a_longer_window_do_not_consume_shorter_windows(): void
+    {
+        $config = $this->searchConfig();
+        $config['limits'] = ['minute' => 100, 'hour' => 1, 'day' => 100];
+        $service = $this->service();
+        $user = $this->request('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15', '84.132.124.163');
+
+        for ($i = 0; $i < 5; $i++) {
+            $service->shouldBlockRequest($user, $config);
+        }
+
+        $this->assertSame(1, Cache::get('search_rate_limit_minute_ip_84.132.124.163'));
+        $this->assertSame(1, Cache::get('search_rate_limit_hour_ip_84.132.124.163'));
+        $this->assertSame(1, Cache::get('search_rate_limit_day_ip_84.132.124.163'));
+    }
+
     public function test_sqli_sortby_is_blocked_and_emails_once(): void
     {
         $request = Request::create('/destination/deutschland/sachsen-anhalt', 'GET', [

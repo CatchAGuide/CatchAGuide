@@ -13,13 +13,15 @@ class QueueStalledAlertMail extends Mailable
     public int $staleCount;
     public int $oldestAgeMinutes;
     public int $staleThresholdMinutes;
+    public int $locksCleared;
     public $timestamp;
 
-    public function __construct(int $staleCount, int $oldestAgeMinutes, int $staleThresholdMinutes)
+    public function __construct(int $staleCount, int $oldestAgeMinutes, int $staleThresholdMinutes, int $locksCleared = 0)
     {
         $this->staleCount = $staleCount;
         $this->oldestAgeMinutes = $oldestAgeMinutes;
         $this->staleThresholdMinutes = $staleThresholdMinutes;
+        $this->locksCleared = $locksCleared;
         $this->timestamp = now();
     }
 
@@ -31,6 +33,7 @@ class QueueStalledAlertMail extends Mailable
                         'staleCount' => $this->staleCount,
                         'oldestAgeMinutes' => $this->oldestAgeMinutes,
                         'staleThresholdMinutes' => $this->staleThresholdMinutes,
+                        'locksCleared' => $this->locksCleared,
                         'timestamp' => $this->timestamp,
                     ]);
     }

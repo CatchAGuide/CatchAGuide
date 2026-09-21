@@ -70,10 +70,12 @@
                     </div>
                 </div>
 
-                <p><strong>Likely cause:</strong> the scheduled <code>queue:work</code> run is stuck, often because a
-                previous run was killed mid-execution and left its <code>withoutOverlapping()</code> lock in place.</p>
+                <p><strong>Automatic restart already attempted:</strong> the health check cleared
+                {{ $locksCleared }} stale <code>queue:work</code> scheduler lock(s) and ran the worker, but the jobs
+                are still waiting. This is not the usual stale-lock problem — check <code>storage/logs</code> and the
+                <code>failed_jobs</code> table, and confirm the server's <code>schedule:run</code> cron is still running.</p>
 
-                <p><strong>To fix on the production server:</strong></p>
+                <p><strong>To retry manually on the production server:</strong></p>
                 <ul>
                     <li><code>cd ~/www/catchaguide.de/public_html</code></li>
                     <li><code>php artisan schedule:clear-cache</code></li>

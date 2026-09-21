@@ -797,54 +797,55 @@
 @section('content')
 <div class="category-hero-page" data-category-hero-page>
     @include('pages.category.partials.product-hero-header', [
-        'listingTitle' => __('homepage.filter-fishing-near-me'),
+        'hubTitle' => __('homepage.filter-fishing-near-me'),
+        'listingTitle' => $guiding->title,
         'searchAction' => listing_search_action(),
         'breadcrumbItems' => [
             ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
             ['label' => $guiding->title, 'url' => null],
         ],
+        'locationLabel' => implode(', ', array_unique(array_filter([
+            $guiding->city ?: $guiding->location,
+            $guiding->region,
+        ]))),
+        'mapHref' => '#map',
+        'ratingScore' => $average_grandtotal_score ?? null,
+        'reviewsCount' => $reviews_count ?? 0,
     ])
 
- <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 4">
+ <div id="guidings-page" class="container category-hero-page__body offers-page-header__anim" style="--offers-anim-i: 5">
     <div class="title-container">
         <div class="title-wrapper">
-            {{-- <h1>Fishing trip in {{$guiding->location}} - {{$guiding->title}}</h1> --}}
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
-                    <h1>
-                    {{ $guiding->title }}
-                    </h1>
-                    <a class="btn" href="#" role="button"><i data-lucide="share-2"></i></a>
+                    <h1>{{ $guiding->title }}</h1>
                 </div>
                 <div class="col-12">
                     <div class="location-row">
                         <div class="location">
-                            <a href="#" class="fs-6 text-decoration-none text-muted">
-                                    <i class="bi bi-geo-alt"></i>@lang('guidings.Fishing_Trip') <strong>{{ $guiding->location }}</strong>
-                                </a>
+                            <span class="fs-6 text-muted">
+                                @lang('guidings.Fishing_Trip') <strong>{{ $guiding->location }}</strong>
+                            </span>
                         </div>
                         <div class="location-map">
-                            <a href="#map" class="fs-6 text-decoration-none text-muted">
+                            <a href="#map" class="fs-6 text-decoration-none">
                                 <span class="text-primary">@lang('guidings.show_on_map')</span>
                             </a>
-
                         </div>
                     </div>
                 </div>
                 @if ($average_grandtotal_score)
-                <div class="ave-reviews-row">
-                    <div class="ratings-score">
-                    <span class="rating-value rating-clickable" id="rating-score-link">{{one($average_grandtotal_score, 1)}}</span>
-                </div> 
-                    <span class="mb-1">
-                        (<a href="#" id="reviews-link" class="text-decoration-none text-muted">{{$reviews_count}} reviews</a>)
-                    </span>
-                </div>
+                    <div class="ave-reviews-row">
+                        <div class="ratings-score">
+                            <span class="rating-value rating-clickable" id="rating-score-link-desktop">{{ one($average_grandtotal_score, 1) }}</span>
+                        </div>
+                        <span class="mb-1">
+                            (<a href="#ratings-container" class="text-decoration-none text-muted">{{ trans_choice('offers.reviews_count', $reviews_count ?? 0, ['count' => $reviews_count ?? 0]) }}</a>)
+                        </span>
+                    </div>
                 @else
-                <span>@lang('guidings.no_reviews')</span>
+                    <span>@lang('guidings.no_reviews')</span>
                 @endif
-                <div class="col-auto p-0">
-                </div>
             </div>
             <div class="title-right-container">
                 <div class="title-right-buttons">
@@ -852,9 +853,9 @@
                     <a href="#book-now" class="btn btn-orange">@lang('message.reservation')</a>
                 </div>
                 <span>@lang('guidings.Best_price_guarantee')</span>
-                </div>
+            </div>
         </div>
-        </div>
+    </div>
         
         <!-- Image Gallery -->
         @php
@@ -863,7 +864,6 @@
             $thumbnailPath = $guiding->thumbnail_path;
             $overallImages = [];
             $desktopThumbs = [];
-            $mobileThumbs = [];
 
             if (media_path_usable($thumbnailPath)) {
                 $overallImages[] = media_url($thumbnailPath);
@@ -878,6 +878,8 @@
             }
 
             $overallImages = array_values(array_unique($overallImages));
+            $galleryCount = count($overallImages);
+            $mobileCarouselImages = array_slice($overallImages, 1);
             $galleryOnly = array_values(array_filter(
                 $overallImages,
                 fn ($url) => ! media_path_usable($thumbnailPath) || $url !== media_url($thumbnailPath)
@@ -888,16 +890,6 @@
                 $padUrl = media_url($thumbnailPath);
                 while (count($desktopThumbs) < 4) {
                     $desktopThumbs[] = $padUrl;
-                }
-            }
-
-            $mobileHiddenCount = max(0, count($galleryOnly) - 2);
-            $mobileThumbs = array_slice($galleryOnly, 0, 2);
-            if (empty($mobileThumbs) && media_path_usable($thumbnailPath)) {
-                $mobileThumbs = [media_url($thumbnailPath), media_url($thumbnailPath)];
-            } elseif (count($mobileThumbs) < 2 && media_path_usable($thumbnailPath)) {
-                while (count($mobileThumbs) < 2) {
-                    $mobileThumbs[] = media_url($thumbnailPath);
                 }
             }
 
@@ -924,7 +916,10 @@
         >
             <div class="left-image" @if(!empty($overallImages)) data-gallery-index="0" style="cursor: pointer;" @endif>
                 @if(!empty($overallImages))
-                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ $guiding->title }}">
+                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}">
+                    @if($galleryCount > 1)
+                        <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
+                    @endif
                 @else
                     <div class="text-center p-4">
                         <p>@lang('guidings.No_image_found')</p>
@@ -937,38 +932,32 @@
                         @php $thumbIndex = $tourGalleryIndex($image); @endphp
                         @if ($index < 3)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                             </div>
                         @elseif ($index == 3 && $desktopHiddenCount > 0)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                                 <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $desktopHiddenCount }} more</span>
                             </div>
                         @elseif ($index == 3)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-                <div class="gallery-mobile">
-                    @foreach ($mobileThumbs as $index => $image)
-                        @php $thumbIndex = $tourGalleryIndex($image); @endphp
-                        @if ($index < 1)
-                            <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                            </div>
-                        @elseif ($index == 1)
-                            <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                                @if($mobileHiddenCount > 0)
-                                    <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $mobileHiddenCount }} more</span>
-                                @endif
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                             </div>
                         @endif
                     @endforeach
                 </div>
             </div>
+            @if(count($mobileCarouselImages) > 0)
+            <div class="camp-gallery__mobile-carousel">
+                <div class="camp-gallery__mobile-carousel-scroll">
+                    @foreach($mobileCarouselImages as $index => $image)
+                        <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
+                            <img src="{{ $image }}" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}" loading="lazy" decoding="async">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <x-gallery.modal

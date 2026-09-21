@@ -35,6 +35,79 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('data-offers-persons-stepper', $html);
         $this->assertStringContainsString('name="num_guests"', $html);
         $this->assertStringContainsString('vacations-page-header__segment--persons', $html);
+        // Mobile search sheet is opt-in only -- absent unless a PDP explicitly requests it.
+        $this->assertStringNotContainsString('data-mobile-search-sheet', $html);
+        $this->assertStringNotContainsString('mobile-search-sheet__trigger', $html);
+        $this->assertStringNotContainsString('vacations-page-header--product', $html);
+    }
+
+    public function test_vacations_product_header_with_mobile_search_sheet_merges_product_title(): void
+    {
+        $html = View::make('pages.vacations.partials.catalog-header', [
+            'listingTitle' => 'Book your next fishing holiday',
+            'listingSubtitle' => 'Choose between camps and trips',
+            'titleTag' => 'p',
+            'currentVacationCountry' => 'germany',
+            'breadcrumbItems' => [
+                ['label' => 'Fishing Holidays', 'url' => route('vacations.index')],
+                ['label' => 'Hausboot Fürstenberg', 'url' => null],
+            ],
+            'enableMobileSearchSheet' => true,
+            'heroProductTitle' => 'Hausboot Fürstenberg',
+            'heroLocationLabel' => 'Fürstenberg, Brandenburg, Germany',
+            'heroMapHref' => '#map',
+            'mobileSearchTriggerLabel' => 'FIND FISHING CAMPS',
+            'mobileSearchSheetTitle' => 'Find a fishing camp',
+        ])->render();
+
+        $this->assertStringContainsString('vacations-page-header--product', $html);
+        $this->assertStringContainsString('vacations-page-header__product-title', $html);
+        $this->assertStringContainsString('Hausboot Fürstenberg', $html);
+        $this->assertStringContainsString('Fürstenberg, Brandenburg, Germany', $html);
+        $this->assertStringContainsString('data-mobile-search-sheet-open', $html);
+        $this->assertStringContainsString('FIND FISHING CAMPS', $html);
+        $this->assertStringContainsString('Find a fishing camp', $html);
+        // Still the same single form/fields -- the sheet wraps, does not duplicate, them.
+        $this->assertSame(1, substr_count($html, 'id="vacationsCatalogCountry"'));
+        $this->assertSame(1, substr_count($html, '<input type="hidden" name="num_guests"'));
+        $this->assertStringContainsString('fa-map-marker-alt', $html);
+        $this->assertStringContainsString('vacations-page-header__search-btn-label--sheet', $html);
+        $this->assertStringContainsString(__('offers.search_submit'), $html);
+        $this->assertStringNotContainsString('mobile-search-sheet__chips', $html);
+        $this->assertStringNotContainsString('class="mobile-search-sheet__chip"', $html);
+    }
+
+    public function test_product_header_mobile_sheet_stacks_search_fields(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/page/_vacations-header.scss'));
+        $header = (string) file_get_contents(resource_path('views/pages/vacations/partials/catalog-header.blade.php'));
+
+        $this->assertStringContainsString('[data-mobile-search-sheet].is-open', $source);
+        $this->assertStringContainsString('flex-direction: column', $source);
+        $this->assertStringContainsString('vacations-page-header__search-btn-label--sheet', $source);
+        $this->assertMatchesRegularExpression(
+            '/&__breadcrumbs \{[\s\S]*?@media \(max-width: 767\.98px\) \{[\s\S]*?padding-top:\s*0\.35rem;[\s\S]*?background:\s*#fff;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\[data-mobile-search-sheet\]\.is-open \{[\s\S]*?\.vacations-page-header__segment \{[\s\S]*?border:\s*1\.5px solid[\s\S]*?border-radius:\s*999px;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacations-page-header__segment--persons[\s\S]*?\[data-offers-persons-delta="-1"\] \{[\s\S]*?order:\s*1;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/&--product \{[\s\S]*\.cag-title-rule \{[\s\S]*@media \(max-width: 767\.98px\) \{\s*display: none;/',
+            $source
+        );
+        $this->assertStringNotContainsString('data-mobile-search-chip', $header);
+        $this->assertStringContainsString('fa-map-marker-alt', $header);
+        $this->assertMatchesRegularExpression(
+            '/\.vacations-page-header__place \{[\s\S]*?flex-direction:\s*column;[\s\S]*?color:\s*\$vacations-header-coral;/',
+            $source
+        );
+        $this->assertStringNotContainsString('#9ec9ff', $source);
     }
 
     public function test_app_v2_layout_uses_site_header_for_vacations_listings(): void
@@ -113,6 +186,10 @@ class VacationsCatalogHeaderTest extends TestCase
 
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $trip);
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $camp);
+        $this->assertStringContainsString('listing_place_label', $trip);
+        $this->assertStringContainsString('listing_place_label', $camp);
+        $this->assertStringContainsString("'heroLocationLabel' => \$tripPlaceLabel", $trip);
+        $this->assertStringContainsString("'heroLocationLabel' => \$campPlaceLabel", $camp);
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $legacy);
         $this->assertStringNotContainsString('pages.category.partials.product-hero-header', $trip);
         $this->assertStringNotContainsString('pages.category.partials.product-hero-header', $camp);

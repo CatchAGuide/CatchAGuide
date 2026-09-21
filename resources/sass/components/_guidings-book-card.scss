@@ -1,0 +1,264 @@
+// Compact dark booking card used on the guiding PDP mobile floating bar.
+.guidings-book-card {
+    background: $category-tour;
+    border-radius: 1.15rem;
+    padding: 0.6rem 0.7rem 0.65rem;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
+    color: #fff;
+    text-align: left;
+
+    &__form {
+        margin: 0;
+    }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        margin-bottom: 0.5rem;
+        min-width: 0;
+    }
+
+    &__price {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: nowrap;
+        gap: 0.28rem;
+        min-width: 0;
+        flex: 1 1 auto;
+        white-space: nowrap;
+    }
+
+    &__amount {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.1;
+        color: #fff;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+    &__unit {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.62);
+        line-height: 1.1;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    &__breakdown {
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.62);
+    }
+
+    &__stepper {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.1rem;
+        min-height: 1.85rem;
+        padding: 0.08rem 0.22rem;
+        border: 1.5px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        background: transparent;
+        color: #fff;
+        min-width: 6.7rem;
+    }
+
+    &__stepper-btn {
+        flex: 0 0 1.3rem;
+        width: 1.3rem;
+        height: 1.3rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        font-size: 1rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+
+        &:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+    }
+
+    &__stepper-label {
+        flex: 1 1 auto;
+        min-width: 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+    }
+
+    &__cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+        min-height: 2.45rem;
+        margin: 0;
+        padding: 0.55rem 0.9rem;
+        border: 0;
+        border-radius: 999px;
+        background: $primary-color;
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        box-shadow: none;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            background: darken($primary-color, 4%);
+            color: #fff;
+        }
+    }
+
+    &__cta-arrow {
+        font-size: 0.95rem;
+        line-height: 1;
+    }
+
+    &__note {
+        margin: 0.55rem 0 0;
+        font-size: 0.78rem;
+        color: $font-color;
+        text-align: left;
+    }
+
+    @media (max-width: 380px) {
+        padding: 0.55rem 0.65rem 0.6rem;
+
+        &__amount {
+            font-size: 1.05rem;
+        }
+
+        &__unit {
+            font-size: 0.64rem;
+        }
+
+        &__stepper {
+            min-width: 6.2rem;
+        }
+
+        &__cta {
+            min-height: 2.3rem;
+            font-size: 0.84rem;
+        }
+    }
+}
+
+#booking-tour {
+    background: $category-tour;
+    border: 0;
+    border-radius: 1.15rem;
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
+
+    .card-body {
+        padding: 1.25rem 1.35rem 1.15rem;
+    }
+
+    h4 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .from-text {
+        display: inline;
+        margin-right: 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.78);
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .per-guiding-text {
+        color: rgba(255, 255, 255, 0.62) !important;
+        font-size: 0.85rem !important;
+    }
+
+    hr {
+        border-color: rgba(255, 255, 255, 0.14);
+        opacity: 1;
+        margin: 1rem 0;
+    }
+
+    .price-item {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.88rem;
+        line-height: 1.45;
+    }
+
+    .booking-select .form-select {
+        min-height: 2.4rem;
+        padding: 0.4rem 2rem 0.4rem 0.85rem;
+        border-radius: 0.65rem;
+        background-color: #fff;
+        color: $category-tour;
+        font-weight: 600;
+    }
+
+    .reserve-now-btn {
+        margin-bottom: 0 !important;
+        border-radius: 0.75rem;
+        font-weight: 700;
+    }
+
+    small {
+        display: block;
+        margin: 0.35rem 0 0.75rem;
+        color: rgba(255, 255, 255, 0.62);
+    }
+}
+
+.guidings-book-mobile {
+    display: none;
+
+    @media screen and (max-width: 980px) {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1050;
+        width: 100%;
+        padding: 0.4rem 0.7rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        background: transparent;
+        pointer-events: none;
+
+        .guidings-book-card {
+            pointer-events: auto;
+        }
+
+        // JS lifts the bar with `bottom` so it sits on the footer instead of covering it.
+        &.is-above-footer {
+            padding-bottom: 0.4rem;
+        }
+    }
+}
+
+@media screen and (max-width: 980px) {
+    #guidings-page {
+        padding-bottom: 7.25rem;
+    }
+}

@@ -80,6 +80,13 @@
     position: relative;
     z-index: 20;
 
+    // Mobile: the title/location/map-link now live in the dark hero band
+    // instead (catalog-header.blade.php's mobile-only merged product title,
+    // see resources/sass/page/_vacations-header.scss's &--product block).
+    @media (max-width: 767.98px) {
+        display: none;
+    }
+
     @media (min-width: 768px) {
         padding-top: 0; // floating search already provides top clearance on desktop
     }
@@ -254,59 +261,78 @@
     }
 }
 
-// Enhanced Camp Navigation (3-row layout)
+// Section jump pills under the gallery (Accommodations, Guidings, …)
 .camp-nav-enhanced {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0.15rem;
+}
 
-    @media (max-width: 768px) {
-        margin-top: 18px;
-        gap: 0.5rem;
+.camp-product-specs {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0.15rem;
+
+    @media (max-width: 767.98px) {
+        display: flex;
+    }
+}
+
+.camp-product-spec {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border: 1.5px solid rgba(15, 23, 42, 0.12);
+    border-radius: 999px;
+    background: #fff;
+    line-height: 1.2;
+
+    &__label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #6b7280;
     }
 
-    @media (max-width: 480px) {
-        gap: 0.5rem;
+    &__value {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #222133;
     }
 }
 
 .camp-nav-item {
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
     border: none;
     background-color: #313041;
     color: #fff;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     cursor: pointer;
-    min-width: 100px;
+    min-width: 0;
     width: auto;
 
     &:hover {
         background-color: #4b5563;
-        transform: translateY(-1px);
         color: #fff;
         text-decoration: none;
     }
 
     &:active {
-        transform: translateY(0);
         background-color: #374151;
     }
 
-    @media (max-width: 768px) {
-        padding: 0.625rem 0.875rem;
-        min-width: 90px;
-    }
-
     @media (max-width: 480px) {
-        padding: 0.5rem 0.75rem;
-        min-width: 80px;
-        border-radius: 6px;
+        padding: 0.45rem 0.85rem;
     }
 }
 
@@ -335,21 +361,15 @@
 }
 
 .camp-nav-item__name {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 0.25rem;
+    margin: 0;
     line-height: 1.2;
     color: #fff;
 
-    @media (max-width: 768px) {
-        font-size: 0.8125rem;
-        margin-bottom: 0.2rem;
-    }
-
     @media (max-width: 480px) {
-        font-size: 0.75rem;
-        margin-bottom: 0.2rem;
+        font-size: 0.78rem;
     }
 }
 
@@ -392,6 +412,21 @@
     padding: 26px;
     box-shadow: var(--camp-shadow);
 
+    &#description {
+        @media (max-width: 767.98px) {
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            border-radius: 0;
+            padding: 0.35rem 0 0;
+
+            .camp-section__title,
+            .camp-desc-wrap > h3 {
+                display: none;
+            }
+        }
+    }
+
     &.section-card {
         border-top: 2px solid rgba(232, 96, 76, .2);
     }
@@ -402,6 +437,8 @@
     // border — so the heading floats free and listings get the reclaimed
     // width instead of being inset twice.
     &--listings {
+        scroll-margin-top: 7rem;
+
         @media (max-width: 768px) {
             background: transparent;
             border: none;
@@ -754,11 +791,6 @@
     // Mobile-only stack - positioned before description section
     &--mobile-top {
         display: none;
-        margin-bottom: 1rem;
-
-        @media (max-width: 991.98px) {
-            display: block;
-        }
     }
 
     // Desktop-only stack - floats inside description section for text wrapping
@@ -794,6 +826,50 @@
 
     &__header {
         margin-bottom: 1.25rem;
+    }
+
+    &__price-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 0.55rem;
+    }
+
+    &__price {
+        display: flex;
+        align-items: baseline;
+        gap: 0.35rem;
+        min-width: 0;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    &__amount {
+        color: #313041;
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+    }
+
+    &__unit {
+        color: #6b7280;
+        font-size: 0.82rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    &__note {
+        flex: 1 1 auto;
+        min-width: 0;
+        color: #6b7280;
+        font-size: 0.72rem;
+        font-weight: 500;
+        line-height: 1.3;
+        text-align: right;
+        white-space: nowrap;
     }
 
     &__title {

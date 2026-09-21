@@ -75,6 +75,18 @@ $muted: #787780;
       @media (min-width: 768px) {
         margin-top: -2rem;
       }
+
+      // This z-index:2 makes this element its own stacking context, which
+      // traps the mobile search sheet's z-index:1210 (below) inside it --
+      // outside this box, the sheet only counts as "z-index 2" against
+      // page-level fixed elements like the mobile booking bar
+      // (.guidings-book-mobile / .listing-mobile-book), so it can lose a
+      // same-z-index DOM-order tiebreak and render behind them. Raise this
+      // ancestor's own stacking level while the sheet is open so it always
+      // wins at the page level.
+      &:has([data-mobile-search-sheet].is-open) {
+        z-index: 2100;
+      }
     }
   }
 
@@ -329,8 +341,8 @@ $muted: #787780;
       // the nav switches to its solid look here instead (see _site-nav.scss).
       order: -1;
       margin-top: 0;
-      padding-top: 0.85rem;
-      padding-bottom: 0.65rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.3rem;
       background: #fff;
     }
   }
@@ -382,6 +394,500 @@ $muted: #787780;
       font-size: 0.65rem;
       opacity: 0.55;
     }
+  }
+
+  // Guiding product page: mobile keeps the compact product hero + search sheet.
+  // Breadcrumbs use the shared white strip under the nav (see &__breadcrumbs),
+  // matching vacations. Desktop restores the listing header (hub title, full
+  // search, crumbs below the search box).
+  &--product {
+    .offers-page-header__title--hub {
+      display: none;
+
+      @media (min-width: 768px) {
+        display: block;
+      }
+    }
+
+    .offers-page-header__search-btn-label--listing {
+      display: none;
+
+      @media (min-width: 768px) {
+        display: inline;
+      }
+    }
+
+    // Desktop search is WHERE | WHO | Search. Chips live outside that row
+    // so they cannot occupy a 4th grid cell. Hide them (and the sheet /
+    // compact button labels) unless the mobile sheet is open.
+    .offers-page-header__search-row {
+      display: contents;
+    }
+
+    .mobile-search-sheet__chips,
+    .offers-page-header__search-btn-label--sheet,
+    .offers-page-header__search-btn-label--compact {
+      display: none;
+    }
+
+    .offers-page-header__where-icon--listing {
+      display: none;
+
+      @media (min-width: 768px) {
+        display: inline-block;
+      }
+    }
+
+    .offers-page-header__where-icon--product {
+      display: inline-block;
+
+      @media (min-width: 768px) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .offers-page-header__title--product,
+      .offers-page-header__place,
+      .offers-page-header__rating {
+        display: none;
+      }
+
+      .offers-page-header__search-box {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .offers-page-header__search-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.85fr) auto;
+        align-items: stretch;
+      }
+
+      .offers-page-header__search-btn-label--compact,
+      .mobile-search-sheet__chips,
+      .offers-page-header__search-btn-label--sheet {
+        display: none;
+      }
+
+      .offers-page-header__search-btn-arrow {
+        display: inline;
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      .offers-page-header__title--hub,
+      .offers-page-header__search-btn-label--listing {
+        display: none;
+      }
+
+      .offers-page-header__hero {
+        padding-bottom: 3.15rem;
+      }
+
+      .offers-page-header__copy {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+          "title"
+          "place"
+          "rating";
+        gap: 0.4rem 1.25rem;
+        max-width: none;
+      }
+
+      .offers-page-header__title--product {
+        grid-area: title;
+        margin: 0;
+        min-width: 0;
+      }
+
+      .offers-page-header__place {
+        grid-area: place;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 0.7rem;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.9rem;
+        line-height: 1.35;
+
+        a {
+          color: $coral;
+          font-weight: 700;
+          text-decoration: none;
+
+          &:hover {
+            color: #ff7a66;
+          }
+        }
+      }
+
+      .offers-page-header__rating {
+        grid-area: rating;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-top: 0.15rem;
+      }
+
+      .offers-page-header__score {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0 0.4rem;
+        border-radius: 0.45rem 0.45rem 0.45rem 0.15rem;
+        background: $coral;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+
+        &:hover,
+        &.rating-clickable:hover {
+          color: #fff !important;
+          background: #E85B40;
+          transform: none;
+        }
+      }
+
+      .offers-page-header__reviews {
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+
+        &:hover {
+          color: #fff !important;
+          text-decoration: none !important;
+        }
+      }
+
+      .offers-page-header__search-btn-label--sheet,
+      .offers-page-header__search-btn-arrow,
+      .mobile-search-sheet__chips {
+        display: none;
+      }
+    }
+
+    // Mobile-only search pill + bottom sheet: on mobile the compact
+    // single-row search bar above is replaced by a full-width pill (shows
+    // a live summary) that opens the search box as a bottom sheet. Desktop
+    // keeps the listing search row. These three pieces render unstyled
+    // (plain button/div) without an explicit default, so hide them outside
+    // the mobile query before the query below turns them back on.
+    // Shared chrome markup: resources/views/components/mobile-search-sheet.blade.php
+    // Shared open/close behavior: resources/views/layouts/partials/mobile-search-sheet-script.blade.php
+    .mobile-search-sheet__trigger,
+    .mobile-search-sheet__backdrop,
+    .mobile-search-sheet__head,
+    .mobile-search-sheet__chips,
+    .offers-page-header__search-btn-label--sheet {
+      display: none;
+    }
+
+    @media (max-width: 767.98px) {
+      .mobile-search-sheet__trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        width: 100%;
+        background: #fff;
+        border: 0;
+        border-radius: 0.75rem;
+        padding: 0.7rem 0.9rem;
+        box-shadow: 0 14px 36px rgba($slate, 0.14);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .mobile-search-sheet__trigger-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        min-width: 0;
+      }
+
+      .mobile-search-sheet__trigger-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $muted;
+      }
+
+      .mobile-search-sheet__trigger-summary {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: $slate;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 13rem;
+      }
+
+      .mobile-search-sheet__trigger-cta {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: $coral;
+      }
+
+      .mobile-search-sheet__backdrop {
+        display: none;
+
+        &.is-open {
+          display: block;
+          position: fixed;
+          inset: 0;
+          z-index: 1200;
+          background: rgba(13, 13, 15, 0.5);
+          animation: mobileSearchSheetFade 0.18s ease;
+        }
+      }
+
+      [data-mobile-search-sheet] {
+        display: none;
+
+        &.is-open {
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          top: auto;
+          z-index: 1210;
+          margin-top: 0;
+          max-height: 85vh;
+          overflow-y: auto;
+          background: #fff;
+          border-radius: 1.25rem 1.25rem 0 0;
+          padding: 1.1rem 1.1rem 1.4rem;
+          box-shadow: 0 -12px 32px rgba(13, 13, 15, 0.28);
+          animation: mobileSearchSheetUp 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+      }
+
+      .mobile-search-sheet__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.85rem;
+      }
+
+      .mobile-search-sheet__head-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: $slate;
+      }
+
+      .mobile-search-sheet__close {
+        flex: none;
+        width: 2rem;
+        height: 2rem;
+        border: 0;
+        border-radius: 50%;
+        background: rgba($slate, 0.08);
+        color: $slate;
+        font-size: 0.95rem;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      // Guest stepper inside the sheet: reuse the exact same popup DOM node
+      // Guidings already renders on desktop (no second stepper instance) —
+      // force the popup's − / + buttons permanently inline ("− count +")
+      // regardless of the popup's own open/closed state.
+      [data-mobile-search-sheet] .offers-persons-stepper--popup {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      [data-mobile-search-sheet] .offers-persons-stepper__popup {
+        display: contents !important;
+      }
+
+      [data-mobile-search-sheet] .offers-persons-stepper__trigger {
+        order: 2;
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+
+      [data-mobile-search-sheet] [data-offers-persons-delta="-1"] {
+        order: 1;
+      }
+
+      [data-mobile-search-sheet] [data-offers-persons-delta="1"] {
+        order: 3;
+      }
+
+      [data-mobile-search-sheet].is-open {
+        .offers-page-header__search-box {
+          display: flex;
+          flex-direction: column;
+          gap: 0.7rem;
+          background: transparent;
+          border: 0;
+          box-shadow: none;
+          overflow: visible;
+          padding: 0;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: none;
+        }
+
+        .offers-page-header__search-row {
+          display: contents;
+        }
+
+        .offers-page-header__segment--where {
+          order: 1;
+        }
+
+        .offers-page-header__segment--who {
+          order: 2;
+        }
+
+        .mobile-search-sheet__chips {
+          order: 3;
+        }
+
+        .offers-page-header__search-btn {
+          order: 4;
+        }
+
+        .offers-page-header__segment {
+          box-sizing: border-box;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.7rem;
+          width: 100%;
+          min-height: 3.15rem;
+          padding: 0.7rem 0.95rem;
+          border: 1.5px solid rgba($slate, 0.14);
+          border-right-width: 1.5px;
+          border-bottom-width: 1.5px;
+          border-radius: 999px;
+          background: #fff;
+        }
+
+        .offers-page-header__segment-label {
+          font-size: 0.68rem;
+          letter-spacing: 0.06em;
+        }
+
+        .offers-page-header__segment--who .offers-page-header__segment-label {
+          position: static;
+          width: auto;
+          height: auto;
+          overflow: visible;
+          clip: auto;
+        }
+
+        .offers-page-header__segment-control > i {
+          color: $muted;
+        }
+
+        .offers-page-header__segment-control > i.offers-page-header__where-icon--listing {
+          display: none;
+        }
+
+        .offers-page-header__segment-control > i.offers-page-header__where-icon--product {
+          display: inline-block;
+        }
+
+        .offers-page-header__segment-control .form-control {
+          height: auto;
+          min-height: 1.35rem;
+          padding: 0 0 0 1.35rem;
+          font-size: 0.95rem;
+          font-weight: 700;
+        }
+
+        .offers-page-header__search-btn {
+          width: 100%;
+          min-height: 3.15rem;
+          border-radius: 999px;
+          padding: 0.85rem 1.15rem;
+          font-size: 1rem;
+          gap: 0.45rem;
+        }
+
+        .offers-page-header__search-btn-label--compact {
+          display: none;
+        }
+
+        .offers-persons-stepper--catalog {
+          width: 100%;
+          min-height: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          justify-content: space-between;
+
+          .offers-persons-stepper__btn {
+            width: 1.65rem;
+            height: 1.65rem;
+            flex-basis: 1.65rem;
+            border-radius: 999px;
+          }
+        }
+
+        .offers-page-header__search-btn-label--sheet,
+        .offers-page-header__search-btn-arrow {
+          display: inline;
+        }
+      }
+
+      .mobile-search-sheet__chips {
+        display: none;
+      }
+
+      [data-mobile-search-sheet].is-open .mobile-search-sheet__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .mobile-search-sheet__chip {
+        margin: 0;
+        padding: 0.4rem 0.75rem;
+        border: 1.5px solid rgba($slate, 0.16);
+        border-radius: 999px;
+        background: #fff;
+        color: $slate;
+        font-size: 0.82rem;
+        font-weight: 600;
+        line-height: 1.2;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+@keyframes mobileSearchSheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobileSearchSheetFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -1111,6 +1617,83 @@ $muted: #787780;
   &--mobile,
   &--modal {
     min-height: 44px;
+  }
+
+  &--popup {
+    position: relative;
+    width: auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    justify-content: center;
+  }
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: $slate;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid rgba($coral, 0.45);
+      outline-offset: 2px;
+      border-radius: 0.25rem;
+    }
+  }
+
+  &__popup {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.45rem);
+    z-index: 5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-width: 5.5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid rgba($slate, 0.1);
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba($slate, 0.16);
+    transform: translateX(-50%);
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      width: 0.55rem;
+      height: 0.55rem;
+      border-right: 1px solid rgba($slate, 0.1);
+      border-bottom: 1px solid rgba($slate, 0.1);
+      background: #fff;
+      transform: translateX(-50%) translateY(-50%) rotate(45deg);
+    }
+  }
+
+  &.is-open &__popup {
+    display: flex;
+  }
+
+  &--popup &__btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 1.75rem;
+    border-radius: 999px;
   }
 }
 

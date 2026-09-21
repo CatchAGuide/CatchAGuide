@@ -45,14 +45,14 @@ class GuidingProductSearchContextTest extends TestCase
             'preselectedGuests' => 3,
         ])->render();
 
+        $this->assertStringContainsString('name="person"', $html);
         $this->assertMatchesRegularExpression(
-            '/<option[^>]*value="3"[^>]*selected/i',
+            '/value="3"[^>]*\bselected\b|\bselected\b[^>]*value="3"/',
             $html
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/<option value=""[^>]*selected/i',
-            $html
-        );
+        $this->assertStringContainsString('id="personSelect"', $html);
+        $this->assertStringContainsString('id="booking-tour"', $html);
+        $this->assertStringNotContainsString('data-guidings-book-stepper', $html);
     }
 
     public function test_product_page_keeps_search_place_and_preselects_guests(): void
@@ -78,10 +78,20 @@ class GuidingProductSearchContextTest extends TestCase
             '/name="num_guests"[^>]*value="3"|value="3"[^>]*name="num_guests"/',
             $html
         );
+        $this->assertStringContainsString('name="person"', $html);
         $this->assertMatchesRegularExpression(
-            '/<option[^>]*value="3"[^>]*selected/i',
+            '/value="3"[^>]*\bselected\b|\bselected\b[^>]*value="3"/',
             $html
         );
+        $this->assertStringContainsString('offers-page-header--product', $html);
+        $this->assertStringContainsString('<h1 class="offers-page-header__title', $html);
+        $this->assertStringContainsString('offers-page-header__title--hub', $html);
+        $this->assertStringContainsString($guiding->title, $html);
+        $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $html);
+        $this->assertStringContainsString(__('offers.search_change'), $html);
+        $this->assertStringContainsString(__('offers.search_submit'), $html);
+        $this->assertStringContainsString('id="booking-tour"', $html);
+        $this->assertStringContainsString('id="personSelect"', $html);
     }
 
     private function guiding(): Guiding

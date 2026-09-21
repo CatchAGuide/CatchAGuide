@@ -2187,6 +2187,10 @@ $guidings-header-bg: #f7f9fb;
     display: flex;
     margin-bottom: 16px;
 
+    @media (max-width: 767.98px) {
+      display: none;
+    }
+
     .title-wrapper {
       display: flex;
       justify-content: space-between;
@@ -2194,6 +2198,18 @@ $guidings-header-bg: #f7f9fb;
     }
     .title-left-container{
       width: calc(100% - 200px);
+    }
+
+    &--actions-only {
+      justify-content: flex-end;
+
+      .title-wrapper {
+        justify-content: flex-end;
+      }
+
+      .title-right-container {
+        width: auto;
+      }
     }
 
     .guiding-title {
@@ -2814,10 +2830,12 @@ $guidings-header-bg: #f7f9fb;
   margin-bottom: 16px !important;
 
   .left-image {
+    position: relative;
     width: 600px;
     padding: 0 !important;
     height: 400px;
     cursor: pointer;
+    overflow: hidden;
 
     &:hover {
       filter: contrast(0.5);
@@ -2829,6 +2847,12 @@ $guidings-header-bg: #f7f9fb;
       max-height: 400px;
       height: 100%;
     }
+  }
+
+  .camp-gallery__mobile-carousel {
+    display: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .right-images {
@@ -2848,10 +2872,6 @@ $guidings-header-bg: #f7f9fb;
   .col-7,
   .col-5 {
     flex: 1;
-  }
-
-  .gallery-mobile {
-    display: none;
   }
 
   .gallery {
@@ -3052,9 +3072,6 @@ div#masonry-grid {
   }
 }
 
-.guidings-book-mobile {
-  display: none;
-}
 .filter-sort-container{
   display: flex;
   gap: 8px;
@@ -3118,8 +3135,25 @@ div#masonry-grid {
     }
 
     .guidings-gallery {
+      min-height: 0;
+      min-width: 0;
+      overflow-x: hidden;
+      gap: 10px;
+
       .right-images {
+        display: none;
+      }
+
+      .camp-gallery__mobile-carousel {
+        display: block !important;
+        flex: 0 0 100%;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        grid-column: auto;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box;
       }
     }
 
@@ -3136,7 +3170,10 @@ div#masonry-grid {
       }
       .title-right-container {
         display: none;
+      }
 
+      &--actions-only {
+        display: none;
       }
     }
 
@@ -3172,13 +3209,6 @@ div#masonry-grid {
       }
     }
 
-    .gallery-mobile {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      height: 100%;
-    }
-
     .gallery {
       display: none;
     }
@@ -3186,10 +3216,11 @@ div#masonry-grid {
     .guidings-gallery .left-image {
       position: relative;
       width: 100%;
-      padding-bottom: 66.67% !important;
-      /* 4 / 6 = 0.6667 or 66.67% */
+      padding-bottom: 62.5% !important;
       overflow: hidden;
       height: auto;
+      min-height: 0;
+      border-radius: 12px;
 
       img {
         position: absolute;
@@ -3199,12 +3230,6 @@ div#masonry-grid {
         height: 100%;
         -o-object-fit: cover;
         object-fit: cover;
-      }
-    }
-
-    .right-images {
-      img {
-        max-height: 200px;
       }
     }
 
@@ -3399,54 +3424,6 @@ div#masonry-grid {
     }
   }
 
-  .guidings-book-mobile {
-    position: fixed;
-    bottom: 0;
-    z-index: 2;
-    width: 100%;
-    display: block;
-
-    .tour-details-two__book-tours {
-      padding: 0;
-    }
-
-    .booking-form-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-direction: column;
-      // gap: 16px;
-
-      .booking-select {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        align-items: center;
-      }
-
-      .booking-price {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        font-weight: 600;
-        font-size: 18px;
-        min-width: 150px;
-
-        #priceDisplay {
-          text-decoration: 2px $primary-color !important;
-        }
-      }
-    }
-
-    .booking-price-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }
-  }
 }
 
 @media screen and (max-width: 768px) {

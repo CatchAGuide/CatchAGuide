@@ -48,6 +48,14 @@ $vacations-header-muted: #787780;
       @media (min-width: 768px) {
         margin-top: -1.75rem;
       }
+
+      // See offers.scss's identical &--search block for why this is needed:
+      // z-index:2 here traps the mobile search sheet's stacking context, so
+      // raise it while the sheet is open to beat page-level fixed elements
+      // like .listing-mobile-book.
+      &:has([data-mobile-search-sheet].is-open) {
+        z-index: 2100;
+      }
     }
   }
 
@@ -307,8 +315,8 @@ $vacations-header-muted: #787780;
       // the nav switches to its solid look here instead (see _site-nav.scss).
       order: -1;
       margin-top: 0;
-      padding-top: 0.85rem;
-      padding-bottom: 0.65rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.3rem;
       background: #fff;
     }
   }
@@ -360,5 +368,322 @@ $vacations-header-muted: #787780;
       font-size: 0.65rem;
       opacity: 0.55;
     }
+  }
+
+  // Camp/Trip product pages (catalog-header.blade.php with $enableMobileSearchSheet):
+  // on mobile only, the dark band shows the listing's own title/location instead of
+  // the generic hub copy -- desktop is untouched, the real title lives further down
+  // the page as it always has (.camp-topbar / .trip-offer-page__hero-heading).
+  &--product {
+    .vacations-page-header__title,
+    .vacations-page-header__sub,
+    .cag-title-rule {
+      @media (max-width: 767.98px) {
+        display: none;
+      }
+    }
+
+    .vacations-page-header__product-title {
+      display: none;
+      margin: 0 0 0.45rem;
+      color: #fff;
+      font-size: clamp(1.4rem, 5vw, 1.7rem);
+      font-weight: 800;
+      line-height: 1.15;
+
+      @media (max-width: 767.98px) {
+        display: block;
+      }
+    }
+
+    .vacations-page-header__place {
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.9rem;
+      line-height: 1.35;
+
+      @media (max-width: 767.98px) {
+        display: flex;
+      }
+
+      a {
+        color: $vacations-header-coral;
+        font-weight: 700;
+        text-decoration: none;
+
+        &:hover {
+          color: #ff7a66;
+        }
+      }
+    }
+  }
+}
+
+// Mobile-only search pill + bottom sheet (shared with offers.scss's product
+// header). Structure/behavior documented there; tokens use this file's own
+// $vacations-header-* variables instead of offers.scss's $slate/$coral/$muted.
+.vacations-page-header--product {
+  // These three render unstyled (plain button/div) without an explicit
+  // default, so hide them outside the mobile query below turns them on.
+  .mobile-search-sheet__trigger,
+  .mobile-search-sheet__backdrop,
+  .mobile-search-sheet__head,
+  .mobile-search-sheet__chips,
+  .vacations-page-header__search-btn-label--sheet {
+    display: none;
+  }
+
+  @media (max-width: 767.98px) {
+    .mobile-search-sheet__trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      width: 100%;
+      background: #fff;
+      border: 0;
+      border-radius: 0.75rem;
+      padding: 0.7rem 0.9rem;
+      box-shadow: 0 14px 36px rgba($vacations-header-slate, 0.14);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .mobile-search-sheet__trigger-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+    }
+
+    .mobile-search-sheet__trigger-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $vacations-header-muted;
+    }
+
+    .mobile-search-sheet__trigger-summary {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: $vacations-header-slate;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 13rem;
+    }
+
+    .mobile-search-sheet__trigger-cta {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: $vacations-header-coral;
+    }
+
+    .mobile-search-sheet__backdrop {
+      display: none;
+
+      &.is-open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        background: rgba(13, 13, 15, 0.5);
+        animation: mobileSearchSheetFade 0.18s ease;
+      }
+    }
+
+    [data-mobile-search-sheet] {
+      display: none;
+
+      &.is-open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
+        z-index: 1210;
+        margin-top: 0;
+        max-height: 85vh;
+        overflow-y: auto;
+        background: #fff;
+        border-radius: 1.25rem 1.25rem 0 0;
+        padding: 1.1rem 1.1rem 1.4rem;
+        box-shadow: 0 -12px 32px rgba(13, 13, 15, 0.28);
+        animation: mobileSearchSheetUp 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+    }
+
+    .mobile-search-sheet__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.85rem;
+    }
+
+    .mobile-search-sheet__head-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: $vacations-header-slate;
+    }
+
+    .mobile-search-sheet__close {
+      flex: none;
+      width: 2rem;
+      height: 2rem;
+      border: 0;
+      border-radius: 50%;
+      background: rgba($vacations-header-slate, 0.08);
+      color: $vacations-header-slate;
+      font-size: 0.95rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .vacations-page-header__search-btn-label--sheet {
+      display: none;
+    }
+
+    .mobile-search-sheet__chips {
+      display: none;
+    }
+
+    [data-mobile-search-sheet].is-open {
+      .vacations-page-header__search-box {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        overflow: visible;
+        padding: 0;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .vacations-page-header__segment {
+        box-sizing: border-box;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.7rem;
+        width: 100%;
+        min-height: 3.15rem;
+        padding: 0.7rem 0.95rem;
+        border: 1.5px solid rgba($vacations-header-slate, 0.14);
+        border-right-width: 1.5px;
+        border-bottom-width: 1.5px;
+        border-radius: 999px;
+        background: #fff;
+
+        &--country,
+        &--persons {
+          border-bottom: 1.5px solid rgba($vacations-header-slate, 0.14);
+        }
+      }
+
+      .vacations-page-header__segment--persons .offers-persons-stepper--catalog {
+        width: 100%;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        justify-content: space-between;
+
+        .offers-persons-stepper__value {
+          order: 0;
+          flex: 1 1 auto;
+          justify-content: flex-start;
+        }
+
+        [data-offers-persons-delta="-1"] {
+          order: 1;
+        }
+
+        [data-offers-persons-delta="1"] {
+          order: 3;
+        }
+
+        .offers-persons-stepper__btn {
+          width: 1.65rem;
+          height: 1.65rem;
+          flex-basis: 1.65rem;
+          border-radius: 999px;
+        }
+      }
+
+      .vacations-page-header__segment-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+      }
+
+      .vacations-page-header__search-btn {
+        width: 100%;
+        min-height: 3.15rem;
+        border-radius: 999px;
+        padding: 0.85rem 1.15rem;
+        font-size: 1rem;
+        gap: 0.45rem;
+      }
+
+      .vacations-page-header__search-btn-label--compact {
+        display: none;
+      }
+
+      .vacations-page-header__search-btn-label--sheet,
+      .vacations-page-header__search-btn-arrow {
+        display: inline;
+      }
+    }
+
+    [data-mobile-search-sheet].is-open .mobile-search-sheet__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .mobile-search-sheet__chip {
+      margin: 0;
+      padding: 0.4rem 0.75rem;
+      border: 1.5px solid rgba($vacations-header-slate, 0.16);
+      border-radius: 999px;
+      background: #fff;
+      color: $vacations-header-slate;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+  }
+}
+
+// Same keyframes offers.scss defines for its identical mobile search sheet.
+// Redeclaring here is harmless (both files compile into the same app.css;
+// duplicate @keyframes with identical rules is valid CSS, not a Sass error).
+@keyframes mobileSearchSheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobileSearchSheetFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

@@ -90,6 +90,14 @@ $trip-offer-lh-relaxed: 1.7;
 
     &__hero-heading {
         margin-bottom: 1.5rem;
+
+        // Mobile: the title/location/map-link now live in the dark hero band
+        // instead (catalog-header.blade.php's mobile-only merged product
+        // title, see resources/sass/page/_vacations-header.scss's &--product
+        // block).
+        @media (max-width: 767.98px) {
+            display: none;
+        }
     }
 
     &__title {
@@ -309,10 +317,9 @@ $trip-offer-lh-relaxed: 1.7;
         }
 
         @media (max-width: 576px) {
-            // Phone: show cards as a compact 2-column grid (2 rows total for 4 cards).
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: .6rem;
+            gap: 0.6rem;
             margin-bottom: 1.25rem;
         }
     }
@@ -480,6 +487,10 @@ $trip-offer-lh-relaxed: 1.7;
         padding: 1.5rem 1.75rem;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         border: 1px solid $trip-offer-theme-border;
+
+        @media (max-width: 576px) {
+            padding: 1.15rem 1.1rem;
+        }
     }
 
     &__about-description {

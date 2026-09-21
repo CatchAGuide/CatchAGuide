@@ -5,6 +5,36 @@
     $isDraft = !empty($isDraft);
     $preselectedGuests = $preselectedGuests ?? null;
     $campMetaDescription = \Illuminate\Support\Str::limit(strip_tags($camp['description']['camp_description'] ?? ''), 200);
+    $campPlaceLabel = listing_place_label([
+        translate($camp['city'] ?? '') ?: ($camp['location'] ?? ''),
+        translate($camp['region'] ?? ''),
+        translate($camp['country'] ?? ''),
+    ]);
+    $campFromPrice = $camp['from_price'] ?? null;
+    $campFromPriceAmount = $campFromPrice !== null
+        ? '€'.number_format((float) $campFromPrice, 0, ',', '.')
+        : null;
+    $campFromPriceDisplay = $campFromPriceAmount !== null
+        ? __('vacations.from_price', ['price' => $campFromPriceAmount])
+        : null;
+    $campGuestCount = null;
+    $fallbackGuestCount = null;
+    foreach ($accommodations ?? [] as $acc) {
+        $occupancy = (int) ($acc['max_occupancy'] ?? 0);
+        if ($occupancy < 1) {
+            continue;
+        }
+        if ($fallbackGuestCount === null || $occupancy < $fallbackGuestCount) {
+            $fallbackGuestCount = $occupancy;
+        }
+        $amount = $acc['price']['amount'] ?? null;
+        if ($campFromPrice !== null && $amount !== null && abs((float) $amount - (float) $campFromPrice) < 0.01) {
+            $campGuestCount = $occupancy;
+            break;
+        }
+    }
+    $campGuestCount = $campGuestCount ?? $fallbackGuestCount ?? 1;
+    $campPriceNote = trans_choice('vacations.accommodation_for_guests', $campGuestCount, ['count' => $campGuestCount]);
 @endphp
 
 @section('description', $campMetaDescription)
@@ -41,8 +71,14 @@
         'breadcrumbItems' => [
             ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
             ['label' => __('vacations.pillar_camps_title'), 'url' => route('vacations.camps.index')],
-            ['label' => translate($camp['title'] ?? ''), 'url' => null],
+            ['label' => translate($camp['region'] ?? $camp['city'] ?? $camp['title'] ?? ''), 'url' => null],
         ],
+        'enableMobileSearchSheet' => true,
+        'heroProductTitle' => translate($camp['title'] ?? ''),
+        'heroLocationLabel' => $campPlaceLabel,
+        'heroMapHref' => '#map',
+        'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_camp'),
+        'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_camp'),
     ])
 <div 
     x-data="campConfigurator({
@@ -68,8 +104,10 @@
             <div class="camp-topbar__info">
                 <h1 class="camp-topbar__title">{{ translate($camp['title']) }}</h1>
                 <div class="camp-topbar__meta">
-                    <span>{{ translate($camp['city']) }}, {{ translate($camp['region']) }}, {{ translate($camp['country']) }}</span>
-                    <span class="camp-topbar__dot">•</span>
+                    @if($campPlaceLabel !== '')
+                        <span>{{ $campPlaceLabel }}</span>
+                        <span class="camp-topbar__dot">•</span>
+                    @endif
                     <a class="camp-topbar__link" href="#map">{{ __('vacations.show_on_map') }}</a>
                 </div>
             </div>
@@ -83,18 +121,23 @@
     <!-- Gallery -->
     @php
         $campGalleryId = 'camp-detail-'.($camp['id'] ?? 'page');
-        $campLocation = trim(implode(', ', array_filter([
-            translate($camp['city'] ?? null) ?: ($camp['city'] ?? null),
-            translate($camp['region'] ?? null) ?: ($camp['region'] ?? null),
-            translate($camp['country'] ?? null) ?: ($camp['country'] ?? null),
-        ])));
+        $campLocation = $campPlaceLabel;
         $campModalTitle = translate($camp['title'] ?? null) ?: ($camp['title'] ?? '');
         $mobileCarouselImages = array_slice($galleryImages, 1);
+        $galleryCount = count($galleryImages);
+        $accommodationsCount = count($accommodations ?? []);
+        $boatsCount = count($boats ?? []);
+        $specialOffersCount = isset($specialOffers) ? count($specialOffers) : 0;
+        $guidingsCount = isset($guidings) ? count($guidings) : 0;
+        $campHasSectionNav = ($accommodationsCount + $boatsCount + $specialOffersCount + $guidingsCount) > 0;
     @endphp
     <div class="camp-container">
         <div class="camp-gallery" data-vacation-gallery="{{ $campGalleryId }}" data-gallery-images='@json($galleryImages)'>
             <div class="camp-gallery__main" data-gallery-index="0">
                 <img src="{{ $primaryImage }}" alt="{{ $camp['title'] }}" fetchpriority="high" decoding="async">
+                @if($galleryCount > 1)
+                    <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
+                @endif
             </div>
             <div class="camp-gallery__right">
                 @foreach ($topRightImages as $index => $image)
@@ -126,6 +169,31 @@
             </div>
             @endif
         </div>
+
+        @if($campHasSectionNav)
+            <nav class="camp-nav-enhanced">
+                @if($accommodationsCount > 0)
+                    <a href="#accommodations" class="camp-nav-item">
+                        <span class="camp-nav-item__name">{{ __('vacations.accommodations') }}</span>
+                    </a>
+                @endif
+                @if($boatsCount > 0)
+                    <a href="#boats" class="camp-nav-item">
+                        <span class="camp-nav-item__name">{{ __('vacations.rental_boats') }}</span>
+                    </a>
+                @endif
+                @if($specialOffersCount > 0)
+                    <a href="#special-offers" class="camp-nav-item">
+                        <span class="camp-nav-item__name">{{ __('vacations.special_offers') }}</span>
+                    </a>
+                @endif
+                @if($guidingsCount > 0)
+                    <a href="#guidings" class="camp-nav-item">
+                        <span class="camp-nav-item__name">{{ __('vacations.guidings_tours') }}</span>
+                    </a>
+                @endif
+            </nav>
+        @endif
     </div>
 
     <x-gallery.modal
@@ -140,40 +208,6 @@
     <!-- Main Content with Sidebar -->
     <div class="camp-container camp-layout" style="grid-template-columns: 1fr;">
         <div class="camp-layout__content">
-            <!-- Navigation -->
-            <nav class="camp-nav-enhanced">
-                @php
-                    $accommodationsCount = count($accommodations ?? []);
-                    $boatsCount = count($boats ?? []);
-                    $specialOffersCount = isset($specialOffers) ? count($specialOffers) : 0;
-                    $guidingsCount = isset($guidings) ? count($guidings) : 0;
-                @endphp
-                
-                @if($accommodationsCount > 0)
-                <a href="#accommodations" class="camp-nav-item">
-                    <div class="camp-nav-item__name">{{ __('vacations.accommodations') }}</div>
-                </a>
-                @endif
-                
-                @if($boatsCount > 0)
-                <a href="#boats" class="camp-nav-item">
-                    <div class="camp-nav-item__name">{{ __('vacations.rental_boats') }}</div>
-                </a>
-                @endif
-                
-                @if($specialOffersCount > 0)
-                <a href="#special-offers" class="camp-nav-item">
-                    <div class="camp-nav-item__name">{{ __('vacations.special_offers') }}</div>
-                </a>
-                @endif
-                
-                @if($guidingsCount > 0)
-                <a href="#guidings" class="camp-nav-item">
-                    <div class="camp-nav-item__name">{{ __('vacations.guidings_tours') }}</div>
-                </a>
-                @endif
-            </nav>
-
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
@@ -567,16 +601,14 @@
     </div>
 
     @unless($isDraft)
-        @php
-            $campFromPrice = $camp['from_price'] ?? null;
-            $campFromPriceDisplay = $campFromPrice !== null
-                ? '€'.number_format((float) $campFromPrice, 0, ',', '.')
-                : null;
-        @endphp
         <x-vacation.mobile-book-bar
-            :price-display="$campFromPriceDisplay"
-            :price-suffix="__('vacations.per_night')"
-            :cta-label="__('vacations.contact_us_button')"
+            variant="stacked"
+            :price-prefix="$campFromPriceAmount ? __('vacations.from_price_prefix') : null"
+            :price-display="$campFromPriceAmount"
+            :price-suffix="$campFromPriceAmount ? __('vacations.per_night') : null"
+            :price-note="$campPriceNote"
+            :note-nowrap="true"
+            :cta-label="__('vacations.check_availability')"
             data-camp-mobile-book
         />
     @endunless

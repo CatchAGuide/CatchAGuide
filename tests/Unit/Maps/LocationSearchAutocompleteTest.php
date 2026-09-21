@@ -66,6 +66,17 @@ class LocationSearchAutocompleteTest extends TestCase
         $this->assertStringContainsString('Empty / missing means unrestricted', $source);
     }
 
+    public function test_places_dropdown_sits_above_the_mobile_search_sheet(): void
+    {
+        $source = (string) file_get_contents(resource_path('sass/components/_places-autocomplete.scss'));
+
+        $this->assertStringContainsString('body.is-mobile-search-open .pac-container', $source);
+        $this->assertMatchesRegularExpression(
+            '/body\.is-mobile-search-open \.pac-container \{[^}]*z-index:\s*2200/',
+            $source
+        );
+    }
+
     public function test_admin_ad_hoc_autocomplete_does_not_restrict_places_types(): void
     {
         $files = [

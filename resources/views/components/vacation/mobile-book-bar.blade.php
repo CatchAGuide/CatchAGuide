@@ -1,16 +1,32 @@
 @props([
     'priceDisplay' => null,
+    'pricePrefix' => null,
     'priceSuffix' => null,
+    'priceNote' => null,
+    'noteNowrap' => false,
     'ctaLabel',
+    'variant' => null,
 ])
 
-<div class="listing-mobile-book" role="region" aria-label="{{ $ctaLabel }}">
+<div @class([
+    'listing-mobile-book',
+    'listing-mobile-book--stacked' => $variant === 'stacked',
+    'listing-mobile-book--note-nowrap' => $noteNowrap,
+]) role="region" aria-label="{{ $ctaLabel }}">
     <div class="listing-mobile-book__inner">
         <div class="listing-mobile-book__bar">
-            <div class="listing-mobile-book__price">
-                <span class="listing-mobile-book__amount">{{ $priceDisplay ?: '—' }}</span>
-                @if($priceSuffix)
-                    <span class="listing-mobile-book__unit">{{ $priceSuffix }}</span>
+            <div class="listing-mobile-book__top">
+                <div class="listing-mobile-book__price">
+                    @if($pricePrefix)
+                        <span class="listing-mobile-book__unit">{{ $pricePrefix }}</span>
+                    @endif
+                    <span class="listing-mobile-book__amount">{{ $priceDisplay ?: '—' }}</span>
+                    @if($priceSuffix)
+                        <span class="listing-mobile-book__unit">{{ $priceSuffix }}</span>
+                    @endif
+                </div>
+                @if($priceNote)
+                    <span class="listing-mobile-book__note">{{ $priceNote }}</span>
                 @endif
             </div>
             <button type="button" {{ $attributes->class(['listing-mobile-book__cta']) }}>

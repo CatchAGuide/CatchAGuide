@@ -793,6 +793,37 @@ if (!function_exists('getLocationDetails')) {
     }
 }
 
+if (! function_exists('listing_place_label')) {
+    /**
+     * Join unique non-empty place parts for product headers.
+     * Pass city-or-location first (tours: city ?: location), then region, then country.
+     *
+     * @param  list<string|null>  $parts
+     */
+    function listing_place_label(array $parts): string
+    {
+        $labels = [];
+        $seen = [];
+
+        foreach ($parts as $part) {
+            $value = trim((string) $part);
+            if ($value === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($value, 'UTF-8');
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $labels[] = $value;
+        }
+
+        return implode(', ', $labels);
+    }
+}
+
 if (! function_exists('listing_search_action')) {
     /**
      * Header location-search catalog: guidings stays on tours, offers stays on offers.

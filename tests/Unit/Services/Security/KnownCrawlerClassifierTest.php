@@ -33,6 +33,18 @@ class KnownCrawlerClassifierTest extends TestCase
         $this->assertSame('Ahrefs', $result->name);
     }
 
+    public function test_dataforseo_rsiteauditor_is_seo_crawler(): void
+    {
+        $result = $this->classifier()->classify($this->request(
+            'Mozilla/5.0 (compatible; RSiteAuditor)',
+            '68.183.49.222'
+        ));
+
+        $this->assertTrue($result->isTrusted());
+        $this->assertSame(CrawlerLane::SeoCrawler, $result->lane);
+        $this->assertSame('DataForSEO', $result->name);
+    }
+
     public function test_browser_user_is_not_a_crawler(): void
     {
         $result = $this->classifier()->classify($this->request(

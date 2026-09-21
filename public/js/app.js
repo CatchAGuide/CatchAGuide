@@ -15,9 +15,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_listingGalleryModal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/listingGalleryModal */ "./resources/js/modules/listingGalleryModal.js");
 /* harmony import */ var _modules_pageLoader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/pageLoader */ "./resources/js/modules/pageLoader.js");
 /* harmony import */ var _modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/bottomNavViewport */ "./resources/js/modules/bottomNavViewport.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
+/* harmony import */ var _modules_listingMobileBookBar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/listingMobileBookBar */ "./resources/js/modules/listingMobileBookBar.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
 // require("./bootstrap");
+
 
 
 
@@ -35,8 +37,9 @@ document.addEventListener('DOMContentLoaded', function () {
   (0,_modules_listingGalleryModal__WEBPACK_IMPORTED_MODULE_3__.initListingGalleryModals)();
   (0,_modules_pageLoader__WEBPACK_IMPORTED_MODULE_4__.initPageLoader)();
   (0,_modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_5__.initBottomNavViewport)();
-  (0,lucide__WEBPACK_IMPORTED_MODULE_6__.createIcons)({
-    icons: lucide__WEBPACK_IMPORTED_MODULE_7__
+  (0,_modules_listingMobileBookBar__WEBPACK_IMPORTED_MODULE_6__.initListingMobileBookBar)();
+  (0,lucide__WEBPACK_IMPORTED_MODULE_7__.createIcons)({
+    icons: lucide__WEBPACK_IMPORTED_MODULE_8__
   });
 });
 
@@ -496,6 +499,82 @@ function initListingGalleryModals() {
       }
     });
   }
+}
+
+/***/ },
+
+/***/ "./resources/js/modules/listingMobileBookBar.js"
+/*!******************************************************!*\
+  !*** ./resources/js/modules/listingMobileBookBar.js ***!
+  \******************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LISTING_MOBILE_BOOK_ABOVE_FOOTER_CLASS: () => (/* binding */ LISTING_MOBILE_BOOK_ABOVE_FOOTER_CLASS),
+/* harmony export */   LISTING_MOBILE_BOOK_BAR_SELECTOR: () => (/* binding */ LISTING_MOBILE_BOOK_BAR_SELECTOR),
+/* harmony export */   LISTING_MOBILE_BOOK_FOOTER_SELECTOR: () => (/* binding */ LISTING_MOBILE_BOOK_FOOTER_SELECTOR),
+/* harmony export */   initListingMobileBookBar: () => (/* binding */ initListingMobileBookBar),
+/* harmony export */   listingMobileBookBarBottom: () => (/* binding */ listingMobileBookBarBottom),
+/* harmony export */   syncListingMobileBookBarWithFooter: () => (/* binding */ syncListingMobileBookBarWithFooter)
+/* harmony export */ });
+var LISTING_MOBILE_BOOK_FOOTER_SELECTOR = 'footer.site-footer, footer.cag-footer';
+var LISTING_MOBILE_BOOK_BAR_SELECTOR = '.listing-mobile-book, .guidings-book-mobile';
+var LISTING_MOBILE_BOOK_ABOVE_FOOTER_CLASS = 'is-above-footer';
+
+/**
+ * Keep the fixed mobile booking bar flush with the viewport bottom until the
+ * site footer enters view, then lift it so it sits just above the footer.
+ */
+function listingMobileBookBarBottom(viewportHeight, footerTop) {
+  return Math.max(0, Math.round(viewportHeight - footerTop));
+}
+function syncListingMobileBookBarWithFooter(bars, footer, viewportHeight) {
+  if (!footer) {
+    return;
+  }
+  var bottom = listingMobileBookBarBottom(viewportHeight, footer.getBoundingClientRect().top);
+  var pinned = bottom > 0;
+  bars.forEach(function (bar) {
+    if (pinned) {
+      bar.style.bottom = "".concat(bottom, "px");
+    } else {
+      bar.style.removeProperty('bottom');
+    }
+    bar.classList.toggle(LISTING_MOBILE_BOOK_ABOVE_FOOTER_CLASS, pinned);
+  });
+}
+function initListingMobileBookBar() {
+  var bars = Array.from(document.querySelectorAll(LISTING_MOBILE_BOOK_BAR_SELECTOR));
+  if (!bars.length) {
+    return;
+  }
+  var footer = document.querySelector(LISTING_MOBILE_BOOK_FOOTER_SELECTOR);
+  if (!footer || footer.getAttribute('data-listing-book-bar-io') === '1') {
+    return;
+  }
+  footer.setAttribute('data-listing-book-bar-io', '1');
+  var viewportHeight = function viewportHeight() {
+    return window.innerHeight;
+  };
+  var sync = function sync() {
+    return syncListingMobileBookBarWithFooter(bars, footer, viewportHeight());
+  };
+  var frame = 0;
+  var requestSync = function requestSync() {
+    if (frame) {
+      return;
+    }
+    frame = window.requestAnimationFrame(function () {
+      frame = 0;
+      sync();
+    });
+  };
+  sync();
+  window.addEventListener('scroll', requestSync, {
+    passive: true
+  });
+  window.addEventListener('resize', requestSync);
 }
 
 /***/ },
