@@ -18929,6 +18929,8 @@ div#masonry-grid img {
   align-items: baseline;
   gap: 0.35rem;
   min-width: 0;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .camp-booking-card__amount {
   color: #313041;
@@ -18952,6 +18954,7 @@ div#masonry-grid img {
   font-weight: 500;
   line-height: 1.3;
   text-align: right;
+  white-space: nowrap;
 }
 .camp-booking-card__title {
   margin: 0 0 0.4rem;
@@ -35534,6 +35537,11 @@ html.booking-assistant-modal-open body {
     pointer-events: none;
   }
 }
+@media (max-width: 991.98px) {
+  .listing-mobile-book.is-above-footer .listing-mobile-book__inner {
+    padding-bottom: 0.5rem;
+  }
+}
 .listing-mobile-book__inner {
   pointer-events: auto;
   width: 100%;
@@ -35635,6 +35643,9 @@ html.booking-assistant-modal-open body {
 .listing-mobile-book--stacked .listing-mobile-book__inner {
   padding: 0.4rem 0.7rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
+.listing-mobile-book--stacked.is-above-footer .listing-mobile-book__inner {
+  padding-bottom: 0.4rem;
+}
 .listing-mobile-book--stacked .listing-mobile-book__bar {
   flex-direction: column;
   align-items: stretch;
@@ -35648,15 +35659,21 @@ html.booking-assistant-modal-open body {
 .listing-mobile-book--stacked .listing-mobile-book__top {
   width: 100%;
 }
+.listing-mobile-book--stacked .listing-mobile-book__price {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
 .listing-mobile-book--stacked .listing-mobile-book__note {
   color: rgba(255, 255, 255, 0.62);
   white-space: normal;
   max-width: 12rem;
 }
 .listing-mobile-book--stacked .listing-mobile-book__amount {
-  font-size: 1.15rem;
+  font-size: 1.4rem;
   color: #fff;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 .listing-mobile-book--stacked .listing-mobile-book__unit {
   font-size: 0.7rem;
@@ -35686,12 +35703,16 @@ html.booking-assistant-modal-open body {
     padding: 0.55rem 0.65rem 0.6rem;
   }
   .listing-mobile-book--stacked .listing-mobile-book__amount {
-    font-size: 1.05rem;
+    font-size: 1.25rem;
   }
   .listing-mobile-book--stacked .listing-mobile-book__cta {
     min-height: 2.3rem;
     font-size: 0.84rem;
   }
+}
+.listing-mobile-book--note-nowrap .listing-mobile-book__note {
+  white-space: nowrap;
+  max-width: none;
 }
 
 .guidings-book-card {
@@ -35916,6 +35937,9 @@ html.booking-assistant-modal-open body {
   }
   .guidings-book-mobile .guidings-book-card {
     pointer-events: auto;
+  }
+  .guidings-book-mobile.is-above-footer {
+    padding-bottom: 0.4rem;
   }
 }
 

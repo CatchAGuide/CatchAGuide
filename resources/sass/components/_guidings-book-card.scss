@@ -249,6 +249,11 @@
         .guidings-book-card {
             pointer-events: auto;
         }
+
+        // JS lifts the bar with `bottom` so it sits on the footer instead of covering it.
+        &.is-above-footer {
+            padding-bottom: 0.4rem;
+        }
     }
 }
 

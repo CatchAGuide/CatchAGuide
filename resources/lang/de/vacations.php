@@ -62,6 +62,8 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'request_holiday' => 'Urlaub anfragen',
     'check_availability' => 'Verfügbarkeit prüfen',
     'from_price' => 'Ab :price',
+    'from_price_prefix' => 'Ab',
+    'accommodation_for_guests' => '{1} Unterkunft für :count Person|[2,*] Unterkunft für :count Personen',
     'general_contact_title' => 'Kontakt aufnehmen',
     'general_contact_message' => 'Hast du Fragen zu diesem Camp? Unser Team hilft dir gerne weiter!',
     'general_contact_form' => 'Kontaktformular',

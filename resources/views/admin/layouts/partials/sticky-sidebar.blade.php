@@ -137,6 +137,13 @@
                 </li>
 
                 <li class="sub-category">
+                    <h3>{{ __('admin.security.section') }}</h3>
+                </li>
+                <li class="slide">
+                    <a class="side-menu__item {{ request()->routeIs('admin.security.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.security.threats') }}"><i class="side-menu__icon fe fe-shield"></i><span class="side-menu__label">{{ __('admin.security.nav') }}</span></a>
+                </li>
+
+                <li class="sub-category">
                     <h3>Content</h3>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.faq.*') ? 'is-expanded' : '' }}">

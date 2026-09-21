@@ -62,6 +62,8 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'request_holiday' => 'Request holiday',
     'check_availability' => 'Check availability',
     'from_price' => 'From :price',
+    'from_price_prefix' => 'From',
+    'accommodation_for_guests' => '{1} Accommodation for :count guest|[2,*] Accommodation for :count guests',
     'general_contact_title' => 'Contact us',
     'general_contact_message' => 'Do you have questions about this camp? Our team is here to help!',
     'general_contact_form' => 'Contact Form',

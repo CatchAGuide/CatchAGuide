@@ -468,6 +468,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Threat Assessment (admin security panel)
+    |--------------------------------------------------------------------------
+    |
+    | Hints used by ThreatVerdictService to explain a flagged IP. They only
+    | change the wording/verdict shown in the admin panel, never blocking.
+    |
+    */
+    'assessment' => [
+        'scraper_violations' => 10, // 24h rate-limit violations before an IP is called an aggressive scraper
+        'crawler_ua_keywords' => ['bot', 'crawl', 'spider', 'audit', 'scan', 'scrap', 'fetch', 'monitor'],
+        'crawler_rdns_suffixes' => [
+            '.dataforseo.com',
+            '.ahrefs.com',
+            '.ahrefs.net',
+            '.semrush.com',
+            '.moz.com',
+            '.majestic.com',
+            '.screamingfrog.co.uk',
+            '.sistrix.com',
+            '.seznam.cz',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Exploit Signatures
     |--------------------------------------------------------------------------
     |

@@ -42,6 +42,14 @@
         font-size: 0.9rem;
         overflow: hidden;
     }
+    #camp-vacation-bookings-datatable tbody td.col-status,
+    #camp-vacation-bookings-datatable tbody td.col-actions {
+        overflow: visible;
+    }
+    #camp-vacation-bookings-datatable tbody tr:has(.dropdown.show) {
+        position: relative;
+        z-index: 20;
+    }
     #camp-vacation-bookings-datatable tbody tr:hover { background-color: #f8f9fa; }
 
     /* Column widths sum to 100% and are enforced via table-layout: fixed
@@ -290,6 +298,7 @@
                                                     <button type="button"
                                                             class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}"
                                                             data-bs-toggle="dropdown"
+                                                            data-bs-boundary="viewport"
                                                             data-url="{{ route('admin.camp-vacation-bookings.update-status', $request) }}"
                                                             data-status="{{ $rowStatus }}"
                                                             aria-expanded="false">
@@ -593,6 +602,18 @@
             });
         });
 
+        // Keep status menus out of table overflow clipping (Bootstrap 5.0 has no data-bs-popper-config).
+        document.querySelectorAll('#camp-vacation-bookings-datatable .js-status-dropdown-btn').forEach(function (btn) {
+            if (typeof bootstrap === 'undefined' || !bootstrap.Dropdown) return;
+            if (bootstrap.Dropdown.getInstance(btn)) return;
+            new bootstrap.Dropdown(btn, {
+                boundary: 'viewport',
+                popperConfig: function (defaultBsPopperConfig) {
+                    return Object.assign({}, defaultBsPopperConfig, { strategy: 'fixed' });
+                }
+            });
+        });
+
         // status updates (AJAX)
         document.querySelectorAll('#camp-vacation-bookings-datatable .js-status-option').forEach(option => {
             option.addEventListener('click', function (e) {
@@ -621,8 +642,16 @@
                     if (!data.success) return;
                     btn.classList.remove('btn-status-open', 'btn-status-in_process', 'btn-status-done');
                     btn.classList.add('btn-status-' + data.status);
+                    btn.setAttribute('data-status', data.status);
                     const label = btn.querySelector('.js-status-btn-text');
                     if (label) label.textContent = data.status_label || data.status;
+                    dropdown.querySelectorAll('.js-status-option').forEach(function (item) {
+                        item.classList.toggle('active', item.getAttribute('data-status') === data.status);
+                    });
+                    const instance = typeof bootstrap !== 'undefined' && bootstrap.Dropdown
+                        ? bootstrap.Dropdown.getInstance(btn)
+                        : null;
+                    if (instance) instance.hide();
                 })
                 .catch(() => {});
             });

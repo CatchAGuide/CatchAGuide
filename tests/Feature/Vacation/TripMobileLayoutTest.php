@@ -31,6 +31,7 @@ class TripMobileLayoutTest extends TestCase
         $html = $response->getContent();
 
         $this->assertStringContainsString('listing-mobile-book--stacked', $html);
+        $this->assertMatchesRegularExpression('/<footer[^>]*class="[^"]*site-footer/', $html);
         $this->assertStringContainsString('trip-offer-page__booking-cta', $html);
         $this->assertSame('Request a quote', __('vacations.request_trip', [], 'en'));
         $this->assertSame('Request a quote', __('vacations.request_trip_bar', [], 'en'));

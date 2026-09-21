@@ -15,6 +15,15 @@
         pointer-events: none;
     }
 
+    // JS lifts the bar with `bottom` so it sits on the footer instead of covering it.
+    &.is-above-footer {
+        @media (max-width: 991.98px) {
+            .listing-mobile-book__inner {
+                padding-bottom: 0.5rem;
+            }
+        }
+    }
+
     &__inner {
         pointer-events: auto;
         width: 100%;
@@ -126,6 +135,10 @@
             padding: 0.4rem 0.7rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
         }
 
+        &.is-above-footer .listing-mobile-book__inner {
+            padding-bottom: 0.4rem;
+        }
+
         .listing-mobile-book__bar {
             flex-direction: column;
             align-items: stretch;
@@ -141,6 +154,12 @@
             width: 100%;
         }
 
+        .listing-mobile-book__price {
+            flex: 0 0 auto;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
         .listing-mobile-book__note {
             color: rgba(255, 255, 255, 0.62);
             white-space: normal;
@@ -148,9 +167,10 @@
         }
 
         .listing-mobile-book__amount {
-            font-size: 1.15rem;
+            font-size: 1.4rem;
             color: #fff;
             letter-spacing: -0.02em;
+            white-space: nowrap;
         }
 
         .listing-mobile-book__unit {
@@ -187,13 +207,20 @@
             }
 
             .listing-mobile-book__amount {
-                font-size: 1.05rem;
+                font-size: 1.25rem;
             }
 
             .listing-mobile-book__cta {
                 min-height: 2.3rem;
                 font-size: 0.84rem;
             }
+        }
+    }
+
+    &--note-nowrap {
+        .listing-mobile-book__note {
+            white-space: nowrap;
+            max-width: none;
         }
     }
 }

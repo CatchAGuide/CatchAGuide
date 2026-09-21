@@ -5,6 +5,7 @@ import { initVacationCampFishTags } from "./modules/vacationCampFishTags";
 import { initListingGalleryModals } from "./modules/listingGalleryModal";
 import { initPageLoader } from "./modules/pageLoader";
 import { initBottomNavViewport } from "./modules/bottomNavViewport";
+import { initListingMobileBookBar } from "./modules/listingMobileBookBar";
 import { createIcons, icons } from 'lucide';
 
 window.initListingGalleryModals = initListingGalleryModals;
@@ -19,5 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initListingGalleryModals();
   initPageLoader();
   initBottomNavViewport();
+  initListingMobileBookBar();
   createIcons({ icons });
 });

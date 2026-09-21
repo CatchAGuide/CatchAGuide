@@ -11,9 +11,30 @@
         translate($camp['country'] ?? ''),
     ]);
     $campFromPrice = $camp['from_price'] ?? null;
-    $campFromPriceDisplay = $campFromPrice !== null
-        ? __('vacations.from_price', ['price' => '€'.number_format((float) $campFromPrice, 0, ',', '.')])
+    $campFromPriceAmount = $campFromPrice !== null
+        ? '€'.number_format((float) $campFromPrice, 0, ',', '.')
         : null;
+    $campFromPriceDisplay = $campFromPriceAmount !== null
+        ? __('vacations.from_price', ['price' => $campFromPriceAmount])
+        : null;
+    $campGuestCount = null;
+    $fallbackGuestCount = null;
+    foreach ($accommodations ?? [] as $acc) {
+        $occupancy = (int) ($acc['max_occupancy'] ?? 0);
+        if ($occupancy < 1) {
+            continue;
+        }
+        if ($fallbackGuestCount === null || $occupancy < $fallbackGuestCount) {
+            $fallbackGuestCount = $occupancy;
+        }
+        $amount = $acc['price']['amount'] ?? null;
+        if ($campFromPrice !== null && $amount !== null && abs((float) $amount - (float) $campFromPrice) < 0.01) {
+            $campGuestCount = $occupancy;
+            break;
+        }
+    }
+    $campGuestCount = $campGuestCount ?? $fallbackGuestCount ?? 1;
+    $campPriceNote = trans_choice('vacations.accommodation_for_guests', $campGuestCount, ['count' => $campGuestCount]);
 @endphp
 
 @section('description', $campMetaDescription)
@@ -582,9 +603,11 @@
     @unless($isDraft)
         <x-vacation.mobile-book-bar
             variant="stacked"
-            :price-display="$campFromPriceDisplay"
-            :price-suffix="__('vacations.per_night')"
-            :price-note="__('vacations.no_booking_fees')"
+            :price-prefix="$campFromPriceAmount ? __('vacations.from_price_prefix') : null"
+            :price-display="$campFromPriceAmount"
+            :price-suffix="$campFromPriceAmount ? __('vacations.per_night') : null"
+            :price-note="$campPriceNote"
+            :note-nowrap="true"
             :cta-label="__('vacations.check_availability')"
             data-camp-mobile-book
         />

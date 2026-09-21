@@ -8,12 +8,15 @@
         <h5 class="camp-booking-card__title">{{ __('vacations.contact_us') }}</h5>
         <div class="camp-booking-card__price-row">
             <div class="camp-booking-card__price">
-                <span class="camp-booking-card__amount">{{ $campFromPriceDisplay ?? '—' }}</span>
-                @if(! empty($campFromPriceDisplay))
+                @if(!empty($campFromPriceAmount))
+                    <span class="camp-booking-card__unit">{{ __('vacations.from_price_prefix') }}</span>
+                    <span class="camp-booking-card__amount">{{ $campFromPriceAmount }}</span>
                     <span class="camp-booking-card__unit">{{ __('vacations.per_night') }}</span>
+                @else
+                    <span class="camp-booking-card__amount">{{ $campFromPriceDisplay ?? '—' }}</span>
                 @endif
             </div>
-            <span class="camp-booking-card__note">{{ __('vacations.no_booking_fees') }}</span>
+            <span class="camp-booking-card__note">{{ $campPriceNote ?? __('vacations.no_booking_fees') }}</span>
         </div>
     </div>
 
