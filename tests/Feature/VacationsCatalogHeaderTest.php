@@ -73,11 +73,8 @@ class VacationsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('fa-map-marker-alt', $html);
         $this->assertStringContainsString('vacations-page-header__search-btn-label--sheet', $html);
         $this->assertStringContainsString(__('offers.search_submit'), $html);
-        if (substr_count($html, '<option') > 2) {
-            $this->assertStringContainsString('mobile-search-sheet__chips', $html);
-            $this->assertStringContainsString('data-mobile-search-chip', $html);
-            $this->assertStringContainsString('data-mobile-search-chip-value', $html);
-        }
+        $this->assertStringNotContainsString('mobile-search-sheet__chips', $html);
+        $this->assertStringNotContainsString('class="mobile-search-sheet__chip"', $html);
     }
 
     public function test_product_header_mobile_sheet_stacks_search_fields(): void
@@ -87,14 +84,30 @@ class VacationsCatalogHeaderTest extends TestCase
 
         $this->assertStringContainsString('[data-mobile-search-sheet].is-open', $source);
         $this->assertStringContainsString('flex-direction: column', $source);
-        $this->assertStringContainsString('.mobile-search-sheet__chips', $source);
         $this->assertStringContainsString('vacations-page-header__search-btn-label--sheet', $source);
+        $this->assertMatchesRegularExpression(
+            '/&__breadcrumbs \{[\s\S]*?@media \(max-width: 767\.98px\) \{[\s\S]*?padding-top:\s*0\.35rem;[\s\S]*?background:\s*#fff;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\[data-mobile-search-sheet\]\.is-open \{[\s\S]*?\.vacations-page-header__segment \{[\s\S]*?border:\s*1\.5px solid[\s\S]*?border-radius:\s*999px;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.vacations-page-header__segment--persons[\s\S]*?\[data-offers-persons-delta="-1"\] \{[\s\S]*?order:\s*1;/',
+            $source
+        );
         $this->assertMatchesRegularExpression(
             '/&--product \{[\s\S]*\.cag-title-rule \{[\s\S]*@media \(max-width: 767\.98px\) \{\s*display: none;/',
             $source
         );
-        $this->assertStringContainsString('data-mobile-search-chip-value', $header);
+        $this->assertStringNotContainsString('data-mobile-search-chip', $header);
         $this->assertStringContainsString('fa-map-marker-alt', $header);
+        $this->assertMatchesRegularExpression(
+            '/\.vacations-page-header__place \{[\s\S]*?flex-direction:\s*column;[\s\S]*?color:\s*\$vacations-header-coral;/',
+            $source
+        );
+        $this->assertStringNotContainsString('#9ec9ff', $source);
     }
 
     public function test_app_v2_layout_uses_site_header_for_vacations_listings(): void
@@ -173,6 +186,10 @@ class VacationsCatalogHeaderTest extends TestCase
 
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $trip);
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $camp);
+        $this->assertStringContainsString('listing_place_label', $trip);
+        $this->assertStringContainsString('listing_place_label', $camp);
+        $this->assertStringContainsString("'heroLocationLabel' => \$tripPlaceLabel", $trip);
+        $this->assertStringContainsString("'heroLocationLabel' => \$campPlaceLabel", $camp);
         $this->assertStringContainsString('pages.vacations.partials.catalog-header', $legacy);
         $this->assertStringNotContainsString('pages.category.partials.product-hero-header', $trip);
         $this->assertStringNotContainsString('pages.category.partials.product-hero-header', $camp);

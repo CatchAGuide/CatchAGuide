@@ -96,6 +96,13 @@
 @endsection
 
 @section('content')
+    @php
+        $tripPlaceLabel = listing_place_label([
+            ($tripView['city'] ?? '') ?: ($tripView['location'] ?? ''),
+            $tripView['region'] ?? '',
+            $tripView['country'] ?? '',
+        ]);
+    @endphp
     <div class="trip-offer-page category-hero-page" data-category-hero-page data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
         @include('pages.vacations.partials.catalog-header', [
             'listingTitle' => __('vacations.hub_header_title'),
@@ -109,11 +116,7 @@
             ],
             'enableMobileSearchSheet' => true,
             'heroProductTitle' => $tripView['title'] ?? __('trips.page_title_fallback'),
-            'heroLocationLabel' => implode(', ', array_filter([
-                $tripView['city'] ?? null,
-                $tripView['region'] ?? null,
-                $tripView['country'] ?? null,
-            ])),
+            'heroLocationLabel' => $tripPlaceLabel,
             'heroMapHref' => '#tripOfferMap',
             'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_trip'),
             'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_trip'),
@@ -133,9 +136,11 @@
                     {{ $tripView['title'] }}
                 </h1>
                 <div class="trip-offer-page__location-row">
-                    <span class="trip-offer-page__location">
-                        {{ implode(', ', array_filter([$tripView['city'] ?? null, $tripView['region'] ?? null, $tripView['country'] ?? null])) }}
-                    </span>
+                    @if($tripPlaceLabel !== '')
+                        <span class="trip-offer-page__location">
+                            {{ $tripPlaceLabel }}
+                        </span>
+                    @endif
                     <button type="button" class="trip-offer-page__map-link" data-trip-scroll-to-map>
                         <i class="fas fa-map-marker-alt"></i>
                         {{ __('vacations.show_on_map') }}
@@ -145,7 +150,7 @@
 
             @php
                 $tripGalleryId = 'trip-detail-'.($tripView['id'] ?? 'page');
-                $tripLocation = implode(', ', array_filter([$tripView['city'] ?? null, $tripView['region'] ?? null, $tripView['country'] ?? null]));
+                $tripLocation = $tripPlaceLabel;
                 $tripPriceDisplay = !empty($tripView['price']['per_person'])
                     ? '€'.number_format($tripView['price']['per_person'], 0)
                     : null;

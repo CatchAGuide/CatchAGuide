@@ -83,25 +83,6 @@
         $vacationCountryLabel !== '' ? $vacationCountryLabel : __('offers.search_mobile_summary_empty'),
         trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]),
     ])->filter()->implode(' · '));
-
-    $searchSuggestionChips = collect();
-    if ($enableMobileSearchSheet) {
-        $searchSuggestionChips = collect($vacationCountryOptions)
-            ->map(fn ($country) => [
-                'label' => translate($country->name),
-                'value' => (string) $country->slug,
-            ])
-            ->filter(fn (array $chip) => $chip['label'] !== '' && $chip['value'] !== '')
-            ->unique(fn (array $chip) => mb_strtolower($chip['value']));
-
-        if (is_string($currentVacationCountry) && $currentVacationCountry !== '' && $currentVacationCountry !== 'all-offers') {
-            $searchSuggestionChips = $searchSuggestionChips
-                ->sortBy(fn (array $chip) => $chip['value'] === $currentVacationCountry ? 0 : 1)
-                ->values();
-        }
-
-        $searchSuggestionChips = $searchSuggestionChips->take(4)->values();
-    }
 @endphp
 <div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
@@ -194,19 +175,6 @@
                             <button type="button" class="offers-persons-stepper__btn" data-offers-persons-delta="1" aria-label="+">+</button>
                         </div>
                     </div>
-
-                    @if($searchSuggestionChips->isNotEmpty())
-                        <div class="mobile-search-sheet__chips">
-                            @foreach($searchSuggestionChips as $chip)
-                                <button
-                                    type="button"
-                                    class="mobile-search-sheet__chip"
-                                    data-mobile-search-chip="{{ $chip['label'] }}"
-                                    data-mobile-search-chip-value="{{ $chip['value'] }}"
-                                >{{ $chip['label'] }}</button>
-                            @endforeach
-                        </div>
-                    @endif
 
                     <button type="submit" class="vacations-page-header__search-btn">
                         <span class="vacations-page-header__search-btn-label vacations-page-header__search-btn-label--compact">{{ __('homepage.searchbar-search') }}</span>

@@ -315,8 +315,8 @@ $vacations-header-muted: #787780;
       // the nav switches to its solid look here instead (see _site-nav.scss).
       order: -1;
       margin-top: 0;
-      padding-top: 0.85rem;
-      padding-bottom: 0.65rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.3rem;
       background: #fff;
     }
   }
@@ -398,9 +398,9 @@ $vacations-header-muted: #787780;
 
     .vacations-page-header__place {
       display: none;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.35rem 0.7rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
       margin: 0;
       color: rgba(255, 255, 255, 0.72);
       font-size: 0.9rem;
@@ -411,12 +411,12 @@ $vacations-header-muted: #787780;
       }
 
       a {
-        color: #9ec9ff;
+        color: $vacations-header-coral;
         font-weight: 700;
         text-decoration: none;
 
         &:hover {
-          color: #c5deff;
+          color: #ff7a66;
         }
       }
     }
@@ -572,6 +572,7 @@ $vacations-header-muted: #787780;
       }
 
       .vacations-page-header__segment {
+        box-sizing: border-box;
         flex-direction: row;
         align-items: center;
         gap: 0.7rem;
@@ -579,11 +580,45 @@ $vacations-header-muted: #787780;
         min-height: 3.15rem;
         padding: 0.7rem 0.95rem;
         border: 1.5px solid rgba($vacations-header-slate, 0.14);
+        border-right-width: 1.5px;
+        border-bottom-width: 1.5px;
         border-radius: 999px;
         background: #fff;
 
-        &--country {
+        &--country,
+        &--persons {
           border-bottom: 1.5px solid rgba($vacations-header-slate, 0.14);
+        }
+      }
+
+      .vacations-page-header__segment--persons .offers-persons-stepper--catalog {
+        width: 100%;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        justify-content: space-between;
+
+        .offers-persons-stepper__value {
+          order: 0;
+          flex: 1 1 auto;
+          justify-content: flex-start;
+        }
+
+        [data-offers-persons-delta="-1"] {
+          order: 1;
+        }
+
+        [data-offers-persons-delta="1"] {
+          order: 3;
+        }
+
+        .offers-persons-stepper__btn {
+          width: 1.65rem;
+          height: 1.65rem;
+          flex-basis: 1.65rem;
+          border-radius: 999px;
         }
       }
 

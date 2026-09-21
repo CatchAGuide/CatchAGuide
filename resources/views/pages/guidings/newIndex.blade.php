@@ -864,7 +864,6 @@
             $thumbnailPath = $guiding->thumbnail_path;
             $overallImages = [];
             $desktopThumbs = [];
-            $mobileThumbs = [];
 
             if (media_path_usable($thumbnailPath)) {
                 $overallImages[] = media_url($thumbnailPath);
@@ -879,6 +878,8 @@
             }
 
             $overallImages = array_values(array_unique($overallImages));
+            $galleryCount = count($overallImages);
+            $mobileCarouselImages = array_slice($overallImages, 1);
             $galleryOnly = array_values(array_filter(
                 $overallImages,
                 fn ($url) => ! media_path_usable($thumbnailPath) || $url !== media_url($thumbnailPath)
@@ -889,16 +890,6 @@
                 $padUrl = media_url($thumbnailPath);
                 while (count($desktopThumbs) < 4) {
                     $desktopThumbs[] = $padUrl;
-                }
-            }
-
-            $mobileHiddenCount = max(0, count($galleryOnly) - 2);
-            $mobileThumbs = array_slice($galleryOnly, 0, 2);
-            if (empty($mobileThumbs) && media_path_usable($thumbnailPath)) {
-                $mobileThumbs = [media_url($thumbnailPath), media_url($thumbnailPath)];
-            } elseif (count($mobileThumbs) < 2 && media_path_usable($thumbnailPath)) {
-                while (count($mobileThumbs) < 2) {
-                    $mobileThumbs[] = media_url($thumbnailPath);
                 }
             }
 
@@ -925,7 +916,10 @@
         >
             <div class="left-image" @if(!empty($overallImages)) data-gallery-index="0" style="cursor: pointer;" @endif>
                 @if(!empty($overallImages))
-                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ $guiding->title }}">
+                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}">
+                    @if($galleryCount > 1)
+                        <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
+                    @endif
                 @else
                     <div class="text-center p-4">
                         <p>@lang('guidings.No_image_found')</p>
@@ -938,38 +932,32 @@
                         @php $thumbIndex = $tourGalleryIndex($image); @endphp
                         @if ($index < 3)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                             </div>
                         @elseif ($index == 3 && $desktopHiddenCount > 0)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                                 <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $desktopHiddenCount }} more</span>
                             </div>
                         @elseif ($index == 3)
                             <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-                <div class="gallery-mobile">
-                    @foreach ($mobileThumbs as $index => $image)
-                        @php $thumbIndex = $tourGalleryIndex($image); @endphp
-                        @if ($index < 1)
-                            <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                            </div>
-                        @elseif ($index == 1)
-                            <div class="gallery-item" data-gallery-index="{{ $thumbIndex }}" style="cursor: pointer;">
-                                <img src="{{ $image }}" class="img-fluid" alt="{{ $guiding->title }} - {{ $index + 1 }}">
-                                @if($mobileHiddenCount > 0)
-                                    <span class="position-absolute" style="top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">+{{ $mobileHiddenCount }} more</span>
-                                @endif
+                                <img src="{{ $image }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}">
                             </div>
                         @endif
                     @endforeach
                 </div>
             </div>
+            @if(count($mobileCarouselImages) > 0)
+            <div class="camp-gallery__mobile-carousel">
+                <div class="camp-gallery__mobile-carousel-scroll">
+                    @foreach($mobileCarouselImages as $index => $image)
+                        <div class="camp-gallery__mobile-carousel-item" data-gallery-index="{{ $index + 1 }}">
+                            <img src="{{ $image }}" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => $index + 2]) }}" loading="lazy" decoding="async">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <x-gallery.modal

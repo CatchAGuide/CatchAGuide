@@ -341,8 +341,8 @@ $muted: #787780;
       // the nav switches to its solid look here instead (see _site-nav.scss).
       order: -1;
       margin-top: 0;
-      padding-top: 0.85rem;
-      padding-bottom: 0.65rem;
+      padding-top: 0.35rem;
+      padding-bottom: 0.3rem;
       background: #fff;
     }
   }
@@ -397,17 +397,11 @@ $muted: #787780;
   }
 
   // Guiding product page: mobile keeps the compact product hero + search sheet.
-  // Desktop restores the listing header (hub title, full search, crumbs below).
+  // Breadcrumbs use the shared white strip under the nav (see &__breadcrumbs),
+  // matching vacations. Desktop restores the listing header (hub title, full
+  // search, crumbs below the search box).
   &--product {
     .offers-page-header__title--hub {
-      display: none;
-
-      @media (min-width: 768px) {
-        display: block;
-      }
-    }
-
-    .offers-page-header__breadcrumbs--below {
       display: none;
 
       @media (min-width: 768px) {
@@ -455,8 +449,7 @@ $muted: #787780;
     @media (min-width: 768px) {
       .offers-page-header__title--product,
       .offers-page-header__place,
-      .offers-page-header__rating,
-      .offers-page-header__breadcrumbs--hero {
+      .offers-page-header__rating {
         display: none;
       }
 
@@ -495,44 +488,11 @@ $muted: #787780;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
         grid-template-areas:
-          "crumbs"
           "title"
           "place"
           "rating";
         gap: 0.4rem 1.25rem;
         max-width: none;
-      }
-
-      .offers-page-header__breadcrumbs--hero {
-        grid-area: crumbs;
-        width: auto;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-        background: transparent;
-        order: 0;
-
-        .offers-page-header__crumb-list {
-          color: rgba(255, 255, 255, 0.62);
-
-          a {
-            color: rgba(255, 255, 255, 0.62);
-            font-weight: 600;
-
-            &:hover {
-              color: #fff;
-            }
-          }
-
-          .is-active {
-            color: rgba(255, 255, 255, 0.92);
-          }
-
-          .fa-chevron-right {
-            color: rgba(255, 255, 255, 0.42);
-            opacity: 1;
-          }
-        }
       }
 
       .offers-page-header__title--product {
@@ -804,6 +764,7 @@ $muted: #787780;
         }
 
         .offers-page-header__segment {
+          box-sizing: border-box;
           flex-direction: row;
           align-items: center;
           gap: 0.7rem;
@@ -811,15 +772,10 @@ $muted: #787780;
           min-height: 3.15rem;
           padding: 0.7rem 0.95rem;
           border: 1.5px solid rgba($slate, 0.14);
+          border-right-width: 1.5px;
+          border-bottom-width: 1.5px;
           border-radius: 999px;
           background: #fff;
-
-          &--where,
-          &--who {
-            border-right: 0;
-            border-bottom: 0;
-            padding-right: 0.95rem;
-          }
         }
 
         .offers-page-header__segment-label {
@@ -836,15 +792,14 @@ $muted: #787780;
         }
 
         .offers-page-header__segment-control > i {
-          display: inline-block;
           color: $muted;
         }
 
-        .offers-page-header__where-icon--listing {
+        .offers-page-header__segment-control > i.offers-page-header__where-icon--listing {
           display: none;
         }
 
-        .offers-page-header__where-icon--product {
+        .offers-page-header__segment-control > i.offers-page-header__where-icon--product {
           display: inline-block;
         }
 
@@ -871,7 +826,19 @@ $muted: #787780;
 
         .offers-persons-stepper--catalog {
           width: 100%;
+          min-height: 0;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
           justify-content: space-between;
+
+          .offers-persons-stepper__btn {
+            width: 1.65rem;
+            height: 1.65rem;
+            flex-basis: 1.65rem;
+            border-radius: 999px;
+          }
         }
 
         .offers-page-header__search-btn-label--sheet,

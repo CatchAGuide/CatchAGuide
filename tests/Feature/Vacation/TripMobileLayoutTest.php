@@ -32,6 +32,10 @@ class TripMobileLayoutTest extends TestCase
 
         $this->assertStringContainsString('listing-mobile-book--stacked', $html);
         $this->assertStringContainsString('trip-offer-page__booking-cta', $html);
+        $this->assertSame('Request a quote', __('vacations.request_trip', [], 'en'));
+        $this->assertSame('Request a quote', __('vacations.request_trip_bar', [], 'en'));
+        $this->assertSame('Unverbindlich anfragen', __('vacations.request_trip', [], 'de'));
+        $this->assertSame('Unverbindlich anfragen', __('vacations.request_trip_bar', [], 'de'));
         $this->assertStringContainsString(__('vacations.request_trip_bar'), $html);
         $this->assertStringContainsString(__('vacations.request_trip'), $html);
         $this->assertStringContainsString(__('vacations.per_person'), $html);
@@ -49,6 +53,32 @@ class TripMobileLayoutTest extends TestCase
         $this->assertStringContainsString('data-mobile-search-sheet', $html);
         $this->assertStringContainsString('camp-gallery__counter', $html);
         $this->assertStringNotContainsString('trip-offer-page__mobile-sticky-simple', $html);
+        $this->assertStringContainsString('vacations-page-header__product-title', $html);
+        $this->assertStringContainsString('vacations-page-header__place', $html);
+        $this->assertStringContainsString('Bäverfjärden', $html);
+        $this->assertStringContainsString(__('vacations.show_on_map'), $html);
+    }
+
+    public function test_trip_product_header_falls_back_to_location_when_city_region_country_empty(): void
+    {
+        $trip = $this->makeTrip([
+            'city' => null,
+            'region' => null,
+            'country' => null,
+            'location' => 'Po-Delta bei Adria, Italien',
+        ]);
+
+        $response = $this->get(route('vacations.trips.show', $trip->slug));
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString('vacations-page-header__place', $html);
+        $this->assertMatchesRegularExpression(
+            '/vacations-page-header__place[\s\S]{0,240}Po-Delta bei Adria, Italien/',
+            $html
+        );
+        $this->assertStringContainsString(__('vacations.show_on_map'), $html);
     }
 
     public function test_draft_trip_page_does_not_render_the_mobile_book_bar(): void
@@ -64,13 +94,13 @@ class TripMobileLayoutTest extends TestCase
     public function test_stacked_book_bar_renders_duration_note(): void
     {
         $html = Blade::render(
-            '<x-vacation.mobile-book-bar variant="stacked" price-display="€1.290" price-suffix="pro Person" price-note="7 Tage & 6 Nächte inklusive" cta-label="Reise anfragen" />'
+            '<x-vacation.mobile-book-bar variant="stacked" price-display="€1.290" price-suffix="pro Person" price-note="7 Tage & 6 Nächte inklusive" cta-label="Unverbindlich anfragen" />'
         );
 
         $this->assertStringContainsString('listing-mobile-book--stacked', $html);
         $this->assertStringContainsString('listing-mobile-book__note', $html);
         $this->assertStringContainsString('7 Tage &amp; 6 Nächte inklusive', $html);
-        $this->assertStringContainsString('Reise anfragen', $html);
+        $this->assertStringContainsString('Unverbindlich anfragen', $html);
     }
 
     private function makeTrip(array $overrides = []): Trip

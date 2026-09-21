@@ -4526,8 +4526,8 @@ body .main-menu .main-menu-wrapper__nav {
   .offers-page-header__breadcrumbs {
     order: -1;
     margin-top: 0;
-    padding-top: 0.85rem;
-    padding-bottom: 0.65rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.3rem;
     background: #fff;
   }
 }
@@ -4582,14 +4582,6 @@ body .main-menu .main-menu-wrapper__nav {
     display: block;
   }
 }
-.offers-page-header--product .offers-page-header__breadcrumbs--below {
-  display: none;
-}
-@media (min-width: 768px) {
-  .offers-page-header--product .offers-page-header__breadcrumbs--below {
-    display: block;
-  }
-}
 .offers-page-header--product .offers-page-header__search-btn-label--listing {
   display: none;
 }
@@ -4625,8 +4617,7 @@ body .main-menu .main-menu-wrapper__nav {
 @media (min-width: 768px) {
   .offers-page-header--product .offers-page-header__title--product,
   .offers-page-header--product .offers-page-header__place,
-  .offers-page-header--product .offers-page-header__rating,
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero {
+  .offers-page-header--product .offers-page-header__rating {
     display: none;
   }
   .offers-page-header--product .offers-page-header__search-box {
@@ -4657,35 +4648,9 @@ body .main-menu .main-menu-wrapper__nav {
   .offers-page-header--product .offers-page-header__copy {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "crumbs" "title" "place" "rating";
+    grid-template-areas: "title" "place" "rating";
     gap: 0.4rem 1.25rem;
     max-width: none;
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero {
-    grid-area: crumbs;
-    width: auto;
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    order: 0;
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero .offers-page-header__crumb-list {
-    color: rgba(255, 255, 255, 0.62);
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero .offers-page-header__crumb-list a {
-    color: rgba(255, 255, 255, 0.62);
-    font-weight: 600;
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero .offers-page-header__crumb-list a:hover {
-    color: #fff;
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero .offers-page-header__crumb-list .is-active {
-    color: rgba(255, 255, 255, 0.92);
-  }
-  .offers-page-header--product .offers-page-header__breadcrumbs--hero .offers-page-header__crumb-list .fa-chevron-right {
-    color: rgba(255, 255, 255, 0.42);
-    opacity: 1;
   }
   .offers-page-header--product .offers-page-header__title--product {
     grid-area: title;
@@ -4908,6 +4873,7 @@ body .main-menu .main-menu-wrapper__nav {
     order: 4;
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment {
+    box-sizing: border-box;
     flex-direction: row;
     align-items: center;
     gap: 0.7rem;
@@ -4915,13 +4881,10 @@ body .main-menu .main-menu-wrapper__nav {
     min-height: 3.15rem;
     padding: 0.7rem 0.95rem;
     border: 1.5px solid rgba(49, 48, 65, 0.14);
+    border-right-width: 1.5px;
+    border-bottom-width: 1.5px;
     border-radius: 999px;
     background: #fff;
-  }
-  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment--where, .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment--who {
-    border-right: 0;
-    border-bottom: 0;
-    padding-right: 0.95rem;
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment-label {
     font-size: 0.68rem;
@@ -4935,13 +4898,12 @@ body .main-menu .main-menu-wrapper__nav {
     clip: auto;
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment-control > i {
-    display: inline-block;
     color: #787780;
   }
-  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__where-icon--listing {
+  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment-control > i.offers-page-header__where-icon--listing {
     display: none;
   }
-  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__where-icon--product {
+  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment-control > i.offers-page-header__where-icon--product {
     display: inline-block;
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__segment-control .form-control {
@@ -4964,7 +4926,18 @@ body .main-menu .main-menu-wrapper__nav {
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-persons-stepper--catalog {
     width: 100%;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
     justify-content: space-between;
+  }
+  .offers-page-header--product [data-mobile-search-sheet].is-open .offers-persons-stepper--catalog .offers-persons-stepper__btn {
+    width: 1.65rem;
+    height: 1.65rem;
+    flex-basis: 1.65rem;
+    border-radius: 999px;
   }
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__search-btn-label--sheet,
   .offers-page-header--product [data-mobile-search-sheet].is-open .offers-page-header__search-btn-arrow {
@@ -9011,10 +8984,12 @@ body .main-menu .main-menu-wrapper__nav {
   margin-bottom: 16px !important;
 }
 .guidings-gallery .left-image {
+  position: relative;
   width: 600px;
   padding: 0 !important;
   height: 400px;
   cursor: pointer;
+  overflow: hidden;
 }
 .guidings-gallery .left-image:hover {
   filter: contrast(0.5);
@@ -9025,6 +9000,11 @@ body .main-menu .main-menu-wrapper__nav {
      object-fit: cover;
   max-height: 400px;
   height: 100%;
+}
+.guidings-gallery .camp-gallery__mobile-carousel {
+  display: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 .guidings-gallery .right-images {
   width: calc(100% - 616px);
@@ -9042,9 +9022,6 @@ body .main-menu .main-menu-wrapper__nav {
 .guidings-gallery .col-7,
 .guidings-gallery .col-5 {
   flex: 1;
-}
-.guidings-gallery .gallery-mobile {
-  display: none;
 }
 .guidings-gallery .gallery {
   display: flex;
@@ -9243,8 +9220,25 @@ div#masonry-grid img {
   #guidings-page .guidings-description-container .description-item span {
     font-size: 18px;
   }
+  #guidings-page .guidings-gallery {
+    min-height: 0;
+    min-width: 0;
+    overflow-x: hidden;
+    gap: 10px;
+  }
   #guidings-page .guidings-gallery .right-images {
+    display: none;
+  }
+  #guidings-page .guidings-gallery .camp-gallery__mobile-carousel {
+    display: block !important;
+    flex: 0 0 100%;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    grid-column: auto;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box;
   }
   #guidings-page .title-container .title-wrapper {
     display: flex;
@@ -9285,22 +9279,17 @@ div#masonry-grid img {
   #guidings-page #guidings-accordion .table th {
     font-weight: 500;
   }
-  #guidings-page .gallery-mobile {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    height: 100%;
-  }
   #guidings-page .gallery {
     display: none;
   }
   #guidings-page .guidings-gallery .left-image {
     position: relative;
     width: 100%;
-    padding-bottom: 66.67% !important;
-    /* 4 / 6 = 0.6667 or 66.67% */
+    padding-bottom: 62.5% !important;
     overflow: hidden;
     height: auto;
+    min-height: 0;
+    border-radius: 12px;
   }
   #guidings-page .guidings-gallery .left-image img {
     position: absolute;
@@ -9310,9 +9299,6 @@ div#masonry-grid img {
     height: 100%;
     -o-object-fit: cover;
     object-fit: cover;
-  }
-  #guidings-page .right-images img {
-    max-height: 200px;
   }
   #guidings-page #showMoreBtn.btn-orange {
     display: none;
@@ -10186,8 +10172,8 @@ div#masonry-grid img {
   .vacations-page-header__breadcrumbs {
     order: -1;
     margin-top: 0;
-    padding-top: 0.85rem;
-    padding-bottom: 0.65rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.3rem;
     background: #fff;
   }
 }
@@ -10256,9 +10242,9 @@ div#masonry-grid img {
 }
 .vacations-page-header--product .vacations-page-header__place {
   display: none;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.7rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
   margin: 0;
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.9rem;
@@ -10270,12 +10256,12 @@ div#masonry-grid img {
   }
 }
 .vacations-page-header--product .vacations-page-header__place a {
-  color: #9ec9ff;
+  color: #E8604C;
   font-weight: 700;
   text-decoration: none;
 }
 .vacations-page-header--product .vacations-page-header__place a:hover {
-  color: #c5deff;
+  color: #ff7a66;
 }
 
 .vacations-page-header--product .mobile-search-sheet__trigger,
@@ -10404,6 +10390,7 @@ div#masonry-grid img {
     grid-template-columns: minmax(0, 1fr);
   }
   .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment {
+    box-sizing: border-box;
     flex-direction: row;
     align-items: center;
     gap: 0.7rem;
@@ -10411,11 +10398,39 @@ div#masonry-grid img {
     min-height: 3.15rem;
     padding: 0.7rem 0.95rem;
     border: 1.5px solid rgba(49, 48, 65, 0.14);
+    border-right-width: 1.5px;
+    border-bottom-width: 1.5px;
     border-radius: 999px;
     background: #fff;
   }
-  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--country {
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--country, .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons {
     border-bottom: 1.5px solid rgba(49, 48, 65, 0.14);
+  }
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons .offers-persons-stepper--catalog {
+    width: 100%;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    justify-content: space-between;
+  }
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons .offers-persons-stepper--catalog .offers-persons-stepper__value {
+    order: 0;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons .offers-persons-stepper--catalog [data-offers-persons-delta="-1"] {
+    order: 1;
+  }
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons .offers-persons-stepper--catalog [data-offers-persons-delta="1"] {
+    order: 3;
+  }
+  .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment--persons .offers-persons-stepper--catalog .offers-persons-stepper__btn {
+    width: 1.65rem;
+    height: 1.65rem;
+    flex-basis: 1.65rem;
+    border-radius: 999px;
   }
   .vacations-page-header--product [data-mobile-search-sheet].is-open .vacations-page-header__segment-label {
     font-size: 0.68rem;
@@ -17990,21 +18005,6 @@ div#masonry-grid img {
      object-fit: cover;
   display: block;
 }
-.camp-gallery__main .camp-gallery__counter {
-  position: absolute;
-  right: 0.65rem;
-  bottom: 0.65rem;
-  z-index: 2;
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  background: rgba(17, 24, 39, 0.72);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-  pointer-events: none;
-}
 @media (min-width: 768px) {
   .camp-gallery__main {
     min-height: 240px;
@@ -18080,6 +18080,21 @@ div#masonry-grid img {
   -o-object-fit: cover;
      object-fit: cover;
   display: block;
+}
+.camp-gallery__counter {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 2;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.72);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  pointer-events: none;
 }
 .camp-gallery__more {
   position: absolute;
@@ -18401,12 +18416,8 @@ div#masonry-grid img {
 .camp-nav-enhanced {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-}
-@media (max-width: 767.98px) {
-  .camp-nav-enhanced {
-    display: none;
-  }
+  gap: 0.5rem;
+  margin: 0.85rem 0 0.15rem;
 }
 
 .camp-product-specs {
@@ -18445,42 +18456,32 @@ div#masonry-grid img {
 }
 
 .camp-nav-item {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
   border: none;
   background-color: #313041;
   color: #fff;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease;
   cursor: pointer;
-  min-width: 100px;
+  min-width: 0;
   width: auto;
 }
 .camp-nav-item:hover {
   background-color: #4b5563;
-  transform: translateY(-1px);
   color: #fff;
   text-decoration: none;
 }
 .camp-nav-item:active {
-  transform: translateY(0);
   background-color: #374151;
-}
-@media (max-width: 768px) {
-  .camp-nav-item {
-    padding: 0.625rem 0.875rem;
-    min-width: 90px;
-  }
 }
 @media (max-width: 480px) {
   .camp-nav-item {
-    padding: 0.5rem 0.75rem;
-    min-width: 80px;
-    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
   }
 }
 
@@ -18510,23 +18511,16 @@ div#masonry-grid img {
 }
 
 .camp-nav-item__name {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 0.25rem;
+  margin: 0;
   line-height: 1.2;
   color: #fff;
 }
-@media (max-width: 768px) {
-  .camp-nav-item__name {
-    font-size: 0.8125rem;
-    margin-bottom: 0.2rem;
-  }
-}
 @media (max-width: 480px) {
   .camp-nav-item__name {
-    font-size: 0.75rem;
-    margin-bottom: 0.2rem;
+    font-size: 0.78rem;
   }
 }
 
@@ -18585,6 +18579,9 @@ div#masonry-grid img {
 }
 .camp-section.section-card {
   border-top: 2px solid rgba(232, 96, 76, 0.2);
+}
+.camp-section--listings {
+  scroll-margin-top: 7rem;
 }
 @media (max-width: 768px) {
   .camp-section--listings {
@@ -18923,6 +18920,42 @@ div#masonry-grid img {
 }
 .camp-booking-card__header {
   margin-bottom: 1.25rem;
+}
+.camp-booking-card__price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+}
+.camp-booking-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.camp-booking-card__amount {
+  color: #313041;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.camp-booking-card__unit {
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.camp-booking-card__note {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: right;
 }
 .camp-booking-card__title {
   margin: 0 0 0.4rem;
@@ -35621,7 +35654,8 @@ html.booking-assistant-modal-open body {
 }
 .listing-mobile-book--stacked .listing-mobile-book__note {
   color: rgba(255, 255, 255, 0.62);
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 12rem;
 }
 .listing-mobile-book--stacked .listing-mobile-book__amount {
   font-size: 1.15rem;

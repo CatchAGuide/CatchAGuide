@@ -124,8 +124,10 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('offers-page-header__title--hub', $html);
         $this->assertStringContainsString('Pike guiding on Kummerow Lake', $html);
         $this->assertStringContainsString(__('homepage.filter-fishing-near-me'), $html);
+        $this->assertStringContainsString('offers-page-header__breadcrumbs', $html);
         $this->assertStringContainsString('offers-page-header__breadcrumbs--below', $html);
-        $this->assertStringContainsString('offers-page-header__breadcrumbs--hero', $html);
+        $this->assertStringNotContainsString('offers-page-header__breadcrumbs--hero', $html);
+        $this->assertSame(1, substr_count($html, 'aria-label="Breadcrumb"'));
         $this->assertStringNotContainsString('<p class="offers-page-header__title offers-page-header__anim"', $html);
         $this->assertStringContainsString('Kummerow, Mecklenburgische Seenplatte', $html);
         $this->assertStringContainsString('#map', $html);
@@ -159,16 +161,40 @@ class GuidingsCatalogHeaderTest extends TestCase
 
         $this->assertStringContainsString('&--product {', $source);
         $this->assertStringContainsString('.offers-page-header__title--hub', $source);
-        $this->assertStringContainsString('.offers-page-header__breadcrumbs--below', $source);
         $this->assertStringContainsString('.offers-page-header__title--product', $source);
         $this->assertMatchesRegularExpression(
-            '/@media \(max-width: 767\.98px\) \{[\s\S]*?grid-template-areas:[\s\S]*?"crumbs"[\s\S]*?"title"[\s\S]*?"place"[\s\S]*?"rating"/',
+            '/&__breadcrumbs \{[\s\S]*?@media \(max-width: 767\.98px\) \{[\s\S]*?order:\s*-1;[\s\S]*?padding-top:\s*0\.35rem;[\s\S]*?background:\s*#fff;/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.offers-page-header__breadcrumbs--below \{[\s\S]*?display:\s*none;/',
+            $source
+        );
+        $this->assertStringNotContainsString('offers-page-header__breadcrumbs--hero', $source);
+        $this->assertMatchesRegularExpression(
+            '/@media \(max-width: 767\.98px\) \{[\s\S]*?grid-template-areas:[\s\S]*?"title"[\s\S]*?"place"[\s\S]*?"rating"/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/grid-template-areas:[\s\S]*?"crumbs"/',
             $source
         );
         $this->assertStringContainsString('[data-mobile-search-sheet].is-open', $source);
         $this->assertStringContainsString('flex-direction: column', $source);
         $this->assertStringContainsString('.mobile-search-sheet__chips', $source);
         $this->assertStringContainsString('.offers-page-header__search-row', $source);
+        $this->assertMatchesRegularExpression(
+            '/\[data-mobile-search-sheet\]\.is-open \{[\s\S]*?\.offers-page-header__segment \{[\s\S]*?border:\s*1\.5px solid[\s\S]*?border-radius:\s*999px;/',
+            $source
+        );
+        $this->assertDoesNotMatchRegularExpression(
+            '/\[data-mobile-search-sheet\]\.is-open \{[\s\S]*?\.offers-page-header__segment \{[\s\S]*?&--where,[\s\S]*?&--who \{[\s\S]*?border-right:\s*0;/',
+            $source
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.offers-page-header__segment-control > i\.offers-page-header__where-icon--listing \{[\s\S]*?display:\s*none;/',
+            $source
+        );
         $this->assertMatchesRegularExpression(
             '/&--product \{[\s\S]*?\.mobile-search-sheet__chips,[\s\S]*?\.offers-page-header__search-btn-label--sheet,[\s\S]*?\.offers-page-header__search-btn-label--compact \{[\s\S]*?display:\s*none;/',
             $source
@@ -197,7 +223,8 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString(__('offers.search_where'), $html);
         $this->assertStringContainsString(__('offers.search_who'), $html);
         $this->assertStringContainsString(__('offers.search_submit'), $html);
-        $this->assertStringContainsString('data-mobile-search-chip', $html);
+        $this->assertStringNotContainsString('mobile-search-sheet__chips', $html);
+        $this->assertStringNotContainsString('class="mobile-search-sheet__chip"', $html);
         $this->assertStringContainsString('fa-map-marker-alt', $html);
         $this->assertStringContainsString('id="categoryHeroSearchPlace"', $html);
         $placesEntry = (string) file_get_contents(resource_path('js/maps/places-entry.js'));

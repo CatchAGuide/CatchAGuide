@@ -41,14 +41,6 @@
         $placeValue !== '' ? $placeValue : __('offers.search_mobile_summary_empty'),
         trans_choice('offers.persons_count', $offersGuests, ['count' => $offersGuests]),
     ])->filter()->implode(' · '));
-    $popularPlaces = __('offers.search_mobile_popular_places');
-    $searchSuggestionChips = collect([$placeValue, $locationLabel])
-        ->concat(is_array($popularPlaces) ? $popularPlaces : [])
-        ->map(fn ($label) => trim((string) $label))
-        ->filter()
-        ->unique(fn ($label) => mb_strtolower($label))
-        ->take(4)
-        ->values();
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell data-product-hero-header>
     @include('layouts.partials.site-nav', [
@@ -62,21 +54,6 @@
                 <div class="offers-page-header__copy">
                     @if($hubTitle !== '')
                         <p class="offers-page-header__title offers-page-header__title--hub offers-page-header__anim" style="--offers-anim-i: 0">{{ $hubTitle }}</p>
-                    @endif
-                    @if(count($breadcrumbItems) > 0)
-                        <nav class="offers-page-header__breadcrumbs offers-page-header__breadcrumbs--hero offers-page-header__anim" style="--offers-anim-i: 0" aria-label="Breadcrumb">
-                            <ol class="offers-page-header__crumb-list">
-                                <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                                @foreach($breadcrumbItems as $item)
-                                    <li aria-hidden="true"><i class="fas fa-chevron-right"></i></li>
-                                    @if(! empty($item['url']))
-                                        <li><a href="{{ $item['url'] }}">{{ $item['label'] }}</a></li>
-                                    @else
-                                        <li class="is-active" aria-current="page">{{ $item['label'] }}</li>
-                                    @endif
-                                @endforeach
-                            </ol>
-                        </nav>
                     @endif
 
                     <h1 class="offers-page-header__title offers-page-header__title--product offers-page-header__anim" style="--offers-anim-i: 1">{{ $listingTitle }}</h1>
@@ -168,18 +145,6 @@
                             <i class="fas fa-arrow-right offers-page-header__search-btn-arrow" aria-hidden="true"></i>
                         </button>
                     </div>
-
-                    @if($searchSuggestionChips->isNotEmpty())
-                        <div class="mobile-search-sheet__chips">
-                            @foreach($searchSuggestionChips as $chipLabel)
-                                <button
-                                    type="button"
-                                    class="mobile-search-sheet__chip"
-                                    data-mobile-search-chip="{{ $chipLabel }}"
-                                >{{ $chipLabel }}</button>
-                            @endforeach
-                        </div>
-                    @endif
                 </div>
             </form>
             </x-mobile-search-sheet>

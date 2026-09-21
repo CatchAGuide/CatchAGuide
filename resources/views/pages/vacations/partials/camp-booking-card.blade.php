@@ -6,6 +6,15 @@
 <div class="camp-booking-card">
     <div class="camp-booking-card__header">
         <h5 class="camp-booking-card__title">{{ __('vacations.contact_us') }}</h5>
+        <div class="camp-booking-card__price-row">
+            <div class="camp-booking-card__price">
+                <span class="camp-booking-card__amount">{{ $campFromPriceDisplay ?? '—' }}</span>
+                @if(! empty($campFromPriceDisplay))
+                    <span class="camp-booking-card__unit">{{ __('vacations.per_night') }}</span>
+                @endif
+            </div>
+            <span class="camp-booking-card__note">{{ __('vacations.no_booking_fees') }}</span>
+        </div>
     </div>
 
     <div class="camp-booking-card__body">
@@ -44,7 +53,7 @@
         </div>
 
         <button type="button" class="camp-booking-card__cta" data-camp-booking-cta>
-            {{ __('vacations.contact_us_button') }}
+            {{ __('vacations.check_availability') }}
         </button>
     </div>
 </div>
