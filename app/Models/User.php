@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Services\Guide\GuideProfilePhotoService;
 use App\Traits\Cacheable;
 use App\Traits\HasGuideStatus;
 
@@ -242,5 +243,13 @@ class User extends Authenticatable
         }
         
         return $this->phone ?? '';
+    }
+
+    /**
+     * Public guide photo: stored upload when present, otherwise a listing image.
+     */
+    public function profilePhotoUrl(mixed $listing = null): string
+    {
+        return app(GuideProfilePhotoService::class)->url($this, $listing);
     }
 }

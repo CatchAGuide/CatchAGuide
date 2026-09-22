@@ -75,120 +75,6 @@
             margin-bottom: 2rem; /* Adjust as needed */
         }
 
-        /* Enhanced guiding tile cards (same guide + similar guidings) */
-        .tour-details-two .guiding-tile {
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            transition: box-shadow 0.25s ease, transform 0.25s ease;
-            border: 1px solid rgba(0,0,0,0.06);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .tour-details-two .guiding-tile:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            transform: translateY(-2px);
-        }
-        .tour-details-two .guiding-tile__img-wrap {
-            position: relative;
-            aspect-ratio: 4/3;
-            overflow: hidden;
-            background: #e9ecef;
-        }
-        .tour-details-two .guiding-tile__img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.35s ease;
-        }
-        .tour-details-two .guiding-tile:hover .guiding-tile__img-wrap img {
-            transform: scale(1.03);
-        }
-        .tour-details-two .guiding-tile__rating {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(0,0,0,0.65);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .tour-details-two .guiding-tile__rating svg {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-        }
-        .tour-details-two .guiding-tile__body {
-            padding: 14px 16px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .tour-details-two .guiding-tile__title {
-            font-size: 1rem;
-            font-weight: 600;
-            line-height: 1.35;
-            margin-bottom: 6px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .tour-details-two .guiding-tile__title a {
-            color: #262e35;
-            text-decoration: none;
-        }
-        .tour-details-two .guiding-tile__title a:hover {
-            color: #E85B40;
-        }
-        .tour-details-two .guiding-tile__location {
-            font-size: 0.875rem;
-            color: #6c757d;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .tour-details-two .guiding-tile__meta {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .tour-details-two .guiding-tile__meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .tour-details-two .guiding-tile__price {
-            margin-top: auto;
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: #262e35;
-        }
-        .tour-details-two .guiding-tile__price .from {
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-
-        /* Carousel: tile fills owl item height */
-        .tour-details-two .popular-tours__carousel .owl-item {
-            display: flex;
-        }
-        .tour-details-two .popular-tours__carousel .owl-item .guiding-tile {
-            width: 100%;
-        }
-      
         @media screen and (max-width: 767px) {
             .price-details{
                 display:none;
@@ -644,20 +530,13 @@
             .tours-list__inner.mobile-view::-webkit-scrollbar {
                 display: none;
             }
-            .tours-list__inner.mobile-view .guiding-tile,
-            .tours-list__inner.mobile-view .popular-tours__single {
-                flex: 0 0 78%;
-                scroll-snap-align: start;
-                margin: 0;
-            }
             .desktop-view {
                 display: none !important;
             }
             .mobile-view {
                 display: block !important;
             }
-            
-            /* Mobile carousel styling – enhanced tiles use .guiding-tile; legacy fallback */
+
             .popular-tours__single {
                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 border-radius: 8px;
@@ -678,14 +557,6 @@
             
             .popular-tours__content {
                 padding: 15px;
-            }
-            
-            .tour-details-two .guiding-tile__body {
-                padding: 12px 14px;
-            }
-            
-            .tour-details-two .guiding-tile__title {
-                font-size: 0.95rem;
             }
             
             .crop-text-2 {
@@ -1739,16 +1610,13 @@
                     <div class="about-one__left">
                         <div class="about-one__img-box">
                             <div class="tour-details__review-comment-top-img">
-                                @if($guiding->user->profil_image)
-                                    <img class="center-block rounded-circle"
-                                         src="{{asset('uploads/profile_images/'. $guiding->user->profil_image)}}" alt="" width="200px"
-                                         height="200px">
-                                @else
-                                    <img class="center-block rounded-circe"
-                                         src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="200px"
-                                         height="200px">
-                                @endif
-
+                                <img class="center-block rounded-circle"
+                                     src="{{ guide_profile_photo_url($guiding->user, $guiding) }}"
+                                     alt="{{ $guiding->user->firstname }}"
+                                     width="180"
+                                     height="180"
+                                     loading="lazy"
+                                     decoding="async">
                             </div>
                             <h4 class="mt-3"
                                 style="text-align: center">{{$guiding->user->firstname}}</h4>
@@ -1804,6 +1672,9 @@
 
     <div class="guidings-rating mb-3">
         @if($reviews_count > 0)
+            {{-- Mobile-only reviews (≤767px). The desktop overview + card rail below are hidden there. --}}
+            @include('pages.guidings.partials.reviews-mobile')
+
             <div class="ratings-head">
                 <div class="rating-overview text-center shadow-sm">
                     <div class="ratings-wrapper">
@@ -1931,52 +1802,10 @@
         </div>
     </section>
     @endif
-    @if ($other_guidings->count() > 0)
-    <section class="tour-details-two mb-5 p-0">
-        <div class="container">
-            <div class="tour-details-two__related-tours {{$agent->ismobile() ? 'text-center' : ''}}">
-                <h3 class="tour-details-two__title">@lang('guidings.Match_Guiding')</h3>
-                <div class="popular-tours__carousel owl-theme owl-carousel">
-                    @foreach($other_guidings as $other_guiding)
-                        @php
-                            $tile_img = $other_guiding->thumbnail_path ? media_url($other_guiding->thumbnail_path) : null;
-                            if (!$tile_img && count(get_galleries_image_link($other_guiding)) > 0) {
-                                $tile_img = get_galleries_image_link($other_guiding)[0];
-                            }
-                            $tile_rating = $other_guiding->user ? $other_guiding->user->average_rating() : null;
-                            $tile_reviews = $other_guiding->user && $other_guiding->user->reviews ? $other_guiding->user->reviews->count() : 0;
-                        @endphp
-                        <a href="{{ $other_guiding->publicShowUrl($productPageQuery ?? []) }}" class="guiding-tile text-decoration-none">
-                            <div class="guiding-tile__img-wrap">
-                                @if($tile_img)
-                                    <img src="{{ $tile_img }}" alt="{{ $other_guiding->title }}" loading="lazy">
-                                @endif
-                                @if($tile_rating)
-                                    <span class="guiding-tile__rating">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                        {{ number_format($tile_rating, 1) }}@if($tile_reviews) ({{ $tile_reviews }})@endif
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="guiding-tile__body">
-                                <h3 class="guiding-tile__title">{{ $other_guiding->title ? translate(Str::limit($other_guiding->title, 55)) : translate($other_guiding->title) }}</h3>
-                                <div class="guiding-tile__location"><i class="fas fa-map-marker-alt"></i> {{ $other_guiding->location }}</div>
-                                <div class="guiding-tile__meta">
-                                    <span>{{ $other_guiding->duration }} @if($other_guiding->duration_type == 'multi_day') {{ __('guidings.days') }} @else {{ __('guidings.hours') }} @endif</span>
-                                    <span>{{ $other_guiding->max_guests }} @if($other_guiding->max_guests != 1) {{ __('guidings.persons') }} @else {{ __('guidings.person') }} @endif</span>
-                                </div>
-                                <div class="guiding-tile__price"><span class="from">@lang('message.from')</span> {{ $other_guiding->getLowestPrice() }}€</div>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-                <div class="text-center my-3">
-                    <a href="/guidings" class="btn btn-outline-secondary">{{ __('guidings.View_all_guidings') }}</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    @endif
+    @include('pages.guidings.partials.similar-guidings-rail', [
+        'guidings' => $other_guidings ?? collect(),
+        'seeAllUrl' => $similar_guidings_see_all_url ?? route('guidings.index'),
+    ])
 </div>
 <div class="guidings-book-mobile">
     @if($agent->ismobile())
@@ -2058,7 +1887,11 @@ $(document).ready(function(){
     
     // Function to scroll to reviews with highlight effect
     function scrollToReviews() {
-        const ratingsContainer = document.getElementById('ratings-container');
+        // Desktop rail is display:none on mobile, where the mobile reviews block takes over.
+        const desktopRatings = document.getElementById('ratings-container');
+        const ratingsContainer = (desktopRatings && desktopRatings.offsetParent !== null)
+            ? desktopRatings
+            : (document.getElementById('ratings-container-mobile') || desktopRatings);
         if (ratingsContainer) {
             ratingsContainer.scrollIntoView({ 
                 behavior: 'smooth',
@@ -2082,6 +1915,15 @@ $(document).ready(function(){
     // Auto-scroll to reviews when rating scores are clicked
     $('#rating-score-link, #rating-overview-link').on('click', function() {
         scrollToReviews();
+    });
+
+    // "(N reviews)" anchor in the title row: only take over when the desktop rail is hidden (mobile)
+    $('a[href="#ratings-container"]').not('#reviews-link').on('click', function(e) {
+        const desktopRatings = document.getElementById('ratings-container');
+        if (desktopRatings && desktopRatings.offsetParent === null) {
+            e.preventDefault();
+            scrollToReviews();
+        }
     });
     
     // Add this code to check if the button exists

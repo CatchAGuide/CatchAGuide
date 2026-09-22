@@ -91,6 +91,11 @@ return [
     'over_10' => 'over 10',
     'no_reviews' => 'No reviews yet',
     'automatic_review_badge' => 'Automatic review by Catch A Guide',
+    'reviews_based_on' => 'Based on :count verified review|Based on :count verified reviews',
+    'guest_comments' => 'Guest comments',
+    'previous_comment' => 'Previous comment',
+    'next_comment' => 'Next comment',
+    'show_comment' => 'Show comment :number',
 
 
     'Excellent' => 'Excellent',

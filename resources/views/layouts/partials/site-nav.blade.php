@@ -11,8 +11,8 @@
     $langFormId = $idPrefix.'-language-form';
     $profileToggleId = $idPrefix.'NavProfileToggle';
     $siteNavUser = Auth::user();
-    $siteNavAvatar = $siteNavUser && $siteNavUser->profil_image
-        ? asset('images/'.$siteNavUser->profil_image)
+    $siteNavAvatar = $siteNavUser
+        ? guide_profile_photo_url($siteNavUser)
         : asset('images/placeholder_guide.jpg');
     $siteNavName = $siteNavUser
         ? (trim((string) $siteNavUser->firstname) ?: __('homepage.header-profile'))

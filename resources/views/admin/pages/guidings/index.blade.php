@@ -335,9 +335,12 @@
                                         <td>
                                             <a href="{{route('admin.guides.edit', $guiding->user->id)}}" class="text-decoration-none">
                                                 <div class="guiding-guide-cell">
-                                                    @if(!empty($guiding->user->profil_image ?? null))
+                                                    @php
+                                                        $guidePhotoUrl = guide_profile_photo_url($guiding->user, $guiding);
+                                                    @endphp
+                                                    @if($guidePhotoUrl && ! str_contains($guidePhotoUrl, 'placeholder_guide'))
                                                         <img
-                                                            src="{{ asset('uploads/profile_images/' . $guiding->user->profil_image) }}"
+                                                            src="{{ $guidePhotoUrl }}"
                                                             alt="{{ $guiding->user->full_name }}"
                                                             class="guiding-guide-avatar"
                                                             loading="lazy"

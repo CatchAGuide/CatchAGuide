@@ -9,6 +9,7 @@ use App\Models\CampVacationBooking;
 use App\Models\Guiding;
 use App\Models\Trip;
 use App\Models\TripBooking;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -241,7 +242,7 @@ class ConsolidatedListingsController extends Controller
                 'price_high' => $high,
                 'currency' => 'EUR',
                 'owner_name' => (string) ($g->user->full_name ?? $g->user->name ?? ''),
-                'owner_photo_url' => $this->guideProfilePhotoUrl($g->user->profil_image ?? null),
+                'owner_photo_url' => $this->guideOwnerPhotoUrl($g->user, $g),
                 'owner_email' => (string) ($g->user->email ?? ''),
                 'owner_phone' => method_exists($g->user, 'getFullPhoneNumber') ? $g->user->getFullPhoneNumber() : ((string) ($g->user->phone ?? '')),
                 'owner_city' => (string) ($g->user->information->city ?? ''),
@@ -331,7 +332,7 @@ class ConsolidatedListingsController extends Controller
                 'price_high' => $high,
                 'currency' => (string) ($a->currency ?? 'EUR'),
                 'owner_name' => (string) ($a->user->full_name ?? $a->user->name ?? ''),
-                'owner_photo_url' => $this->guideProfilePhotoUrl($a->user->profil_image ?? null),
+                'owner_photo_url' => $this->guideOwnerPhotoUrl($a->user, $a),
                 'owner_email' => (string) ($a->user->email ?? ''),
                 'owner_phone' => method_exists($a->user, 'getFullPhoneNumber') ? $a->user->getFullPhoneNumber() : ((string) ($a->user->phone ?? '')),
                 'owner_city' => (string) ($a->user->information->city ?? ''),
@@ -422,7 +423,7 @@ class ConsolidatedListingsController extends Controller
                 'price_high' => $high,
                 'currency' => 'EUR',
                 'owner_name' => (string) ($c->user->full_name ?? $c->user->name ?? ''),
-                'owner_photo_url' => $this->guideProfilePhotoUrl($c->user->profil_image ?? null),
+                'owner_photo_url' => $this->guideOwnerPhotoUrl($c->user, $c),
                 'owner_email' => (string) ($c->user->email ?? ''),
                 'owner_phone' => method_exists($c->user, 'getFullPhoneNumber') ? $c->user->getFullPhoneNumber() : ((string) ($c->user->phone ?? '')),
                 'owner_city' => (string) ($c->user->information->city ?? ''),
@@ -504,7 +505,7 @@ class ConsolidatedListingsController extends Controller
                 'price_high' => $high,
                 'currency' => (string) ($t->currency ?? 'EUR'),
                 'owner_name' => (string) ($t->provider_name ?? $t->user->full_name ?? $t->user->name ?? ''),
-                'owner_photo_url' => $this->tripProviderPhotoUrl($t->provider_photo ?? null) ?: $this->guideProfilePhotoUrl($t->user->profil_image ?? null),
+                'owner_photo_url' => $this->tripProviderPhotoUrl($t->provider_photo ?? null) ?: $this->guideOwnerPhotoUrl($t->user, $t),
                 'owner_email' => (string) ($t->user->email ?? ''),
                 'owner_phone' => method_exists($t->user, 'getFullPhoneNumber') ? $t->user->getFullPhoneNumber() : ((string) ($t->user->phone ?? '')),
                 'owner_city' => (string) ($t->user->information->city ?? ''),
@@ -521,21 +522,15 @@ class ConsolidatedListingsController extends Controller
         })->values();
     }
 
-    private function guideProfilePhotoUrl(?string $profileImage): ?string
+    private function guideOwnerPhotoUrl(?User $user, mixed $listing = null): ?string
     {
-        $img = trim((string) ($profileImage ?? ''));
-        if ($img === '') {
+        if ($user === null) {
             return null;
         }
-        if (str_starts_with($img, 'http') || str_starts_with($img, '//')) {
-            return $img;
-        }
-        // Some tables store only filename; some might store a relative path.
-        if (str_contains($img, '/')) {
-            return asset(ltrim($img, '/'));
-        }
-        // Existing admin guidings list uses this path convention.
-        return asset('uploads/profile_images/' . ltrim($img, '/'));
+
+        $url = guide_profile_photo_url($user, $listing);
+
+        return str_contains($url, 'placeholder_guide') ? null : $url;
     }
 
     private function tripProviderPhotoUrl(?string $path): ?string

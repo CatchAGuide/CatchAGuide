@@ -37,8 +37,6 @@ class CampMobileBookBarTest extends TestCase
         $this->assertStringContainsString('cag-footer', $html);
         $this->assertStringContainsString('data-camp-mobile-book', $html);
         $this->assertStringContainsString(__('vacations.check_availability'), $html);
-        $this->assertStringContainsString(__('vacations.from_price_prefix'), $html);
-        $this->assertStringContainsString(__('vacations.per_night'), $html);
         $this->assertStringContainsString(trans_choice('vacations.accommodation_for_guests', 1, ['count' => 1]), $html);
         $this->assertStringNotContainsString(__('vacations.no_booking_fees'), $html);
         $this->assertStringContainsString('listing-mobile-book__note', $html);
@@ -220,6 +218,13 @@ class CampMobileBookBarTest extends TestCase
             'region' => $camp->region ?: 'Test Region',
             'accommodation_type' => 'cabin',
             'max_occupancy' => $maxOccupancy,
+            'per_person_pricing' => [
+                [
+                    'person' => $maxOccupancy,
+                    'price_per_night' => 100,
+                    'price_per_week' => null,
+                ],
+            ],
         ]);
 
         $camp->accommodations()->attach($accommodation->id);

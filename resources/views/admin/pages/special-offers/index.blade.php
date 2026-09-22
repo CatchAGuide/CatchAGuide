@@ -78,7 +78,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <x-admin.owner-cell :user="$specialOffer->user" />
+                                                    <x-admin.owner-cell :user="$specialOffer->user" :listing="$specialOffer" />
                                                 </td>
                                                 <td>{{ $specialOffer->created_at->format('M d, Y') }}</td>
                                                 <td class="text-center">

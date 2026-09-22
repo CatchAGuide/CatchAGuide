@@ -3,6 +3,7 @@
 namespace App\Presenters\Guiding;
 
 use App\Models\Guiding;
+use Illuminate\Support\Collection;
 
 class GuidingCardPresenter
 {
@@ -28,7 +29,7 @@ class GuidingCardPresenter
      *     requested_count: ?int
      * }
      */
-    public function present(Guiding $guiding, ?int $requestedCount = null): array
+    public function present(Guiding $guiding, ?int $requestedCount = null, array $urlQuery = []): array
     {
         $averageRating = $guiding->cached_average_rating ?? $guiding->user?->average_rating();
         $reviewCount = $guiding->cached_review_count ?? ($guiding->user?->reviews->count() ?? 0);
@@ -37,11 +38,11 @@ class GuidingCardPresenter
         return [
             'type' => 'tour',
             'id' => $guiding->id,
-            'url' => $guiding->publicShowUrl(),
+            'url' => $guiding->publicShowUrl($urlQuery),
             'image' => get_featured_image_link($guiding) ?: asset('images/placeholder_guide.webp'),
             'badge' => __('homepage.landing_card_badge'),
             'title' => translate($guiding->title),
-            'location' => translate($guiding->location),
+            'location' => $this->locationLabel($guiding),
             'meta' => trim(($guiding->duration ?: 0).' '.$durationUnit.' · '.__('homepage.landing_card_max_guests', ['count' => (int) $guiding->max_guests])),
             'rating' => $averageRating ? number_format((float) $averageRating, 1) : null,
             'review_count' => (int) $reviewCount,
@@ -50,5 +51,27 @@ class GuidingCardPresenter
             'price_unit' => __('vacations.person'),
             'requested_count' => $requestedCount,
         ];
+    }
+
+    /**
+     * @param  Collection<int, Guiding>  $guidings
+     * @param  array<string, mixed>  $urlQuery
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function presentMany(Collection $guidings, array $urlQuery = []): Collection
+    {
+        return $guidings
+            ->map(fn (Guiding $guiding) => $this->present($guiding, null, $urlQuery))
+            ->values();
+    }
+
+    public function locationLabel(Guiding $guiding): string
+    {
+        $label = listing_place_label([
+            $guiding->city ?: $guiding->location,
+            $guiding->country,
+        ]);
+
+        return $label !== '' ? translate($label) : '';
     }
 }

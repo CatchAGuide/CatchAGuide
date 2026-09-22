@@ -388,16 +388,13 @@ transform: translate3d(0,0,0); width: 100%;">
                             <div class="about-one__left">
                                 <div class="about-one__img-box">
                                     <div class="tour-details__review-comment-top-img">
-                                        @if($guiding->user->profil_image)
-                                            <img class="center-block rounded-circle"
-                                                 src="{{asset('images/'. $guiding->user->profil_image)}}" alt="" width="200px"
-                                                 height="200px">
-                                        @else
-                                            <img class="center-block rounded-circe"
-                                                 src="{{asset('images/placeholder_guide.jpg')}}" alt="" width="200px"
-                                                 height="200px">
-                                        @endif
-
+                                        <img class="center-block rounded-circle"
+                                             src="{{ guide_profile_photo_url($guiding->user, $guiding) }}"
+                                             alt="{{ $guiding->user->firstname }}"
+                                             width="180"
+                                             height="180"
+                                             loading="lazy"
+                                             decoding="async">
                                     </div>
                                     <h4 class="mt-3"
                                         style="text-align: center">{{$guiding->user->firstname}}</h4>

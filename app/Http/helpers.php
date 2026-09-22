@@ -3,7 +3,9 @@
 use App\Contracts\Media\MediaProcessorInterface;
 use App\Models\CategoryEntity;
 use App\Models\CategoryPage;
+use App\Models\User;
 use App\Services\CategoryPage\CategoryListingThumbnailFallback;
+use App\Services\Guide\GuideProfilePhotoService;
 use App\Services\Media\ListingMediaPathBuilder;
 use App\Services\Media\ListingMediaStorageRegistry;
 use App\Services\Media\ManagedMediaPathMatcher;
@@ -294,6 +296,18 @@ if (!function_exists('media_url')) {
     function media_url(?string $path, ?string $placeholder = 'images/placeholder_guide.jpg'): string
     {
         return app(MediaUrlResolver::class)->resolve($path, $placeholder);
+    }
+}
+
+if (! function_exists('guide_profile_photo_url')) {
+    /**
+     * Guide avatar URL: stored profile photo when the file exists, otherwise a listing image.
+     */
+    function guide_profile_photo_url($user = null, $listing = null): string
+    {
+        $resolved = $user instanceof User ? $user : null;
+
+        return app(GuideProfilePhotoService::class)->url($resolved, $listing);
     }
 }
 

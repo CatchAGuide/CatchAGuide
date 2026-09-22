@@ -37,6 +37,10 @@
         $guidingGuestsLabel,
         !empty($waterNames) ? implode(', ', $waterNames) : null,
     ]));
+    $placeLabel = listing_place_label([
+        $guiding->city ?: $guiding->location,
+        $guiding->country,
+    ]) ?: $guiding->location;
     $guidingPriceDisplay = $lowestPrice.'€';
     $guidingPriceSuffix = __('vacations.per_person_short');
 @endphp
@@ -106,7 +110,7 @@
                     :title="$guiding->title"
                     type="tour"
                     :badge="__('offers.badge_tour')"
-                    :location="$guiding->location"
+                    :location="$placeLabel"
                     :rating="$averageRating"
                     :review-count="$reviewCount"
                     :specs="$guidingModalSpecs"
@@ -123,7 +127,7 @@
                     <div class="guidings-item">
                         <div class="guidings-item-title">
                             <h5 class="fw-bolder text-truncate">{{ Str::limit($guiding->title, 70) }}</h5>
-                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $guiding->location }}</span>
+                            <span class="truncate"><i class="fas fa-map-marker-alt me-2"></i>{{ $placeLabel }}</span>
                         </div>
                         @if ($averageRating)
                             <div class="ave-reviews-row">

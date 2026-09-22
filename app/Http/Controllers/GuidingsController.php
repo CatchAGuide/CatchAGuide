@@ -36,6 +36,7 @@ use App\Services\GuidingFilterService;
 use App\Services\ImageOptimizationService;
 use App\Services\Translation\GuidingTranslationService;
 use App\Services\Guiding\GuidingSeoService;
+use App\Services\Guiding\SimilarGuidingsService;
 use App\Services\Media\ListingGalleryRetention;
 use App\Services\Media\ListingMediaRelocator;
 use App\Services\Media\MediaTrashService;
@@ -192,6 +193,7 @@ class GuidingsController extends Controller
         private ListingGalleryRetention $galleryRetention,
         private MediaTrashService $mediaTrash,
         private OfferCatalogPageService $offerCatalog,
+        private SimilarGuidingsService $similarGuidings,
     )
     {
         $this->initializeOptimizationServices();
@@ -304,8 +306,6 @@ class GuidingsController extends Controller
 
     public function newShow(string $slug, Request $request)
     {
-        $locale = Config::get('app.locale');
-        
         $query = Guiding::where('slug', $slug);
         
         $destination = null;
@@ -344,57 +344,16 @@ class GuidingsController extends Controller
 
         $guiding->healThumbnailPath();
 
-        // $targetFish = $guiding->is_newguiding ? json_decode($guiding->target_fish, true) : $guiding->guidingTargets->pluck('id')->toArray();
-        $targetFish = json_decode($guiding->target_fish, true);
-        $fishingFrom = $guiding->fishing_from_id;
-        $fishingType = $guiding->fishing_type_id;
-
-        // Get reviews instead of ratings
-        // $reviews = $guiding->reviews;
         $reviews = Review::where('guide_id', $guiding->user_id)
             ->with('booking', 'booking.registeredUser', 'booking.guestUser', 'booking.calendar_schedule', 'booking.blocked_event')
+            ->newestFirst()
             ->get();
         $reviews_count = $reviews->count();
 
-        // Calculate average scores
         $average_overall_score = $reviews_count > 0 ? $reviews->avg('overall_score') : 0;
         $average_guide_score = $reviews_count > 0 ? $reviews->avg('guide_score') : 0;
         $average_region_water_score = $reviews_count > 0 ? $reviews->avg('region_water_score') : 0;
         $average_grandtotal_score = $reviews_count > 0 ? $reviews->avg('grandtotal_score') : 0;
-
-        $otherGuidings = Guiding::publiclyVisible()
-            ->where('id', '!=', $guiding->id)
-            ->where(function($query) use ($targetFish, $fishingFrom, $fishingType) {
-                $query->where(function($q) use ($targetFish, $fishingFrom, $fishingType) {
-                    if (!empty($targetFish)) {
-                        $q->where(function($subQ) use ($targetFish) {
-                            foreach ($targetFish as $fish) {
-                                $subQ->orWhereJsonContains('target_fish', $fish);
-                            }
-                        });
-                    }
-                    
-                    if (!empty($fishingFrom)) {
-                        $q->orWhere(function($subQ) use ($fishingFrom) {
-                            $subQ->where('fishing_from_id', $fishingFrom)
-                                  ->orWhereHas('fishingFrom', function($subSubQ) use ($fishingFrom) {
-                                      $subSubQ->where('id', $fishingFrom);
-                                  });
-                        });
-                    }
-                    
-                    if (!empty($fishingType)) {
-                        $q->orWhere(function($subQ) use ($fishingType) {
-                            $subQ->where('fishing_type_id', $fishingType)
-                                  ->orWhereHas('fishingTypes', function($subSubQ) use ($fishingType) {
-                                      $subSubQ->where('id', $fishingType);
-                                  });
-                        });
-                    }
-                });
-            })
-            ->limit(4)
-            ->get();
 
         $sameGuidings = Guiding::where('user_id', $guiding->user_id)
             ->where('id', '!=', $guiding->id)
@@ -402,7 +361,6 @@ class GuidingsController extends Controller
             ->limit(10)
             ->get();
 
-        // Translation logic
         $locale = app()->getLocale();
         if ($guiding->language !== $locale) {
             $translationService = new GuidingTranslationService();
@@ -412,7 +370,6 @@ class GuidingsController extends Controller
             }
         }
         $this->applyGuidingTranslations($sameGuidings);
-        $this->applyGuidingTranslations($otherGuidings);
 
         $preselectedGuests = null;
         $productPageQuery = OfferListingFilter::productPageQueryFromInput($request->query());
@@ -421,6 +378,8 @@ class GuidingsController extends Controller
                 OfferListingFilter::fromRequest($request->all())->numGuests
             );
         }
+
+        $similar = $this->similarGuidings->forProductPage($guiding);
 
         return view('pages.guidings.newIndex', [
             'guiding' => $guiding,
@@ -431,7 +390,8 @@ class GuidingsController extends Controller
             'average_guide_score' => $average_guide_score,
             'average_region_water_score' => $average_region_water_score,
             'average_grandtotal_score' => $average_grandtotal_score,
-            'other_guidings' => $otherGuidings,
+            'other_guidings' => $similar['guidings'],
+            'similar_guidings_see_all_url' => $similar['see_all_url'],
             'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
             'preselectedGuests' => $preselectedGuests,
