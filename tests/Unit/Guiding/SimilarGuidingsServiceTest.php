@@ -174,15 +174,16 @@ class SimilarGuidingsServiceTest extends TestCase
         $this->assertSame('Ludwigshafen', $guiding->city);
         $this->assertSame('Germany', $guiding->country);
 
-        $html = view('pages.guidings.partials.guiding-card', [
+        $html = view('pages.guidings.partials.tour-list-rows', [
             'guidings' => collect([$guiding]),
         ])->render();
 
-        $this->assertStringContainsString('guiding-card-wrapper', $html);
-        $this->assertStringContainsString('gc-mob-book-btn', $html);
+        $this->assertStringContainsString('offers-card', $html);
+        $this->assertStringContainsString('offers-card__cta', $html);
         $this->assertStringContainsString('Ludwigshafen, Germany', $html);
         $this->assertStringNotContainsString('stale street', $html);
         $this->assertStringNotContainsString('cag-home-offer', $html);
+        $this->assertStringNotContainsString('guiding-card-wrapper', $html);
     }
 
     /**
