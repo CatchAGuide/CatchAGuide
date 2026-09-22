@@ -1162,41 +1162,44 @@
     </div>
 
     <!-- Payment Information Section -->
-    <div class="mb-3">
-        <div class="card shadow-sm">
-            <div class="card-body py-3">
-                <h3 class="mb-2">@lang('booking.how_you_can_pay')</h3>
-                <p class="mb-2">@lang('booking.no_payment_now')</p>
-                <p class="mb-2">@lang('booking.payment_description')</p>
+    @php
+        $paymentMethods = collect([
+            $guiding->user->bar_allowed ? ['icon' => 'fas fa-money-bill-wave', 'label' => __('booking.cash')] : null,
+            $guiding->user->banktransfer_allowed ? ['icon' => 'fas fa-university', 'label' => __('booking.bank_transfer')] : null,
+            $guiding->user->paypal_allowed ? ['icon' => 'fab fa-paypal', 'label' => __('booking.paypal')] : null,
+        ])->filter()->values();
+    @endphp
+    @if($paymentMethods->isNotEmpty())
+        <div class="tour-payment mb-3">
+            <div class="tour-payment__card">
+                <h3 class="tour-payment__title">
+                    <i class="fas fa-wallet" aria-hidden="true"></i>
+                    <span>@lang('booking.how_you_can_pay')</span>
+                </h3>
 
-                <div class="d-flex flex-wrap gap-3">
-                    @if ($guiding->user->bar_allowed)
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-money-bill payment-icon me-2"></i>
-                        <span>@lang('booking.cash')</span>
-                    </div>
-                    @endif
-                    
-                    @if ($guiding->user->banktransfer_allowed)
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-credit-card payment-icon me-2"></i>
-                        <span>@lang('booking.bank_transfer')</span>
-                    </div>
-                    @endif
-                    
-                    @if ($guiding->user->paypal_allowed)
-                    <div class="d-flex align-items-center">
-                        <i class="fab fa-paypal payment-icon me-2"></i>
-                        <span>@lang('booking.paypal')</span>
-                    </div>
-                    @endif
+                <div class="tour-payment__highlight">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    <p>@lang('booking.no_payment_now')</p>
                 </div>
+
+                <p class="tour-payment__text">@lang('booking.payment_description')</p>
+
+                <ul class="tour-payment__methods">
+                    @foreach($paymentMethods as $method)
+                        <li class="tour-payment__method">
+                            <span class="tour-payment__method-icon" aria-hidden="true">
+                                <i class="{{ $method['icon'] }}"></i>
+                            </span>
+                            <span class="tour-payment__method-label">{{ $method['label'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
-    </div>
+    @endif
 
-    <!-- Description Section -->
-    <div class="">
+    <!-- Availability Section -->
+    <div class="tour-availability">
         <h2 class="mb-3">@lang('guidings.Availability')</h2>
         
         <!-- Calendar Legend -->
