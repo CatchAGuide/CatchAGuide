@@ -57,6 +57,33 @@ class ListingGalleryModalComponentTest extends TestCase
         $this->assertStringContainsString('offers-gallery-modal__counter', $html);
     }
 
+    public function test_gallery_modal_renders_post_cta_form_when_method_is_post(): void
+    {
+        $html = Blade::render(
+            '<x-gallery.modal
+                id="post-cta"
+                :images="[\'https://example.com/one.jpg\']"
+                title="Checkout Tour"
+                type="tour"
+                cta-url="https://example.com/checkout"
+                cta-method="POST"
+                :cta-fields="[\'guiding_id\' => 42, \'person\' => 2, \'selected_date\' => \'\']"
+                cta-label="Reserve"
+            />'
+        );
+
+        $this->assertStringContainsString('offers-gallery-modal__cta-form', $html);
+        $this->assertStringContainsString('action="https://example.com/checkout"', $html);
+        $this->assertStringContainsString('method="POST"', $html);
+        $this->assertStringContainsString('name="guiding_id"', $html);
+        $this->assertStringContainsString('value="42"', $html);
+        $this->assertStringContainsString('name="person"', $html);
+        $this->assertStringContainsString('value="2"', $html);
+        $this->assertStringContainsString('type="submit"', $html);
+        $this->assertStringContainsString('Reserve', $html);
+        $this->assertStringNotContainsString('href="https://example.com/checkout"', $html);
+    }
+
     public function test_gallery_modal_omits_cta_when_url_missing(): void
     {
         $html = Blade::render(

@@ -862,7 +862,15 @@
             :price-prefix="__('message.from')"
             :price-display="$tourPriceDisplay"
             :price-suffix="$tourPriceDisplay ? __('vacations.per_person_short') : null"
-            cta-url="#book-now"
+            cta-url="{{ route('checkout') }}"
+            cta-method="POST"
+            :cta-fields="[
+                'guiding_id' => $guiding->id,
+                'person' => $guiding->defaultBookingGuestCount(
+                    isset($preselectedGuests) ? (int) $preselectedGuests : null
+                ),
+                'selected_date' => '',
+            ]"
             :cta-label="__('message.reservation')"
         />
 <section class="guidings-description-container mb-5">

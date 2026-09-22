@@ -36124,19 +36124,34 @@ html.booking-assistant-modal-open body {
   justify-content: center;
   min-width: 8.5rem;
   padding: 0.7rem 1.1rem;
+  border: 0;
   border-radius: 12px;
   background: #E8604C;
   color: #fff !important;
+  font-family: inherit;
   font-size: 0.85rem;
   font-weight: 700;
+  line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 .offers-gallery-modal__cta:hover {
   background: rgb(229.0965346535, 75.9282178218, 53.4034653465);
   color: #fff !important;
   transform: translateY(-1px);
+}
+.offers-gallery-modal__cta-form {
+  margin: 0;
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+}
+.offers-gallery-modal__cta-form .offers-gallery-modal__cta {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 @media (max-width: 767.98px) {
@@ -36187,11 +36202,17 @@ html.booking-assistant-modal-open body {
   .offers-gallery-modal__price-amount {
     font-size: 1.2rem;
   }
-  .offers-gallery-modal__cta {
+  .offers-gallery-modal__cta, .offers-gallery-modal__cta-form {
     flex: 1 1 auto;
     min-width: 0;
     max-width: 58%;
+  }
+  .offers-gallery-modal__cta {
     padding: 0.75rem 0.9rem;
+  }
+  .offers-gallery-modal__cta-form .offers-gallery-modal__cta {
+    max-width: none;
+    flex: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
