@@ -1672,6 +1672,9 @@
 
     <div class="guidings-rating mb-3">
         @if($reviews_count > 0)
+            {{-- Mobile-only reviews (≤767px). The desktop overview + card rail below are hidden there. --}}
+            @include('pages.guidings.partials.reviews-mobile')
+
             <div class="ratings-head">
                 <div class="rating-overview text-center shadow-sm">
                     <div class="ratings-wrapper">
@@ -1884,7 +1887,11 @@ $(document).ready(function(){
     
     // Function to scroll to reviews with highlight effect
     function scrollToReviews() {
-        const ratingsContainer = document.getElementById('ratings-container');
+        // Desktop rail is display:none on mobile, where the mobile reviews block takes over.
+        const desktopRatings = document.getElementById('ratings-container');
+        const ratingsContainer = (desktopRatings && desktopRatings.offsetParent !== null)
+            ? desktopRatings
+            : (document.getElementById('ratings-container-mobile') || desktopRatings);
         if (ratingsContainer) {
             ratingsContainer.scrollIntoView({ 
                 behavior: 'smooth',
@@ -1908,6 +1915,15 @@ $(document).ready(function(){
     // Auto-scroll to reviews when rating scores are clicked
     $('#rating-score-link, #rating-overview-link').on('click', function() {
         scrollToReviews();
+    });
+
+    // "(N reviews)" anchor in the title row: only take over when the desktop rail is hidden (mobile)
+    $('a[href="#ratings-container"]').not('#reviews-link').on('click', function(e) {
+        const desktopRatings = document.getElementById('ratings-container');
+        if (desktopRatings && desktopRatings.offsetParent === null) {
+            e.preventDefault();
+            scrollToReviews();
+        }
     });
     
     // Add this code to check if the button exists

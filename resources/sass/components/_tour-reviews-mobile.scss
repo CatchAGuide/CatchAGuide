@@ -1,0 +1,442 @@
+// Tour (guiding) PDP reviews — MOBILE ONLY (≤767px).
+// Markup: resources/views/pages/guidings/partials/reviews-mobile.blade.php
+// Desktop keeps the existing overview card + horizontal review rail untouched; below 768px
+// those are hidden and this block replaces them (same 767px cut-off the page already uses).
+
+$tr-navy: $guidings-header-slate;
+$tr-coral: $primary-color;
+$tr-coral-dark: #c4411f;
+$tr-coral-tint: #fdefeb;
+$tr-ink: #4a4f60;
+$tr-muted: #9aa0ae;
+$tr-on-navy-muted: #a9afc0;
+$tr-line: #f0f1f4;
+$tr-outline: #dfe2e8;
+$tr-tick-off: #e6e8ee;
+$tr-green: #2f9e6b;
+$tr-green-ink: #41805f;
+
+.tour-reviews-m {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .guidings-rating {
+    > .ratings-head,
+    > .ratings-container,
+    > .ratings-nav {
+      display: none;
+    }
+  }
+
+  .tour-reviews-m {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0 0 8px;
+    text-align: left;
+
+    &__card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 14px rgba($tr-navy, 0.09);
+      overflow: hidden;
+    }
+
+    // --- Score band -------------------------------------------------------
+    &__hero {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 22px 18px;
+      background: $tr-navy;
+      color: #fff;
+    }
+
+    &__score {
+      flex: none;
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    &__score-val {
+      font-size: 54px;
+      font-weight: 700;
+      line-height: 0.85;
+      letter-spacing: -0.03em;
+    }
+
+    &__score-den {
+      padding-bottom: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1;
+      color: $tr-on-navy-muted;
+    }
+
+    // Right-aligned, one line each — shrinks to fit rather than wrapping,
+    // since the longer locale strings (e.g. German "verifizierten Bewertungen")
+    // don't fit the card at 19px/12.5px on a narrow phone.
+    &__hero-meta {
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: right;
+    }
+
+    &__label {
+      font-size: clamp(15px, 4.6vw, 19px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__count {
+      margin-top: 3px;
+      font-size: clamp(10px, 3vw, 12.5px);
+      font-weight: 500;
+      line-height: 1.3;
+      color: $tr-on-navy-muted;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // --- Metric rows ------------------------------------------------------
+    &__metrics {
+      list-style: none;
+      margin: 0;
+      padding: 6px 22px 8px;
+    }
+
+    &__metric {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 0;
+      border-bottom: 1px solid $tr-line;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    &__metric-label {
+      min-width: 0;
+      font-size: 13.5px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: $tr-ink;
+    }
+
+    &__metric-bar {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    &__ticks {
+      display: flex;
+      gap: 3px;
+
+      i {
+        display: block;
+        width: 9px;
+        height: 9px;
+        border-radius: 2px;
+        background: $tr-tick-off;
+
+        &.is-on {
+          background: $tr-coral;
+        }
+      }
+    }
+
+    &__metric-value {
+      min-width: 46px;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      color: $tr-navy;
+
+      small {
+        font-size: 11.5px;
+        font-weight: 500;
+        color: $tr-muted;
+      }
+    }
+
+    &__trust {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 13px 22px 17px;
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.3;
+      color: $tr-green-ink;
+
+      svg {
+        flex: none;
+        color: $tr-green;
+      }
+    }
+
+    // --- Guest comments slider -------------------------------------------
+    &__comments {
+      padding: 18px 22px 16px;
+    }
+
+    &__comments-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    &__comments-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: $tr-navy;
+    }
+
+    &__arrows {
+      display: flex;
+      gap: 7px;
+    }
+
+    &__arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid $tr-outline;
+      border-radius: 999px;
+      background: #fff;
+      color: $tr-navy;
+      cursor: pointer;
+
+      &:active {
+        background: #f6f7f9;
+        border-color: #c9cdd6;
+      }
+    }
+
+    &__track {
+      display: flex;
+      align-items: flex-start;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__slide {
+      flex: 0 0 100%;
+      min-width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    &__person {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    &__avatar {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: $tr-navy;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    &__person-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    &__name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 15.5px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: $tr-navy;
+    }
+
+    &__date {
+      margin-top: 2px;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: $tr-muted;
+    }
+
+    &__pill {
+      flex: none;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: $tr-coral-tint;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      color: $tr-coral-dark;
+
+      small {
+        font-size: 11.5px;
+        font-weight: 500;
+        color: #b9593c;
+      }
+    }
+
+    &__text {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+      margin: 13px 0 0;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: $tr-ink;
+      text-wrap: pretty;
+
+      &.is-open {
+        display: block;
+        -webkit-line-clamp: unset;
+      }
+    }
+
+    &__more {
+      margin-top: 6px;
+      padding: 0;
+      border: 0;
+      background: none;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1;
+      color: $tr-coral;
+      cursor: pointer;
+
+      &[hidden] {
+        display: none;
+      }
+
+      &:active {
+        color: $tr-coral-dark;
+        text-decoration: underline;
+      }
+    }
+
+    &__badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: #f3f3f3;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #6f6f6f;
+    }
+
+    &__foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 13px;
+      border-top: 1px solid $tr-line;
+    }
+
+    &__dots {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    &__dot {
+      width: 6px;
+      height: 6px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: $tr-outline;
+      cursor: pointer;
+      transition: width 0.3s, background 0.3s;
+
+      &.is-active {
+        width: 20px;
+        background: $tr-coral;
+      }
+    }
+
+    &__counter {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: $tr-muted;
+    }
+  }
+}
+
+// Very narrow phones: keep "Region & Water" + 10 ticks + value on one row.
+@media (max-width: 359px) {
+  .tour-reviews-m {
+    &__hero {
+      gap: 12px;
+      padding: 18px 16px 16px;
+    }
+
+    &__score-val {
+      font-size: 46px;
+    }
+
+    &__metrics,
+    &__trust {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    &__comments {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    &__ticks i {
+      width: 7px;
+      height: 7px;
+    }
+
+    &__ticks {
+      gap: 2px;
+    }
+  }
+}

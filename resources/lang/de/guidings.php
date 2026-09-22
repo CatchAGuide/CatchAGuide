@@ -91,6 +91,11 @@ return [
     'over_10' => 'von 10',
     'no_reviews' => 'Noch keine Bewertungen',
     'automatic_review_badge' => 'Automatische Bewertung von Catch A Guide',
+    'reviews_based_on' => ':count verifizierte Bewertung|:count verifizierte Bewertungen',
+    'guest_comments' => 'Gästekommentare',
+    'previous_comment' => 'Vorheriger Kommentar',
+    'next_comment' => 'Nächster Kommentar',
+    'show_comment' => 'Kommentar :number anzeigen',
 
     'Excellent' => 'Ausgezeichnet',
     'Very_Good' => 'Sehr Gut',
