@@ -2475,35 +2475,42 @@ $guidings-header-bg: #f7f9fb;
 
     // Ensure columns-2 layout displays months side by side
     // Using higher specificity (#guidings-page div#lite-datepicker .litepicker) to override other rules
+    // Desktop-only: Litepicker defaults to content-box + 280px min-width, which overflows the card border
     .litepicker .container__months.columns-2 {
       width: 100%;
       max-width: 100%;
+      box-sizing: border-box;
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
       justify-content: center;
       align-items: flex-start;
       gap: 10px;
+      padding: 8px 12px 12px;
 
       .month-item {
         width: calc(50% - 5px);
-        min-width: 280px;
-        max-width: none;
-        flex: 0 0 calc(50% - 5px);
-        flex-shrink: 0;
+        min-width: 0;
+        max-width: calc(50% - 5px);
+        flex: 1 1 calc(50% - 5px);
+        box-sizing: border-box;
 
         .container__days {
+          max-width: none;
+          box-sizing: border-box;
 
           .day-item,
           div {
             width: calc(100% / 7);
+            max-width: 100%;
             height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.9rem;
             border-radius: 4px;
-            margin: 1px;
+            margin: 0;
+            box-sizing: border-box;
           }
 
           .day-item {
@@ -3551,37 +3558,81 @@ div#masonry-grid {
   }
 }
 
-// Similar guidings: fishing-tours listing cards on the tour product page
-#guidings-page .guiding-similar-rail {
-  .guiding-similar-rail__see-all {
+// Same-guide + similar: fishing-tours catalog list rows on the tour product page
+#guidings-page {
+  #same-guide-guidings-list,
+  #similar-guidings-list {
     display: flex;
-    justify-content: center;
-    margin-top: 0.75rem;
+    flex-direction: column;
+    gap: 16px;
   }
 
-  .guiding-similar-rail__see-all .btn-orange {
-    min-width: 220px;
-  }
+  .guiding-product-list-item {
+    display: none;
 
-  @media (max-width: 767.98px) {
-    margin-bottom: 5.5rem; // keep above the floating book bar
-
-    .container {
-      padding-left: 0;
-      padding-right: 0;
+    &.is-visible {
+      display: block;
     }
 
+    .offers-card {
+      margin-bottom: 0;
+    }
+  }
+
+  .guiding-similar-rail {
     .guiding-similar-rail__see-all {
-      padding: 0 6px;
-      margin-top: 0.5rem;
+      display: flex;
+      justify-content: center;
+      margin-top: 0.75rem;
     }
 
     .guiding-similar-rail__see-all .btn-orange {
-      width: 100%;
-      min-width: 0;
-      height: 44px;
-      border-radius: 10px;
-      font-size: 0.94rem;
+      min-width: 220px;
+    }
+
+    // Homepage-style horizontal peek carousel on mobile only
+    .guiding-similar-rail__carousel {
+      .cag-home-offers__viewport {
+        padding-left: 12px;
+        padding-right: 12px;
+        scroll-padding-left: 12px;
+      }
+
+      .cag-home-offers__rail {
+        padding-right: 12px;
+      }
+
+      .cag-home-offer {
+        flex: 0 0 min(280px, 78vw);
+        width: min(280px, 78vw);
+      }
+    }
+
+    @media (max-width: 767.98px) {
+      margin-bottom: 5.5rem; // keep above the floating book bar
+
+      .container {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .tour-details-two__title {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .guiding-similar-rail__see-all {
+        padding: 0 12px;
+        margin-top: 0.75rem;
+      }
+
+      .guiding-similar-rail__see-all .btn-orange {
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+        border-radius: 10px;
+        font-size: 0.94rem;
+      }
     }
   }
 }

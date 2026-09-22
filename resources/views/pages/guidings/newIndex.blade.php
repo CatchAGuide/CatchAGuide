@@ -369,10 +369,25 @@
             }
         }
         
-        /* Desktop: two column view (768px and up) */
+        /* Desktop: two column view (768px and up) — keep days inside the calendar card border */
         @media (min-width: 768px) {
+            #guidings-page #lite-datepicker .litepicker,
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2,
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item {
+                box-sizing: border-box !important;
+            }
+
+            #guidings-page #lite-datepicker .litepicker .container__months.columns-2 {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 8px 12px 12px;
+            }
+
             #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item {
                 width: calc(50% - 5px) !important;
+                min-width: 0 !important;
+                max-width: calc(50% - 5px) !important;
+                flex: 1 1 calc(50% - 5px) !important;
             }
             
             #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days,
@@ -380,7 +395,9 @@
                 display: grid !important;
                 grid-template-columns: repeat(7, 1fr) !important;
                 width: 100% !important;
+                max-width: 100% !important;
                 gap: 1px !important;
+                box-sizing: border-box !important;
             }
             
             #guidings-page #lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days > *,
@@ -388,6 +405,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 min-width: 0 !important;
+                margin: 0 !important;
                 box-sizing: border-box !important;
             }
         }
@@ -656,10 +674,10 @@
             font-weight: 500;
         }
 
-        /* Same-guide block: index listing cards; show every card on mobile (desktop uses .show + See more) */
+        /* Same-guide block: catalog list rows; show every card on mobile (desktop uses .is-visible + See more) */
         @media (max-width: 767px) {
-            #same-guide-guidings-list .guiding-list-item {
-                display: flex !important;
+            #same-guide-guidings-list .guiding-product-list-item {
+                display: block !important;
             }
         }
     </style>
@@ -1786,9 +1804,11 @@
                     <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$guiding->user->firstname}}</h3>
                     <div class="tours-list__right">
                         <div class="tours-list__inner" id="same-guide-guidings-list">
-                            @include('pages.guidings.partials.guiding-card', [
+                            @include('pages.guidings.partials.tour-list-rows', [
                                 'guidings' => $same_guiding,
                                 'collapseShowMore' => $same_guiding->count() > 2,
+                                'numGuests' => $preselectedGuests ?? null,
+                                'query' => $productPageQuery ?? [],
                             ])
                         </div>
                         @if($same_guiding->count() > 2)
@@ -1805,6 +1825,8 @@
     @include('pages.guidings.partials.similar-guidings-rail', [
         'guidings' => $other_guidings ?? collect(),
         'seeAllUrl' => $similar_guidings_see_all_url ?? route('guidings.index'),
+        'numGuests' => $preselectedGuests ?? null,
+        'query' => $productPageQuery ?? [],
     ])
 </div>
 <div class="guidings-book-mobile">
@@ -2050,17 +2072,17 @@ $(document).ready(function(){
         // Mobile touch events are already handled by the browser
     }
     
-    // "See more" for same-guide listing (index-style cards; first two visible until expanded)
+    // "See more" for same-guide listing (catalog list rows; first two visible until expanded)
     const showMoreBtn = document.getElementById("showMoreBtn");
     const sameGuideList = document.getElementById("same-guide-guidings-list");
-    const items = sameGuideList ? sameGuideList.querySelectorAll(".guiding-list-item") : [];
+    const items = sameGuideList ? sameGuideList.querySelectorAll(".guiding-product-list-item") : [];
     let isExpanded = false;
 
     if (showMoreBtn && sameGuideList) {
         showMoreBtn.addEventListener("click", function () {
             isExpanded = !isExpanded;
             items.forEach((item, index) => {
-                item.classList.toggle("show", isExpanded || index < 2);
+                item.classList.toggle("is-visible", isExpanded || index < 2);
             });
             showMoreBtn.textContent = isExpanded
                 ? @json(__('guidings.Show_Less'))

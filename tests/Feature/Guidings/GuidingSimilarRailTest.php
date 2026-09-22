@@ -63,17 +63,16 @@ class GuidingSimilarRailTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('guiding-similar-rail', false);
-        $response->assertSee('guiding-card-wrapper', false);
-        $response->assertSee('gc-mob-book-btn', false);
+        $response->assertSee('offers-card', false);
+        $response->assertSee('offers-card__cta', false);
+        $response->assertSee('cag-home-offer', false);
+        $response->assertSee('data-offer-rail="similar-guidings"', false);
         $response->assertSee('NEARBY_PRODUCT_CARD_TOUR', false);
         $response->assertDontSee('FAR_PRODUCT_CARD_TOUR', false);
-        $response->assertDontSee('cag-home-offer', false);
         $response->assertDontSee('guiding-tile', false);
+        $response->assertDontSee('guiding-card-wrapper', false);
         $response->assertSee('Ludwigshafen, Germany', false);
         $response->assertDontSee('Some stale street address', false);
-        $this->assertFalse(
-            str_contains($response->getContent(), 'data-offer-rail="similar-guidings"')
-        );
 
         $seeAll = $response->viewData('similar_guidings_see_all_url');
         $this->assertIsString($seeAll);

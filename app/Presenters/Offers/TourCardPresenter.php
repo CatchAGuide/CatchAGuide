@@ -31,7 +31,7 @@ class TourCardPresenter
             'gallery_images' => $gallery,
             'badge' => __('offers.badge_tour'),
             'badge_class' => 'tour',
-            'location' => translate($guiding->location),
+            'location' => $this->locationLabel($guiding),
             'meta_line' => null,
             'traits' => [],
             'feature_badges' => [],
@@ -245,6 +245,16 @@ class TourCardPresenter
         }
 
         return __('guidings.shore');
+    }
+
+    private function locationLabel(Guiding $guiding): string
+    {
+        $label = listing_place_label([
+            $guiding->city ?: $guiding->location,
+            $guiding->country,
+        ]);
+
+        return $label !== '' ? translate($label) : '';
     }
 
     private function averageRating(Guiding $guiding): ?float

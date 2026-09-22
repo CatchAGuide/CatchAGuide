@@ -17,7 +17,7 @@ class SimilarGuidingsService
     ) {}
 
     /**
-     * Nearby tours for a product page, rendered with the guidings listing card.
+     * Nearby tours for a product page (catalog list rows on desktop, homepage carousel on mobile).
      *
      * @return array{guidings: Collection<int, Guiding>, see_all_url: string}
      */

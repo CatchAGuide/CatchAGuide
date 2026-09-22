@@ -8683,30 +8683,38 @@ body .main-menu .main-menu-wrapper__nav {
 #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 {
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: center;
   align-items: flex-start;
   gap: 10px;
+  padding: 8px 12px 12px;
 }
 #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item {
   width: calc(50% - 5px);
-  min-width: 280px;
+  min-width: 0;
+  max-width: calc(50% - 5px);
+  flex: 1 1 calc(50% - 5px);
+  box-sizing: border-box;
+}
+#guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days {
   max-width: none;
-  flex: 0 0 calc(50% - 5px);
-  flex-shrink: 0;
+  box-sizing: border-box;
 }
 #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days .day-item,
 #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days div {
   width: 14.2857142857%;
+  max-width: 100%;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.9rem;
   border-radius: 4px;
-  margin: 1px;
+  margin: 0;
+  box-sizing: border-box;
 }
 #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days .day-item.is-locked, #guidings-page div#lite-datepicker .litepicker .container__months.columns-2 .month-item .container__days .day-item.is-today {
   -webkit-text-decoration-line: line-through;
@@ -9539,6 +9547,21 @@ div#masonry-grid img {
   display: block;
 }
 
+#guidings-page #same-guide-guidings-list,
+#guidings-page #similar-guidings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#guidings-page .guiding-product-list-item {
+  display: none;
+}
+#guidings-page .guiding-product-list-item.is-visible {
+  display: block;
+}
+#guidings-page .guiding-product-list-item .offers-card {
+  margin-bottom: 0;
+}
 #guidings-page .guiding-similar-rail .guiding-similar-rail__see-all {
   display: flex;
   justify-content: center;
@@ -9546,6 +9569,18 @@ div#masonry-grid img {
 }
 #guidings-page .guiding-similar-rail .guiding-similar-rail__see-all .btn-orange {
   min-width: 220px;
+}
+#guidings-page .guiding-similar-rail .guiding-similar-rail__carousel .cag-home-offers__viewport {
+  padding-left: 12px;
+  padding-right: 12px;
+  scroll-padding-left: 12px;
+}
+#guidings-page .guiding-similar-rail .guiding-similar-rail__carousel .cag-home-offers__rail {
+  padding-right: 12px;
+}
+#guidings-page .guiding-similar-rail .guiding-similar-rail__carousel .cag-home-offer {
+  flex: 0 0 min(280px, 78vw);
+  width: min(280px, 78vw);
 }
 @media (max-width: 767.98px) {
   #guidings-page .guiding-similar-rail {
@@ -9555,9 +9590,13 @@ div#masonry-grid img {
     padding-left: 0;
     padding-right: 0;
   }
+  #guidings-page .guiding-similar-rail .tour-details-two__title {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
   #guidings-page .guiding-similar-rail .guiding-similar-rail__see-all {
-    padding: 0 6px;
-    margin-top: 0.5rem;
+    padding: 0 12px;
+    margin-top: 0.75rem;
   }
   #guidings-page .guiding-similar-rail .guiding-similar-rail__see-all .btn-orange {
     width: 100%;

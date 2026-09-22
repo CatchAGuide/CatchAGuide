@@ -93,6 +93,19 @@ class TourCardPresenterGuestPriceTest extends TestCase
         );
     }
 
+    public function test_list_row_location_prefers_city_and_country_over_raw_location(): void
+    {
+        $guiding = $this->guiding([
+            'city' => 'Ludwigshafen',
+            'country' => 'Germany',
+            'location' => 'Some stale street address',
+        ]);
+
+        $card = app(TourCardPresenter::class)->presentListRow($guiding);
+
+        $this->assertSame('Ludwigshafen, Germany', $card['location']);
+    }
+
     /**
      * @param  array<string, mixed>  $attributes
      */
