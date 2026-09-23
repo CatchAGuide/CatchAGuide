@@ -803,7 +803,8 @@
         >
             <div class="left-image" @if(!empty($overallImages)) data-gallery-index="0" style="cursor: pointer;" @endif>
                 @if(!empty($overallImages))
-                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}">
+                    {{-- Largest image in the first viewport (the page's LCP element): fetch it before other images. --}}
+                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}" fetchpriority="high" decoding="async">
                     @if($galleryCount > 1)
                         <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
                     @endif

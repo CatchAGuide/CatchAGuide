@@ -10,27 +10,32 @@
     <link rel="dns-prefetch" href="{{ $mediaCdnHost }}">
 @endif
 <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap/css/bootstrap.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/animate/animate.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/animate/custom-animate.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/jarallax/jarallax.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/jquery-magnific-popup/jquery.magnific-popup.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/nouislider/nouislider.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/nouislider/nouislider.pips.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/odometer/odometer.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/swiper/swiper.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/tevily-icons/style.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/vendors/tiny-slider/tiny-slider.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/reey-font/stylesheet.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/owl-carousel/owl.carousel.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/owl-carousel/owl.theme.default.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/twentytwenty/twentytwenty.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/bxslider/jquery.bxslider.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/vendors/bootstrap-select/css/bootstrap-select.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/vegas/vegas.min.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/jquery-ui/jquery-ui.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/timepicker/timePicker.css') }}" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.css" />
+
+{{-- Widget stylesheets that used to sit before the theme CSS: loaded without blocking render (the page
+     waited on 37 stylesheets before painting — Core Web Vitals flagged LCP > 2.5s site-wide). --}}
+@include('layouts.includes.non-critical-stylesheets', ['sheets' => [
+    ['href' => asset('assets/vendors/animate/animate.min.css')],
+    ['href' => asset('assets/vendors/animate/custom-animate.css')],
+    ['href' => asset('assets/vendors/jarallax/jarallax.css')],
+    ['href' => asset('assets/vendors/jquery-magnific-popup/jquery.magnific-popup.css')],
+    ['href' => asset('assets/vendors/nouislider/nouislider.min.css')],
+    ['href' => asset('assets/vendors/nouislider/nouislider.pips.css')],
+    ['href' => asset('assets/vendors/odometer/odometer.min.css')],
+    ['href' => asset('assets/vendors/twentytwenty/twentytwenty.css')],
+    ['href' => asset('assets/vendors/bxslider/jquery.bxslider.css')],
+    ['href' => asset('assets/vendors/vegas/vegas.min.css')],
+    ['href' => asset('assets/vendors/jquery-ui/jquery-ui.css')],
+    ['href' => asset('assets/vendors/timepicker/timePicker.css')],
+    ['href' => 'https://cdnjs.cloudflare.com/ajax/libs/trix/1.3.1/trix.min.css'],
+]])
 
 <!-- template styles -->
 <link rel="stylesheet" href="{{ asset('assets/css/tevily.css') }}" />
@@ -40,16 +45,22 @@
 <!-- webschuppen styles -->
 <link rel="stylesheet" href="{{ mix('css/app.css') }}" />
 
-<link rel="stylesheet" href="{{ asset('assets/vendors/toastr/toastr.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/vendors/litepicker/css/litepicker.css') }}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" integrity="sha256-16PDMvytZTH9heHu9KBPjzrFTaoner60bnABykjNiM0=" crossorigin="anonymous">
-<link href="{{ asset('assets/vendors/bootstrap-star-rating/css/star-rating.min.css') }}" media="all" rel="stylesheet" type="text/css" />
-<link href="{{ asset('assets/vendors/bootstrap-star-rating/themes/krajee-svg/theme.css') }}" media="all" rel="stylesheet" type="text/css" />
+{{-- Widget stylesheets that used to sit after app.css (same position, non-blocking). --}}
+@include('layouts.includes.non-critical-stylesheets', ['sheets' => [
+    ['href' => asset('assets/vendors/toastr/toastr.min.css')],
+    ['href' => asset('assets/vendors/litepicker/css/litepicker.css')],
+    ['href' => 'https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css', 'integrity' => 'sha256-16PDMvytZTH9heHu9KBPjzrFTaoner60bnABykjNiM0='],
+    ['href' => asset('assets/vendors/bootstrap-star-rating/css/star-rating.min.css')],
+    ['href' => asset('assets/vendors/bootstrap-star-rating/themes/krajee-svg/theme.css')],
+]])
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@6.6.6/css/flag-icons.min.css" crossorigin="anonymous" />
-<link rel="stylesheet" href="{{ asset('assets/vendors/tagify/tagify.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/vendors/cropperjs/cropper.min.css') }}">
+@include('layouts.includes.non-critical-stylesheets', ['sheets' => [
+    ['href' => asset('assets/vendors/tagify/tagify.css')],
+    ['href' => asset('assets/vendors/cropperjs/cropper.min.css')],
+]])
 <link rel="stylesheet" href="{{ asset('assets/css/password-toggle.css') }}">
+
 
 <style>
     .pagination .page-item .page-link {
@@ -220,14 +231,6 @@
         }
     }
     
-    .header {
-        background-image: url('https://static.fishingbooker.com/public/images/home/background-lg.jpg');
-        background-size: cover;
-        background-position: center;
-        color: white;
-        position: relative;
-        padding-bottom: 100px; /* Ensures space for the floating search bar */
-    }
     .header .overlay {
         background: rgba(0, 0, 0, 0.5);
         position: absolute;
