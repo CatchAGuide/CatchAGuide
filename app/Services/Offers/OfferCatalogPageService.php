@@ -120,6 +120,26 @@ class OfferCatalogPageService
     }
 
     /**
+     * The tour/trip/camp queries a catalog built from $input lists (same filters as
+     * buildFromInput()), or null for a type the input excludes. Lets other features — e.g. the
+     * facet insight summaries — describe exactly the listings a page shows.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array{tour: ?Builder, trip: ?Builder, camp: ?Builder}
+     */
+    public function listingQueries(array $input): array
+    {
+        $filter = OfferListingFilter::fromRequest($input);
+        $vacationGeoFilter = $this->vacationFilterWithoutSpecies($filter->toVacationFilter());
+
+        return [
+            'tour' => $filter->showsTours() ? $this->queryTours($filter, Request::create('/', 'GET', $input)) : null,
+            'trip' => $filter->showsTrips() ? $this->queryTrips($filter, $vacationGeoFilter) : null,
+            'camp' => $filter->showsCamps() ? $this->queryCamps($filter, $vacationGeoFilter) : null,
+        ];
+    }
+
+    /**
      * Publicly visible tours a /guidings/{country}/{region?}/{city?} page lists with no
      * user filters applied — the same query buildForToursDestination() runs, counted only.
      */

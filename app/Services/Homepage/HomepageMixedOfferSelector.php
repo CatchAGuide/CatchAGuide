@@ -148,6 +148,24 @@ class HomepageMixedOfferSelector
      * Tours + camps + trips a /destination/{country}/{region?}/{city?} page draws its offer
      * modules from, counted without the per-module limit (feeds the inventory gate).
      */
+    /**
+     * The tour/camp/trip queries a /destination/{country}/{region?}/{city?} page draws its offer
+     * modules from, unlimited.
+     *
+     * @return array{tour: Builder, camp: Builder, trip: Builder}
+     */
+    public function destinationQueries(
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
+    ): array {
+        return [
+            'tour' => $this->destinationTourQuery($country, $region, $city),
+            'camp' => $this->destinationCampQuery($country, $region, $city),
+            'trip' => $this->destinationTripQuery($country, $region, $city),
+        ];
+    }
+
     public function countForDestination(
         CategoryEntity $country,
         ?CategoryEntity $region = null,
