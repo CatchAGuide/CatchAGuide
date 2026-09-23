@@ -10,7 +10,16 @@
     $reviewsCount = (int) ($reviewsCount ?? 0);
     $breadcrumbItems = $breadcrumbItems ?? [];
     $searchAction = listing_search_action($searchAction ?? null);
-    $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
+    // num_guests is intentionally not carried on crawlable links to this page (see CLAUDE.md's
+    // "SEO / catalog page conventions") — fall back to the session-remembered search instead of
+    // request()->num_guests alone, so the prefill still works with a clean URL.
+    $requestGuests = request()->filled('num_guests')
+        ? request()->query('num_guests')
+        : (request()->filled('num_persons') ? request()->query('num_persons') : null);
+    $sessionGuests = $requestGuests === null
+        ? (app(ListingSearchStateService::class)->current()['numGuests'] ?: null)
+        : null;
+    $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) ($requestGuests ?? $sessionGuests ?? OfferListingFilter::DEFAULT_GUESTS)));
     $requestHasPlace = (request()->placeLat || request()->placelat) && (request()->placeLng || request()->placelng);
 
     if (! $requestHasPlace && trim((string) ($placeValue ?? '')) === '') {

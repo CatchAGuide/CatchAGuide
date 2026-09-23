@@ -70,7 +70,12 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
         ], $markers[0]['images']);
     }
 
-    public function test_from_guidings_appends_search_query_to_product_url(): void
+    /**
+     * Unlike trips/camps, guiding markers must never carry search query onto this crawlable
+     * link (see CLAUDE.md's "SEO / catalog page conventions") — it's restored on the detail
+     * page from session (ListingSearchStateService) instead.
+     */
+    public function test_from_guidings_never_appends_search_query_to_product_url(): void
     {
         $guiding = (object) [
             'id' => 9,
@@ -88,11 +93,8 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
             'num_guests' => 3,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('3', $query['num_guests']);
-        $this->assertSame('Düsseldorf, Deutschland', $query['place']);
+        $this->assertSame(route('guidings.show', ['slug' => 'rhine-perch']), $markers[0]['url']);
+        $this->assertNull(parse_url($markers[0]['url'], PHP_URL_QUERY));
     }
 
     public function test_from_trips_appends_search_query_to_product_url(): void

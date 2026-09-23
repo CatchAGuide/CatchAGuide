@@ -156,7 +156,6 @@ final class SitePrimaryNav
             'vacations.targets.index',
             'destination',
             'destination.country',
-            'destination.legacy-geo',
             'targets.index',
             'targets.show',
             'vacations.countries',

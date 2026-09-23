@@ -29,6 +29,7 @@ class ListingSearchStateServiceTest extends TestCase
             'city' => 'Madrid',
             'country' => 'Spain',
             'region' => 'Madrid',
+            'numGuests' => '',
         ], $service->current());
     }
 
@@ -128,7 +129,37 @@ class ListingSearchStateServiceTest extends TestCase
             'city' => '',
             'country' => '',
             'region' => '',
+            'numGuests' => '',
         ], $service->current());
+    }
+
+    public function test_remember_stores_and_resolves_guest_count(): void
+    {
+        $service = new ListingSearchStateService;
+
+        $service->remember($this->bindNamedRequest('/guidings/alloffers', 'guidings.index', [
+            'num_guests' => '3',
+        ]));
+
+        $this->assertSame('3', $service->current()['numGuests']);
+
+        $resolved = $service->resolveFromRequest($this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show'));
+        $this->assertSame('3', $resolved['numGuests']);
+    }
+
+    public function test_resolve_from_request_prefers_live_guest_count_over_persisted(): void
+    {
+        $service = new ListingSearchStateService;
+
+        $service->remember($this->bindNamedRequest('/guidings/alloffers', 'guidings.index', [
+            'num_guests' => '3',
+        ]));
+
+        $resolved = $service->resolveFromRequest($this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show', [
+            'num_guests' => '5',
+        ]));
+
+        $this->assertSame('5', $resolved['numGuests']);
     }
 
     private function bindNamedRequest(string $uri, string $routeName, array $query = [], ?string $route = null): Request

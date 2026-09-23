@@ -7,13 +7,15 @@
     $targetsMap = $targetsMap ?? null;
     $fromDestination = $fromDestination ?? false;
     $destinationId = $destinationId ?? null;
-    $searchQuery = \App\Domain\Offers\OfferListingFilter::productPageQueryFromInput(request()->query());
-    $showUrl = $guiding->publicShowUrl(array_merge(
-        $searchQuery,
+    // Search/guest-count context is restored on the detail page from session
+    // (ListingSearchStateService) instead of being carried on this crawlable card link, per
+    // CLAUDE.md's "SEO / catalog page conventions" (never carry filter/tracking query params
+    // into a link to a single-entity detail page).
+    $showUrl = $guiding->publicShowUrl(
         ($fromDestination && $destinationId !== null)
             ? ['from_destination' => true, 'destination_id' => $destinationId]
             : []
-    ));
+    );
 
     $galleryImages = $guiding->cached_gallery_images ?? json_decode($guiding->gallery_images);
     $galleryFull = array_values(array_filter(array_map(function ($img) {

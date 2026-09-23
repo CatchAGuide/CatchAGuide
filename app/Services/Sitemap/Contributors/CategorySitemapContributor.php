@@ -40,18 +40,22 @@ final class CategorySitemapContributor implements SitemapContributorInterface
             ),
         ]);
 
+        // Only 'methods' and 'targets' have a real public route (see CategoryController::targets()
+        // and routes/web/catalog.php) — any other `type` value on a CategoryPage row is stale/bad
+        // data (e.g. a row whose type ended up set to a species slug instead of 'Targets') with no
+        // route to serve it. Emitting those into the sitemap submits dead `/category-page/{type}/
+        // {slug}` URLs to Google, which is exactly what was piling up as 404s in Search Console.
         $pages = CategoryPage::query()
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
+            ->whereRaw('LOWER(type) IN (?, ?)', ['methods', 'targets'])
             ->get(['type', 'slug', 'updated_at']);
 
         foreach ($pages as $page) {
             $type = strtolower((string) $page->type);
-            $path = match ($type) {
-                'methods' => ['guidings', 'methods', $page->slug],
-                'targets' => ['targets', $page->slug],
-                default => ['category-page', $type, $page->slug],
-            };
+            $path = $type === 'methods'
+                ? ['guidings', 'methods', $page->slug]
+                : ['targets', $page->slug];
             $entries->push(SitemapEntry::make(
                 $this->encoder->join($context->baseUrl, $path),
                 'monthly',

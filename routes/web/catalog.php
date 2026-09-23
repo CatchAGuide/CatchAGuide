@@ -93,9 +93,8 @@ Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestSt
 
 Route::redirect('destinationen', '/destination', 301)->name('destination_de');
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
-Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
-Route::get('destination/{country}/{region}/{city?}', [DestinationCountryController::class, 'redirectLegacyGeo'])
-    ->name('destination.legacy-geo')
+Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'show'])
+    ->name('destination.country')
     ->middleware('ddos:search');
 
 Route::get('targets', [CategoryController::class, 'targetsIndex'])

@@ -289,14 +289,15 @@ class MapMarkerCollection
     }
 
     /**
-     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for
+     *     call-site compatibility. Search/guest-count context is restored on the detail page
+     *     from session (see ListingSearchStateService) instead of being carried on this
+     *     crawlable map-marker link, per CLAUDE.md's "SEO / catalog page conventions".
      */
     private static function guidingShowUrl(object $guiding, array $query = []): string
     {
-        $query = array_filter($query, fn ($v) => $v !== null && $v !== '');
-
         if (method_exists($guiding, 'publicShowUrl')) {
-            return $guiding->publicShowUrl($query);
+            return $guiding->publicShowUrl();
         }
 
         $slug = $guiding->slug ?? null;
@@ -304,7 +305,7 @@ class MapMarkerCollection
             return '#';
         }
 
-        return route('guidings.show', array_merge(['slug' => $slug], $query));
+        return route('guidings.show', ['slug' => $slug]);
     }
 
     /**
