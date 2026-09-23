@@ -63,7 +63,7 @@
         {!! json_encode($orgJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
     </script>
 
-    @include('components.seo.head-meta', ['appNameOnAttributes' => false, 'appNameOnGuidings' => false, 'appNameElsewhere' => false, 'describeGuidingsFromTitle' => false, 'metaFallbacks' => true])
+    @include('components.seo.head-meta', ['appNameOnAttributes' => false, 'appNameOnGuidings' => false, 'appNameElsewhere' => false])
 
     <!-- favicons Icons -->
     {{-- @if(app()->getLocale() == 'en')

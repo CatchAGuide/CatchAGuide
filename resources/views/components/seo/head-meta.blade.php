@@ -10,8 +10,12 @@
 
     Per-layout flags keep each layout's existing title format:
       $appNameOnAttributes / $appNameOnGuidings / $appNameElsewhere — append " - {app name}"
-      $describeGuidingsFromTitle — /guidings* description falls back to the title (app.blade)
-      $metaFallbacks — emit "{app name} - …" description/keywords when the view sets none
+
+    Description/keywords: the view's own @section('description') / ('keywords'), as plain text,
+    capped at 160 characters, without a brand prefix — and nothing when the view sets none (Google
+    then writes its own snippet). The old blocks dropped the view's description entirely on
+    layouts.app pages (guide articles, trips, camps) and elsewhere prefixed "{app name} - " to an
+    untruncated paragraph.
 --}}
 @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
 @inject('pageAttributeLookup', 'App\Services\Seo\PageAttributeLookup')
@@ -20,6 +24,17 @@
     $viewTitle = trim($__env->yieldContent('title', 'Bitte Title setzen'));
     $pageSuffix = e($paginationSeo->titleSuffix(request()));
     $withAppName = fn (string $title, bool $append) => $title.$pageSuffix.($append ? ' - '.$appName : '');
+    // Section values arrive HTML-escaped; some CMS copy is stored escaped too ("k&amp;uuml;nstlich").
+    // Decode until stable, strip tags, collapse whitespace, cap, re-escape once.
+    $plainText = function (?string $escaped, int $limit): ?string {
+        $text = (string) $escaped;
+        for ($i = 0; $i < 3 && ($decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8')) !== $text; $i++) {
+            $text = $decoded;
+        }
+        $text = trim(preg_replace('/\s+/u', ' ', strip_tags($text)) ?? '');
+
+        return $text === '' ? null : e(Str::limit($text, $limit, '…'));
+    };
 
     $attributes = $pageAttributeLookup->forRequest(request());
     $metaDescription = null;
@@ -38,13 +53,8 @@
     } else {
         $onGuidings = request()->segment(1) === 'guidings';
         $metaTitle = $withAppName($viewTitle, $onGuidings ? ($appNameOnGuidings ?? false) : ($appNameElsewhere ?? false));
-
-        if ($onGuidings && ($describeGuidingsFromTitle ?? false)) {
-            $metaDescription = $appName.' - '.$viewTitle;
-        } elseif ($metaFallbacks ?? false) {
-            $metaDescription = $appName.' - '.trim($__env->yieldContent('description'));
-            $metaKeywords = $appName.' - '.trim($__env->yieldContent('keywords'));
-        }
+        $metaDescription = $plainText($__env->yieldContent('description'), 160);
+        $metaKeywords = $plainText($__env->yieldContent('keywords'), 255);
     }
 @endphp
 <title>{!! $metaTitle !!}</title>
