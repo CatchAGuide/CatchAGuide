@@ -12,6 +12,7 @@ use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,6 +25,7 @@ class GuidingDestinationController extends Controller
         private CategoryPageContentService $categoryContent,
         private HomepageCountrySelector $homepageCountries,
         private GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private CatalogInventoryGate $inventoryGate,
     ) {}
 
     public function index(): View
@@ -116,7 +118,11 @@ class GuidingDestinationController extends Controller
             false,
         );
 
-        $regions = CategoryEntity::regions()->with('country')->where('country_id', $countryRow->id)->get();
+        // Region/city rails only link pages that clear the inventory gate — a gated page is
+        // noindexed, so linking it from the hub would keep feeding it to crawlers.
+        $regions = CategoryEntity::regions()->with('country')->where('country_id', $countryRow->id)->get()
+            ->filter(fn (CategoryEntity $region) => $this->inventoryGate->guidingDestinationIndexable($countryRow, $region))
+            ->values();
 
         if ($regionRow) {
             $cities = CategoryEntity::cities()->with(['country', 'region'])
@@ -128,6 +134,10 @@ class GuidingDestinationController extends Controller
                 ->where('country_id', $countryRow->id)
                 ->get();
         }
+        $cities = $cities
+            ->filter(fn (CategoryEntity $city) => $city->region !== null
+                && $this->inventoryGate->guidingDestinationIndexable($countryRow, $city->region, $city))
+            ->values();
 
         $faq = $this->categoryContent->resolveFaqsForEntityDisplay(
             $entityType,
@@ -168,6 +178,7 @@ class GuidingDestinationController extends Controller
             'fish_size_limit' => $this->geoCollection($rowData, 'fish_size_limits'),
             'fish_time_limit' => $this->geoCollection($rowData, 'fish_time_limits'),
             'vm' => $vm,
+            'noindex' => ! $this->inventoryGate->guidingDestinationIndexable($countryRow, $regionRow, $cityRow),
         ]);
     }
 

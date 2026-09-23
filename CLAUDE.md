@@ -68,6 +68,14 @@ concrete classes directly.
 `entries()`) and are aggregated by `SitemapGenerator`. Adding a new sitemap section means adding a new contributor,
 not branching inside an existing one.
 
+The set follows the Sept 2026 "Sitemap Concept CaG" spec: eight files per language, `sitemap-<area>-<lang>.xml`
+(`pages`, `tours`, `holidays`, `facets-global`, `facets-tours`, `geo-tours`, `facets-holidays`, `magazine`), listed by
+`/sitemap.xml`. File names are Search Console's per-file history key — don't rename them. Rules every contributor
+follows: a URL appears in exactly one file (`SitemapNoDuplicateUrlsTest`); only URLs that serve 200, are indexable
+and self-canonical, with no query params; `lastmod` comes from real content timestamps (`SitemapLastmod`), never
+the generation time, and is omitted when unknown; no `changefreq`/`priority`; hreflang alternates are added by
+`SitemapGenerator` (set `localized: false` for pages with no counterpart on the other domain).
+
 ### Media storage
 
 All listing image uploads flow through `app/Services/Media/` (`ListingImageUploadService`,
@@ -116,20 +124,20 @@ Components live under `app/Http/Livewire/` (not the Livewire-3-default `app/Live
 Live-verified during the Sept 2026 SEO audit (catchaguide.de/.com); each rule below was confirmed against the
 actual site/codebase, not just theorized:
 
-- **Gate facet/combination pages by inventory before they're indexable.** A country/species/method page with
-  zero matching listings still renders and gets sitemap'd today (confirmed: `/vacations/camps/malediven` shows
-  a "we're building our offering here" placeholder and is live/indexable). Google correctly treats these as
-  thin content, which drags down the whole site's perceived quality. When adding any new facet or
-  country×species-style combination page, check listing count first and `noindex` (don't just hide) pages
-  under a minimum-inventory threshold rather than publishing them by default.
-- **A pillar/filter param page that's meant to be a distinct, indexable page must not canonical itself away.**
-  `/vacations/countries?pillar=camps` renders camps-filtered content but its `<link rel="canonical">` points at
-  the param-free `/vacations/countries` — i.e. it tells Google "I'm not a distinct page" even though the
-  content differs from the plain country hub. If a query-param variant is meant to rank on its own, either give
-  it a real path segment or point its canonical at itself, not at a different page with different content.
-  (`/vacations/camps/countries` as a path 404s today — that split currently only exists as a query param.)
-- **Sitemaps must include hub/index pages, not just detail pages.** Confirmed absent from every current
-  sitemap: `/offers`, `/guidings/countries`, `/vacations/countries`, `/guidings/targets`. These are exactly the
+- **Gate facet/combination pages by inventory before they're indexable.** A facet page with too little
+  inventory is thin content that drags down the whole site (confirmed: `/vacations/camps/malediven` rendered a
+  "we're building our offering here" placeholder and was indexable). `App\Services\Seo\CatalogInventoryGate`
+  is the single rule — at least 1 product for country/species/method pages, at least 3 for region/city pages.
+  Below it, a page still renders but gets `noindex` (pass `noindex` to the view), drops out of hub rails and is
+  left out of every sitemap. New facet or country×species-style pages must go through the gate, not re-derive
+  their own threshold.
+- **A filter variant that's meant to be a distinct, indexable page gets a real path segment, not a query
+  param.** `/vacations/countries?pillar=camps` used to render different content while canonicalizing to the
+  param-free page. The pillar variants now live at `/vacations/{camps|trips}/countries` and
+  `/vacations/{camps|trips}/targets/{species}`, and the `?pillar=`/`?vacation=` forms 301 there. Follow the same
+  pattern for any new filter variant that should rank on its own.
+- **Sitemaps must include hub/index pages, not just detail pages.** `/offers`, `/guidings/countries`,
+  `/vacations/countries` and `/guidings/targets` were once missing from every sitemap. These are exactly the
   pages that rank for generic head-term queries — when adding a sitemap contributor, include the section's own
   index/hub route, not just its `{slug}` children.
 - **Never carry filter/tracking-style query params (`?num_guests=1`, geo params, etc.) into a link that points
@@ -139,15 +147,18 @@ actual site/codebase, not just theorized:
   and pollute Search Console's "crawled — not indexed" bucket with URL-variant duplicates of pages that would
   otherwise index fine. If a template links to a detail page, strip query params from that link, and make sure
   the detail page's own canonical tag points at its clean URL regardless of what query string it was hit with.
+- **URL slugs are stored lowercase.** `CategoryEntity` (country/region/city) and `CategoryPage` (species/method)
+  lowercase their slugs on save, and uppercase variants 301 to the lowercase URL. Two rows ("Österreich",
+  "Äsche") were stored uppercase, so every link built from `$model->slug` pointed at a redirect.
 - **Country/region slugs with umlauts must go through `App\Domain\Vacation\CountrySlug::canonicalize()`**, not
   a raw/unnormalized slug — that class exists specifically because uppercase/lowercase and encoded/unencoded
   umlaut variants of the same country (`Österreich` vs `österreich`) are treated as different URLs otherwise.
   `/vacations/{country}` already correctly 301s the uppercase-umlaut form to the canonical lowercase one via
   this — reuse the same canonicalization for any new country-slug-generating code rather than re-deriving it.
-- **Cross-type hub pages need real internal links, not just sitemap entries.** Confirmed:
-  `resources/views/layouts/partials/footer.blade.php` links the vacations pillar routes but has no link to
-  `/destination` or `/targets` at all — the two pages that target the highest-volume generic queries
-  (`angeln in spanien`, `zander angeln`, etc.) and every other locale/section's hub-style page. When adding a
+- **Cross-type hub pages need real internal links, not just sitemap entries.** The footer
+  (`resources/views/layouts/partials/footer.blade.php`) once had no link to `/destination` or `/targets` — the
+  two pages that target the highest-volume generic queries (`angeln in spanien`, `zander angeln`, etc.); its
+  "Destinations and species" group now links them. When adding a
   new cross-type or facet hub page, add it to primary nav/footer, not just a sitemap — sitemap presence alone
   doesn't give Google (or users) a path to discover it through the site's own link graph.
 - **Never resurrect a static sitemap file under `public/`.** The live site was found serving several

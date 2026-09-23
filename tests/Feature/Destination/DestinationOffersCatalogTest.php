@@ -7,6 +7,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -27,6 +28,12 @@ class DestinationOffersCatalogTest extends TestCase
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+
+        // These tests cover page rendering; the inventory gate has its own tests
+        // (CatalogInventoryGateTest, GeoPageInventoryGateTest).
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('guidingDestinationIndexable', 'destinationIndexable', 'vacationCountryIndexable')->andReturn(true);
+        $this->app->instance(CatalogInventoryGate::class, $gate);
     }
 
     public function test_destination_country_renders_popular_offers_rail_instead_of_catalog(): void

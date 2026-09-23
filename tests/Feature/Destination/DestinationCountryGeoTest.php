@@ -7,6 +7,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -27,6 +28,12 @@ class DestinationCountryGeoTest extends TestCase
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+
+        // These tests cover page rendering; the inventory gate has its own tests
+        // (CatalogInventoryGateTest, GeoPageInventoryGateTest).
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('guidingDestinationIndexable', 'destinationIndexable', 'vacationCountryIndexable')->andReturn(true);
+        $this->app->instance(CatalogInventoryGate::class, $gate);
     }
 
     public function test_destination_country_shows_region_and_city_carousels_when_present(): void
@@ -77,6 +84,29 @@ class DestinationCountryGeoTest extends TestCase
         // entity's plain name (CategoryEntity::getTitleAttribute()) — still real content,
         // not a redirect to the country hub.
         $response->assertSee('Catalonia', false);
+    }
+
+    public function test_destination_region_below_inventory_gate_is_noindexed(): void
+    {
+        $country = $this->createCountry('spanien-gated-region');
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Duenn',
+            'slug' => 'duenn-'.$country->slug,
+        ]);
+
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('destinationIndexable')->andReturnUsing(
+            fn (CategoryEntity $c, ?CategoryEntity $r = null) => $r === null
+        );
+        $this->app->instance(CatalogInventoryGate::class, $gate);
+        $this->bindDestinationOffers();
+
+        $response = $this->get('/destination/'.$country->slug.'/'.$region->slug);
+
+        $response->assertOk();
+        $response->assertSee('<meta name="robots" content="NOINDEX, FOLLOW" />', false);
     }
 
     public function test_destination_city_url_renders_city_page(): void

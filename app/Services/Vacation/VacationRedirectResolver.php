@@ -107,7 +107,8 @@ class VacationRedirectResolver
             }
         }
 
-        if (preg_match('#^vacations/(trips|camps)/([^/]+)$#', $path, $m)) {
+        // "countries" is the pillar country-list route, never a country or listing slug.
+        if (preg_match('#^vacations/(trips|camps)/(?!countries$)([^/]+)$#', $path, $m)) {
             $pillar = $m[1];
             $segment = $m[2];
             $canonical = CountrySlug::canonicalize($segment) ?? mb_strtolower(CountrySlug::decode($segment), 'UTF-8');

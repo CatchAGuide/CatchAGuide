@@ -15,25 +15,9 @@
 @section('description', $sub_title)
 
 @php
-    // ?pillar=trips|camps renders a genuinely different country list (see
-    // VacationCountryController::countries()) — it must self-canonicalize instead of pointing
-    // at the param-free parent, which would tell Google it's not a distinct page (see CLAUDE.md's
-    // "SEO / catalog page conventions"). Any other/invalid query param is still stripped.
-    $countriesPillar = request()->routeIs('vacations.countries')
-        ? strtolower((string) request()->query('pillar', ''))
-        : '';
-    $countriesPillar = in_array($countriesPillar, ['trips', 'camps'], true) ? $countriesPillar : null;
-@endphp
-@if($countriesPillar !== null)
-    @section('canonical')
-        <link rel="canonical" href="{{ route('vacations.countries', ['pillar' => $countriesPillar]) }}" />
-    @endsection
-@endif
-
-@php
     $isDestinationHub = request()->routeIs('destination');
     $isGuidingsCountries = request()->routeIs('guidings.countries');
-    $isVacationsCountries = request()->routeIs('vacations.countries');
+    $isVacationsCountries = request()->routeIs('vacations.countries', 'vacations.trips.countries', 'vacations.camps.countries');
     $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries || $isVacationsCountries;
 
     $heroBreadcrumbItems = match (true) {

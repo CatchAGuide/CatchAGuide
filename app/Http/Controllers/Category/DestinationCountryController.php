@@ -11,6 +11,7 @@ use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -23,6 +24,7 @@ class DestinationCountryController extends Controller
         private CategoryPageContentService $categoryContent,
         private GuidingCategoryAvailabilityRepository $guidingAvailability,
         private VacationDestinationRepository $destinations,
+        private CatalogInventoryGate $inventoryGate,
     ) {}
 
     public function index(): View
@@ -144,18 +146,24 @@ class DestinationCountryController extends Controller
             false,
         );
 
+        // Region/city rails only link pages that clear the inventory gate (gated pages are noindexed).
         $regions = CategoryEntity::regions()->with('country')
             ->where('country_id', $countryRow->id)
-            ->get();
+            ->get()
+            ->filter(fn (CategoryEntity $region) => $this->inventoryGate->destinationIndexable($countryRow, $region))
+            ->values();
 
-        $cities = $regionRow
+        $cities = ($regionRow
             ? CategoryEntity::cities()->with(['country', 'region'])
                 ->where('country_id', $countryRow->id)
                 ->where('region_id', $regionRow->id)
                 ->get()
             : CategoryEntity::cities()->with(['country', 'region'])
                 ->where('country_id', $countryRow->id)
-                ->get();
+                ->get())
+            ->filter(fn (CategoryEntity $city) => $city->region !== null
+                && $this->inventoryGate->destinationIndexable($countryRow, $city->region, $city))
+            ->values();
 
         $placeName = $rowData->name;
         $offerModules = $this->mixedOffers->byModuleForDestination($countryRow, $regionRow, $cityRow);
@@ -188,6 +196,7 @@ class DestinationCountryController extends Controller
                 'camp' => route('vacations.camps.show', ['slug' => $countryRow->slug]),
                 'trip' => route('vacations.trips.show', ['slug' => $countryRow->slug]),
             ],
+            'noindex' => ! $this->inventoryGate->destinationIndexable($countryRow, $regionRow, $cityRow),
         ]);
     }
 

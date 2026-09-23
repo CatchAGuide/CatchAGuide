@@ -21,6 +21,19 @@ class CategoryPage extends Model
         'is_favorite'
     ];
 
+    /**
+     * Species/method slugs are URL segments — keep them lowercase so /targets/Äsche and
+     * /targets/äsche can't both serve the same page (MySQL matches either casing).
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (CategoryPage $page) {
+            if (filled($page->slug)) {
+                $page->slug = mb_strtolower($page->slug, 'UTF-8');
+            }
+        });
+    }
+
     public function language($languageCode = null)
     {
         $relation = $this->hasMany(Language::class, 'source_id', 'id')

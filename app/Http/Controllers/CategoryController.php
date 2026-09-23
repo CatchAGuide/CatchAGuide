@@ -191,6 +191,11 @@ class CategoryController extends Controller
             return app(TargetFishPageController::class)->show($request, $slug);
         }
 
+        $lowerSlug = mb_strtolower(rawurldecode((string) $slug), 'UTF-8');
+        if ($type === 'methods' && $lowerSlug !== rawurldecode((string) $slug)) {
+            return redirect()->route('guidings.methods.show', ['slug' => $lowerSlug] + $request->query(), 301);
+        }
+
         $language = app()->getLocale();
         $row_data = CategoryPage::whereSlug($slug)
             ->whereRaw('LOWER(type) = ?', [$type])

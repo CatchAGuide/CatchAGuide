@@ -120,6 +120,21 @@ class OfferCatalogPageService
     }
 
     /**
+     * Publicly visible tours a /guidings/{country}/{region?}/{city?} page lists with no
+     * user filters applied — the same query buildForToursDestination() runs, counted only.
+     */
+    public function countToursForDestination(
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
+    ): int {
+        $input = DestinationOfferScope::mergeIntoRequest([], $country, $region, $city);
+        $input['type'] = 'tour';
+
+        return $this->queryTours(OfferListingFilter::fromRequest($input), Request::create('/', 'GET', $input))->count();
+    }
+
+    /**
      * Target-fish category pages: lock species.
      * Global lists tours + vacations; Tours/Vacations lock the offer type to that surface.
      */
@@ -128,6 +143,8 @@ class OfferCatalogPageService
         int $speciesId,
         string $contentScope = CategoryPageScope::GLOBAL,
         ?string $speciesName = null,
+        ?string $vacationPillar = null,
+        array $vacationToggleBaseUrls = [],
     ): OfferCatalogViewModel {
         $input = $request->all();
         $input['species'] = [$speciesId];
@@ -142,6 +159,11 @@ class OfferCatalogPageService
         } elseif ($contentScope === CategoryPageScope::VACATIONS) {
             $input['type'] = 'vacation';
             $lockVacationScope = true;
+
+            // /vacations/{camps|trips}/targets/{slug}: the path, not the query, picks the pillar.
+            if ($vacationPillar !== null) {
+                $input['vacation'] = $vacationPillar;
+            }
         }
 
         return $this->buildFromInput(
@@ -153,6 +175,7 @@ class OfferCatalogPageService
             lockVacationScope: $lockVacationScope,
             includeFaq: false,
             ensureSpeciesOptions: $speciesName !== null ? [['id' => $speciesId, 'name' => $speciesName]] : [],
+            vacationToggleBaseUrls: $vacationToggleBaseUrls,
         );
     }
 
@@ -188,6 +211,7 @@ class OfferCatalogPageService
         bool $lockMethodScope = false,
         bool $includeFaq = true,
         array $ensureSpeciesOptions = [],
+        array $vacationToggleBaseUrls = [],
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
@@ -294,6 +318,7 @@ class OfferCatalogPageService
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
             lockMethodScope: $lockMethodScope,
+            vacationToggleBaseUrls: $vacationToggleBaseUrls,
         );
     }
 

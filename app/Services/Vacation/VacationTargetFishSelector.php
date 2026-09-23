@@ -9,6 +9,7 @@ use App\Models\Camp;
 use App\Models\Trip;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\CategoryPage\FavoriteTargetSpeciesResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -73,6 +74,23 @@ class VacationTargetFishSelector
         return $sourceId > 0 && $this->countActiveListings($sourceId, $name) > 0;
     }
 
+    /**
+     * Active camps and trips for this species, counted separately — the pillar-scoped
+     * species pages (/vacations/{camps|trips}/targets/{slug}) are gated per pillar.
+     *
+     * @return array{camps: int, trips: int}
+     */
+    public function activeListingCounts(int $sourceId, string $name): array
+    {
+        if ($sourceId <= 0) {
+            return ['camps' => 0, 'trips' => 0];
+        }
+
+        [$campQuery, $tripQuery] = $this->activeListingQueries($sourceId, $name);
+
+        return ['camps' => $campQuery->count(), 'trips' => $tripQuery->count()];
+    }
+
     private function hasVacationsContent(int $sourceId): bool
     {
         if ($sourceId <= 0) {
@@ -91,6 +109,16 @@ class VacationTargetFishSelector
 
     private function countActiveListings(int $targetId, string $targetName): int
     {
+        [$campQuery, $tripQuery] = $this->activeListingQueries($targetId, $targetName);
+
+        return $campQuery->count() + $tripQuery->count();
+    }
+
+    /**
+     * @return array{0: Builder, 1: Builder}
+     */
+    private function activeListingQueries(int $targetId, string $targetName): array
+    {
         $speciesIds = $targetId > 0 ? [$targetId] : [];
         $speciesNames = $targetId > 0 ? [] : [$targetName];
 
@@ -100,6 +128,6 @@ class VacationTargetFishSelector
         $tripQuery = Trip::query()->where('status', $this->policy->activeStatus());
         $tripQuery = $this->filterApplicator->applySpeciesColumnFilter($tripQuery, 'target_species', $speciesIds, $speciesNames);
 
-        return $campQuery->count() + $tripQuery->count();
+        return [$campQuery, $tripQuery];
     }
 }

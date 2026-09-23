@@ -2,36 +2,33 @@
 
 namespace App\Services\Sitemap;
 
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 final class SitemapXmlWriter
 {
     /**
-     * @param  Collection<int, SitemapEntry>|iterable<SitemapEntry>  $entries
+     * @param  iterable<SitemapEntry>  $entries
+     * @return array{count: int, lastmod: ?string} lastmod is the newest entry lastmod, for the index
      */
-    public function writeUrlset(string $filePath, iterable $entries): int
+    public function writeUrlset(string $filePath, iterable $entries): array
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
-            . 'xmlns:xhtml="http://www.w3.org/1999/xhtml" '
-            . 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" '
-            . 'xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" '
-            . 'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
+            . 'xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
 
         $count = 0;
+        $newest = null;
         foreach ($entries as $entry) {
-            $lastmod = $entry->lastmod ?? Carbon::now()->toISOString();
             $xml .= "\t" . '<url>' . "\n";
-            $xml .= "\t\t" . '<loc>' . htmlspecialchars($entry->loc, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</loc>' . "\n";
-            $xml .= "\t\t" . '<changefreq>' . htmlspecialchars($entry->changefreq, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</changefreq>' . "\n";
-            $xml .= "\t\t" . '<priority>' . htmlspecialchars((string) $entry->priority, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</priority>' . "\n";
-            $xml .= "\t\t" . '<lastmod>' . htmlspecialchars($lastmod, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</lastmod>' . "\n";
+            $xml .= "\t\t" . '<loc>' . $this->escape($entry->loc) . '</loc>' . "\n";
+            if ($entry->lastmod !== null) {
+                $xml .= "\t\t" . '<lastmod>' . $this->escape($entry->lastmod) . '</lastmod>' . "\n";
+                $newest = $this->newer($newest, $entry->lastmod);
+            }
             foreach ($entry->alternates as $hreflang => $href) {
                 $xml .= "\t\t" . '<xhtml:link rel="alternate" hreflang="'
-                    . htmlspecialchars((string) $hreflang, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" href="'
-                    . htmlspecialchars($href, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" />' . "\n";
+                    . $this->escape((string) $hreflang) . '" href="'
+                    . $this->escape($href) . '" />' . "\n";
             }
             $xml .= "\t" . '</url>' . "\n";
             $count++;
@@ -40,25 +37,37 @@ final class SitemapXmlWriter
         $xml .= '</urlset>' . "\n";
         Storage::disk('sitemaps')->put($filePath, $xml);
 
-        return $count;
+        return ['count' => $count, 'lastmod' => $newest];
     }
 
     /**
-     * @param  list<string>  $sitemapUrls  Absolute child sitemap locs
+     * @param  array<string, ?string>  $sitemaps  Absolute child sitemap loc => newest lastmod inside it
      */
-    public function writeIndex(string $filePath, array $sitemapUrls): void
+    public function writeIndex(string $filePath, array $sitemaps): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 
-        foreach ($sitemapUrls as $sitemapUrl) {
+        foreach ($sitemaps as $sitemapUrl => $lastmod) {
             $xml .= "\t" . '<sitemap>' . "\n";
-            $xml .= "\t\t" . '<loc>' . htmlspecialchars($sitemapUrl, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</loc>' . "\n";
-            $xml .= "\t\t" . '<lastmod>' . Carbon::now()->toISOString() . '</lastmod>' . "\n";
+            $xml .= "\t\t" . '<loc>' . $this->escape($sitemapUrl) . '</loc>' . "\n";
+            if ($lastmod !== null) {
+                $xml .= "\t\t" . '<lastmod>' . $this->escape($lastmod) . '</lastmod>' . "\n";
+            }
             $xml .= "\t" . '</sitemap>' . "\n";
         }
 
-        $xml .= '</sitemapindex>';
+        $xml .= '</sitemapindex>' . "\n";
         Storage::disk('sitemaps')->put($filePath, $xml);
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+    }
+
+    private function newer(?string $a, string $b): string
+    {
+        return $a === null || strtotime($b) > strtotime($a) ? $b : $a;
     }
 }

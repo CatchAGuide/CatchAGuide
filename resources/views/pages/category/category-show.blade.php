@@ -22,6 +22,13 @@
     };
 @endphp
 
+@if($noindex ?? false)
+    {{-- Below the inventory gate: still reachable, kept out of the index. --}}
+    @section('meta_robots')
+        <meta name="robots" content="NOINDEX, FOLLOW" />
+    @endsection
+@endif
+
 @section('title', $row_data->language->title)
 @section('description', $row_data->language->introduction)
 @section('header_title', $row_data->language->title)

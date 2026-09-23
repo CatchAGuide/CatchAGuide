@@ -60,6 +60,18 @@ Route::get('offers', [OffersController::class, 'index'])->name('offers.index')->
 Route::get('vacations', [VacationHubController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::get('vacations/trips', [VacationPillarController::class, 'index'])->defaults('pillar', 'trips')->name('vacations.trips.index')->middleware('ddos:search');
 Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defaults('pillar', 'camps')->name('vacations.camps.index')->middleware('ddos:search');
+Route::get('vacations/trips/countries', [VacationCountryController::class, 'countries'])->defaults('pillar', 'trips')->name('vacations.trips.countries')->middleware('ddos:search');
+Route::get('vacations/camps/countries', [VacationCountryController::class, 'countries'])->defaults('pillar', 'camps')->name('vacations.camps.countries')->middleware('ddos:search');
+Route::get('vacations/trips/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::VACATIONS)
+    ->defaults('vacation', 'trip')
+    ->name('vacations.trips.targets')
+    ->middleware('ddos:search');
+Route::get('vacations/camps/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::VACATIONS)
+    ->defaults('vacation', 'camp')
+    ->name('vacations.camps.targets')
+    ->middleware('ddos:search');
 Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
 Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
 Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');

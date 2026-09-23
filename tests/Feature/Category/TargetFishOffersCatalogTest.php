@@ -225,6 +225,120 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertSee('action="'.url('/vacations').'"', false);
     }
 
+    /**
+     * Camps/trips species pages are path segments, not ?vacation= — the query form 301s to the
+     * path that owns it, keeping one self-canonical URL per pillar×species.
+     */
+    public function test_vacation_query_param_redirects_to_pillar_path(): void
+    {
+        $slug = 'pike-'.uniqid();
+
+        $this->get('/vacations/targets/'.$slug.'?vacation=camp&sortby=price-asc')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.camps.targets', ['slug' => $slug, 'sortby' => 'price-asc']));
+
+        $this->get('/vacations/camps/targets/'.$slug.'?vacation=trip')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.trips.targets', ['slug' => $slug]));
+
+        // An emptied vacation filter on a pillar path means "all vacations".
+        $this->get('/vacations/trips/targets/'.$slug.'?vacation=')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.targets', ['slug' => $slug]));
+    }
+
+    public function test_uppercase_species_and_method_slugs_redirect_to_lowercase(): void
+    {
+        $this->get('/targets/%C3%84sche')
+            ->assertStatus(301)
+            ->assertRedirect(route('targets.show', ['slug' => 'äsche']));
+        $this->get('/vacations/camps/targets/%C3%84sche?sortby=newest')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.camps.targets', ['slug' => 'äsche', 'sortby' => 'newest']));
+        $this->get('/guidings/methods/Spinnfischen')
+            ->assertStatus(301)
+            ->assertRedirect(route('guidings.methods.show', ['slug' => 'spinnfischen']));
+
+        $page = CategoryPage::query()->create(['name' => 'Äsche', 'type' => 'Targets', 'slug' => 'Äsche-'.uniqid(), 'source_id' => 0]);
+        $this->assertSame(mb_strtolower($page->slug, 'UTF-8'), $page->fresh()->slug);
+    }
+
+    public function test_camps_species_page_locks_camp_pillar_and_toggles_to_paths(): void
+    {
+        $page = $this->createTargetFishPage('pike-camps-path', CategoryPageScope::VACATIONS);
+        $this->createCamp(['target_fish' => [(int) $page->source_id]]);
+
+        $mock = Mockery::mock(OfferCatalogPageService::class);
+        $mock->shouldReceive('buildForTargetFish')
+            ->once()
+            ->withArgs(fn ($request, $speciesId, $scope, $name, $pillar, $toggleUrls) => $scope === CategoryPageScope::VACATIONS
+                && $pillar === 'camp'
+                && $toggleUrls['camp'] === route('vacations.camps.targets', ['slug' => $page->slug])
+                && $toggleUrls['trip'] === route('vacations.trips.targets', ['slug' => $page->slug])
+                && $toggleUrls['all'] === route('vacations.targets', ['slug' => $page->slug]))
+            ->andReturn($this->viewModel(
+                type: 'vacation',
+                vacation: 'camp',
+                catalogUrl: route('vacations.camps.targets', ['slug' => $page->slug]),
+                speciesIds: [(int) $page->source_id],
+                lockVacationScope: true,
+            ));
+        $this->app->instance(OfferCatalogPageService::class, $mock);
+
+        $response = $this->get(route('vacations.camps.targets', ['slug' => $page->slug]));
+
+        $response->assertOk();
+        $response->assertSee('<link rel="canonical" href="'.route('vacations.camps.targets', ['slug' => $page->slug]).'" />', false);
+        $response->assertDontSee('NOINDEX', false);
+    }
+
+    /**
+     * A species with camps but no trips still renders on the trips path (the pillar toggle links
+     * there) but stays out of the index.
+     */
+    public function test_trips_species_page_without_trips_is_noindexed(): void
+    {
+        $page = $this->createTargetFishPage('pike-no-trips', CategoryPageScope::VACATIONS);
+        // Listings also match by species name, and the shared dev DB has real pike trips — use a
+        // name nothing else carries so the trips count is genuinely zero.
+        $uniqueName = 'testfisch-'.uniqid();
+        Target::query()->whereKey($page->source_id)->update(['name' => $uniqueName, 'name_en' => $uniqueName]);
+        $this->createCamp(['target_fish' => [(int) $page->source_id]]);
+
+        $this->bindTargetFishCatalog(fn () => $this->viewModel(
+            type: 'vacation',
+            vacation: 'trip',
+            catalogUrl: route('vacations.trips.targets', ['slug' => $page->slug]),
+            speciesIds: [(int) $page->source_id],
+            lockVacationScope: true,
+        ));
+
+        $response = $this->get(route('vacations.trips.targets', ['slug' => $page->slug]));
+
+        $response->assertOk();
+        $response->assertSee('<meta name="robots" content="NOINDEX, FOLLOW" />', false);
+    }
+
+    public function test_vacation_toggle_urls_use_path_segments_when_given(): void
+    {
+        $vm = $this->viewModel(
+            type: 'vacation',
+            catalogUrl: 'http://localhost/vacations/targets/pike',
+            speciesIds: [7],
+            vacationToggleBaseUrls: [
+                'all' => 'http://localhost/vacations/targets/pike',
+                'camp' => 'http://localhost/vacations/camps/targets/pike',
+                'trip' => 'http://localhost/vacations/trips/targets/pike',
+            ],
+        );
+
+        $urls = $vm->vacationToggleUrls();
+        $this->assertStringStartsWith('http://localhost/vacations/camps/targets/pike', $urls['camp']);
+        $this->assertStringStartsWith('http://localhost/vacations/trips/targets/pike', $urls['trip']);
+        $this->assertStringNotContainsString('vacation=', $urls['camp']);
+        $this->assertStringNotContainsString('type=', $urls['trip']);
+    }
+
     public function test_vacations_target_fish_page_404s_when_content_missing_for_scope(): void
     {
         $page = $this->createTargetFishPage('pike-vacations-missing', CategoryPageScope::TOURS);
@@ -310,6 +424,7 @@ class TargetFishOffersCatalogTest extends TestCase
         ?string $place = null,
         ?float $placeLat = null,
         ?float $placeLng = null,
+        array $vacationToggleBaseUrls = [],
     ): OfferCatalogViewModel {
         $cards = $cards ?? collect();
         $filter = OfferListingFilter::fromRequest(array_filter([
@@ -351,6 +466,7 @@ class TargetFishOffersCatalogTest extends TestCase
             lockSpeciesScope: true,
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
+            vacationToggleBaseUrls: $vacationToggleBaseUrls,
         );
     }
 

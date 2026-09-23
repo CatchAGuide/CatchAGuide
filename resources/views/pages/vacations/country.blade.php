@@ -25,7 +25,12 @@
 @section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
 
 @php $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class); @endphp
-@if($seoRobots->shouldNoindexVacations(request()))
+@if($noindex ?? false)
+{{-- Below the inventory gate: still reachable, kept out of the index. --}}
+@section('meta_robots')
+    <meta name="robots" content="NOINDEX, FOLLOW" />
+@endsection
+@elseif($seoRobots->shouldNoindexVacations(request()))
 @section('meta_robots')
     <meta name="robots" content="{{ $seoRobots->robotsContentForVacations(request()) }}" />
 @endsection

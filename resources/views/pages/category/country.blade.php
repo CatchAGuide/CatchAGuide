@@ -27,6 +27,13 @@
 @endphp
 @extends('layouts.app-v2')
 
+@if($noindex ?? false)
+    {{-- Below the inventory gate: still reachable, kept out of the index. --}}
+    @section('meta_robots')
+        <meta name="robots" content="NOINDEX, FOLLOW" />
+    @endsection
+@endif
+
 @section('title', $row_data->title)
 @section('description', $row_data->sub_title)
 @section('header_title', $row_data->title)
