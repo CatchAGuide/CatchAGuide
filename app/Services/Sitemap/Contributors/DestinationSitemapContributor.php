@@ -3,6 +3,7 @@
 namespace App\Services\Sitemap\Contributors;
 
 use App\Contracts\Sitemap\SitemapContributorInterface;
+use App\Domain\Vacation\CountrySlug;
 use App\Models\CategoryEntity;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
@@ -35,9 +36,20 @@ final class DestinationSitemapContributor implements SitemapContributorInterface
             ),
         ]);
 
+        // Sitemap entries must list the canonical (lowercase) slug directly — otherwise Google
+        // discovers a URL whose only job is to 301 elsewhere, which is exactly the "Discovered/
+        // Page with redirect" pattern DestinationCountryController::show() now avoids for direct
+        // requests (see CLAUDE.md's "SEO / catalog page conventions").
+        $seenSlugs = [];
         foreach (CategoryEntity::countries()->whereNotNull('slug')->where('slug', '!=', '')->get(['slug']) as $country) {
+            $canonicalSlug = CountrySlug::canonicalize($country->slug) ?? $country->slug;
+            if (isset($seenSlugs[$canonicalSlug])) {
+                continue;
+            }
+            $seenSlugs[$canonicalSlug] = true;
+
             $entries->push(SitemapEntry::make(
-                $this->encoder->join($context->baseUrl, ['destination', $country->slug]),
+                $this->encoder->join($context->baseUrl, ['destination', $canonicalSlug]),
                 'monthly',
                 0.7,
             ));

@@ -52,4 +52,29 @@ class DestinationSitemapContributorTest extends TestCase
             $locs
         );
     }
+
+    /**
+     * A capitalized/umlaut country slug (e.g. "Österreich") must never appear in the sitemap
+     * as-is — only its canonical lowercase form, otherwise Google is told to crawl a URL whose
+     * only job is to 301 elsewhere (see CLAUDE.md's "SEO / catalog page conventions").
+     */
+    public function test_destination_sitemap_lists_canonical_slug_not_raw_uppercase_umlaut_slug(): void
+    {
+        $country = CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Österreich',
+            'slug' => 'Österreich-'.uniqid(),
+            'countrycode' => 'AT',
+        ]);
+
+        $contributor = new DestinationSitemapContributor(new SitemapPathEncoder());
+        $locs = $contributor->entries(new SitemapContext('https://www.catchaguide.com', 'de'))
+            ->map(fn (SitemapEntry $entry) => $entry->loc)
+            ->all();
+
+        $canonical = \App\Domain\Vacation\CountrySlug::canonicalize($country->slug);
+
+        $this->assertContains('https://www.catchaguide.com/destination/'.rawurlencode($canonical), $locs);
+        $this->assertNotContains('https://www.catchaguide.com/destination/'.rawurlencode($country->slug), $locs);
+    }
 }
