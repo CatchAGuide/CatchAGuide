@@ -33,6 +33,8 @@
     @endif
     <link rel="alternate" type="application/json" href="{{ url('/api/catalog/trips') }}" />
     @include('components.seo.hreflang')
+    {{-- JSON-LD pushed by pages/partials via @push('structured_data') (components.seo.json-ld). --}}
+    @stack('structured_data')
 
     @php
         $orgJsonLd = [

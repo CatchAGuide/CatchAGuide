@@ -26,7 +26,7 @@ class StructuredDataTest extends TestCase
 
     public function test_listing_pages_emit_only_valid_json_ld_without_placeholder_data(): void
     {
-        foreach (['/guidings/alloffers', '/offers', '/'] as $path) {
+        foreach (['/guidings/alloffers', '/offers', '/', '/guidings', '/destination', '/vacations'] as $path) {
             $response = $this->get($path);
             $response->assertOk();
 

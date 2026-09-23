@@ -92,6 +92,18 @@
         trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]),
     ])->filter()->implode(' · '));
 @endphp
+@inject('structuredData', 'App\Services\Seo\StructuredDataBuilder')
+@php
+    // Product pages show the region as the last visual crumb; the structured trail names the page itself.
+    $structuredCrumbs = $breadcrumbItems;
+    if (filled($heroProductTitle ?? null) && count($structuredCrumbs) > 0) {
+        $structuredCrumbs[count($structuredCrumbs) - 1] = ['label' => $heroProductTitle, 'url' => null];
+    }
+@endphp
+@if(count($structuredCrumbs) > 0)
+    @include('components.seo.json-ld', ['data' => $structuredData->breadcrumbList($structuredCrumbs, request()->url())])
+@endif
+
 <div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
         'overlay' => true,

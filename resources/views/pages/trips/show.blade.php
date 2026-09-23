@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@include('components.seo.json-ld', ['data' => $structuredData ?? null])
 
 @push('styles')
     <style>

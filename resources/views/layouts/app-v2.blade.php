@@ -26,6 +26,8 @@
         <link rel="canonical" href="{{ request()->url() }}" />
     @endif
     @include('components.seo.hreflang')
+    {{-- JSON-LD pushed by pages/partials via @push('structured_data') (components.seo.json-ld). --}}
+    @stack('structured_data')
     @hasSection('meta_robots')
         @yield('meta_robots')
     @else

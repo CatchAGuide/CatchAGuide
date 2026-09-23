@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@include('components.seo.json-ld', ['data' => $structuredData ?? null])
 @section('title', $camp['title'] ?? 'Camp Offers - Vacations V2')
 
 @php

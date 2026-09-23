@@ -51,6 +51,11 @@
         trans_choice('offers.persons_count', $offersGuests, ['count' => $offersGuests]),
     ])->filter()->implode(' · '));
 @endphp
+@inject('structuredData', 'App\Services\Seo\StructuredDataBuilder')
+@if(count($breadcrumbItems) > 0)
+    @include('components.seo.json-ld', ['data' => $structuredData->breadcrumbList($breadcrumbItems, request()->url())])
+@endif
+
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell data-product-hero-header>
     @include('layouts.partials.site-nav', [
         'overlay' => true,

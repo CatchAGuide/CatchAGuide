@@ -15,8 +15,9 @@
     @endif
 @endsection
 
-@section('meta_robots')
-    @php
+{{-- Structured data goes to the layout's structured_data stack; this used to sit in the
+     meta_robots section, which silently replaced the page's robots tag. --}}
+@php
         $jsonLd = [
             '@context' => 'https://schema.org',
             '@type' => 'TouristTrip',
@@ -37,11 +38,8 @@
                 'availability' => 'https://schema.org/InStock'
             ],
         ];
-    @endphp
-    <script type="application/ld+json">
-        {!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
-    </script>
-@endsection
+@endphp
+@include('components.seo.json-ld', ['data' => $jsonLd])
 
 @section('css_after')
     <style>

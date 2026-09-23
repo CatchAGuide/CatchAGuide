@@ -6,6 +6,7 @@ use App\Models\Trip;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Presenters\Vacation\TripTrustSignalResolver;
 use App\Services\Search\ListingSearchStateService;
+use App\Services\Seo\StructuredDataBuilder;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use App\Services\Trip\TripCacheService;
@@ -28,6 +29,7 @@ class TripOfferController extends Controller
         private TripTrustSignalResolver $tripTrust,
         private ListingViewTranslationService $viewTranslation,
         private ListingSearchStateService $searchState,
+        private StructuredDataBuilder $structuredData,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -87,6 +89,7 @@ class TripOfferController extends Controller
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
             'reviewTrust' => $this->tripTrust->resolve($trip),
             'canonicalUrl' => $isDraft ? null : route('vacations.trips.show', $slug),
+            'structuredData' => $isDraft ? null : $this->structuredData->trip($trip, route('vacations.trips.show', $trip->slug)),
             'preselectedGuests' => $preselectedGuests,
         ]);
     }

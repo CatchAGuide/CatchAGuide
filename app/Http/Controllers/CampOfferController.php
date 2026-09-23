@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
 use App\Services\Search\ListingSearchStateService;
+use App\Services\Seo\StructuredDataBuilder;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Support\Facades\Lang;
@@ -22,6 +23,7 @@ class CampOfferController extends Controller
     public function __construct(
         private ListingViewTranslationService $viewTranslation,
         private ListingSearchStateService $searchState,
+        private StructuredDataBuilder $structuredData,
     ) {}
 
     private function getImageUrl($path)
@@ -263,7 +265,8 @@ class CampOfferController extends Controller
             'contactModalTitle',
             'isDraft',
             'preselectedGuests'
-        ))->with('camp', $campData);
+        ))->with('camp', $campData)
+            ->with('structuredData', $isDraft ? null : $this->structuredData->camp($camp, route('vacations.camps.show', $camp->slug)));
     }
     
     /**
