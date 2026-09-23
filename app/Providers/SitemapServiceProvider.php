@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Seo\LocalePathMapper;
+use App\Services\Seo\PageAttributeLookup;
 use App\Services\Seo\SeoRobotsPolicy;
 use App\Services\Sitemap\CategoryPageSitemapSource;
 use App\Services\Sitemap\Contributors\GlobalFacetSitemapContributor;
@@ -26,6 +27,7 @@ class SitemapServiceProvider extends ServiceProvider
     {
         $this->app->singleton(LocalePathMapper::class);
         $this->app->singleton(SeoRobotsPolicy::class);
+        $this->app->scoped(PageAttributeLookup::class);
         $this->app->singleton(SitemapPathEncoder::class);
         $this->app->singleton(SitemapXmlWriter::class);
         $this->app->singleton(SitemapLastmod::class);

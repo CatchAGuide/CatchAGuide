@@ -316,4 +316,6 @@ Important note: If you provide personal contact details such as your email addre
 
     'faq-page-title' => 'Frequently Asked Questions for Catch A Guide',
     'accept_the' => 'I accept the',
+    // Title suffix for paginated listing pages (App\Services\Seo\PaginationSeo).
+    'page_n' => 'Page :page',
 ];

@@ -26,10 +26,11 @@
     @endif
     
     <!-- Canonical URL to prevent duplicate content -->
+    @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
     @hasSection('canonical')
         @yield('canonical')
     @else
-        <link rel="canonical" href="{{ request()->url() }}" />
+        <link rel="canonical" href="{{ $paginationSeo->canonicalUrl(request()) }}" />
     @endif
     <link rel="alternate" type="application/json" href="{{ url('/api/catalog/trips') }}" />
     @include('components.seo.hreflang')
@@ -62,60 +63,7 @@
         {!! json_encode($orgJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
     </script>
     
-    @if(count($pageAttributes))
-        @foreach($pageAttributes as $attribute)
-            @if($attribute->meta_type == 'title')
-                <title>{{$attribute->content}}</title>
-            @else
-                <title>@yield('title', 'Bitte Title setzen')</title>
-            @endif
-            
-            @if($attribute->meta_type == 'description')
-                <meta name="description" content="{{$attribute->content}}">
-            @endif
-
-            @if($attribute->meta_type == 'keywords')
-                <meta name="keywords" content="{{$attribute->content}}">
-            @endif
-        @endforeach
-    @else
-        @if(Request::segment(1) == 'guidings')
-            @if(empty($__env->yieldContent('title')))
-            <title>Guidings - {{ config('app.name') }}</title>
-            <meta name="description" content="{{ config('app.name') }} Guidings">
-            @else
-            <title>@yield('title', 'Bitte Title setzen')</title>
-            <meta name="description" content="{{ config('app.name') }} - @yield('description')">
-            <meta name="keywords" content="{{ config('app.name') }} - @yield('keywords')">
-            @endif
-        @else
-            @php
-            $page_attr = App\Models\PageAttribute::whereDomain(request()->getHost())->whereUri(request()->path())->get();
-
-            $page_title = $page_attr->where('meta_type', 'title')->first();
-            $page_meta_desc = $page_attr->where('meta_type', 'description')->first();
-            $page_keywords = $page_attr->where('meta_type', 'keywords')->first();
-            @endphp
-
-            @if(is_null($page_title))
-            <title>@yield('title', 'Bitte Title setzen') - {{ config('app.name') }} </title>
-            @else
-            <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
-            @endif
-
-            @if(!is_null($page_meta_desc))
-            <meta name="description" content="{{ $page_meta_desc->content }}">
-            @else
-            <meta name="description" content="{{ config('app.name') }} - @yield('description')">
-            @endif
-
-            @if(!is_null($page_keywords))
-            <meta name="keywords" content="{{ $page_keywords->content }}">
-            @else
-            <meta name="keywords" content="{{ config('app.name') }} - @yield('keywords')">
-            @endif
-        @endif
-    @endif
+    @include('components.seo.head-meta', ['appNameOnAttributes' => false, 'appNameOnGuidings' => false, 'appNameElsewhere' => true, 'describeGuidingsFromTitle' => false, 'metaFallbacks' => true])
 
     <!-- favicons Icons -->
     {{-- @if(app()->getLocale() == 'en')

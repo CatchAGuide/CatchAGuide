@@ -324,4 +324,6 @@ Wichtiger Hinweis: Solltest du persönliche Kontaktdaten wie z.B. deine E-Mail-A
 
     'faq-page-title' => 'Häufig gestellte Fragen zu Catch A Guide',
     'accept_the' => 'Ich akzeptiere die',
+    // Title suffix for paginated listing pages (App\Services\Seo\PaginationSeo).
+    'page_n' => 'Seite :page',
 ];

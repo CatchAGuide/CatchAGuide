@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 
 /**
  * Decides whether a public listing/filter request should be noindexed.
- * Clean product URLs stay indexable; faceted/query variants do not.
+ * Clean product URLs stay indexable; faceted/query variants do not. Plain pagination (?page=N
+ * alone) is not a facet: each page is a distinct, self-canonical page (PaginationSeo).
  */
 final class SeoRobotsPolicy
 {
@@ -25,7 +26,6 @@ final class SeoRobotsPolicy
         'placeLat',
         'placeLng',
         'sortby',
-        'page',
     ];
 
     /**
@@ -34,7 +34,6 @@ final class SeoRobotsPolicy
     private const VACATION_NOINDEX_PARAMS = [
         'species',
         'sortby',
-        'page',
         'pillar',
     ];
 

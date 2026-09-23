@@ -59,6 +59,13 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertTrue($this->policy->shouldNoindexVacations($request));
     }
 
+    public function test_plain_pagination_is_indexable_but_filtered_pagination_is_not(): void
+    {
+        $this->assertFalse($this->policy->shouldNoindexGuidings(Request::create('/guidings/alloffers', 'GET', ['page' => '3'])));
+        $this->assertFalse($this->policy->shouldNoindexVacations(Request::create('/vacations/norwegen', 'GET', ['page' => '2'])));
+        $this->assertTrue($this->policy->shouldNoindexGuidings(Request::create('/guidings/alloffers', 'GET', ['page' => '3', 'sortby' => 'price-asc'])));
+    }
+
     public function test_empty_query_values_do_not_trigger_noindex(): void
     {
         $request = Request::create('/guidings', 'GET', ['place' => '']);
