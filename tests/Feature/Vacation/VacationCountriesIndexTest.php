@@ -106,6 +106,28 @@ class VacationCountriesIndexTest extends TestCase
         $response->assertDontSee(route('vacations.trips.show', $campsCountry->slug, false), false);
     }
 
+    /**
+     * ?pillar=trips|camps renders a genuinely different country list, so it must self-canonicalize
+     * instead of pointing at the param-free parent — otherwise Google is told the two pages are
+     * duplicates despite different content (see CLAUDE.md's "SEO / catalog page conventions").
+     */
+    public function test_vacations_countries_pillar_variant_self_canonicalizes(): void
+    {
+        $this->mockHubGrid([]);
+
+        $plain = $this->get(route('vacations.countries'));
+        $plain->assertOk();
+        $plain->assertSee('<link rel="canonical" href="'.route('vacations.countries').'" />', false);
+
+        $camps = $this->get(route('vacations.countries', ['pillar' => 'camps']));
+        $camps->assertOk();
+        $camps->assertSee(
+            '<link rel="canonical" href="'.route('vacations.countries', ['pillar' => 'camps']).'" />',
+            false
+        );
+        $camps->assertDontSee('<link rel="canonical" href="'.route('vacations.countries').'" />', false);
+    }
+
     public function test_vacations_countries_index_excludes_country_without_any_listings(): void
     {
         $country = $this->createCountry('no-listings');

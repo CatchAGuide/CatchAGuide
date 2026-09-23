@@ -35,6 +35,14 @@ final class MainSitemapContributor implements SitemapContributorInterface
             '/about-us' => ['priority' => 0.7, 'changefreq' => 'monthly'],
             '/partner' => ['priority' => 0.8, 'changefreq' => 'monthly'],
             '/for-agents' => ['priority' => 0.5, 'changefreq' => 'monthly'],
+            // Hub/index pages that rank for generic head-term queries — a sitemap contributor
+            // must include a section's own index route, not just its {slug} children (see
+            // CLAUDE.md's "SEO / catalog page conventions"); these 4 were confirmed absent from
+            // every current sitemap. /guidings/countries is emitted by
+            // GuidingDestinationSitemapContributor alongside its country pages, not here.
+            '/offers' => ['priority' => 0.8, 'changefreq' => 'weekly'],
+            '/guidings/targets' => ['priority' => 0.75, 'changefreq' => 'weekly'],
+            '/vacations/countries' => ['priority' => 0.75, 'changefreq' => 'weekly'],
         ];
 
         return collect($uris)->map(function (array $settings, string $uri) use ($context) {

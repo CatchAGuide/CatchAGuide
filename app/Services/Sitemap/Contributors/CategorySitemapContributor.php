@@ -4,15 +4,20 @@ namespace App\Services\Sitemap\Contributors;
 
 use App\Contracts\Sitemap\SitemapContributorInterface;
 use App\Models\CategoryPage;
+use App\Models\Target;
+use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapPathEncoder;
+use App\Services\Vacation\VacationTargetFishSelector;
 use Illuminate\Support\Collection;
 
 final class CategorySitemapContributor implements SitemapContributorInterface
 {
     public function __construct(
         private readonly SitemapPathEncoder $encoder,
+        private readonly GuidingCategoryAvailabilityRepository $guidingAvailability,
+        private readonly VacationTargetFishSelector $vacationTargetAvailability,
     ) {}
 
     public function key(): string
@@ -49,7 +54,7 @@ final class CategorySitemapContributor implements SitemapContributorInterface
             ->whereNotNull('slug')
             ->where('slug', '!=', '')
             ->whereRaw('LOWER(type) IN (?, ?)', ['methods', 'targets'])
-            ->get(['type', 'slug', 'updated_at']);
+            ->get(['type', 'slug', 'updated_at', 'source_id', 'name']);
 
         foreach ($pages as $page) {
             $type = strtolower((string) $page->type);
@@ -62,6 +67,36 @@ final class CategorySitemapContributor implements SitemapContributorInterface
                 0.6,
                 $page->updated_at?->toAtomString(),
             ));
+
+            // The tours- and vacations-scoped species pages (guidings/targets/{slug},
+            // vacations/targets/{slug}) render genuinely different, substantial content from the
+            // global /targets/{slug} page (confirmed live: distinct title, several times the byte
+            // size) — gated the same way TargetFishPageController::show() gates them, so a species
+            // with zero listings for that scope never gets a thin page submitted (see CLAUDE.md's
+            // "SEO / catalog page conventions").
+            if ($type === 'targets') {
+                $speciesId = (int) $page->source_id;
+                $target = $speciesId > 0 ? Target::find($speciesId) : null;
+                $speciesName = $target?->name ?? $page->name;
+
+                if ($speciesId > 0 && $this->guidingAvailability->hasGuidingsForTarget($speciesId)) {
+                    $entries->push(SitemapEntry::make(
+                        $this->encoder->join($context->baseUrl, ['guidings', 'targets', $page->slug]),
+                        'monthly',
+                        0.6,
+                        $page->updated_at?->toAtomString(),
+                    ));
+                }
+
+                if ($speciesId > 0 && $this->vacationTargetAvailability->hasActiveListings($speciesId, (string) $speciesName)) {
+                    $entries->push(SitemapEntry::make(
+                        $this->encoder->join($context->baseUrl, ['vacations', 'targets', $page->slug]),
+                        'monthly',
+                        0.6,
+                        $page->updated_at?->toAtomString(),
+                    ));
+                }
+            }
         }
 
         return $entries;

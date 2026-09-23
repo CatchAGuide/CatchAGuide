@@ -6,6 +6,7 @@ use App\Services\Seo\LocalePathMapper;
 use App\Services\Seo\SeoRobotsPolicy;
 use App\Services\Sitemap\Contributors\CategorySitemapContributor;
 use App\Services\Sitemap\Contributors\DestinationSitemapContributor;
+use App\Services\Sitemap\Contributors\GuidingDestinationSitemapContributor;
 use App\Services\Sitemap\Contributors\ListingSitemapContributor;
 use App\Services\Sitemap\Contributors\MagazineSitemapContributor;
 use App\Services\Sitemap\Contributors\MainSitemapContributor;
@@ -30,6 +31,7 @@ class SitemapServiceProvider extends ServiceProvider
             VacationSitemapContributor::class,
             CategorySitemapContributor::class,
             DestinationSitemapContributor::class,
+            GuidingDestinationSitemapContributor::class,
             MainSitemapContributor::class,
         ], 'sitemap.contributors');
 

@@ -35,8 +35,9 @@ class VacationSitemapContributor implements SitemapContributorInterface
         app()->setLocale($context->lang);
         $entries = collect();
 
+        // The /vacations landing page itself is emitted by MainSitemapContributor — no URL may
+        // appear in more than one sitemap file, or Search Console's per-file coverage is ambiguous.
         $static = [
-            'vacations' => ['changefreq' => 'weekly', 'priority' => 0.9],
             'vacations/trips' => ['changefreq' => 'weekly', 'priority' => 0.8],
             'vacations/camps' => ['changefreq' => 'weekly', 'priority' => 0.8],
             'vacations/all-offers' => ['changefreq' => 'weekly', 'priority' => 0.75],

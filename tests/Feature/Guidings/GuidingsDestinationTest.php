@@ -379,6 +379,25 @@ class GuidingsDestinationTest extends TestCase
         $response->assertSee('Tours Catalonia Title', false);
     }
 
+    public function test_guidings_destination_redirects_uppercase_umlaut_slug_to_canonical(): void
+    {
+        $response = $this->get('/guidings/'.rawurlencode('Österreich'));
+
+        $response->assertRedirect(route('guidings.destination', ['country' => 'österreich']));
+        $response->assertStatus(301);
+    }
+
+    public function test_guidings_destination_redirect_preserves_region_and_city(): void
+    {
+        $response = $this->get('/guidings/'.rawurlencode('Österreich').'/tirol/innsbruck');
+
+        $response->assertRedirect(route('guidings.destination', [
+            'country' => 'österreich',
+            'region' => 'tirol',
+            'city' => 'innsbruck',
+        ]));
+    }
+
     public function test_numeric_guiding_show_route_still_wins_over_destination(): void
     {
         $this->assertSame(

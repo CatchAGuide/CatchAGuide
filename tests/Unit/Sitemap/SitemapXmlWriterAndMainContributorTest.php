@@ -91,6 +91,10 @@ class SitemapXmlWriterAndMainContributorTest extends TestCase
         $this->assertContains('https://www.catchaguide.com/about-us', $locs);
         $this->assertContains('https://www.catchaguide.com/partner', $locs);
         $this->assertContains('https://www.catchaguide.com/for-agents', $locs);
+        $this->assertContains('https://www.catchaguide.com/offers', $locs);
+        $this->assertNotContains('https://www.catchaguide.com/guidings/countries', $locs);
+        $this->assertContains('https://www.catchaguide.com/guidings/targets', $locs);
+        $this->assertContains('https://www.catchaguide.com/vacations/countries', $locs);
 
         foreach ($locs as $loc) {
             $this->assertStringNotContainsString('/login', $loc);

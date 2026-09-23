@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Category;
 
 use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\GuidingsController;
 use App\Models\CategoryEntity;
@@ -11,6 +12,7 @@ use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Offers\OfferCatalogPageService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -36,8 +38,20 @@ class GuidingDestinationController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $country, ?string $region = null, ?string $city = null)
+    public function show(Request $request, string $country, ?string $region = null, ?string $city = null): View|RedirectResponse
     {
+        // Uppercase/umlaut country slugs (e.g. "Österreich") must 301 to their canonical lowercase
+        // form, same as /vacations/{country} and /destination/{country} — otherwise MySQL's
+        // case-insensitive collation lets both casings resolve as separate, mutually-
+        // uncanonicalized 200 pages (see CLAUDE.md's "SEO / catalog page conventions").
+        if (CountrySlug::needsCanonicalRedirect($country)) {
+            return redirect()->route('guidings.destination', array_filter([
+                'country' => CountrySlug::canonicalize($country),
+                'region' => $region,
+                'city' => $city,
+            ]), 301);
+        }
+
         $countryRow = CategoryEntity::countries()
             ->whereSlug($country)
             ->first();
