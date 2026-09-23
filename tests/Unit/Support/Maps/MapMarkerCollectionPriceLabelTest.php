@@ -97,7 +97,12 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
         $this->assertNull(parse_url($markers[0]['url'], PHP_URL_QUERY));
     }
 
-    public function test_from_trips_appends_search_query_to_product_url(): void
+    /**
+     * Search/guest-count context must never land on this crawlable card link (see CLAUDE.md's
+     * "SEO / catalog page conventions") — it's restored on the detail page from session
+     * (ListingSearchStateService) instead.
+     */
+    public function test_from_trips_never_appends_search_query_to_product_url(): void
     {
         $trip = (object) [
             'id' => 8,
@@ -116,14 +121,11 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
             'num_guests' => 3,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('3', $query['num_guests']);
-        $this->assertSame('spain', $query['country']);
+        $this->assertSame(route('vacations.trips.show', ['slug' => 'valencia-bass']), $markers[0]['url']);
+        $this->assertNull(parse_url($markers[0]['url'], PHP_URL_QUERY));
     }
 
-    public function test_from_camps_appends_search_query_to_product_url(): void
+    public function test_from_camps_never_appends_search_query_to_product_url(): void
     {
         $camp = (object) [
             'id' => 5,
@@ -140,11 +142,8 @@ class MapMarkerCollectionPriceLabelTest extends TestCase
             'num_guests' => 2,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($markers[0]['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('2', $query['num_guests']);
-        $this->assertSame('austria', $query['country']);
+        $this->assertSame(route('vacations.camps.show', ['slug' => 'danube-camp']), $markers[0]['url']);
+        $this->assertNull(parse_url($markers[0]['url'], PHP_URL_QUERY));
     }
 
     public function test_normalize_module_maps_guiding_to_tour(): void

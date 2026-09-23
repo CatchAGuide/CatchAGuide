@@ -70,7 +70,13 @@ class CampTripCardRatingTest extends TestCase
         $this->assertSame(0, $card['review_count']);
     }
 
-    public function test_trip_list_row_url_keeps_search_country_and_guests(): void
+    /**
+     * Search/guest-count context must never land on this crawlable card link (see CLAUDE.md's
+     * "SEO / catalog page conventions") — it's restored on the detail page from session
+     * (ListingSearchStateService) instead. The $query argument is accepted for call-site
+     * compatibility but must not affect the URL.
+     */
+    public function test_trip_list_row_url_never_carries_search_query(): void
     {
         $viewTranslation = Mockery::mock(ListingViewTranslationService::class);
         $viewTranslation->shouldReceive('applyToModel')->once();
@@ -96,15 +102,11 @@ class CampTripCardRatingTest extends TestCase
             'num_guests' => 3,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($card['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('test-trip', basename((string) parse_url($card['url'], PHP_URL_PATH)));
-        $this->assertSame('3', $query['num_guests']);
-        $this->assertSame('spain', $query['country']);
+        $this->assertSame(route('vacations.trips.show', ['slug' => 'test-trip']), $card['url']);
+        $this->assertNull(parse_url($card['url'], PHP_URL_QUERY));
     }
 
-    public function test_camp_list_row_url_keeps_search_country_and_guests(): void
+    public function test_camp_list_row_url_never_carries_search_query(): void
     {
         $viewTranslation = Mockery::mock(ListingViewTranslationService::class);
         $viewTranslation->shouldReceive('applyToModel')->once();
@@ -129,11 +131,7 @@ class CampTripCardRatingTest extends TestCase
             'num_guests' => 4,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($card['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('test-camp', basename((string) parse_url($card['url'], PHP_URL_PATH)));
-        $this->assertSame('4', $query['num_guests']);
-        $this->assertSame('spain', $query['country']);
+        $this->assertSame(route('vacations.camps.show', ['slug' => 'test-camp']), $card['url']);
+        $this->assertNull(parse_url($card['url'], PHP_URL_QUERY));
     }
 }

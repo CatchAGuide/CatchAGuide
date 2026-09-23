@@ -11,6 +11,7 @@ use App\Models\Camp;
 use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
+use App\Services\Search\ListingSearchStateService;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Support\Facades\Lang;
@@ -20,6 +21,7 @@ class CampOfferController extends Controller
 {
     public function __construct(
         private ListingViewTranslationService $viewTranslation,
+        private ListingSearchStateService $searchState,
     ) {}
 
     private function getImageUrl($path)
@@ -234,7 +236,14 @@ class CampOfferController extends Controller
         
         $showCategories = true;
         $contactModalTitle = !empty($campData['title']) ? '' . $campData['title'] : '';
+        // num_guests is intentionally not carried on crawlable links to this page (see CLAUDE.md's
+        // "SEO / catalog page conventions") — fall back to the session-remembered search from the
+        // catalog page the visitor came from, same as the header's location prefill does.
         $preselectedGuests = VacationListingFilter::fromRequest($request->query())->numGuests;
+        if ($preselectedGuests === null) {
+            $sessionGuests = $this->searchState->current()['numGuests'];
+            $preselectedGuests = $sessionGuests !== '' ? (int) $sessionGuests : null;
+        }
 
         return view('pages.vacations.v2', compact(
             'campData',

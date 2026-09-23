@@ -12,6 +12,13 @@ class TripCardPresenter
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for call-site
+     *     compatibility. Search/guest-count context is restored on the detail page from session
+     *     (see ListingSearchStateService) instead of being carried on the crawlable card link, per
+     *     CLAUDE.md's "SEO / catalog page conventions" (never carry filter/tracking query params
+     *     into a link to a single-entity detail page).
+     */
     public function present(Trip $trip, array $query = []): array
     {
         $this->viewTranslation->applyToModel($trip, ListingTranslationService::TYPE_TRIP);
@@ -30,7 +37,7 @@ class TripCardPresenter
             'id' => $trip->id,
             'title' => $trip->title,
             'slug' => $trip->slug,
-            'url' => route('vacations.trips.show', array_merge(['slug' => $trip->slug], $this->filterQuery($query))),
+            'url' => route('vacations.trips.show', ['slug' => $trip->slug]),
             'image' => media_url($trip->thumbnail_path),
             'gallery_images' => get_galleries_image_link($trip, 0),
             'badge' => __('vacations.badge_trip'),
@@ -251,14 +258,5 @@ class TripCardPresenter
         }
 
         return trim($inclusions . ($group ? ' · ' . $group : ''));
-    }
-
-    /**
-     * @param  array<string, mixed>  $query
-     * @return array<string, mixed>
-     */
-    private function filterQuery(array $query): array
-    {
-        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 }

@@ -55,9 +55,17 @@
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
+    // num_guests is intentionally not carried on crawlable links to a listing detail page (see
+    // CLAUDE.md's "SEO / catalog page conventions") — fall back to the session-remembered search
+    // (same ListingSearchStateService used for location above) instead of request()->num_guests
+    // alone, so the prefill still works with a clean URL.
+    $requestGuestsRaw = request()->filled('num_guests') ? request()->query('num_guests') : null;
+    $sessionGuestsRaw = $requestGuestsRaw === null
+        ? (app(ListingSearchStateService::class)->current()['numGuests'] ?: null)
+        : null;
     $vacationGuestsValue = max(1, min(
         VacationListingFilter::MAX_GUESTS,
-        (int) (request()->num_guests ?: VacationListingFilter::DEFAULT_GUESTS)
+        (int) ($requestGuestsRaw ?? $sessionGuestsRaw ?? VacationListingFilter::DEFAULT_GUESTS)
     ));
 
     // Mobile-only pill + bottom-sheet search (see components/mobile-search-sheet.blade.php).
