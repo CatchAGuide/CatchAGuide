@@ -42,6 +42,8 @@ Route::get('robots.txt', function () {
         'Disallow: /register',
         'Disallow: /password/',
         'Disallow: /api/catalog/',
+        // Auth-only action links (add/remove from wishlist) rendered on public cards.
+        'Disallow: /wishlist/',
         '',
         '# Allow important pages',
         'Allow: /guidings',

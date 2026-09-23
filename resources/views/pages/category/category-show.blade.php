@@ -660,8 +660,6 @@
                                 @include('pages.guidings.partials.guiding-card', [
                                     'guidings'         => $guidings,
                                     'targetsMap'       => $targetsMap ?? null,
-                                    'fromDestination'  => true,
-                                    'destinationId'    => $row_data->id,
                                 ])
                                 {!! $guides->links('vendor.pagination.default') !!}
                             </div>

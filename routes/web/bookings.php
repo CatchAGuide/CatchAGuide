@@ -30,6 +30,6 @@ Route::get('/booking-request/thank-you', function () {
 
 Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
 
-Route::get('/all-countries', function () {
-    return view('pages.countries.index');
-})->name('allcountries');
+// Legacy "all countries" link: the view it rendered needs a $countries list this closure never
+// passed (it 500'd). /destination is the maintained all-countries hub.
+Route::permanentRedirect('/all-countries', '/destination')->name('allcountries');

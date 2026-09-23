@@ -1,5 +1,6 @@
 @extends('layouts.app-v2')
-@section('share_tags')
+{{-- meta_robots replaces the layout's default INDEX,FOLLOW tag; putting it in share_tags left both. --}}
+@section('meta_robots')
     <meta name="robots" content="noindex, nofollow">
 @endsection
 @section('css_after')

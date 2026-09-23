@@ -161,6 +161,13 @@ actual site/codebase, not just theorized:
   "Destinations and species" group now links them. When adding a
   new cross-type or facet hub page, add it to primary nav/footer, not just a sitemap — sitemap presence alone
   doesn't give Google (or users) a path to discover it through the site's own link graph.
+- **Hreflang only for pages that exist on both domains.** `components/seo/hreflang.blade.php` maps the current
+  path to the other domain; for content written per language with unrelated slugs (magazine articles, root guide
+  articles) that path doesn't exist, and Google logged the resulting 302s/404s. Add any new per-language page
+  type to its exclusion list, and give its sitemap entries `localized: false`.
+- **Production's document root is the project root**, and its (gitignored, but rsync-deployed) root `.htaccess`
+  rewrites internally into `public/`. Any `public/.htaccess` redirect built from `REQUEST_URI` must strip that
+  `/public` prefix, or it redirects to `/public/...` and costs a second hop (Search Console "Redirect error").
 - **Never resurrect a static sitemap file under `public/`.** The live site was found serving several
   hand-written/frozen sitemap files years old (`public/de/catchaguideDE.xml`, `public/NewENSitemap.xml`,
   `public/sitemaps/sitemap_category_{en,de}.xml`, `sitemap_routes.xml`, top-level `sitemap_index.xml`) still

@@ -17,6 +17,7 @@ class RobotsAndWwwRedirectTest extends TestCase
         $response->assertDontSee('catchaguide.com', false);
         $response->assertSee('Allow: /angelmagazin/', false);
         $response->assertDontSee('Allow: /fishing-magazine/', false);
+        $response->assertSee('Disallow: /wishlist/', false);
     }
 
     public function test_robots_txt_on_com_advertises_com_sitemap_and_english_magazine_path(): void
