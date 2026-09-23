@@ -55,7 +55,6 @@
 @endsection
 
 @section('custom_style')
-@include('layouts.schema.listings')
 
 <!-- Structured Data for Search Results -->
 <script type="application/ld+json">
