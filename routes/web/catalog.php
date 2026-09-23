@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\Category\GuidingDestinationController;
@@ -90,6 +91,19 @@ Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->middleware('web');
 Route::post('/vacation-interest', [VacationInterestController::class, 'store'])->name('vacations.interest.store');
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
+// Legacy country URL still linked from older magazine/guide articles (and possibly external
+// sites): 404'd until now. One 301 to the canonical /vacations/{country}, query dropped.
+// Legacy species URL from older guide articles (/category/target-fish/{slug}): 301 to /targets/{slug}.
+Route::get('category/target-fish/{slug}', fn (string $slug) => redirect()->route(
+    'targets.show',
+    ['slug' => mb_strtolower($slug)],
+    301,
+))->name('targets.legacy');
+Route::get('vacations/location/{country}', fn (string $country) => redirect()->route(
+    'vacations.country',
+    ['country' => CountrySlug::canonicalize($country) ?? mb_strtolower($country)],
+    301,
+))->name('vacations.location.legacy');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
 Route::get('trips-destinations', [TripsCatalogController::class, 'index'])->name('trips.index')->middleware('ddos:search');

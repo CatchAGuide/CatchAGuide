@@ -1863,10 +1863,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/offer/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                        <a class="btn btn-primary" data-same-guiding-link>Details</a>
                     </div>
                 </div>
             `;
+            // Set the href in JS: a URL-looking placeholder in the markup string gets
+            // picked up by crawlers as a literal (404ing) link.
+            colDiv.querySelector('[data-same-guiding-link]').href = '/guidings/offer/' + encodeURIComponent(newGuiding.slug);
             container.appendChild(colDiv);
         }
 

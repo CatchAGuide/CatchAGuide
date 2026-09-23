@@ -33,3 +33,8 @@ Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name
 // Legacy "all countries" link: the view it rendered needs a $countries list this closure never
 // passed (it 500'd). /destination is the maintained all-countries hub.
 Route::permanentRedirect('/all-countries', '/destination')->name('allcountries');
+
+// Legacy booking-request URL: still the call to action in ~20 magazine/guide articles, but it
+// fell through to guidings/{slug} and 404'd. Registered here, before catalog.php's catch-all.
+Route::get('guidings/bookingrequest', fn () => redirect()->route('guidings.request', request()->query(), 301))
+    ->name('guidings.bookingrequest.legacy');
