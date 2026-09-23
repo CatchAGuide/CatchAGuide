@@ -12,6 +12,7 @@ use App\Services\Sitemap\CategoryPageSitemapSource;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use Illuminate\Support\Collection;
 
@@ -26,6 +27,7 @@ final class GlobalFacetSitemapContributor implements SitemapContributorInterface
         private readonly CatalogInventoryGate $gate,
         private readonly CategoryPageSitemapSource $categoryPages,
         private readonly SitemapLastmod $lastmod,
+        private readonly SitemapListingFreshness $freshness,
     ) {}
 
     public function key(): string
@@ -54,7 +56,10 @@ final class GlobalFacetSitemapContributor implements SitemapContributorInterface
                 continue;
             }
             $countrySlug = CountrySlug::canonicalize($country->slug);
-            $entries->push($this->geoEntry($context, ['destination', $countrySlug], CategoryPageEntityType::GEO_COUNTRY, $country));
+            $entries->push($this->geoEntry($context, ['destination', $countrySlug], CategoryPageEntityType::GEO_COUNTRY, $country,
+                $this->freshness->tourCountry($country->slug, $country->countrycode),
+                $this->freshness->vacationCountry($countrySlug),
+            ));
 
             $regions = CategoryEntity::regions()->where('country_id', $country->id)->whereNotNull('slug')->orderBy('id')->get();
             foreach ($regions as $region) {
@@ -77,7 +82,7 @@ final class GlobalFacetSitemapContributor implements SitemapContributorInterface
             if ($this->categoryPages->globalTargetIsLive($page, $context->lang)) {
                 $entries->push(SitemapEntry::make(
                     $this->encoder->join($context->baseUrl, ['targets', $page->slug]),
-                    $this->categoryPages->lastmod($page, CategoryPageScope::GLOBAL, $context->lang),
+                    $this->categoryPages->lastmod($page, CategoryPageScope::GLOBAL, $context->lang, $this->freshness->tourTarget((int) $page->source_id)),
                 ));
             }
         }
@@ -88,11 +93,11 @@ final class GlobalFacetSitemapContributor implements SitemapContributorInterface
     /**
      * @param  list<string>  $segments
      */
-    private function geoEntry(SitemapContext $context, array $segments, string $entityType, CategoryEntity $entity): SitemapEntry
+    private function geoEntry(SitemapContext $context, array $segments, string $entityType, CategoryEntity $entity, ?string ...$listingTimestamps): SitemapEntry
     {
         return SitemapEntry::make(
             $this->encoder->join($context->baseUrl, $segments),
-            $this->lastmod->forContent($entityType, CategoryPageScope::GLOBAL, $entity->id, $context->lang, $entity->updated_at),
+            $this->lastmod->forContent($entityType, CategoryPageScope::GLOBAL, $entity->id, $context->lang, $entity->updated_at, ...$listingTimestamps),
         );
     }
 }

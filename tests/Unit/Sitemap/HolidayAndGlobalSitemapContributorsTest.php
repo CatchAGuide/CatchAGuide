@@ -12,6 +12,7 @@ use App\Services\Sitemap\Contributors\HolidayFacetSitemapContributor;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
@@ -60,6 +61,7 @@ class HolidayAndGlobalSitemapContributorsTest extends TestCase
             $destinations,
             $source,
             app(SitemapLastmod::class),
+            app(SitemapListingFreshness::class),
         );
         $locs = $this->locs($contributor->entries(new SitemapContext(self::BASE, 'de')));
 
@@ -98,7 +100,7 @@ class HolidayAndGlobalSitemapContributorsTest extends TestCase
         $source = Mockery::mock(CategoryPageSitemapSource::class);
         $source->shouldReceive('targetPages')->andReturn(collect());
 
-        $contributor = new GlobalFacetSitemapContributor(new SitemapPathEncoder(), $gate, $source, app(SitemapLastmod::class));
+        $contributor = new GlobalFacetSitemapContributor(new SitemapPathEncoder(), $gate, $source, app(SitemapLastmod::class), app(SitemapListingFreshness::class));
         $locs = $this->locs($contributor->entries(new SitemapContext(self::BASE, 'de')));
 
         $this->assertContains(self::BASE.'/destination', $locs);

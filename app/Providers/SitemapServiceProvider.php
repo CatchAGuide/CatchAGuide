@@ -15,6 +15,7 @@ use App\Services\Sitemap\Contributors\TourGeoSitemapContributor;
 use App\Services\Sitemap\Contributors\TourListingSitemapContributor;
 use App\Services\Sitemap\SitemapGenerator;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use App\Services\Sitemap\SitemapXmlWriter;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +29,7 @@ class SitemapServiceProvider extends ServiceProvider
         $this->app->singleton(SitemapPathEncoder::class);
         $this->app->singleton(SitemapXmlWriter::class);
         $this->app->singleton(SitemapLastmod::class);
+        $this->app->singleton(SitemapListingFreshness::class);
         $this->app->singleton(CategoryPageSitemapSource::class);
 
         // The eight child files of /sitemap.xml, one per page type. Each URL belongs to exactly

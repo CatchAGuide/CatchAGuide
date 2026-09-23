@@ -12,6 +12,7 @@ use App\Services\Sitemap\CategoryPageSitemapSource;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use Illuminate\Support\Collection;
 
@@ -27,6 +28,7 @@ final class TourFacetSitemapContributor implements SitemapContributorInterface
         private readonly CatalogInventoryGate $gate,
         private readonly CategoryPageSitemapSource $categoryPages,
         private readonly SitemapLastmod $lastmod,
+        private readonly SitemapListingFreshness $freshness,
     ) {}
 
     public function key(): string
@@ -54,7 +56,7 @@ final class TourFacetSitemapContributor implements SitemapContributorInterface
             if ($this->gate->guidingDestinationIndexable($country)) {
                 $entries->push(SitemapEntry::make(
                     $this->encoder->join($context->baseUrl, ['guidings', CountrySlug::canonicalize($country->slug)]),
-                    $this->lastmod->forContent(CategoryPageEntityType::GEO_COUNTRY, CategoryPageScope::TOURS, $country->id, $context->lang, $country->updated_at),
+                    $this->lastmod->forContent(CategoryPageEntityType::GEO_COUNTRY, CategoryPageScope::TOURS, $country->id, $context->lang, $country->updated_at, $this->freshness->tourCountry($country->slug, $country->countrycode)),
                 ));
             }
         }
@@ -64,7 +66,7 @@ final class TourFacetSitemapContributor implements SitemapContributorInterface
             if ($this->categoryPages->tourTargetIsLive($page, $context->lang)) {
                 $entries->push(SitemapEntry::make(
                     $this->encoder->join($context->baseUrl, ['guidings', 'targets', $page->slug]),
-                    $this->categoryPages->lastmod($page, CategoryPageScope::TOURS, $context->lang),
+                    $this->categoryPages->lastmod($page, CategoryPageScope::TOURS, $context->lang, $this->freshness->tourTarget((int) $page->source_id)),
                 ));
             }
         }
@@ -74,7 +76,7 @@ final class TourFacetSitemapContributor implements SitemapContributorInterface
             if ($this->categoryPages->methodIsLive($page, $context->lang)) {
                 $entries->push(SitemapEntry::make(
                     $this->encoder->join($context->baseUrl, ['guidings', 'methods', $page->slug]),
-                    $this->categoryPages->lastmod($page, CategoryPageScope::TOURS, $context->lang),
+                    $this->categoryPages->lastmod($page, CategoryPageScope::TOURS, $context->lang, $this->freshness->tourMethod((int) $page->source_id)),
                 ));
             }
         }

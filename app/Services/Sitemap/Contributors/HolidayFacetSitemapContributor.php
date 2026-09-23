@@ -13,6 +13,7 @@ use App\Services\Sitemap\CategoryPageSitemapSource;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use Illuminate\Support\Collection;
 
@@ -35,6 +36,7 @@ final class HolidayFacetSitemapContributor implements SitemapContributorInterfac
         private readonly VacationDestinationRepository $destinations,
         private readonly CategoryPageSitemapSource $categoryPages,
         private readonly SitemapLastmod $lastmod,
+        private readonly SitemapListingFreshness $freshness,
     ) {}
 
     public function key(): string
@@ -54,7 +56,7 @@ final class HolidayFacetSitemapContributor implements SitemapContributorInterfac
         $entries = collect([SitemapEntry::make($this->encoder->join($context->baseUrl, ['vacations', 'countries']))]);
         foreach ($countries as $slug => $country) {
             if ($this->gate->vacationCountryIndexable($slug)) {
-                $entries->push($this->countryEntry($context, ['vacations', $slug], CategoryPageScope::VACATIONS, $country));
+                $entries->push($this->countryEntry($context, ['vacations', $slug], CategoryPageScope::VACATIONS, $country, $this->freshness->vacationCountry($slug)));
             }
         }
 
@@ -72,7 +74,7 @@ final class HolidayFacetSitemapContributor implements SitemapContributorInterfac
             $entries->push(SitemapEntry::make($this->encoder->join($context->baseUrl, ['vacations', $pillar, 'countries'])));
             foreach ($countries as $slug => $country) {
                 if ($this->gate->vacationCountryIndexable($slug, $pillar)) {
-                    $entries->push($this->countryEntry($context, ['vacations', $pillar, $slug], $scope, $country));
+                    $entries->push($this->countryEntry($context, ['vacations', $pillar, $slug], $scope, $country, $this->freshness->vacationCountry($slug, $pillar)));
                 }
             }
 
@@ -110,11 +112,11 @@ final class HolidayFacetSitemapContributor implements SitemapContributorInterfac
     /**
      * @param  list<string>  $segments
      */
-    private function countryEntry(SitemapContext $context, array $segments, string $scope, ?CategoryEntity $country): SitemapEntry
+    private function countryEntry(SitemapContext $context, array $segments, string $scope, ?CategoryEntity $country, ?string $listingTimestamp): SitemapEntry
     {
         $lastmod = $country === null
-            ? null
-            : $this->lastmod->forContent(CategoryPageEntityType::GEO_COUNTRY, $scope, $country->id, $context->lang, $country->updated_at);
+            ? $this->lastmod->newest($listingTimestamp)
+            : $this->lastmod->forContent(CategoryPageEntityType::GEO_COUNTRY, $scope, $country->id, $context->lang, $country->updated_at, $listingTimestamp);
 
         return SitemapEntry::make($this->encoder->join($context->baseUrl, $segments), $lastmod);
     }

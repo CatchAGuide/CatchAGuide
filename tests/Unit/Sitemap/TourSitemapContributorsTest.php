@@ -11,6 +11,7 @@ use App\Services\Sitemap\Contributors\TourGeoSitemapContributor;
 use App\Services\Sitemap\SitemapContext;
 use App\Services\Sitemap\SitemapEntry;
 use App\Services\Sitemap\SitemapLastmod;
+use App\Services\Sitemap\SitemapListingFreshness;
 use App\Services\Sitemap\SitemapPathEncoder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Mockery;
@@ -64,6 +65,7 @@ class TourSitemapContributorsTest extends TestCase
             $this->gate(fn (CategoryEntity $country) => $country->is($open)),
             $this->noCategoryPages(),
             app(SitemapLastmod::class),
+            app(SitemapListingFreshness::class),
         );
         $locs = $this->locs($contributor->entries(new SitemapContext(self::BASE, 'de')));
 
@@ -95,6 +97,7 @@ class TourSitemapContributorsTest extends TestCase
             $this->gate(fn () => false),
             $source,
             app(SitemapLastmod::class),
+            app(SitemapListingFreshness::class),
         );
         $entries = $contributor->entries(new SitemapContext(self::BASE, 'de'))->keyBy('loc');
 

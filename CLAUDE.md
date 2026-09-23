@@ -72,8 +72,9 @@ The set follows the Sept 2026 "Sitemap Concept CaG" spec: eight files per langua
 (`pages`, `tours`, `holidays`, `facets-global`, `facets-tours`, `geo-tours`, `facets-holidays`, `magazine`), listed by
 `/sitemap.xml`. File names are Search Console's per-file history key — don't rename them. Rules every contributor
 follows: a URL appears in exactly one file (`SitemapNoDuplicateUrlsTest`); only URLs that serve 200, are indexable
-and self-canonical, with no query params; `lastmod` comes from real content timestamps (`SitemapLastmod`), never
-the generation time, and is omitted when unknown; no `changefreq`/`priority`; hreflang alternates are added by
+and self-canonical, with no query params; `lastmod` is the newest of the page's own content timestamps
+(`SitemapLastmod`) and its listing set (`SitemapListingFreshness`), never the generation time, and is omitted when
+unknown; no `changefreq`/`priority`; hreflang alternates are added by
 `SitemapGenerator` (set `localized: false` for pages with no counterpart on the other domain).
 
 ### Media storage

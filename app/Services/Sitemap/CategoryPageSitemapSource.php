@@ -79,13 +79,16 @@ class CategoryPageSitemapSource
             && $this->hasContent($page, CategoryPageScope::TOURS, $lang, true);
     }
 
-    public function lastmod(CategoryPage $page, string $scope, string $lang): ?string
+    /**
+     * @param  mixed  ...$listingTimestamps  newest change in the page's listing set, if known
+     */
+    public function lastmod(CategoryPage $page, string $scope, string $lang, mixed ...$listingTimestamps): ?string
     {
         $type = strtolower((string) $page->type) === 'methods'
             ? CategoryPageEntityType::METHOD
             : CategoryPageEntityType::TARGET_FISH;
 
-        return $this->lastmod->forContent($type, $scope, (int) $page->source_id, $lang, $page->updated_at);
+        return $this->lastmod->forContent($type, $scope, (int) $page->source_id, $lang, $page->updated_at, ...$listingTimestamps);
     }
 
     private function hasTours(CategoryPage $page): bool
