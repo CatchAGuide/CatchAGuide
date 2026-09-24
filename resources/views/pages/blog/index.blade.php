@@ -82,7 +82,8 @@
 @section('header_sub_title', !empty($activeCategory) ? getLocalizedValue($activeCategory) : __('message.Magazine_subtitle'))
 
 @section('canonical')
-    <link rel="canonical" href="{{ strtok(url()->current(), '?') }}" />
+    @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
+    <link rel="canonical" href="{{ $paginationSeo->canonicalUrl(request(), strtok(url()->current(), '?')) }}" />
 @endsection
 
 @section('share_tags')

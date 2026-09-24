@@ -14,6 +14,9 @@ return [
         Auf dieser Seite präsentieren wir dir eine umfassende Übersicht aller Zielfische. Klicke auf deinen Wunschfisch und entdecke die besten Angeltouren, um genau diesen Fang zu landen. Egal, ob du Süßwasser- oder Salzwasserangler bist – hier findest du dein maßgeschneidertes Angelabenteuer.',
         'offers_title' => 'Touren, Camps & Reisen für :fish',
         'offers_empty' => 'Noch keine Angebote für :fish. Entdecke in der Zwischenzeit Touren und Urlaube in ganz Europa.',
+        'meta_description' => ':fish: geführte Angeltouren, Angelcamps und Angelreisen bei Catch A Guide vergleichen und direkt online buchen.',
+        'pillar_title_camp' => 'Angelcamps für :fish',
+        'pillar_title_trip' => 'Angelreisen auf :fish',
     ],
     'methods' => [
         'title' => 'Die beliebtesten Angelmethoden für Angeltouren',

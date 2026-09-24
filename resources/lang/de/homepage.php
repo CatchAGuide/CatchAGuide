@@ -202,6 +202,8 @@ return [
     'footer_by_country' => 'Nach Land',
     'footer_by_fish' => 'Nach Zielfisch',
     'footer_by_method' => 'Nach Methode',
+    'footer_group_discover' => 'Reiseziele und Fischarten',
+    'footer_target_species' => 'Zielfischarten',
     'footer_list_offer' => 'Tour anbieten',
     'footer_become_partner' => 'Partner werden',
     'footer_contact_label' => 'Kontakt',

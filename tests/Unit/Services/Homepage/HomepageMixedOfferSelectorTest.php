@@ -5,8 +5,11 @@ namespace Tests\Unit\Services\Homepage;
 use App\Models\CategoryEntity;
 use App\Models\Target;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Mockery;
 use Tests\TestCase;
 
 class HomepageMixedOfferSelectorTest extends TestCase
@@ -93,5 +96,34 @@ class HomepageMixedOfferSelectorTest extends TestCase
             $this->assertLessThanOrEqual(2, $modules[$type]->count());
             $this->assertTrue($modules[$type]->every(fn ($row) => ($row['type'] ?? null) === $type));
         }
+    }
+
+    public function test_destination_region_queries_use_the_tours_catalog_geo_scope(): void
+    {
+        // Region pages used to match the listings' free-text region column against the page's
+        // name, which found nothing for most regions (Rheindelta, Småland, Algarve...), so the
+        // page showed no offers and the inventory gate noindexed it. They must scope offers
+        // the way /guidings/{country}/{region} does: by the region's stored centroid.
+        $country = CategoryEntity::countries()->make(['name' => 'Niederlande', 'slug' => 'niederlande', 'countrycode' => 'NL']);
+        $region = CategoryEntity::regions()->make([
+            'name' => 'Rheindelta',
+            'slug' => 'rheindelta',
+            'filters' => ['placeLat' => '51.7', 'placeLng' => '4.3', 'region' => 'Zuid-Holland'],
+        ]);
+
+        $query = Mockery::mock(Builder::class);
+        $query->shouldReceive('count')->andReturn(5, 2, 1);
+        $catalog = Mockery::mock(OfferCatalogPageService::class);
+        $catalog->shouldReceive('listingQueries')
+            ->once()
+            ->withArgs(fn (array $input) => $input['placeLat'] === 51.7
+                && $input['placeLng'] === 4.3
+                && $input['region'] === 'Zuid-Holland'
+                && $input['place_types'] === ['administrative_area_level_1']
+                && ! isset($input['type']))
+            ->andReturn(['tour' => $query, 'trip' => $query, 'camp' => $query]);
+        $this->app->instance(OfferCatalogPageService::class, $catalog);
+
+        $this->assertSame(8, app(HomepageMixedOfferSelector::class)->countForDestination($country, $region));
     }
 }

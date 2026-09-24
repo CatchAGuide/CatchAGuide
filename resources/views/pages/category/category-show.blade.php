@@ -1,7 +1,7 @@
 @extends('layouts.app-v2')
 
 @php
-    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show', 'vacations.targets');
+    $useCategoryHeroHeader = request()->routeIs('targets.show', 'guidings.targets', 'guidings.methods.show', 'vacations.targets', 'vacations.camps.targets', 'vacations.trips.targets');
     $heroSearchAction = listing_search_action();
     $guidingsLandingCrumb = ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.landing')];
     $heroParentCrumbs = match (true) {
@@ -13,7 +13,7 @@
             $guidingsLandingCrumb,
             ['label' => __('category.targets.breadcrumb'), 'url' => route('guidings.targets.index')],
         ],
-        request()->routeIs('vacations.targets') => [
+        request()->routeIs('vacations.targets', 'vacations.camps.targets', 'vacations.trips.targets') => [
             ['label' => __('vacations.hub_breadcrumb'), 'url' => route('vacations.index')],
         ],
         default => [
@@ -22,9 +22,23 @@
     };
 @endphp
 
-@section('title', $row_data->language->title)
-@section('description', $row_data->language->introduction)
-@section('header_title', $row_data->language->title)
+@if($noindex ?? false)
+    {{-- Below the inventory gate: still reachable, kept out of the index. --}}
+    @section('meta_robots')
+        <meta name="robots" content="NOINDEX, FOLLOW" />
+    @endsection
+@endif
+
+@section('title', $pillarTitle ?? $row_data->language->title)
+@php
+    // CMS copy is often markup with no text ("<p>&nbsp;</p>"): use the first field with visible
+    // text, then a generic sentence naming the species.
+    $metaDescription = collect([$row_data->language->introduction, $row_data->language->sub_title])
+        ->first(fn ($copy) => preg_replace('/[\s\x{A0}]+/u', '', html_entity_decode(strip_tags((string) $copy))) !== '')
+        ?? __('category.targets.meta_description', ['fish' => $row_data->source->name ?? $row_data->name]);
+@endphp
+@section('description', $metaDescription)
+@section('header_title', $pillarTitle ?? $row_data->language->title)
 @section('header_sub_title', $row_data->language->sub_title)
 
 @section('share_tags')
@@ -571,7 +585,7 @@
     @if($useCategoryHeroHeader)
         <div class="category-hero-page" data-category-hero-page>
         @include('pages.category.partials.hero-header', [
-            'listingTitle' => $row_data->language->title,
+            'listingTitle' => $pillarTitle ?? $row_data->language->title,
             'listingSubtitle' => $row_data->language->sub_title,
             'searchAction' => $heroSearchAction,
             'breadcrumbItems' => array_merge($heroParentCrumbs, [
@@ -653,8 +667,6 @@
                                 @include('pages.guidings.partials.guiding-card', [
                                     'guidings'         => $guidings,
                                     'targetsMap'       => $targetsMap ?? null,
-                                    'fromDestination'  => true,
-                                    'destinationId'    => $row_data->id,
                                 ])
                                 {!! $guides->links('vendor.pagination.default') !!}
                             </div>

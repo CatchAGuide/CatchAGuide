@@ -98,12 +98,37 @@ class VacationCountriesIndexTest extends TestCase
             $this->hubGridRow($campsCountry, trips: 0, camps: 2),
         ]);
 
-        $response = $this->get(route('vacations.countries', ['pillar' => 'trips']));
+        $response = $this->get(route('vacations.trips.countries'));
 
         $response->assertOk();
         $response->assertViewHas('destination_route', 'vacations.trips.show');
         $response->assertSee(route('vacations.trips.show', $tripsCountry->slug, false), false);
         $response->assertDontSee(route('vacations.trips.show', $campsCountry->slug, false), false);
+    }
+
+    /**
+     * The pillar country lists are real paths that canonicalize to themselves; the old
+     * ?pillar= form 301s there instead of rendering a query-param duplicate (see CLAUDE.md's
+     * "SEO / catalog page conventions").
+     */
+    public function test_pillar_country_lists_live_on_self_canonical_paths(): void
+    {
+        $this->mockHubGrid([]);
+
+        $plain = $this->get(route('vacations.countries'));
+        $plain->assertOk();
+        $plain->assertSee('<link rel="canonical" href="'.route('vacations.countries').'" />', false);
+
+        $camps = $this->get(route('vacations.camps.countries'));
+        $camps->assertOk();
+        $camps->assertSee('<link rel="canonical" href="'.route('vacations.camps.countries').'" />', false);
+
+        $this->get('/vacations/countries?pillar=camps')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.camps.countries'));
+        $this->get('/vacations/countries?pillar=trips&sortby=name')
+            ->assertStatus(301)
+            ->assertRedirect(route('vacations.trips.countries', ['sortby' => 'name']));
     }
 
     public function test_vacations_countries_index_excludes_country_without_any_listings(): void

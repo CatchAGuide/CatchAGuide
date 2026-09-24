@@ -427,19 +427,36 @@
     justify-content: center;
     min-width: 8.5rem;
     padding: 0.7rem 1.1rem;
+    border: 0;
     border-radius: 12px;
     background: $coral;
     color: #fff !important;
+    font-family: inherit;
     font-size: 0.85rem;
     font-weight: 700;
+    line-height: 1.2;
     text-decoration: none;
     white-space: nowrap;
+    cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease;
 
     &:hover {
       background: darken($coral, 5%);
       color: #fff !important;
       transform: translateY(-1px);
+    }
+  }
+
+  &__cta-form {
+    margin: 0;
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+
+    .offers-gallery-modal__cta {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
     }
   }
 }
@@ -505,11 +522,20 @@
       font-size: 1.2rem;
     }
 
-    &__cta {
+    &__cta,
+    &__cta-form {
       flex: 1 1 auto;
       min-width: 0;
       max-width: 58%;
+    }
+
+    &__cta {
       padding: 0.75rem 0.9rem;
+    }
+
+    &__cta-form .offers-gallery-modal__cta {
+      max-width: none;
+      flex: none;
     }
   }
 }

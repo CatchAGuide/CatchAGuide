@@ -14,7 +14,7 @@
         <x-vacation.country-slider
             :title="__('vacations.hub_country_slider_title')"
             :subtitle="__('vacations.hub_country_slider_subtitle')"
-            :link-url="route('vacations.countries', ['pillar' => $pillar])"
+            :link-url="route('vacations.'.$pillar.'.countries')"
             :link-label="__('vacations.hub_country_slider_see_all')"
             :slider-id="$sliderId"
         >

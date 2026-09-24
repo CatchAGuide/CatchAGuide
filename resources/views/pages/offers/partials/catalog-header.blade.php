@@ -17,6 +17,8 @@
         isset($vm) ? $vm->lockedScopeParams() : [],
     );
 @endphp
+@inject('structuredData', 'App\Services\Seo\StructuredDataBuilder')
+@include('components.seo.json-ld', ['data' => $structuredData->breadcrumbList([['label' => __('offers.breadcrumb')]], request()->url())])
 <div class="offers-page-header-shell cag-site-nav-shell" data-offers-header-shell>
     @include('layouts.partials.site-nav', [
         'overlay' => true,

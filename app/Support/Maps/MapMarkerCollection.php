@@ -70,7 +70,10 @@ class MapMarkerCollection
      * Structured vacation markers (trips) — popup HTML built client-side.
      *
      * @param  iterable  $trips
-     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for
+     *     call-site compatibility. Search/guest-count context is restored on the detail page
+     *     from session (see ListingSearchStateService) instead of being carried on this
+     *     crawlable map-marker link, per CLAUDE.md's "SEO / catalog page conventions".
      * @return array<int, array<string, mixed>>
      */
     public static function fromTrips(iterable $trips, array $query = []): array
@@ -102,10 +105,7 @@ class MapMarkerCollection
                 'variant' => 'trip',
                 'pillar' => 'trip',
                 'title' => (string) ($trip->title ?? ''),
-                'url' => route('vacations.trips.show', array_merge(
-                    ['slug' => $trip->slug],
-                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
-                )),
+                'url' => route('vacations.trips.show', ['slug' => $trip->slug]),
                 'location' => (string) ($trip->location ?? ''),
                 'image' => (string) $image,
                 'images' => $images,
@@ -126,7 +126,10 @@ class MapMarkerCollection
      * Eager-load accommodations + specialOffers before calling to avoid N+1.
      *
      * @param  iterable  $camps
-     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for
+     *     call-site compatibility. Search/guest-count context is restored on the detail page
+     *     from session (see ListingSearchStateService) instead of being carried on this
+     *     crawlable map-marker link, per CLAUDE.md's "SEO / catalog page conventions".
      * @return array<int, array<string, mixed>>
      */
     public static function fromCamps(iterable $camps, array $query = []): array
@@ -160,10 +163,7 @@ class MapMarkerCollection
                 'variant' => 'camp',
                 'pillar' => 'camp',
                 'title' => (string) ($camp->title ?? ''),
-                'url' => route('vacations.camps.show', array_merge(
-                    ['slug' => $camp->slug],
-                    array_filter($query, fn ($v) => $v !== null && $v !== ''),
-                )),
+                'url' => route('vacations.camps.show', ['slug' => $camp->slug]),
                 'location' => (string) ($camp->location ?? $camp->city ?? ''),
                 'image' => (string) $image,
                 'images' => $images,
@@ -289,14 +289,15 @@ class MapMarkerCollection
     }
 
     /**
-     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for
+     *     call-site compatibility. Search/guest-count context is restored on the detail page
+     *     from session (see ListingSearchStateService) instead of being carried on this
+     *     crawlable map-marker link, per CLAUDE.md's "SEO / catalog page conventions".
      */
     private static function guidingShowUrl(object $guiding, array $query = []): string
     {
-        $query = array_filter($query, fn ($v) => $v !== null && $v !== '');
-
         if (method_exists($guiding, 'publicShowUrl')) {
-            return $guiding->publicShowUrl($query);
+            return $guiding->publicShowUrl();
         }
 
         $slug = $guiding->slug ?? null;
@@ -304,7 +305,7 @@ class MapMarkerCollection
             return '#';
         }
 
-        return route('guidings.show', array_merge(['slug' => $slug], $query));
+        return route('guidings.show', ['slug' => $slug]);
     }
 
     /**

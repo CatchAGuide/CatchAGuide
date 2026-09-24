@@ -36,6 +36,11 @@
         isset($lockedParams) && is_array($lockedParams) ? $lockedParams : [],
     );
 @endphp
+@inject('structuredData', 'App\Services\Seo\StructuredDataBuilder')
+@if(count($breadcrumbItems) > 0)
+    @include('components.seo.json-ld', ['data' => $structuredData->breadcrumbList($breadcrumbItems, request()->url())])
+@endif
+
 <div class="offers-page-header-shell cag-site-nav-shell" data-category-header-shell>
     @include('layouts.partials.site-nav', [
         'overlay' => true,

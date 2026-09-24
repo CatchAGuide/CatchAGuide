@@ -20,12 +20,15 @@
     <!-- End Google Tag Manager -->
 
     <!-- Canonical URL to prevent duplicate content -->
+    @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
     @hasSection('canonical')
         @yield('canonical')
     @else
-        <link rel="canonical" href="{{ request()->url() }}" />
+        <link rel="canonical" href="{{ $paginationSeo->canonicalUrl(request()) }}" />
     @endif
     @include('components.seo.hreflang')
+    {{-- JSON-LD pushed by pages/partials via @push('structured_data') (components.seo.json-ld). --}}
+    @stack('structured_data')
     @hasSection('meta_robots')
         @yield('meta_robots')
     @else
@@ -60,62 +63,7 @@
         {!! json_encode($orgJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
     </script>
 
-    @if(count($pageAttributes))
-        @foreach($pageAttributes as $attribute)
-            @if($attribute->meta_type == 'title')
-            <!-- 1 -->
-                <title>{{$attribute->content}}</title>
-            @else
-            <!-- 2 -->
-                <title>@yield('title', 'Bitte Title setzen')</title>
-            @endif
-            
-            @if($attribute->meta_type == 'description')
-                <meta name="description" content="{{$attribute->content}}">
-            @endif
-
-            @if($attribute->meta_type == 'keywords')
-                <meta name="keywords" content="{{$attribute->content}}">
-            @endif
-        @endforeach
-    @else
-        @if(Request::segment(1) == 'guidings')
-            @if(empty($__env->yieldContent('title')))
-            <title>Guidings - {{ config('app.name') }}</title>
-            <meta name="description" content="{{ config('app.name') }} Guidings">
-            @else
-            <title>@yield('title', 'Bitte Title setzen')</title>
-            <meta name="description" content="{{ config('app.name') }} - @yield('description')">
-            <meta name="keywords" content="{{ config('app.name') }} - @yield('keywords')">
-            @endif
-        @else
-            @php
-            $page_attr = App\Models\PageAttribute::whereDomain(request()->getHost())->whereUri(request()->path())->get();
-
-            $page_title = $page_attr->where('meta_type', 'title')->first();
-            $page_meta_desc = $page_attr->where('meta_type', 'description')->first();
-            $page_keywords = $page_attr->where('meta_type', 'keywords')->first();
-            @endphp
-
-            @if(is_null($page_title))
-            <title>@yield('title', 'Bitte Title setzen')</title>
-            @else
-            <title>@yield('title', 'Bitte Title setzen') - {{ $page_title->content }}</title>
-            @endif
-
-            @if(!is_null($page_meta_desc))
-            <meta name="description" content="{{ $page_meta_desc->content }}">
-            @else
-            <meta name="description" content="{{ config('app.name') }} - @yield('description')">
-            @endif
-
-            @if(!is_null($page_keywords))
-            <meta name="keywords" content="{{ $page_keywords->content }}">
-            @else
-            <meta name="keywords" content="{{ config('app.name') }} - @yield('keywords')">
-            @endif
-        @endif
-    @endif
+    @include('components.seo.head-meta', ['appNameOnAttributes' => false, 'appNameOnGuidings' => false, 'appNameElsewhere' => false])
 
     <!-- favicons Icons -->
     {{-- @if(app()->getLocale() == 'en')
@@ -281,42 +229,7 @@
             <!-- <a href="{{ route('welcome') }}" aria-label="logo image"><img src="{{ asset('assets/images/logo/CatchAGuide_Logo_PNG.png') }}" width="155" alt=""/></a> -->
         </div>
         <!-- /.logo-box -->
-        <div class="mobile-nav__container">
-            <ul class="main-menu__list">
-                <li class="dropdown current">
-                    <a href="https://www.catchaguide.com">Startseite</a>
-                </li>
-                <li class="dropdown ">
-                    <a href="https://www.catchaguide.com/guidings">Alle Angelguidings</a>
-                </li>
-                <li class="dropdown ">
-                    <a href="https://www.catchaguide.com/angelmagazin">Angelmagazin</a>
-                </li>
-
-                <li class="magazine-nmb ">
-                    <a href="https://www.catchaguide.com/angelmagazin">Angelmagazin</a>
-                </li>
-
-
-
-                <nav class="main-menu-wrapper__nav d-flex`">
-                    <a class="main-menu-wrapper__user sm-hidden" href="https://www.catchaguide.com/profile" title="Einloggen/Registrieren"> 
-                        <span style="margin-right: 20px;">Einloggen/Registrieren</span>
-                        <div class="main-menu-wrapper__right main-menu__user icon-avatar"></div>
-                    </a>
-                    <div class="language-wrapper">
-                        <form action="{{ route('language.switch') }}" method="POST">
-                            @csrf
-                            <select name="language" class="selectpicker" data-width="fit" onchange="this.form.submit()">
-                                @foreach (config('app.locales') as $key => $locale)
-                                <option  value="{{ $locale }}" data-content='<span class="fi fi-{{$key}}"></span>' {{ app()->getLocale() == $locale ? 'selected' : '' }}></option>
-                                @endforeach
-                            </select>        
-                        </form>
-                    </div>
-                </nav>
-            </ul>
-        </div>
+        <div class="mobile-nav__container"></div>
         <!-- /.mobile-nav__container -->
 
         <ul class="mobile-nav__contact list-unstyled">

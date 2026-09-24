@@ -2,7 +2,7 @@
 
 namespace App\Services\Homepage;
 
-use App\Domain\Offers\DestinationOfferGeoScope;
+use App\Domain\Offers\DestinationOfferScope;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\CategoryEntity;
 use App\Models\Guiding;
@@ -11,7 +11,9 @@ use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
+use App\Services\Offers\OfferCatalogPageService;
 use App\Services\Offers\OfferFilterService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -24,6 +26,7 @@ class HomepageMixedOfferSelector
         private TripCardPresenter $tripPresenter,
         private TourCardPresenter $tourPresenter,
         private OfferFilterService $offerFilters,
+        private OfferCatalogPageService $offerCatalog,
     ) {}
 
     /**
@@ -64,7 +67,7 @@ class HomepageMixedOfferSelector
     ): array {
         $perType = $perType ?? 8;
         $cacheKey = implode('_', [
-            'destination_offer_modules_v1',
+            'destination_offer_modules_v2',
             app()->getLocale(),
             (string) $country->id,
             (string) ($region?->id ?? '0'),
@@ -143,19 +146,41 @@ class HomepageMixedOfferSelector
             ->get();
     }
 
+    /**
+     * The tour/camp/trip queries a /destination/{country}/{region?}/{city?} page draws its offer
+     * modules from, unlimited. Same geo scope as the /guidings/{country}/{region?}/{city?}
+     * catalog (the place's stored centroid and bounds), so a destination page shows — and the
+     * inventory gate counts — the offers that actually lie in the region or city. Matching the
+     * listings' free-text region/city columns against the page's name found nothing for most
+     * regions.
+     *
+     * @return array{tour: Builder, trip: Builder, camp: Builder}
+     */
+    public function destinationQueries(
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
+    ): array {
+        return $this->offerCatalog->listingQueries(DestinationOfferScope::mergeIntoRequest([], $country, $region, $city));
+    }
+
+    public function countForDestination(
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
+    ): int {
+        return collect($this->destinationQueries($country, $region, $city))
+            ->sum(fn (Builder $query) => $query->count());
+    }
+
     private function popularGuidingsForDestination(
         int $limit,
         CategoryEntity $country,
         ?CategoryEntity $region,
         ?CategoryEntity $city,
     ): Collection {
-        $query = Guiding::query()
+        return $this->destinationTourQuery($country, $region, $city)
             ->withCount('bookings')
-            ->publiclyVisible();
-
-        DestinationOfferGeoScope::apply($query, $country, $region, $city, includeCountryIso: true);
-
-        return $query
             ->orderByDesc('bookings_count')
             ->limit($limit)
             ->get();
@@ -167,10 +192,7 @@ class HomepageMixedOfferSelector
         ?CategoryEntity $region,
         ?CategoryEntity $city,
     ): Collection {
-        $query = $this->camps->queryForCountry($this->vacationFilter($country));
-        DestinationOfferGeoScope::apply($query, $country, $region, $city);
-
-        return $query
+        return $this->destinationCampQuery($country, $region, $city)
             ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations'])
             ->orderByDesc('created_at')
             ->limit($limit)
@@ -183,21 +205,25 @@ class HomepageMixedOfferSelector
         ?CategoryEntity $region,
         ?CategoryEntity $city,
     ): Collection {
-        $query = $this->trips->queryForCountry($this->vacationFilter($country));
-        DestinationOfferGeoScope::apply($query, $country, $region, $city);
-
-        return $query
+        return $this->destinationTripQuery($country, $region, $city)
             ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
     }
 
-    private function vacationFilter(CategoryEntity $country): VacationListingFilter
+    private function destinationTourQuery(CategoryEntity $country, ?CategoryEntity $region, ?CategoryEntity $city): Builder
     {
-        return VacationListingFilter::fromRequest([
-            'country' => $country->slug,
-            'country_short' => $country->countrycode,
-        ]);
+        return $this->destinationQueries($country, $region, $city)['tour'];
+    }
+
+    private function destinationCampQuery(CategoryEntity $country, ?CategoryEntity $region, ?CategoryEntity $city): Builder
+    {
+        return $this->destinationQueries($country, $region, $city)['camp'];
+    }
+
+    private function destinationTripQuery(CategoryEntity $country, ?CategoryEntity $region, ?CategoryEntity $city): Builder
+    {
+        return $this->destinationQueries($country, $region, $city)['trip'];
     }
 
     private function popularGuidingsForSpecies(int $limit, int $speciesId): Collection

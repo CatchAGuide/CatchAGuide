@@ -13,6 +13,7 @@ use App\Models\Guiding;
 use App\Models\Language;
 use App\Models\User;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -36,6 +37,12 @@ class GuidingsDestinationTest extends TestCase
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+
+        // These tests cover page rendering; the inventory gate has its own tests
+        // (CatalogInventoryGateTest, GeoPageInventoryGateTest).
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('guidingDestinationIndexable', 'destinationIndexable', 'vacationCountryIndexable')->andReturn(true);
+        $this->app->instance(CatalogInventoryGate::class, $gate);
     }
 
     private function createTour(array $overrides = []): Guiding
@@ -204,6 +211,48 @@ class GuidingsDestinationTest extends TestCase
             'country' => $country->slug,
             'region' => $region->slug,
         ], false), false);
+    }
+
+    /**
+     * Regions below the inventory gate (fewer than three tours) render noindex and drop out of
+     * the country page's region rail — linking a noindexed page from the hub would keep feeding
+     * it to crawlers (see CLAUDE.md's "SEO / catalog page conventions").
+     */
+    public function test_gated_region_is_noindexed_and_left_out_of_the_country_rail(): void
+    {
+        $country = $this->createCountry('spanien-gate');
+        $busy = CategoryEntity::regions()->create([
+            'type' => 'region', 'country_id' => $country->id,
+            'name' => 'Busy Region '.$country->slug, 'slug' => 'busy-'.$country->slug,
+        ]);
+        $thin = CategoryEntity::regions()->create([
+            'type' => 'region', 'country_id' => $country->id,
+            'name' => 'Thin Region '.$country->slug, 'slug' => 'thin-'.$country->slug,
+        ]);
+
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('guidingDestinationIndexable')->andReturnUsing(
+            fn (CategoryEntity $c, ?CategoryEntity $region = null, ?CategoryEntity $city = null) => $city === null
+                && ($region === null || $region->is($busy))
+        );
+        $this->app->instance(CatalogInventoryGate::class, $gate);
+        $this->bindToursCatalog(fn () => $this->viewModel(
+            catalogUrl: route('guidings.destination', ['country' => $country->slug]),
+        ));
+
+        $countryPage = $this->get(route('guidings.destination', ['country' => $country->slug]));
+        $countryPage->assertOk();
+        $countryPage->assertSee('<meta name="robots" content="INDEX,FOLLOW" >', false);
+        $countryPage->assertSee($busy->name, false);
+        $countryPage->assertDontSee($thin->name, false);
+
+        $thinPage = $this->get(route('guidings.destination', ['country' => $country->slug, 'region' => $thin->slug]));
+        $thinPage->assertOk();
+        $thinPage->assertSee('<meta name="robots" content="NOINDEX, FOLLOW" />', false);
+
+        $busyPage = $this->get(route('guidings.destination', ['country' => $country->slug, 'region' => $busy->slug]));
+        $busyPage->assertOk();
+        $busyPage->assertDontSee('NOINDEX', false);
     }
 
     public function test_guidings_region_renders_compact_city_rail(): void
@@ -377,6 +426,25 @@ class GuidingsDestinationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Tours Catalonia Title', false);
+    }
+
+    public function test_guidings_destination_redirects_uppercase_umlaut_slug_to_canonical(): void
+    {
+        $response = $this->get('/guidings/'.rawurlencode('Österreich'));
+
+        $response->assertRedirect(route('guidings.destination', ['country' => 'österreich']));
+        $response->assertStatus(301);
+    }
+
+    public function test_guidings_destination_redirect_preserves_region_and_city(): void
+    {
+        $response = $this->get('/guidings/'.rawurlencode('Österreich').'/tirol/innsbruck');
+
+        $response->assertRedirect(route('guidings.destination', [
+            'country' => 'österreich',
+            'region' => 'tirol',
+            'city' => 'innsbruck',
+        ]));
     }
 
     public function test_numeric_guiding_show_route_still_wins_over_destination(): void

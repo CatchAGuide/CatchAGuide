@@ -1,6 +1,6 @@
 @extends('layouts.app-v2')
 
-@section('title', 'FAQ')
+@section('title', __('message.faq-page-title'))
 @section('description',__('message.faq-page-title'))
 
 @section('content')
@@ -11,38 +11,14 @@
                     <ul class="thm-breadcrumb list-unstyled">
                         <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
                         <li><span><i class="fas fa-solid fa-chevron-right"></i></span></li>
-                        <li class="active">@yield('title')</li>
+                        <li class="active">@lang('message.faq')</li>
                     </ul>
                 </div>
             </div>
         </section>
     </div>
-    <!--Page Header Start-->
-    <!-- <section class="page-header">
-        <div class="page-header__top">
-            <div class="page-header-bg-magazin" style="background-image: url({{asset('assets/images/faq.jpg')}}); "></div>
-            <div class="page-header-bg-overly-magazin"></div>
-            <div class="container">
-                <div class="page-header__top-inner">
-                    <h1 class="h2">@yield('title')</h1>
-                </div>
-            </div>
-        </div>
-        <div class="page-header__bottom">
-            <div class="container">
-                <div class="page-header__bottom-inner">
-                    <ul class="thm-breadcrumb list-unstyled">
-                        <li><a href="{{ route('welcome') }}">@lang('message.home')</a></li>
-                        <li><span>&#183;</span></li>
-                        <li class="active">@yield('title')</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section> -->
-    <!--Page Header End-->
     <div class="container my-3">
-        <h1>Frequently Asked Questions</h1>
+        <h1>@lang('message.faq-page-title')</h1>
         <br>
         <div class="accordion" id="accordionExample">
             @foreach($faqs as $faq)

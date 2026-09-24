@@ -202,6 +202,8 @@ return [
     'footer_by_country' => 'By country',
     'footer_by_fish' => 'By target fish',
     'footer_by_method' => 'By method',
+    'footer_group_discover' => 'Destinations and species',
+    'footer_target_species' => 'Target fish species',
     'footer_list_offer' => 'List a tour',
     'footer_become_partner' => 'Become Catch A Guide partner',
     'footer_contact_label' => 'Contact',

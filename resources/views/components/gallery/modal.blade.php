@@ -14,6 +14,8 @@
     'priceNote' => null,
     'ctaUrl' => null,
     'ctaLabel' => null,
+    'ctaMethod' => 'GET',
+    'ctaFields' => [],
 ])
 
 @php
@@ -21,6 +23,9 @@
     $galleryCount = count($images);
     $ratingValue = isset($rating) ? (float) $rating : null;
     $reviewCount = (int) $reviewCount;
+    $ctaMethod = strtoupper((string) ($ctaMethod ?? 'GET'));
+    $ctaFields = is_array($ctaFields ?? null) ? $ctaFields : [];
+    $usesPostCta = $ctaMethod === 'POST' && $ctaUrl && $ctaLabel;
     $specLabels = array_values(array_filter(array_map(function ($spec) {
         if (is_string($spec)) {
             return $spec;
@@ -166,7 +171,21 @@
                             @endif
                         </div>
                     @endif
-                    @if($ctaUrl && $ctaLabel)
+                    @if($usesPostCta)
+                        <form
+                            action="{{ $ctaUrl }}"
+                            method="POST"
+                            class="offers-gallery-modal__cta-form"
+                        >
+                            @csrf
+                            @foreach($ctaFields as $fieldName => $fieldValue)
+                                <input type="hidden" name="{{ $fieldName }}" value="{{ $fieldValue }}">
+                            @endforeach
+                            <button type="submit" class="offers-gallery-modal__cta">
+                                {{ $ctaLabel }}
+                            </button>
+                        </form>
+                    @elseif($ctaUrl && $ctaLabel)
                         <a href="{{ $ctaUrl }}" class="offers-gallery-modal__cta">
                             {{ $ctaLabel }}
                         </a>

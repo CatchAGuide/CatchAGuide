@@ -8,6 +8,7 @@ use App\Models\CategoryEntity;
 use App\Presenters\Vacation\CampCardPresenter;
 use App\Presenters\Vacation\TripCardPresenter;
 use App\Repositories\Vacation\VacationDestinationRepository;
+use App\Services\Seo\CatalogInventoryGate;
 use App\Services\Vacation\VacationCountryPageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class VacationCountryController extends Controller
         private VacationDestinationRepository $destinations,
         private TripCardPresenter $tripPresenter,
         private CampCardPresenter $campPresenter,
+        private CatalogInventoryGate $inventoryGate,
     ) {}
 
     public function show(Request $request, string $country): View|RedirectResponse
@@ -32,7 +34,7 @@ class VacationCountryController extends Controller
 
         $vm = $this->countryPage->build($request, $country);
 
-        return $this->countryView($vm);
+        return $this->countryView($vm, noindex: ! $this->inventoryGate->vacationCountryIndexable($country));
     }
 
     public function allOffers(Request $request): View|RedirectResponse
@@ -53,11 +55,17 @@ class VacationCountryController extends Controller
     /**
      * "See all countries" page for the vacations pillar — same layout as the
      * mixed destination hub, but scoped to countries that have vacations
-     * listings (optionally narrowed to a single pillar via ?pillar=).
+     * listings (optionally narrowed to a single pillar by the /vacations/{trips|camps}/countries
+     * path). The legacy ?pillar= form 301s to that path so each variant is one self-canonical URL.
      */
-    public function countries(Request $request): View
+    public function countries(Request $request): View|RedirectResponse
     {
-        $pillar = strtolower((string) $request->query('pillar', ''));
+        $queryPillar = strtolower((string) $request->query('pillar', ''));
+        if (in_array($queryPillar, ['trips', 'camps'], true)) {
+            return redirect()->route("vacations.{$queryPillar}.countries", $request->except('pillar'), 301);
+        }
+
+        $pillar = $request->route('pillar');
         $pillar = in_array($pillar, ['trips', 'camps'], true) ? $pillar : null;
 
         $countryRoute = match ($pillar) {
@@ -116,11 +124,12 @@ class VacationCountryController extends Controller
         );
     }
 
-    private function countryView($vm, bool $isAllOffers = false): View
+    private function countryView($vm, bool $isAllOffers = false, bool $noindex = false): View
     {
         return view('pages.vacations.country', [
             'vm' => $vm,
             'isAllOffers' => $isAllOffers,
+            'noindex' => $noindex,
             'listingRows' => collect($vm->listings->items())->map(function (array $item) use ($vm) {
                 $productQuery = $vm->filter->productPageQuery();
 

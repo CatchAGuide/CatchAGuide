@@ -68,4 +68,15 @@ class TargetsPageRedirectTest extends TestCase
         $response->assertViewIs('pages.category.category-index');
         $response->assertViewHas('type', 'targets');
     }
+
+    public function test_category_page_uppercase_slug_redirects_to_lowercase_in_one_hop(): void
+    {
+        $this->get('/category-page/targets/%C3%84sche')
+            ->assertStatus(301)
+            ->assertRedirect(route('targets.show', ['slug' => 'äsche']));
+
+        $this->get('/category-page/methods/Spinnfischen')
+            ->assertStatus(301)
+            ->assertRedirect(route('guidings.methods.show', ['slug' => 'spinnfischen']));
+    }
 }

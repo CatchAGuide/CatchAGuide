@@ -29,6 +29,12 @@ class GuidingCardPresenter
      *     requested_count: ?int
      * }
      */
+    /**
+     * @param  array<string, mixed>  $urlQuery  Deprecated/unused for URL-building — kept for
+     *     call-site compatibility. Search/guest-count context is restored on the detail page
+     *     from session (see ListingSearchStateService) instead of being carried on this
+     *     crawlable card link, per CLAUDE.md's "SEO / catalog page conventions".
+     */
     public function present(Guiding $guiding, ?int $requestedCount = null, array $urlQuery = []): array
     {
         $averageRating = $guiding->cached_average_rating ?? $guiding->user?->average_rating();
@@ -38,7 +44,7 @@ class GuidingCardPresenter
         return [
             'type' => 'tour',
             'id' => $guiding->id,
-            'url' => $guiding->publicShowUrl($urlQuery),
+            'url' => $guiding->publicShowUrl(),
             'image' => get_featured_image_link($guiding) ?: asset('images/placeholder_guide.webp'),
             'badge' => __('homepage.landing_card_badge'),
             'title' => translate($guiding->title),

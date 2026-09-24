@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\CategoryPage\CategoryPageScope;
+use App\Domain\Vacation\CountrySlug;
 use App\Http\Controllers\CampOfferController;
 use App\Http\Controllers\Category\DestinationCountryController;
 use App\Http\Controllers\Category\GuidingDestinationController;
@@ -60,6 +61,18 @@ Route::get('offers', [OffersController::class, 'index'])->name('offers.index')->
 Route::get('vacations', [VacationHubController::class, 'index'])->name('vacations.index')->middleware('ddos:search');
 Route::get('vacations/trips', [VacationPillarController::class, 'index'])->defaults('pillar', 'trips')->name('vacations.trips.index')->middleware('ddos:search');
 Route::get('vacations/camps', [VacationPillarController::class, 'index'])->defaults('pillar', 'camps')->name('vacations.camps.index')->middleware('ddos:search');
+Route::get('vacations/trips/countries', [VacationCountryController::class, 'countries'])->defaults('pillar', 'trips')->name('vacations.trips.countries')->middleware('ddos:search');
+Route::get('vacations/camps/countries', [VacationCountryController::class, 'countries'])->defaults('pillar', 'camps')->name('vacations.camps.countries')->middleware('ddos:search');
+Route::get('vacations/trips/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::VACATIONS)
+    ->defaults('vacation', 'trip')
+    ->name('vacations.trips.targets')
+    ->middleware('ddos:search');
+Route::get('vacations/camps/targets/{slug}', [TargetFishPageController::class, 'show'])
+    ->defaults('content_scope', CategoryPageScope::VACATIONS)
+    ->defaults('vacation', 'camp')
+    ->name('vacations.camps.targets')
+    ->middleware('ddos:search');
 Route::get('vacations/trips/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'trips')->name('vacations.trips.show')->middleware('ddos:search');
 Route::get('vacations/camps/{slug}', [VacationPillarController::class, 'slug'])->defaults('pillar', 'camps')->name('vacations.camps.show')->middleware('ddos:search');
 Route::get('vacations/all-offers', [VacationCountryController::class, 'allOffers'])->name('vacations.all-offers')->middleware('ddos:search');
@@ -78,6 +91,19 @@ Route::post('/vacation-booking', [VacationBookingController::class, 'store'])
     ->middleware('web');
 Route::post('/vacation-interest', [VacationInterestController::class, 'store'])->name('vacations.interest.store');
 Route::get('vacations/c/{country}', [VacationsController::class, 'category'])->name('vacations.category')->middleware('ddos:search');
+// Legacy country URL still linked from older magazine/guide articles (and possibly external
+// sites): 404'd until now. One 301 to the canonical /vacations/{country}, query dropped.
+// Legacy species URL from older guide articles (/category/target-fish/{slug}): 301 to /targets/{slug}.
+Route::get('category/target-fish/{slug}', fn (string $slug) => redirect()->route(
+    'targets.show',
+    ['slug' => mb_strtolower($slug)],
+    301,
+))->name('targets.legacy');
+Route::get('vacations/location/{country}', fn (string $country) => redirect()->route(
+    'vacations.country',
+    ['country' => CountrySlug::canonicalize($country) ?? mb_strtolower($country)],
+    301,
+))->name('vacations.location.legacy');
 Route::get('vacations-v2/{campId}', [CampOfferController::class, 'show'])->name('vacations.v2');
 
 Route::get('trips-destinations', [TripsCatalogController::class, 'index'])->name('trips.index')->middleware('ddos:search');
@@ -93,9 +119,8 @@ Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestSt
 
 Route::redirect('destinationen', '/destination', 301)->name('destination_de');
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
-Route::get('destination/{country}', [DestinationCountryController::class, 'country'])->name('destination.country')->middleware('ddos:search');
-Route::get('destination/{country}/{region}/{city?}', [DestinationCountryController::class, 'redirectLegacyGeo'])
-    ->name('destination.legacy-geo')
+Route::get('destination/{country}/{region?}/{city?}', [DestinationCountryController::class, 'show'])
+    ->name('destination.country')
     ->middleware('ddos:search');
 
 Route::get('targets', [CategoryController::class, 'targetsIndex'])

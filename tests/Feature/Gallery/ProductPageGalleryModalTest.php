@@ -26,7 +26,9 @@ class ProductPageGalleryModalTest extends TestCase
                 :specs="['4 hours', 'Max 2']"
                 price-prefix="from"
                 price-display="120€"
-                cta-url="#book-now"
+                cta-url="{{ route('checkout') }}"
+                cta-method="POST"
+                :cta-fields="['guiding_id' => 12, 'person' => 1, 'selected_date' => '']"
                 cta-label="Book"
             />
             BLADE,
@@ -41,8 +43,28 @@ class ProductPageGalleryModalTest extends TestCase
         $this->assertStringContainsString('data-vacation-gallery="tour-detail-1"', $html);
         $this->assertStringContainsString('offers-gallery-modal__dock', $html);
         $this->assertStringContainsString('Tour Title', $html);
-        $this->assertStringContainsString('#book-now', $html);
+        $this->assertStringContainsString('offers-gallery-modal__cta-form', $html);
+        $this->assertStringContainsString('name="guiding_id"', $html);
+        $this->assertStringContainsString('name="person"', $html);
+        $this->assertStringContainsString('type="submit"', $html);
+        $this->assertStringNotContainsString('href="#book-now"', $html);
         $this->assertStringNotContainsString('id="galleryModal"', $html);
         $this->assertStringNotContainsString('data-bs-target="#galleryModal"', $html);
+    }
+
+    public function test_gallery_modal_scss_sizes_post_cta_form_on_mobile(): void
+    {
+        $scss = (string) file_get_contents(
+            dirname(__DIR__, 3).DIRECTORY_SEPARATOR
+            .'resources'.DIRECTORY_SEPARATOR.'sass'.DIRECTORY_SEPARATOR
+            .'components'.DIRECTORY_SEPARATOR.'_listing-gallery-modal.scss'
+        );
+
+        $this->assertStringContainsString('&__cta-form', $scss);
+        $this->assertStringContainsString('&__cta,', $scss);
+        $this->assertStringContainsString('&__cta-form {', $scss);
+        $this->assertStringContainsString('max-width: 58%', $scss);
+        $this->assertStringContainsString('.offers-gallery-modal__cta {', $scss);
+        $this->assertStringContainsString('width: 100%', $scss);
     }
 }

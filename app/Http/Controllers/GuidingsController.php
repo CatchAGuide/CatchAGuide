@@ -42,6 +42,7 @@ use App\Services\Media\ListingMediaRelocator;
 use App\Services\Media\MediaTrashService;
 use App\Domain\Offers\OfferListingFilter;
 use App\Services\Offers\OfferCatalogPageService;
+use App\Services\Search\ListingSearchStateService;
 
 class GuidingsController extends Controller
 {
@@ -194,6 +195,7 @@ class GuidingsController extends Controller
         private MediaTrashService $mediaTrash,
         private OfferCatalogPageService $offerCatalog,
         private SimilarGuidingsService $similarGuidings,
+        private ListingSearchStateService $searchState,
     )
     {
         $this->initializeOptimizationServices();
@@ -373,10 +375,18 @@ class GuidingsController extends Controller
 
         $preselectedGuests = null;
         $productPageQuery = OfferListingFilter::productPageQueryFromInput($request->query());
-        if ($request->filled('num_guests') || $request->filled('num_persons')) {
-            $preselectedGuests = $guiding->resolveBookingGuestCount(
-                OfferListingFilter::fromRequest($request->all())->numGuests
-            );
+        // num_guests is intentionally not carried on crawlable links to this page (see CLAUDE.md's
+        // "SEO / catalog page conventions") — fall back to the session-remembered search from the
+        // catalog page the visitor came from, same as the header's location prefill does.
+        $requestedGuests = $request->filled('num_guests') || $request->filled('num_persons')
+            ? OfferListingFilter::fromRequest($request->all())->numGuests
+            : null;
+        if ($requestedGuests === null) {
+            $sessionGuests = $this->searchState->current()['numGuests'];
+            $requestedGuests = $sessionGuests !== '' ? (int) $sessionGuests : null;
+        }
+        if ($requestedGuests !== null) {
+            $preselectedGuests = $guiding->resolveBookingGuestCount($requestedGuests);
         }
 
         $similar = $this->similarGuidings->forProductPage($guiding);
