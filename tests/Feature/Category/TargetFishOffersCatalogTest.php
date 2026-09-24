@@ -290,6 +290,11 @@ class TargetFishOffersCatalogTest extends TestCase
         $response->assertOk();
         $response->assertSee('<link rel="canonical" href="'.route('vacations.camps.targets', ['slug' => $page->slug]).'" />', false);
         $response->assertDontSee('NOINDEX', false);
+        // Its own title, distinct from /vacations/targets/{slug} and the trips page.
+        $this->assertMatchesRegularExpression(
+            '#<title>[^<]*'.preg_quote(trim(__('category.targets.pillar_title_camp', ['fish' => ''])), '#').'#u',
+            $response->getContent()
+        );
     }
 
     /**

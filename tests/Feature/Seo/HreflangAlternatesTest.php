@@ -73,4 +73,13 @@ class HreflangAlternatesTest extends TestCase
         $response->assertOk();
         $response->assertDontSee('hreflang=', false);
     }
+
+    public function test_paginated_listing_alternates_point_at_the_same_page(): void
+    {
+        $response = $this->get('/vacations/trips?page=2');
+
+        $response->assertOk();
+        $response->assertSee('hreflang="en" href="'.rtrim(config('cag.en_app_url'), '/').'/vacations/trips?page=2"', false);
+        $response->assertSee('hreflang="de" href="'.rtrim(config('cag.de_app_url'), '/').'/vacations/trips?page=2"', false);
+    }
 }

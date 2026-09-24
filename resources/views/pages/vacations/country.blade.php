@@ -22,7 +22,7 @@
 @section('title', $listingTitle . ' — ' . __('vacations.hub_breadcrumb'))
 @section('header_title', $listingTitle)
 @section('header_sub_title', $countrySubtitle)
-@section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro, 155))
+@section('description', \Illuminate\Support\Str::limit($countrySubtitle ?: $countryIntro ?: ($isAllOffers ? __('vacations.all_offers_subtitle') : ''), 155))
 
 @php $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class); @endphp
 @if($noindex ?? false)

@@ -55,6 +55,10 @@ Italien: Die Seen Norditaliens und die Küstenregionen sind bei Anglern sehr bel
     'next' => 'Nächste',
     'details' => 'Einzelheiten',
     'add_to_favorites' => 'Zu Favoriten hinzufügen',
+    'meta_title_all' => 'Angeln in :place – Angeltouren & Angelurlaub',
+    'meta_title_tours' => 'Angeltouren in :place mit Guide',
+    'meta_description_all' => 'Geführte Angeltouren, Angelcamps und Angelreisen in :place: Angebote vergleichen, Bewertungen lesen und direkt online buchen.',
+    'meta_description_tours' => 'Geführte Angeltouren in :place mit geprüften Guides: Touren vergleichen, Bewertungen lesen und direkt online buchen.',
     'popular_title' => 'Beliebt bei Anglern in :place',
     'popular_empty' => 'In :place gibt es noch keine Angebote. Entdecke in der Zwischenzeit Touren und Urlaube in ganz Europa.',
 ];

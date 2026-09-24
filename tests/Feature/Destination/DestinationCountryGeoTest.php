@@ -84,6 +84,9 @@ class DestinationCountryGeoTest extends TestCase
         // entity's plain name (CategoryEntity::getTitleAttribute()) — still real content,
         // not a redirect to the country hub.
         $response->assertSee('Catalonia', false);
+        // Without CMS copy the <title> and meta description still describe the place.
+        $response->assertSee('<title>'.e(__('destination.meta_title_all', ['place' => 'Catalonia'])), false);
+        $response->assertSee('<meta name="description" content="'.e(__('destination.meta_description_all', ['place' => 'Catalonia'])).'"', false);
     }
 
     public function test_destination_region_below_inventory_gate_is_noindexed(): void

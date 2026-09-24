@@ -19,6 +19,18 @@
 
         $enUrl = $mapper->alternateUrl($enBase, $path, $currentLang, 'en');
         $deUrl = $mapper->alternateUrl($deBase, $path, $currentLang, 'de');
+
+        // Page 2+ of a listing is its own self-canonical page (PaginationSeo), so its alternates
+        // are page N of the other domain too — not page 1, which would contradict the canonical.
+        // Follows the canonical: the layouts' default canonical keeps ?page=N, a page's own
+        // canonical section may drop it.
+        $page = app(\App\Services\Seo\PaginationSeo::class)->currentPage(request());
+        $canonicalKeepsPage = ! $__env->hasSection('canonical')
+            || str_contains($__env->yieldContent('canonical'), '?page='.$page);
+        if ($page > 1 && $canonicalKeepsPage) {
+            $enUrl .= '?page='.$page;
+            $deUrl .= '?page='.$page;
+        }
     }
 @endphp
 

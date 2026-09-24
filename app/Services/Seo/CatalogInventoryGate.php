@@ -69,7 +69,7 @@ class CatalogInventoryGate
      */
     public function destinationIndexable(CategoryEntity $country, ?CategoryEntity $region = null, ?CategoryEntity $city = null): bool
     {
-        $key = implode('_', ['destination_geo_listing_count_v1', $country->id, $region?->id ?? 0, $city?->id ?? 0]);
+        $key = implode('_', ['destination_geo_listing_count_v2', $country->id, $region?->id ?? 0, $city?->id ?? 0]);
         $count = (int) Cache::remember(
             $key,
             now()->addMinutes(self::CACHE_MINUTES),

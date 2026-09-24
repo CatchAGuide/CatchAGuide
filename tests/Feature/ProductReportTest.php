@@ -6,6 +6,7 @@ use App\Mail\ProductReportAdminMail;
 use App\Mail\ProductReportCustomerMail;
 use App\Models\ProductReport;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -14,6 +15,9 @@ use Tests\TestCase;
 
 class ProductReportTest extends TestCase
 {
+    // ProductReport::query()->delete() below runs against the configured database; roll it back.
+    use DatabaseTransactions;
+
     protected function setUp(): void
     {
         parent::setUp();

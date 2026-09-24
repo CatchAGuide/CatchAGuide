@@ -705,7 +705,8 @@
         <div class="title-wrapper">
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
-                    <h1>{{ $guiding->title }}</h1>
+                    {{-- The hero header above carries the page's <h1>; this repeat is visual only. --}}
+                    <p class="h1">{{ $guiding->title }}</p>
                 </div>
                 <div class="col-12">
                     <div class="location-row">

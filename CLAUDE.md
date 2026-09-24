@@ -43,7 +43,9 @@ npm run test:e2e:ui
 
 Test env (`phpunit.xml`): array cache/session/mail, sync queue, `BCRYPT_ROUNDS=4`, Telescope disabled. DB connection
 is whatever `.env`/`phpunit.xml` currently has configured (sqlite in-memory lines are present but commented out) —
-check before assuming an isolated test DB.
+check before assuming an isolated test DB. Locally that is the real dev database, so any test that deletes or updates
+existing rows must `use DatabaseTransactions` — `OfferFilterServiceTest`'s `Target::query()->delete()` once wiped the
+whole `targets` table on every full-suite run.
 
 ## Architecture
 
@@ -176,6 +178,17 @@ actual site/codebase, not just theorized:
   from a `SitemapContributorInterface` implementation aggregated by `SitemapGenerator` (see above) — check
   `public/` and `public/sitemaps/` for stray static `.xml` files before assuming that's already true, and check
   Search Console's Sitemaps list on both properties for stale submissions when investigating indexing issues.
+- **Listing robots are an allowlist.** `SeoRobotsPolicy` noindexes a guidings/vacations listing when any
+  non-empty query parameter other than `page` (and campaign tags like `utm_*`/`gclid`) is present. A denylist of
+  filter names silently let unlisted filters (`target_fish[]`, `guide_id`, `fishing_type`, …) become indexable.
+- **Destination offers are scoped by geo, not by name.** `/destination/{country}/{region}/{city}` rails and the
+  inventory gate use the tours catalog's scope (`DestinationOfferScope` → `OfferCatalogPageService::listingQueries`,
+  i.e. the place's stored centroid/bounds). Matching listings' free-text `region`/`city` columns against the page's
+  name found nothing for most regions (Rheindelta, Småland, Algarve, Roermond), so those pages showed no offers and
+  were noindexed.
+- **Hreflang mirrors the canonical.** Page 2+ of a paginated listing declares `?page=N` alternates, not page 1.
+- **Don't serve pages from stored HTML.** Magazine threads used a DB page cache (`App\Models\Cache`) that kept an old
+  `<head>` for a week after deploys and shared one visitor's CSRF token; render per request instead.
 
 ### Guide status
 

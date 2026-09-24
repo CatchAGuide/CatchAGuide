@@ -150,6 +150,11 @@ class TargetFishPageController extends Controller
             'vm' => $vm,
             'content_scope' => $scope,
             'noindex' => $noindex,
+            // /vacations/{camps|trips}/targets/{slug} share the vacations CMS copy with
+            // /vacations/targets/{slug}; give each pillar its own title so the three don't compete.
+            'pillarTitle' => $vacationPillar !== null
+                ? __('category.targets.pillar_title_'.$vacationPillar, ['fish' => $placeName])
+                : null,
             'speciesRedirectOptions' => $this->speciesRedirectOptions($page, $scope, $locale, $speciesId, $vacationPillar),
             'speciesRedirectCurrent' => $speciesId,
             'speciesRedirectAllUrl' => $scope === CategoryPageScope::TOURS

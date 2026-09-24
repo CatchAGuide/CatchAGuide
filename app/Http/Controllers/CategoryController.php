@@ -176,13 +176,15 @@ class CategoryController extends Controller
         $guidingAvailability ??= app(GuidingCategoryAvailabilityRepository::class);
 
         $type = strtolower((string) $type);
+        // Slugs are stored lowercase; lowercasing here saves the canonical page a second hop.
+        $lowerSlug = mb_strtolower(rawurldecode((string) $slug), 'UTF-8');
 
         if ($type === 'methods' && $request->routeIs('category.targets')) {
-            return redirect()->route('guidings.methods.show', ['slug' => $slug] + $request->query(), 301);
+            return redirect()->route('guidings.methods.show', ['slug' => $lowerSlug] + $request->query(), 301);
         }
 
         if ($type === 'targets' && $request->routeIs('category.targets')) {
-            return redirect()->route('targets.show', ['slug' => $slug] + $request->query(), 301);
+            return redirect()->route('targets.show', ['slug' => $lowerSlug] + $request->query(), 301);
         }
 
         if ($type === 'targets') {
@@ -191,7 +193,6 @@ class CategoryController extends Controller
             return app(TargetFishPageController::class)->show($request, $slug);
         }
 
-        $lowerSlug = mb_strtolower(rawurldecode((string) $slug), 'UTF-8');
         if ($type === 'methods' && $lowerSlug !== rawurldecode((string) $slug)) {
             return redirect()->route('guidings.methods.show', ['slug' => $lowerSlug] + $request->query(), 301);
         }
