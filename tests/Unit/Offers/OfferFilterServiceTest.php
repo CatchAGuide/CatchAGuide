@@ -5,12 +5,16 @@ namespace Tests\Unit\Offers;
 use App\Models\Target;
 use App\Services\Offers\OfferFilterMapBuilder;
 use App\Services\Offers\OfferFilterService;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Tests\TestCase;
 
 class OfferFilterServiceTest extends TestCase
 {
+    // Target::query()->delete() below runs against the configured database; roll it back.
+    use DatabaseTransactions;
+
     public function test_listing_ids_for_species_unions_precomputed_maps(): void
     {
         Cache::flush();

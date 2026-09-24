@@ -8,7 +8,11 @@ use App\Models\Guiding;
 class TourCardPresenter
 {
     /**
-     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for call-site
+     *     compatibility. Search/guest-count context is restored on the detail page from session
+     *     (see ListingSearchStateService) instead of being carried on the crawlable card link, per
+     *     CLAUDE.md's "SEO / catalog page conventions" (never carry filter/tracking query params
+     *     into a link to a single-entity detail page).
      */
     public function present(Guiding $guiding, array $query = []): array
     {
@@ -26,7 +30,7 @@ class TourCardPresenter
             'id' => $guiding->id,
             'title' => $title,
             'slug' => $guiding->slug,
-            'url' => $guiding->publicShowUrl($this->filterQuery($query)),
+            'url' => $guiding->publicShowUrl(),
             'image' => $image,
             'gallery_images' => $gallery,
             'badge' => __('offers.badge_tour'),
@@ -126,15 +130,6 @@ class TourCardPresenter
     private function formatEuro(float|int $amount): string
     {
         return number_format((float) $amount, 0, ',', '.').'€';
-    }
-
-    /**
-     * @param  array<string, mixed>  $query
-     * @return array<string, mixed>
-     */
-    private function filterQuery(array $query): array
-    {
-        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 
     /**

@@ -55,9 +55,17 @@
     $breadcrumbItems = $breadcrumbItems ?? [
         ['label' => __('vacations.hub_breadcrumb'), 'url' => null],
     ];
+    // num_guests is intentionally not carried on crawlable links to a listing detail page (see
+    // CLAUDE.md's "SEO / catalog page conventions") — fall back to the session-remembered search
+    // (same ListingSearchStateService used for location above) instead of request()->num_guests
+    // alone, so the prefill still works with a clean URL.
+    $requestGuestsRaw = request()->filled('num_guests') ? request()->query('num_guests') : null;
+    $sessionGuestsRaw = $requestGuestsRaw === null
+        ? (app(ListingSearchStateService::class)->current()['numGuests'] ?: null)
+        : null;
     $vacationGuestsValue = max(1, min(
         VacationListingFilter::MAX_GUESTS,
-        (int) (request()->num_guests ?: VacationListingFilter::DEFAULT_GUESTS)
+        (int) ($requestGuestsRaw ?? $sessionGuestsRaw ?? VacationListingFilter::DEFAULT_GUESTS)
     ));
 
     // Mobile-only pill + bottom-sheet search (see components/mobile-search-sheet.blade.php).
@@ -84,6 +92,18 @@
         trans_choice('offers.persons_count', $vacationGuestsValue, ['count' => $vacationGuestsValue]),
     ])->filter()->implode(' · '));
 @endphp
+@inject('structuredData', 'App\Services\Seo\StructuredDataBuilder')
+@php
+    // Product pages show the region as the last visual crumb; the structured trail names the page itself.
+    $structuredCrumbs = $breadcrumbItems;
+    if (filled($heroProductTitle ?? null) && count($structuredCrumbs) > 0) {
+        $structuredCrumbs[count($structuredCrumbs) - 1] = ['label' => $heroProductTitle, 'url' => null];
+    }
+@endphp
+@if(count($structuredCrumbs) > 0)
+    @include('components.seo.json-ld', ['data' => $structuredData->breadcrumbList($structuredCrumbs, request()->url())])
+@endif
+
 <div class="vacations-page-header-shell cag-site-nav-shell" data-vacations-header-shell>
     @include('layouts.partials.site-nav', [
         'overlay' => true,

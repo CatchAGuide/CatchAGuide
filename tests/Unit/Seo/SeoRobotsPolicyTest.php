@@ -59,9 +59,30 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertTrue($this->policy->shouldNoindexVacations($request));
     }
 
+    public function test_plain_pagination_is_indexable_but_filtered_pagination_is_not(): void
+    {
+        $this->assertFalse($this->policy->shouldNoindexGuidings(Request::create('/guidings/alloffers', 'GET', ['page' => '3'])));
+        $this->assertFalse($this->policy->shouldNoindexVacations(Request::create('/vacations/norwegen', 'GET', ['page' => '2'])));
+        $this->assertTrue($this->policy->shouldNoindexGuidings(Request::create('/guidings/alloffers', 'GET', ['page' => '3', 'sortby' => 'price-asc'])));
+    }
+
     public function test_empty_query_values_do_not_trigger_noindex(): void
     {
         $request = Request::create('/guidings', 'GET', ['place' => '']);
         $this->assertFalse($this->policy->shouldNoindexGuidings($request));
+    }
+
+    public function test_filters_missing_from_any_list_still_noindex(): void
+    {
+        foreach ([['target_fish' => ['1']], ['guide_id' => '5', 'page' => '2'], ['fishing_type' => '1'], ['duration' => '1'], ['country' => 'Deutschland']] as $query) {
+            $this->assertTrue($this->policy->shouldNoindexGuidings(Request::create('/guidings', 'GET', $query)), json_encode($query));
+        }
+        $this->assertTrue($this->policy->shouldNoindexVacations(Request::create('/vacations/norwegen', 'GET', ['num_guests' => '2'])));
+    }
+
+    public function test_tracking_tags_and_empty_arrays_do_not_trigger_noindex(): void
+    {
+        $this->assertFalse($this->policy->shouldNoindexGuidings(Request::create('/guidings', 'GET', ['utm_source' => 'newsletter', 'gclid' => 'abc', 'page' => '2'])));
+        $this->assertFalse($this->policy->shouldNoindexGuidings(Request::create('/guidings', 'GET', ['target_fish' => ['', null]])));
     }
 }

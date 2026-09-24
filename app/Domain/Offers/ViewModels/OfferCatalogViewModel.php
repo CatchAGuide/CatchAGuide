@@ -35,6 +35,7 @@ final class OfferCatalogViewModel
         public readonly bool $lockTourScope = false,
         public readonly bool $lockVacationScope = false,
         public readonly bool $lockMethodScope = false,
+        public readonly array $vacationToggleBaseUrls = [],
     ) {}
 
     public function pageTitle(): string
@@ -305,6 +306,16 @@ final class OfferCatalogViewModel
 
         $withVacation = function (string $vacation) use ($query): string {
             $params = $query;
+
+            // Pages where the vacation filter is a path segment (/vacations/camps/targets/{slug})
+            // link to that path instead of carrying ?vacation=, which would just 301.
+            if (isset($this->vacationToggleBaseUrls[$vacation])) {
+                unset($params['type'], $params['vacation']);
+                $base = $this->vacationToggleBaseUrls[$vacation];
+
+                return $params === [] ? $base : $base.'?'.http_build_query($params);
+            }
+
             if ($vacation !== 'all') {
                 $params['vacation'] = $vacation;
             } else {

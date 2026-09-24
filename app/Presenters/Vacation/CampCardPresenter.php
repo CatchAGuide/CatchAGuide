@@ -12,6 +12,13 @@ class CampCardPresenter
         private ListingViewTranslationService $viewTranslation,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $query  Deprecated/unused for URL-building — kept for call-site
+     *     compatibility. Search/guest-count context is restored on the detail page from session
+     *     (see ListingSearchStateService) instead of being carried on the crawlable card link, per
+     *     CLAUDE.md's "SEO / catalog page conventions" (never carry filter/tracking query params
+     *     into a link to a single-entity detail page).
+     */
     public function present(Camp $camp, array $query = []): array
     {
         $this->viewTranslation->applyToModel($camp, ListingTranslationService::TYPE_CAMP);
@@ -28,7 +35,7 @@ class CampCardPresenter
             'id' => $camp->id,
             'title' => $camp->title,
             'slug' => $camp->slug,
-            'url' => route('vacations.camps.show', array_merge(['slug' => $camp->slug], $this->filterQuery($query))),
+            'url' => route('vacations.camps.show', ['slug' => $camp->slug]),
             'image' => media_url($camp->thumbnail_path),
             'gallery_images' => get_galleries_image_link($camp, 0),
             'badge' => __('vacations.badge_camp'),
@@ -292,14 +299,5 @@ class CampCardPresenter
         $nights = (int) $accommodation->minimum_stay_nights;
 
         return $nights . ' ' . ($nights === 1 ? __('vacations.night') : __('vacations.nights'));
-    }
-
-    /**
-     * @param  array<string, mixed>  $query
-     * @return array<string, mixed>
-     */
-    private function filterQuery(array $query): array
-    {
-        return array_filter($query, fn ($v) => $v !== null && $v !== '');
     }
 }

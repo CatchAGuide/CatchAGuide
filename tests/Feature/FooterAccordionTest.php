@@ -66,6 +66,28 @@ class FooterAccordionTest extends TestCase
         $this->assertStringNotContainsString('<details', $html);
     }
 
+    /**
+     * /destination and /targets (the global cross-type hubs) and /vacations/countries had no
+     * footer/nav link at all — sitemap presence alone doesn't give Google or users a discovery
+     * path (see CLAUDE.md's "SEO / catalog page conventions"). Uses exact <a href="..."> markers
+     * rather than plain substring checks, since e.g. targets.index's URL (/targets) is itself a
+     * substring of guidings.targets.index's URL (/guidings/targets).
+     */
+    public function test_footer_links_to_cross_type_hubs_and_vacations_countries(): void
+    {
+        $response = $this->get(route('additional.about_us'));
+
+        $response->assertOk();
+        $html = $response->getContent();
+
+        $this->assertStringContainsString(__('homepage.footer_group_discover'), $html);
+        $this->assertStringContainsString(__('homepage.footer_destinations'), $html);
+        $this->assertStringContainsString(__('homepage.footer_target_species'), $html);
+        $this->assertStringContainsString('href="'.route('destination').'"', $html);
+        $this->assertStringContainsString('href="'.route('targets.index').'"', $html);
+        $this->assertStringContainsString('href="'.route('vacations.countries').'"', $html);
+    }
+
     public function test_bottom_nav_keeps_gray_inactive_and_coral_active_styles(): void
     {
         $home = (string) file_get_contents(resource_path('sass/page/home.scss'));

@@ -11,6 +11,7 @@ use App\Services\CategoryPage\CategoryPageContentService;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
 use App\Services\Vacation\VacationTargetFishSelector;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -25,7 +26,7 @@ class TargetFishPageController extends Controller
         private VacationTargetFishSelector $vacationTargetAvailability,
     ) {}
 
-    public function show(Request $request, string $slug): View
+    public function show(Request $request, string $slug): View|RedirectResponse
     {
         $scope = (string) ($request->route('content_scope') ?: CategoryPageScope::GLOBAL);
         if (! in_array($scope, [
@@ -34,6 +35,22 @@ class TargetFishPageController extends Controller
             CategoryPageScope::VACATIONS,
         ], true)) {
             abort(404);
+        }
+
+        // One URL per species page: an uppercase slug variant 301s to the lowercase one, the
+        // same rule country slugs follow (see CLAUDE.md's "SEO / catalog page conventions").
+        $lowerSlug = mb_strtolower(rawurldecode($slug), 'UTF-8');
+        if ($lowerSlug !== rawurldecode($slug)) {
+            return redirect()->route($request->route()->getName(), ['slug' => $lowerSlug] + $request->query(), 301);
+        }
+
+        // Vacations species pages narrow to camps/trips by path segment, never by ?vacation=.
+        $vacationPillar = $scope === CategoryPageScope::VACATIONS
+            ? $this->routeVacationPillar($request)
+            : null;
+        if ($scope === CategoryPageScope::VACATIONS
+            && ($redirect = $this->redirectVacationQueryToPath($request, $slug, $vacationPillar))) {
+            return $redirect;
         }
 
         $locale = app()->getLocale();
@@ -89,6 +106,12 @@ class TargetFishPageController extends Controller
             abort(404);
         }
 
+        // A pillar-scoped page whose species has vacations but none of this pillar still renders
+        // (the camps/trips toggle links here) but stays out of the index — see CLAUDE.md's
+        // "SEO / catalog page conventions" on gating facet pages by inventory.
+        $noindex = $vacationPillar !== null
+            && $this->vacationTargetAvailability->activeListingCounts($speciesId, $placeName)[$vacationPillar.'s'] < 1;
+
         if ($scope === CategoryPageScope::GLOBAL) {
             return view('pages.category.category-show', [
                 'row_data' => $page,
@@ -102,20 +125,37 @@ class TargetFishPageController extends Controller
                 'offersVariant' => 'destination',
                 'offerBrowseUrls' => [
                     'tour' => route('guidings.targets', ['slug' => $page->slug]),
-                    'camp' => route('vacations.targets', ['slug' => $page->slug, 'vacation' => 'camp']),
-                    'trip' => route('vacations.targets', ['slug' => $page->slug, 'vacation' => 'trip']),
+                    'camp' => route('vacations.camps.targets', ['slug' => $page->slug]),
+                    'trip' => route('vacations.trips.targets', ['slug' => $page->slug]),
                 ],
             ]);
         }
 
-        $vm = $this->offerCatalog->buildForTargetFish($request, $speciesId, $scope, $placeName);
+        $vm = $this->offerCatalog->buildForTargetFish(
+            $request,
+            $speciesId,
+            $scope,
+            $placeName,
+            $vacationPillar,
+            $scope === CategoryPageScope::VACATIONS ? [
+                'all' => route('vacations.targets', ['slug' => $page->slug]),
+                'camp' => route('vacations.camps.targets', ['slug' => $page->slug]),
+                'trip' => route('vacations.trips.targets', ['slug' => $page->slug]),
+            ] : [],
+        );
 
         return view('pages.category.category-show', [
             'row_data' => $page,
             'title' => $page->language->title ?? $page->name,
             'vm' => $vm,
             'content_scope' => $scope,
-            'speciesRedirectOptions' => $this->speciesRedirectOptions($page, $scope, $locale, $speciesId),
+            'noindex' => $noindex,
+            // /vacations/{camps|trips}/targets/{slug} share the vacations CMS copy with
+            // /vacations/targets/{slug}; give each pillar its own title so the three don't compete.
+            'pillarTitle' => $vacationPillar !== null
+                ? __('category.targets.pillar_title_'.$vacationPillar, ['fish' => $placeName])
+                : null,
+            'speciesRedirectOptions' => $this->speciesRedirectOptions($page, $scope, $locale, $speciesId, $vacationPillar),
             'speciesRedirectCurrent' => $speciesId,
             'speciesRedirectAllUrl' => $scope === CategoryPageScope::TOURS
                 ? route('guidings.targets.index')
@@ -134,11 +174,14 @@ class TargetFishPageController extends Controller
      *
      * @return Collection<int, array{id: int, name: string, url: string}>
      */
-    private function speciesRedirectOptions(CategoryPage $currentPage, string $scope, string $locale, int $currentSpeciesId): Collection
+    private function speciesRedirectOptions(CategoryPage $currentPage, string $scope, string $locale, int $currentSpeciesId, ?string $vacationPillar = null): Collection
     {
-        $currentUrl = $scope === CategoryPageScope::TOURS
-            ? route('guidings.targets', ['slug' => $currentPage->slug])
-            : route('vacations.targets', ['slug' => $currentPage->slug]);
+        $routeName = match (true) {
+            $scope === CategoryPageScope::TOURS => 'guidings.targets',
+            $vacationPillar !== null => "vacations.{$vacationPillar}s.targets",
+            default => 'vacations.targets',
+        };
+        $currentUrl = route($routeName, ['slug' => $currentPage->slug]);
 
         $siblings = CategoryPage::query()
             ->whereRaw('LOWER(type) = ?', ['targets'])
@@ -163,9 +206,7 @@ class TargetFishPageController extends Controller
             ->map(fn (CategoryPage $item) => [
                 'id' => (int) $item->source_id,
                 'name' => $item->language->title,
-                'url' => $scope === CategoryPageScope::TOURS
-                    ? route('guidings.targets', ['slug' => $item->slug])
-                    : route('vacations.targets', ['slug' => $item->slug]),
+                'url' => route($routeName, ['slug' => $item->slug]),
             ])
             ->values();
 
@@ -174,5 +215,40 @@ class TargetFishPageController extends Controller
             'name' => $currentPage->language->title ?? $currentPage->name,
             'url' => $currentUrl,
         ])->values();
+    }
+
+    /**
+     * camp|trip when the route is /vacations/{camps|trips}/targets/{slug}, null for /vacations/targets/{slug}.
+     */
+    private function routeVacationPillar(Request $request): ?string
+    {
+        $pillar = $request->route('vacation');
+
+        return in_array($pillar, ['camp', 'trip'], true) ? $pillar : null;
+    }
+
+    /**
+     * 301 a ?vacation= filter to the path that owns it: /vacations/targets/{slug}?vacation=camp
+     * → /vacations/camps/targets/{slug}, and a pillar path asked for a different pillar (or "all")
+     * → that pillar's path. Keeps each camps/trips species page a single self-canonical URL.
+     */
+    private function redirectVacationQueryToPath(Request $request, string $slug, ?string $routePillar): ?RedirectResponse
+    {
+        if (! $request->has('vacation')) {
+            return null;
+        }
+
+        $requested = strtolower((string) $request->query('vacation', ''));
+        $requested = in_array($requested, ['camp', 'trip'], true) ? $requested : null;
+        $query = $request->except('vacation', 'type');
+
+        if ($requested === $routePillar) {
+            // Same pillar as the path (the filter form re-submits it) — only strip it if the path is plain.
+            return null;
+        }
+
+        $routeName = $requested === null ? 'vacations.targets' : "vacations.{$requested}s.targets";
+
+        return redirect()->route($routeName, ['slug' => $slug] + $query, 301);
     }
 }

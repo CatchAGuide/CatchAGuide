@@ -14,6 +14,9 @@ return [
         On this page, you’ll find a complete overview of Europe’s target fish. Click on your preferred species and discover the best fishing tours to land your dream catch. Whether you’re a freshwater or saltwater angler – your next adventure starts here!',
         'offers_title' => 'Tours, camps & trips for :fish',
         'offers_empty' => 'No offers for :fish yet. Browse tours and holidays across Europe in the meantime.',
+        'meta_description' => ':fish: compare guided fishing tours, fishing camps and fishing trips on Catch A Guide and book online.',
+        'pillar_title_camp' => 'Fishing camps for :fish',
+        'pillar_title_trip' => 'Fishing trips for :fish',
     ],
     'methods' => [
         'title' => 'The Most Popular Fishing Methods for Fishing Tours in Europe',

@@ -24,7 +24,8 @@
 @section('description', \Illuminate\Support\Str::limit($listingSubtitle, 155))
 
 @section('canonical')
-    <link rel="canonical" href="{{ route('guidings.index') }}" />
+    @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
+    <link rel="canonical" href="{{ $paginationSeo->canonicalUrl(request(), route('guidings.index')) }}" />
 @endsection
 
 @section('header_title', $listingTitle)
@@ -55,7 +56,6 @@
 @endsection
 
 @section('custom_style')
-@include('layouts.schema.listings')
 
 <!-- Structured Data for Search Results -->
 <script type="application/ld+json">

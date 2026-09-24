@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Vacation\CountrySlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,6 +27,22 @@ class CategoryEntity extends Model
     protected $casts = [
         'filters' => 'array',
     ];
+
+    private const GEO_TYPES = ['country', 'region', 'city'];
+
+    /**
+     * Geo slugs are URL segments for /destination, /guidings and /vacations pages — store them
+     * canonical (lowercase, umlauts kept) so every route('…', $entity->slug) emits the URL that
+     * serves 200 instead of an uppercase variant that has to 301 (e.g. "Österreich").
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (CategoryEntity $entity) {
+            if (in_array($entity->type, self::GEO_TYPES, true) && filled($entity->slug)) {
+                $entity->slug = CountrySlug::canonicalize($entity->slug) ?? $entity->slug;
+            }
+        });
+    }
 
     public function scopeCountries($query)
     {

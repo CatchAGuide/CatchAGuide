@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\View;
+use App\Services\Seo\PageAttributeLookup;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +17,6 @@ use App\Models\FishingEquipment;
 use App\Models\Rating;
 use App\Models\Thread;
 use App\Models\Faq;
-use App\Models\PageAttribute;
 use App\Support\SitePrimaryNav;
 
 class ViewServiceProvider extends ServiceProvider
@@ -288,24 +288,10 @@ class ViewServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            static $pageAttributes;
-
-            if ($pageAttributes === null) {
-                $host = request()->getHost();
-                $path = request()->path();
-                $cacheKey = "page_attributes_{$host}_{$path}";
-
-                $pageAttributes = Cache::remember($cacheKey, now()->addHours(24), function () use ($host, $path) {
-                    return PageAttribute::where('domain', '=', $host)
-                        ->where('uri', $path)
-                        ->get();
-                });
-            }
-
             // Named "pageAttributes", not "attributes" - the latter is Blade's reserved
             // variable for a component's HTML attribute bag, and sharing it to every
             // view clobbers $attributes inside any <x-...> component in the app.
-            $view->with('pageAttributes', $pageAttributes);
+            $view->with('pageAttributes', app(PageAttributeLookup::class)->forRequest(request()));
         });
 
 

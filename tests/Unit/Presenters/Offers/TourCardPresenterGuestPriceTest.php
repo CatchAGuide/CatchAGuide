@@ -50,7 +50,13 @@ class TourCardPresenterGuestPriceTest extends TestCase
         );
     }
 
-    public function test_list_row_url_keeps_search_place_and_guests(): void
+    /**
+     * Search/guest-count context must never land on this crawlable card link (see CLAUDE.md's
+     * "SEO / catalog page conventions") — it's restored on the detail page from session
+     * (ListingSearchStateService) instead. The $query argument is accepted for call-site
+     * compatibility but must not affect the URL.
+     */
+    public function test_list_row_url_never_carries_search_query(): void
     {
         $guiding = $this->guiding([
             'price_type' => 'per_person',
@@ -69,16 +75,8 @@ class TourCardPresenterGuestPriceTest extends TestCase
             'num_guests' => 3,
         ]);
 
-        $query = [];
-        parse_str((string) parse_url($card['url'], PHP_URL_QUERY), $query);
-
-        $this->assertSame('test-tour', basename((string) parse_url($card['url'], PHP_URL_PATH)));
-        $this->assertSame('3', $query['num_guests']);
-        $this->assertSame('Düsseldorf, Deutschland', $query['place']);
-        $this->assertSame('51.2277', $query['placeLat']);
-        $this->assertSame('6.7735', $query['placeLng']);
-        $this->assertSame('Düsseldorf', $query['city']);
-        $this->assertSame('germany', $query['country']);
+        $this->assertSame(route('guidings.show', ['slug' => 'test-tour']), $card['url']);
+        $this->assertNull(parse_url($card['url'], PHP_URL_QUERY));
     }
 
     public function test_present_without_query_keeps_a_bare_product_url(): void

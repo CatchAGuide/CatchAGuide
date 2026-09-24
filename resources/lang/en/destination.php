@@ -55,6 +55,10 @@ Italy: The lakes of northern Italy and the coastal regions are very popular with
     'next' => 'Next',
     'details' => 'Details',
     'add_to_favorites' => 'Add to Favorites',
+    'meta_title_all' => 'Fishing in :place – fishing tours & holidays',
+    'meta_title_tours' => 'Guided fishing tours in :place',
+    'meta_description_all' => 'Guided fishing tours, fishing camps and fishing trips in :place: compare offers, read reviews and book online.',
+    'meta_description_tours' => 'Guided fishing tours in :place with verified guides: compare tours, read reviews and book online.',
     'popular_title' => 'Popular with anglers in :place',
     'popular_empty' => 'No offers in :place yet. Browse tours and holidays across Europe in the meantime.',
 ];  

@@ -23,6 +23,42 @@ Route::get('sitemap.xml', function () {
     ]);
 });
 
+// Host-aware, matching sitemap.xml above — public/robots.txt (the old static file, removed) served the
+// exact same content on both domains, so catchaguide.de advertised catchaguide.com's sitemap and vice versa,
+// and there was no way to give one domain a rule the other doesn't need.
+Route::get('robots.txt', function () {
+    $host = request()->getHost();
+    $canonicalHost = str_replace('www.', '', $host);
+    $normalizedHost = $canonicalHost;
+
+    $lines = [
+        'User-agent: *',
+        'Allow: /',
+        '',
+        '# Disallow admin and private areas',
+        'Disallow: /admin/',
+        'Disallow: /profile/',
+        'Disallow: /login',
+        'Disallow: /register',
+        'Disallow: /password/',
+        'Disallow: /api/catalog/',
+        // Auth-only action links (add/remove from wishlist) rendered on public cards.
+        'Disallow: /wishlist/',
+        '',
+        '# Allow important pages',
+        'Allow: /guidings',
+        'Allow: /vacations',
+        $normalizedHost === 'catchaguide.de' ? 'Allow: /angelmagazin/' : 'Allow: /fishing-magazine/',
+        '',
+        '# Sitemap',
+        "Sitemap: https://{$canonicalHost}/sitemap.xml",
+        '',
+        'Crawl-delay: 1',
+    ];
+
+    return response(implode("\n", $lines), 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+});
+
 Route::post('/get-user-location', [WelcomeController::class, 'getUserLocation'])->name('user.location');
 Route::post('/guidings/search-place-log', [GuidingSearchPlaceLogController::class, 'store'])
     ->middleware('throttle:60,1')

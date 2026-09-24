@@ -27,11 +27,29 @@
 @endphp
 @extends('layouts.app-v2')
 
-@section('title', $row_data->title)
-@section('description', $row_data->sub_title)
+@if($noindex ?? false)
+    {{-- Below the inventory gate: still reachable, kept out of the index. --}}
+    @section('meta_robots')
+        <meta name="robots" content="NOINDEX, FOLLOW" />
+    @endsection
+@endif
+
+@php
+    // Regions and cities often have no CMS copy yet: the title falls back to the bare place name
+    // ("Bayern") and the description to nothing. Give them a descriptive title and description.
+    $metaTemplate = ($destination_route ?? null) === 'guidings.destination' ? 'tours' : 'all';
+    $metaTitle = $row_data->title !== $row_data->name
+        ? $row_data->title
+        : __('destination.meta_title_'.$metaTemplate, ['place' => $row_data->name]);
+    $metaDescription = $row_data->sub_title
+        ?: $row_data->introduction
+        ?: __('destination.meta_description_'.$metaTemplate, ['place' => $row_data->name]);
+@endphp
+
+@section('title', $metaTitle)
+@section('description', $metaDescription)
 @section('header_title', $row_data->title)
 @section('header_sub_title', $row_data->sub_title)
-@section('description', $row_data->sub_title)
 
 @section('share_tags')
     <meta property="og:title" content="{{$row_data->title}}" />

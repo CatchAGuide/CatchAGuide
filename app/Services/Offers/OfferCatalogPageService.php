@@ -120,6 +120,41 @@ class OfferCatalogPageService
     }
 
     /**
+     * The tour/trip/camp queries a catalog built from $input lists (same filters as
+     * buildFromInput()), or null for a type the input excludes. Lets other features — e.g. the
+     * facet insight summaries — describe exactly the listings a page shows.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array{tour: ?Builder, trip: ?Builder, camp: ?Builder}
+     */
+    public function listingQueries(array $input): array
+    {
+        $filter = OfferListingFilter::fromRequest($input);
+        $vacationGeoFilter = $this->vacationFilterWithoutSpecies($filter->toVacationFilter());
+
+        return [
+            'tour' => $filter->showsTours() ? $this->queryTours($filter, Request::create('/', 'GET', $input)) : null,
+            'trip' => $filter->showsTrips() ? $this->queryTrips($filter, $vacationGeoFilter) : null,
+            'camp' => $filter->showsCamps() ? $this->queryCamps($filter, $vacationGeoFilter) : null,
+        ];
+    }
+
+    /**
+     * Publicly visible tours a /guidings/{country}/{region?}/{city?} page lists with no
+     * user filters applied — the same query buildForToursDestination() runs, counted only.
+     */
+    public function countToursForDestination(
+        CategoryEntity $country,
+        ?CategoryEntity $region = null,
+        ?CategoryEntity $city = null,
+    ): int {
+        $input = DestinationOfferScope::mergeIntoRequest([], $country, $region, $city);
+        $input['type'] = 'tour';
+
+        return $this->queryTours(OfferListingFilter::fromRequest($input), Request::create('/', 'GET', $input))->count();
+    }
+
+    /**
      * Target-fish category pages: lock species.
      * Global lists tours + vacations; Tours/Vacations lock the offer type to that surface.
      */
@@ -128,6 +163,8 @@ class OfferCatalogPageService
         int $speciesId,
         string $contentScope = CategoryPageScope::GLOBAL,
         ?string $speciesName = null,
+        ?string $vacationPillar = null,
+        array $vacationToggleBaseUrls = [],
     ): OfferCatalogViewModel {
         $input = $request->all();
         $input['species'] = [$speciesId];
@@ -142,6 +179,11 @@ class OfferCatalogPageService
         } elseif ($contentScope === CategoryPageScope::VACATIONS) {
             $input['type'] = 'vacation';
             $lockVacationScope = true;
+
+            // /vacations/{camps|trips}/targets/{slug}: the path, not the query, picks the pillar.
+            if ($vacationPillar !== null) {
+                $input['vacation'] = $vacationPillar;
+            }
         }
 
         return $this->buildFromInput(
@@ -153,6 +195,7 @@ class OfferCatalogPageService
             lockVacationScope: $lockVacationScope,
             includeFaq: false,
             ensureSpeciesOptions: $speciesName !== null ? [['id' => $speciesId, 'name' => $speciesName]] : [],
+            vacationToggleBaseUrls: $vacationToggleBaseUrls,
         );
     }
 
@@ -188,6 +231,7 @@ class OfferCatalogPageService
         bool $lockMethodScope = false,
         bool $includeFaq = true,
         array $ensureSpeciesOptions = [],
+        array $vacationToggleBaseUrls = [],
     ): OfferCatalogViewModel {
         $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
@@ -294,6 +338,7 @@ class OfferCatalogPageService
             lockTourScope: $lockTourScope,
             lockVacationScope: $lockVacationScope,
             lockMethodScope: $lockMethodScope,
+            vacationToggleBaseUrls: $vacationToggleBaseUrls,
         );
     }
 

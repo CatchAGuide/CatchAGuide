@@ -17,7 +17,7 @@
 @php
     $isDestinationHub = request()->routeIs('destination');
     $isGuidingsCountries = request()->routeIs('guidings.countries');
-    $isVacationsCountries = request()->routeIs('vacations.countries');
+    $isVacationsCountries = request()->routeIs('vacations.countries', 'vacations.trips.countries', 'vacations.camps.countries');
     $useCategoryHeroHeader = $isDestinationHub || $isGuidingsCountries || $isVacationsCountries;
 
     $heroBreadcrumbItems = match (true) {

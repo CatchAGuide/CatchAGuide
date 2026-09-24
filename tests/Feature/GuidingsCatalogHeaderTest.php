@@ -97,7 +97,9 @@ class GuidingsCatalogHeaderTest extends TestCase
         $this->assertStringContainsString('data-category-hero-page', $source);
         $this->assertStringContainsString("'listingTitle' => \$guiding->title", $source);
         $this->assertStringContainsString("'hubTitle' => __('homepage.filter-fishing-near-me')", $source);
-        $this->assertStringContainsString('<h1>{{ $guiding->title }}</h1>', $source);
+        // The hero header owns the page's only <h1>; the body repeats the title visually only.
+        $this->assertStringNotContainsString('<h1>{{ $guiding->title }}</h1>', $source);
+        $this->assertStringContainsString('<p class="h1">{{ $guiding->title }}</p>', $source);
         $this->assertStringNotContainsString('navbar-custom', $source);
     }
 

@@ -7,6 +7,7 @@ use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
 use App\Models\Language;
 use App\Services\Homepage\HomepageMixedOfferSelector;
+use App\Services\Seo\CatalogInventoryGate;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Mockery;
@@ -27,9 +28,15 @@ class DestinationCountryGeoTest extends TestCase
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \App\Http\Middleware\DDoSProtectionMiddleware::class,
         ]);
+
+        // These tests cover page rendering; the inventory gate has its own tests
+        // (CatalogInventoryGateTest, GeoPageInventoryGateTest).
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('guidingDestinationIndexable', 'destinationIndexable', 'vacationCountryIndexable')->andReturn(true);
+        $this->app->instance(CatalogInventoryGate::class, $gate);
     }
 
-    public function test_destination_country_hides_region_and_city_carousels(): void
+    public function test_destination_country_shows_region_and_city_carousels_when_present(): void
     {
         $country = $this->createCountry('spanien-no-geo');
         $region = CategoryEntity::regions()->create([
@@ -51,24 +58,14 @@ class DestinationCountryGeoTest extends TestCase
         $response = $this->get(route('destination.country', ['country' => $country->slug]));
 
         $response->assertOk();
-        $response->assertDontSee(__('destination.all_region'), false);
-        $response->assertDontSee(__('destination.all_cities'), false);
-        $response->assertDontSee($region->name, false);
-        $response->assertDontSee('Unique Dest City '.$country->slug, false);
-        $response->assertDontSee('id="carousel-regions"', false);
-        $response->assertDontSee('id="carousel-cities"', false);
-        $response->assertDontSee('data-geo-rail="regions"', false);
-        $response->assertDontSee('data-geo-rail="cities"', false);
-        $response->assertSee('cag-site-nav--overlay', false);
-        $response->assertDontSee('hero-tour.webp', false);
-        $response->assertSee('data-category-header-shell', false);
-        $response->assertSee('offers-page-header__hero', false);
+        $response->assertSee(__('destination.all_region'), false);
+        $response->assertSee(__('destination.all_cities'), false);
+        $response->assertSee($region->name, false);
+        $response->assertSee('Unique Dest City '.$country->slug, false);
         $response->assertSee('Fishing in Spain', false);
-        $response->assertDontSee('navbar-custom short-header long-header', false);
-        $response->assertDontSee('data-offers-region-redirect', false);
     }
 
-    public function test_destination_region_url_redirects_to_country(): void
+    public function test_destination_region_url_renders_region_page(): void
     {
         $country = $this->createCountry('spanien-legacy-region');
         $region = CategoryEntity::regions()->create([
@@ -78,13 +75,44 @@ class DestinationCountryGeoTest extends TestCase
             'slug' => 'catalonia-'.$country->slug,
         ]);
 
+        $this->bindDestinationOffers();
+
         $response = $this->get('/destination/'.$country->slug.'/'.$region->slug);
 
-        $response->assertRedirect(route('destination.country', ['country' => $country->slug], false));
-        $response->assertStatus(301);
+        $response->assertOk();
+        // No scoped CMS content was seeded for the region, so the view falls back to the
+        // entity's plain name (CategoryEntity::getTitleAttribute()) — still real content,
+        // not a redirect to the country hub.
+        $response->assertSee('Catalonia', false);
+        // Without CMS copy the <title> and meta description still describe the place.
+        $response->assertSee('<title>'.e(__('destination.meta_title_all', ['place' => 'Catalonia'])), false);
+        $response->assertSee('<meta name="description" content="'.e(__('destination.meta_description_all', ['place' => 'Catalonia'])).'"', false);
     }
 
-    public function test_destination_city_url_redirects_to_country_and_keeps_query(): void
+    public function test_destination_region_below_inventory_gate_is_noindexed(): void
+    {
+        $country = $this->createCountry('spanien-gated-region');
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Duenn',
+            'slug' => 'duenn-'.$country->slug,
+        ]);
+
+        $gate = Mockery::mock(CatalogInventoryGate::class);
+        $gate->shouldReceive('destinationIndexable')->andReturnUsing(
+            fn (CategoryEntity $c, ?CategoryEntity $r = null) => $r === null
+        );
+        $this->app->instance(CatalogInventoryGate::class, $gate);
+        $this->bindDestinationOffers();
+
+        $response = $this->get('/destination/'.$country->slug.'/'.$region->slug);
+
+        $response->assertOk();
+        $response->assertSee('<meta name="robots" content="NOINDEX, FOLLOW" />', false);
+    }
+
+    public function test_destination_city_url_renders_city_page(): void
     {
         $country = $this->createCountry('spanien-legacy-city');
         $region = CategoryEntity::regions()->create([
@@ -101,19 +129,65 @@ class DestinationCountryGeoTest extends TestCase
             'slug' => 'barcelona-'.$country->slug,
         ]);
 
+        $this->bindDestinationOffers();
+
         $response = $this->get('/destination/'.$country->slug.'/'.$region->slug.'/'.$city->slug.'?type=tour');
 
-        $response->assertRedirect(route('destination.country', [
-            'country' => $country->slug,
-            'type' => 'tour',
-        ], false));
+        $response->assertOk();
+        $response->assertSee('Barcelona', false);
+    }
+
+    public function test_destination_city_url_404s_when_city_does_not_belong_to_region(): void
+    {
+        $country = $this->createCountry('spanien-mismatch');
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Catalonia',
+            'slug' => 'catalonia-'.$country->slug,
+        ]);
+        $otherRegion = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Andalusia',
+            'slug' => 'andalusia-'.$country->slug,
+        ]);
+        $city = CategoryEntity::cities()->create([
+            'type' => 'city',
+            'country_id' => $country->id,
+            'region_id' => $otherRegion->id,
+            'name' => 'Seville',
+            'slug' => 'seville-'.$country->slug,
+        ]);
+
+        $response = $this->get('/destination/'.$country->slug.'/'.$region->slug.'/'.$city->slug);
+
+        $response->assertNotFound();
+    }
+
+    public function test_destination_country_redirects_uppercase_umlaut_slug_to_canonical(): void
+    {
+        $response = $this->get('/destination/'.rawurlencode('Österreich'));
+
+        $response->assertRedirect(route('destination.country', ['country' => 'österreich']));
         $response->assertStatus(301);
     }
 
-    public function test_destination_country_route_is_country_only(): void
+    public function test_destination_country_redirect_preserves_region_and_city(): void
+    {
+        $response = $this->get('/destination/'.rawurlencode('Österreich').'/tirol/innsbruck');
+
+        $response->assertRedirect(route('destination.country', [
+            'country' => 'österreich',
+            'region' => 'tirol',
+            'city' => 'innsbruck',
+        ]));
+    }
+
+    public function test_destination_country_route_supports_optional_region_and_city(): void
     {
         $this->assertSame(
-            'destination/{country}',
+            'destination/{country}/{region?}/{city?}',
             app('router')->getRoutes()->getByName('destination.country')->uri()
         );
         $this->assertSame(

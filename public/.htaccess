@@ -10,8 +10,11 @@
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Redirect Trailing Slashes If Not A Folder...
+    # Production's document root is the project root, whose .htaccess internally rewrites
+    # /x/ to /public/x/ — so REQUEST_URI here carries a /public prefix. Strip it, or the redirect
+    # goes to /public/x and costs a second hop back to /x (Search Console "Redirect error").
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteCond %{REQUEST_URI} ^(?:/public(?=/))?(/.+?)/+$
     RewriteRule ^ %1 [L,R=301]
 
     # Send Requests To Front Controller...

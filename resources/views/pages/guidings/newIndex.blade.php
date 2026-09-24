@@ -15,8 +15,9 @@
     @endif
 @endsection
 
-@section('meta_robots')
-    @php
+{{-- Structured data goes to the layout's structured_data stack; this used to sit in the
+     meta_robots section, which silently replaced the page's robots tag. --}}
+@php
         $jsonLd = [
             '@context' => 'https://schema.org',
             '@type' => 'TouristTrip',
@@ -37,11 +38,8 @@
                 'availability' => 'https://schema.org/InStock'
             ],
         ];
-    @endphp
-    <script type="application/ld+json">
-        {!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}
-    </script>
-@endsection
+@endphp
+@include('components.seo.json-ld', ['data' => $jsonLd])
 
 @section('css_after')
     <style>
@@ -707,7 +705,8 @@
         <div class="title-wrapper">
             <div class="title-left-container">
                 <div class="col-24 col mb-1 guiding-title">
-                    <h1>{{ $guiding->title }}</h1>
+                    {{-- The hero header above carries the page's <h1>; this repeat is visual only. --}}
+                    <p class="h1">{{ $guiding->title }}</p>
                 </div>
                 <div class="col-12">
                     <div class="location-row">
@@ -805,7 +804,8 @@
         >
             <div class="left-image" @if(!empty($overallImages)) data-gallery-index="0" style="cursor: pointer;" @endif>
                 @if(!empty($overallImages))
-                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}">
+                    {{-- Largest image in the first viewport (the page's LCP element): fetch it before other images. --}}
+                    <img src="{{ $overallImages[0] }}" class="img-fluid" alt="{{ __('guidings.gallery_image_alt', ['title' => $guiding->title, 'num' => 1]) }}" fetchpriority="high" decoding="async">
                     @if($galleryCount > 1)
                         <span class="camp-gallery__counter">1/{{ $galleryCount }}</span>
                     @endif
@@ -1864,10 +1864,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     <div class="card-body">
                         <h5 class="card-title">${newGuiding.title}</h5>
                         <p class="card-text">${newGuiding.location}</p>
-                        <a href="/guidings/offer/${newGuiding.slug}" class="btn btn-primary">Details</a>
+                        <a class="btn btn-primary" data-same-guiding-link>Details</a>
                     </div>
                 </div>
             `;
+            // Set the href in JS: a URL-looking placeholder in the markup string gets
+            // picked up by crawlers as a literal (404ing) link.
+            colDiv.querySelector('[data-same-guiding-link]').href = '/guidings/offer/' + encodeURIComponent(newGuiding.slug);
             container.appendChild(colDiv);
         }
 

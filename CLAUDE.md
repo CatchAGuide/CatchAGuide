@@ -43,7 +43,9 @@ npm run test:e2e:ui
 
 Test env (`phpunit.xml`): array cache/session/mail, sync queue, `BCRYPT_ROUNDS=4`, Telescope disabled. DB connection
 is whatever `.env`/`phpunit.xml` currently has configured (sqlite in-memory lines are present but commented out) —
-check before assuming an isolated test DB.
+check before assuming an isolated test DB. Locally that is the real dev database, so any test that deletes or updates
+existing rows must `use DatabaseTransactions` — `OfferFilterServiceTest`'s `Target::query()->delete()` once wiped the
+whole `targets` table on every full-suite run.
 
 ## Architecture
 
@@ -67,6 +69,15 @@ concrete classes directly.
 `app/Services/Sitemap/Contributors/*` each implement `SitemapContributorInterface` (`key()`, `fileName()`,
 `entries()`) and are aggregated by `SitemapGenerator`. Adding a new sitemap section means adding a new contributor,
 not branching inside an existing one.
+
+The set follows the Sept 2026 "Sitemap Concept CaG" spec: eight files per language, `sitemap-<area>-<lang>.xml`
+(`pages`, `tours`, `holidays`, `facets-global`, `facets-tours`, `geo-tours`, `facets-holidays`, `magazine`), listed by
+`/sitemap.xml`. File names are Search Console's per-file history key — don't rename them. Rules every contributor
+follows: a URL appears in exactly one file (`SitemapNoDuplicateUrlsTest`); only URLs that serve 200, are indexable
+and self-canonical, with no query params; `lastmod` is the newest of the page's own content timestamps
+(`SitemapLastmod`) and its listing set (`SitemapListingFreshness`), never the generation time, and is omitted when
+unknown; no `changefreq`/`priority`; hreflang alternates are added by
+`SitemapGenerator` (set `localized: false` for pages with no counterpart on the other domain).
 
 ### Media storage
 
@@ -110,6 +121,74 @@ logic in views.
 
 Components live under `app/Http/Livewire/` (not the Livewire-3-default `app/Livewire/`), with views under
 `resources/views/livewire/`.
+
+### SEO / catalog page conventions (learned from the Sept 2026 audit — verify before repeating)
+
+Live-verified during the Sept 2026 SEO audit (catchaguide.de/.com); each rule below was confirmed against the
+actual site/codebase, not just theorized:
+
+- **Gate facet/combination pages by inventory before they're indexable.** A facet page with too little
+  inventory is thin content that drags down the whole site (confirmed: `/vacations/camps/malediven` rendered a
+  "we're building our offering here" placeholder and was indexable). `App\Services\Seo\CatalogInventoryGate`
+  is the single rule — at least 1 product for country/species/method pages, at least 3 for region/city pages.
+  Below it, a page still renders but gets `noindex` (pass `noindex` to the view), drops out of hub rails and is
+  left out of every sitemap. New facet or country×species-style pages must go through the gate, not re-derive
+  their own threshold.
+- **A filter variant that's meant to be a distinct, indexable page gets a real path segment, not a query
+  param.** `/vacations/countries?pillar=camps` used to render different content while canonicalizing to the
+  param-free page. The pillar variants now live at `/vacations/{camps|trips}/countries` and
+  `/vacations/{camps|trips}/targets/{species}`, and the `?pillar=`/`?vacation=` forms 301 there. Follow the same
+  pattern for any new filter variant that should rank on its own.
+- **Sitemaps must include hub/index pages, not just detail pages.** `/offers`, `/guidings/countries`,
+  `/vacations/countries` and `/guidings/targets` were once missing from every sitemap. These are exactly the
+  pages that rank for generic head-term queries — when adding a sitemap contributor, include the section's own
+  index/hub route, not just its `{slug}` children.
+- **Never carry filter/tracking-style query params (`?num_guests=1`, geo params, etc.) into a link that points
+  at a single-entity detail page** (an individual guiding/trip/camp offer, a target-fish page). Those params
+  belong on listing/search pages. Confirmed live: individual `/guidings/offer/{slug}` pages hit with
+  listing-style geo query strings appended (`?place=...&place_types[0]=...&num_guests=1`) both throw 5xx errors
+  and pollute Search Console's "crawled — not indexed" bucket with URL-variant duplicates of pages that would
+  otherwise index fine. If a template links to a detail page, strip query params from that link, and make sure
+  the detail page's own canonical tag points at its clean URL regardless of what query string it was hit with.
+- **URL slugs are stored lowercase.** `CategoryEntity` (country/region/city) and `CategoryPage` (species/method)
+  lowercase their slugs on save, and uppercase variants 301 to the lowercase URL. Two rows ("Österreich",
+  "Äsche") were stored uppercase, so every link built from `$model->slug` pointed at a redirect.
+- **Country/region slugs with umlauts must go through `App\Domain\Vacation\CountrySlug::canonicalize()`**, not
+  a raw/unnormalized slug — that class exists specifically because uppercase/lowercase and encoded/unencoded
+  umlaut variants of the same country (`Österreich` vs `österreich`) are treated as different URLs otherwise.
+  `/vacations/{country}` already correctly 301s the uppercase-umlaut form to the canonical lowercase one via
+  this — reuse the same canonicalization for any new country-slug-generating code rather than re-deriving it.
+- **Cross-type hub pages need real internal links, not just sitemap entries.** The footer
+  (`resources/views/layouts/partials/footer.blade.php`) once had no link to `/destination` or `/targets` — the
+  two pages that target the highest-volume generic queries (`angeln in spanien`, `zander angeln`, etc.); its
+  "Destinations and species" group now links them. When adding a
+  new cross-type or facet hub page, add it to primary nav/footer, not just a sitemap — sitemap presence alone
+  doesn't give Google (or users) a path to discover it through the site's own link graph.
+- **Hreflang only for pages that exist on both domains.** `components/seo/hreflang.blade.php` maps the current
+  path to the other domain; for content written per language with unrelated slugs (magazine articles, root guide
+  articles) that path doesn't exist, and Google logged the resulting 302s/404s. Add any new per-language page
+  type to its exclusion list, and give its sitemap entries `localized: false`.
+- **Production's document root is the project root**, and its (gitignored, but rsync-deployed) root `.htaccess`
+  rewrites internally into `public/`. Any `public/.htaccess` redirect built from `REQUEST_URI` must strip that
+  `/public` prefix, or it redirects to `/public/...` and costs a second hop (Search Console "Redirect error").
+- **Never resurrect a static sitemap file under `public/`.** The live site was found serving several
+  hand-written/frozen sitemap files years old (`public/de/catchaguideDE.xml`, `public/NewENSitemap.xml`,
+  `public/sitemaps/sitemap_category_{en,de}.xml`, `sitemap_routes.xml`, top-level `sitemap_index.xml`) still
+  being crawled by Google alongside the real, current ones from `SitemapGenerator`. All sitemap output must come
+  from a `SitemapContributorInterface` implementation aggregated by `SitemapGenerator` (see above) — check
+  `public/` and `public/sitemaps/` for stray static `.xml` files before assuming that's already true, and check
+  Search Console's Sitemaps list on both properties for stale submissions when investigating indexing issues.
+- **Listing robots are an allowlist.** `SeoRobotsPolicy` noindexes a guidings/vacations listing when any
+  non-empty query parameter other than `page` (and campaign tags like `utm_*`/`gclid`) is present. A denylist of
+  filter names silently let unlisted filters (`target_fish[]`, `guide_id`, `fishing_type`, …) become indexable.
+- **Destination offers are scoped by geo, not by name.** `/destination/{country}/{region}/{city}` rails and the
+  inventory gate use the tours catalog's scope (`DestinationOfferScope` → `OfferCatalogPageService::listingQueries`,
+  i.e. the place's stored centroid/bounds). Matching listings' free-text `region`/`city` columns against the page's
+  name found nothing for most regions (Rheindelta, Småland, Algarve, Roermond), so those pages showed no offers and
+  were noindexed.
+- **Hreflang mirrors the canonical.** Page 2+ of a paginated listing declares `?page=N` alternates, not page 1.
+- **Don't serve pages from stored HTML.** Magazine threads used a DB page cache (`App\Models\Cache`) that kept an old
+  `<head>` for a week after deploys and shared one visitor's CSRF token; render per request instead.
 
 ### Guide status
 

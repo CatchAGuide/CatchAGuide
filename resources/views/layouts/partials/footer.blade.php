@@ -23,6 +23,18 @@
             'items' => [
                 ['label' => __('homepage.offers_camps_title'), 'url' => route('vacations.camps.index')],
                 ['label' => __('homepage.offers_trips_title'), 'url' => route('vacations.trips.index')],
+                ['label' => __('homepage.footer_by_country'), 'url' => route('vacations.countries')],
+            ],
+        ],
+        [
+            // Cross-type hubs (destination/targets) target the highest-volume generic queries
+            // ("angeln in spanien", "zander angeln") but had no internal link path — sitemap
+            // presence alone doesn't give Google (or users) a way to discover them (see
+            // CLAUDE.md's "SEO / catalog page conventions").
+            'title' => __('homepage.footer_group_discover'),
+            'items' => [
+                ['label' => __('homepage.footer_destinations'), 'url' => route('destination')],
+                ['label' => __('homepage.footer_target_species'), 'url' => route('targets.index')],
             ],
         ],
         [
