@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Booking;
 
+use App\Enums\GuideStatus;
 use App\Models\BlockedEvent;
 use App\Models\Booking;
 use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
+use App\Models\UserGuest;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -14,6 +16,8 @@ use Tests\TestCase;
 class BookingRescheduleSecurityTest extends TestCase
 {
     use DatabaseTransactions;
+
+    private const SESSION_KEY = 'booking_reschedule';
 
     protected function setUp(): void
     {
@@ -28,12 +32,12 @@ class BookingRescheduleSecurityTest extends TestCase
         ]);
     }
 
-    private function createRejectedBooking(array $overrides = []): Booking
+    private function createRejectedBooking(array $overrides = [], array $tour = []): Booking
     {
-        $guide = User::factory()->create(['language' => 'en']);
+        $guide = User::factory()->create(['language' => 'en', 'is_guide' => 1, 'guide_status' => GuideStatus::VERIFIED]);
 
         $guiding = new Guiding();
-        $guiding->forceFill([
+        $guiding->forceFill(array_merge([
             'title' => 'Test Tour '.uniqid(),
             'slug' => 'test-tour-'.uniqid(),
             'location' => 'Somewhere',
@@ -42,9 +46,10 @@ class BookingRescheduleSecurityTest extends TestCase
             'duration' => 4,
             'price' => 150,
             'price_type' => 'per_tour',
+            'pricing_extra' => json_encode([['name' => 'Lunch', 'price' => 20]]),
             'fishing_type_id' => FishingType::query()->value('id'),
             'user_id' => $guide->id,
-        ])->save();
+        ], $tour))->save();
 
         $blockedEvent = new BlockedEvent();
         $blockedEvent->forceFill([
@@ -54,7 +59,12 @@ class BookingRescheduleSecurityTest extends TestCase
             'user_id' => $guide->id,
         ])->save();
 
-        $alternativeDate = now()->addDays(10)->toDateString();
+        $guest = UserGuest::create([
+            'salutation' => 'male', 'title' => '', 'firstname' => 'Jonas', 'lastname' => 'Keller',
+            'address' => '', 'postal' => '', 'city' => '', 'country' => 'Deutschland',
+            'phone' => '15123456789', 'phone_country_code' => '+49',
+            'email' => 'jonas.keller@example.com', 'language' => 'en',
+        ]);
 
         $booking = new Booking();
         $booking->forceFill(array_merge([
@@ -63,98 +73,227 @@ class BookingRescheduleSecurityTest extends TestCase
             'status' => 'rejected',
             'is_rescheduled' => false,
             'token' => 'test-token-'.uniqid(),
-            'alternative_dates' => json_encode([$alternativeDate]),
+            'alternative_dates' => json_encode([
+                now()->addDays(10)->toDateString(),
+                now()->addDays(12)->toDateString(),
+            ]),
+            'additional_information' => 'River is flooded that weekend.',
             'is_guest' => true,
-            'email' => 'guest@example.com',
-            'count_of_users' => 1,
+            'user_id' => $guest->id,
+            'email' => 'jonas.keller@example.com',
+            'phone' => '+49 15123456789',
+            'count_of_users' => 2,
             'price' => 150,
+            'book_date' => now()->addDays(5)->toDateString(),
         ], $overrides))->save();
 
         return $booking;
     }
 
-    public function test_reschedule_store_requires_a_token(): void
+    private function alternative(Booking $booking, int $index = 0): string
+    {
+        return json_decode($booking->alternative_dates, true)[$index];
+    }
+
+    private function inSession(Booking $booking): self
+    {
+        return $this->withSession([self::SESSION_KEY => ['token' => $booking->token, 'date' => null]]);
+    }
+
+    // Opening the emailed link
+
+    public function test_emailed_link_moves_the_token_into_the_session_and_off_the_url(): void
     {
         $booking = $this->createRejectedBooking();
-        $alternativeDate = json_decode($booking->alternative_dates, true)[0];
+        $date = $this->alternative($booking, 1);
 
-        $response = $this->postJson(route('booking.reschedule.store'), [
-            'selectedDate' => $alternativeDate,
-            'count_of_users' => 1,
-            'terms_accepted' => 1,
-            'total_price' => 1, // attacker-supplied bargain price — must be ignored even if accepted
-        ]);
+        $this->get(route('booking.reschedule', ['token' => $booking->token]).'?date='.$date)
+            ->assertRedirect(route('booking.reschedule.show'))
+            ->assertStatus(303)
+            ->assertHeader('Referrer-Policy', 'no-referrer')
+            ->assertSessionHas(self::SESSION_KEY, ['token' => $booking->token, 'date' => $date]);
+    }
 
-        $response->assertStatus(422);
+    public function test_reschedule_page_preselects_the_emailed_date_and_masks_contact_details(): void
+    {
+        $booking = $this->createRejectedBooking();
+        $date = $this->alternative($booking, 1);
+
+        $response = $this->withSession([self::SESSION_KEY => ['token' => $booking->token, 'date' => $date]])
+            ->get(route('booking.reschedule.show'))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertSee('River is flooded that weekend.')
+            ->assertSee('Jonas K.')
+            ->assertSee('j•')
+            ->assertDontSee('Keller')
+            ->assertDontSee('jonas.keller@example.com')
+            ->assertDontSee('15123456789')
+            ->assertDontSee($booking->token);
+
+        preg_match('#<script type="application/json" id="tour-checkout-config">(.*?)</script>#s', $response->getContent(), $match);
+        $config = json_decode($match[1], true);
+
+        $this->assertSame($date, $config['selectedDate']);
+        $this->assertSame([$this->alternative($booking, 0), $date], $config['allowedDates']);
+        $this->assertTrue($config['contactLocked']);
+        $this->assertNull($config['contact']);
+        $this->assertSame(2, $config['persons']);
+        $this->assertSame(route('booking.reschedule.store'), $config['submitUrl']);
+    }
+
+    public function test_a_date_that_was_not_suggested_falls_back_to_the_first_suggestion(): void
+    {
+        $booking = $this->createRejectedBooking();
+
+        $response = $this->withSession([self::SESSION_KEY => ['token' => $booking->token, 'date' => now()->addDays(40)->toDateString()]])
+            ->get(route('booking.reschedule.show'))
+            ->assertOk();
+
+        preg_match('#id="tour-checkout-config">(.*?)</script>#s', $response->getContent(), $match);
+        $this->assertSame($this->alternative($booking), json_decode($match[1], true)['selectedDate']);
+    }
+
+    // Friendly fallbacks instead of errors
+
+    public function test_unknown_link_shows_a_helpful_page(): void
+    {
+        $this->get(route('booking.reschedule', ['token' => 'does-not-exist']))
+            ->assertRedirect(route('booking.reschedule.show'));
+
+        $this->get(route('booking.reschedule.show'))
+            ->assertNotFound()
+            ->assertSee(__('checkout.reschedule.states.invalid.title'))
+            ->assertSee(route('guidings.index'));
+    }
+
+    public function test_used_link_explains_the_request_was_already_sent(): void
+    {
+        $booking = $this->createRejectedBooking(['is_rescheduled' => true]);
+
+        $this->inSession($booking)->get(route('booking.reschedule.show'))
+            ->assertOk()
+            ->assertSee(__('checkout.reschedule.states.used.title'));
+    }
+
+    public function test_past_suggestions_offer_to_book_the_tour_for_another_date(): void
+    {
+        $booking = $this->createRejectedBooking(['alternative_dates' => json_encode([now()->subDays(2)->toDateString()])]);
+
+        $this->inSession($booking)->get(route('booking.reschedule.show'))
+            ->assertOk()
+            ->assertSee(__('checkout.reschedule.states.expired.title'))
+            ->assertSee($booking->guiding->publicShowUrl(), false);
+    }
+
+    public function test_unpublished_tour_cannot_be_rescheduled(): void
+    {
+        $booking = $this->createRejectedBooking([], ['status' => 2]);
+
+        $this->inSession($booking)->get(route('booking.reschedule.show'))
+            ->assertOk()
+            ->assertSee(__('checkout.reschedule.states.unavailable.title'))
+            ->assertDontSee($booking->guiding->publicShowUrl(), false);
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => $this->alternative($booking),
+            'persons' => 1,
+        ])->assertStatus(409);
+
         $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
 
-    public function test_reschedule_store_rejects_an_unknown_token(): void
-    {
-        $response = $this->postJson(route('booking.reschedule.store'), [
-            'token' => 'this-token-does-not-exist',
-            'selectedDate' => now()->addDays(10)->toDateString(),
-            'count_of_users' => 1,
-            'terms_accepted' => 1,
-        ]);
+    // Submitting
 
-        $response->assertStatus(404);
-        $response->assertJson(['success' => false]);
+    public function test_store_requires_the_session_from_the_emailed_link(): void
+    {
+        $booking = $this->createRejectedBooking();
+
+        // A token in the body is ignored: only the session from the link counts.
+        $this->postJson(route('booking.reschedule.store'), [
+            'token' => $booking->token,
+            'selected_date' => $this->alternative($booking),
+            'persons' => 1,
+        ])->assertStatus(409)->assertJson(['success' => false]);
+
+        $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
 
-    public function test_reschedule_store_rejects_a_booking_that_is_not_rejected(): void
+    public function test_store_rejects_a_booking_that_is_not_rejected(): void
     {
-        // Simulates the old vulnerable flow: guessing/enumerating a booking_id (here, a
-        // token) for a booking that was never rejected — must not be reschedulable.
         $booking = $this->createRejectedBooking(['status' => 'pending']);
-        $alternativeDate = json_decode($booking->alternative_dates, true)[0];
 
-        $response = $this->postJson(route('booking.reschedule.store'), [
-            'token' => $booking->token,
-            'selectedDate' => $alternativeDate,
-            'count_of_users' => 1,
-            'terms_accepted' => 1,
-        ]);
-
-        $response->assertStatus(404);
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => $this->alternative($booking),
+            'persons' => 1,
+        ])->assertStatus(409);
     }
 
-    public function test_reschedule_store_rejects_a_date_outside_the_offered_alternatives(): void
+    public function test_store_rejects_a_date_outside_the_offered_alternatives(): void
     {
         $booking = $this->createRejectedBooking();
 
-        $response = $this->postJson(route('booking.reschedule.store'), [
-            'token' => $booking->token,
-            'selectedDate' => now()->addDays(999)->toDateString(),
-            'count_of_users' => 1,
-            'terms_accepted' => 1,
-        ]);
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => now()->addDays(99)->toDateString(),
+            'persons' => 1,
+        ])->assertStatus(422)->assertJsonValidationErrors(['selected_date']);
 
-        $response->assertStatus(422);
         $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
 
-    public function test_reschedule_store_ignores_client_submitted_price_and_recomputes_it_server_side(): void
+    public function test_store_rejects_too_many_guests_and_unknown_extras(): void
     {
         $booking = $this->createRejectedBooking();
-        $alternativeDate = json_decode($booking->alternative_dates, true)[0];
 
-        $response = $this->postJson(route('booking.reschedule.store'), [
-            'token' => $booking->token,
-            'selectedDate' => $alternativeDate,
-            'count_of_users' => 1,
-            'terms_accepted' => 1,
-            'total_price' => 0.01, // attacker-supplied — the guiding's real per-tour price is 150
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => $this->alternative($booking),
+            'persons' => 9,
+            'extras' => [4],
+        ])->assertStatus(422)->assertJsonValidationErrors(['persons']);
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => $this->alternative($booking),
+            'persons' => 2,
+            'extras' => [4],
+        ])->assertStatus(422)->assertJsonValidationErrors(['extras']);
+    }
+
+    public function test_store_ignores_client_submitted_price_and_recomputes_it_server_side(): void
+    {
+        $booking = $this->createRejectedBooking();
+        $date = $this->alternative($booking);
+
+        $response = $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+            'selected_date' => $date,
+            'persons' => 2,
+            'extras' => [0],
+            'total_price' => 0.01, // attacker-supplied — must be ignored
         ]);
 
-        $response->assertOk();
-        $response->assertJson(['success' => true]);
+        $response->assertOk()->assertJson(['success' => true])->assertSessionMissing(self::SESSION_KEY);
 
-        $booking->refresh();
-        $this->assertTrue((bool) $booking->is_rescheduled);
+        $this->assertTrue((bool) $booking->fresh()->is_rescheduled);
 
-        $newBooking = Booking::find($response->json('booking_id'));
+        $newBooking = Booking::where('parent_id', $booking->id)->first();
         $this->assertNotNull($newBooking);
-        $this->assertEquals(150.0, (float) $newBooking->price, 'price must come from the guiding record, not the client');
+        $this->assertEquals(190.0, (float) $newBooking->price, '150 tour + lunch 20 × 2, from the guiding record');
+        $this->assertSame($date, substr((string) $newBooking->book_date, 0, 10));
+        $this->assertSame(route('checkout.thank-you', [$newBooking]), $response->json('redirect_url'));
+
+        // The confirmation page of the new request is open to this session only.
+        $this->get($response->json('redirect_url'))->assertOk();
+    }
+
+    public function test_a_link_can_only_be_used_once(): void
+    {
+        $booking = $this->createRejectedBooking();
+        $payload = ['selected_date' => $this->alternative($booking), 'persons' => 1];
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $payload)->assertOk();
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $payload)
+            ->assertStatus(409)
+            ->assertJson(['message' => __('checkout.reschedule.errors.used')]);
+
+        $this->assertSame(1, Booking::where('parent_id', $booking->id)->count());
     }
 }

@@ -217,6 +217,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'country_hero_eyebrow' => 'Angelurlaub',
     'fishing_vacation_in_country' => 'Angelurlaub in :country',
     'country_listing_title' => 'Angelurlaub in :country',
+    'country_meta_description' => 'Angelurlaub in :country: Angelcamps, Unterkünfte mit Boot und geführte Angelreisen. Angebote vergleichen und direkt anfragen.',
     'all_offers_nav' => 'Alle',
     'all_offers_title' => 'Alle Angelerlebnisse',
     'all_offers_subtitle' => 'Entdecke alle Guided Fishing Trips und Angelcamps.',

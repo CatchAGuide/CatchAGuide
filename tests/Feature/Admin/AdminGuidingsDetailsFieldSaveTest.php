@@ -157,4 +157,48 @@ class AdminGuidingsDetailsFieldSaveTest extends TestCase
         $this->assertNotNull($untouched, 'An untranslated sibling item must still fall back to the main-language entry.');
         $this->assertSame('No smoking on board', $untouched['value']);
     }
+
+    public function test_editing_an_auto_translated_id_keyed_list_keeps_sibling_translations(): void
+    {
+        $this->actingAsEmployee();
+        [$guiding, $info, $otherInfo] = $this->makeGuidingWithOtherInformation();
+
+        // Auto-translation stores list fields as an id-keyed dict, not [{id, value}] rows.
+        Language::query()->create([
+            'source_id' => (string) $guiding->id,
+            'type' => 'guidings',
+            'language' => 'de',
+            'title' => 'Test Tour DE',
+            'json_data' => ['other_information' => [
+                (string) $info->id => 'Kinder erlaubt',
+                (string) $otherInfo->id => 'Rauchen an Bord verboten',
+            ]],
+        ]);
+
+        $details = $this->getJson("/admin/guidings/{$guiding->id}/details");
+        if ($details->status() === 404) {
+            $this->markTestSkipped('Admin guidings details route not reachable in this test environment.');
+        }
+        $details->assertOk();
+        $shown = collect($details->json('translations.de.other_information'));
+        $this->assertSame('Kinder erlaubt', $shown->firstWhere('id', $info->id)['value']);
+        $this->assertSame($info->name, $shown->firstWhere('id', $info->id)['name']);
+
+        $this->post("/admin/guidings/{$guiding->id}/details-field", [
+            'field' => 'other_information',
+            'value' => 'Kinderfreundlich (bearbeitet)',
+            'language' => 'de',
+            'list_id' => (string) $info->id,
+        ])->assertOk();
+
+        $saved = collect(Language::where('source_id', (string) $guiding->id)
+            ->where('type', 'guidings')
+            ->where('language', 'de')
+            ->first()
+            ->json_data['other_information']);
+
+        $this->assertCount(2, $saved);
+        $this->assertSame('Kinderfreundlich (bearbeitet)', $saved->firstWhere('id', $info->id)['value']);
+        $this->assertSame('Rauchen an Bord verboten', $saved->firstWhere('id', $otherInfo->id)['value']);
+    }
 }

@@ -221,6 +221,15 @@ class SitePrimaryNavTest extends TestCase
         $this->assertTrue(SitePrimaryNav::isCheckoutPage());
     }
 
+    public function test_booking_reschedule_uses_the_checkout_chrome(): void
+    {
+        $this->bindNamedRequest('/booking/reschedule', 'booking.reschedule.show');
+
+        $this->assertTrue(SitePrimaryNav::isCheckoutPage());
+        $this->assertFalse(SitePrimaryNav::usesLayoutPageHeader());
+        $this->assertFalse(SitePrimaryNav::usesLayoutBottomNav());
+    }
+
     public function test_tour_camp_and_trip_product_pages_skip_the_mobile_catalog_bar(): void
     {
         $this->bindNamedRequest('/guidings/offer/sea-trout', 'guidings.show');

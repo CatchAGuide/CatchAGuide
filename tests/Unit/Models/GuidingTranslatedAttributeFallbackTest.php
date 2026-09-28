@@ -101,6 +101,36 @@ class GuidingTranslatedAttributeFallbackTest extends TestCase
         $this->assertSame($info->id, $result->first()['id']);
     }
 
+    /**
+     * Auto-translation (GuidingTranslationService::reconstructJsonFields) keeps the source column's
+     * id-keyed dict shape ({"3": "text"}). Only [{id, value}] rows used to be recognized, so every
+     * auto-translated requirement/other-information value silently fell back to the main language.
+     */
+    public function test_id_keyed_dict_translation_is_merged_by_id(): void
+    {
+        [$guiding, $info, $otherInfo] = $this->makeGuidingWithOtherInformation();
+
+        $guiding->translated = [
+            'other_information' => [(string) $info->id => 'Kinderfreundlich (übersetzt)'],
+        ];
+
+        $result = collect($guiding->other_information);
+
+        $this->assertSame('Kinderfreundlich (übersetzt)', $result->firstWhere('id', $info->id)['value']);
+        $this->assertSame($info->name, $result->firstWhere('id', $info->id)['name']);
+        $this->assertSame('No smoking on board', $result->firstWhere('id', $otherInfo->id)['value']);
+    }
+
+    public function test_translated_list_rows_normalizes_both_storage_shapes(): void
+    {
+        $this->assertSame(
+            [['id' => 3, 'value' => 'dict text'], ['id' => 5, 'value' => 'row text']],
+            Guiding::translatedListRows([3 => 'dict text', 4 => '  ', 7 => ['value' => 'no id'], 8 => ['id' => 5, 'value' => 'row text']]),
+        );
+        $this->assertSame([['id' => 2, 'value' => 'json']], Guiding::translatedListRows('{"2":"json"}'));
+        $this->assertSame([], Guiding::translatedListRows(null));
+    }
+
     public function test_scalar_field_still_returns_empty_translated_value_when_actually_set(): void
     {
         $guiding = new Guiding(['title' => 'English title']);

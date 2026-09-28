@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Checkout\ViewModels\BookingRejectViewModel;
 use App\Http\Requests\UpdateUserRequest;
+use App\Presenters\Offers\TourCardPresenter;
 
 use App\Mail\Guide\StorniGuidingMail;
 use App\Mail\Ceo\BookingCancelMailToCEO;
@@ -424,22 +426,21 @@ class ProfileController extends Controller
 
         return redirect()->route('profile.bookings')->with(['message' => 'Booking Accepted Successfully']);
     }
-    public function reject(Booking $booking){
+    public function reject(Booking $booking, TourCardPresenter $presenter){
 
-        if(!$booking || $booking->status != 'pending'){
+        if(!$booking || $booking->status != 'pending' || !$booking->guiding){
             abort(404);
         }
 
-        $isGuideOwner = (int) auth('web')->id() === (int) $booking->guiding?->user_id;
+        $isGuideOwner = (int) auth('web')->id() === (int) $booking->guiding->user_id;
         if (!$isGuideOwner && !auth('employees')->check()) {
             abort(403);
         }
 
-        return view('pages.additional.rejected',[
-            'booking' => $booking,
-            'blocked_events' => $booking->guiding?->getBlockedEvents() ?? [],
+        // Same form as the emailed /booking-reject/{token} link.
+        return view('pages.modern-checkout.reject', [
+            'reject' => new BookingRejectViewModel($booking, $presenter),
         ]);
-
     }
 
     public function favoriteguides()

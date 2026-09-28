@@ -407,10 +407,8 @@ class GuidingsController extends Controller
             }
 
             $translatedById = [];
-            foreach ((is_array($jsonData[$field] ?? null) ? $jsonData[$field] : []) as $item) {
-                if (is_array($item) && isset($item['id'])) {
-                    $translatedById[(string) $item['id']] = $item;
-                }
+            foreach (Guiding::translatedListRows($jsonData[$field] ?? []) as $item) {
+                $translatedById[(string) $item['id']] = $item;
             }
 
             $merged[$field] = array_map(function ($mainItem) use ($translatedById) {
@@ -418,7 +416,10 @@ class GuidingsController extends Controller
                     return $mainItem;
                 }
 
-                return $translatedById[(string) $mainItem['id']] ?? $mainItem;
+                // Merge (not replace) so a translated id/value row keeps the main row's name.
+                $translatedItem = $translatedById[(string) $mainItem['id']] ?? null;
+
+                return $translatedItem !== null ? array_merge($mainItem, $translatedItem) : $mainItem;
             }, $mainList);
         }
 
@@ -529,7 +530,9 @@ class GuidingsController extends Controller
                     return response()->json(['error' => 'list_id required for list field in translation'], 422);
                 }
 
-                $arr = isset($jsonData[$field]) && is_array($jsonData[$field]) ? array_values($jsonData[$field]) : [];
+                // Normalize to id-carrying rows: auto-translation stores an id-keyed dict, and
+                // array_values() on that dropped every id so edits never matched a row.
+                $arr = Guiding::translatedListRows($jsonData[$field] ?? []);
 
                 $targetIndex = null;
                 foreach ($arr as $i => $item) {

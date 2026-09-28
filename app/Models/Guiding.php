@@ -191,10 +191,8 @@ class Guiding extends Model
         }
 
         $translatedById = [];
-        foreach ($translatedValue as $item) {
-            if (is_array($item) && isset($item['id'])) {
-                $translatedById[(string) $item['id']] = $item;
-            }
+        foreach (self::translatedListRows($translatedValue) as $item) {
+            $translatedById[(string) $item['id']] = $item;
         }
 
         return array_map(function ($mainItem) use ($translatedById) {
@@ -210,6 +208,29 @@ class Guiding extends Model
             // name that only the main-language row has.
             return $translatedItem !== null ? array_merge($mainItem, $translatedItem) : $mainItem;
         }, $mainList);
+    }
+
+    /**
+     * Normalize a translated TRANSLATABLE_LIST_FIELDS value into rows that carry their own id.
+     * Auto-translation (GuidingTranslationService::reconstructJsonFields) keeps the source
+     * column's legacy id-keyed dict shape ({"3": "text"}), while the admin details editor
+     * stores rows ([{"id":3,"value":"text"}]) — see keyListFieldById() for the same two shapes
+     * on the main column. Rows without an id or text are dropped.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function translatedListRows($value): array
+    {
+        $rows = [];
+        foreach (decode_if_json($value, true) ?: [] as $key => $item) {
+            if (is_array($item) && isset($item['id'])) {
+                $rows[] = $item;
+            } elseif (is_string($item) && trim($item) !== '') {
+                $rows[] = ['id' => $key, 'value' => $item];
+            }
+        }
+
+        return $rows;
     }
 
     /**
@@ -617,6 +638,18 @@ class Guiding extends Model
             'guests' => $guests,
             'is_fixed' => true,
         ];
+    }
+
+    /**
+     * Price used to sort listings by price: the amount the listing card shows for this guest count
+     * (see TourCardPresenter::listingPriceFields), so price sorting follows the visible prices.
+     * Falls back to the card's "from" per-person price when no total resolves.
+     */
+    public function listingSortPrice(int $guests): ?int
+    {
+        $price = $this->resolvePriceForGuests($guests)['total'] ?? $this->getLowestPrice();
+
+        return $price > 0 ? $price : null;
     }
 
     /**

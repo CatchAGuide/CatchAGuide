@@ -195,12 +195,13 @@ class VacationFilterApplicator
         });
     }
 
+    /**
+     * Price sorts are handled by CampListingRepository: a camp's price is derived, not a column.
+     */
     public function applyCampSort(Builder $query, VacationListingFilter $filter): Builder
     {
         return match ($filter->sortBy) {
             'newest' => $query->orderByDesc('created_at'),
-            'price-asc' => $query->orderBy('id'),
-            'price-desc' => $query->orderByDesc('id'),
             default => $query->orderByDesc('created_at'),
         };
     }

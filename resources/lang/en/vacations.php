@@ -217,6 +217,7 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'country_hero_eyebrow' => 'Fishing holidays',
     'fishing_vacation_in_country' => 'Fishing Holidays in :country',
     'country_listing_title' => 'Fishing Holidays in :country',
+    'country_meta_description' => 'Fishing holidays in :country: fishing lodges, boat hire and guided fishing trips. Compare offers and request your trip directly.',
     'all_offers_nav' => 'All',
     'all_offers_title' => 'All Fishing Experiences',
     'all_offers_subtitle' => 'Browse every guided fishing trip and fishing camp across Europe.',

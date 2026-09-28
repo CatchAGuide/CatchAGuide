@@ -7,6 +7,24 @@ use Tests\TestCase;
 
 class GuidingResolvePriceForGuestsTest extends TestCase
 {
+    public function test_listing_sort_price_matches_the_card_total_not_price_split_across_max_guests(): void
+    {
+        // Card shows 190€ for a fixed-price boat; getLowestPrice() would be 190 / 4 = 48.
+        $fixed = new Guiding(['price_type' => 'per_boat', 'price' => 190, 'max_guests' => 4]);
+        $this->assertSame(190, $fixed->listingSortPrice(1));
+
+        // Two-person minimum: card shows the 180€ tier total for a single guest.
+        $minimumTwo = new Guiding([
+            'price_type' => 'per_person',
+            'prices' => json_encode([['person' => 2, 'amount' => 180], ['person' => 3, 'amount' => 240]]),
+        ]);
+        $this->assertSame(180, $minimumTwo->listingSortPrice(1));
+        $this->assertSame(240, $minimumTwo->listingSortPrice(3));
+
+        $unpriced = new Guiding(['price_type' => 'per_person', 'prices' => json_encode([])]);
+        $this->assertNull($unpriced->listingSortPrice(1));
+    }
+
     public function test_per_person_tier_returns_total_and_per_person_rate(): void
     {
         $guiding = new Guiding([

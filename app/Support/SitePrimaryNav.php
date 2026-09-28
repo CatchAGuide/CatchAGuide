@@ -208,7 +208,12 @@ final class SitePrimaryNav
     {
         $request ??= request();
 
-        return $request->routeIs('checkout', 'checkout.*') || $request->is('checkout*');
+        // The customer reschedule page and the guide's reject form share the checkout design.
+        return $request->routeIs(
+            'checkout', 'checkout.*',
+            'booking.reschedule', 'booking.reschedule.*',
+            'booking.reject', 'booking.rejectsuccess',
+        ) || $request->is('checkout*', 'booking/reschedule*', 'booking-reject/*', 'reject/success');
     }
 
     public static function isProductDetailPage(?Request $request = null): bool

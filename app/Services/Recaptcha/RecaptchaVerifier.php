@@ -7,9 +7,9 @@ use ReCaptcha\Response;
 
 class RecaptchaVerifier
 {
-    public function verify(?string $token, ?string $ip = null): Response
+    public function verify(?string $token, ?string $ip = null, ?string $secret = null): Response
     {
-        $secret = (string) config('recaptcha.api_secret_key', '');
+        $secret ??= (string) config('recaptcha.api_secret_key', '');
 
         if ($secret === '') {
             // Fail closed if configured as required.

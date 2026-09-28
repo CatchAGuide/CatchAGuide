@@ -11,6 +11,9 @@ use Carbon\Carbon;
 
 class GuidingTranslationService
 {
+    /** Id-keyed list fields whose free-text values are translated row by row. */
+    private const LIST_TEXT_FIELDS = ['requirements', 'recommendations', 'other_information'];
+
     private const DE_SOURCE_WORDS = [
         'und', 'oder', 'für', 'mit', 'auf', 'dem', 'der', 'die', 'das', 'den', 'des',
         'ein', 'eine', 'einer', 'einem', 'einen', 'ist', 'sind', 'wird', 'werden',
@@ -391,6 +394,101 @@ class GuidingTranslationService
         $reconstructed = array_merge($reconstructed, $translatedFields);
         
         return $reconstructed;
+    }
+
+    /**
+     * Free-text rows of requirements/recommendations/other_information that the existing
+     * $targetLanguage translation lacks, keyed like getTranslatableFields() ("requirements_3").
+     * Translations made before getTranslatableFields() read the raw columns stored these
+     * fields as [], so the tour page showed the main-language text.
+     *
+     * @return array<string, string>
+     */
+    public function missingListRows(Guiding $guiding, string $targetLanguage): array
+    {
+        $translation = $this->findTranslation($guiding, $targetLanguage);
+        if ($translation === null) {
+            return [];
+        }
+
+        $data = is_array($translation->json_data) ? $translation->json_data : [];
+        $sourceFields = $this->getTranslatableFields($guiding);
+        $missing = [];
+
+        foreach (self::LIST_TEXT_FIELDS as $field) {
+            $translatedIds = collect(Guiding::translatedListRows($data[$field] ?? []))
+                ->filter(fn (array $row) => is_string($row['value'] ?? null) && trim($row['value']) !== '')
+                ->map(fn (array $row) => (string) $row['id'])
+                ->all();
+
+            foreach (decode_if_json($guiding->getRawOriginal($field), true) ?: [] as $key => $value) {
+                $id = (string) (is_array($value) && isset($value['id']) ? $value['id'] : $key);
+                $fieldKey = "{$field}_{$key}";
+                if (isset($sourceFields[$fieldKey]) && ! in_array($id, $translatedIds, true)) {
+                    $missing[$fieldKey] = $sourceFields[$fieldKey];
+                }
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Translate only the rows missingListRows() reports and merge them into the existing
+     * translation, leaving every other translated field (and admin edits) untouched.
+     *
+     * @return int Number of rows translated
+     */
+    public function translateMissingListRows(Guiding $guiding, string $targetLanguage, ?string $engine = null): int
+    {
+        $missing = $this->missingListRows($guiding, $targetLanguage);
+        if ($missing === []) {
+            return 0;
+        }
+
+        $translated = $this->batchTranslateWithGoogle($missing, $targetLanguage, $guiding->language ?? 'de', $engine);
+        $translation = $this->findTranslation($guiding, $targetLanguage);
+        $data = is_array($translation->json_data) ? $translation->json_data : [];
+        $count = 0;
+
+        foreach (self::LIST_TEXT_FIELDS as $field) {
+            $rows = Guiding::translatedListRows($data[$field] ?? []);
+            $changed = false;
+
+            foreach (decode_if_json($guiding->getRawOriginal($field), true) ?: [] as $key => $value) {
+                $text = $translated["{$field}_{$key}"] ?? null;
+                if (! isset($missing["{$field}_{$key}"]) || ! is_string($text) || trim($text) === '') {
+                    continue;
+                }
+
+                $id = is_array($value) && isset($value['id']) ? $value['id'] : $key;
+                $rows = array_values(array_filter($rows, fn (array $row) => (string) $row['id'] !== (string) $id));
+                $rows[] = ['id' => $id, 'value' => $text];
+                $changed = true;
+                $count++;
+            }
+
+            if ($changed) {
+                $data[$field] = $rows;
+            }
+        }
+
+        if ($count > 0) {
+            $translation->json_data = $data;
+            $translation->save();
+            Cache::forget('guiding_translation_'.$guiding->id.'_'.$targetLanguage);
+        }
+
+        return $count;
+    }
+
+    private function findTranslation(Guiding $guiding, string $targetLanguage): ?Language
+    {
+        return Language::where([
+            'source_id' => $guiding->id,
+            'type' => 'guidings',
+            'language' => $targetLanguage,
+        ])->first();
     }
 
     /**
