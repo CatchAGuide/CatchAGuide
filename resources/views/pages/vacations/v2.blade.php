@@ -90,7 +90,7 @@
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
-    class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
+    class="camp-page min-h-screen"
 >
     @if($isDraft)
         <div class="camp-container py-3">
@@ -212,23 +212,6 @@
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
-                    <!-- Contact Us - Mobile only; booking uses the floating bar -->
-                    @unless($isDraft)
-                    <div class="camp-cta-stack camp-cta-stack--mobile-top">
-                        @include('pages.trips.partials.contact-card', [
-                            'wrapperClass' => 'mb-0',
-                            'modalTarget' => '#campGeneralContactModal',
-                            'title' => __('vacations.general_contact_title'),
-                            'message' => __('vacations.general_contact_message'),
-                            'buttonLabel' => __('vacations.general_contact_form'),
-                            'showTripAnalytics' => false,
-                            'reportSourceType' => 'camp',
-                            'reportSourceId' => $camp['id'] ?? null,
-                            'reportedUrl' => url()->current(),
-                        ])
-                    </div>
-                    @endunless
-                    
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
@@ -296,6 +279,23 @@
                             @endif
                         </div>
                     </section>
+
+                    <!-- Contact Us - Mobile only, after the description; booking uses the floating bar -->
+                    @unless($isDraft)
+                    <div class="camp-cta-stack camp-cta-stack--mobile-top">
+                        @include('pages.trips.partials.contact-card', [
+                            'wrapperClass' => 'mb-0',
+                            'modalTarget' => '#campGeneralContactModal',
+                            'title' => __('vacations.general_contact_title'),
+                            'message' => __('vacations.general_contact_message'),
+                            'buttonLabel' => __('vacations.general_contact_form'),
+                            'showTripAnalytics' => false,
+                            'reportSourceType' => 'camp',
+                            'reportSourceId' => $camp['id'] ?? null,
+                            'reportedUrl' => url()->current(),
+                        ])
+                    </div>
+                    @endunless
 
                     <section id="distances" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.distances') }}</h2>
@@ -1172,15 +1172,15 @@ document.addEventListener('DOMContentLoaded', function () {
   .camp-booking-card {
     width: 100%;
     padding: 1.5rem 1.75rem;
-    border: 1px solid rgba(15, 23, 42, .08);
-    border-radius: 1.5rem;
-    background: #fff;
-    box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
+    border: 0;
+    border-radius: 1.15rem;
+    background: #313041;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
   }
   .camp-booking-card__header { margin-bottom: 1.25rem; }
   .camp-booking-card__title {
     margin: 0 0 .4rem;
-    color: #313041;
+    color: #fff;
     font-size: 1.25rem;
     font-weight: 700;
   }
@@ -1199,7 +1199,7 @@ document.addEventListener('DOMContentLoaded', function () {
   .camp-booking-card__field-group { gap: .35rem; }
   .camp-booking-card__field-label {
     margin: 0;
-    color: #6b7280;
+    color: rgba(255, 255, 255, 0.62);
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: .12em;

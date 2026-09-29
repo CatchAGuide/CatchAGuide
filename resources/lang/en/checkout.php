@@ -219,7 +219,7 @@ return [
         'extra_line' => ':name × :count :unit',
         'add_extras' => 'Add extras',
         'total' => 'Total',
-        'pay_nothing_today' => 'You pay nothing today.',
+        'pay_nothing_today' => 'Pay the guide directly once your booking is confirmed.',
         'contact_title' => 'Your contact details',
         'contact_privacy' => 'Your details only go to your guide.',
         'have_account' => 'Already have an account? Log in',

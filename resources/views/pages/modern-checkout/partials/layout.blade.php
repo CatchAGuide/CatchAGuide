@@ -23,7 +23,7 @@
 
             @include($partials.'.calendar', ['checkout' => $checkout, 'note' => $calendarNote ?? null])
 
-            @include($checkout->isReschedule() ? $partials.'.contact-locked' : $partials.'.contact', ['checkout' => $checkout])
+            @include($partials.'.contact', ['checkout' => $checkout])
 
             @include($partials.'.payment', ['checkout' => $checkout])
 

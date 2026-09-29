@@ -74,6 +74,16 @@ class TourBookingSubmissionService
     }
 
     /**
+     * Guest record for a contact payload, creating or updating the row keyed by email.
+     *
+     * @param  array{first_name: string, last_name: string, email: string, country_code: string, phone: string}  $contact
+     */
+    public function syncGuest(array $contact, string $locale): UserGuest
+    {
+        return $this->resolveGuest($contact, $locale);
+    }
+
+    /**
      * @param  array{first_name: string, last_name: string, email: string, country_code: string, phone: string}  $contact
      */
     private function resolveGuest(array $contact, string $locale): UserGuest

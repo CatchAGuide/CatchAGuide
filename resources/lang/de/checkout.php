@@ -221,7 +221,7 @@ return [
         'extra_line' => ':name × :count :unit',
         'add_extras' => 'Extras dazubuchen',
         'total' => 'Gesamt',
-        'pay_nothing_today' => 'Heute zahlst du nichts.',
+        'pay_nothing_today' => 'Zahlung erst nach Bestätigung, direkt beim Guide.',
         'contact_title' => 'Deine Kontaktdaten',
         'contact_privacy' => 'Deine Daten gehen nur an deinen Guide.',
         'have_account' => 'Schon ein Konto? Einloggen',

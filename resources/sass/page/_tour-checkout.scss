@@ -674,25 +674,6 @@ $tc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     font-size: 12.5px;
   }
 
-  .tc-contact__summary {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 12px;
-    margin: 14px 0 0;
-  }
-
-  .tc-contact__item:first-child {
-    grid-column: 1 / -1;
-  }
-
-  .tc-contact__value {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--tc-ink);
-    overflow-wrap: anywhere;
-  }
-
   // Guide reject form: chosen dates, message, request summary
   .tc-date-picks {
     margin-top: 12px;
@@ -1182,10 +1163,6 @@ $tc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     .tc-notice {
       margin-top: 14px;
       font-size: 13.5px;
-    }
-
-    .tc-contact--locked .tc-contact__summary {
-      order: 4;
     }
 
     &.tc--state {

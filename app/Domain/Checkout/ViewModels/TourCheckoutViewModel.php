@@ -15,7 +15,8 @@ use Carbon\CarbonImmutable;
  * so the checkout renders without follow-up API calls.
  *
  * The reschedule page (declined request → new date) reuses it via forReschedule(): the
- * calendar is limited to the guide's suggested dates and the contact details are locked.
+ * calendar is limited to the guide's suggested dates and the contact fields are prefilled
+ * from the original request so the visitor can edit them.
  */
 final class TourCheckoutViewModel
 {
@@ -36,8 +37,12 @@ final class TourCheckoutViewModel
         private readonly ?string $requestedDate = null,
         /** @var list<string>|null Only these dates are selectable; null = any free date. */
         private readonly ?array $allowedDates = null,
-        /** @var array{name: string, email: string, phone: string}|null Masked, read-only contact. */
-        private readonly ?array $lockedContact = null,
+        /**
+         * Full contact prefill for the reschedule form. Its presence marks this page as a reschedule.
+         *
+         * @var array{firstName: string, lastName: string, email: string, countryCode: string, phone: string}|null
+         */
+        private readonly ?array $prefilledContact = null,
         /** @var list<int> */
         private readonly array $initialExtras = [],
         private readonly ?string $submitUrl = null,
@@ -50,7 +55,7 @@ final class TourCheckoutViewModel
 
     /**
      * @param  list<string>|null  $allowedDates
-     * @param  array{name: string, email: string, phone: string}  $lockedContact
+     * @param  array{firstName: string, lastName: string, email: string, countryCode: string, phone: string}  $contact
      * @param  list<int>  $initialExtras
      */
     public static function forReschedule(
@@ -59,7 +64,7 @@ final class TourCheckoutViewModel
         int $persons,
         ?string $preferredDate,
         ?array $allowedDates,
-        array $lockedContact,
+        array $contact,
         array $initialExtras,
     ): self {
         return new self(
@@ -69,7 +74,7 @@ final class TourCheckoutViewModel
             $persons,
             $preferredDate,
             $allowedDates,
-            $lockedContact,
+            $contact,
             $initialExtras,
             route('booking.reschedule.store'),
         );
@@ -77,15 +82,7 @@ final class TourCheckoutViewModel
 
     public function isReschedule(): bool
     {
-        return $this->lockedContact !== null;
-    }
-
-    /**
-     * @return array{name: string, email: string, phone: string}|null
-     */
-    public function lockedContact(): ?array
-    {
-        return $this->lockedContact;
+        return $this->prefilledContact !== null;
     }
 
     /**
@@ -203,7 +200,7 @@ final class TourCheckoutViewModel
             'minDate' => $this->minDate,
             'blocked' => $this->blockedRanges,
             'allowedDates' => $this->allowedDates,
-            'contactLocked' => $this->isReschedule(),
+            'reschedule' => $this->isReschedule(),
             'initialExtras' => array_values(array_intersect(
                 array_map('intval', $this->initialExtras),
                 array_column($this->pricing->extras(), 'index'),
@@ -214,8 +211,7 @@ final class TourCheckoutViewModel
                 'table' => $this->pricing->priceTable(),
                 'extras' => $this->pricing->extras(),
             ],
-            // A locked (reschedule) contact is never sent to the browser in clear text.
-            'contact' => $this->isReschedule() ? null : [
+            'contact' => $this->prefilledContact ?? [
                 'firstName' => (string) ($this->user?->firstname ?? ''),
                 'lastName' => (string) ($this->user?->lastname ?? ''),
                 'email' => (string) ($this->user?->email ?? ''),

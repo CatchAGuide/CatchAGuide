@@ -23,8 +23,8 @@ function tourCheckout() {
     const i18n = config.i18n || {};
     // Service objects stay outside Alpine's reactive state.
     const calendar = new TourCalendar({ minDate: config.minDate, blocked: config.blocked, allowed: config.allowedDates });
-    // Reschedule: contact details come from the original request and are not editable here.
-    const contactLocked = Boolean(config.contactLocked);
+    // Reschedule sends the edited contact with the new date, and no guiding id or captcha.
+    const reschedule = Boolean(config.reschedule);
     const pricing = new TourPricing(config.pricing || {});
     const money = new MoneyFormatter(config.locale || 'de');
     const validator = new ContactValidator(i18n.errors);
@@ -149,7 +149,7 @@ function tourCheckout() {
         },
 
         validate(captcha) {
-            const errors = contactLocked ? {} : validator.validate(this.contact);
+            const errors = validator.validate(this.contact);
             if (!this.selectedDate) errors.date = i18n.errors?.date;
             // Invisible widgets fetch their token on submit; only a checkbox must be solved first.
             if (captcha && !captcha.isInvisible?.() && !captcha.getResponse()) errors.captcha = i18n.errors?.captcha;
@@ -184,20 +184,20 @@ function tourCheckout() {
                 persons: this.persons,
                 selected_date: this.selectedDate,
                 extras: this.selectedExtras,
+                first_name: this.contact.firstName,
+                last_name: this.contact.lastName,
+                email: this.contact.email,
+                country_code: this.contact.countryCode,
+                phone: this.contact.phone,
             };
 
-            if (contactLocked) {
+            if (reschedule) {
                 return booking;
             }
 
             return {
                 ...booking,
                 guiding_id: config.guidingId,
-                first_name: this.contact.firstName,
-                last_name: this.contact.lastName,
-                email: this.contact.email,
-                country_code: this.contact.countryCode,
-                phone: this.contact.phone,
                 'g-recaptcha-response': captchaToken,
             };
         },

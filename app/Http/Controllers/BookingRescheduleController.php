@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Domain\Checkout\ViewModels\TourCheckoutViewModel;
 use App\Http\Requests\TourRescheduleRequest;
 use App\Models\Booking;
+use App\Models\User;
+use App\Models\UserGuest;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Services\Booking\Reschedule\RescheduleAlreadyUsedException;
 use App\Services\Booking\Reschedule\RescheduleOffer;
@@ -12,7 +14,6 @@ use App\Services\Booking\Reschedule\RescheduleOfferResolver;
 use App\Services\Booking\Reschedule\RescheduleSession;
 use App\Services\Booking\Reschedule\TourRescheduleService;
 use App\Services\Checkout\BookingConfirmationAccess;
-use App\Support\PiiMask;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -65,7 +66,6 @@ class BookingRescheduleController extends Controller
         }
 
         $booking = $offer->booking;
-        $customer = $booking->user;
 
         $checkout = TourCheckoutViewModel::forReschedule(
             $booking->guiding,
@@ -73,11 +73,7 @@ class BookingRescheduleController extends Controller
             (int) $booking->count_of_users,
             $this->session->preferredDate(),
             $offer->dates,
-            [
-                'name' => PiiMask::name($customer?->firstname, $customer?->lastname),
-                'email' => PiiMask::email($booking->email),
-                'phone' => PiiMask::phone($booking->phone),
-            ],
+            $this->contactPrefill($booking),
             $this->originalExtraIndexes($booking),
         );
 
@@ -108,7 +104,7 @@ class BookingRescheduleController extends Controller
         $date = (string) $request->validated('selected_date');
 
         try {
-            $booking = $reschedules->submit($offer->booking, $quote, $date);
+            $booking = $reschedules->submit($offer->booking, $quote, $date, $request->contact());
         } catch (RescheduleAlreadyUsedException) {
             return $this->unavailableResponse(new RescheduleOffer(RescheduleOffer::USED, $offer->booking));
         } catch (InvalidArgumentException) {
@@ -154,6 +150,65 @@ class BookingRescheduleController extends Controller
             'success' => false,
             'message' => __('checkout.reschedule.errors.'.$offer->status),
         ], 409);
+    }
+
+    /**
+     * Full contact from the original request, split into the checkout form fields.
+     *
+     * @return array{firstName: string, lastName: string, email: string, countryCode: string, phone: string}
+     */
+    private function contactPrefill(Booking $booking): array
+    {
+        $customer = $booking->user;
+        $countryCode = $this->countryCode($booking, $customer);
+
+        return [
+            'firstName' => trim((string) ($customer->firstname ?? '')),
+            'lastName' => trim((string) ($customer->lastname ?? '')),
+            'email' => (string) ($booking->customerEmail() ?? ''),
+            'countryCode' => $countryCode,
+            'phone' => $this->nationalPhone($booking, $customer, $countryCode),
+        ];
+    }
+
+    private function countryCode(Booking $booking, User|UserGuest|null $customer): string
+    {
+        $codes = array_keys((array) config('phone_country_codes', []));
+        $stored = (string) ($customer->phone_country_code ?? $booking->phone_country_code ?? '');
+
+        if (in_array($stored, $codes, true)) {
+            return $stored;
+        }
+
+        $compactPhone = preg_replace('/\s+/', '', (string) $booking->phone) ?? '';
+        usort($codes, fn (string $a, string $b) => strlen($b) <=> strlen($a));
+
+        foreach ($codes as $code) {
+            $compactCode = preg_replace('/\s+/', '', $code) ?? '';
+            if ($compactCode !== '' && str_starts_with($compactPhone, $compactCode)) {
+                return $code;
+            }
+        }
+
+        return TourCheckoutViewModel::DEFAULT_COUNTRY_CODE;
+    }
+
+    private function nationalPhone(Booking $booking, User|UserGuest|null $customer, string $countryCode): string
+    {
+        $phone = trim((string) ($customer->phone ?? ''));
+        if ($phone !== '') {
+            return $phone;
+        }
+
+        $full = trim((string) $booking->phone);
+        $compactCode = preg_replace('/\s+/', '', $countryCode) ?? '';
+        $compactFull = preg_replace('/\s+/', '', $full) ?? '';
+
+        if ($compactCode !== '' && str_starts_with($compactFull, $compactCode)) {
+            return trim(substr($compactFull, strlen($compactCode)));
+        }
+
+        return $full;
     }
 
     /**

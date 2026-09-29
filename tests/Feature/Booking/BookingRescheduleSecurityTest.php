@@ -114,7 +114,7 @@ class BookingRescheduleSecurityTest extends TestCase
             ->assertSessionHas(self::SESSION_KEY, ['token' => $booking->token, 'date' => $date]);
     }
 
-    public function test_reschedule_page_preselects_the_emailed_date_and_masks_contact_details(): void
+    public function test_reschedule_page_preselects_the_emailed_date_and_shows_editable_contact_details(): void
     {
         $booking = $this->createRejectedBooking();
         $date = $this->alternative($booking, 1);
@@ -124,11 +124,13 @@ class BookingRescheduleSecurityTest extends TestCase
             ->assertOk()
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertSee('River is flooded that weekend.')
-            ->assertSee('Jonas K.')
-            ->assertSee('j•')
-            ->assertDontSee('Keller')
-            ->assertDontSee('jonas.keller@example.com')
-            ->assertDontSee('15123456789')
+            ->assertSee('name="first_name"', false)
+            ->assertSee('name="last_name"', false)
+            ->assertSee('name="email"', false)
+            ->assertSee('name="phone"', false)
+            ->assertDontSee('Jonas K.')
+            ->assertDontSee('j•')
+            ->assertDontSee(__('checkout.reschedule.contact_note'))
             ->assertDontSee($booking->token);
 
         preg_match('#<script type="application/json" id="tour-checkout-config">(.*?)</script>#s', $response->getContent(), $match);
@@ -136,8 +138,14 @@ class BookingRescheduleSecurityTest extends TestCase
 
         $this->assertSame($date, $config['selectedDate']);
         $this->assertSame([$this->alternative($booking, 0), $date], $config['allowedDates']);
-        $this->assertTrue($config['contactLocked']);
-        $this->assertNull($config['contact']);
+        $this->assertTrue($config['reschedule']);
+        $this->assertSame([
+            'firstName' => 'Jonas',
+            'lastName' => 'Keller',
+            'email' => 'jonas.keller@example.com',
+            'countryCode' => '+49',
+            'phone' => '15123456789',
+        ], $config['contact']);
         $this->assertSame(2, $config['persons']);
         $this->assertSame(route('booking.reschedule.store'), $config['submitUrl']);
     }
@@ -195,10 +203,7 @@ class BookingRescheduleSecurityTest extends TestCase
             ->assertSee(__('checkout.reschedule.states.unavailable.title'))
             ->assertDontSee($booking->guiding->publicShowUrl(), false);
 
-        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
-            'selected_date' => $this->alternative($booking),
-            'persons' => 1,
-        ])->assertStatus(409);
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking))->assertStatus(409);
 
         $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
@@ -210,11 +215,9 @@ class BookingRescheduleSecurityTest extends TestCase
         $booking = $this->createRejectedBooking();
 
         // A token in the body is ignored: only the session from the link counts.
-        $this->postJson(route('booking.reschedule.store'), [
+        $this->postJson(route('booking.reschedule.store'), $this->payload($booking, [
             'token' => $booking->token,
-            'selected_date' => $this->alternative($booking),
-            'persons' => 1,
-        ])->assertStatus(409)->assertJson(['success' => false]);
+        ]))->assertStatus(409)->assertJson(['success' => false]);
 
         $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
@@ -223,20 +226,16 @@ class BookingRescheduleSecurityTest extends TestCase
     {
         $booking = $this->createRejectedBooking(['status' => 'pending']);
 
-        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
-            'selected_date' => $this->alternative($booking),
-            'persons' => 1,
-        ])->assertStatus(409);
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking))->assertStatus(409);
     }
 
     public function test_store_rejects_a_date_outside_the_offered_alternatives(): void
     {
         $booking = $this->createRejectedBooking();
 
-        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
             'selected_date' => now()->addDays(99)->toDateString(),
-            'persons' => 1,
-        ])->assertStatus(422)->assertJsonValidationErrors(['selected_date']);
+        ]))->assertStatus(422)->assertJsonValidationErrors(['selected_date']);
 
         $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
     }
@@ -245,17 +244,15 @@ class BookingRescheduleSecurityTest extends TestCase
     {
         $booking = $this->createRejectedBooking();
 
-        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
-            'selected_date' => $this->alternative($booking),
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
             'persons' => 9,
             'extras' => [4],
-        ])->assertStatus(422)->assertJsonValidationErrors(['persons']);
+        ]))->assertStatus(422)->assertJsonValidationErrors(['persons']);
 
-        $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
-            'selected_date' => $this->alternative($booking),
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
             'persons' => 2,
             'extras' => [4],
-        ])->assertStatus(422)->assertJsonValidationErrors(['extras']);
+        ]))->assertStatus(422)->assertJsonValidationErrors(['extras']);
     }
 
     public function test_store_ignores_client_submitted_price_and_recomputes_it_server_side(): void
@@ -263,12 +260,12 @@ class BookingRescheduleSecurityTest extends TestCase
         $booking = $this->createRejectedBooking();
         $date = $this->alternative($booking);
 
-        $response = $this->inSession($booking)->postJson(route('booking.reschedule.store'), [
+        $response = $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
             'selected_date' => $date,
             'persons' => 2,
             'extras' => [0],
             'total_price' => 0.01, // attacker-supplied — must be ignored
-        ]);
+        ]));
 
         $response->assertOk()->assertJson(['success' => true])->assertSessionMissing(self::SESSION_KEY);
 
@@ -287,7 +284,7 @@ class BookingRescheduleSecurityTest extends TestCase
     public function test_a_link_can_only_be_used_once(): void
     {
         $booking = $this->createRejectedBooking();
-        $payload = ['selected_date' => $this->alternative($booking), 'persons' => 1];
+        $payload = $this->payload($booking);
 
         $this->inSession($booking)->postJson(route('booking.reschedule.store'), $payload)->assertOk();
         $this->inSession($booking)->postJson(route('booking.reschedule.store'), $payload)
@@ -295,5 +292,87 @@ class BookingRescheduleSecurityTest extends TestCase
             ->assertJson(['message' => __('checkout.reschedule.errors.used')]);
 
         $this->assertSame(1, Booking::where('parent_id', $booking->id)->count());
+    }
+
+    public function test_store_saves_an_edited_contact_on_the_new_request(): void
+    {
+        $booking = $this->createRejectedBooking();
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
+            'persons' => 2,
+            'first_name' => 'Mia',
+            'last_name' => 'Berg',
+            'email' => 'mia.berg@example.com',
+            'phone' => '1701234567',
+        ]))->assertOk();
+
+        $newBooking = Booking::where('parent_id', $booking->id)->first();
+        $guest = UserGuest::where('email', 'mia.berg@example.com')->first();
+
+        $this->assertNotNull($newBooking);
+        $this->assertNotNull($guest);
+        $this->assertSame($guest->id, $newBooking->user_id);
+        $this->assertSame('Mia', $guest->firstname);
+        $this->assertSame('Berg', $guest->lastname);
+        $this->assertSame('1701234567', $guest->phone);
+        $this->assertSame('+49', $guest->phone_country_code);
+        $this->assertSame('mia.berg@example.com', $newBooking->email);
+        $this->assertSame('+49 1701234567', $newBooking->phone);
+        $this->assertSame('+49', $newBooking->phone_country_code);
+
+        $originalGuest = UserGuest::where('email', 'jonas.keller@example.com')->first();
+        $this->assertSame('Jonas', $originalGuest->firstname);
+        $this->assertSame('Keller', $originalGuest->lastname);
+        $this->assertSame('jonas.keller@example.com', $booking->fresh()->email);
+    }
+
+    public function test_store_updates_the_same_guest_when_only_the_name_changes(): void
+    {
+        $booking = $this->createRejectedBooking();
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
+            'last_name' => 'Berg',
+            'phone' => '1701234567',
+        ]))->assertOk();
+
+        $guest = UserGuest::find($booking->user_id);
+        $newBooking = Booking::where('parent_id', $booking->id)->first();
+
+        $this->assertSame('Jonas', $guest->firstname);
+        $this->assertSame('Berg', $guest->lastname);
+        $this->assertSame('1701234567', $guest->phone);
+        $this->assertSame($booking->user_id, $newBooking->user_id);
+        $this->assertSame('+49 1701234567', $newBooking->phone);
+    }
+
+    public function test_store_rejects_an_incomplete_contact_and_keeps_the_link(): void
+    {
+        $booking = $this->createRejectedBooking();
+
+        $this->inSession($booking)->postJson(route('booking.reschedule.store'), $this->payload($booking, [
+            'first_name' => '',
+            'email' => 'not-an-email',
+            'phone' => '12',
+        ]))->assertStatus(422)->assertJsonValidationErrors(['first_name', 'email', 'phone']);
+
+        $this->assertFalse((bool) $booking->fresh()->is_rescheduled);
+        $this->assertSame(0, Booking::where('parent_id', $booking->id)->count());
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    private function payload(Booking $booking, array $overrides = []): array
+    {
+        return array_merge([
+            'selected_date' => $this->alternative($booking),
+            'persons' => 1,
+            'first_name' => 'Jonas',
+            'last_name' => 'Keller',
+            'email' => 'jonas.keller@example.com',
+            'country_code' => '+49',
+            'phone' => '15123456789',
+        ], $overrides);
     }
 }

@@ -1,7 +1,7 @@
-<section class="tc-card tc-contact" aria-labelledby="tc-contact-title">
+<section class="tc-card tc-contact" @if ($checkout->isReschedule()) data-clarity-mask="True" @endif aria-labelledby="tc-contact-title">
     <div class="tc-contact__head">
         <h2 class="tc-card__title" id="tc-contact-title">{{ __('checkout.tour.contact_title') }}</h2>
-        @unless ($checkout->isLoggedIn())
+        @unless ($checkout->isLoggedIn() || $checkout->isReschedule())
             <a href="#" class="tc-link tc-contact__login" @click.prevent="window.openLoginModal && window.openLoginModal()">{{ __('checkout.tour.have_account') }}</a>
         @endunless
     </div>

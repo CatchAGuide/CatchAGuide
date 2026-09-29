@@ -156,7 +156,7 @@ class BookingService
         ]);
 
         $guiding = $original->guiding;
-        $user = $original->user;
+        $user = $this->rescheduleCustomer($original, $data);
 
         $selectedDate = $data['selected_date'];
         $persons = (int) $data['count_of_users'];
@@ -184,8 +184,8 @@ class BookingService
         $totalExtraPrice = $data['total_extra_price'] ?? $this->calculateTotalExtraPrice($extrasSerialized);
 
         $bookingAttributes = [
-            'user_id' => $original->user_id,
-            'is_guest' => $original->is_guest,
+            'user_id' => $data['user_id'] ?? $original->user_id,
+            'is_guest' => array_key_exists('is_guest', $data) ? (bool) $data['is_guest'] : $original->is_guest,
             'guiding_id' => $guiding->id,
             'blocked_event_id' => $blockedEvent->id,
             'is_paid' => false,
@@ -197,8 +197,9 @@ class BookingService
             'status' => 'pending',
             'book_date' => $selectedDate,
             'expires_at' => $expiresAt,
-            'phone' => $original->phone,
-            'email' => $original->email,
+            'phone' => $data['phone'] ?? $original->phone,
+            'phone_country_code' => $data['phone_country_code'] ?? $original->phone_country_code,
+            'email' => $data['email'] ?? $original->email,
             'token' => $this->generateBookingToken($blockedEvent->id),
             'parent_id' => $original->id,
         ];
@@ -212,7 +213,7 @@ class BookingService
         }
 
         if ($sendEmails && !app()->environment('local')) {
-            SendCheckoutEmail::dispatch($newBooking, $user, $guiding, $guiding->user);
+            SendCheckoutEmail::dispatch($newBooking, $newBooking->user ?? $user, $guiding, $guiding->user);
         }
 
         event(new BookingCreated($newBooking, $sendEmails, $createdSource));
@@ -316,6 +317,26 @@ class BookingService
         }
 
         $schedule->delete();
+    }
+
+    /**
+     * Customer attached to the new request. A changed user id (edited email on a guest
+     * reschedule) is loaded from the matching table; otherwise the original customer is used.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function rescheduleCustomer(Booking $original, array $data): User|UserGuest|null
+    {
+        $userId = $data['user_id'] ?? $original->user_id;
+        $isGuest = array_key_exists('is_guest', $data) ? (bool) $data['is_guest'] : (bool) $original->is_guest;
+
+        if ((int) $userId === (int) $original->user_id && $isGuest === (bool) $original->is_guest) {
+            return $original->user;
+        }
+
+        $customer = $isGuest ? UserGuest::find($userId) : User::find($userId);
+
+        return $customer ?? $original->user;
     }
 
     private function assertRequiredKeys(array $data, array $keys): void

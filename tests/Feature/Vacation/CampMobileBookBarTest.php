@@ -177,10 +177,24 @@ class CampMobileBookBarTest extends TestCase
 
         $galleryPos = strpos($html, 'class="camp-gallery"');
         $navPos = strpos($html, 'class="camp-nav-enhanced"');
+        $descriptionPos = strpos($html, 'id="description"');
+        $mobileContactPos = strpos($html, 'class="camp-cta-stack camp-cta-stack--mobile-top"');
+        $distancesPos = strpos($html, 'id="distances"');
 
         $this->assertNotFalse($galleryPos);
         $this->assertNotFalse($navPos);
         $this->assertGreaterThan($galleryPos, $navPos);
+        $this->assertNotFalse($descriptionPos);
+        $this->assertNotFalse($mobileContactPos);
+        $this->assertNotFalse($distancesPos);
+        $this->assertGreaterThan($descriptionPos, $mobileContactPos);
+        $this->assertGreaterThan($mobileContactPos, $distancesPos);
+
+        $styles = (string) file_get_contents(base_path('resources/sass/page/_vacations-v2.scss'));
+        $this->assertDoesNotMatchRegularExpression(
+            '/&#description[\s\S]*?camp-desc-wrap > h3/',
+            $styles
+        );
     }
 
     private function makeCamp(array $overrides = []): Camp

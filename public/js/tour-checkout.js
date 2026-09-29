@@ -842,8 +842,8 @@ function tourCheckout() {
     blocked: config.blocked,
     allowed: config.allowedDates
   });
-  // Reschedule: contact details come from the original request and are not editable here.
-  var contactLocked = Boolean(config.contactLocked);
+  // Reschedule sends the edited contact with the new date, and no guiding id or captcha.
+  var reschedule = Boolean(config.reschedule);
   var pricing = new _pricing__WEBPACK_IMPORTED_MODULE_2__.TourPricing(config.pricing || {});
   var _money = new _pricing__WEBPACK_IMPORTED_MODULE_2__.MoneyFormatter(config.locale || 'de');
   var validator = new _contact_validator__WEBPACK_IMPORTED_MODULE_3__.ContactValidator(i18n.errors);
@@ -964,7 +964,7 @@ function tourCheckout() {
     },
     validate: function validate(captcha) {
       var _i18n$errors, _captcha$isInvisible, _i18n$errors2;
-      var errors = contactLocked ? {} : validator.validate(this.contact);
+      var errors = validator.validate(this.contact);
       if (!this.selectedDate) errors.date = (_i18n$errors = i18n.errors) === null || _i18n$errors === void 0 ? void 0 : _i18n$errors.date;
       // Invisible widgets fetch their token on submit; only a checkbox must be solved first.
       if (captcha && !((_captcha$isInvisible = captcha.isInvisible) !== null && _captcha$isInvisible !== void 0 && _captcha$isInvisible.call(captcha)) && !captcha.getResponse()) errors.captcha = (_i18n$errors2 = i18n.errors) === null || _i18n$errors2 === void 0 ? void 0 : _i18n$errors2.captcha;
@@ -1016,18 +1016,18 @@ function tourCheckout() {
       var booking = {
         persons: this.persons,
         selected_date: this.selectedDate,
-        extras: this.selectedExtras
-      };
-      if (contactLocked) {
-        return booking;
-      }
-      return _objectSpread(_objectSpread({}, booking), {}, {
-        guiding_id: config.guidingId,
+        extras: this.selectedExtras,
         first_name: this.contact.firstName,
         last_name: this.contact.lastName,
         email: this.contact.email,
         country_code: this.contact.countryCode,
-        phone: this.contact.phone,
+        phone: this.contact.phone
+      };
+      if (reschedule) {
+        return booking;
+      }
+      return _objectSpread(_objectSpread({}, booking), {}, {
+        guiding_id: config.guidingId,
         'g-recaptcha-response': captchaToken
       });
     },
