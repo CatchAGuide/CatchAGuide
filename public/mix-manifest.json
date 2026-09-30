@@ -7,6 +7,7 @@
     "/js/places.js": "/js/places.js?id=5c682dd459ff59ad7cdf93c7aded5c6a",
     "/js/tour-checkout.js": "/js/tour-checkout.js?id=a3bed8c28cc7820d118d3907cbd48a31",
     "/js/booking-reject.js": "/js/booking-reject.js?id=d16fea3dd8aa9b6d5b8dfb26a302234f",
+    "/js/camp-checkout.js": "/js/camp-checkout.js?id=e4150c1fe197d95d0bb7b9fb685e6ed7",
     "/css/maps.css": "/css/maps.css?id=60a1234fb116ae7cd45ce2b3173215a0",
     "/images/vendor/leaflet/dist/layers.png?1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6": "/images/vendor/leaflet/dist/layers.png?1dbbe9d028e292f36fcba8f8b3a28d5e8932754fc2215b9ac69e4cdecf5107c6?id=3d61d49c98ea3572cae4482e97b666d0",
     "/images/vendor/leaflet/dist/layers-2x.png?066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf": "/images/vendor/leaflet/dist/layers-2x.png?066daca850d8ffbef007af00b06eac0015728dee279c51f3cb6c716df7c42edf?id=f905cd0e87fcdde8969be92b8a9a3fa9",
@@ -14,5 +15,5 @@
     "/css/admin-layout.css": "/css/admin-layout.css?id=74ad84140ff17f522555ef8742024752",
     "/css/admin-auth.css": "/css/admin-auth.css?id=da5cc796b8f33df7139a649977d7cddf",
     "/css/admin-offer-sendout.css": "/css/admin-offer-sendout.css?id=13e9edb8aa692fdd6e14d3fcf594330d",
-    "/css/app.css": "/css/app.css?id=9d9bcaf3b17de06da839ce68a48af0e8"
+    "/css/app.css": "/css/app.css?id=1a103a494203cf389607ab537bb5475a"
 }

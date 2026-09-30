@@ -97,8 +97,7 @@ class VacationCountryCategorySourceTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSeeText('the best tours, waters & seasons');
-        $response->assertSeeText('Fishing vacation in');
-        $response->assertSeeText('Toursonlyland');
+        $response->assertSeeText(__('vacations.country_listing_title', ['country' => 'Toursonlyland']));
     }
 
     public function test_country_page_without_vacations_cms_still_has_a_meta_description(): void

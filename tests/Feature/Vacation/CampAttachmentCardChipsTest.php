@@ -12,21 +12,19 @@ class CampAttachmentCardChipsTest extends TestCase
         app()->setLocale('de');
         $html = $this->renderAccommodationCard();
 
+        // Hard facts are two flat chips: guests + bedrooms. Beds are one summary line.
         $this->assertStringContainsString('user-new.svg', $html);
-        $this->assertStringContainsString('4 '.__('vacations.pers_short'), $html);
+        $this->assertStringContainsString('4 '.__('vacations.chip_guests'), $html);
         $this->assertStringNotContainsString('👥', $html);
         $this->assertStringContainsString('attachment-chip--persons', $html);
-        $this->assertStringContainsString('attachment-chip--bath', $html);
-        $this->assertStringContainsString('attachment-chip--area', $html);
         $this->assertStringContainsString('attachment-chip--bedrooms', $html);
-        $this->assertStringContainsString('attachment-chip--bed"', $html);
-        $this->assertGreaterThanOrEqual(4, substr_count($html, 'attachment-chip--bed"'));
-        $this->assertStringContainsString('(5) Einzelbett', $html);
-        $this->assertStringContainsString('(1) Sofabett', $html);
-        $this->assertStringContainsString('(1) Kinderbett', $html);
-        $this->assertStringContainsString('(1) Klappbett', $html);
-        $this->assertStringNotContainsString(__('accommodations.bedrooms').':', $html);
-        $this->assertStringNotContainsString('Schlafzimmer:', $html);
+        $this->assertStringContainsString('3 '.__('vacations.chip_bedrooms'), $html);
+        $this->assertStringNotContainsString('attachment-chip--bath', $html);
+        $this->assertStringNotContainsString('attachment-chip--area', $html);
+        $this->assertStringNotContainsString('attachment-chip--bed"', $html);
+        $this->assertStringContainsString('accommodation-card__bed-summary', $html);
+        $this->assertStringContainsString('accommodation-card__bed-summary-label">'.__('vacations.chip_bedrooms').':', $html);
+        $this->assertStringContainsString('5 Einzelbett, 1 Sofabett, 1 Kinderbett, 1 Klappbett', $html);
         $this->assertStringContainsString('attachment-chip--water', $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
@@ -35,6 +33,7 @@ class CampAttachmentCardChipsTest extends TestCase
 
     public function test_guiding_card_uses_the_same_persons_icon_as_other_attachments(): void
     {
+        app()->setLocale('en');
         $html = $this->renderGuidingCard();
 
         $this->assertStringContainsString('user-new.svg', $html);
@@ -42,9 +41,11 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('attachment-chip--persons', $html);
         $this->assertStringContainsString('attachment-chip--duration', $html);
         $this->assertStringContainsString('clock-new.svg', $html);
-        $this->assertStringContainsString('attachment-chip--water-type', $html);
-        $this->assertStringContainsString('See', $html);
-        $this->assertStringContainsString(__('vacations.chip_water_type'), $html);
+        // Water types are a fact row (icon + "Water" + localized name), not a chip.
+        $this->assertStringNotContainsString('attachment-chip--water-type', $html);
+        $this->assertStringContainsString('water-waves.png', $html);
+        $this->assertStringContainsString(__('guidings.Water'), $html);
+        $this->assertStringContainsString('Lake', $html);
         $this->assertStringContainsString('attachment-chip__tooltip', $html);
         $this->assertStringContainsString(__('vacations.max_persons'), $html);
         $this->assertStringContainsString('attachment-expand-btn', $html);
@@ -142,21 +143,22 @@ class CampAttachmentCardChipsTest extends TestCase
             ],
         ])->render();
 
-        $this->assertSame(3, substr_count($html, 'user-new.svg'));
-        $this->assertStringContainsString('6 '.__('vacations.pers_short'), $html);
-        $this->assertStringContainsString('2 '.__('vacations.pers_short'), $html);
+        // Nested components are compact title/type blocks; only the guiding keeps a fact list,
+        // where the party size uses the same "N Pers." value as the persons chip elsewhere.
+        $this->assertStringContainsString('id="accommodation-1"', $html);
+        $this->assertStringContainsString('id="rental-boat-2"', $html);
+        $this->assertStringContainsString('id="guiding-3"', $html);
+        $this->assertStringContainsString('Lakeside cabin', $html);
+        $this->assertStringContainsString('Bass boat', $html);
+        $this->assertStringContainsString('Dawn tour', $html);
+        $this->assertStringContainsString('special-offer-card__fact-label">'.__('guidings.persons'), $html);
         $this->assertStringContainsString('4 '.__('vacations.pers_short'), $html);
+        $this->assertStringContainsString('See', $html);
+        $this->assertStringNotContainsString('attachment-chip', $html);
+        $this->assertStringNotContainsString('👥', $html);
         $this->assertStringNotContainsString(__('rental_boats.capacity').':', $html);
         $this->assertStringNotContainsString(__('vacations.max_persons').':', $html);
         $this->assertStringNotContainsString(__('accommodations.bedrooms').':', $html);
-        $this->assertStringContainsString('attachment-chip--bath', $html);
-        $this->assertStringContainsString('attachment-chip--bed"', $html);
-        $this->assertStringContainsString('(1) Doppelbett', $html);
-        $this->assertStringContainsString('attachment-chip--water-type', $html);
-        $this->assertStringContainsString('See', $html);
-        $this->assertStringNotContainsString('Schlafzimmer:', $html);
-        $this->assertStringContainsString('attachment-chip__tooltip', $html);
-        $this->assertStringContainsString(__('vacations.max_persons'), $html);
         $this->assertStringContainsString('attachment-expand-btn', $html);
     }
 

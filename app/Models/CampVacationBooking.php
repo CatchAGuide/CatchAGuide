@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class CampVacationBooking extends Model
@@ -23,9 +24,21 @@ class CampVacationBooking extends Model
         'source_type',
         'source_id',
         'preferred_date',
+        'nights',
+        'accommodation_id',
+        'rental_boat_id',
+        'guiding_id',
+        'special_offer_id',
+        'estimated_total',
+        'currency',
+        'price_breakdown',
         'number_of_persons',
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'user_id',
+        'language',
         'phone_country_code',
         'phone',
         'message',
@@ -35,7 +48,35 @@ class CampVacationBooking extends Model
     protected $casts = [
         'preferred_date' => 'date',
         'number_of_persons' => 'integer',
+        'nights' => 'integer',
+        'estimated_total' => 'decimal:2',
+        'price_breakdown' => 'array',
     ];
+
+    public function camp(): BelongsTo
+    {
+        return $this->belongsTo(Camp::class, 'source_id');
+    }
+
+    public function accommodation(): BelongsTo
+    {
+        return $this->belongsTo(Accommodation::class);
+    }
+
+    public function rentalBoat(): BelongsTo
+    {
+        return $this->belongsTo(RentalBoat::class);
+    }
+
+    public function guiding(): BelongsTo
+    {
+        return $this->belongsTo(Guiding::class);
+    }
+
+    public function specialOffer(): BelongsTo
+    {
+        return $this->belongsTo(SpecialOffer::class);
+    }
 
     public static function statusOptions(): array
     {

@@ -237,7 +237,6 @@ class CampOfferController extends Controller
             })->toArray();
         
         $showCategories = true;
-        $contactModalTitle = !empty($campData['title']) ? '' . $campData['title'] : '';
         // num_guests is intentionally not carried on crawlable links to this page (see CLAUDE.md's
         // "SEO / catalog page conventions") — fall back to the session-remembered search from the
         // catalog page the visitor came from, same as the header's location prefill does.
@@ -262,7 +261,6 @@ class CampOfferController extends Controller
             'bottomStripImages',
             'remainingGalleryCount',
             'galleryImages',
-            'contactModalTitle',
             'isDraft',
             'preselectedGuests'
         ))->with('camp', $campData)
