@@ -740,6 +740,9 @@ function bookingReject() {
                 _context.n = 4;
                 break;
               }
+              // Replace the form entry so Back returns to the bookings list.
+              // The form URL is no-store, so a history entry would be refetched
+              // and show a second confirmation after the request is no longer pending.
               window.location.replace(result.redirectUrl);
               return _context.a(2);
             case 4:

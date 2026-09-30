@@ -637,27 +637,27 @@
                         @endif
                     </div>
 
-                    <div class="trip-offer-page__pricing-grid">
-                        <div class="trip-offer-page__pricing-grid-card">
-                            <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.single_supplement')) }}</p>
-                            <p class="trip-offer-page__pricing-grid-value">
-                                @if(!empty($tripView['price']['single_room_addition']))
-                                    @php $sym = ($tripView['price']['currency'] ?? 'EUR') === 'EUR' ? '€' : ''; @endphp
-                                    +{{ $sym }}{{ number_format($tripView['price']['single_room_addition'], 0) }}
-                                @else
-                                    —
-                                @endif
-                            </p>
+                    @if(!empty($tripView['price']['single_room_addition']) || !empty($tripView['downpayment_policy']))
+                        <div class="trip-offer-page__pricing-grid">
+                            @if(!empty($tripView['price']['single_room_addition']))
+                                <div class="trip-offer-page__pricing-grid-card">
+                                    <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.single_supplement')) }}</p>
+                                    <p class="trip-offer-page__pricing-grid-value">
+                                        @php $sym = ($tripView['price']['currency'] ?? 'EUR') === 'EUR' ? '€' : ''; @endphp
+                                        +{{ $sym }}{{ number_format($tripView['price']['single_room_addition'], 0) }}
+                                    </p>
+                                </div>
+                            @endif
+                            @if(!empty($tripView['downpayment_policy']))
+                                <div class="trip-offer-page__pricing-grid-card">
+                                    <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.deposit_at_booking')) }}</p>
+                                    <p class="trip-offer-page__pricing-grid-value">
+                                        {{ $tripView['downpayment_policy'] }}
+                                    </p>
+                                </div>
+                            @endif
                         </div>
-                        @if(!empty($tripView['downpayment_policy']))
-                            <div class="trip-offer-page__pricing-grid-card">
-                                <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.deposit_at_booking')) }}</p>
-                                <p class="trip-offer-page__pricing-grid-value">
-                                    {{ $tripView['downpayment_policy'] }}
-                                </p>
-                            </div>
-                        @endif
-                    </div>
+                    @endif
 
                     @if(!empty($tripView['cancellation_policy']))
                     <div class="trip-offer-page__pricing-cancellation-card">
@@ -843,43 +843,43 @@
                 @unless($isDraft)
                     <div class="trip-offer-page__booking-card">
                         <div class="trip-offer-page__booking-header">
-                            <div class="trip-offer-page__booking-header-grid">
-                                <div class="trip-offer-page__booking-price-block">
-                                    <div class="trip-offer-page__booking-title-row">
-                                        <span class="trip-offer-page__booking-label">
-                                            {{ __('trips.price_per_person_short') }}
+                            <div class="trip-offer-page__booking-price-block">
+                                <span class="trip-offer-page__booking-label">
+                                    {{ __('trips.price_per_person_short') }}
+                                </span>
+                                <div class="trip-offer-page__booking-price">
+                                    @if($tripView['price']['per_person'])
+                                        <span class="trip-offer-page__booking-amount">
+                                            € {{ number_format($tripView['price']['per_person'], 0) }}
                                         </span>
-                                    </div>
-                                    <div class="trip-offer-page__booking-price">
-                                        @if($tripView['price']['per_person'])
-                                            <span class="trip-offer-page__booking-amount">
-                                                € {{ number_format($tripView['price']['per_person'], 0) }}
-                                            </span>
-                                        @else
-                                            <span class="trip-offer-page__booking-amount">
-                                                {{ __('trips.pricing_title') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="trip-offer-page__booking-qty-block">
-                                    <p class="trip-offer-page__booking-field-label">
-                                        {{ __('trips.guests_label') }}
-                                    </p>
-                                    <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
-                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
-                                            –
-                                        </button>
-                                        <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>1</span>
-                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
-                                            +
-                                        </button>
-                                    </div>
+                                    @else
+                                        <span class="trip-offer-page__booking-amount">
+                                            {{ __('trips.pricing_title') }}
+                                        </span>
+                                    @endif
+                                    @if($tripPriceNote)
+                                        <span class="trip-offer-page__booking-note">{{ $tripPriceNote }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <div class="trip-offer-page__booking-body">
+                            <div class="trip-offer-page__booking-field-group">
+                                <p class="trip-offer-page__booking-field-label">
+                                    {{ __('trips.guests_label') }}
+                                </p>
+                                <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
+                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
+                                        –
+                                    </button>
+                                    <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>1</span>
+                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
                             {{-- Dated trips: schedule dropdown. Year-round: date only in the request modal. --}}
                             @unless($isYearRoundTrip)
                             <div class="trip-offer-page__booking-field-group">

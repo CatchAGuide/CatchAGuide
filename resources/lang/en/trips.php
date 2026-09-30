@@ -149,7 +149,7 @@ return [
     'contact'                      => 'Contact',
     'contact_us_title'             => 'Contact us',
     'contact_us_message'           => 'Do you have questions about this trip? Our team is here to help!',
-    'contact_form'                 => 'Contact Form',
+    'contact_form'                 => 'Contact us',
     'angler'                       => 'Angler',
     'decrease_guests'              => 'Decrease guests',
     'increase_guests'              => 'Increase guests',
