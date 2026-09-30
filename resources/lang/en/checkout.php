@@ -404,6 +404,7 @@ return [
         ],
         'success_title' => 'Your request is with the camp',
         'success_text' => 'The camp checks availability for :date and sends you a binding offer. A copy of your request goes to :email.',
+        'success_text_no_date' => 'The camp checks availability and sends you a binding offer. A copy of your request goes to :email.',
         'success_price' => 'Estimated price',
         'success_back' => 'Back to the camp',
         'summary' => [

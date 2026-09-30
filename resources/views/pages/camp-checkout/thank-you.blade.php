@@ -29,10 +29,16 @@
             </div>
             <h1 class="cc-done__title">{{ __('checkout.camp.success_title') }}</h1>
             <p class="cc-done__text">
-                {!! __('checkout.camp.success_text', [
-                    'date' => e($arrival),
-                    'email' => '<strong>'.e($booking->email).'</strong>',
-                ]) !!}
+                @if ($arrival !== '')
+                    {!! __('checkout.camp.success_text', [
+                        'date' => e($arrival),
+                        'email' => '<strong>'.e($booking->email).'</strong>',
+                    ]) !!}
+                @else
+                    {!! __('checkout.camp.success_text_no_date', [
+                        'email' => '<strong>'.e($booking->email).'</strong>',
+                    ]) !!}
+                @endif
             </p>
             <div class="cc-done__price">
                 <span class="cc-done__price-label">{{ __('checkout.camp.success_price') }}</span>

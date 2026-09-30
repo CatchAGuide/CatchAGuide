@@ -47,10 +47,12 @@ class CampCheckoutController extends Controller
         $quote = $request->pricing()->quote($request->selection());
 
         try {
+            $arrivalDate = $request->validated('arrival_date');
+
             $booking = $submissions->submit(
                 $camp,
                 $quote,
-                (string) $request->validated('arrival_date'),
+                is_string($arrivalDate) && $arrivalDate !== '' ? $arrivalDate : null,
                 $request->contact(),
                 $request->guestMessage(),
                 $request->user(),

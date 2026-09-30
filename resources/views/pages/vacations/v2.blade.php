@@ -218,7 +218,7 @@
                             <!-- Booking + Contact Us - Desktop only, floats inside description -->
                             @unless($isDraft)
                             <div class="camp-cta-stack camp-cta-stack--desktop-float">
-                                @include('pages.vacations.partials.camp-booking-card', ['instance' => 'desktop'])
+                                @include('pages.vacations.partials.camp-booking-card')
                                 @include('pages.trips.partials.contact-card', [
                                     'wrapperClass' => 'mb-0 mt-3',
                                     'modalTarget' => '#campGeneralContactModal',
@@ -775,10 +775,9 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Booking card + mobile bar lead to the camp checkout, carrying the chosen date and guests.
+    // Booking card + mobile bar lead to the camp checkout, carrying the chosen guest count.
     const checkoutUrl = @json(route('checkout.camp.show', $camp['slug']));
     const bookingCards = document.querySelectorAll('.camp-booking-card');
-    const bookingDateInputs = document.querySelectorAll('[data-camp-booking-date]');
     const bookingGuestLabels = document.querySelectorAll('[data-camp-booking-guests-label]');
     const mobileBookButtons = document.querySelectorAll('[data-camp-mobile-book]');
     let bookingGuests = {{ (int) ($preselectedGuests ?? 1) }} || 1;
@@ -792,8 +791,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function goToCheckout() {
         const url = new URL(checkoutUrl, window.location.origin);
-        const selectedDate = Array.from(bookingDateInputs).map(input => input.value).find(Boolean) || '';
-        if (selectedDate) url.searchParams.set('date', selectedDate);
         url.searchParams.set('persons', String(bookingGuests));
         window.location.assign(url.toString());
     }
@@ -938,12 +935,36 @@ document.addEventListener('DOMContentLoaded', function () {
     background: #313041;
     box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
   }
-  .camp-booking-card__header { margin-bottom: 1.25rem; }
+  .camp-booking-card__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.85rem;
+    row-gap: 0.35rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+  }
   .camp-booking-card__title {
-    margin: 0 0 .4rem;
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
     color: #fff;
     font-size: 1.25rem;
     font-weight: 700;
+    line-height: 1.25;
+  }
+  .camp-booking-card__price {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    white-space: normal;
+  }
+  .camp-booking-card__note {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
   .camp-booking-card__message {
     margin: 0;
@@ -965,15 +986,6 @@ document.addEventListener('DOMContentLoaded', function () {
     font-weight: 600;
     letter-spacing: .12em;
     text-transform: uppercase;
-  }
-  .camp-booking-card__date-input {
-    width: 100%;
-    padding: .65rem .9rem;
-    border: 1px solid #e5e7eb;
-    border-radius: .9rem;
-    background: #f9fafb;
-    color: #313041;
-    font: inherit;
   }
   .camp-booking-card__guest-stepper {
     display: flex;

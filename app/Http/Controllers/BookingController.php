@@ -62,14 +62,21 @@ class BookingController extends Controller
             abort(404);
         }
 
-        if($booking && $booking->status != 'pending'){
-            if($booking->guiding->user->language == 'en'){
-                \App::setLocale('en');
-            }    
+        if ($booking->status !== 'pending') {
+            // The form URL stays in history until the success navigation replaces it.
+            // A back click (or a second open of the emailed link) must land on the
+            // same confirmation as a fresh rejection, not the legacy status notice.
+            if ($booking->status === 'rejected') {
+                return redirect()->route('booking.rejectsuccess');
+            }
 
-            return view('pages.additional.mail_redirection.status',[
-             'booking' => $booking,
-             'action' => 'reject',
+            if ($booking->guiding->user->language == 'en') {
+                \App::setLocale('en');
+            }
+
+            return view('pages.additional.mail_redirection.status', [
+                'booking' => $booking,
+                'action' => 'reject',
             ]);
         }
 

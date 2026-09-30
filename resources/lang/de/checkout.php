@@ -406,6 +406,7 @@ return [
         ],
         'success_title' => 'Deine Anfrage ist beim Camp',
         'success_text' => 'Das Camp prüft die Verfügbarkeit für den :date und schickt dir ein verbindliches Angebot. Eine Kopie deiner Anfrage geht an :email.',
+        'success_text_no_date' => 'Das Camp prüft die Verfügbarkeit und schickt dir ein verbindliches Angebot. Eine Kopie deiner Anfrage geht an :email.',
         'success_price' => 'Geschätzter Preis',
         'success_back' => 'Zurück zum Camp',
         'summary' => [

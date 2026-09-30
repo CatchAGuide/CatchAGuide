@@ -29,7 +29,7 @@ class CampBookingSubmissionService
     public function submit(
         Camp $camp,
         CampCheckoutQuote $quote,
-        string $arrivalDate,
+        ?string $arrivalDate,
         array $contact,
         string $guestMessage,
         ?User $currentUser,
@@ -41,7 +41,7 @@ class CampBookingSubmissionService
         $booking = CampVacationBooking::create([
             'source_type' => CampVacationBooking::SOURCE_CAMP,
             'source_id' => $camp->id,
-            'preferred_date' => $arrivalDate,
+            'preferred_date' => $arrivalDate !== null && $arrivalDate !== '' ? $arrivalDate : null,
             'nights' => $quote->nights,
             'number_of_persons' => $quote->persons,
             'accommodation_id' => $quote->lineId('accommodation'),

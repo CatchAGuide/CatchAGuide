@@ -902,26 +902,49 @@ function campCheckout() {
       return typeof window.RecaptchaWidget === 'function' && document.querySelector(RECAPTCHA_SELECTOR) ? new window.RecaptchaWidget(RECAPTCHA_SELECTOR) : null;
     },
     validate: function validate(captcha) {
-      var _i18n$errors, _i18n$errors2, _captcha$isInvisible, _i18n$errors3;
+      var _i18n$errors, _captcha$isInvisible, _i18n$errors2;
       var errors = validator.validate(this.contact);
-      if (!this.arrivalDate) errors.date = (_i18n$errors = i18n.errors) === null || _i18n$errors === void 0 ? void 0 : _i18n$errors.date;
-      if (pricing.accommodations.length && !this.selectedUnit) errors.accommodation = (_i18n$errors2 = i18n.errors) === null || _i18n$errors2 === void 0 ? void 0 : _i18n$errors2.accommodation;
+      if (pricing.accommodations.length && !this.selectedUnit) errors.accommodation = (_i18n$errors = i18n.errors) === null || _i18n$errors === void 0 ? void 0 : _i18n$errors.accommodation;
       // Invisible widgets fetch their token on submit; only a checkbox must be solved first.
-      if (captcha && !((_captcha$isInvisible = captcha.isInvisible) !== null && _captcha$isInvisible !== void 0 && _captcha$isInvisible.call(captcha)) && !captcha.getResponse()) errors.captcha = (_i18n$errors3 = i18n.errors) === null || _i18n$errors3 === void 0 ? void 0 : _i18n$errors3.captcha;
+      if (captcha && !((_captcha$isInvisible = captcha.isInvisible) !== null && _captcha$isInvisible !== void 0 && _captcha$isInvisible.call(captcha)) && !captcha.getResponse()) errors.captcha = (_i18n$errors2 = i18n.errors) === null || _i18n$errors2 === void 0 ? void 0 : _i18n$errors2.captcha;
       this.errors = errors;
       return ERROR_ORDER.find(function (field) {
         return errors[field];
       }) || null;
     },
+    // Mobile book bar covers the bottom of the viewport. A checkbox that still
+    // sits under that bar (or further down the page) has to be scrolled up.
+    captchaSitsBelow: function captchaSitsBelow(target) {
+      if (!window.matchMedia('(max-width: 1023px)').matches) {
+        return false;
+      }
+      var dock = document.querySelector('.cc-dock');
+      var limit = dock ? dock.getBoundingClientRect().top : window.innerHeight;
+      return target.getBoundingClientRect().bottom > limit - 8;
+    },
+    scrollCaptchaIntoView: function scrollCaptchaIntoView(target) {
+      var dock = document.querySelector('.cc-dock');
+      var dockHeight = dock ? dock.getBoundingClientRect().height : 0;
+      var rect = target.getBoundingClientRect();
+      var room = window.innerHeight - dockHeight - 24;
+      var top = rect.height > room ? window.scrollY + rect.top - 16 : window.scrollY + rect.bottom - (window.innerHeight - dockHeight - 24);
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: 'smooth'
+      });
+    },
     revealError: function revealError(field) {
       var target = this.$refs["field_".concat(field)];
       if (!target) return;
-
-      // Keep the field clear of the sticky site nav and the mobile total bar.
-      target.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
+      if (field === 'captcha' && this.captchaSitsBelow(target)) {
+        this.scrollCaptchaIntoView(target);
+      } else {
+        // Keep the field clear of the sticky site nav and the mobile total bar.
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
       var focusable = target.matches('input, select, textarea, button') ? target : target.querySelector('input, select, textarea, button');
       focusable === null || focusable === void 0 || focusable.focus({
         preventScroll: true
@@ -952,7 +975,7 @@ function campCheckout() {
     },
     payload: function payload(captchaToken) {
       return {
-        arrival_date: this.arrivalDate,
+        arrival_date: this.arrivalDate || null,
         nights: this.nights,
         persons: this.persons,
         accommodation_id: idOrNull(this.accommodationId),
@@ -971,7 +994,7 @@ function campCheckout() {
     submit: function submit() {
       var _this3 = this;
       return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-        var captcha, firstInvalid, attempt, captchaToken, _i18n$errors4, result, _i18n$errors5, _i18n$errors6, _i18n$errors7, firstServerError;
+        var captcha, firstInvalid, attempt, captchaToken, _i18n$errors3, result, _i18n$errors4, _i18n$errors5, _i18n$errors6, firstServerError;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
@@ -1009,7 +1032,7 @@ function campCheckout() {
                 break;
               }
               _this3.errors = {
-                captcha: (_i18n$errors4 = i18n.errors) === null || _i18n$errors4 === void 0 ? void 0 : _i18n$errors4.captcha
+                captcha: (_i18n$errors3 = i18n.errors) === null || _i18n$errors3 === void 0 ? void 0 : _i18n$errors3.captcha
               };
               _this3.$nextTick(function () {
                 return _this3.revealError('captcha');
@@ -1031,9 +1054,9 @@ function campCheckout() {
               _this3.loading = false;
               _this3.errors = result.fieldErrors;
               if (result.status === 429) {
-                _this3.formError = result.retryAfter > 0 ? "".concat((_i18n$errors5 = i18n.errors) === null || _i18n$errors5 === void 0 ? void 0 : _i18n$errors5.tooManyRequests, " (").concat(result.retryAfter, "s)") : (_i18n$errors6 = i18n.errors) === null || _i18n$errors6 === void 0 ? void 0 : _i18n$errors6.tooManyRequests;
+                _this3.formError = result.retryAfter > 0 ? "".concat((_i18n$errors4 = i18n.errors) === null || _i18n$errors4 === void 0 ? void 0 : _i18n$errors4.tooManyRequests, " (").concat(result.retryAfter, "s)") : (_i18n$errors5 = i18n.errors) === null || _i18n$errors5 === void 0 ? void 0 : _i18n$errors5.tooManyRequests;
               } else if (result.message || result.status !== 422) {
-                _this3.formError = result.message || ((_i18n$errors7 = i18n.errors) === null || _i18n$errors7 === void 0 ? void 0 : _i18n$errors7.unexpected);
+                _this3.formError = result.message || ((_i18n$errors6 = i18n.errors) === null || _i18n$errors6 === void 0 ? void 0 : _i18n$errors6.unexpected);
               }
 
               // Only a request that reached validation consumed the captcha token.

@@ -69,6 +69,10 @@ class CampCheckoutTest extends TestCase
         $this->assertLessThan($cta, $captcha);
         $this->assertLessThan($dock, $cta);
         $this->assertLessThan($bar, $dock);
+        // Mobile bar drops the generic error when the captcha message is already shown.
+        // The desktop submit block keeps its own alert.
+        $this->assertStringContainsString('x-show="hasErrors && !errors.captcha"', $html);
+        $this->assertStringContainsString('class="cc-cta__alert" x-show="hasErrors"', $html);
         $response->assertSee('id="cc-boat"', false);
         $response->assertDontSee('id="cc-tour"', false);
         $response->assertSee(__('checkout.camp.submit'));
@@ -77,6 +81,13 @@ class CampCheckoutTest extends TestCase
         $response->assertSee('cc-date__glyph', false);
         $response->assertSee('openArrivalPicker', false);
         $response->assertSee(__('checkout.camp.arrival_placeholder'), false);
+        $response->assertSee(
+            __('checkout.camp.arrival').' <span class="cc-field__optional">'.__('checkout.camp.optional').'</span>',
+            false,
+        );
+        preg_match('/<input[^>]*id="cc-date"[^>]*>/', $html, $dateInput);
+        $this->assertArrayHasKey(0, $dateInput);
+        $this->assertDoesNotMatchRegularExpression('/\brequired\b/', $dateInput[0]);
 
         $config = $this->clientConfig($response->getContent());
         $this->assertSame(3, $config['persons']);
@@ -145,9 +156,34 @@ class CampCheckoutTest extends TestCase
         $this->assertSame('Anna Fischer', $booking->name);
         $this->assertSame(CampVacationBooking::STATUS_OPEN, $booking->status);
         $this->assertStringContainsString('We bring our own rods.', $booking->message);
+        $this->assertStringContainsString(__('checkout.camp.summary.arrival').':', $booking->message);
         $this->assertCount(2, $booking->price_breakdown);
 
         $response->assertJson(['redirect_url' => route('checkout.camp.thank-you', [$camp->slug, $booking->id])]);
+    }
+
+    public function test_submission_accepts_a_request_without_an_arrival_date(): void
+    {
+        [$camp, $accommodation] = $this->makeCampWithOptions();
+
+        $payload = $this->payload([
+            'accommodation_id' => $accommodation->id,
+            'arrival_date' => '',
+        ]);
+
+        $this->postJson(route('checkout.camp.store', $camp->slug), $payload)
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $booking = CampVacationBooking::query()->latest('id')->firstOrFail();
+        $this->assertNull($booking->preferred_date);
+        $this->assertStringNotContainsString(__('checkout.camp.summary.arrival').':', $booking->message);
+
+        $this->get(route('checkout.camp.thank-you', [$camp->slug, $booking->id]))
+            ->assertOk()
+            ->assertSee(__('checkout.camp.success_text_no_date', [
+                'email' => '<strong>'.e($booking->email).'</strong>',
+            ]), false);
     }
 
     public function test_submission_rejects_options_from_another_camp(): void

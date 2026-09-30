@@ -126,7 +126,10 @@ function bookingReject() {
             const result = await client.submit({ alternative_dates: this.dates, reason: this.message.trim() });
 
             if (result.ok) {
-                window.location.assign(result.redirectUrl);
+                // Replace the form entry so Back returns to the bookings list.
+                // The form URL is no-store, so a history entry would be refetched
+                // and show a second confirmation after the request is no longer pending.
+                window.location.replace(result.redirectUrl);
                 return;
             }
 

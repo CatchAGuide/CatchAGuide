@@ -4,7 +4,9 @@
 
     <div class="cc-stay">
         <div class="cc-field cc-stay__date" x-ref="field_date" @click="openArrivalPicker">
-            <label class="cc-field__label" for="cc-date">{{ __('checkout.camp.arrival') }}</label>
+            <label class="cc-field__label" for="cc-date">
+                {{ __('checkout.camp.arrival') }} <span class="cc-field__optional">{{ __('checkout.camp.optional') }}</span>
+            </label>
             <div @class(['cc-date', 'is-empty' => blank($checkout->arrivalDate())]) :class="{ 'is-empty': !arrivalDate, 'is-invalid': errors.date }">
                 <input
                     id="cc-date"
@@ -19,7 +21,6 @@
                     @change="clearError('date')"
                     :aria-invalid="Boolean(errors.date).toString()"
                     aria-describedby="cc-date-error"
-                    required
                 >
                 <span class="cc-date__hint" aria-hidden="true">{{ __('checkout.camp.arrival_placeholder') }}</span>
                 <span class="cc-date__glyph" aria-hidden="true">

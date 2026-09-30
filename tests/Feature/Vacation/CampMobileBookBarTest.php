@@ -23,6 +23,22 @@ class CampMobileBookBarTest extends TestCase
         URL::forceRootUrl('http://cag.local');
     }
 
+    public function test_camp_contact_button_uses_contact_us_copy_in_both_locales(): void
+    {
+        $camp = $this->makeCamp();
+
+        $german = $this->get(route('vacations.camps.show', $camp->slug))->assertOk()->getContent();
+        $this->assertSame(2, $this->contactButtonCount($german, 'Kontakt aufnehmen'));
+        $this->assertSame(0, $this->contactButtonCount($german, 'Kontaktformular'));
+
+        $english = $this->withSession(['locale' => 'en'])
+            ->get(route('vacations.camps.show', $camp->slug))
+            ->assertOk()
+            ->getContent();
+        $this->assertSame(2, $this->contactButtonCount($english, 'Contact us'));
+        $this->assertSame(0, $this->contactButtonCount($english, 'Contact Form'));
+    }
+
     public function test_live_camp_page_renders_a_mobile_book_bar_and_one_desktop_booking_card(): void
     {
         $camp = $this->makeCamp();
@@ -42,8 +58,9 @@ class CampMobileBookBarTest extends TestCase
         $this->assertStringContainsString('listing-mobile-book__note', $html);
         $this->assertStringContainsString('listing-mobile-book--stacked', $html);
         $this->assertStringContainsString('listing-mobile-book--note-nowrap', $html);
-        $this->assertStringContainsString('id="camp-booking-date-desktop"', $html);
-        $this->assertStringNotContainsString('camp-booking-date-mobile', $html);
+        $this->assertStringNotContainsString('camp-booking-date', $html);
+        $this->assertStringNotContainsString('data-camp-booking-date', $html);
+        $this->assertStringContainsString('data-camp-booking-guests', $html);
         $this->assertSame(1, substr_count($html, 'class="camp-booking-card"'));
         $this->assertStringContainsString('Test Waters', $html);
         $this->assertStringContainsString(__('vacations.catalog_header_mobile_trigger_camp'), $html);
@@ -133,7 +150,9 @@ class CampMobileBookBarTest extends TestCase
         $this->assertStringContainsString("__('vacations.check_availability')", $source);
         $this->assertStringContainsString(":price-suffix=\"\$campFromPriceAmount ? __('vacations.per_night') : null\"", $source);
         $this->assertStringContainsString("__('vacations.check_availability')", $card);
-        $this->assertStringContainsString('camp-booking-card__price-row', $card);
+        $this->assertStringNotContainsString('data-camp-booking-date', $card);
+        $this->assertStringNotContainsString('camp-booking-card__price-row', $card);
+        $this->assertStringContainsString('camp-booking-card__price', $card);
         $this->assertStringContainsString('camp-booking-card__unit', $card);
         $this->assertStringContainsString("__('vacations.from_price_prefix')", $card);
         $this->assertStringContainsString("__('vacations.per_night')", $card);
@@ -195,6 +214,17 @@ class CampMobileBookBarTest extends TestCase
             '/&#description[\s\S]*?camp-desc-wrap > h3/',
             $styles
         );
+    }
+
+    private function contactButtonCount(string $html, string $label): int
+    {
+        preg_match_all(
+            '/class="btn btn-outline-orange"[^>]*>\s*'.preg_quote($label, '/').'\s*<i class="fas fa-arrow-right/',
+            $html,
+            $matches
+        );
+
+        return count($matches[0]);
     }
 
     private function makeCamp(array $overrides = []): Camp

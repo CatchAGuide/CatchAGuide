@@ -80,13 +80,15 @@ class CampQuotePresenter
      *
      * @param  list<array{type: string, name: string, quantity: int, unit_price: ?float, amount: float}>  $lines
      */
-    public function summary(string $arrival, int $nights, int $persons, array $lines, float $total, string $guestMessage): string
+    public function summary(?string $arrival, int $nights, int $persons, array $lines, float $total, string $guestMessage): string
     {
-        $rows = [
-            __('checkout.camp.summary.heading'),
-            __('checkout.camp.summary.arrival').': '.$this->date($arrival),
-            __('checkout.camp.summary.stay').': '.$this->stay($nights, $persons),
-        ];
+        $rows = [__('checkout.camp.summary.heading')];
+
+        if ($formattedArrival = $this->date($arrival)) {
+            $rows[] = __('checkout.camp.summary.arrival').': '.$formattedArrival;
+        }
+
+        $rows[] = __('checkout.camp.summary.stay').': '.$this->stay($nights, $persons);
 
         foreach ($this->lines($lines) as $line) {
             $rows[] = '- '.$line['label'].': '.$line['amount'];

@@ -1,7 +1,7 @@
 {{--
     Camp checkout (resources/sass/page/_camp-checkout.scss). One form, two layouts:
-    - mobile (< 1024px): single column, price overview at the end of the form, and a sticky
-      book bar (total, submit, legal line, reCAPTCHA) at the bottom;
+    - mobile (< 1024px): single column, price overview at the end of the form, the
+      reCAPTCHA directly under that card, and a sticky book bar (total, submit, legal line);
     - desktop (>= 1024px): form column + sticky summary aside. The reCAPTCHA sits in
       that aside, above the submit button.
     Only presentational blocks (price overview, submit + legal line) exist per layout; fields
@@ -51,7 +51,8 @@
             </div>
         </form>
 
-        {{-- One reCAPTCHA: inside the summary card on desktop, pulled into the sticky bar on mobile. --}}
+        {{-- One reCAPTCHA: above the desktop submit button. On mobile the card chrome
+             drops away, so the widget sits under the price card and the book bar stays separate. --}}
         <div class="cc-side">
             <aside class="cc-aside" aria-label="{{ __('checkout.camp.summary_title') }}">
                 <div class="cc-product">
@@ -81,7 +82,8 @@
 
             <div class="cc-dock">
                 <div class="cc-bar">
-                    <p class="cc-bar__alert" x-show="hasErrors" role="alert" x-cloak>{{ __('checkout.camp.form_errors') }}</p>
+                    {{-- The checkbox already explains itself. Skip the generic line when that is the error. --}}
+                    <p class="cc-bar__alert" x-show="hasErrors && !errors.captcha" role="alert" x-cloak>{{ __('checkout.camp.form_errors') }}</p>
                     <p class="cc-bar__alert" x-show="formError" x-text="formError" role="alert" x-cloak></p>
                     <div class="cc-bar__row">
                         <div class="cc-bar__info">

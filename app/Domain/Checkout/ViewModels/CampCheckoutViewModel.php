@@ -30,7 +30,7 @@ final class CampCheckoutViewModel
         private readonly array $requested = [],
     ) {
         $this->pricing = CampCheckoutPricing::for($camp);
-        // Submission validates `after:today` and `before:+2 years`.
+        // A chosen date is still checked as `after:today` and `before:+2 years`. The field itself is optional.
         $this->minDate = CarbonImmutable::tomorrow()->toDateString();
         $this->maxDate = CarbonImmutable::today()->addYears(2)->subDay()->toDateString();
     }

@@ -221,7 +221,6 @@ function campCheckout() {
 
         validate(captcha) {
             const errors = validator.validate(this.contact);
-            if (!this.arrivalDate) errors.date = i18n.errors?.date;
             if (pricing.accommodations.length && !this.selectedUnit) errors.accommodation = i18n.errors?.accommodation;
             // Invisible widgets fetch their token on submit; only a checkbox must be solved first.
             if (captcha && !captcha.isInvisible?.() && !captcha.getResponse()) errors.captcha = i18n.errors?.captcha;
@@ -231,12 +230,42 @@ function campCheckout() {
             return ERROR_ORDER.find((field) => errors[field]) || null;
         },
 
+        // Mobile book bar covers the bottom of the viewport. A checkbox that still
+        // sits under that bar (or further down the page) has to be scrolled up.
+        captchaSitsBelow(target) {
+            if (!window.matchMedia('(max-width: 1023px)').matches) {
+                return false;
+            }
+
+            const dock = document.querySelector('.cc-dock');
+            const limit = dock ? dock.getBoundingClientRect().top : window.innerHeight;
+
+            return target.getBoundingClientRect().bottom > limit - 8;
+        },
+
+        scrollCaptchaIntoView(target) {
+            const dock = document.querySelector('.cc-dock');
+            const dockHeight = dock ? dock.getBoundingClientRect().height : 0;
+            const rect = target.getBoundingClientRect();
+            const room = window.innerHeight - dockHeight - 24;
+            const top = rect.height > room
+                ? window.scrollY + rect.top - 16
+                : window.scrollY + rect.bottom - (window.innerHeight - dockHeight - 24);
+
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        },
+
         revealError(field) {
             const target = this.$refs[`field_${field}`];
             if (!target) return;
 
-            // Keep the field clear of the sticky site nav and the mobile total bar.
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (field === 'captcha' && this.captchaSitsBelow(target)) {
+                this.scrollCaptchaIntoView(target);
+            } else {
+                // Keep the field clear of the sticky site nav and the mobile total bar.
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
             const focusable = target.matches('input, select, textarea, button')
                 ? target
                 : target.querySelector('input, select, textarea, button');
@@ -252,7 +281,7 @@ function campCheckout() {
 
         payload(captchaToken) {
             return {
-                arrival_date: this.arrivalDate,
+                arrival_date: this.arrivalDate || null,
                 nights: this.nights,
                 persons: this.persons,
                 accommodation_id: idOrNull(this.accommodationId),

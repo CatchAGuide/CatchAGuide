@@ -183,7 +183,16 @@ class BookingRejectFormTest extends TestCase
 
         $this->get(route('booking.reject', $booking->token))
             ->assertOk()
+            ->assertViewIs('pages.additional.mail_redirection.status')
             ->assertDontSee('x-data="bookingReject"', false);
+    }
+
+    public function test_already_rejected_request_uses_the_success_page(): void
+    {
+        $booking = $this->pendingBooking(['status' => 'rejected']);
+
+        $this->get(route('booking.reject', $booking->token))
+            ->assertRedirect(route('booking.rejectsuccess'));
     }
 
     public function test_guide_profile_reject_uses_the_same_form(): void

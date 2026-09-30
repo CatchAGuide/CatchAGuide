@@ -740,7 +740,7 @@ function bookingReject() {
                 _context.n = 4;
                 break;
               }
-              window.location.assign(result.redirectUrl);
+              window.location.replace(result.redirectUrl);
               return _context.a(2);
             case 4:
               _this2.loading = false;

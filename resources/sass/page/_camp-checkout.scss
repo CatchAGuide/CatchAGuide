@@ -263,22 +263,15 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     position: relative;
     display: block;
     padding-right: 44px;
-    appearance: none;
-    -webkit-appearance: none;
+    // appearance: none makes Chrome paint its own calendar icon and ignore the
+    // picker-indicator rules below, so the custom glyph and the native one both show.
     min-width: 0;
     line-height: 48px;
 
     &::-webkit-calendar-picker-indicator,
     &::-moz-calendar-picker-indicator {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      opacity: 0;
-      cursor: pointer;
-      background: transparent;
+      // opacity alone still paints the icon next to the custom glyph.
+      display: none;
     }
 
     &::-webkit-clear-button,
@@ -757,10 +750,10 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
 
 @include media("<desktop") {
   .cc {
-    // The summary card's box drops away. Only its reCAPTCHA joins the sticky bar,
-    // between the submit row and the legal line.
-    .cc-aside,
-    .cc-dock {
+    // The summary card's chrome drops away. Its reCAPTCHA stays in the page flow,
+    // directly under the inline price card. Only the book bar sticks.
+    .cc-side,
+    .cc-aside {
       display: contents;
     }
 
@@ -778,12 +771,14 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
       margin-bottom: 28px;
     }
 
-    .cc-side {
+    .cc-captcha {
+      margin-bottom: 20px;
+    }
+
+    .cc-dock {
       position: sticky;
       bottom: 0;
       z-index: 20;
-      display: flex;
-      flex-direction: column;
       margin-left: calc(clamp(1.25rem, 3vw, 3rem) * -1);
       margin-right: calc(clamp(1.25rem, 3vw, 3rem) * -1);
       background: var(--cc-surface);
@@ -792,26 +787,9 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
     }
 
-    .cc-bar {
-      order: 1;
-    }
-
-    .cc-captcha {
-      order: 2;
-    }
-
-    .cc-dock > .cc-legal {
-      order: 3;
-    }
-
-    .cc-side .cc-captcha,
     .cc-dock > .cc-legal {
       margin-top: 8px;
       padding: 0 20px;
-    }
-
-    .cc-side .cc-legal--start {
-      text-align: center;
     }
 
     // Date on its own row; nights + guests share the next one.

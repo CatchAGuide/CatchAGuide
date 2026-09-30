@@ -51,7 +51,7 @@ class CampCheckoutRequest extends FormRequest
         $ids = fn (array $options): array => array_keys($options);
 
         return [
-            'arrival_date' => ['required', 'date_format:Y-m-d', 'after:today', 'before:'.now()->addYears(2)->toDateString()],
+            'arrival_date' => ['nullable', 'date_format:Y-m-d', 'after:today', 'before:'.now()->addYears(2)->toDateString()],
             'nights' => ['required', 'integer', 'min:1', 'max:'.CampCheckoutPricing::MAX_NIGHTS],
             'persons' => ['required', 'integer', 'min:1', 'max:'.CampCheckoutPricing::MAX_PERSONS],
             'accommodation_id' => [
@@ -99,7 +99,6 @@ class CampCheckoutRequest extends FormRequest
         $selectionInvalid = __('checkout.camp.errors.selection_invalid');
 
         return [
-            'arrival_date.required' => __('checkout.camp.errors.date_required'),
             'arrival_date.date_format' => __('checkout.camp.errors.date_required'),
             'arrival_date.after' => __('checkout.camp.errors.date_invalid'),
             'arrival_date.before' => __('checkout.camp.errors.date_invalid'),
@@ -175,6 +174,11 @@ class CampCheckoutRequest extends FormRequest
             fn ($value) => is_string($value) ? trim($value) : $value,
             $this->only(['first_name', 'last_name', 'email', 'phone', 'message'])
         ));
+
+        // "" from an empty date input means "no arrival chosen".
+        if ($this->input('arrival_date') === '') {
+            $this->merge(['arrival_date' => null]);
+        }
 
         // "" from an empty <select> means "none".
         foreach (['accommodation_id', 'rental_boat_id', 'guiding_id', 'special_offer_id'] as $key) {
