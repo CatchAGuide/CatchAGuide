@@ -3,22 +3,29 @@
     <h2 class="cc-section__title" id="cc-stay-title">{{ __('checkout.camp.stay_title') }}</h2>
 
     <div class="cc-stay">
-        <div class="cc-field cc-stay__date" x-ref="field_date">
+        <div class="cc-field cc-stay__date" x-ref="field_date" @click="openArrivalPicker">
             <label class="cc-field__label" for="cc-date">{{ __('checkout.camp.arrival') }}</label>
-            <input
-                id="cc-date"
-                class="cc-input"
-                type="date"
-                name="arrival_date"
-                min="{{ $checkout->minDate() }}"
-                max="{{ $checkout->maxDate() }}"
-                x-model="arrivalDate"
-                @change="clearError('date')"
-                :class="{ 'is-invalid': errors.date }"
-                :aria-invalid="Boolean(errors.date).toString()"
-                aria-describedby="cc-date-error"
-                required
-            >
+            <div @class(['cc-date', 'is-empty' => blank($checkout->arrivalDate())]) :class="{ 'is-empty': !arrivalDate, 'is-invalid': errors.date }">
+                <input
+                    id="cc-date"
+                    class="cc-input cc-date__input"
+                    x-ref="arrivalInput"
+                    type="date"
+                    name="arrival_date"
+                    min="{{ $checkout->minDate() }}"
+                    max="{{ $checkout->maxDate() }}"
+                    value="{{ $checkout->arrivalDate() }}"
+                    x-model="arrivalDate"
+                    @change="clearError('date')"
+                    :aria-invalid="Boolean(errors.date).toString()"
+                    aria-describedby="cc-date-error"
+                    required
+                >
+                <span class="cc-date__hint" aria-hidden="true">{{ __('checkout.camp.arrival_placeholder') }}</span>
+                <span class="cc-date__glyph" aria-hidden="true">
+                    @include($icon, ['name' => 'calendar', 'size' => 20, 'stroke' => 1.8])
+                </span>
+            </div>
             <p class="cc-field__error" id="cc-date-error" x-show="errors.date" x-text="errors.date" x-cloak></p>
         </div>
 

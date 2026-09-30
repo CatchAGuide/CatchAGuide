@@ -37,10 +37,46 @@ class CampCheckoutTest extends TestCase
         $response->assertSee('<meta name="robots" content="noindex,nofollow">', false);
         $response->assertSee('x-data="campCheckout"', false);
         $response->assertSee('class="cc-aside"', false);
+        $response->assertSee('class="cc-summary__line-label"', false);
+        $response->assertSee('class="cc-summary__line-detail"', false);
+        $response->assertSee('class="cc-summary__line-amount"', false);
+        $response->assertSee('class="cc-summary__total-label"', false);
         $response->assertSee('class="cc-bar"', false);
+        $response->assertSee('class="cc-dock"', false);
+
+        $html = $response->getContent();
+        $form = strpos($html, 'class="cc-form"');
+        $formEnd = strpos($html, '</form>', $form);
+        $summary = strpos($html, 'cc-summary--inline');
+        $aside = strpos($html, 'class="cc-aside"');
+        $captcha = strpos($html, 'class="cc-captcha"');
+        $cta = strpos($html, 'class="cc-cta"');
+        $dock = strpos($html, 'class="cc-dock"');
+        $bar = strpos($html, 'class="cc-bar"');
+        $this->assertNotFalse($form);
+        $this->assertNotFalse($formEnd);
+        $this->assertNotFalse($summary);
+        $this->assertNotFalse($aside);
+        $this->assertNotFalse($captcha);
+        $this->assertNotFalse($cta);
+        $this->assertNotFalse($dock);
+        $this->assertNotFalse($bar);
+        // Price overview stays in the form. The reCAPTCHA is in the summary card, above its submit button.
+        $this->assertLessThan($summary, $form);
+        $this->assertLessThan($formEnd, $summary);
+        $this->assertLessThan($captcha, $formEnd);
+        $this->assertLessThan($captcha, $aside);
+        $this->assertLessThan($cta, $captcha);
+        $this->assertLessThan($dock, $cta);
+        $this->assertLessThan($bar, $dock);
         $response->assertSee('id="cc-boat"', false);
         $response->assertDontSee('id="cc-tour"', false);
         $response->assertSee(__('checkout.camp.submit'));
+        $response->assertSee('class="cc-date"', false);
+        $response->assertDontSee('class="cc-date is-empty"', false);
+        $response->assertSee('cc-date__glyph', false);
+        $response->assertSee('openArrivalPicker', false);
+        $response->assertSee(__('checkout.camp.arrival_placeholder'), false);
 
         $config = $this->clientConfig($response->getContent());
         $this->assertSame(3, $config['persons']);
@@ -63,6 +99,8 @@ class CampCheckoutTest extends TestCase
 
         $config = $this->clientConfig($response->getContent());
         $this->assertNull($config['arrivalDate']);
+        $response->assertSee('class="cc-date is-empty"', false);
+        $response->assertSee(__('checkout.camp.arrival_placeholder'), false);
         $this->assertSame(20, $config['persons']);
         $this->assertSame(2, $config['nights']); // accommodation minimum stay
     }

@@ -3,14 +3,16 @@
 <ul class="cc-summary__lines">
     <template x-for="line in lines" :key="line.key">
         <li class="cc-summary__line">
-            <span x-text="line.label"></span>
-            <span class="cc-mono" x-text="line.amount"></span>
+            <span class="cc-summary__line-label">
+                <span x-text="line.name"></span><span class="cc-summary__line-detail" x-show="line.detail" x-text="' · ' + line.detail"></span>
+            </span>
+            <span class="cc-summary__line-amount" x-text="line.amount"></span>
         </li>
     </template>
 </ul>
 <hr class="cc-summary__divider">
 <div class="cc-summary__total">
     <span class="cc-summary__total-label">{{ __('checkout.camp.total') }}</span>
-    <span class="cc-summary__total-value cc-mono" x-text="totalLabel"></span>
+    <span class="cc-summary__total-value" x-text="totalLabel"></span>
 </div>
 <p class="cc-summary__note">{{ __('checkout.camp.estimate_note') }}</p>

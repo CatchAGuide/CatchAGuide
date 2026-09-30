@@ -27996,9 +27996,67 @@ body.is-mobile-search-open .pac-container {
 .cc .cc-select__input.is-invalid {
   border-color: var(--cc-error);
 }
-.cc .cc-input[type=date]::-webkit-calendar-picker-indicator {
-  opacity: 0.6;
+.cc .cc-date {
+  position: relative;
+}
+.cc .cc-date.is-invalid .cc-date__input {
+  border-color: var(--cc-error);
+}
+.cc .cc-date__input {
+  position: relative;
+  display: block;
+  padding-right: 44px;
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
+  min-width: 0;
+  line-height: 48px;
+}
+.cc .cc-date__input::-webkit-calendar-picker-indicator, .cc .cc-date__input::-moz-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
   cursor: pointer;
+  background: transparent;
+}
+.cc .cc-date__input::-webkit-clear-button, .cc .cc-date__input::-webkit-inner-spin-button {
+  display: none;
+  -webkit-appearance: none;
+}
+.cc .cc-date__input::-webkit-datetime-edit {
+  color: var(--cc-text);
+}
+.cc .cc-date.is-empty .cc-date__input {
+  color: transparent;
+}
+.cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit, .cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit-fields-wrapper, .cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit-text, .cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit-month-field, .cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit-day-field, .cc .cc-date.is-empty .cc-date__input::-webkit-datetime-edit-year-field {
+  color: transparent;
+}
+.cc .cc-date__hint,
+.cc .cc-date__glyph {
+  position: absolute;
+  top: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.cc .cc-date__hint {
+  left: 14px;
+  right: 44px;
+  color: var(--cc-placeholder);
+  font-size: 16px;
+}
+.cc .cc-date:not(.is-empty) .cc-date__hint {
+  display: none;
+}
+.cc .cc-date__glyph {
+  right: 14px;
+  color: var(--cc-petrol);
 }
 .cc .cc-input--textarea {
   display: block;
@@ -28109,11 +28167,20 @@ body.is-mobile-search-open .pac-container {
   flex: 1;
   min-width: 0;
 }
-.cc .cc-captcha:empty {
+.cc .cc-captcha {
+  position: relative;
+}
+.cc .cc-captcha:not(:has(.g-recaptcha)) {
   display: none;
 }
-.cc .cc-captcha__widget--invisible .grecaptcha-badge {
-  visibility: hidden;
+.cc .cc-captcha__widget--invisible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .cc .cc-summary {
   background: var(--cc-sand);
@@ -28134,17 +28201,26 @@ body.is-mobile-search-open .pac-container {
 }
 .cc .cc-summary__line {
   display: flex;
+  align-items: baseline;
+  align-items: last baseline;
   justify-content: space-between;
   gap: 12px;
   font-size: 14px;
+  line-height: 1.35;
   color: var(--cc-text);
 }
-.cc .cc-summary__line span:first-child {
+.cc .cc-summary__line-label {
   min-width: 0;
 }
-.cc .cc-summary__line .cc-mono {
-  font-weight: 500;
+.cc .cc-summary__line-detail {
   white-space: nowrap;
+}
+.cc .cc-summary__line-amount {
+  flex: none;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .cc .cc-summary__divider {
   border: 0;
@@ -28162,13 +28238,18 @@ body.is-mobile-search-open .pac-container {
 .cc .cc-summary__total-label {
   font-size: 15px;
   font-weight: 600;
-  color: var(--cc-ink);
-}
-.cc .cc-summary__total-value {
-  font-weight: 600;
-  font-size: 19px;
+  line-height: 1.3;
   color: var(--cc-ink);
   white-space: nowrap;
+}
+.cc .cc-summary__total-value {
+  flex: none;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--cc-ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .cc .cc-summary__note {
   font-size: 12.5px;
@@ -28336,12 +28417,50 @@ body.is-mobile-search-open .pac-container {
 }
 
 @media (max-width: 1023px) {
-  .cc .cc-aside {
+  .cc .cc-aside,
+  .cc .cc-dock {
+    display: contents;
+  }
+  .cc .cc-product,
+  .cc .cc-aside > .cc-summary,
+  .cc .cc-cta {
     display: none;
   }
   .cc .cc__grid {
     padding-top: 20px;
-    padding-bottom: 28px;
+  }
+  .cc .cc-form {
+    margin-bottom: 28px;
+  }
+  .cc .cc-side {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    margin-left: calc(clamp(1.25rem, 3vw, 3rem) * -1);
+    margin-right: calc(clamp(1.25rem, 3vw, 3rem) * -1);
+    background: var(--cc-surface);
+    border-top: 1px solid var(--cc-line);
+    box-shadow: 0 -6px 20px rgba(10, 47, 53, 0.08);
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .cc .cc-bar {
+    order: 1;
+  }
+  .cc .cc-captcha {
+    order: 2;
+  }
+  .cc .cc-dock > .cc-legal {
+    order: 3;
+  }
+  .cc .cc-side .cc-captcha,
+  .cc .cc-dock > .cc-legal {
+    margin-top: 8px;
+    padding: 0 20px;
+  }
+  .cc .cc-side .cc-legal--start {
+    text-align: center;
   }
   .cc .cc-stay {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -28354,13 +28473,7 @@ body.is-mobile-search-open .pac-container {
     grid-column: 1/-1;
   }
   .cc .cc-bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    background: var(--cc-surface);
-    border-top: 1px solid var(--cc-line);
-    box-shadow: 0 -6px 20px rgba(10, 47, 53, 0.08);
-    padding: 12px 20px calc(10px + env(safe-area-inset-bottom));
+    padding: 12px 20px 0;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -28396,11 +28509,21 @@ body.is-mobile-search-open .pac-container {
     align-items: stretch;
     gap: 10px;
   }
+  .cc .cc-summary__total {
+    gap: 8px;
+  }
+  .cc .cc-summary__total-label,
+  .cc .cc-summary__total-value {
+    font-size: 13.5px;
+  }
 }
 @media (min-width: 1024px) {
   .cc .cc-summary--inline,
-  .cc .cc-bar {
+  .cc .cc-dock {
     display: none;
+  }
+  .cc .cc-side {
+    display: contents;
   }
   .cc .cc__grid {
     display: grid;
@@ -28410,10 +28533,14 @@ body.is-mobile-search-open .pac-container {
     padding-top: 32px;
     padding-bottom: 72px;
   }
+  .cc .cc-form {
+    grid-column: 1;
+  }
   .cc .cc-stay {
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
   }
   .cc .cc-aside {
+    grid-column: 2;
     position: sticky;
     top: 104px;
     border: 1px solid var(--cc-line);

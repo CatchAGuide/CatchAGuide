@@ -732,6 +732,17 @@ function campCheckout() {
         count: this.minNights
       });
     },
+    openArrivalPicker: function openArrivalPicker() {
+      var input = this.$refs.arrivalInput;
+      if (typeof (input === null || input === void 0 ? void 0 : input.showPicker) !== 'function') {
+        return;
+      }
+      try {
+        input.showPicker();
+      } catch (error) {
+        // This phone already opened its picker from the tap.
+      }
+    },
     changeNights: function changeNights(delta) {
       this.nights = Math.max(this.minNights, Math.min(this.maxNights, this.nights + delta));
       this.clearError('nights');
@@ -815,41 +826,54 @@ function campCheckout() {
         specialId: this.specialId
       });
     },
-    lineLabel: function lineLabel(line) {
-      var label = line.name;
-      if (line.type === 'accommodation') {
-        label = (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineAccommodation, {
-          name: line.name,
-          nights: (0,_support__WEBPACK_IMPORTED_MODULE_4__.choice)(i18n.nightsCount, line.quantity)
-        });
-      } else if (line.type === 'boat') {
-        label = (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineBoat, {
-          days: (0,_support__WEBPACK_IMPORTED_MODULE_4__.choice)(i18n.daysCount, line.quantity)
-        });
-      } else if (line.type === 'tour') {
-        label = (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineTour, {
-          name: line.name
-        });
-      }
-
-      // "× 55 €" only when the amount really is quantity × rate (not a weekly rate).
+    // Name can wrap; the "· 3 Nächte × 55 €" tail stays one piece so its amount shares that baseline.
+    lineParts: function lineParts(line) {
+      var _this = this;
       var exact = line.unitPrice && Math.abs(line.unitPrice * line.quantity - line.amount) < 0.01;
-      if ((line.type === 'accommodation' || line.type === 'boat') && exact) {
-        return (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineRate, {
-          label: label,
-          price: this.money(line.unitPrice)
-        });
+      var withRate = function withRate(text) {
+        return exact ? (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineRate, {
+          label: text,
+          price: _this.money(line.unitPrice)
+        }) : text;
+      };
+      if (line.type === 'accommodation') {
+        return {
+          name: line.name,
+          detail: withRate((0,_support__WEBPACK_IMPORTED_MODULE_4__.choice)(i18n.nightsCount, line.quantity))
+        };
       }
-      return label;
+      if (line.type === 'boat') {
+        var days = (0,_support__WEBPACK_IMPORTED_MODULE_4__.choice)(i18n.daysCount, line.quantity);
+        var full = (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineBoat, {
+          days: days
+        });
+        var name = full.endsWith(days) ? full.slice(0, -days.length).replace(/[\t-\r \xA0\xB7\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+$/, '') : full;
+        return {
+          name: name,
+          detail: withRate(days)
+        };
+      }
+      if (line.type === 'tour') {
+        return {
+          name: (0,_support__WEBPACK_IMPORTED_MODULE_4__.trans)(i18n.lineTour, {
+            name: line.name
+          }),
+          detail: ''
+        };
+      }
+      return {
+        name: line.name,
+        detail: ''
+      };
     },
     get lines() {
-      var _this = this;
+      var _this2 = this;
       return this.quoteLines.map(function (line) {
-        return {
-          key: line.key,
-          label: _this.lineLabel(line),
-          amount: line.amount > 0 ? _this.money(line.amount) : i18n.onRequest
-        };
+        return _objectSpread(_objectSpread({
+          key: line.key
+        }, _this2.lineParts(line)), {}, {
+          amount: line.amount > 0 ? _this2.money(line.amount) : i18n.onRequest
+        });
       });
     },
     get total() {
@@ -945,36 +969,36 @@ function campCheckout() {
       };
     },
     submit: function submit() {
-      var _this2 = this;
+      var _this3 = this;
       return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
         var captcha, firstInvalid, attempt, captchaToken, _i18n$errors4, result, _i18n$errors5, _i18n$errors6, _i18n$errors7, firstServerError;
         return _regenerator().w(function (_context2) {
           while (1) switch (_context2.n) {
             case 0:
-              if (!_this2.loading) {
+              if (!_this3.loading) {
                 _context2.n = 1;
                 break;
               }
               return _context2.a(2);
             case 1:
-              _this2.formError = '';
-              captcha = _this2.recaptcha();
-              firstInvalid = _this2.validate(captcha);
+              _this3.formError = '';
+              captcha = _this3.recaptcha();
+              firstInvalid = _this3.validate(captcha);
               if (!firstInvalid) {
                 _context2.n = 2;
                 break;
               }
-              _this2.$nextTick(function () {
-                return _this2.revealError(firstInvalid);
+              _this3.$nextTick(function () {
+                return _this3.revealError(firstInvalid);
               });
               return _context2.a(2);
             case 2:
               attempt = ++submitAttempt;
               _context2.n = 3;
-              return _this2.captchaToken(captcha);
+              return _this3.captchaToken(captcha);
             case 3:
               captchaToken = _context2.v;
-              if (!(attempt !== submitAttempt || _this2.loading)) {
+              if (!(attempt !== submitAttempt || _this3.loading)) {
                 _context2.n = 4;
                 break;
               }
@@ -984,17 +1008,17 @@ function campCheckout() {
                 _context2.n = 5;
                 break;
               }
-              _this2.errors = {
+              _this3.errors = {
                 captcha: (_i18n$errors4 = i18n.errors) === null || _i18n$errors4 === void 0 ? void 0 : _i18n$errors4.captcha
               };
-              _this2.$nextTick(function () {
-                return _this2.revealError('captcha');
+              _this3.$nextTick(function () {
+                return _this3.revealError('captcha');
               });
               return _context2.a(2);
             case 5:
-              _this2.loading = true;
+              _this3.loading = true;
               _context2.n = 6;
-              return client.submit(_this2.payload(captchaToken));
+              return client.submit(_this3.payload(captchaToken));
             case 6:
               result = _context2.v;
               if (!result.ok) {
@@ -1004,12 +1028,12 @@ function campCheckout() {
               window.location.assign(result.redirectUrl);
               return _context2.a(2);
             case 7:
-              _this2.loading = false;
-              _this2.errors = result.fieldErrors;
+              _this3.loading = false;
+              _this3.errors = result.fieldErrors;
               if (result.status === 429) {
-                _this2.formError = result.retryAfter > 0 ? "".concat((_i18n$errors5 = i18n.errors) === null || _i18n$errors5 === void 0 ? void 0 : _i18n$errors5.tooManyRequests, " (").concat(result.retryAfter, "s)") : (_i18n$errors6 = i18n.errors) === null || _i18n$errors6 === void 0 ? void 0 : _i18n$errors6.tooManyRequests;
+                _this3.formError = result.retryAfter > 0 ? "".concat((_i18n$errors5 = i18n.errors) === null || _i18n$errors5 === void 0 ? void 0 : _i18n$errors5.tooManyRequests, " (").concat(result.retryAfter, "s)") : (_i18n$errors6 = i18n.errors) === null || _i18n$errors6 === void 0 ? void 0 : _i18n$errors6.tooManyRequests;
               } else if (result.message || result.status !== 422) {
-                _this2.formError = result.message || ((_i18n$errors7 = i18n.errors) === null || _i18n$errors7 === void 0 ? void 0 : _i18n$errors7.unexpected);
+                _this3.formError = result.message || ((_i18n$errors7 = i18n.errors) === null || _i18n$errors7 === void 0 ? void 0 : _i18n$errors7.unexpected);
               }
 
               // Only a request that reached validation consumed the captcha token.
@@ -1017,10 +1041,10 @@ function campCheckout() {
                 captcha === null || captcha === void 0 || captcha.reset();
               }
               firstServerError = ERROR_ORDER.find(function (field) {
-                return _this2.errors[field];
+                return _this3.errors[field];
               });
-              _this2.$nextTick(function () {
-                return firstServerError ? _this2.revealError(firstServerError) : _this2.revealError('submit');
+              _this3.$nextTick(function () {
+                return firstServerError ? _this3.revealError(firstServerError) : _this3.revealError('submit');
               });
             case 8:
               return _context2.a(2);

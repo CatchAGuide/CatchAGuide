@@ -1,8 +1,9 @@
 {{--
     Camp checkout (resources/sass/page/_camp-checkout.scss). One form, two layouts:
-    - mobile (< 1024px): single column, price overview at the end of the form and a sticky
-      total bar with the submit button at the bottom;
-    - desktop (>= 1024px): form column + sticky summary aside with the submit button.
+    - mobile (< 1024px): single column, price overview at the end of the form, and a sticky
+      book bar (total, submit, legal line, reCAPTCHA) at the bottom;
+    - desktop (>= 1024px): form column + sticky summary aside. The reCAPTCHA sits in
+      that aside, above the submit button.
     Only presentational blocks (price overview, submit + legal line) exist per layout; fields
     and the reCAPTCHA widget exist exactly once.
 
@@ -45,53 +46,58 @@
 
             @include($partials.'.contact', ['checkout' => $checkout])
 
-            <div class="cc-captcha" x-ref="field_captcha">
-                @include($partials.'.captcha')
-            </div>
-
             <div class="cc-summary cc-summary--inline">
                 @include($partials.'.summary')
             </div>
         </form>
 
-        <aside class="cc-aside" aria-label="{{ __('checkout.camp.summary_title') }}">
-            <div class="cc-product">
-                <div class="cc-product__media">
-                    @if ($product['image'])
-                        <img src="{{ $product['image'] }}" alt="" width="72" height="54" decoding="async">
-                    @else
-                        @include($icon, ['name' => 'image', 'size' => 22, 'stroke' => 1.4])
-                    @endif
+        {{-- One reCAPTCHA: inside the summary card on desktop, pulled into the sticky bar on mobile. --}}
+        <div class="cc-side">
+            <aside class="cc-aside" aria-label="{{ __('checkout.camp.summary_title') }}">
+                <div class="cc-product">
+                    <div class="cc-product__media">
+                        @if ($product['image'])
+                            <img src="{{ $product['image'] }}" alt="" width="72" height="54" decoding="async">
+                        @else
+                            @include($icon, ['name' => 'image', 'size' => 22, 'stroke' => 1.4])
+                        @endif
+                    </div>
+                    <div class="cc-product__body">
+                        <p class="cc-product__title">{{ $product['title'] }}</p>
+                        <p class="cc-product__stay" x-text="stayShort"></p>
+                    </div>
                 </div>
-                <div class="cc-product__body">
-                    <p class="cc-product__title">{{ $product['title'] }}</p>
-                    <p class="cc-product__stay" x-text="stayShort"></p>
+
+                <div class="cc-summary">
+                    @include($partials.'.summary')
                 </div>
-            </div>
 
-            <div class="cc-summary">
-                @include($partials.'.summary')
-            </div>
+                <div class="cc-captcha" x-ref="field_captcha">
+                    @include($partials.'.captcha')
+                </div>
 
-            @include($partials.'.submit', ['variant' => 'aside'])
-        </aside>
-    </div>
+                @include($partials.'.submit', ['variant' => 'aside'])
+            </aside>
 
-    <div class="cc-bar">
-        <p class="cc-bar__alert" x-show="hasErrors" role="alert" x-cloak>{{ __('checkout.camp.form_errors') }}</p>
-        <p class="cc-bar__alert" x-show="formError" x-text="formError" role="alert" x-cloak></p>
-        <div class="cc-bar__row">
-            <div class="cc-bar__info">
-                <p class="cc-bar__total cc-mono" x-text="totalLabel"></p>
-                <p class="cc-bar__stay" x-text="stayShort"></p>
+            <div class="cc-dock">
+                <div class="cc-bar">
+                    <p class="cc-bar__alert" x-show="hasErrors" role="alert" x-cloak>{{ __('checkout.camp.form_errors') }}</p>
+                    <p class="cc-bar__alert" x-show="formError" x-text="formError" role="alert" x-cloak></p>
+                    <div class="cc-bar__row">
+                        <div class="cc-bar__info">
+                            <p class="cc-bar__total cc-mono" x-text="totalLabel"></p>
+                            <p class="cc-bar__stay" x-text="stayShort"></p>
+                        </div>
+                        <button type="button" class="cc-submit" @click="submit()" :disabled="loading" :aria-busy="loading.toString()">
+                            <span x-show="!loading">{{ __('checkout.camp.submit') }}</span>
+                            <span x-show="loading" x-cloak>{{ __('checkout.processing') }}</span>
+                            @include($icon, ['name' => 'arrow-right', 'size' => 18, 'stroke' => 2])
+                        </button>
+                    </div>
+                </div>
+                @include($partials.'.legal')
             </div>
-            <button type="button" class="cc-submit" @click="submit()" :disabled="loading" :aria-busy="loading.toString()">
-                <span x-show="!loading">{{ __('checkout.camp.submit') }}</span>
-                <span x-show="loading" x-cloak>{{ __('checkout.processing') }}</span>
-                @include($icon, ['name' => 'arrow-right', 'size' => 18, 'stroke' => 2])
-            </button>
         </div>
-        @include($partials.'.legal')
     </div>
 </div>
 

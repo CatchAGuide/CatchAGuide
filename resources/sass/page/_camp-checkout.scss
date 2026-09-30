@@ -249,9 +249,86 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     }
   }
 
-  .cc-input[type='date']::-webkit-calendar-picker-indicator {
-    opacity: 0.6;
-    cursor: pointer;
+  // Native date controls draw a calendar glyph, a chevron, or day/month/year dropdowns
+  // depending on the phone. Keep the system picker; paint one icon and an empty hint.
+  .cc-date {
+    position: relative;
+
+    &.is-invalid .cc-date__input {
+      border-color: var(--cc-error);
+    }
+  }
+
+  .cc-date__input {
+    position: relative;
+    display: block;
+    padding-right: 44px;
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 0;
+    line-height: 48px;
+
+    &::-webkit-calendar-picker-indicator,
+    &::-moz-calendar-picker-indicator {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      opacity: 0;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    &::-webkit-clear-button,
+    &::-webkit-inner-spin-button {
+      display: none;
+      -webkit-appearance: none;
+    }
+
+    &::-webkit-datetime-edit {
+      color: var(--cc-text);
+    }
+  }
+
+  .cc-date.is-empty .cc-date__input {
+    color: transparent;
+
+    &::-webkit-datetime-edit,
+    &::-webkit-datetime-edit-fields-wrapper,
+    &::-webkit-datetime-edit-text,
+    &::-webkit-datetime-edit-month-field,
+    &::-webkit-datetime-edit-day-field,
+    &::-webkit-datetime-edit-year-field {
+      color: transparent;
+    }
+  }
+
+  .cc-date__hint,
+  .cc-date__glyph {
+    position: absolute;
+    top: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .cc-date__hint {
+    left: 14px;
+    right: 44px;
+    color: var(--cc-placeholder);
+    font-size: 16px;
+  }
+
+  .cc-date:not(.is-empty) .cc-date__hint {
+    display: none;
+  }
+
+  .cc-date__glyph {
+    right: 14px;
+    color: var(--cc-petrol);
   }
 
   .cc-input--textarea {
@@ -384,13 +461,24 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     min-width: 0;
   }
 
-  // reCAPTCHA (checkbox mode shows the widget; invisible mode only the attribution line)
-  .cc-captcha:empty {
-    display: none;
+  // reCAPTCHA (checkbox mode shows the widget; invisible mode only the attribution line).
+  // The inline badge stays in the DOM for Google, but must not reserve a gap in the form.
+  .cc-captcha {
+    position: relative;
+
+    &:not(:has(.g-recaptcha)) {
+      display: none;
+    }
   }
 
-  .cc-captcha__widget--invisible .grecaptcha-badge {
-    visibility: hidden;
+  .cc-captcha__widget--invisible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   // Price overview
@@ -416,19 +504,30 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
 
   .cc-summary__line {
     display: flex;
+    align-items: baseline;
+    align-items: last baseline;
     justify-content: space-between;
     gap: 12px;
     font-size: 14px;
+    line-height: 1.35;
     color: var(--cc-text);
+  }
 
-    span:first-child {
-      min-width: 0;
-    }
+  .cc-summary__line-label {
+    min-width: 0;
+  }
 
-    .cc-mono {
-      font-weight: 500;
-      white-space: nowrap;
-    }
+  // Keeps "· 3 Nächte × 55 €" together so a long unit name wraps before it, not inside it.
+  .cc-summary__line-detail {
+    white-space: nowrap;
+  }
+
+  .cc-summary__line-amount {
+    flex: none;
+    font-weight: 500;
+    line-height: 1.35;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .cc-summary__divider {
@@ -449,14 +548,19 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
   .cc-summary__total-label {
     font-size: 15px;
     font-weight: 600;
+    line-height: 1.3;
     color: var(--cc-ink);
+    white-space: nowrap;
   }
 
   .cc-summary__total-value {
+    flex: none;
     font-weight: 600;
-    font-size: 19px;
+    font-size: 15px;
+    line-height: 1.3;
     color: var(--cc-ink);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .cc-summary__note {
@@ -653,13 +757,61 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
 
 @include media("<desktop") {
   .cc {
-    .cc-aside {
+    // The summary card's box drops away. Only its reCAPTCHA joins the sticky bar,
+    // between the submit row and the legal line.
+    .cc-aside,
+    .cc-dock {
+      display: contents;
+    }
+
+    .cc-product,
+    .cc-aside > .cc-summary,
+    .cc-cta {
       display: none;
     }
 
     .cc__grid {
       padding-top: 20px;
-      padding-bottom: 28px;
+    }
+
+    .cc-form {
+      margin-bottom: 28px;
+    }
+
+    .cc-side {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      margin-left: calc(clamp(1.25rem, 3vw, 3rem) * -1);
+      margin-right: calc(clamp(1.25rem, 3vw, 3rem) * -1);
+      background: var(--cc-surface);
+      border-top: 1px solid var(--cc-line);
+      box-shadow: 0 -6px 20px rgba(10, 47, 53, 0.08);
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .cc-bar {
+      order: 1;
+    }
+
+    .cc-captcha {
+      order: 2;
+    }
+
+    .cc-dock > .cc-legal {
+      order: 3;
+    }
+
+    .cc-side .cc-captcha,
+    .cc-dock > .cc-legal {
+      margin-top: 8px;
+      padding: 0 20px;
+    }
+
+    .cc-side .cc-legal--start {
+      text-align: center;
     }
 
     // Date on its own row; nights + guests share the next one.
@@ -677,13 +829,7 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     }
 
     .cc-bar {
-      position: sticky;
-      bottom: 0;
-      z-index: 20;
-      background: var(--cc-surface);
-      border-top: 1px solid var(--cc-line);
-      box-shadow: 0 -6px 20px rgba(10, 47, 53, 0.08);
-      padding: 12px 20px calc(10px + env(safe-area-inset-bottom));
+      padding: 12px 20px 0;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -724,6 +870,15 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
         align-items: stretch;
         gap: 10px;
       }
+
+      .cc-summary__total {
+        gap: 8px;
+      }
+
+      .cc-summary__total-label,
+      .cc-summary__total-value {
+        font-size: 13.5px;
+      }
     }
   }
 }
@@ -731,8 +886,14 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
 @include media(">=desktop") {
   .cc {
     .cc-summary--inline,
-    .cc-bar {
+    .cc-dock {
       display: none;
+    }
+
+    // The side wrapper only groups the card and the mobile bar. On desktop the
+    // card is the grid's second column and the reCAPTCHA is already inside it.
+    .cc-side {
+      display: contents;
     }
 
     // Form takes the remaining width; the summary aside keeps a readable fixed range.
@@ -744,11 +905,16 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
       padding-bottom: 72px;
     }
 
+    .cc-form {
+      grid-column: 1;
+    }
+
     .cc-stay {
       grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .cc-aside {
+      grid-column: 2;
       position: sticky;
       top: $cc-sticky-top;
       border: 1px solid var(--cc-line);

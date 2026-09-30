@@ -71,6 +71,19 @@ function campCheckout() {
             return trans(i18n.minNights, { count: this.minNights });
         },
 
+        openArrivalPicker() {
+            const input = this.$refs.arrivalInput;
+            if (typeof input?.showPicker !== 'function') {
+                return;
+            }
+
+            try {
+                input.showPicker();
+            } catch (error) {
+                // This phone already opened its picker from the tap.
+            }
+        },
+
         changeNights(delta) {
             this.nights = Math.max(this.minNights, Math.min(this.maxNights, this.nights + delta));
             this.clearError('nights');
@@ -145,29 +158,34 @@ function campCheckout() {
             });
         },
 
-        lineLabel(line) {
-            let label = line.name;
-            if (line.type === 'accommodation') {
-                label = trans(i18n.lineAccommodation, { name: line.name, nights: choice(i18n.nightsCount, line.quantity) });
-            } else if (line.type === 'boat') {
-                label = trans(i18n.lineBoat, { days: choice(i18n.daysCount, line.quantity) });
-            } else if (line.type === 'tour') {
-                label = trans(i18n.lineTour, { name: line.name });
-            }
-
-            // "× 55 €" only when the amount really is quantity × rate (not a weekly rate).
+        // Name can wrap; the "· 3 Nächte × 55 €" tail stays one piece so its amount shares that baseline.
+        lineParts(line) {
             const exact = line.unitPrice && Math.abs(line.unitPrice * line.quantity - line.amount) < 0.01;
-            if ((line.type === 'accommodation' || line.type === 'boat') && exact) {
-                return trans(i18n.lineRate, { label, price: this.money(line.unitPrice) });
+            const withRate = (text) => (exact
+                ? trans(i18n.lineRate, { label: text, price: this.money(line.unitPrice) })
+                : text);
+
+            if (line.type === 'accommodation') {
+                return { name: line.name, detail: withRate(choice(i18n.nightsCount, line.quantity)) };
+            }
+            if (line.type === 'boat') {
+                const days = choice(i18n.daysCount, line.quantity);
+                const full = trans(i18n.lineBoat, { days });
+                const name = full.endsWith(days) ? full.slice(0, -days.length).replace(/[\s·]+$/u, '') : full;
+
+                return { name, detail: withRate(days) };
+            }
+            if (line.type === 'tour') {
+                return { name: trans(i18n.lineTour, { name: line.name }), detail: '' };
             }
 
-            return label;
+            return { name: line.name, detail: '' };
         },
 
         get lines() {
             return this.quoteLines.map((line) => ({
                 key: line.key,
-                label: this.lineLabel(line),
+                ...this.lineParts(line),
                 amount: line.amount > 0 ? this.money(line.amount) : i18n.onRequest,
             }));
         },
