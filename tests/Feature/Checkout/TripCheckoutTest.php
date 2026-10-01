@@ -265,6 +265,20 @@ class TripCheckoutTest extends TestCase
         $this->assertStringContainsString('id="tripGeneralContactModal"', $html);
     }
 
+    public function test_checkout_lives_under_the_checkout_prefix_and_old_urls_redirect(): void
+    {
+        $trip = $this->makeTrip();
+        $date = now()->addDays(10)->toDateString();
+        $this->addDeparture($trip, $date, 4);
+
+        $this->assertSame('/checkout/trips/'.$trip->slug, route('checkout.trip.show', $trip->slug, false));
+        $this->assertSame('/checkout/trips/'.$trip->slug.'/thank-you/5', route('checkout.trip.thank-you', [$trip->slug, 5], false));
+
+        $this->get('/vacations/trips/'.$trip->slug.'/checkout?date='.$date.'&persons=3&utm_source=x')
+            ->assertStatus(301)
+            ->assertRedirect(route('checkout.trip.show', ['slug' => $trip->slug, 'date' => $date, 'persons' => 3]));
+    }
+
     /**
      * @return array<string, mixed>
      */

@@ -279,6 +279,18 @@ class CampCheckoutTest extends TestCase
         $this->assertStringContainsString('id="campGeneralContactModal"', $html);
     }
 
+    public function test_checkout_lives_under_the_checkout_prefix_and_old_urls_redirect(): void
+    {
+        [$camp] = $this->makeCampWithOptions();
+
+        $this->assertSame('/checkout/camps/'.$camp->slug, route('checkout.camp.show', $camp->slug, false));
+        $this->assertSame('/checkout/camps/'.$camp->slug.'/thank-you/5', route('checkout.camp.thank-you', [$camp->slug, 5], false));
+
+        $this->get('/vacations/camps/'.$camp->slug.'/checkout?persons=3&nights=4')
+            ->assertStatus(301)
+            ->assertRedirect(route('checkout.camp.show', ['slug' => $camp->slug, 'persons' => 3, 'nights' => 4]));
+    }
+
     /**
      * @return array<string, mixed>
      */
