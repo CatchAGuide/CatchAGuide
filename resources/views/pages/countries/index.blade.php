@@ -135,7 +135,7 @@
                     $destinationRoute = $destination_route ?? 'destination.country';
                 @endphp
                 @foreach($countries as $country)
-                    <div class="col-md-4 my-1">
+                    <div class="col-md-4 my-1" data-reveal>
                         <div class="trending-card">
                             <a href="{{ route($destinationRoute, $country->slug) }}">
                                 <div class="trending-card-wrapper">
@@ -158,7 +158,7 @@
                         </div>
                     </div>
                 @endforeach
-                {{-- <div class="col-md-4 my-1">
+                {{-- <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'niederlande']) }}">
                             <div class="trending-card-wrapper">
@@ -179,7 +179,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4 my-1">
+                <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'norwegen']) }}">
                             <div class="trending-card-wrapper">
@@ -200,7 +200,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4 my-1">
+                <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'schweden']) }}"> 
                             <div class="trending-card-wrapper">
@@ -221,7 +221,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4 my-1">
+                <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'spanien']) }}">
                             <div class="trending-card-wrapper">
@@ -242,7 +242,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4 my-1">
+                <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'portugal']) }}">
                             <div class="trending-card-wrapper">
@@ -263,7 +263,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4 my-1">
+                <div class="col-md-4 my-1" data-reveal>
                     <div class="trending-card">
                         <a href="{{ route('destination.country', ['country' => 'kroatien']) }}">
                             <div class="trending-card-wrapper">

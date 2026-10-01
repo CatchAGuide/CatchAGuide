@@ -905,7 +905,7 @@
     </div>
     
     <!-- Description Section -->
-    <div class="description-container card p-3 mb-3 position-relative">
+    <div class="description-container card p-3 mb-3 position-relative" data-reveal>
         <div class="description-list tour-overview">
             @if ($guiding->desc_course_of_action)
                 <div class="description-item tour-overview__block">
@@ -1044,7 +1044,7 @@
         $accordionOpenInfo = !$hasInclusionsPanel && !$hasTourInfoPanel && !$hasBoatPanel && $hasAdditionalPanel;
     @endphp
 
-    <div class="tour-panels mb-3">
+    <div class="tour-panels mb-3" data-reveal>
         {{-- Desktop tabs --}}
         <div class="tabs-container tour-panels__tabs">
             <div class="nav nav-tabs" id="guiding-tab" role="tablist">
@@ -1178,7 +1178,7 @@
         ])->filter()->values();
     @endphp
     @if($paymentMethods->isNotEmpty())
-        <div class="tour-payment mb-3">
+        <div class="tour-payment mb-3" data-reveal>
             <div class="tour-payment__card">
                 <h3 class="tour-payment__title">
                     <i class="fas fa-wallet" aria-hidden="true"></i>
@@ -1207,7 +1207,7 @@
     @endif
 
     <!-- Availability Section -->
-    <div class="tour-availability">
+    <div class="tour-availability" data-reveal>
         <h2 class="mb-3">@lang('guidings.Availability')</h2>
         
         <!-- Calendar Legend -->
@@ -1251,9 +1251,9 @@
     @endif
 
     <div class="mb-5">
-        <div class="tour-details-two__about">
+        <div class="tour-details-two__about" data-reveal>
             <div class="row">
-                <div class="col-md-3 wow fadeInLeft" data-wow-duration="1500ms">
+                <div class="col-md-3">
                     <div class="about-one__left">
                         <div class="about-one__img-box">
                             <div class="tour-details__review-comment-top-img">
@@ -1317,7 +1317,7 @@
         </div>
     </div>
 
-    <div class="guidings-rating mb-3">
+    <div class="guidings-rating mb-3" data-reveal>
         @if($reviews_count > 0)
             {{-- Mobile-only reviews (≤767px). The desktop overview + card rail below are hidden there. --}}
             @include('pages.guidings.partials.reviews-mobile')

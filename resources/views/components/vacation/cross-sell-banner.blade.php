@@ -1,4 +1,4 @@
-<section class="vacation-hub__cross-sell" data-analytics-vacation-rail="cross-sell">
+<section class="vacation-hub__cross-sell" data-reveal data-analytics-vacation-rail="cross-sell">
     <span class="vacation-hub__cross-sell-icon" aria-hidden="true">
         <i class="fas fa-water"></i>
     </span>

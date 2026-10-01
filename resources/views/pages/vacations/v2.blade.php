@@ -297,7 +297,7 @@
                     </div>
                     @endunless
 
-                    <section id="distances" class="camp-section">
+                    <section id="distances" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.distances') }}</h2>
                         <div class="camp-pill-row">
                             @if(!empty($camp['distances']['to_shop_label']))
@@ -316,7 +316,7 @@
                     </section>
 
                     @if(!empty($camp['amenities']))
-                    <section id="amenities-section" class="camp-section">
+                    <section id="amenities-section" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.camp_amenities') }}</h2>
                         <div class="camp-section__cols">
                             {{-- Dynamic amenities from camp_facility_camp pivot table --}}
@@ -331,7 +331,7 @@
                     @endif
 
                     @if(!empty($camp['policies_regulations']))
-                    <section id="policies" class="camp-section">
+                    <section id="policies" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.policies_regulations') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['policies_regulations'] as $policy)
@@ -342,7 +342,7 @@
                     @endif
 
                     @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_parsed']))
-                    <section id="best-travel-times" class="camp-section">
+                    <section id="best-travel-times" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.best_travel_times') }}</h2>
                         
                         @if(!empty($camp['best_travel_times']))
@@ -364,7 +364,7 @@
                     @endif
                     
                     @if(!empty($camp['target_fish']))
-                    <section id="target-fish" class="camp-section">
+                    <section id="target-fish" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.target_fish') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['target_fish'] as $fish)
@@ -375,7 +375,7 @@
                     @endif
 
                     @if(!empty($camp['travel_info']))
-                    <section id="travel-info" class="camp-section">
+                    <section id="travel-info" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.travel_information') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['travel_info'] as $info)
@@ -388,7 +388,7 @@
                     @endif
 
                     @if(!empty($camp['extras']))
-                    <section id="extras" class="camp-section">
+                    <section id="extras" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.extras') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['extras'] as $extra)
@@ -399,7 +399,7 @@
                     @endif
 
                     @if(!empty($camp['conditions']['minimum_stay_nights']) || !empty($camp['conditions']['booking_window']))
-                    <section id="conditions" class="camp-section">
+                    <section id="conditions" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.camp_conditions') }}</h2>
                         <div class="camp-section__cols">
                             @if(!empty($camp['conditions']['minimum_stay_nights']))
@@ -554,7 +554,7 @@
 
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
-        <section id="special-offers" class="camp-section camp-section--listings mb-3">
+        <section id="special-offers" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
                 <div class="camp-section__item mb-4">
@@ -566,7 +566,7 @@
 
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
-        <section id="accommodations" class="camp-section camp-section--listings mb-3">
+        <section id="accommodations" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.accommodations') }}</h2>
             @foreach($accommodations as $accommodation)
                 <div class="camp-section__item mb-4">
@@ -578,7 +578,7 @@
 
         <!-- Guidings Section -->
         @if (isset($guidings) && count($guidings) > 0)
-        <section id="guidings" class="camp-section camp-section--listings mb-3">
+        <section id="guidings" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
                 <div class="camp-section__item mb-4">
@@ -590,7 +590,7 @@
 
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)
-        <section id="boats" class="camp-section camp-section--listings mb-3">
+        <section id="boats" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.rental_boats') }}</h2>
             @foreach($boats as $boat)
                 <div class="camp-section__item mb-4">

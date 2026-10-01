@@ -43,10 +43,9 @@ class VacationProductSearchContextTest extends TestCase
             '/name="num_guests"[^>]*value="3"|value="3"[^>]*name="num_guests"/',
             $html
         );
-        $this->assertMatchesRegularExpression(
-            '/id="trip_number_of_persons"[^>]*value="3"|value="3"[^>]*id="trip_number_of_persons"/',
-            $html
-        );
+        // The booking card's guest stepper starts at the searched party size and carries it to the checkout.
+        $this->assertStringContainsString('data-trip-guests="3"', $html);
+        $this->assertStringContainsString('data-trip-guests-label>3</span>', $html);
     }
 
     private function createPublishedTrip(): Trip

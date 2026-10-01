@@ -279,7 +279,7 @@
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="col-preferred-date" data-label="Preferred date">{{ optional($request->preferred_date)->format('Y-m-d') ?: '—' }}</td>
+                                            <td class="col-preferred-date" data-label="Preferred date">{{ optional($request->preferred_date)->format('Y-m-d') ?: '—' }}@if($request->preferred_date_to) – {{ $request->preferred_date_to->format('Y-m-d') }}@endif</td>
                                             <td class="col-persons" data-label="Persons">{{ $request->number_of_persons ?: '—' }}</td>
                                             <td class="col-created cr-created" data-order="{{ optional($request->created_at)->timestamp }}" data-label="Requested">{{ optional($request->created_at)->format('M j, Y g:i A') }}</td>
                                             <td class="col-status" data-label="Status">

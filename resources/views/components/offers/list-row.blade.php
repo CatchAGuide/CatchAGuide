@@ -70,6 +70,7 @@
 
 <article
     class="offers-card offers-card--{{ $type }}"
+    data-reveal
     data-offer-type="{{ $type }}"
     data-analytics-offer-card
 >

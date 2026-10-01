@@ -1928,12 +1928,12 @@ $trip-offer-lh-relaxed: 1.7;
 
     &__booking-note {
         margin-left: auto;
-        max-width: 11rem;
         color: rgba(255, 255, 255, 0.62);
         font-size: 0.72rem;
         font-weight: $trip-offer-weight-medium;
         line-height: 1.3;
         text-align: right;
+        white-space: nowrap;
     }
 
     &__booking-badge {

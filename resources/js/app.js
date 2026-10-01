@@ -6,6 +6,7 @@ import { initListingGalleryModals } from "./modules/listingGalleryModal";
 import { initPageLoader } from "./modules/pageLoader";
 import { initBottomNavViewport } from "./modules/bottomNavViewport";
 import { initListingMobileBookBar } from "./modules/listingMobileBookBar";
+import { initScrollReveal } from "./modules/scrollReveal";
 import { createIcons, icons } from 'lucide';
 
 window.initListingGalleryModals = initListingGalleryModals;
@@ -21,5 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initPageLoader();
   initBottomNavViewport();
   initListingMobileBookBar();
+  initScrollReveal();
   createIcons({ icons });
 });

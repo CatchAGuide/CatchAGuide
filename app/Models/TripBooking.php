@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class TripBooking extends Model
@@ -22,9 +23,16 @@ class TripBooking extends Model
         'source_type',
         'source_id',
         'preferred_date',
+        'preferred_date_to',
         'number_of_persons',
+        'estimated_total',
+        'currency',
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'user_id',
+        'language',
         'phone_country_code',
         'phone',
         'message',
@@ -34,8 +42,15 @@ class TripBooking extends Model
 
     protected $casts = [
         'preferred_date' => 'date',
+        'preferred_date_to' => 'date',
         'number_of_persons' => 'integer',
+        'estimated_total' => 'decimal:2',
     ];
+
+    public function trip(): BelongsTo
+    {
+        return $this->belongsTo(Trip::class, 'source_id');
+    }
 
     public static function statusOptions(): array
     {

@@ -16,9 +16,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_pageLoader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/pageLoader */ "./resources/js/modules/pageLoader.js");
 /* harmony import */ var _modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/bottomNavViewport */ "./resources/js/modules/bottomNavViewport.js");
 /* harmony import */ var _modules_listingMobileBookBar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/listingMobileBookBar */ "./resources/js/modules/listingMobileBookBar.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
-/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
+/* harmony import */ var _modules_scrollReveal__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modules/scrollReveal */ "./resources/js/modules/scrollReveal.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/lucide.js");
+/* harmony import */ var lucide__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lucide */ "./node_modules/lucide/dist/esm/iconsAndAliases.js");
 // require("./bootstrap");
+
 
 
 
@@ -38,8 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
   (0,_modules_pageLoader__WEBPACK_IMPORTED_MODULE_4__.initPageLoader)();
   (0,_modules_bottomNavViewport__WEBPACK_IMPORTED_MODULE_5__.initBottomNavViewport)();
   (0,_modules_listingMobileBookBar__WEBPACK_IMPORTED_MODULE_6__.initListingMobileBookBar)();
-  (0,lucide__WEBPACK_IMPORTED_MODULE_7__.createIcons)({
-    icons: lucide__WEBPACK_IMPORTED_MODULE_8__
+  (0,_modules_scrollReveal__WEBPACK_IMPORTED_MODULE_7__.initScrollReveal)();
+  (0,lucide__WEBPACK_IMPORTED_MODULE_8__.createIcons)({
+    icons: lucide__WEBPACK_IMPORTED_MODULE_9__
   });
 });
 
@@ -682,6 +685,102 @@ function initPageLoader() {
     show: show,
     hide: hide
   };
+}
+
+/***/ },
+
+/***/ "./resources/js/modules/scrollReveal.js"
+/*!**********************************************!*\
+  !*** ./resources/js/modules/scrollReveal.js ***!
+  \**********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initScrollReveal: () => (/* binding */ initScrollReveal)
+/* harmony export */ });
+/**
+ * Scroll reveal for listing cards and product-page sections.
+ *
+ * Mark an element with `data-reveal`; it fades/slides in the first time it
+ * scrolls into view. Built to stay off the critical path:
+ *  - Anything already on screen when the page loads is never hidden, so the
+ *    hero/LCP and first cards paint exactly as before (no flash, no delay).
+ *  - Only `opacity` + `translate` animate (compositor-only, no CLS), and the
+ *    animation class is dropped afterwards so no transform lingers to break
+ *    sticky/fixed descendants or existing hover transforms.
+ *  - No-op without IntersectionObserver or under prefers-reduced-motion, and
+ *    elements already animated by the legacy WOW.js (`.wow`) are skipped, as
+ *    are `data-reveal` elements nested inside another one.
+ */
+
+var SELECTOR = "[data-reveal]";
+var PENDING = "is-reveal-pending";
+var REVEALING = "is-revealing";
+var STAGGER_MS = 70;
+var MAX_STAGGER_STEPS = 4;
+var revealObserver = null;
+function reveal(entries) {
+  var step = 0;
+  entries.forEach(function (entry) {
+    if (!entry.isIntersecting) {
+      return;
+    }
+    var el = entry.target;
+    revealObserver.unobserve(el);
+
+    // Cards entering together cascade; a lone section enters immediately.
+    el.style.setProperty("--reveal-delay", "".concat(Math.min(step, MAX_STAGGER_STEPS) * STAGGER_MS, "ms"));
+    step += 1;
+    el.addEventListener("animationend", function () {
+      el.classList.remove(REVEALING);
+      el.style.removeProperty("--reveal-delay");
+    }, {
+      once: true
+    });
+    el.classList.add(REVEALING);
+    el.classList.remove(PENDING);
+  });
+}
+
+// First pass: decide what is below the fold. Elements visible at load are left alone.
+function classify(entries, observer) {
+  entries.forEach(function (entry) {
+    var el = entry.target;
+    observer.unobserve(el);
+    if (entry.isIntersecting) {
+      return;
+    }
+    el.classList.add(PENDING);
+    revealObserver.observe(el);
+  });
+}
+function initScrollReveal() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!("IntersectionObserver" in window)) {
+    return;
+  }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+  var targets = Array.from(root.querySelectorAll(SELECTOR)).filter(function (el) {
+    var _el$parentElement;
+    return !el.dataset.revealBound && !el.closest(".wow") &&
+    // Nested reveals would stack two animations; the outermost one wins.
+    !((_el$parentElement = el.parentElement) !== null && _el$parentElement !== void 0 && _el$parentElement.closest(SELECTOR));
+  });
+  if (!targets.length) {
+    return;
+  }
+  revealObserver = revealObserver || new IntersectionObserver(reveal, {
+    rootMargin: "0px 0px -8% 0px",
+    threshold: 0.08
+  });
+  var classifyObserver = new IntersectionObserver(classify);
+  targets.forEach(function (el) {
+    el.dataset.revealBound = "1";
+    classifyObserver.observe(el);
+  });
 }
 
 /***/ },

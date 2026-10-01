@@ -1,7 +1,9 @@
 @php($icon = 'pages.modern-checkout.partials.icon')
+{{-- Shared by the camp and trip checkouts; $copy picks the lang group for the section copy. --}}
+@php($copy ??= 'checkout.camp')
 <section class="cc-section" aria-labelledby="cc-contact-title">
     <div class="cc-section__head">
-        <h2 class="cc-section__title" id="cc-contact-title">{{ __('checkout.camp.contact_title') }}</h2>
+        <h2 class="cc-section__title" id="cc-contact-title">{{ __($copy.'.contact_title') }}</h2>
         @unless ($checkout->isLoggedIn())
             <a href="#" class="cc-link" @click.prevent="window.openLoginModal && window.openLoginModal()">{{ __('checkout.tour.have_account') }}</a>
         @endunless
@@ -69,7 +71,7 @@
 
     <div class="cc-field" x-ref="field_message">
         <label class="cc-field__label" for="cc-message">
-            {{ __('checkout.camp.message') }} <span class="cc-field__optional">{{ __('checkout.camp.optional') }}</span>
+            {{ __($copy.'.message') }} <span class="cc-field__optional">{{ __($copy.'.optional') }}</span>
         </label>
         <textarea
             id="cc-message"
@@ -77,7 +79,7 @@
             name="message"
             rows="4"
             maxlength="2000"
-            placeholder="{{ __('checkout.camp.message_placeholder') }}"
+            placeholder="{{ __($copy.'.message_placeholder') }}"
             x-model="message"
             @input="clearError('message')"
             :class="{ 'is-invalid': errors.message }"

@@ -268,9 +268,13 @@ $cc-sticky-top: 104px; // sticky site nav (80px) + breathing room
     min-width: 0;
     line-height: 48px;
 
-    &::-webkit-calendar-picker-indicator,
+    // Separate rules: a selector list with a pseudo-element the browser doesn't know
+    // (Chrome and -moz-) is dropped as a whole. Opacity alone still paints the icon.
+    &::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+
     &::-moz-calendar-picker-indicator {
-      // opacity alone still paints the icon next to the custom glyph.
       display: none;
     }
 

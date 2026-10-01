@@ -56,6 +56,7 @@
 @import "./modern-checkout"; // Modern checkout with perfect React design match
 @import "./page/tour-checkout"; // Tour checkout (mobile + desktop layouts)
 @import "./page/camp-checkout"; // Camp checkout / availability request (mobile + desktop layouts)
+@import "./page/trip-checkout"; // Trip checkout: date dropdown, wish window and party row on top of the camp checkout styles
 @import "./components/rental-boat-form"; // The rental boat multi-step form component
 @import "./components/accommodation-form"; // The accommodation form component
 @import "./components/camp-form"; // The camp multi-step form component
@@ -73,3 +74,4 @@
 @import "./components/listing-mobile-book-bar"; // Mobile PDP book bar (camps / vacations)
 @import "./components/guidings-book-card"; // Guiding PDP booking card (desktop + floating mobile)
 @import "./components/tour-reviews-mobile"; // Tour PDP reviews — mobile-only (≤767px) score band + comment slider
+@import "./components/scroll-reveal"; // [data-reveal] entrance animation for listing cards / PDP sections

@@ -21,7 +21,7 @@
     ]));
 @endphp
 
-<article class="vacation-trip-list-card guiding-list-item" data-analytics-vacation-card data-pillar="trip">
+<article class="vacation-trip-list-card guiding-list-item" data-reveal data-analytics-vacation-card data-pillar="trip">
     <div class="vacation-trip-list-card__inner">
         <div class="vacation-trip-list-card__media">
             <div

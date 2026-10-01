@@ -17874,12 +17874,12 @@ div#masonry-grid img {
 }
 .trip-offer-page__booking-note {
   margin-left: auto;
-  max-width: 11rem;
   color: rgba(255, 255, 255, 0.62);
   font-size: 0.72rem;
   font-weight: 500;
   line-height: 1.3;
   text-align: right;
+  white-space: nowrap;
 }
 .trip-offer-page__booking-badge {
   padding: 0.3rem 0.6rem;
@@ -28014,7 +28014,10 @@ body.is-mobile-search-open .pac-container {
   min-width: 0;
   line-height: 48px;
 }
-.cc .cc-date__input::-webkit-calendar-picker-indicator, .cc .cc-date__input::-moz-calendar-picker-indicator {
+.cc .cc-date__input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.cc .cc-date__input::-moz-calendar-picker-indicator {
   display: none;
 }
 .cc .cc-date__input::-webkit-clear-button, .cc .cc-date__input::-webkit-inner-spin-button {
@@ -28541,6 +28544,236 @@ body.is-mobile-search-open .pac-container {
   }
   .cc .cc-cta .cc-submit {
     width: 100%;
+  }
+}
+.cc--trip .cc-departures {
+  position: relative;
+}
+.cc--trip .cc-departures__trigger {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border: 1.5px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  background: var(--cc-surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cc--trip .cc-departures__trigger.is-open {
+  border-color: var(--cc-petrol);
+}
+.cc--trip .cc-departures__trigger.is-invalid {
+  border-color: var(--cc-error);
+}
+.cc--trip .cc-departures__value {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cc-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cc--trip .cc-departures__value.is-placeholder {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--cc-muted);
+}
+.cc--trip .cc-departures__chevron {
+  color: var(--cc-petrol);
+  transition: transform 0.2s ease;
+}
+.cc--trip .cc-departures__trigger.is-open .cc-departures__chevron {
+  transform: rotate(180deg);
+}
+.cc--trip .cc-departures__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--cc-surface);
+  border: 1.5px solid var(--cc-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(10, 47, 53, 0.14);
+}
+.cc--trip .cc-departures__option {
+  flex: none;
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--cc-surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cc--trip .cc-departures__option:hover {
+  background: var(--cc-sand);
+}
+.cc--trip .cc-departures__option:focus-visible {
+  outline-offset: -2px;
+}
+.cc--trip .cc-departures__option.is-selected {
+  background: var(--cc-petrol-tint);
+}
+.cc--trip .cc-departures__radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #a9a196;
+  border-radius: 50%;
+  background: var(--cc-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cc--trip .cc-departures__radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.cc--trip .cc-departures__option.is-selected .cc-departures__radio {
+  border-color: var(--cc-petrol);
+}
+.cc--trip .cc-departures__option.is-selected .cc-departures__radio::after {
+  background: var(--cc-petrol);
+}
+.cc--trip .cc-departures__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cc-ink);
+}
+.cc--trip .cc-departures__badge {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--cc-warn-bg);
+  color: var(--cc-warn-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cc--trip .cc-wish {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cc--trip .cc-wish__intro {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--cc-muted);
+}
+.cc--trip .cc-wish__intro .tc-icon {
+  margin-top: 1px;
+}
+.cc--trip .cc-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.cc--trip .cc-wish > .cc-field__error {
+  margin-top: -8px;
+}
+.cc--trip .cc-range .cc-date__hint {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc--trip .cc-wish__duration {
+  font-size: 13px;
+  color: var(--cc-muted);
+}
+.cc--trip .cc-party {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cc--trip .cc-party__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cc--trip .cc-party__count {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--cc-ink);
+}
+.cc--trip .cc-party__max {
+  font-size: 13px;
+  color: var(--cc-muted);
+}
+.cc--trip .cc-party__stepper {
+  flex: none;
+  width: 140px;
+}
+.cc--trip .cc-warning {
+  margin-top: 0;
+}
+.cc--trip .cc-summary__empty {
+  font-size: 14px;
+  color: var(--cc-muted);
+}
+.cc--trip .cc-trip-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--cc-line);
+  border-bottom: 1px solid var(--cc-line);
+  font-size: 14px;
+  color: var(--cc-text);
+}
+.cc--trip .cc-trip-row .tc-icon {
+  color: var(--cc-petrol);
+}
+.cc--trip .cc-trip-row__date {
+  flex: 1;
+  min-width: 0;
+}
+.cc--trip .cc-trip-row__persons {
+  color: var(--cc-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 1023px) {
+  .cc--trip .cc-trip-row {
+    display: none;
+  }
+  .cc--trip .cc-bar__info {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  .cc--trip .cc-bar__stay {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cc--trip .cc-bar .cc-submit {
+    flex: 1 0 auto;
+    white-space: nowrap;
   }
 }
 #rental-boat-form .step-wrapper,
@@ -39121,5 +39354,29 @@ html.booking-assistant-modal-open body {
   }
   .tour-reviews-m__ticks {
     gap: 2px;
+  }
+}
+.is-reveal-pending {
+  opacity: 0;
+  translate: 0 18px;
+}
+
+.is-revealing {
+  animation: cag-reveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms) backwards;
+}
+
+@keyframes cag-reveal {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce), print {
+  .is-reveal-pending {
+    opacity: 1;
+    translate: none;
+  }
+  .is-revealing {
+    animation: none;
   }
 }
