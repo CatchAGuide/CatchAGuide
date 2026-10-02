@@ -51,7 +51,7 @@
 
     @endif
 
-    <section class="vacation-hub__pillar-fork mb-5" aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
+    <section class="vacation-hub__pillar-fork mb-5" data-reveal aria-label="{{ __('vacations.hub_fork_eyebrow') }}">
         <x-vacation.section-heading
             :eyebrow="__('vacations.hub_fork_eyebrow')"
             :title="__('vacations.hub_fork_title')"
@@ -72,7 +72,7 @@
 
     @if($hub->popularListings->isNotEmpty())
 
-        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-analytics-vacation-rail="popular">
+        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-reveal data-analytics-vacation-rail="popular">
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_popular_title')"
@@ -105,7 +105,7 @@
 
     @if($hub->targetFishTiles->isNotEmpty())
 
-        <section class="vacation-hub__fish mb-5" data-analytics-vacation-rail="target-fish">
+        <section class="vacation-hub__fish mb-5" data-reveal data-analytics-vacation-rail="target-fish">
 
             <x-vacation.country-slider
                 :title="__('vacations.hub_target_fish_title')"
@@ -136,7 +136,7 @@
 
     @if($hub->showNewListingsRail)
 
-        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--new mb-5" data-analytics-vacation-rail="new-listings">
+        <section class="vacation-hub__rail vacation-hub__rail--slider vacation-hub__rail--new mb-5" data-reveal data-analytics-vacation-rail="new-listings">
 
             <x-vacation.card-slider
                 :title="__('vacations.hub_new_listings_title')"
@@ -169,7 +169,7 @@
 
     @if($hub->testimonials->isNotEmpty())
 
-        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-analytics-vacation-rail="reviews">
+        <section class="vacation-hub__rail vacation-hub__rail--slider mb-5" data-reveal data-analytics-vacation-rail="reviews">
 
             <x-vacation.card-slider
                 :eyebrow="__('vacations.hub_reviews_eyebrow')"
@@ -211,7 +211,7 @@
 
         <x-vacation.provider-cta-banner :country-count="$hub->countryGrid->count()" />
 
-        <section class="vacation-hub__seo gl-seo">
+        <section class="vacation-hub__seo gl-seo" data-reveal>
             <div class="cag-home-container">
                 <h2 class="gl-seo__title">{{ __('vacations.hub_seo_title') }}</h2>
                 <div class="gl-seo__body" data-gl-seo-body>

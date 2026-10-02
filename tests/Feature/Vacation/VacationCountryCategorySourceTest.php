@@ -97,7 +97,25 @@ class VacationCountryCategorySourceTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSeeText('the best tours, waters & seasons');
-        $response->assertSeeText('Fishing vacation in');
-        $response->assertSeeText('Toursonlyland');
+        $response->assertSeeText(__('vacations.country_listing_title', ['country' => 'Toursonlyland']));
+    }
+
+    public function test_country_page_without_vacations_cms_still_has_a_meta_description(): void
+    {
+        $slug = 'test-vac-nometa-'.uniqid();
+        CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Nocopyland',
+            'slug' => $slug,
+            'countrycode' => '',
+        ]);
+
+        $response = $this->get(route('vacations.country', $slug));
+
+        $response->assertOk();
+        $response->assertSee(
+            '<meta name="description" content="'.e(__('vacations.country_meta_description', ['country' => 'Nocopyland'])).'"',
+            false
+        );
     }
 }

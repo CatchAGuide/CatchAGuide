@@ -1,0 +1,36 @@
+// Scroll reveal for listing cards and product-page sections.
+// Driven by resources/js/modules/scrollReveal.js — elements only get
+// `.is-reveal-pending` when they start below the fold, so nothing is hidden
+// without JS or above the fold. Uses the individual `translate` property so
+// existing hover `transform`s on cards keep working.
+
+$reveal-distance: 18px;
+$reveal-duration: 0.55s;
+$reveal-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+.is-reveal-pending {
+  opacity: 0;
+  translate: 0 $reveal-distance;
+}
+
+.is-revealing {
+  animation: cag-reveal $reveal-duration $reveal-easing var(--reveal-delay, 0ms) backwards;
+}
+
+@keyframes cag-reveal {
+  from {
+    opacity: 0;
+    translate: 0 $reveal-distance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), print {
+  .is-reveal-pending {
+    opacity: 1;
+    translate: none;
+  }
+
+  .is-revealing {
+    animation: none;
+  }
+}

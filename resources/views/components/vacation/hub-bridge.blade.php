@@ -4,7 +4,7 @@
     'countryCount' => 0,
 ])
 
-<section class="vacation-hub__interlude mb-5" data-analytics-vacation-rail="hub-bridge">
+<section class="vacation-hub__interlude mb-5" data-reveal data-analytics-vacation-rail="hub-bridge">
     <div class="vacation-hub__interlude-inner">
         <div class="vacation-hub__interlude-band">
             <header class="vacation-hub__interlude-head">

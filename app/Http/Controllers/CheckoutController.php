@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\Booking;
 use App\Models\Guiding;
+use App\Services\Checkout\BookingConfirmationAccess;
 use Illuminate\Support\Facades\Session;
 
 class CheckoutController extends Controller
@@ -40,8 +41,13 @@ class CheckoutController extends Controller
     }
 
 
-    public function thankYou(Booking $booking)
+    /**
+     * Legacy booking confirmation; guarded like ModernCheckoutController::thankYou.
+     */
+    public function thankYou(Booking $booking, BookingConfirmationAccess $confirmations)
     {
+        abort_unless($confirmations->allows($booking, auth()->user()), 404);
+
         return view('pages.additional.thank_you', [
             'booking' => $booking
         ]);

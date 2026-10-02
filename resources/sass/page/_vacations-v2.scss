@@ -12,7 +12,7 @@
 // Camp Page Layout
 .camp-page {
     min-height: 100vh;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    background: #fff;
     padding-bottom: 40px;
     font-size: 15px;
 
@@ -267,6 +267,12 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     margin: 0.85rem 0 0.15rem;
+
+    @media (min-width: 992px) {
+        gap: 0.65rem;
+        margin-top: 1.25rem;
+        margin-bottom: 2rem;
+    }
 }
 
 .camp-product-specs {
@@ -420,8 +426,7 @@
             border-radius: 0;
             padding: 0.35rem 0 0;
 
-            .camp-section__title,
-            .camp-desc-wrap > h3 {
+            .camp-section__title {
                 display: none;
             }
         }
@@ -788,7 +793,7 @@
 
 // CTA stack (booking request + contact us) for Vacations V2
 .camp-cta-stack {
-    // Mobile-only stack - positioned before description section
+    // Mobile-only stack - sits under the description section
     &--mobile-top {
         display: none;
     }
@@ -819,34 +824,34 @@
 .camp-booking-card {
     width: 100%;
     padding: 1.5rem 1.75rem;
-    border: 1px solid rgba(15, 23, 42, .08);
-    border-radius: 1.5rem;
-    background: #fff;
-    box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
+    border: 0;
+    border-radius: 1.15rem;
+    background: #313041;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
 
     &__header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 0.85rem;
+        row-gap: 0.35rem;
+        align-items: start;
         margin-bottom: 1.25rem;
     }
 
-    &__price-row {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 0.75rem;
-        margin-top: 0.55rem;
-    }
-
     &__price {
+        grid-column: 2;
+        grid-row: 1;
         display: flex;
-        align-items: baseline;
-        gap: 0.35rem;
+        flex-direction: column;
+        align-items: flex-end;
+        align-self: start;
+        gap: 0;
         min-width: 0;
-        flex: 0 0 auto;
-        white-space: nowrap;
+        white-space: normal;
     }
 
     &__amount {
-        color: #313041;
+        color: #fff;
         font-size: 1.35rem;
         font-weight: 800;
         line-height: 1.15;
@@ -855,29 +860,33 @@
     }
 
     &__unit {
-        color: #6b7280;
+        color: rgba(255, 255, 255, 0.62);
         font-size: 0.82rem;
         font-weight: 500;
         white-space: nowrap;
     }
 
     &__note {
-        flex: 1 1 auto;
-        min-width: 0;
-        color: #6b7280;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: auto;
+        color: rgba(255, 255, 255, 0.62);
         font-size: 0.72rem;
         font-weight: 500;
         line-height: 1.3;
-        text-align: right;
-        white-space: nowrap;
+        text-align: left;
+        white-space: normal;
     }
 
     &__title {
-        margin: 0 0 .4rem;
-        color: #313041;
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+        margin: 0;
+        color: #fff;
         font-size: 1.25rem;
         font-weight: 700;
-        line-height: 1.3;
+        line-height: 1.25;
     }
 
     &__message {
@@ -903,28 +912,11 @@
 
     &__field-label {
         margin: 0;
-        color: #6b7280;
+        color: rgba(255, 255, 255, 0.62);
         font-size: .75rem;
         font-weight: 600;
         letter-spacing: .12em;
         text-transform: uppercase;
-    }
-
-    &__date-input {
-        width: 100%;
-        padding: .65rem .9rem;
-        border: 1px solid #e5e7eb;
-        border-radius: .9rem;
-        background: #f9fafb;
-        color: #313041;
-        font: inherit;
-        cursor: pointer;
-
-        &:focus {
-            outline: none;
-            border-color: rgba(49, 48, 65, .35);
-            box-shadow: 0 0 0 3px rgba(49, 48, 65, .08);
-        }
     }
 
     &__guest-stepper {

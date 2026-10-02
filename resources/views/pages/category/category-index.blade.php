@@ -370,7 +370,7 @@
                     <h5 class="mb-2">All Targets</h5>
                     <div class="row">
                         @foreach($allTargets as $targets)
-                            <div class="col-md-4 my-1">
+                            <div class="col-md-4 my-1" data-reveal>
                                 <div class="trending-card">
                                     <a href="{{ $categoryItemUrl($targets->slug) }}"> 
                                         <div class="trending-card-wrapper">

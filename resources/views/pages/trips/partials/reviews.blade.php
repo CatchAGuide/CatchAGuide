@@ -1,6 +1,6 @@
 {{-- @if(!empty($reviewTrust))
     <div class="trip-offer-page__reviews-band">
-        <section class="trip-offer-page__reviews" id="reviews" data-analytics-trip-reviews>
+        <section class="trip-offer-page__reviews" id="reviews" data-reveal data-analytics-trip-reviews>
             <div class="trip-offer-page__reviews-card">
                 <h2 class="trip-offer-page__section-title trip-offer-page__reviews-title">
                     {{ __('vacations.reviews_title') }}

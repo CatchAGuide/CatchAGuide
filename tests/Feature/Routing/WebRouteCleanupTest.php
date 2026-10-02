@@ -115,7 +115,7 @@ class WebRouteCleanupTest extends TestCase
         $this->assertMiddlewareContains('checkout', 'ddos:checkout');
         $this->assertMiddlewareContains('checkout.index', 'throttle:10,1,checkout-page:');
         $this->assertMiddlewareContains('checkout.index', 'ddos:checkout');
-        $this->assertMiddlewareContains('checkout.store', 'throttle:5,1,checkout-store:');
+        $this->assertMiddlewareContains('checkout.store', 'throttle:checkout-submit');
         $this->assertMiddlewareContains('booking.accept', 'throttle:10,1');
         $this->assertMiddlewareContains('booking.reject', 'throttle:10,1');
         $this->assertMiddlewareContains('booking.rejection', 'throttle:10,1');

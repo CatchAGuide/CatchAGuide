@@ -25,6 +25,7 @@ use App\Models\CalendarSchedule;
 use Illuminate\Support\Facades\Cache;
 use App\Services\DDoSProtectionService;
 use App\Services\BookingService;
+use App\Services\Checkout\BookingConfirmationAccess;
 
 class Checkout extends Component
 {
@@ -527,6 +528,8 @@ class Checkout extends Component
         sleep(5);
 
         $this->loading = false;
+        app(BookingConfirmationAccess::class)->grant($booking);
+
         return redirect(route('thank-you', [$booking]));
     }
     

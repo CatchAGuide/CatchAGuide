@@ -1,0 +1,1485 @@
+// Tour checkout (resources/views/pages/modern-checkout).
+//
+// One DOM, two layouts that never share layout rules:
+// - base `.tc` block: design tokens and component appearance common to both designs;
+// - `media("<desktop")`: mobile design (single column, reordered blocks, sticky total bar);
+// - `media(">=desktop")`: desktop design (main column + sticky summary aside).
+// The calendar keeps the established checkout calendar look via the checkout-calendar mixins.
+
+$tc-sticky-top: 104px; // sticky site nav (80px) + breathing room
+
+.tc {
+  --tc-bg: #f4f1ec;
+  --tc-surface: #fff;
+  --tc-ink: #14232b;
+  --tc-muted: #46555f;
+  --tc-subtle: #8b9299;
+  --tc-teal: #0e4c5a;
+  --tc-teal-dark: #08323c;
+  --tc-teal-tint: #e3edef;
+  --tc-line: #ede7dc;
+  --tc-border: #dcd5c9;
+  --tc-step-line: #cfc7ba;
+  --tc-chip-bg: #faf4ea;
+  --tc-chip-border: #e3dcd1;
+  --tc-disabled: #b5aea2;
+  --tc-cta: #f0563f;
+  --tc-cta-hover: #dc4630;
+  --tc-cta-active: #c93e2a;
+  --tc-error: #c23b22;
+  --tc-error-bg: #fdece8;
+  --tc-shadow: 0 1px 2px rgba(20, 35, 43, 0.06);
+  --tc-focus: 0 0 0 3px rgba(14, 76, 90, 0.18);
+  --tc-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tc-font-head: 'Archivo', var(--tc-font-body);
+  --tc-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  background: var(--tc-bg);
+  color: var(--tc-ink);
+  font-family: var(--tc-font-body);
+  -webkit-font-smoothing: antialiased;
+
+  [x-cloak] {
+    display: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  h1,
+  h2,
+  p,
+  ul,
+  ol {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  button {
+    font-family: inherit;
+  }
+
+  a {
+    color: var(--tc-teal);
+
+    &:hover {
+      color: var(--tc-teal-dark);
+    }
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--tc-teal);
+    outline-offset: 2px;
+  }
+
+  .tc-mono {
+    font-family: var(--tc-font-mono);
+  }
+
+  .tc-muted {
+    color: var(--tc-muted);
+  }
+
+  .tc-icon {
+    flex: none;
+  }
+
+  // Header + steps
+  .tc__container {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .tc__title {
+    font-family: var(--tc-font-head);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--tc-ink);
+  }
+
+  .tc-steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 16.67%;
+      right: 16.67%;
+      height: 1px;
+      background: var(--tc-step-line);
+    }
+  }
+
+  .tc-steps__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .tc-steps__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--tc-bg);
+    border: 1.5px solid var(--tc-teal);
+    color: var(--tc-teal);
+  }
+
+  // Cards
+  .tc-card {
+    background: var(--tc-surface);
+    box-shadow: var(--tc-shadow);
+  }
+
+  .tc-card__title {
+    font-family: var(--tc-font-head);
+    font-weight: 600;
+    color: var(--tc-ink);
+  }
+
+  // Product
+  .tc-product {
+    display: flex;
+  }
+
+  .tc-product__media {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #e7eef0;
+    color: #7fa0a9;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .tc-product__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tc-product__title {
+    font-family: var(--tc-font-head);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--tc-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .tc-product__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.4;
+    color: var(--tc-muted);
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  // Calendar (established checkout calendar design)
+  .tc-calendar {
+    @include checkout-calendar-grid;
+
+    .calendar-nav {
+      color: var(--tc-ink);
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .calendar-day {
+      @include checkout-calendar-day;
+      padding: 0;
+      color: var(--tc-ink);
+    }
+
+    .calendar-day-empty {
+      height: 2.5rem;
+    }
+  }
+
+  .tc-calendar__selected {
+    font-weight: 500;
+    color: var(--tc-teal);
+  }
+
+  // Guests
+  .tc-guests__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tc-guests__label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .tc-guests__max {
+    font-size: 12px;
+    color: var(--tc-muted);
+  }
+
+  .tc-stepper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tc-stepper__btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 10px;
+    border: 1.5px solid var(--tc-teal);
+    background: var(--tc-surface);
+    color: var(--tc-teal);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--tc-teal-tint);
+    }
+
+    &:disabled {
+      border-color: var(--tc-border);
+      color: var(--tc-disabled);
+      cursor: default;
+    }
+  }
+
+  .tc-stepper__value {
+    min-width: 20px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  // Pricing
+  .tc-pricing__row,
+  .tc-pricing__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .tc-pricing__row {
+    font-size: 14px;
+
+    .tc-mono {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+  }
+
+  .tc-pricing__label {
+    color: var(--tc-muted);
+  }
+
+  .tc-pricing__extras-title {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .tc-pricing__extras {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
+  }
+
+  .tc-extra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: var(--tc-ink);
+    cursor: pointer;
+  }
+
+  .tc-extra__box {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 1.5px solid var(--tc-disabled);
+    background: var(--tc-surface);
+    color: #fff;
+
+    .tc-icon {
+      opacity: 0;
+    }
+  }
+
+  .tc-extra__label {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    color: var(--tc-muted);
+  }
+
+  .tc-extra__price {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--tc-subtle);
+    white-space: nowrap;
+  }
+
+  .tc-extra.is-selected {
+    .tc-extra__box {
+      border-color: var(--tc-teal);
+      background: var(--tc-teal);
+
+      .tc-icon {
+        opacity: 1;
+      }
+    }
+
+    .tc-extra__price {
+      color: var(--tc-ink);
+    }
+  }
+
+  .tc-divider {
+    height: 1px;
+    margin: 14px 0 12px;
+    border: 0;
+    background: var(--tc-line);
+    opacity: 1;
+  }
+
+  .tc-pricing__total-label {
+    font-family: var(--tc-font-head);
+    font-weight: 600;
+  }
+
+  .tc-pricing__total-value {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .tc-pricing > .tc-muted {
+    margin-top: 6px;
+  }
+
+  // Contact form
+  .tc-contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .tc-contact__login {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .tc-field__label {
+    display: block;
+    font-weight: 500;
+    color: var(--tc-muted);
+  }
+
+  .tc-input,
+  .tc-phone {
+    width: 100%;
+    border-radius: 12px;
+    border: 1.5px solid var(--tc-border);
+    background: var(--tc-surface);
+    color: var(--tc-ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &.is-invalid {
+      border-color: var(--tc-error);
+    }
+  }
+
+  .tc-input {
+    outline: none;
+    font-family: var(--tc-font-body);
+
+    &:focus {
+      border-color: var(--tc-teal);
+      box-shadow: var(--tc-focus);
+    }
+  }
+
+  .tc-phone {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    &:focus-within {
+      border-color: var(--tc-teal);
+      box-shadow: var(--tc-focus);
+    }
+  }
+
+  .tc-phone__code {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    color: var(--tc-ink);
+
+    .tc-icon {
+      color: var(--tc-muted);
+    }
+  }
+
+  .tc-phone__select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .tc-phone__divider {
+    width: 1px;
+    height: 24px;
+    flex: none;
+    background: var(--tc-chip-border);
+  }
+
+  .tc-phone__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--tc-ink);
+    font-family: var(--tc-font-body);
+    outline: none;
+  }
+
+  // Example values must read as hints, not as filled-in data.
+  .tc-input::placeholder,
+  .tc-phone__input::placeholder {
+    color: #a9a296;
+    opacity: 1;
+  }
+
+  .tc-field__error {
+    color: var(--tc-error);
+  }
+
+  .tc-field__help {
+    margin-top: 6px;
+  }
+
+  // Payment
+  .tc-payment__text {
+    line-height: 1.45;
+    color: var(--tc-muted);
+  }
+
+  .tc-payment__methods {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .tc-chip {
+    display: flex;
+    align-items: center;
+    border-radius: 9px;
+    border: 1px solid var(--tc-chip-border);
+    background: var(--tc-chip-bg);
+    color: var(--tc-muted);
+  }
+
+  // Call to action
+  .tc-cta__captcha {
+    margin-bottom: 14px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  // Invisible reCAPTCHA: keep the inline badge in the DOM (the widget needs it) but out of
+  // sight; the attribution line under the button replaces it, as Google requires.
+  .tc-cta__captcha--invisible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .tc-cta__recaptcha {
+    margin-top: 4px;
+    font-size: 10.5px;
+  }
+
+  .tc-cta > .tc-field__error {
+    margin: -6px 0 12px;
+    font-size: 12px;
+  }
+
+  .tc-alert {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--tc-error-bg);
+    color: var(--tc-error);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .tc-submit {
+    width: 100%;
+    height: 56px;
+    border: 0;
+    border-radius: 15px;
+    background: var(--tc-cta);
+    color: #fff;
+    font-family: var(--tc-font-head);
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(240, 86, 63, 0.28);
+    transition: background 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--tc-cta-hover);
+    }
+
+    &:active:not(:disabled) {
+      background: var(--tc-cta-active);
+    }
+
+    &:disabled {
+      opacity: 0.75;
+      cursor: progress;
+    }
+  }
+
+  .tc-cta__legal {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--tc-muted);
+  }
+
+  .tc-trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 14px;
+    margin-top: 12px;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: var(--tc-muted);
+    }
+
+    .tc-icon {
+      color: var(--tc-teal);
+    }
+  }
+
+  // Reschedule: guide notice, suggested-dates note, locked contact summary
+  .tc-notice {
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--tc-chip-border);
+    background: var(--tc-chip-bg);
+    color: var(--tc-ink);
+    line-height: 1.45;
+  }
+
+  .tc-notice__meta {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--tc-teal);
+  }
+
+  .tc-notice__quote {
+    margin: 12px 0 0;
+    padding-left: 12px;
+    border-left: 2px solid var(--tc-teal);
+
+    figcaption {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tc-muted);
+    }
+
+    blockquote {
+      margin: 4px 0 0;
+      font-style: italic;
+      color: var(--tc-muted);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .tc-calendar__note {
+    margin: -6px 0 12px;
+    font-size: 12.5px;
+  }
+
+  // Guide reject form: chosen dates, message, request summary
+  .tc-date-picks {
+    margin-top: 12px;
+  }
+
+  .tc-date-picks__count,
+  .tc-reject-cta__count {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--tc-teal);
+  }
+
+  .tc-date-picks__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .tc-date-pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 10px 0 12px;
+    border-radius: 999px;
+    border: 1.5px solid var(--tc-teal);
+    background: var(--tc-teal-tint);
+    color: var(--tc-teal);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #d3e3e6;
+    }
+  }
+
+  .tc--reject .tc-calendar > .tc-field__error {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .tc-message__note {
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
+
+  .tc-textarea {
+    display: block;
+    height: auto;
+    min-height: 132px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .tc-message__meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .tc-counter {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--tc-subtle);
+    white-space: nowrap;
+
+    &.is-ok {
+      color: var(--tc-teal);
+    }
+  }
+
+  .tc-request__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0 0;
+
+    > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    dt {
+      font-weight: 400;
+      color: var(--tc-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+      text-align: right;
+    }
+  }
+
+  .tc-reject-cta__count {
+    margin-bottom: 10px;
+  }
+
+  // Reschedule fallback page (used / invalid / expired / unavailable link)
+  &.tc--state .tc__container {
+    max-width: 560px;
+  }
+
+  .tc-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .tc-state__icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tc-state__text {
+    max-width: 42ch;
+    line-height: 1.5;
+    color: var(--tc-muted);
+  }
+
+  .tc-state__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .tc-state__primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .tc-state__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    border-radius: 13px;
+    border: 1.5px solid var(--tc-teal);
+    color: var(--tc-teal);
+    font-family: var(--tc-font-head);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--tc-teal-tint);
+    }
+  }
+
+  .tc-state__link {
+    font-size: 13px;
+  }
+
+  // Mobile sticky bar
+  .tc-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030; // below Bootstrap modals (1050) such as the login modal
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid #e7e0d5;
+    transform: translateY(110%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+
+    &.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  .tc-bar__total {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .tc-bar__sub {
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: var(--tc-muted);
+  }
+
+  .tc-bar__btn {
+    height: 46px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 13px;
+    background: var(--tc-cta);
+    color: #fff;
+    font-family: var(--tc-font-head);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--tc-cta-hover);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tc-bar {
+      transition: none;
+    }
+
+    .calendar-day.selected,
+    .calendar-day.selected::before {
+      animation: none;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Mobile design (< 1024px)
+// ---------------------------------------------------------------------------
+@include media("<desktop") {
+  .tc {
+    padding: 4px 16px 32px;
+
+    .tc-only-desktop,
+    .tc__summary-meta {
+      display: none;
+    }
+
+    // The aside wrappers dissolve so their children join the single-column flow.
+    .tc__grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tc__aside,
+    .tc__summary {
+      display: contents;
+    }
+
+    .tc__head { order: 1; }
+    .tc-product { order: 2; }
+    .tc-calendar { order: 3; }
+    .tc-guests { order: 4; }
+    .tc-pricing { order: 5; }
+    .tc-contact { order: 6; }
+    .tc-payment { order: 7; }
+    .tc-cta { order: 8; margin-top: 6px; }
+
+    .tc__title {
+      font-size: 28px;
+      margin: 10px 0 14px;
+    }
+
+    .tc-steps {
+      margin-bottom: 6px;
+
+      &::before {
+        top: 14px;
+      }
+    }
+
+    .tc-steps__item {
+      gap: 8px;
+      font-size: 11.5px;
+    }
+
+    .tc-steps__icon {
+      width: 28px;
+      height: 28px;
+
+      .tc-icon {
+        width: 13px;
+        height: 13px;
+      }
+    }
+
+    .tc-card {
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .tc-card__title {
+      font-size: 17px;
+    }
+
+    .tc-product {
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .tc-product__media {
+      width: 86px;
+      height: 86px;
+      border-radius: 13px;
+    }
+
+    .tc-product__body {
+      gap: 7px;
+    }
+
+    .tc-product__title {
+      font-size: 15px;
+    }
+
+    .tc-product__meta {
+      font-size: 11.5px;
+
+      .tc-icon {
+        width: 13px;
+        height: 13px;
+      }
+    }
+
+    // Calendar + guests read as one "Date & participants" card.
+    .tc-calendar {
+      border-radius: 18px 18px 0 0;
+      padding-bottom: 0;
+      box-shadow: none;
+
+      .tc-card__title {
+        margin-bottom: 12px;
+      }
+    }
+
+    .tc-calendar__selected,
+    .tc-calendar > .tc-field__error {
+      margin-top: 10px;
+      font-size: 12.5px;
+    }
+
+    .tc-guests {
+      margin-top: -12px; // cancels the flex gap so it continues the calendar card
+      padding: 14px 16px 16px;
+      background: var(--tc-surface);
+      border-radius: 0 0 18px 18px;
+      box-shadow: var(--tc-shadow);
+
+      &::before {
+        content: '';
+        display: block;
+        height: 1px;
+        margin-bottom: 14px;
+        background: var(--tc-line);
+      }
+    }
+
+    .tc-guests__max {
+      margin-top: 8px;
+    }
+
+    .tc-pricing {
+      padding: 16px;
+      background: var(--tc-surface);
+      border-radius: 18px;
+      box-shadow: var(--tc-shadow);
+    }
+
+    .tc-extra {
+      min-height: 44px;
+    }
+
+    .tc-pricing__total-label {
+      font-size: 17px;
+    }
+
+    .tc-pricing__total-value {
+      font-size: 26px;
+    }
+
+    .tc-pricing > .tc-muted {
+      font-size: 12px;
+    }
+
+    // Contact: title, privacy note, login link, then fields.
+    .tc-contact {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tc-contact__head {
+      display: contents;
+    }
+
+    .tc-contact .tc-card__title { order: 1; }
+
+    .tc-contact__privacy {
+      order: 2;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    .tc-contact__login {
+      order: 3;
+      margin-top: 10px;
+      font-size: 12.5px;
+    }
+
+    .tc-contact__grid {
+      order: 4;
+      gap: 12px 10px;
+      margin-top: 14px;
+
+      .tc-field:nth-child(n + 3) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .tc-field__label {
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    // 16px inputs keep iOS Safari from zooming on focus.
+    .tc-input {
+      height: 46px;
+      padding: 0 12px;
+      font-size: 16px;
+    }
+
+    .tc-phone {
+      height: 46px;
+    }
+
+    .tc-phone__code {
+      padding: 0 10px 0 12px;
+      font-size: 15px;
+    }
+
+    .tc-phone__input {
+      padding: 0 12px;
+      font-size: 16px;
+    }
+
+    .tc-field__error {
+      margin-top: 5px;
+      font-size: 11.5px;
+    }
+
+    .tc-field__help {
+      font-size: 11.5px;
+    }
+
+    .tc-payment__text {
+      margin-top: 6px;
+      font-size: 13.5px;
+    }
+
+    .tc-payment__methods {
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tc-chip {
+      gap: 6px;
+      padding: 7px 11px;
+      font-size: 12.5px;
+
+      .tc-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .tc-notice {
+      margin-top: 14px;
+      font-size: 13.5px;
+    }
+
+    &.tc--state {
+      padding-top: 24px;
+    }
+
+    .tc-state {
+      padding: 24px 18px;
+    }
+
+    .tc-state__title {
+      font-size: 24px;
+    }
+
+    .tc-state__text {
+      font-size: 14px;
+    }
+
+    // Guide reject form: head, product, dates, message, request + send.
+    &.tc--reject {
+      .tc-calendar {
+        order: 3;
+        border-radius: 18px;
+        padding-bottom: 16px;
+        box-shadow: var(--tc-shadow);
+      }
+
+      .tc-message { order: 4; }
+
+      .tc-request {
+        order: 5;
+        padding: 16px;
+        border-radius: 18px;
+        background: var(--tc-surface);
+        box-shadow: var(--tc-shadow);
+      }
+
+      .tc-reject-cta { order: 6; margin-top: 6px; }
+
+      // The count already sits under the calendar on mobile.
+      .tc-reject-cta__count { display: none; }
+
+      .tc-textarea {
+        font-size: 16px; // no iOS zoom on focus
+      }
+    }
+
+    // reCAPTCHA renders at a fixed 304px; shrink it on very narrow phones.
+    @media (max-width: 359px) {
+      .tc-cta__captcha {
+        transform: scale(0.9);
+        transform-origin: 0 0;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop design (>= 1024px)
+// ---------------------------------------------------------------------------
+@include media(">=desktop") {
+  .tc {
+    padding: 36px 32px 64px;
+
+    .tc-only-mobile,
+    .tc-bar {
+      display: none;
+    }
+
+    // Left column stacks the page; the aside spans every row and sticks. The last row is
+    // flexible so a taller aside stretches it instead of spacing out the left cards.
+    .tc__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      grid-template-rows: auto auto auto 1fr;
+      gap: 16px 28px;
+      align-items: start;
+    }
+
+    .tc__head,
+    .tc-calendar,
+    .tc-contact,
+    .tc-payment,
+    .tc-message {
+      grid-column: 1;
+    }
+
+    &.tc--reject .tc-reject-cta {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--tc-line);
+    }
+
+    .tc-textarea {
+      font-size: 15px;
+    }
+
+    .tc__aside {
+      grid-column: 2;
+      grid-row: 1 / span 4;
+      position: sticky;
+      top: $tc-sticky-top;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tc__head {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tc__title {
+      font-size: 38px;
+      line-height: 1.05;
+      letter-spacing: -0.015em;
+    }
+
+    .tc-steps {
+      margin: 4px 0 8px;
+
+      &::before {
+        top: 16px;
+      }
+    }
+
+    .tc-steps__item {
+      gap: 9px;
+      font-size: 13px;
+    }
+
+    .tc-steps__icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .tc-card {
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .tc-card__title {
+      font-size: 20px;
+    }
+
+    .tc-calendar .tc-card__title {
+      margin-bottom: 16px;
+    }
+
+    .tc-calendar__selected,
+    .tc-calendar > .tc-field__error {
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .tc-product {
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .tc-product__media {
+      width: 104px;
+      height: 104px;
+      border-radius: 14px;
+    }
+
+    .tc-product__body {
+      gap: 10px;
+    }
+
+    .tc-product__title {
+      font-size: 16px;
+    }
+
+    .tc-product__meta {
+      font-size: 12.5px;
+    }
+
+    .tc__summary {
+      padding: 20px;
+      border-radius: 20px;
+      background: var(--tc-surface);
+      box-shadow: var(--tc-shadow);
+    }
+
+    .tc__summary-meta {
+      margin-bottom: 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--tc-teal);
+    }
+
+    .tc-guests__max {
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .tc-pricing {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--tc-line);
+    }
+
+    .tc-extra {
+      min-height: 40px;
+    }
+
+    .tc-pricing__total-label {
+      font-size: 18px;
+    }
+
+    .tc-pricing__total-value {
+      font-size: 30px;
+    }
+
+    .tc-pricing > .tc-muted {
+      font-size: 12.5px;
+    }
+
+    .tc-cta {
+      margin-top: 18px;
+    }
+
+    .tc-contact__head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .tc-contact__login {
+      font-size: 13px;
+    }
+
+    .tc-contact__privacy {
+      margin-top: 6px;
+      font-size: 12.5px;
+    }
+
+    .tc-contact__grid {
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .tc-field__label {
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+
+    .tc-input {
+      height: 48px;
+      padding: 0 14px;
+      font-size: 15px;
+    }
+
+    .tc-phone {
+      height: 48px;
+    }
+
+    .tc-phone__code {
+      padding: 0 10px 0 14px;
+      font-size: 15px;
+    }
+
+    .tc-phone__divider {
+      height: 26px;
+    }
+
+    .tc-phone__input {
+      padding: 0 14px;
+      font-size: 15px;
+    }
+
+    .tc-field__error,
+    .tc-field__help {
+      font-size: 12px;
+    }
+
+    .tc-field__error {
+      margin-top: 6px;
+    }
+
+    .tc-payment__text {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .tc-payment__methods {
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .tc-notice {
+      font-size: 14px;
+    }
+
+    .tc-state {
+      padding: 40px 36px;
+    }
+
+    .tc-state__title {
+      font-size: 30px;
+    }
+
+    .tc-state__text {
+      font-size: 15px;
+    }
+
+    .tc-state__actions {
+      max-width: 360px;
+    }
+
+    .tc-chip {
+      gap: 7px;
+      padding: 8px 13px;
+      font-size: 13px;
+    }
+  }
+}

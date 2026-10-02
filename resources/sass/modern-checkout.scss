@@ -205,93 +205,7 @@
   }
 
   .calendar-day {
-    height: 2.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #cbd5e1;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    cursor: pointer;
-    background-color: white;
-
-    &:hover {
-      background-color: #f8fafc;
-    }
-
-    &:hover:not(:disabled) {
-      background-color: #f8fafc;
-    }
-
-    &.selected {
-      background: linear-gradient(135deg, var(--green-primary) 0%, var(--green-secondary) 100%);
-      color: white;
-      border: 3px solid var(--green-dark);
-      box-shadow: 
-        0 8px 25px rgba(5, 150, 105, 0.4),
-        0 4px 12px rgba(5, 150, 105, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      transform: scale(1.15);
-      font-family: var(--font-family-primary);
-      font-weight: 700;
-      font-size: 0.875rem;
-      line-height: 1.25rem;
-      position: relative;
-      z-index: 10;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: selectedBounce 3s ease-in-out infinite;
-      
-      &::before {
-        content: '';
-        position: absolute;
-        top: -4px;
-        left: -4px;
-        right: -4px;
-        bottom: -4px;
-        background: linear-gradient(135deg, var(--green-light), var(--green-primary), var(--green-secondary));
-        border-radius: 0.75rem;
-        z-index: -1;
-        animation: selectedGlow 2s ease-in-out infinite;
-      }
-      
-      &::after {
-        content: '✓';
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        width: 20px;
-        height: 20px;
-        background: #dc2626;
-        color: white;
-        border-radius: 50%;
-        font-size: 12px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid white;
-        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
-      }
-      
-      &:hover {
-        transform: scale(1.2);
-        box-shadow: 
-          0 12px 35px rgba(5, 150, 105, 0.5),
-          0 6px 16px rgba(5, 150, 105, 0.4),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      }
-    }
-
-    &.past {
-      opacity: 0.4;
-      cursor: not-allowed;
-      background-color: #f1f5f9;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      background-color: #f1f5f9;
-      color: #94a3b8;
-    }
+    @include checkout-calendar-day;
   }
 
   .alert-success {
@@ -541,52 +455,8 @@
   .calendar-container {
     background-color: white; // Ensure calendar card stays white
     border: 1px solid #e2e8f0; // Standard border
-    
-    .calendar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-    }
 
-    .calendar-nav {
-      border-radius: 0.75rem;
-      border: 1px solid #cbd5e1;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
-      transition: all 0.2s;
-      cursor: pointer;
-      background-color: white;
-
-      &:hover {
-        background-color: #f8fafc;
-      }
-    }
-
-    .calendar-month {
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    .calendar-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.25rem;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-bottom: 0.25rem;
-
-      .weekday {
-        padding: 0.5rem 0;
-      }
-    }
-
-    .calendar-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.25rem;
-    }
+    @include checkout-calendar-grid;
   }
 
   // Booking summary

@@ -30,6 +30,21 @@ return [
      */
     'api_secret_key'               => env('RECAPTCHA_SECRET_KEY', ''),
 
+    /*
+    | Single on/off switch: widgets render and tokens are verified only while active.
+    | Defaults to on for production and staging, off everywhere else (local, testing), so
+    | local forms work without solving a captcha. RECAPTCHA_ACTIVE overrides either way.
+    */
+    'active'                       => (bool) env('RECAPTCHA_ACTIVE', in_array(env('APP_ENV'), ['production', 'staging'], true)),
+
+    /*
+    | Optional key pair registered in the reCAPTCHA admin as type "Invisible reCAPTCHA badge".
+    | Widgets that opt in (<x-recaptcha invisible />, e.g. the tour checkout) run without a
+    | checkbox when both are set, and fall back to the regular checkbox otherwise.
+    */
+    'invisible_site_key'           => env('RECAPTCHA_INVISIBLE_SITE_KEY', ''),
+    'invisible_secret_key'         => env('RECAPTCHA_INVISIBLE_SECRET_KEY', ''),
+
     /**
      *
      * ReCATCHA version

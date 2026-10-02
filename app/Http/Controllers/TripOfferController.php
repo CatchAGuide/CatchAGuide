@@ -6,6 +6,7 @@ use App\Models\Trip;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Presenters\Vacation\TripTrustSignalResolver;
 use App\Services\Search\ListingSearchStateService;
+use App\Services\Checkout\Trip\TripCheckoutOffer;
 use App\Services\Seo\StructuredDataBuilder;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
@@ -91,6 +92,9 @@ class TripOfferController extends Controller
             'canonicalUrl' => $isDraft ? null : route('vacations.trips.show', $slug),
             'structuredData' => $isDraft ? null : $this->structuredData->trip($trip, route('vacations.trips.show', $trip->slug)),
             'preselectedGuests' => $preselectedGuests,
+            // Booking card guest stepper; the checkout clamps it to the trip's group size.
+            'initialGuests' => max(1, min(TripCheckoutOffer::DEFAULT_MAX_PERSONS, (int) ($preselectedGuests ?? 1))),
+            'checkoutUrl' => route('checkout.trip.show', $slug),
         ]);
     }
 

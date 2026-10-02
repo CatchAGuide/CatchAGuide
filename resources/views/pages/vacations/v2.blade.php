@@ -90,7 +90,7 @@
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
-    class="camp-page min-h-screen bg-gradient-to-b from-slate-50 to-white"
+    class="camp-page min-h-screen"
 >
     @if($isDraft)
         <div class="camp-container py-3">
@@ -212,30 +212,13 @@
             <!-- General Information -->
             <main id="general-info" class="camp-info-grid">
                 <div class="camp-sections">
-                    <!-- Contact Us - Mobile only; booking uses the floating bar -->
-                    @unless($isDraft)
-                    <div class="camp-cta-stack camp-cta-stack--mobile-top">
-                        @include('pages.trips.partials.contact-card', [
-                            'wrapperClass' => 'mb-0',
-                            'modalTarget' => '#campGeneralContactModal',
-                            'title' => __('vacations.general_contact_title'),
-                            'message' => __('vacations.general_contact_message'),
-                            'buttonLabel' => __('vacations.general_contact_form'),
-                            'showTripAnalytics' => false,
-                            'reportSourceType' => 'camp',
-                            'reportSourceId' => $camp['id'] ?? null,
-                            'reportedUrl' => url()->current(),
-                        ])
-                    </div>
-                    @endunless
-                    
                     <section id="description" class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.description') }}</h2>
                         <div class="camp-section__body space-y-3">
                             <!-- Booking + Contact Us - Desktop only, floats inside description -->
                             @unless($isDraft)
                             <div class="camp-cta-stack camp-cta-stack--desktop-float">
-                                @include('pages.vacations.partials.camp-booking-card', ['instance' => 'desktop'])
+                                @include('pages.vacations.partials.camp-booking-card')
                                 @include('pages.trips.partials.contact-card', [
                                     'wrapperClass' => 'mb-0 mt-3',
                                     'modalTarget' => '#campGeneralContactModal',
@@ -297,7 +280,24 @@
                         </div>
                     </section>
 
-                    <section id="distances" class="camp-section">
+                    <!-- Contact Us - Mobile only, after the description; booking uses the floating bar -->
+                    @unless($isDraft)
+                    <div class="camp-cta-stack camp-cta-stack--mobile-top">
+                        @include('pages.trips.partials.contact-card', [
+                            'wrapperClass' => 'mb-0',
+                            'modalTarget' => '#campGeneralContactModal',
+                            'title' => __('vacations.general_contact_title'),
+                            'message' => __('vacations.general_contact_message'),
+                            'buttonLabel' => __('vacations.general_contact_form'),
+                            'showTripAnalytics' => false,
+                            'reportSourceType' => 'camp',
+                            'reportSourceId' => $camp['id'] ?? null,
+                            'reportedUrl' => url()->current(),
+                        ])
+                    </div>
+                    @endunless
+
+                    <section id="distances" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.distances') }}</h2>
                         <div class="camp-pill-row">
                             @if(!empty($camp['distances']['to_shop_label']))
@@ -316,7 +316,7 @@
                     </section>
 
                     @if(!empty($camp['amenities']))
-                    <section id="amenities-section" class="camp-section">
+                    <section id="amenities-section" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.camp_amenities') }}</h2>
                         <div class="camp-section__cols">
                             {{-- Dynamic amenities from camp_facility_camp pivot table --}}
@@ -331,7 +331,7 @@
                     @endif
 
                     @if(!empty($camp['policies_regulations']))
-                    <section id="policies" class="camp-section">
+                    <section id="policies" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.policies_regulations') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['policies_regulations'] as $policy)
@@ -342,7 +342,7 @@
                     @endif
 
                     @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_parsed']))
-                    <section id="best-travel-times" class="camp-section">
+                    <section id="best-travel-times" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.best_travel_times') }}</h2>
                         
                         @if(!empty($camp['best_travel_times']))
@@ -364,7 +364,7 @@
                     @endif
                     
                     @if(!empty($camp['target_fish']))
-                    <section id="target-fish" class="camp-section">
+                    <section id="target-fish" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.target_fish') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['target_fish'] as $fish)
@@ -375,7 +375,7 @@
                     @endif
 
                     @if(!empty($camp['travel_info']))
-                    <section id="travel-info" class="camp-section">
+                    <section id="travel-info" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.travel_information') }}</h2>
                         <ul class="camp-section__list">
                             @foreach($camp['travel_info'] as $info)
@@ -388,7 +388,7 @@
                     @endif
 
                     @if(!empty($camp['extras']))
-                    <section id="extras" class="camp-section">
+                    <section id="extras" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.extras') }}</h2>
                         <div class="camp-pill-row">
                             @foreach($camp['extras'] as $extra)
@@ -399,7 +399,7 @@
                     @endif
 
                     @if(!empty($camp['conditions']['minimum_stay_nights']) || !empty($camp['conditions']['booking_window']))
-                    <section id="conditions" class="camp-section">
+                    <section id="conditions" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.camp_conditions') }}</h2>
                         <div class="camp-section__cols">
                             @if(!empty($camp['conditions']['minimum_stay_nights']))
@@ -554,7 +554,7 @@
 
         <!-- Special Offers Section -->
         @if (isset($specialOffers) && count($specialOffers) > 0)
-        <section id="special-offers" class="camp-section camp-section--listings mb-3">
+        <section id="special-offers" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.special_offers') }}</h2>
             @foreach($specialOffers as $specialOffer)
                 <div class="camp-section__item mb-4">
@@ -566,7 +566,7 @@
 
         <!-- Accommodations Section -->
         @if (count($accommodations) > 0)
-        <section id="accommodations" class="camp-section camp-section--listings mb-3">
+        <section id="accommodations" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.accommodations') }}</h2>
             @foreach($accommodations as $accommodation)
                 <div class="camp-section__item mb-4">
@@ -578,7 +578,7 @@
 
         <!-- Guidings Section -->
         @if (isset($guidings) && count($guidings) > 0)
-        <section id="guidings" class="camp-section camp-section--listings mb-3">
+        <section id="guidings" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.guidings_tours') }}</h2>
             @foreach($guidings as $guiding)
                 <div class="camp-section__item mb-4">
@@ -590,7 +590,7 @@
 
         <!-- Rental Boats Section -->
         @if (count($boats) > 0)
-        <section id="boats" class="camp-section camp-section--listings mb-3">
+        <section id="boats" data-reveal class="camp-section camp-section--listings mb-3">
             <h2 class="camp-section__title">{{ __('vacations.rental_boats') }}</h2>
             @foreach($boats as $boat)
                 <div class="camp-section__item mb-4">
@@ -709,96 +709,6 @@
     });
 </script>
 
-<!-- Contact Modal -->
-<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel">{{ $contactModalTitle ?? __('contact.shareYourQuestion') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{-- reCAPTCHA script is rendered by the component --}}
-                <div id="contactFormContainer">
-                    <form id="contactModalForm">
-                        @csrf
-                        <input type="hidden" name="source_type" value="camp">
-                        <input type="hidden" name="source_id" value="{{ $camp['id'] }}">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="{{ __('contact.yourName') }}" name="name" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <input type="email" class="form-control" placeholder="{{ __('contact.email') }}" name="email" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mb-3">
-                            @include('includes.forms.phone-input', [
-                                'placeholder' => 'contact.phone',
-                                'required' => true,
-                                'showLabel' => true,
-                                'labelText' => 'contact.phone'
-                            ])
-                        </div>
-                        <div class="row g-3 mb-3 align-items-end">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @php
-                                        $preferredDateMin = now()->toDateString();
-                                        $preferredDateMax = now()->copy()->addYears(2)->toDateString();
-                                    @endphp
-                                    <label for="preferred_date" class="form-label">{{ __('trips.select_date') }}</label>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="preferred_date"
-                                        name="preferred_date"
-                                        min="{{ $preferredDateMin }}"
-                                        max="{{ $preferredDateMax }}"
-                                        required
-                                    >
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
-                                    <input type="number" class="form-control" id="number_of_persons" name="number_of_persons" min="1" step="1" value="{{ $preselectedGuests ?? '' }}" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group mb-3">
-                            <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
-                        </div>
-                        <div class="contact-modal-submit-row d-flex flex-column flex-sm-row flex-wrap justify-content-between align-items-center gap-3">
-                            <div class="contact-modal-captcha-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-start">
-                                <x-recaptcha />
-                            </div>
-                            <div class="contact-modal-submit-wrap w-100 w-sm-auto d-flex justify-content-center justify-content-sm-end">
-                                <button type="button" id="contactSubmitBtn" class="btn btn-orange">{{ __('contact.btnSend') }}</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <!-- Loading Overlay -->
-                <div id="contactLoadingOverlay" style="display: none;">
-                    <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                        <x-loading.inline class="mb-3" label="Loading..." />
-                        <p class="text-center">{{ __('contact.submitting') }}...</p>
-                    </div>
-                </div>
-                <div class="alert alert-success mt-3" id="contactSuccessMessage" style="display: none;">
-                    {{ __('contact.bookingSuccessMessage') }}
-                </div>
-                <div class="alert alert-danger mt-3" id="contactError" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- General Contact Modal (questions without booking details) -->
 <div class="modal fade" id="campGeneralContactModal" tabindex="-1" aria-labelledby="campGeneralContactModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -865,12 +775,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Booking card + mobile bar lead to the camp checkout, carrying the chosen guest count.
+    const checkoutUrl = @json(route('checkout.camp.show', $camp['slug']));
     const bookingCards = document.querySelectorAll('.camp-booking-card');
-    const bookingDateInputs = document.querySelectorAll('[data-camp-booking-date]');
     const bookingGuestLabels = document.querySelectorAll('[data-camp-booking-guests-label]');
-    const bookingModal = document.getElementById('contactModal');
-    const modalDateInput = document.getElementById('preferred_date');
-    const modalGuestsInput = document.getElementById('number_of_persons');
     const mobileBookButtons = document.querySelectorAll('[data-camp-mobile-book]');
     let bookingGuests = {{ (int) ($preselectedGuests ?? 1) }} || 1;
 
@@ -881,102 +789,32 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function syncBookingDates(value) {
-        bookingDateInputs.forEach(input => {
-            input.value = value;
-        });
+    function goToCheckout() {
+        const url = new URL(checkoutUrl, window.location.origin);
+        url.searchParams.set('persons', String(bookingGuests));
+        window.location.assign(url.toString());
     }
-
-    bookingDateInputs.forEach(input => {
-        input.addEventListener('change', function () {
-            syncBookingDates(input.value);
-        });
-    });
 
     bookingCards.forEach(card => {
-        const minusButton = card.querySelector('[data-camp-booking-guests-minus]');
-        const plusButton = card.querySelector('[data-camp-booking-guests-plus]');
-        const requestButton = card.querySelector('[data-camp-booking-cta]');
-        const dateInput = card.querySelector('[data-camp-booking-date]');
-
-        minusButton?.addEventListener('click', function () {
+        card.querySelector('[data-camp-booking-guests-minus]')?.addEventListener('click', function () {
             updateBookingGuests(bookingGuests - 1);
         });
-
-        plusButton?.addEventListener('click', function () {
+        card.querySelector('[data-camp-booking-guests-plus]')?.addEventListener('click', function () {
             updateBookingGuests(bookingGuests + 1);
         });
-
-        requestButton?.addEventListener('click', function () {
-            if (!dateInput?.value) {
-                dateInput?.reportValidity();
-                dateInput?.focus();
-                return;
-            }
-
-            syncBookingDates(dateInput.value);
-            prefillBookingModal();
-
-            if (bookingModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                const modal = bootstrap.Modal.getOrCreateInstance
-                    ? bootstrap.Modal.getOrCreateInstance(bookingModal)
-                    : new bootstrap.Modal(bookingModal);
-                modal.show();
-            }
-        });
+        card.querySelector('[data-camp-booking-cta]')?.addEventListener('click', goToCheckout);
     });
 
-    function openCampBookingModal() {
-        prefillBookingModal();
-
-        if (bookingModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const modal = bootstrap.Modal.getOrCreateInstance
-                ? bootstrap.Modal.getOrCreateInstance(bookingModal)
-                : new bootstrap.Modal(bookingModal);
-            modal.show();
-        }
-    }
-
     mobileBookButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            openCampBookingModal();
-        });
+        button.addEventListener('click', goToCheckout);
     });
 
     updateBookingGuests(bookingGuests);
 
-    function prefillBookingModal() {
-        const selectedDate = Array.from(bookingDateInputs).map(input => input.value).find(Boolean) || '';
-        if (modalDateInput && selectedDate) modalDateInput.value = selectedDate;
-        if (modalGuestsInput) modalGuestsInput.value = String(bookingGuests);
-    }
-
     const recaptchaErrorMessage = @json(__('validation.recaptcha'));
-    const bookingCaptcha = document.getElementById('contactModalForm') && typeof RecaptchaWidget !== 'undefined'
-        ? new RecaptchaWidget(document.getElementById('contactModalForm'))
-        : null;
     const generalCaptcha = document.getElementById('campGeneralContactModalForm') && typeof RecaptchaWidget !== 'undefined'
         ? new RecaptchaWidget(document.getElementById('campGeneralContactModalForm'))
         : null;
-
-    // Booking request form submission handler
-    $('#contactSubmitBtn').on('click', function() {
-        handleContactFormSubmission();
-    });
-    
-    // Also bind on modal shown event to ensure the button exists
-    $('#contactModal').on('shown.bs.modal', function() {
-        prefillBookingModal();
-        bookingCaptcha?.reset();
-        const contactError = document.getElementById('contactError');
-        if (contactError) {
-            contactError.style.display = 'none';
-            contactError.innerHTML = '';
-        }
-        $('#contactSubmitBtn').off('click').on('click', function() {
-            handleContactFormSubmission();
-        });
-    });
 
     // General contact form submission handler
     $('#campGeneralContactSubmitBtn').on('click', function() {
@@ -995,86 +833,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
     
-    function handleContactFormSubmission() {
-        const contactForm = document.getElementById('contactModalForm');
-        const contactFormContainer = document.getElementById('contactFormContainer');
-        const loadingOverlay = document.getElementById('contactLoadingOverlay');
-        const successMessage = document.getElementById('contactSuccessMessage');
-        const contactError = document.getElementById('contactError');
-        
-        // Hide previous messages
-        contactError.style.display = 'none';
-        successMessage.style.display = 'none';
-        
-        // Validate form
-        if (!contactForm.checkValidity()) {
-            contactForm.reportValidity();
-            return;
-        }
-
-        if (bookingCaptcha && !bookingCaptcha.requireToken(function() {
-            contactError.style.display = 'block';
-            contactError.innerHTML = recaptchaErrorMessage;
-        })) {
-            return;
-        }
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        
-        // Show loading overlay
-        contactFormContainer.style.display = 'none';
-        loadingOverlay.style.display = 'block';
-        
-        // Submit form via AJAX
-        fetch('{{route('sendcontactmail')}}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Hide loading overlay
-            loadingOverlay.style.display = 'none';
-            
-            if (data.success) {
-                // Reset form
-                contactForm.reset();
-                bookingCaptcha?.reset();
-                
-                // Show success message
-                successMessage.style.display = 'block';
-                
-                // Hide contact modal after 2 seconds
-                setTimeout(() => {
-                    const contactModal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
-                    if (contactModal) {
-                        contactModal.hide();
-                    }
-                    successMessage.style.display = 'none';
-                    contactFormContainer.style.display = 'block';
-                }, 2000);
-            } else {
-                contactError.style.display = 'block';
-                contactError.innerHTML = data.message || 'An error occurred. Please try again.';
-                contactFormContainer.style.display = 'block';
-                bookingCaptcha?.reset();
-            }
-        })
-        .catch(error => {
-            // Hide loading overlay and show form again on error
-            loadingOverlay.style.display = 'none';
-            contactFormContainer.style.display = 'block';
-            
-            contactError.style.display = 'block';
-            contactError.innerHTML = error.message || 'An error occurred. Please try again.';
-            bookingCaptcha?.reset();
-        });
-    }
-
     function handleGeneralContactFormSubmission() {
         const contactForm = document.getElementById('campGeneralContactModalForm');
         const contactFormContainer = document.getElementById('campGeneralContactFormContainer');
@@ -1172,17 +930,41 @@ document.addEventListener('DOMContentLoaded', function () {
   .camp-booking-card {
     width: 100%;
     padding: 1.5rem 1.75rem;
-    border: 1px solid rgba(15, 23, 42, .08);
-    border-radius: 1.5rem;
-    background: #fff;
-    box-shadow: 0 15px 45px rgba(15, 23, 42, .16);
+    border: 0;
+    border-radius: 1.15rem;
+    background: #313041;
+    box-shadow: 0 8px 22px rgba(49, 48, 65, 0.16);
   }
-  .camp-booking-card__header { margin-bottom: 1.25rem; }
+  .camp-booking-card__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 0.85rem;
+    row-gap: 0.35rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+  }
   .camp-booking-card__title {
-    margin: 0 0 .4rem;
-    color: #313041;
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    margin: 0;
+    color: #fff;
     font-size: 1.25rem;
     font-weight: 700;
+    line-height: 1.25;
+  }
+  .camp-booking-card__price {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    white-space: normal;
+  }
+  .camp-booking-card__note {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
   .camp-booking-card__message {
     margin: 0;
@@ -1199,20 +981,11 @@ document.addEventListener('DOMContentLoaded', function () {
   .camp-booking-card__field-group { gap: .35rem; }
   .camp-booking-card__field-label {
     margin: 0;
-    color: #6b7280;
+    color: rgba(255, 255, 255, 0.62);
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: .12em;
     text-transform: uppercase;
-  }
-  .camp-booking-card__date-input {
-    width: 100%;
-    padding: .65rem .9rem;
-    border: 1px solid #e5e7eb;
-    border-radius: .9rem;
-    background: #f9fafb;
-    color: #313041;
-    font: inherit;
   }
   .camp-booking-card__guest-stepper {
     display: flex;
@@ -1265,12 +1038,10 @@ document.addEventListener('DOMContentLoaded', function () {
   /* Mobile optimizations for contact modal form */
   @media (max-width: 576px) {
     /* Stack phone country code + number vertically inside modal */
-    #contactModal .phone-input-container .d-flex,
     #campGeneralContactModal .phone-input-container .d-flex {
       flex-direction: column;
     }
 
-    #contactModal .phone-input-container .d-flex > *,
     #campGeneralContactModal .phone-input-container .d-flex > * {
       width: 100% !important;
       max-width: 100% !important;
@@ -1279,19 +1050,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /* Stack ReCaptcha + submit button vertically and make button full width */
-    #contactModal .modal-body .d-flex.justify-content-between,
     #campGeneralContactModal .modal-body .d-flex.justify-content-between {
       flex-direction: column;
       align-items: stretch;
       gap: 1rem;
     }
 
-    #contactModal .modal-body .d-flex.justify-content-between > *,
     #campGeneralContactModal .modal-body .d-flex.justify-content-between > * {
       width: 100% !important;
     }
 
-    #contactModal .btn.btn-orange,
     #campGeneralContactModal .btn.btn-orange {
       width: 100%;
     }

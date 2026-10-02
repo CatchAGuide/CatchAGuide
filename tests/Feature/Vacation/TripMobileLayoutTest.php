@@ -21,6 +21,22 @@ class TripMobileLayoutTest extends TestCase
         URL::forceRootUrl('http://cag.local');
     }
 
+    public function test_trip_contact_button_uses_contact_us_copy_in_both_locales(): void
+    {
+        $trip = $this->makeTrip();
+
+        $german = $this->get(route('vacations.trips.show', $trip->slug))->assertOk()->getContent();
+        $this->assertSame(2, $this->contactButtonCount($german, 'Kontakt aufnehmen'));
+        $this->assertSame(0, $this->contactButtonCount($german, 'Kontaktformular'));
+
+        $english = $this->withSession(['locale' => 'en'])
+            ->get(route('vacations.trips.show', $trip->slug))
+            ->assertOk()
+            ->getContent();
+        $this->assertSame(2, $this->contactButtonCount($english, 'Contact us'));
+        $this->assertSame(0, $this->contactButtonCount($english, 'Contact Form'));
+    }
+
     public function test_live_trip_page_renders_stacked_book_bar_specs_and_search_sheet(): void
     {
         $trip = $this->makeTrip();
@@ -40,10 +56,12 @@ class TripMobileLayoutTest extends TestCase
         $this->assertStringContainsString(__('vacations.request_trip_bar'), $html);
         $this->assertStringContainsString(__('vacations.request_trip'), $html);
         $this->assertStringContainsString(__('vacations.per_person'), $html);
-        $this->assertStringContainsString(e(__('vacations.product_spec_duration_included', [
+        $durationNote = e(__('vacations.product_spec_duration_included', [
             'days' => 7,
             'nights' => 6,
-        ])), $html);
+        ]));
+        $this->assertStringContainsString('trip-offer-page__booking-note', $html);
+        $this->assertSame(2, substr_count($html, $durationNote));
         $this->assertStringNotContainsString('camp-product-specs', $html);
         $this->assertStringContainsString('trip-offer-page__feature-cards', $html);
         $this->assertStringContainsString('trip-offer-page__about-card', $html);
@@ -84,6 +102,42 @@ class TripMobileLayoutTest extends TestCase
         $this->assertStringContainsString(__('vacations.show_on_map'), $html);
     }
 
+    public function test_single_occupancy_surcharge_is_hidden_when_null(): void
+    {
+        $trip = $this->makeTrip(['price_single_room_addition' => null]);
+
+        $response = $this->get(route('vacations.trips.show', $trip->slug));
+
+        $response->assertOk();
+        $response->assertDontSee(strtoupper(__('trips.single_supplement')), false);
+        $response->assertSee(__('trips.pricing_details_title'), false);
+    }
+
+    public function test_single_occupancy_surcharge_is_shown_when_set(): void
+    {
+        $trip = $this->makeTrip(['price_single_room_addition' => 450]);
+
+        $response = $this->get(route('vacations.trips.show', $trip->slug));
+
+        $response->assertOk();
+        $response->assertSee(strtoupper(__('trips.single_supplement')), false);
+        $response->assertSee('+€450', false);
+    }
+
+    public function test_trip_without_duration_omits_the_days_and_nights_note(): void
+    {
+        $trip = $this->makeTrip([
+            'duration_days' => null,
+            'duration_nights' => null,
+        ]);
+
+        $response = $this->get(route('vacations.trips.show', $trip->slug));
+
+        $response->assertOk();
+        $response->assertDontSee('trip-offer-page__booking-note', false);
+        $response->assertDontSee('listing-mobile-book__note', false);
+    }
+
     public function test_draft_trip_page_does_not_render_the_mobile_book_bar(): void
     {
         $trip = $this->makeTrip(['status' => 'draft']);
@@ -104,6 +158,17 @@ class TripMobileLayoutTest extends TestCase
         $this->assertStringContainsString('listing-mobile-book__note', $html);
         $this->assertStringContainsString('7 Tage &amp; 6 Nächte inklusive', $html);
         $this->assertStringContainsString('Unverbindlich anfragen', $html);
+    }
+
+    private function contactButtonCount(string $html, string $label): int
+    {
+        preg_match_all(
+            '/class="btn btn-outline-orange"[^>]*>\s*'.preg_quote($label, '/').'\s*<i class="fas fa-arrow-right/',
+            $html,
+            $matches
+        );
+
+        return count($matches[0]);
     }
 
     private function makeTrip(array $overrides = []): Trip

@@ -93,7 +93,7 @@
             </div>
             <div class="row">
                 @forelse($locations as $loc)
-                    <div class="col-md-4 my-1">
+                    <div class="col-md-4 my-1" data-reveal>
                         <div class="trending-card">
                             <a href="{{ route('trips.category', ['location' => $loc->slug]) }}">
                                 <div class="trending-card-wrapper">

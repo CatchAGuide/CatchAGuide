@@ -1,12 +1,18 @@
-{{-- The "id" prop lets JavaScript address one specific widget on pages that hold several. --}}
-@props(['id' => null])
+{{-- The "id" prop lets JavaScript address one specific widget on pages that hold several.
+     Renders nothing while reCAPTCHA is inactive (config recaptcha.active: production and
+     staging by default). "invisible" opts into the no-checkbox widget when the invisible key pair is set;
+     such forms must fetch the token with RecaptchaWidget#execute() and verify with
+     Recaptcha::production(invisible: true). --}}
+@use('App\Rules\Recaptcha')
+@props(['id' => null, 'invisible' => false])
 
 @php
-    $siteKey = (string) config('recaptcha.api_site_key', '');
+    $useInvisible = $invisible && Recaptcha::invisibleConfigured();
+    $siteKey = (string) config($useInvisible ? 'recaptcha.invisible_site_key' : 'recaptcha.api_site_key', '');
     $attrs = (array) config('recaptcha.tag_attributes', []);
 @endphp
 
-@if($siteKey !== '')
+@if(Recaptcha::active() && $siteKey !== '')
     @once
         @php
             $lang = app()->getLocale();
@@ -22,6 +28,23 @@
                     return name && typeof window[name] === 'function' ? window[name] : undefined;
                 }
 
+                // Resolves a pending execute() promise of an invisible widget, then runs the
+                // widget's own configured callback (if any).
+                function settling(el, name, tokenFromArgs) {
+                    return function (token) {
+                        var settle = el._recaptchaSettle;
+                        el._recaptchaSettle = null;
+                        if (settle) {
+                            settle(tokenFromArgs ? token : '');
+                        }
+
+                        var own = callbackFor(el.dataset[name]);
+                        if (own) {
+                            own.apply(null, arguments);
+                        }
+                    };
+                }
+
                 function render(el) {
                     if (el.dataset.recaptchaWidgetId !== undefined) {
                         return;
@@ -32,10 +55,11 @@
                             sitekey: el.dataset.sitekey,
                             theme: el.dataset.theme || undefined,
                             size: el.dataset.size || undefined,
+                            badge: el.dataset.badge || undefined,
                             tabindex: el.dataset.tabindex ? parseInt(el.dataset.tabindex, 10) : undefined,
-                            callback: callbackFor(el.dataset.callback),
-                            'expired-callback': callbackFor(el.dataset.expiredCallback),
-                            'error-callback': callbackFor(el.dataset.errorCallback)
+                            callback: settling(el, 'callback', true),
+                            'expired-callback': settling(el, 'expiredCallback', false),
+                            'error-callback': settling(el, 'errorCallback', false)
                         });
                     } catch (e) {
                         // One broken widget must not stop the remaining ones from rendering.
@@ -115,6 +139,44 @@
                     return this;
                 };
 
+                RecaptchaWidget.prototype.isInvisible = function () {
+                    var el = this.element();
+
+                    return !!el && el.dataset.size === 'invisible';
+                };
+
+                // Token for submitting the form. Checkbox widgets return what the visitor
+                // already solved; invisible widgets run the (usually silent) check now and
+                // resolve once Google answers ('' when it fails or expires).
+                RecaptchaWidget.prototype.execute = function () {
+                    var el = this.element();
+                    var id = this.widgetId();
+
+                    if (!this.isInvisible()) {
+                        return Promise.resolve(this.getResponse());
+                    }
+
+                    if (id === null || !window.grecaptcha || !window.grecaptcha.execute) {
+                        return Promise.resolve('');
+                    }
+
+                    return new Promise(function (resolve) {
+                        // A newer execute() supersedes an unanswered one (e.g. challenge closed).
+                        if (el._recaptchaSettle) {
+                            el._recaptchaSettle('');
+                        }
+                        el._recaptchaSettle = resolve;
+
+                        try {
+                            window.grecaptcha.reset(id);
+                            window.grecaptcha.execute(id);
+                        } catch (e) {
+                            el._recaptchaSettle = null;
+                            resolve('');
+                        }
+                    });
+                };
+
                 RecaptchaWidget.prototype.requireToken = function (onMissing) {
                     if (!this.element() || this.getResponse()) {
                         return true;
@@ -167,7 +229,12 @@
         data-recaptcha
         data-sitekey="{{ $siteKey }}"
         @if(!empty($attrs['theme'])) data-theme="{{ $attrs['theme'] }}" @endif
-        @if(!empty($attrs['size'])) data-size="{{ $attrs['size'] }}" @endif
+        @if($useInvisible)
+            data-size="invisible"
+            data-badge="inline"
+        @elseif(!empty($attrs['size']))
+            data-size="{{ $attrs['size'] }}"
+        @endif
         @if(isset($attrs['tabindex'])) data-tabindex="{{ $attrs['tabindex'] }}" @endif
         @if(!empty($attrs['callback'])) data-callback="{{ $attrs['callback'] }}" @endif
         @if(!empty($attrs['expired-callback'])) data-expired-callback="{{ $attrs['expired-callback'] }}" @endif

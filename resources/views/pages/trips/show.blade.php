@@ -1,72 +1,6 @@
 @extends('layouts.app')
 @include('components.seo.json-ld', ['data' => $structuredData ?? null])
 
-@push('styles')
-    <style>
-        /* Trip request modal: avoid native <select> overflow on mobile */
-        #tripContactModal .modal-dialog {
-            margin: .5rem;
-            max-width: calc(100% - 1rem);
-        }
-        @media (min-width: 577px) {
-            #tripContactModal .modal-dialog {
-                margin: 1.75rem auto;
-                max-width: 800px;
-            }
-        }
-        #tripContactModal .modal-content,
-        #tripContactModal .modal-body {
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-        #tripContactModal .row > [class*="col-"],
-        #tripContactModal .form-group,
-        #tripContactModal .trip-contact-date-field {
-            min-width: 0;
-            max-width: 100%;
-        }
-        #tripContactModal .trip-contact-date-options {
-            display: flex;
-            flex-direction: column;
-            gap: .5rem;
-            width: 100%;
-            max-width: 100%;
-        }
-        #tripContactModal .trip-contact-date-option {
-            display: flex;
-            align-items: flex-start;
-            gap: .65rem;
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-            padding: .7rem .8rem;
-            border: 1px solid #e5e7eb;
-            border-radius: .75rem;
-            background: #f9fafb;
-            cursor: pointer;
-            font-weight: normal;
-            color: #313041;
-        }
-        #tripContactModal .trip-contact-date-option:has(.trip-contact-date-option__input:checked) {
-            border-color: rgba(232, 96, 76, 0.55);
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(232, 96, 76, 0.12);
-        }
-        #tripContactModal .trip-contact-date-option__input {
-            flex: 0 0 auto;
-            margin-top: .2rem;
-            accent-color: #E8604C;
-        }
-        #tripContactModal .trip-contact-date-option__label {
-            flex: 1 1 auto;
-            min-width: 0;
-            font-size: .9rem;
-            line-height: 1.35;
-            word-break: break-word;
-        }
-    </style>
-@endpush
-
 @section('title', $tripView['title'] ?? __('trips.page_title_fallback'))
 @section('description', \Illuminate\Support\Str::limit(strip_tags($tripView['description']['full'] ?? ''), 155))
 
@@ -104,7 +38,7 @@
             $tripView['country'] ?? '',
         ]);
     @endphp
-    <div class="trip-offer-page category-hero-page" data-category-hero-page data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-analytics-page="trip-offer">
+    <div class="trip-offer-page category-hero-page" data-category-hero-page data-trip-duration-days="{{ $tripView['duration']['days'] ?? '' }}" data-year-round="{{ !empty($isYearRoundTrip) ? '1' : '0' }}" data-trip-guests="{{ $initialGuests }}" data-analytics-page="trip-offer">
         @include('pages.vacations.partials.catalog-header', [
             'listingTitle' => __('vacations.hub_header_title'),
             'listingSubtitle' => __('vacations.hub_header_subtitle'),
@@ -275,7 +209,7 @@
         {{-- Layout: main content left; sticky booking card + map right (aligned with About) --}}
         <div class="trip-offer-page__layout">
             <main class="trip-offer-page__main">
-                <section class="trip-offer-page__about" id="about">
+                <section class="trip-offer-page__about" data-reveal id="about">
                     <div class="trip-offer-page__about-card">
                         <h2 class="trip-offer-page__section-title">
                             {{ __('trips.about_this_trip') }}
@@ -364,7 +298,7 @@
                 </section>
 
                 @unless($isYearRoundTrip)
-                <section class="trip-offer-page__availability" id="availability">
+                <section class="trip-offer-page__availability" data-reveal id="availability">
                     <div class="trip-offer-page__availability-header">
                         <h2 class="trip-offer-page__section-title">
                             {{ __('trips.availability_title') }}
@@ -458,7 +392,7 @@
                 @endunless
 
                 @if(!empty($tripView['trip_highlights']))
-                    <section class="trip-offer-page__highlights" id="highlights">
+                    <section class="trip-offer-page__highlights" data-reveal id="highlights">
                         <h2 class="trip-offer-page__section-title">
                             {{ __('trips.trip_highlights') }}
                         </h2>
@@ -471,7 +405,7 @@
                 @endif
 
                 @if(!empty($tripScheduleItems))
-                    <section class="trip-offer-page__daily-schedule" id="itinerary">
+                    <section class="trip-offer-page__daily-schedule" data-reveal id="itinerary">
                         <div class="trip-offer-page__daily-schedule-card">
                             <h2 class="trip-offer-page__section-title">
                                 {{ __('trips.trip_schedule') }}
@@ -506,7 +440,7 @@
                 @endif
 
                 @if(!empty($includedItems) || !empty($excludedItems))
-                    <section class="trip-offer-page__details-grid" id="details">
+                    <section class="trip-offer-page__details-grid" data-reveal id="details">
                         <div class="trip-offer-page__included-excluded-card">
                             <h2 class="trip-offer-page__section-title trip-offer-page__included-title">
                                 {{ __('trips.whats_included_title') }}
@@ -553,7 +487,7 @@
 
                 {{-- Cards: Accommodation, Your Guide, Boat & Equipment (between What's Included and Additional Information) --}}
                 @if($hasAccommodationContent)
-                    <section class="trip-offer-page__card-group" id="accommodation-card">
+                    <section class="trip-offer-page__card-group" data-reveal id="accommodation-card">
                         <div class="trip-offer-page__card-group-list">
                             <div class="trip-offer-page__card-group-single">
                                 {{-- Accommodation --}}
@@ -617,7 +551,7 @@
                 @endif
 
                 {{-- Pricing Details card --}}
-                <section class="trip-offer-page__pricing-details" id="pricing-details">
+                <section class="trip-offer-page__pricing-details" data-reveal id="pricing-details">
                     <h2 class="trip-offer-page__section-title trip-offer-page__pricing-details-title">
                         {{ __('trips.pricing_details_title') }}
                     </h2>
@@ -637,27 +571,27 @@
                         @endif
                     </div>
 
-                    <div class="trip-offer-page__pricing-grid">
-                        <div class="trip-offer-page__pricing-grid-card">
-                            <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.single_supplement')) }}</p>
-                            <p class="trip-offer-page__pricing-grid-value">
-                                @if(!empty($tripView['price']['single_room_addition']))
-                                    @php $sym = ($tripView['price']['currency'] ?? 'EUR') === 'EUR' ? '€' : ''; @endphp
-                                    +{{ $sym }}{{ number_format($tripView['price']['single_room_addition'], 0) }}
-                                @else
-                                    —
-                                @endif
-                            </p>
+                    @if(!empty($tripView['price']['single_room_addition']) || !empty($tripView['downpayment_policy']))
+                        <div class="trip-offer-page__pricing-grid">
+                            @if(!empty($tripView['price']['single_room_addition']))
+                                <div class="trip-offer-page__pricing-grid-card">
+                                    <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.single_supplement')) }}</p>
+                                    <p class="trip-offer-page__pricing-grid-value">
+                                        @php $sym = ($tripView['price']['currency'] ?? 'EUR') === 'EUR' ? '€' : ''; @endphp
+                                        +{{ $sym }}{{ number_format($tripView['price']['single_room_addition'], 0) }}
+                                    </p>
+                                </div>
+                            @endif
+                            @if(!empty($tripView['downpayment_policy']))
+                                <div class="trip-offer-page__pricing-grid-card">
+                                    <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.deposit_at_booking')) }}</p>
+                                    <p class="trip-offer-page__pricing-grid-value">
+                                        {{ $tripView['downpayment_policy'] }}
+                                    </p>
+                                </div>
+                            @endif
                         </div>
-                        @if(!empty($tripView['downpayment_policy']))
-                            <div class="trip-offer-page__pricing-grid-card">
-                                <p class="trip-offer-page__pricing-grid-label">{{ strtoupper(__('trips.deposit_at_booking')) }}</p>
-                                <p class="trip-offer-page__pricing-grid-value">
-                                    {{ $tripView['downpayment_policy'] }}
-                                </p>
-                            </div>
-                        @endif
-                    </div>
+                    @endif
 
                     @if(!empty($tripView['cancellation_policy']))
                     <div class="trip-offer-page__pricing-cancellation-card">
@@ -674,7 +608,7 @@
 
                 {{-- Guide and Boat card --}}
                 @if($hasGuideContent || $hasBoatContent)
-                    <section class="trip-offer-page__card-group" id="guide-boat-card">
+                    <section class="trip-offer-page__card-group" data-reveal id="guide-boat-card">
                         <div class="trip-offer-page__card-group-list">
                             <div class="trip-offer-page__card-group-single">
                             {{-- Your Guide (target: avatar left, name + experience right, then light-blue certification tags) --}}
@@ -773,7 +707,7 @@
                 @endif
 
                 @if(!empty($additionalInfoItems))
-                    <section class="trip-offer-page__additional-info-section" id="additional-info">
+                    <section class="trip-offer-page__additional-info-section" data-reveal id="additional-info">
                         <div class="trip-offer-page__additional-info-card">
                             <h2 class="trip-offer-page__section-title trip-offer-page__additional-info-title">
                                 {{ __('trips.additional_info_title') }}
@@ -810,7 +744,7 @@
                 @endif
 
                 @if(!empty($nonFishingActivities))
-                    <section class="trip-offer-page__non-fishing-section" id="non-fishing-activities">
+                    <section class="trip-offer-page__non-fishing-section" data-reveal id="non-fishing-activities">
                         <div class="trip-offer-page__non-fishing-card">
                             <h2 class="trip-offer-page__section-title trip-offer-page__non-fishing-title">
                                 {{ __('trips.non_fishing_activities') }}
@@ -843,43 +777,43 @@
                 @unless($isDraft)
                     <div class="trip-offer-page__booking-card">
                         <div class="trip-offer-page__booking-header">
-                            <div class="trip-offer-page__booking-header-grid">
-                                <div class="trip-offer-page__booking-price-block">
-                                    <div class="trip-offer-page__booking-title-row">
-                                        <span class="trip-offer-page__booking-label">
-                                            {{ __('trips.price_per_person_short') }}
+                            <div class="trip-offer-page__booking-price-block">
+                                <span class="trip-offer-page__booking-label">
+                                    {{ __('trips.price_per_person_short') }}
+                                </span>
+                                <div class="trip-offer-page__booking-price">
+                                    @if($tripView['price']['per_person'])
+                                        <span class="trip-offer-page__booking-amount">
+                                            € {{ number_format($tripView['price']['per_person'], 0) }}
                                         </span>
-                                    </div>
-                                    <div class="trip-offer-page__booking-price">
-                                        @if($tripView['price']['per_person'])
-                                            <span class="trip-offer-page__booking-amount">
-                                                € {{ number_format($tripView['price']['per_person'], 0) }}
-                                            </span>
-                                        @else
-                                            <span class="trip-offer-page__booking-amount">
-                                                {{ __('trips.pricing_title') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="trip-offer-page__booking-qty-block">
-                                    <p class="trip-offer-page__booking-field-label">
-                                        {{ __('trips.guests_label') }}
-                                    </p>
-                                    <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
-                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
-                                            –
-                                        </button>
-                                        <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>1</span>
-                                        <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
-                                            +
-                                        </button>
-                                    </div>
+                                    @else
+                                        <span class="trip-offer-page__booking-amount">
+                                            {{ __('trips.pricing_title') }}
+                                        </span>
+                                    @endif
+                                    @if($tripPriceNote)
+                                        <span class="trip-offer-page__booking-note">{{ $tripPriceNote }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <div class="trip-offer-page__booking-body">
+                            <div class="trip-offer-page__booking-field-group">
+                                <p class="trip-offer-page__booking-field-label">
+                                    {{ __('trips.guests_label') }}
+                                </p>
+                                <div class="trip-offer-page__guest-stepper trip-offer-page__guest-stepper--subtle" data-trip-guests>
+                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--minus trip-offer-page__stepper-btn--subtle" data-trip-guests-minus aria-label="{{ __('trips.decrease_guests') }}">
+                                        –
+                                    </button>
+                                    <span class="trip-offer-page__guest-label trip-offer-page__guest-label--number" data-trip-guests-label>{{ $initialGuests }}</span>
+                                    <button type="button" class="trip-offer-page__stepper-btn trip-offer-page__stepper-btn--plus trip-offer-page__stepper-btn--subtle" data-trip-guests-plus aria-label="{{ __('trips.increase_guests') }}">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
                             {{-- Dated trips: schedule dropdown. Year-round: date only in the request modal. --}}
                             @unless($isYearRoundTrip)
                             <div class="trip-offer-page__booking-field-group">
@@ -967,145 +901,6 @@
             data-analytics-trip-inquiry
         />
         @endunless
-
-        <!-- Contact Modal (Trips) -->
-        <div class="modal fade" id="tripContactModal" tabindex="-1" aria-labelledby="tripContactModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="tripContactModalLabel">{{ $contactModalTitle ?? __('contact.shareYourQuestion') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('cookie.close-btn') }}"></button>
-                    </div>
-                    <div class="modal-body">
-                        {{-- reCAPTCHA script is rendered by the component --}}
-                        <div id="tripContactFormContainer">
-                            <form id="tripContactModalForm">
-                                @csrf
-                                <input type="hidden" name="source_type" value="trip">
-                                <input type="hidden" name="source_id" value="{{ $tripView['id'] ?? '' }}">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="{{ __('contact.yourName') }}" name="name" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <input type="email" class="form-control" placeholder="{{ __('contact.email') }}" name="email" required>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    @include('includes.forms.phone-input', [
-                                        'placeholder' => 'contact.phone',
-                                        'required' => true,
-                                        'showLabel' => true,
-                                        'labelText' => 'contact.phone'
-                                    ])
-                                </div>
-
-                                <div class="row g-3 mb-3 align-items-end">
-                                    <div class="col-12 col-md-6">
-                                        <div class="form-group trip-contact-date-field">
-                                            <label for="trip_preferred_date" class="form-label">{{ __('trips.select_date') }}</label>
-                                            @if(!empty($isYearRoundTrip))
-                                                <input
-                                                    type="date"
-                                                    class="form-control"
-                                                    id="trip_preferred_date"
-                                                    name="preferred_date"
-                                                    min="{{ $minBookingDate }}"
-                                                    value="{{ $initialBookingDate }}"
-                                                    data-trip-selected-date
-                                                    required>
-                                            @else
-                                                {{-- Stacked options avoid native <select> popup overflow on mobile --}}
-                                                <div
-                                                    class="trip-contact-date-options"
-                                                    id="trip_preferred_date"
-                                                    role="group"
-                                                    aria-label="{{ __('trips.select_date') }}"
-                                                    data-trip-selected-date-group
-                                                >
-                                                    @if(!empty($availabilityCards))
-                                                        @foreach($availabilityCards as $card)
-                                                            @php
-                                                                $status = $card['availability_status'] ?? 'available';
-                                                                if ($status === 'fully_booked') {
-                                                                    continue;
-                                                                }
-                                                                $departureValue = $card['departure_date'] ?? '';
-                                                                $label = $card['date_formatted'] ?? ($card['day'] ?? '') . '. ' . ($card['month'] ?? '') . ' ' . now()->year;
-                                                                if (!empty($card['return_date_formatted'])) {
-                                                                    $label .= ' – ' . $card['return_date_formatted'];
-                                                                }
-                                                                if (in_array($status, ['almost_full', 'limited'], true) && isset($card['spots_available'])) {
-                                                                    $label .= ' — ' . ($card['spots_available'] == 1
-                                                                        ? __('trips.only_x_spot', ['count' => 1])
-                                                                        : __('trips.only_x_spot_plural', ['count' => $card['spots_available']]));
-                                                                }
-                                                                $optionId = 'trip_preferred_date_' . preg_replace('/\W+/', '_', (string) $departureValue);
-                                                            @endphp
-                                                            <label class="trip-contact-date-option" for="{{ $optionId }}">
-                                                                <input
-                                                                    type="radio"
-                                                                    class="trip-contact-date-option__input"
-                                                                    id="{{ $optionId }}"
-                                                                    name="preferred_date"
-                                                                    value="{{ $departureValue }}"
-                                                                    data-trip-selected-date
-                                                                    {{ (!empty($selectedDate) && $departureValue === $selectedDate) ? 'checked' : '' }}
-                                                                    required
-                                                                >
-                                                                <span class="trip-contact-date-option__label">{{ $label }}</span>
-                                                            </label>
-                                                        @endforeach
-                                                    @endif
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <div class="form-group">
-                                            <label for="trip_number_of_persons" class="form-label">{{ __('trips.guests_label') }}</label>
-                                            <input type="number" class="form-control" id="trip_number_of_persons" name="number_of_persons" min="1" step="1" value="{{ $preselectedGuests ?? '' }}" required>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <textarea name="description" class="form-control" rows="4" placeholder="{{ __('contact.feedback') }}" required></textarea>
-                                </div>
-
-                                <div class="trip-contact-submit-row d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                    <div class="trip-contact-captcha-wrap">
-                                        <x-recaptcha />
-                                    </div>
-                                    <div class="trip-contact-submit-wrap">
-                                        <button type="button" id="tripContactSubmitBtn" class="btn btn-orange">
-                                            {{ __('contact.btnSend') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div id="tripContactLoadingOverlay" style="display: none;">
-                            <div class="d-flex justify-content-center align-items-center flex-column p-4">
-                                <x-loading.inline class="mb-3" :label="__('vacations.loading')" />
-                                <p class="text-center">{{ __('contact.submitting') }}</p>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-success mt-3" id="tripContactSuccessMessage" style="display: none;">
-                            {{ __('contact.bookingSuccessMessage') }}
-                        </div>
-                        <div class="alert alert-danger mt-3" id="tripContactError" style="display: none;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- General Contact Modal (Trips) -->
         <div class="modal fade" id="tripGeneralContactModal" tabindex="-1" aria-labelledby="tripGeneralContactModalLabel" aria-hidden="true">
@@ -1331,55 +1126,10 @@
                 page._tripGetSelectedDateValue = getSelectedDateValue;
             })();
 
-            // Availability "Book" -> sync date selects and open contact modal
+            // Booking card CTA, mobile bar and availability "Book" buttons lead to the trip
+            // checkout, carrying the chosen departure and guest count.
             (function() {
-                const reserveButtons = page.querySelectorAll('[data-reserve-date]');
-                if (!reserveButtons || reserveButtons.length === 0) return;
-
-                reserveButtons.forEach((btn) => {
-                    btn.addEventListener('click', function () {
-                        const date = btn.getAttribute('data-reserve-date') || '';
-                        if (!date) return;
-
-                        if (typeof page._tripSetAllDateControls === 'function') {
-                            page._tripSetAllDateControls(date);
-                        }
-
-                        const requestCta = page.querySelector('.trip-offer-page__booking-cta');
-                        if (requestCta) requestCta.click();
-                    });
-                });
-            })();
-
-            // Floating card "Request now" -> open contact modal and prefill
-            (function() {
-                const ctas = page.querySelectorAll('.trip-offer-page__booking-cta');
-                const modalEl = document.getElementById('tripContactModal');
-                if (!ctas || ctas.length === 0 || !modalEl || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
-
-                const personsInput = document.getElementById('trip_number_of_persons');
-
-                function getModalInstance(el) {
-                    // Supports Bootstrap 5 (getInstance / getOrCreateInstance) and older builds (constructor)
-                    const Modal = bootstrap.Modal;
-                    if (Modal.getInstance) {
-                        return Modal.getInstance(el) || (Modal.getOrCreateInstance ? Modal.getOrCreateInstance(el) : new Modal(el));
-                    }
-                    return new Modal(el);
-                }
-
-                function prefillContactForm() {
-                    const selectedDate = typeof page._tripGetSelectedDateValue === 'function'
-                        ? page._tripGetSelectedDateValue()
-                        : '';
-                    const guests = parseInt(page.dataset.tripGuests || '2', 10) || 2;
-
-                    if (personsInput) personsInput.value = String(guests);
-                    if (selectedDate && typeof page._tripSetAllDateControls === 'function') {
-                        page._tripSetAllDateControls(selectedDate);
-                    }
-                }
-
+                const checkoutUrl = @json($checkoutUrl);
                 const isYearRound = page.dataset.yearRound === '1';
 
                 function isVisible(el) {
@@ -1389,15 +1139,26 @@
                     return el.getClientRects().length > 0;
                 }
 
-                ctas.forEach((cta) => {
+                function goToCheckout(date) {
+                    const url = new URL(checkoutUrl, window.location.origin);
+                    if (date) url.searchParams.set('date', date);
+                    url.searchParams.set('persons', String(parseInt(page.dataset.tripGuests || '1', 10) || 1));
+                    window.location.assign(url.toString());
+                }
+
+                page.querySelectorAll('[data-reserve-date]').forEach((btn) => {
+                    btn.addEventListener('click', function () {
+                        goToCheckout(btn.getAttribute('data-reserve-date') || '');
+                    });
+                });
+
+                page.querySelectorAll('.trip-offer-page__booking-cta').forEach((cta) => {
                     cta.addEventListener('click', function () {
-                        // Dated trips (desktop only): require booking-card schedule first.
-                        // Year-round / mobile sticky: open modal immediately (date chosen in modal).
+                        // Dated trips (desktop booking card): pick a schedule first. The mobile
+                        // bar and year-round trips go straight on; the date is chosen at checkout.
                         const fromMobileSticky = !!cta.closest('.listing-mobile-book, .trip-offer-page__mobile-sticky-footer');
                         if (!isYearRound && !fromMobileSticky) {
-                            const bookingDateControl = page.querySelector(
-                                '.trip-offer-page__booking-select[data-trip-selected-date], .trip-offer-page__booking-date-input[data-trip-selected-date]'
-                            );
+                            const bookingDateControl = page.querySelector('.trip-offer-page__booking-select[data-trip-selected-date]');
                             if (bookingDateControl && isVisible(bookingDateControl) && !bookingDateControl.value) {
                                 bookingDateControl.reportValidity();
                                 bookingDateControl.focus();
@@ -1405,88 +1166,12 @@
                             }
                         }
 
-                        prefillContactForm();
-                        const modal = getModalInstance(modalEl);
-                        modal.show();
+                        const selectedDate = typeof page._tripGetSelectedDateValue === 'function'
+                            ? page._tripGetSelectedDateValue()
+                            : '';
+                        goToCheckout(isYearRound ? '' : selectedDate);
                     });
                 });
-
-                modalEl.addEventListener('shown.bs.modal', function () {
-                    prefillContactForm();
-                });
-            })();
-
-            // Trips contact modal submission (AJAX)
-            (function() {
-                const submitBtn = document.getElementById('tripContactSubmitBtn');
-                const contactForm = document.getElementById('tripContactModalForm');
-                if (!submitBtn || !contactForm) return;
-
-                const formContainer = document.getElementById('tripContactFormContainer');
-                const loadingOverlay = document.getElementById('tripContactLoadingOverlay');
-                const successMessage = document.getElementById('tripContactSuccessMessage');
-                const contactError = document.getElementById('tripContactError');
-
-                function setVisible(el, visible) {
-                    if (!el) return;
-                    el.style.display = visible ? 'block' : 'none';
-                }
-
-                async function handleSubmit() {
-                    setVisible(contactError, false);
-                    setVisible(successMessage, false);
-
-                    if (!contactForm.checkValidity()) {
-                        contactForm.reportValidity();
-                        return;
-                    }
-
-                    const formData = new FormData(contactForm);
-
-                    if (formContainer) formContainer.style.display = 'none';
-                    if (loadingOverlay) loadingOverlay.style.display = 'block';
-
-                    try {
-                        const tokenEl = contactForm.querySelector('input[name="_token"]');
-                        const res = await fetch(@json(route('sendcontactmail')), {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': tokenEl ? tokenEl.value : ''
-                            }
-                        });
-                        const data = await res.json();
-
-                        if (loadingOverlay) loadingOverlay.style.display = 'none';
-
-                        if (data && data.success) {
-                            contactForm.reset();
-                            setVisible(successMessage, true);
-
-                            setTimeout(() => {
-                                const modalEl = document.getElementById('tripContactModal');
-                                const modal = (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal)
-                                    ? (bootstrap.Modal.getInstance ? (bootstrap.Modal.getInstance(modalEl) || (bootstrap.Modal.getOrCreateInstance ? bootstrap.Modal.getOrCreateInstance(modalEl) : new bootstrap.Modal(modalEl))) : new bootstrap.Modal(modalEl))
-                                    : null;
-                                if (modal) modal.hide();
-                                setVisible(successMessage, false);
-                                if (formContainer) formContainer.style.display = 'block';
-                            }, 2000);
-                        } else {
-                            if (formContainer) formContainer.style.display = 'block';
-                            setVisible(contactError, true);
-                            contactError.innerHTML = (data && data.message) ? data.message : 'An error occurred. Please try again.';
-                        }
-                    } catch (e) {
-                        if (loadingOverlay) loadingOverlay.style.display = 'none';
-                        if (formContainer) formContainer.style.display = 'block';
-                        setVisible(contactError, true);
-                        contactError.innerHTML = e && e.message ? e.message : 'An error occurred. Please try again.';
-                    }
-                }
-
-                submitBtn.addEventListener('click', handleSubmit);
             })();
 
             // General contact modal submission (questions without booking details)

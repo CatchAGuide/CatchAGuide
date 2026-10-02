@@ -21,7 +21,7 @@
 @endphp
 
 @if($faqItems->isNotEmpty())
-    <section {{ $attributes->merge(['class' => 'vacation-faq']) }}>
+    <section data-reveal {{ $attributes->merge(['class' => 'vacation-faq']) }}>
         <div class="vacation-faq__inner">
             <x-vacation.section-heading :title="$title" />
 

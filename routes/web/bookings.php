@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingRescheduleController;
 use App\Http\Controllers\CheckoutController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,12 +14,17 @@ Route::get('/booking-reject/{token}', [BookingController::class, 'reject'])
 Route::post('/update/reject/{token}', [BookingController::class, 'rejectProcess'])
     ->middleware('throttle:10,1')
     ->name('booking.rejection');
-Route::get('/booking/reschedule/{token}', [BookingController::class, 'reschedule'])
-    ->middleware('throttle:10,1')
-    ->name('booking.reschedule');
-Route::post('/booking/reschedule/store', [BookingController::class, 'rescheduleStore'])
+// Customer reschedule after a guide declined: the emailed /{token} link is exchanged for a
+// session and redirected to the token-free page (see BookingRescheduleController).
+Route::get('/booking/reschedule', [BookingRescheduleController::class, 'show'])
+    ->middleware('throttle:30,1')
+    ->name('booking.reschedule.show');
+Route::post('/booking/reschedule/store', [BookingRescheduleController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('booking.reschedule.store');
+Route::get('/booking/reschedule/{token}', [BookingRescheduleController::class, 'enter'])
+    ->middleware('throttle:10,1')
+    ->name('booking.reschedule');
 
 Route::get('/reject/success', function () {
     return view('pages.additional.reject_success');

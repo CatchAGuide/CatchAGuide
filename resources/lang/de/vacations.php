@@ -66,7 +66,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'accommodation_for_guests' => '{1} Unterkunft für :count Person|[2,*] Unterkunft für :count Personen',
     'general_contact_title' => 'Kontakt aufnehmen',
     'general_contact_message' => 'Hast du Fragen zu diesem Camp? Unser Team hilft dir gerne weiter!',
-    'general_contact_form' => 'Kontaktformular',
+    'general_contact_form' => 'Kontakt aufnehmen',
     'book_vacations' => 'Urlaub buchen',
     'facilities' => 'Ausstattung',
 
@@ -217,6 +217,7 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'country_hero_eyebrow' => 'Angelurlaub',
     'fishing_vacation_in_country' => 'Angelurlaub in :country',
     'country_listing_title' => 'Angelurlaub in :country',
+    'country_meta_description' => 'Angelurlaub in :country: Angelcamps, Unterkünfte mit Boot und geführte Angelreisen. Angebote vergleichen und direkt anfragen.',
     'all_offers_nav' => 'Alle',
     'all_offers_title' => 'Alle Angelerlebnisse',
     'all_offers_subtitle' => 'Entdecke alle Guided Fishing Trips und Angelcamps.',

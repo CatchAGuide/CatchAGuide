@@ -149,7 +149,7 @@ return [
     'contact'                      => 'Kontakt',
     'contact_us_title'             => 'Kontakt aufnehmen',
     'contact_us_message'           => 'Hast du Fragen zu dieser Reise? Unser Team hilft dir gerne weiter!',
-    'contact_form'                 => 'Kontaktformular',
+    'contact_form'                 => 'Kontakt aufnehmen',
     'angler'                       => 'Angler',
     'decrease_guests'              => 'Gäste reduzieren',
     'increase_guests'              => 'Gäste erhöhen',

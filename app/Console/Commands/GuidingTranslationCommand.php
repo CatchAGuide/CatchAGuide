@@ -25,6 +25,7 @@ class GuidingTranslationCommand extends Command
                             {--admin-changes : Only process guidings with admin changes}
                             {--missing-only : Only process guidings that have no translation for at least one target language}
                             {--report-missing : List guidings missing translations (no translation performed)}
+                            {--list-fields : Only translate requirements/recommendations/other_information rows missing from existing translations; other translated fields are left untouched}
                             {--dry-run : Show what would change without writing (applies to detect-language and translate)}';
 
     /**
@@ -116,8 +117,23 @@ class GuidingTranslationCommand extends Command
                         continue;
                     }
 
+                    if ($this->option('list-fields')) {
+                        $missingRows = count($this->translationService->missingListRows($guiding, $targetLanguage));
+                        if ($missingRows === 0) {
+                            $results['skipped']++;
+                            continue;
+                        }
+                        if ($dryRun) {
+                            $this->line("\nWould translate {$missingRows} list row(s): {$guiding->title} (ID: {$guiding->id}) to {$targetLanguage}");
+                        } else {
+                            $this->translationService->translateMissingListRows($guiding, $targetLanguage, $this->option('engine') ?: null);
+                        }
+                        $results['translated']++;
+                        continue;
+                    }
+
                     // Check if translation needed
-                    if (!$force && !$this->translationService->hasSignificantChanges($guiding, $targetLanguage)) {
+                    if (!$force &&!$this->translationService->hasSignificantChanges($guiding, $targetLanguage)) {
                         // Check if translation exists
                         $existing = $this->translationService->getTranslatedGuiding($guiding, $targetLanguage);
                         if ($existing) {

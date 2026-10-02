@@ -40,6 +40,10 @@ mix.sass("resources/sass/admin/_category-pages.scss", "public/css/admin-category
 mix.js("resources/js/app.js", "public/js/app.js");
 mix.js("resources/js/maps/index.js", "public/js/maps.js");
 mix.js("resources/js/maps/places-entry.js", "public/js/places.js");
+mix.js("resources/js/checkout/tour-checkout.js", "public/js/tour-checkout.js");
+mix.js("resources/js/checkout/booking-reject.js", "public/js/booking-reject.js");
+mix.js("resources/js/checkout/camp-checkout.js", "public/js/camp-checkout.js");
+mix.js("resources/js/checkout/trip-checkout.js", "public/js/trip-checkout.js");
 mix.sass("resources/sass/maps.scss", "public/css/maps.css");
 
 mix.version();

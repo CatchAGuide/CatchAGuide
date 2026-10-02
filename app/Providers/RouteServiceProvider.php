@@ -66,12 +66,8 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         // Inline "throttle:x,y" middleware keys every route by domain+IP only, so all
-        // of those routes share one counter. Named limiters get their own bucket, which
-        // keeps page loads and price recalculations from consuming the booking allowance.
-        RateLimiter::for('checkout-price', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
-        });
-
+        // of those routes share one counter. A named limiter gets its own bucket, which
+        // keeps checkout page loads from consuming the booking allowance.
         RateLimiter::for('checkout-submit', function (Request $request) {
             return Limit::perMinute(5)
                         ->by($request->ip())

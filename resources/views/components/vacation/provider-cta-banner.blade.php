@@ -1,5 +1,5 @@
 {{-- Reuses cag-home-partner__* styles (home.scss) — same layout as guidings landing's provider-cta. --}}
-<section class="vacation-hub__provider-cta cag-home-partner" data-analytics-vacation-rail="provider-cta">
+<section class="vacation-hub__provider-cta cag-home-partner" data-reveal data-analytics-vacation-rail="provider-cta">
     <div class="cag-home-container cag-home-partner__inner">
         <div class="cag-home-partner__intro">
             <p class="cag-home-partner__eyebrow">{{ __('vacations.provider_cta_eyebrow') }}</p>

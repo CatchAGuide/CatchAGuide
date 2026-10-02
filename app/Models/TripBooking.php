@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class TripBooking extends Model
@@ -22,9 +23,16 @@ class TripBooking extends Model
         'source_type',
         'source_id',
         'preferred_date',
+        'preferred_date_to',
         'number_of_persons',
+        'estimated_total',
+        'currency',
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'user_id',
+        'language',
         'phone_country_code',
         'phone',
         'message',
@@ -34,8 +42,38 @@ class TripBooking extends Model
 
     protected $casts = [
         'preferred_date' => 'date',
+        'preferred_date_to' => 'date',
         'number_of_persons' => 'integer',
+        'estimated_total' => 'decimal:2',
     ];
+
+    public function trip(): BelongsTo
+    {
+        return $this->belongsTo(Trip::class, 'source_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Language for mails to the guest: the signed-in sender's own language setting first, then
+     * the language of the page the request was sent from, then the current locale.
+     */
+    public function customerLocale(): string
+    {
+        $supported = array_values(config('app.locales', []));
+
+        foreach ([$this->user?->language, $this->language] as $candidate) {
+            $locale = EmailLog::normalizeLanguage(is_string($candidate) ? $candidate : null);
+            if (in_array($locale, $supported, true)) {
+                return $locale;
+            }
+        }
+
+        return app()->getLocale();
+    }
 
     public static function statusOptions(): array
     {

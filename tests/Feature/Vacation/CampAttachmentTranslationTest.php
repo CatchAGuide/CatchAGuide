@@ -126,7 +126,8 @@ class CampAttachmentTranslationTest extends TestCase
         $response = $this->get(route('vacations.camps.show', $camp->slug));
 
         $response->assertOk();
-        $response->assertSee('attachment-chip--water-type', false);
+        // Water types are a fact row on the guiding card (icon + localized name), not a chip.
+        $response->assertSee('water-waves.png', false);
         $response->assertSee($water->name, false);
         $otherLocaleName = app()->getLocale() === 'en'
             ? $water->getAttributes()['name']

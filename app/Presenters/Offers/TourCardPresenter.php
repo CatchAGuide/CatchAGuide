@@ -62,6 +62,27 @@ class TourCardPresenter
     }
 
     /**
+     * Compact product summary for the tour checkout: only what the card shows, without the
+     * rating/species lookups present() runs. Title and location match the tour page's own
+     * header (locale-aware model title, "city, region"), so no translate() call is made.
+     *
+     * @return array{title: string, image: string, location: string, duration: string|null, url: string}
+     */
+    public function presentCheckoutSummary(Guiding $guiding): array
+    {
+        return [
+            'title' => (string) $guiding->title,
+            'image' => $this->galleryImages($guiding)[0] ?? asset('images/placeholder_guide.jpg'),
+            'location' => implode(', ', array_unique(array_filter([
+                $guiding->city ?: $guiding->location,
+                $guiding->region,
+            ]))),
+            'duration' => $this->durationLabel($guiding),
+            'url' => $guiding->publicShowUrl(),
+        ];
+    }
+
+    /**
      * @param  array<string, mixed>  $query
      */
     public function presentListRow(Guiding $guiding, ?int $numGuests = null, array $query = []): array

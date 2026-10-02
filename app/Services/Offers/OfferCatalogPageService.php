@@ -401,7 +401,8 @@ class OfferCatalogPageService
             $tourRatings = $needsRecommended
                 ? $this->guideRatingStatsByGuideId($tours->pluck('user_id')->filter()->unique()->map(fn ($id) => (int) $id)->all())
                 : [];
-            $keys = $keys->concat($tours->map(function (Guiding $guiding) use ($needsPrice, $needsRecommended, $needsNearest, $origin, $tourRatings) {
+            $guests = $filter->numGuests ?? OfferListingFilter::DEFAULT_GUESTS;
+            $keys = $keys->concat($tours->map(function (Guiding $guiding) use ($needsPrice, $needsRecommended, $needsNearest, $origin, $tourRatings, $guests) {
                 $stats = $needsRecommended
                     ? ($tourRatings[(int) $guiding->user_id] ?? null)
                     : null;
@@ -410,7 +411,7 @@ class OfferCatalogPageService
                     'type' => 'tour',
                     'id' => (int) $guiding->id,
                     'created_at' => $guiding->created_at,
-                    'price' => $needsPrice ? ($guiding->getLowestPrice() ?: null) : null,
+                    'price' => $needsPrice ? $guiding->listingSortPrice($guests) : null,
                     'rating' => $stats['rating'] ?? null,
                     'review_count' => $stats['review_count'] ?? 0,
                     'distance' => ($needsNearest && $origin !== null)

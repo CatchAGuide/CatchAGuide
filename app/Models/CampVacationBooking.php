@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class CampVacationBooking extends Model
@@ -23,9 +24,21 @@ class CampVacationBooking extends Model
         'source_type',
         'source_id',
         'preferred_date',
+        'nights',
+        'accommodation_id',
+        'rental_boat_id',
+        'guiding_id',
+        'special_offer_id',
+        'estimated_total',
+        'currency',
+        'price_breakdown',
         'number_of_persons',
         'name',
+        'first_name',
+        'last_name',
         'email',
+        'user_id',
+        'language',
         'phone_country_code',
         'phone',
         'message',
@@ -35,7 +48,58 @@ class CampVacationBooking extends Model
     protected $casts = [
         'preferred_date' => 'date',
         'number_of_persons' => 'integer',
+        'nights' => 'integer',
+        'estimated_total' => 'decimal:2',
+        'price_breakdown' => 'array',
     ];
+
+    public function camp(): BelongsTo
+    {
+        return $this->belongsTo(Camp::class, 'source_id');
+    }
+
+    public function accommodation(): BelongsTo
+    {
+        return $this->belongsTo(Accommodation::class);
+    }
+
+    public function rentalBoat(): BelongsTo
+    {
+        return $this->belongsTo(RentalBoat::class);
+    }
+
+    public function guiding(): BelongsTo
+    {
+        return $this->belongsTo(Guiding::class);
+    }
+
+    public function specialOffer(): BelongsTo
+    {
+        return $this->belongsTo(SpecialOffer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Language for mails to the guest: the signed-in sender's own language setting first, then
+     * the language of the page the request was sent from, then the current locale.
+     */
+    public function customerLocale(): string
+    {
+        $supported = array_values(config('app.locales', []));
+
+        foreach ([$this->user?->language, $this->language] as $candidate) {
+            $locale = EmailLog::normalizeLanguage(is_string($candidate) ? $candidate : null);
+            if (in_array($locale, $supported, true)) {
+                return $locale;
+            }
+        }
+
+        return app()->getLocale();
+    }
 
     public static function statusOptions(): array
     {
