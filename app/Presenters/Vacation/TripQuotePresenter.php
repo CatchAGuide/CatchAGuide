@@ -47,6 +47,27 @@ class TripQuotePresenter
     }
 
     /**
+     * Numeric range for the guest mail: "Sa, 03.10. – Fr, 09.10.2026" / "Sat, Oct 3 – Fri, Oct 9, 2026"
+     * with weekdays, "01.05. – 31.05.2027" / "May 1 – May 31, 2027" without.
+     */
+    public function dayRange(string $start, ?string $end, bool $withWeekday): string
+    {
+        $locale = app()->getLocale();
+        $de = $locale === 'de';
+        $day = ($withWeekday ? ($de ? 'dd, ' : 'ddd, ') : '').($de ? 'DD.MM.' : 'MMM D');
+        $year = $de ? 'YYYY' : ', YYYY';
+        $from = CarbonImmutable::parse($start)->locale($locale);
+
+        if ($end === null || $end === '' || $end === $start) {
+            return $from->isoFormat($day.$year);
+        }
+
+        $to = CarbonImmutable::parse($end)->locale($locale);
+
+        return $from->isoFormat($from->year !== $to->year ? $day.$year : $day).' – '.$to->isoFormat($day.$year);
+    }
+
+    /**
      * "Only 2 spots left" for nearly full departures, otherwise empty.
      */
     public function spots(?int $spots, int $fewSpots): string

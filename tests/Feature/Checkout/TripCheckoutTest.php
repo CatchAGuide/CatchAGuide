@@ -2,10 +2,15 @@
 
 namespace Tests\Feature\Checkout;
 
+use App\Mail\Admin\TripCheckoutAdminMail;
+use App\Mail\Guest\TripCheckoutGuestMail;
+use App\Mail\VacationBookingAdminMail;
+use App\Mail\VacationBookingCustomerMail;
 use App\Models\Trip;
 use App\Models\TripBooking;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -176,6 +181,205 @@ class TripCheckoutTest extends TestCase
         $this->assertStringContainsString('ab 3.870', $booking->message);
     }
 
+    public function test_submission_mails_the_guest_the_trip_confirmation_in_the_page_language(): void
+    {
+        Mail::fake();
+        $trip = $this->makeTrip();
+        $departure = now()->addDays(10)->toDateString();
+        $this->addDeparture($trip, $departure, 4);
+
+        $this->withSession(['locale' => 'de'])
+            ->postJson(route('checkout.trip.store', $trip->slug), $this->payload(['departure_date' => $departure]))
+            ->assertOk();
+
+        $booking = TripBooking::query()->where('source_id', $trip->id)->latest('id')->firstOrFail();
+        $this->assertSame('de', $booking->language);
+
+        Mail::assertSent(TripCheckoutGuestMail::class, fn (TripCheckoutGuestMail $mail) => $mail->hasTo('anna@example.com')
+            && $mail->locale === 'de'
+            && $mail->booking->is($booking)
+            && $mail->trip->is($trip));
+        Mail::assertSent(TripCheckoutAdminMail::class, fn (TripCheckoutAdminMail $mail) => $mail->hasTo(config('mail.admin_email'))
+            && $mail->locale === 'de'
+            && $mail->booking->is($booking));
+        Mail::assertNotSent(VacationBookingAdminMail::class);
+        Mail::assertNotSent(VacationBookingCustomerMail::class);
+    }
+
+    public function test_guest_mail_uses_the_signed_in_users_own_language_over_the_page_language(): void
+    {
+        Mail::fake();
+        $trip = $this->makeTrip(['year_round_availability' => true]);
+        $user = User::query()->firstOrFail();
+        $user->forceFill(['language' => 'en'])->save();
+
+        $this->actingAs($user)
+            ->withSession(['locale' => 'de'])
+            ->postJson(route('checkout.trip.store', $trip->slug), $this->payload([
+                'wish_start' => now()->addDays(30)->toDateString(),
+                'wish_end' => now()->addDays(60)->toDateString(),
+            ]))
+            ->assertOk();
+
+        Mail::assertSent(TripCheckoutGuestMail::class, fn (TripCheckoutGuestMail $mail) => $mail->locale === 'en');
+        Mail::assertSent(TripCheckoutAdminMail::class, fn (TripCheckoutAdminMail $mail) => $mail->locale === 'en');
+    }
+
+    public function test_guest_mail_locale_falls_back_to_the_page_language(): void
+    {
+        $user = (new User)->forceFill(['language' => 'Deutsch']);
+        $booking = new TripBooking(['language' => 'en']);
+
+        $booking->setRelation('user', $user);
+        $this->assertSame('de', $booking->customerLocale());
+
+        $user->language = 'fr';
+        $this->assertSame('en', $booking->customerLocale());
+
+        $booking->setRelation('user', null);
+        $this->assertSame('en', $booking->customerLocale());
+    }
+
+    public function test_guest_mail_renders_a_fixed_departure_in_german(): void
+    {
+        $trip = $this->makeTrip();
+        $booking = $this->makeBooking($trip, ['preferred_date' => '2026-10-03', 'estimated_total' => 2580]);
+
+        $mail = (new TripCheckoutGuestMail($booking, $trip, 'Eigene Ruten bringen wir mit.'))->locale('de');
+        $html = $mail->render();
+
+        $this->assertSame('Deine Anfrage für deine Angelreise ist angekommen', $mail->subject);
+        $this->assertStringContainsString('Hallo Anna,', $html);
+        $this->assertStringContainsString('danke für deine Anfrage zur Angelreise Test Checkout Trip. Wir prüfen die freien Plätze', $html);
+        $this->assertStringContainsString('Test Checkout Trip, Sa, 03.10. – Fr, 09.10.2026: Wir prüfen die Plätze', $html);
+        $this->assertStringContainsString('Pyrenäen · Spanien', $html);
+        $this->assertStringContainsString('Reisezeitraum', $html);
+        $this->assertStringContainsString('7 Tage · 6 Nächte', $html);
+        $this->assertStringContainsString('Angelreise · 2 Personen ×', $html);
+        $this->assertStringContainsString("1.290\u{00A0}€", $html);
+        $this->assertStringContainsString("ca. 2.580\u{00A0}€", $html);
+        $this->assertStringContainsString('„Eigene Ruten bringen wir mit.“', $html);
+        $this->assertStringContainsString(__('emails.trip_checkout_guest.step_fixed_1', [], 'de'), $html);
+        $this->assertStringContainsString('href="'.route('vacations.trips.show', $trip->slug).'"', $html);
+    }
+
+    public function test_guest_mail_renders_a_preferred_window_in_english(): void
+    {
+        $trip = $this->makeTrip(['year_round_availability' => true]);
+        $booking = $this->makeBooking($trip, [
+            'preferred_date' => '2027-05-01',
+            'preferred_date_to' => '2027-05-31',
+            'estimated_total' => 2380,
+        ]);
+
+        $mail = (new TripCheckoutGuestMail($booking, $trip))->locale('en');
+        $html = $mail->render();
+
+        $this->assertSame('Your request for your fishing trip has arrived', $mail->subject);
+        $this->assertStringContainsString('Hi Anna,', $html);
+        $this->assertStringContainsString(__('emails.trip_checkout_guest.preheader_window', [], 'en'), $html);
+        $this->assertStringContainsString('Preferred period', $html);
+        $this->assertStringContainsString('May 1 – May 31, 2027', $html);
+        $this->assertStringContainsString(trans_choice('checkout.trip.days_count', 7, ['count' => 7], 'en'), $html);
+        $this->assertStringNotContainsString(trans_choice('checkout.trip.nights_count', 6, ['count' => 6], 'en'), $html);
+        $this->assertStringContainsString('from €1,190', $html);
+        $this->assertStringContainsString('from €2,380', $html);
+        $this->assertStringContainsString(__('emails.trip_checkout_guest.step_window_1', [], 'en'), $html);
+        // No message section when the guest left the message empty.
+        $this->assertStringNotContainsString(__('emails.trip_checkout_guest.section_message', [], 'en'), $html);
+    }
+
+    public function test_guest_mail_without_a_price_shows_on_request(): void
+    {
+        $trip = $this->makeTrip(['price_per_person' => null]);
+        $booking = $this->makeBooking($trip, ['preferred_date' => '2026-10-03', 'estimated_total' => null]);
+
+        $html = (new TripCheckoutGuestMail($booking, $trip))->locale('de')->render();
+
+        $this->assertStringContainsString(__('checkout.trip.on_request', [], 'de'), $html);
+        $this->assertStringNotContainsString('Angelreise · 2 Personen ×', $html);
+    }
+
+    public function test_guest_mail_is_listed_and_previewable_in_the_admin_email_templates(): void
+    {
+        $template = config('email_templates.templates.guest_trip_checkout_request');
+        $this->assertSame('mails.guest.trip_checkout_request', $template['view']);
+        $this->assertSame((new TripCheckoutGuestMail(new TripBooking, new Trip))->type, $template['log_type']);
+
+        // Same steps as GuidingsSettingController::emailPreview().
+        foreach (['de' => ['So geht es weiter', 'Pyrenäen'], 'en' => ['What happens next', 'Pyrenees']] as $locale => [$heading, $region]) {
+            app()->setLocale($locale);
+            $html = view($template['view'], TripCheckoutGuestMail::sample()->viewData())->render();
+
+            $this->assertStringContainsString($heading, $html);
+            $this->assertStringContainsString($region, $html);
+        }
+    }
+
+    public function test_admin_mail_renders_a_fixed_departure_in_german(): void
+    {
+        $trip = $this->makeTrip(['title' => 'Fliegenfischen Spanien: Pyrenäen-Reise', 'group_size_max' => 8]);
+        $departure = now()->addDays(10);
+        $this->addDeparture($trip, $departure->toDateString(), 2);
+        $booking = $this->makeBooking($trip, ['preferred_date' => $departure->toDateString(), 'estimated_total' => 2580]);
+
+        $mail = (new TripCheckoutAdminMail($booking, $trip, 'Eigene Ruten bringen wir mit.'))->locale('de');
+        $html = $mail->render();
+
+        $this->assertSame(
+            'Neue Angelreise-Anfrage · Fliegenfischen Spanien · '.$departure->format('d.m.')." · 2 Pers. · ca. 2.580\u{00A0}€",
+            $mail->subject,
+        );
+        $this->assertTrue($mail->hasReplyTo('anna@example.com'));
+        $this->assertStringContainsString('<strong style="font-weight:600;">Fliegenfischen Spanien</strong> von Anna Fischer', $html);
+        $this->assertStringContainsString('beim Veranstalter', $html);
+        $this->assertStringContainsString('Fliegenfischen Spanien: Pyrenäen-Reise', $html);
+        $this->assertStringContainsString('Pyrenäen · Spanien', $html);
+        $this->assertStringContainsString('Fester Termin', $html);
+        $this->assertStringContainsString('7 Tage · 6 Nächte', $html);
+        $this->assertStringContainsString('2 von 8', $html);
+        $this->assertStringContainsString("Angelreise · 2 Personen × 1.290\u{00A0}€", $html);
+        $this->assertStringContainsString('„Eigene Ruten bringen wir mit.“', $html);
+        $this->assertStringContainsString('href="'.route('admin.trip-bookings.index').'"', $html);
+    }
+
+    public function test_admin_mail_renders_a_preferred_window_in_english(): void
+    {
+        $trip = $this->makeTrip(['year_round_availability' => true]);
+        $booking = $this->makeBooking($trip, [
+            'preferred_date' => '2027-05-01',
+            'preferred_date_to' => '2027-05-31',
+            'estimated_total' => 2380,
+        ]);
+
+        $mail = (new TripCheckoutAdminMail($booking, $trip))->locale('en');
+        $html = $mail->render();
+
+        $this->assertSame('New fishing trip request · Test Checkout Trip · May 1 · 2 pers. · from €2,380', $mail->subject);
+        $this->assertStringContainsString('Preferred period', $html);
+        $this->assertStringContainsString('May 1 – May 31, 2027', $html);
+        $this->assertStringContainsString('Trip length', $html);
+        $this->assertStringContainsString('Fishing trip · 2 people × from €1,190', $html);
+        $this->assertStringNotContainsString('Free places at request', $html);
+        $this->assertStringNotContainsString(__('emails.checkout_request_admin.section_message', [], 'en'), $html);
+    }
+
+    public function test_admin_mail_is_listed_and_previewable_in_the_admin_email_templates(): void
+    {
+        $template = config('email_templates.templates.admin_trip_checkout_request');
+        $this->assertSame('mails.admin.checkout_request', $template['view']);
+        $this->assertSame((new TripCheckoutAdminMail(new TripBooking, new Trip))->type, $template['log_type']);
+
+        // Same steps as GuidingsSettingController::emailPreview().
+        foreach (['de' => ['Neue Anfrage', '2 von 8'], 'en' => ['New request', '2 of 8']] as $locale => [$heading, $spots]) {
+            app()->setLocale($locale);
+            $html = view($template['view'], TripCheckoutAdminMail::sample()->viewData())->render();
+
+            $this->assertStringContainsString($heading, $html);
+            $this->assertStringContainsString($spots, $html);
+        }
+    }
+
     public function test_submission_rejects_a_full_or_unknown_departure(): void
     {
         $trip = $this->makeTrip();
@@ -277,6 +481,25 @@ class TripCheckoutTest extends TestCase
         $this->get('/vacations/trips/'.$trip->slug.'/checkout?date='.$date.'&persons=3&utm_source=x')
             ->assertStatus(301)
             ->assertRedirect(route('checkout.trip.show', ['slug' => $trip->slug, 'date' => $date, 'persons' => 3]));
+    }
+
+    private function makeBooking(Trip $trip, array $overrides = []): TripBooking
+    {
+        return TripBooking::query()->create(array_merge([
+            'source_type' => TripBooking::SOURCE_TRIP,
+            'source_id' => $trip->id,
+            'number_of_persons' => 2,
+            'currency' => 'EUR',
+            'name' => 'Anna Fischer',
+            'first_name' => 'Anna',
+            'last_name' => 'Fischer',
+            'email' => 'anna@example.com',
+            'phone_country_code' => '+49',
+            'phone' => '151 2345678',
+            'message' => 'Summary',
+            'language' => 'de',
+            'status' => TripBooking::STATUS_OPEN,
+        ], $overrides));
     }
 
     /**

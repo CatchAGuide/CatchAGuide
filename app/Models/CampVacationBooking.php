@@ -78,6 +78,29 @@ class CampVacationBooking extends Model
         return $this->belongsTo(SpecialOffer::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Language for mails to the guest: the signed-in sender's own language setting first, then
+     * the language of the page the request was sent from, then the current locale.
+     */
+    public function customerLocale(): string
+    {
+        $supported = array_values(config('app.locales', []));
+
+        foreach ([$this->user?->language, $this->language] as $candidate) {
+            $locale = EmailLog::normalizeLanguage(is_string($candidate) ? $candidate : null);
+            if (in_array($locale, $supported, true)) {
+                return $locale;
+            }
+        }
+
+        return app()->getLocale();
+    }
+
     public static function statusOptions(): array
     {
         return [

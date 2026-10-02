@@ -56,19 +56,18 @@ final class TripCheckoutOffer
         }
 
         $today = CarbonImmutable::today();
-        $nights = $this->tripNights();
 
         return $this->departures = $this->trip->availabilityDates
             ->filter(fn (TripAvailabilityDate $date) => $date->departure_date !== null
                 && $date->departure_date->gte($today)
                 && $date->spots_available !== 0)
             ->sortBy(fn (TripAvailabilityDate $date) => $date->departure_date->toDateString())
-            ->mapWithKeys(function (TripAvailabilityDate $date) use ($nights) {
-                $start = CarbonImmutable::parse($date->departure_date->toDateString());
+            ->mapWithKeys(function (TripAvailabilityDate $date) {
+                $start = $date->departure_date->toDateString();
 
-                return [$start->toDateString() => [
-                    'date' => $start->toDateString(),
-                    'end' => $nights > 0 ? $start->addDays($nights)->toDateString() : null,
+                return [$start => [
+                    'date' => $start,
+                    'end' => $this->returnDate($start),
                     'spots' => $date->spots_available,
                 ]];
             })
@@ -123,6 +122,16 @@ final class TripCheckoutOffer
     public function durationNights(): int
     {
         return max(0, (int) $this->trip->duration_nights);
+    }
+
+    /**
+     * Return date (Y-m-d) for a departure on $start; null when the trip has no duration.
+     */
+    public function returnDate(string $start): ?string
+    {
+        $nights = $this->tripNights();
+
+        return $nights > 0 ? CarbonImmutable::parse($start)->addDays($nights)->toDateString() : null;
     }
 
     /**

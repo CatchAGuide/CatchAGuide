@@ -2,12 +2,17 @@
 
 namespace Tests\Feature\Checkout;
 
+use App\Mail\Admin\CampCheckoutAdminMail;
+use App\Mail\Guest\CampCheckoutGuestMail;
+use App\Mail\VacationBookingAdminMail;
+use App\Mail\VacationBookingCustomerMail;
 use App\Models\Accommodation;
 use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\RentalBoat;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -184,6 +189,206 @@ class CampCheckoutTest extends TestCase
             ->assertSee(__('checkout.camp.success_text_no_date', [
                 'email' => '<strong>'.e($booking->email).'</strong>',
             ]), false);
+    }
+
+    public function test_submission_mails_the_guest_the_camp_confirmation_in_the_page_language(): void
+    {
+        Mail::fake();
+        [$camp, $accommodation] = $this->makeCampWithOptions();
+
+        $this->withSession(['locale' => 'de'])
+            ->postJson(route('checkout.camp.store', $camp->slug), $this->payload([
+                'accommodation_id' => $accommodation->id,
+            ]))
+            ->assertOk();
+
+        $booking = CampVacationBooking::query()->latest('id')->firstOrFail();
+        $this->assertSame('de', $booking->language);
+
+        Mail::assertSent(CampCheckoutGuestMail::class, fn (CampCheckoutGuestMail $mail) => $mail->hasTo('anna@example.com')
+            && $mail->locale === 'de'
+            && $mail->booking->is($booking));
+        Mail::assertSent(CampCheckoutAdminMail::class, fn (CampCheckoutAdminMail $mail) => $mail->hasTo(config('mail.admin_email'))
+            && $mail->locale === 'de'
+            && $mail->booking->is($booking));
+        Mail::assertNotSent(VacationBookingAdminMail::class);
+        Mail::assertNotSent(VacationBookingCustomerMail::class);
+    }
+
+    public function test_guest_mail_uses_the_signed_in_users_own_language_over_the_page_language(): void
+    {
+        Mail::fake();
+        [$camp, $accommodation] = $this->makeCampWithOptions();
+        $user = User::query()->firstOrFail();
+        $user->forceFill(['language' => 'en'])->save();
+
+        $this->actingAs($user)
+            ->withSession(['locale' => 'de'])
+            ->postJson(route('checkout.camp.store', $camp->slug), $this->payload([
+                'accommodation_id' => $accommodation->id,
+            ]))
+            ->assertOk();
+
+        Mail::assertSent(CampCheckoutGuestMail::class, fn (CampCheckoutGuestMail $mail) => $mail->locale === 'en');
+        Mail::assertSent(CampCheckoutAdminMail::class, fn (CampCheckoutAdminMail $mail) => $mail->locale === 'en');
+    }
+
+    public function test_guest_mail_locale_falls_back_to_the_page_language(): void
+    {
+        $user = (new User)->forceFill(['language' => 'Deutsch']);
+        $booking = new CampVacationBooking(['language' => 'en']);
+
+        $booking->setRelation('user', $user);
+        $this->assertSame('de', $booking->customerLocale());
+
+        $user->language = 'fr';
+        $this->assertSame('en', $booking->customerLocale());
+
+        $booking->setRelation('user', null);
+        $this->assertSame('en', $booking->customerLocale());
+    }
+
+    public function test_guest_mail_renders_the_design_in_german_and_english(): void
+    {
+        [$camp, $accommodation, $boat] = $this->makeCampWithOptions();
+
+        $booking = CampVacationBooking::query()->create([
+            'source_type' => CampVacationBooking::SOURCE_CAMP,
+            'source_id' => $camp->id,
+            'preferred_date' => '2026-10-12',
+            'nights' => 3,
+            'number_of_persons' => 2,
+            'estimated_total' => 960,
+            'currency' => 'EUR',
+            'price_breakdown' => [
+                ['type' => 'accommodation', 'id' => $accommodation->id, 'name' => 'Apartment', 'quantity' => 3, 'unit_price' => 120.0, 'amount' => 360.0],
+                ['type' => 'boat', 'id' => $boat->id, 'name' => 'Boat', 'quantity' => 3, 'unit_price' => 200.0, 'amount' => 600.0],
+            ],
+            'name' => 'Anna Fischer',
+            'first_name' => 'Anna',
+            'last_name' => 'Fischer',
+            'email' => 'anna@example.com',
+            'phone_country_code' => '+49',
+            'phone' => '151 2345678',
+            'message' => 'Summary',
+            'language' => 'de',
+            'status' => CampVacationBooking::STATUS_OPEN,
+        ]);
+
+        $german = (new CampCheckoutGuestMail($booking, $camp, 'Wir bringen eigenes Tackle mit.'))->locale('de');
+        $html = $german->render();
+
+        $this->assertSame('Deine Anfrage für Test Checkout Camp ist angekommen', $german->subject);
+        $this->assertStringContainsString('Hallo Anna,', $html);
+        $this->assertStringContainsString('Riba-Roja · Spain', $html);
+        $this->assertStringContainsString('Mo., 12.10.2026', $html);
+        $this->assertStringContainsString('Mietboot · 3 Tage × 200', $html);
+        $this->assertStringContainsString('ca. 960', $html);
+        $this->assertStringContainsString('„Wir bringen eigenes Tackle mit.“', $html);
+        $this->assertStringContainsString('So geht es weiter', $html);
+        $this->assertStringContainsString('href="'.route('vacations.camps.show', $camp->slug).'"', $html);
+
+        $english = (new CampCheckoutGuestMail($booking, $camp))->locale('en');
+        $html = $english->render();
+
+        $this->assertSame('Your request for Test Checkout Camp has arrived', $english->subject);
+        $this->assertStringContainsString('Hi Anna,', $html);
+        $this->assertStringContainsString('Mon, Oct 12, 2026', $html);
+        $this->assertStringContainsString('approx. €960', $html);
+        $this->assertStringContainsString('What happens next', $html);
+        // No message section when the guest left the message empty.
+        $this->assertStringNotContainsString(__('emails.camp_checkout_guest.section_message', [], 'en'), $html);
+    }
+
+    public function test_guest_mail_is_listed_and_previewable_in_the_admin_email_templates(): void
+    {
+        $template = config('email_templates.templates.guest_camp_checkout_request');
+        $this->assertSame('mails.guest.camp_checkout_request', $template['view']);
+        $this->assertSame((new CampCheckoutGuestMail(new CampVacationBooking, new Camp))->type, $template['log_type']);
+
+        // Same steps as GuidingsSettingController::emailPreview().
+        foreach (['de' => 'So geht es weiter', 'en' => 'What happens next'] as $locale => $heading) {
+            app()->setLocale($locale);
+            $html = view($template['view'], CampCheckoutGuestMail::sample()->viewData())->render();
+
+            $this->assertStringContainsString('Welscamp Riba-Roja', $html);
+            $this->assertStringContainsString($heading, $html);
+        }
+    }
+
+    public function test_admin_mail_renders_the_design_in_german_and_english(): void
+    {
+        [$camp, $accommodation, $boat] = $this->makeCampWithOptions();
+
+        $booking = CampVacationBooking::query()->create([
+            'source_type' => CampVacationBooking::SOURCE_CAMP,
+            'source_id' => $camp->id,
+            'preferred_date' => '2026-10-12',
+            'nights' => 3,
+            'number_of_persons' => 2,
+            'estimated_total' => 960,
+            'currency' => 'EUR',
+            'price_breakdown' => [
+                ['type' => 'accommodation', 'id' => $accommodation->id, 'name' => 'Apartment', 'quantity' => 3, 'unit_price' => 120.0, 'amount' => 360.0],
+                ['type' => 'boat', 'id' => $boat->id, 'name' => 'Aluboot 5 m', 'quantity' => 3, 'unit_price' => 200.0, 'amount' => 600.0],
+            ],
+            'name' => 'Anna Fischer',
+            'first_name' => 'Anna',
+            'last_name' => 'Fischer',
+            'email' => 'anna@example.com',
+            'phone_country_code' => '+49',
+            'phone' => '151 2345678',
+            'message' => 'Summary',
+            'language' => 'de',
+            'status' => CampVacationBooking::STATUS_OPEN,
+        ]);
+        $booking->forceFill(['created_at' => '2026-10-01 14:32:00']);
+
+        $german = (new CampCheckoutAdminMail($booking, $camp, 'Wir bringen eigenes Tackle mit.'))->locale('de');
+        $html = $german->render();
+
+        $this->assertSame("Neue Camp-Anfrage · Test Checkout Camp · 12.10. · 2 Pers. · ca. 960\u{00A0}€", $german->subject);
+        $this->assertTrue($german->hasReplyTo('anna@example.com'));
+        $this->assertStringContainsString('Angelcamp', $html);
+        $this->assertStringContainsString('Hallo Team,', $html);
+        $this->assertStringContainsString('<strong style="font-weight:600;">Fr., 02.10.2026, 14:32</strong>', $html);
+        $this->assertStringContainsString('href="mailto:anna@example.com"', $html);
+        $this->assertStringContainsString('href="tel:+491512345678"', $html);
+        $this->assertStringContainsString('Riba-Roja · Spain', $html);
+        $this->assertStringContainsString('Mo., 12.10.2026', $html);
+        $this->assertStringContainsString('Do., 15.10.2026', $html);
+        $this->assertStringContainsString('Aluboot 5 m', $html);
+        $this->assertStringContainsString('Mietboot · 3 Tage × 200', $html);
+        $this->assertStringContainsString('„Wir bringen eigenes Tackle mit.“', $html);
+        $this->assertStringContainsString('href="'.route('admin.camp-vacation-bookings.index').'"', $html);
+        $this->assertStringContainsString('href="'.route('vacations.camps.show', $camp->slug).'"', $html);
+
+        $english = (new CampCheckoutAdminMail($booking, $camp))->locale('en');
+        $html = $english->render();
+
+        $this->assertSame('New camp request · Test Checkout Camp · Oct 12 · 2 pers. · approx. €960', $english->subject);
+        $this->assertStringContainsString('Hi team,', $html);
+        $this->assertStringContainsString('Fri, Oct 2, 2026, 14:32', $html);
+        $this->assertStringContainsString('Rental boat', $html);
+        $this->assertStringContainsString('Thu, Oct 15, 2026', $html);
+        // No message section when the guest left the message empty.
+        $this->assertStringNotContainsString(__('emails.checkout_request_admin.section_message', [], 'en'), $html);
+    }
+
+    public function test_admin_mail_is_listed_and_previewable_in_the_admin_email_templates(): void
+    {
+        $template = config('email_templates.templates.admin_camp_checkout_request');
+        $this->assertSame('mails.admin.checkout_request', $template['view']);
+        $this->assertSame((new CampCheckoutAdminMail(new CampVacationBooking, new Camp))->type, $template['log_type']);
+
+        // Same steps as GuidingsSettingController::emailPreview().
+        foreach (['de' => 'Neue Anfrage', 'en' => 'New request'] as $locale => $heading) {
+            app()->setLocale($locale);
+            $html = view($template['view'], CampCheckoutAdminMail::sample()->viewData())->render();
+
+            $this->assertStringContainsString('Welscamp Riba-Roja', $html);
+            $this->assertStringContainsString($heading, $html);
+        }
     }
 
     public function test_submission_rejects_options_from_another_camp(): void

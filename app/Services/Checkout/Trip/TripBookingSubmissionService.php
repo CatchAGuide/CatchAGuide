@@ -2,8 +2,9 @@
 
 namespace App\Services\Checkout\Trip;
 
-use App\Mail\VacationBookingAdminMail;
-use App\Mail\VacationBookingCustomerMail;
+use App\Mail\Admin\TripCheckoutAdminMail;
+use App\Mail\Guest\TripCheckoutGuestMail;
+use App\Models\Trip;
 use App\Models\TripBooking;
 use App\Models\User;
 use App\Presenters\Vacation\TripQuotePresenter;
@@ -13,8 +14,8 @@ use Throwable;
 
 /**
  * Turns a validated trip checkout into a trip request (TripBooking, handled in the admin's trip
- * request list) with the server-side estimate, and notifies guest and admin with the same mails
- * the trip contact form uses.
+ * request list) with the server-side estimate, and notifies the guest (trip checkout
+ * confirmation) and the admin (trip request notification), both in the guest's language.
  */
 class TripBookingSubmissionService
 {
@@ -71,28 +72,22 @@ class TripBookingSubmissionService
             'status' => TripBooking::STATUS_OPEN,
         ]);
 
+        $booking->setRelation('user', $currentUser);
+
         if (! app()->environment('local')) {
-            $this->notify($booking, $summary, (string) $trip->title);
+            $this->notify($booking, $trip, $guestMessage);
         }
 
         return $booking;
     }
 
-    private function notify(TripBooking $booking, string $summary, string $tripTitle): void
+    private function notify(TripBooking $booking, Trip $trip, string $guestMessage): void
     {
-        $extra = [
-            'contact_message' => $summary,
-            'preferred_date' => $booking->preferred_date?->toDateString(),
-            'number_of_persons' => $booking->number_of_persons,
-            'source_type' => TripBooking::SOURCE_TRIP,
-            'source_id' => $booking->source_id,
-            'source_title' => $tripTitle,
-            'view_requests_url' => route('admin.trip-bookings.index'),
-        ];
+        $locale = $booking->customerLocale();
 
         $mails = [
-            [$booking->email, new VacationBookingCustomerMail($booking->name, $booking->email, $summary, $booking->phone, $booking->phone_country_code, $extra)],
-            [config('mail.admin_email'), new VacationBookingAdminMail($booking->name, $booking->email, $summary, $booking->phone, $booking->phone_country_code, $extra)],
+            [$booking->email, (new TripCheckoutGuestMail($booking, $trip, $guestMessage))->locale($locale)],
+            [config('mail.admin_email'), (new TripCheckoutAdminMail($booking, $trip, $guestMessage))->locale($locale)],
         ];
 
         foreach ($mails as [$recipient, $mail]) {

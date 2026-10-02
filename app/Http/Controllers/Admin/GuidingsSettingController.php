@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\Admin\CampCheckoutAdminMail;
+use App\Mail\Admin\TripCheckoutAdminMail;
+use App\Mail\Guest\CampCheckoutGuestMail;
+use App\Mail\Guest\TripCheckoutGuestMail;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
@@ -764,6 +768,18 @@ HTML;
                         : 'emails.vacation_booking_customer',
                     'viewRequestsUrl' => route('admin.trip-bookings.index'),
                 ];
+
+            case 'guest_camp_checkout_request':
+                return CampCheckoutGuestMail::sample()->viewData();
+
+            case 'guest_trip_checkout_request':
+                return TripCheckoutGuestMail::sample()->viewData();
+
+            case 'admin_camp_checkout_request':
+                return CampCheckoutAdminMail::sample()->viewData();
+
+            case 'admin_trip_checkout_request':
+                return TripCheckoutAdminMail::sample()->viewData();
 
             case 'ceo_booking_notification':
             case 'booking_reject_mail_to_ceo':
