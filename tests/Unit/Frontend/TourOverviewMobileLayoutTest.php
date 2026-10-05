@@ -30,6 +30,19 @@ class TourOverviewMobileLayoutTest extends TestCase
         $this->assertStringNotContainsString("badge border border-secondary text-secondary me-1", $blade);
     }
 
+    public function test_starting_time_falls_back_to_default_text_when_not_set(): void
+    {
+        $blade = (string) file_get_contents($this->projectPath('resources/views/pages/guidings/newIndex.blade.php'));
+
+        $this->assertStringContainsString("@lang('guidings.Starting_Time_Default')", $blade);
+        $this->assertStringNotContainsString('@if ($guiding->desc_starting_time || $guiding->desc_departure_time)', $blade);
+
+        foreach (['en', 'de'] as $locale) {
+            $lang = require $this->projectPath("resources/lang/{$locale}/guidings.php");
+            $this->assertNotEmpty($lang['Starting_Time_Default'] ?? null, "Missing {$locale} Starting_Time_Default");
+        }
+    }
+
     public function test_overview_see_more_uses_translated_labels(): void
     {
         $blade = (string) file_get_contents($this->projectPath('resources/views/pages/guidings/newIndex.blade.php'));

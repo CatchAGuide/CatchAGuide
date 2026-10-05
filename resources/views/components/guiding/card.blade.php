@@ -219,20 +219,15 @@
                         $meetingPoint = trim((string) ($guiding['desc_meeting_point'] ?? ''));
                         $hasMeetingPoint = $meetingPoint !== '';
                     @endphp
-                    @if($startTimesValue)
-                        <div class="guiding-card__schedule-item">
-                            <div class="guiding-card__schedule-label">{{ __('guidings.Starting_Time') }}</div>
-                            <div class="guiding-card__schedule-value">{{ $startTimesValue }}</div>
-                        </div>
-                    @endif
+                    <div class="guiding-card__schedule-item">
+                        <div class="guiding-card__schedule-label">{{ __('guidings.Starting_Time') }}</div>
+                        <div class="guiding-card__schedule-value">{{ $startTimesValue ?: __('guidings.Starting_Time_Default') }}</div>
+                    </div>
                     @if($hasMeetingPoint)
                         <div class="guiding-card__schedule-item">
                             <div class="guiding-card__schedule-label">{{ __('guidings.Meeting_Point') }}</div>
                             <div class="guiding-card__schedule-value">{!! clean_html($meetingPoint) !!}</div>
                         </div>
-                    @endif
-                    @if(!$startTimesValue && !$hasMeetingPoint)
-                        <p class="guiding-card__empty">{{ __('vacations.no_schedule_details') }}</p>
                     @endif
                 </div>
             </div>
