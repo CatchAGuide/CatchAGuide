@@ -64,7 +64,7 @@
 
         <div class="card">
             <div class="table-responsive">
-                <table class="table table-hover table-sm align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 sb-table">
                     <thead>
                         <tr>
                             <th>{{ __('sales.list.number') }}</th>
@@ -80,34 +80,48 @@
                     </thead>
                     <tbody>
                         @forelse($documents as $row)
+                            @php($document = $row['document'])
                             <tr>
-                                <td><a href="{{ route('admin.sales.offers.edit', $row['document']) }}" class="fw-semibold">{{ $row['document']->number }}</a></td>
-                                <td>{{ $row['customer'] }}<div class="small text-muted">{{ $row['document']->email }}</div></td>
-                                <td class="small">{{ $row['products'] }}</td>
-                                <td class="small text-nowrap">{{ $row['period'] }}</td>
-                                <td class="text-end text-nowrap">{{ $row['total'] }}</td>
+                                <td><a href="{{ route('admin.sales.offers.edit', $document) }}" class="sb-table__number">{{ $document->number }}</a></td>
                                 <td>
-                                    <span class="badge bg-{{ $row['document']->status->badge() }}">{{ $row['document']->status->label() }}</span>
-                                    @if($row['document']->hasUnseenAcceptance())
+                                    <div>{{ $row['customer'] }}</div>
+                                    <div class="sb-table__muted">{{ $document->email }}</div>
+                                </td>
+                                <td class="sb-table__products" title="{{ $row['products'] }}">{{ $row['products'] }}</td>
+                                <td>{{ $row['period'] }}</td>
+                                <td class="text-end sb-table__amount">{{ $row['total'] }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $document->status->badge() }}">{{ $document->status->label() }}</span>
+                                    @if($document->hasUnseenAcceptance())
                                         <span class="badge bg-danger">{{ __('sales.list.new_acceptance') }}</span>
                                     @endif
                                 </td>
-                                <td class="small text-nowrap">{{ $row['last_sent'] }}</td>
-                                <td class="small">{{ $row['document']->creator?->name }}</td>
-                                <td class="text-end text-nowrap">
-                                    <a href="{{ route('admin.sales.offers.edit', $row['document']) }}" class="btn btn-outline-primary btn-sm">{{ __('sales.list.open') }}</a>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-copy="{{ $row['url'] }}" data-copied="{{ __('sales.list.copied') }}">{{ __('sales.list.copy_link') }}</button>
-                                    <form method="POST" action="{{ route('admin.sales.offers.duplicate', $row['document']) }}" class="d-inline">@csrf<button class="btn btn-outline-secondary btn-sm">{{ __('sales.list.duplicate') }}</button></form>
+                                <td>{{ $row['last_sent'] }}</td>
+                                <td>{{ $document->creator?->name }}</td>
+                                <td class="text-end">
+                                    <form id="offer-duplicate-{{ $document->id }}" method="POST" action="{{ route('admin.sales.offers.duplicate', $document) }}" class="d-none">@csrf</form>
                                     @if($row['can_decline'])
-                                        <form method="POST" action="{{ route('admin.sales.offers.decline', $row['document']) }}" class="d-inline">@csrf<button class="btn btn-outline-warning btn-sm">{{ __('sales.list.decline') }}</button></form>
+                                        <form id="offer-decline-{{ $document->id }}" method="POST" action="{{ route('admin.sales.offers.decline', $document) }}" class="d-none">@csrf</form>
                                     @endif
                                     @if($row['can_cancel'])
-                                        <form method="POST" action="{{ route('admin.sales.offers.cancel', $row['document']) }}" class="d-inline" onsubmit="return confirm(@js(__('sales.list.cancel_confirm', ['number' => $row['document']->number])))">@csrf<button class="btn btn-outline-danger btn-sm">{{ __('sales.list.cancel') }}</button></form>
+                                        <form id="offer-cancel-{{ $document->id }}" method="POST" action="{{ route('admin.sales.offers.cancel', $document) }}" class="d-none"
+                                              onsubmit="return confirm(@js(__('sales.list.cancel_confirm', ['number' => $document->number])))">@csrf</form>
                                     @endif
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ route('admin.sales.offers.edit', $document) }}" class="btn btn-outline-primary" data-bs-toggle="tooltip" title="{{ __('sales.list.open') }}" aria-label="{{ __('sales.list.open') }}"><i class="fas fa-pen"></i></a>
+                                        <button type="button" class="btn btn-outline-secondary" data-copy="{{ $row['url'] }}" data-bs-toggle="tooltip" title="{{ __('sales.list.copy_link') }}" aria-label="{{ __('sales.list.copy_link') }}"><i class="fas fa-link"></i></button>
+                                        <button type="submit" form="offer-duplicate-{{ $document->id }}" class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="{{ __('sales.list.duplicate') }}" aria-label="{{ __('sales.list.duplicate') }}"><i class="fas fa-copy"></i></button>
+                                        @if($row['can_decline'])
+                                            <button type="submit" form="offer-decline-{{ $document->id }}" class="btn btn-outline-warning" data-bs-toggle="tooltip" title="{{ __('sales.list.decline') }}" aria-label="{{ __('sales.list.decline') }}"><i class="fas fa-thumbs-down"></i></button>
+                                        @endif
+                                        @if($row['can_cancel'])
+                                            <button type="submit" form="offer-cancel-{{ $document->id }}" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="{{ __('sales.list.cancel') }}" aria-label="{{ __('sales.list.cancel') }}"><i class="fas fa-ban"></i></button>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center text-muted py-4">{{ __('sales.list.empty') }}</td></tr>
+                            <tr><td colspan="9" class="text-center sb-table__muted py-4">{{ __('sales.list.empty') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -126,9 +140,9 @@
         button.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(button.dataset.copy);
-                const label = button.textContent;
-                button.textContent = button.dataset.copied;
-                setTimeout(() => { button.textContent = label; }, 1500);
+                const icon = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => { button.innerHTML = icon; }, 1500);
             } catch (error) {
                 console.warn('Copy failed', error);
             }

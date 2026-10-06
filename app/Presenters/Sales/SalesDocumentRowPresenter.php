@@ -6,7 +6,6 @@ use App\Models\SalesDocument;
 use App\Services\Sales\SalesDocumentStatusFlow;
 use App\Services\Sales\SalesFormat;
 use App\Services\Sales\SalesLinks;
-use Illuminate\Support\Str;
 
 /**
  * One row of the admin offers list (spec §4.8).
@@ -31,7 +30,7 @@ class SalesDocumentRowPresenter
         return [
             'document' => $document,
             'customer' => $document->fullName() ?: '–',
-            'products' => Str::limit($document->cards->pluck('title_snapshot')->filter()->implode(', ') ?: '–', 70),
+            'products' => $document->cards->pluck('title_snapshot')->filter()->implode(', ') ?: '–',
             'period' => $document->travel_from
                 ? SalesFormat::date($document->travel_from->toDateString(), $locale).' – '.SalesFormat::date(($document->travel_to ?? $document->travel_from)->toDateString(), $locale)
                 : '–',

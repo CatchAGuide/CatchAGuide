@@ -92,6 +92,24 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(1, $document->events()->where('type', SalesEventType::Created)->count());
     }
 
+    public function test_saving_again_replaces_every_item_instead_of_adding_to_them(): void
+    {
+        $tour = $this->makeTour();
+        $cards = [
+            $this->tourCard($tour),
+            $this->tourCard($tour, ['key' => 'c2', 'extras' => []]),
+            ['key' => 'c3', 'type' => 'custom', 'title' => 'Transfer', 'description' => '', 'date' => '', 'quantity' => 1, 'unit_label' => '', 'unit_price' => '40'],
+        ];
+        $document = $this->savedDocument($cards);
+        $this->assertSame(4, $document->items()->count());
+
+        app(SalesDocumentWriter::class)->save($document, $this->header(), $cards, $this->employee);
+        app(SalesDocumentWriter::class)->save($document, $this->header(), $cards, $this->employee);
+
+        $this->assertSame(4, $document->items()->count());
+        $this->assertCount(3, app(SalesDocumentStateMapper::class)->toCards($document->refresh()));
+    }
+
     public function test_manual_price_changes_are_logged(): void
     {
         $tour = $this->makeTour();

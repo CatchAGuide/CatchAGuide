@@ -20,6 +20,18 @@ use Carbon\CarbonImmutable;
  */
 class SalesDocumentPresenter
 {
+    /**
+     * CaG product-type colours, mirroring $category-tour / -camp / -trip in
+     * resources/sass/settings/_category-colors.scss (emails need literal values).
+     * Custom lines have no product type: neutral slate (coral is reserved for actions).
+     */
+    public const TYPE_COLORS = [
+        'tour' => '#313041',
+        'camp' => '#0C8A7F',
+        'trip' => '#1F6FA8',
+        'custom' => '#5A6478',
+    ];
+
     public const STATE_OPEN = 'open';
 
     public const STATE_ACCEPTED = 'accepted';
@@ -140,6 +152,7 @@ class SalesDocumentPresenter
         return [
             'type' => $group['type'],
             'kind' => __('sales.kind.'.$group['type'], [], $locale),
+            'color' => self::TYPE_COLORS[$group['type']] ?? self::TYPE_COLORS['custom'],
             'title' => $group['title'],
             'location' => $group['location'],
             'url' => $group['url'],

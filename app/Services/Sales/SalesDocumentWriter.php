@@ -44,7 +44,10 @@ class SalesDocumentWriter
             }
             $document->save();
 
-            $document->items()->delete();
+            // Child lines first, then the cards: MySQL stops a multi-row delete partway when the
+            // self-referencing ON DELETE CASCADE hits the same table, which left old cards behind.
+            SalesDocumentItem::query()->where('document_id', $document->id)->whereNotNull('parent_item_id')->delete();
+            SalesDocumentItem::query()->where('document_id', $document->id)->delete();
             $this->writeItems($document, array_values($cards), $quote);
 
             if ($isNew) {

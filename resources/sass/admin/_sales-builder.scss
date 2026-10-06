@@ -2,6 +2,7 @@
 // and the offers list. Compiled to public/css/admin-sales-builder.css (webpack.mix.js).
 
 @import "../settings/breakpoints";
+@import "../settings/category-colors";
 
 $sb-line: #dfe2ea;
 $sb-panel: #ffffff;
@@ -20,11 +21,12 @@ $sb-radius: 8px;
 $sb-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 $sb-stack: map-get($breakpoints, "desktop");
 
+// CaG product-type colours (settings/_category-colors.scss); custom lines stay neutral.
 $sb-tags: (
-  tour: (#e3f0ff, #1f4f99),
-  camp: (#e6f5ea, #22663a),
-  trip: (#fbecd9, #8a4b0c),
-  custom: (#ece8f6, #4f3d87),
+  tour: (category-color("tour", "soft"), category-color("tour")),
+  camp: (category-color("camp", "soft"), category-color("camp")),
+  trip: (category-color("trip", "soft"), category-color("trip")),
+  custom: (#eceef3, #5a6478),
 );
 
 // The admin theme clips .app-content with overflow:hidden, which turns off position:sticky
@@ -773,5 +775,67 @@ $sb-tags: (
 .sb-list {
   .sb-filters {
     margin-bottom: 16px;
+  }
+}
+
+// One type size for the whole table (cells, headings, badges, buttons); secondary
+// information is muted by colour, not by a smaller size. Nothing wraps.
+$sb-table-size: 13px;
+
+// Scoped like the admin theme's `.admin-shell .table thead th` (12px, uppercase) so it wins here.
+.admin-shell .table.sb-table,
+.sb-table {
+  font-size: $sb-table-size;
+
+  th,
+  td,
+  .badge,
+  .btn {
+    font-size: $sb-table-size;
+    line-height: 1.4;
+  }
+
+  thead th,
+  th {
+    font-weight: 600;
+    color: $sb-muted;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  td {
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-weight: 500;
+    padding: 0.3em 0.6em;
+  }
+
+  .btn-group .btn {
+    width: 32px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &__number {
+    font-weight: 600;
+  }
+
+  &__muted {
+    color: $sb-muted;
+  }
+
+  &__amount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  &__products {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

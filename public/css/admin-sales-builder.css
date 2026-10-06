@@ -1,3 +1,43 @@
+@keyframes cag-badge-glare {
+  0% {
+    transform: translateX(-70%) skewX(-16deg);
+  }
+  42% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+  100% {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+.cag-badge-glare {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.32), inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+}
+.cag-badge-glare::after {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: 0;
+  width: 48%;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.05) 32%, rgba(255, 255, 255, 0.58) 48%, rgba(255, 255, 255, 0.18) 58%, transparent 78%);
+  transform: translateX(-70%) skewX(-16deg);
+  animation: cag-badge-glare 3.8s ease-in-out infinite;
+  animation-delay: 0s;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cag-badge-glare::after {
+    animation: none;
+    display: none;
+  }
+}
+
 .app-content:has(.sb),
 .horizontalMenucontainer:has(.sb) {
   overflow: clip;
@@ -235,20 +275,20 @@
   flex-shrink: 0;
 }
 .sb-tag--tour {
-  background: #e3f0ff;
-  color: #1f4f99;
+  background: rgba(49, 48, 65, 0.09);
+  color: #313041;
 }
 .sb-tag--camp {
-  background: #e6f5ea;
-  color: #22663a;
+  background: rgba(12, 138, 127, 0.11);
+  color: #0c8a7f;
 }
 .sb-tag--trip {
-  background: #fbecd9;
-  color: #8a4b0c;
+  background: rgba(31, 111, 168, 0.11);
+  color: #1f6fa8;
 }
 .sb-tag--custom {
-  background: #ece8f6;
-  color: #4f3d87;
+  background: #eceef3;
+  color: #5a6478;
 }
 
 .sb-fixed {
@@ -690,4 +730,65 @@
 
 .sb-list .sb-filters {
   margin-bottom: 16px;
+}
+
+.admin-shell .table.sb-table,
+.sb-table {
+  font-size: 13px;
+}
+.admin-shell .table.sb-table th,
+.admin-shell .table.sb-table td,
+.admin-shell .table.sb-table .badge,
+.admin-shell .table.sb-table .btn,
+.sb-table th,
+.sb-table td,
+.sb-table .badge,
+.sb-table .btn {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.admin-shell .table.sb-table thead th,
+.admin-shell .table.sb-table th,
+.sb-table thead th,
+.sb-table th {
+  font-weight: 600;
+  color: #5f6880;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.admin-shell .table.sb-table td,
+.sb-table td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.admin-shell .table.sb-table .badge,
+.sb-table .badge {
+  font-weight: 500;
+  padding: 0.3em 0.6em;
+}
+.admin-shell .table.sb-table .btn-group .btn,
+.sb-table .btn-group .btn {
+  width: 32px;
+  padding-left: 0;
+  padding-right: 0;
+}
+.admin-shell .table.sb-table__number,
+.sb-table__number {
+  font-weight: 600;
+}
+.admin-shell .table.sb-table__muted,
+.sb-table__muted {
+  color: #5f6880;
+}
+.admin-shell .table.sb-table__amount,
+.sb-table__amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.admin-shell .table.sb-table__products,
+.sb-table__products {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

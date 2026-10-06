@@ -12,7 +12,7 @@
     };
     $money = fn ($amount) => SalesFormat::money($amount, app()->getLocale());
 @endphp
-<div class="sb" wire:poll.30s="autosave" x-data x-on:sales-focus.window="$nextTick(() => document.querySelector($event.detail.selector)?.focus())">
+<div class="sb" wire:poll.30s.keep-alive="autosave" x-data x-on:visibilitychange.document="if (document.hidden) $wire.autosave()" x-on:sales-focus.window="$nextTick(() => document.querySelector($event.detail.selector)?.focus())">
     <div class="sb-top">
         <div>
             <h1 class="sb-title">{{ $t('heading') }}</h1>

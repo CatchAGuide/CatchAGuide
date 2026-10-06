@@ -51,7 +51,7 @@ class SalesPlanComplianceTest extends TestCase
         $this->get('/de/offer/'.$document->public_token)->assertOk();
     }
 
-    public function test_accept_box_shows_the_hosts_cancellation_policy_and_no_product_subtotals(): void
+    public function test_accept_box_shows_the_hosts_cancellation_policy_and_product_subtotals(): void
     {
         $trip = $this->makeTrip();
         $trip->forceFill(['cancellation_policy' => 'Bis 30 Tage vor Anreise kostenlos.'])->save();
@@ -71,7 +71,8 @@ class SalesPlanComplianceTest extends TestCase
             ->assertSee('Stornobedingungen des Gastgebers')
             ->assertSee('Stornobedingungen – Dorsch &amp; Heilbutt-Woche Hitra', false)
             ->assertSee('Bis 30 Tage vor Anreise kostenlos.')
-            ->assertDontSee('Zwischensumme');
+            // The tour has an extra (2 lines), so it shows a subtotal on the page as in the email.
+            ->assertSee('Zwischensumme');
 
         // The confirmation email keeps its per-product subtotals.
         $this->assertStringContainsString('Zwischensumme', (new SalesDocumentMail($document, SalesDocumentOutput::Confirmation))->render());

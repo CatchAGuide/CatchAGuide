@@ -82,6 +82,36 @@ class SalesAdminTest extends TestCase
         Mail::assertSent(SalesDocumentMail::class);
     }
 
+    public function test_saving_a_draft_repeatedly_never_duplicates_the_trip(): void
+    {
+        $tour = $this->makeTour();
+        $trip = $this->makeTrip();
+        $this->actingAs($this->employee, 'employees');
+
+        $component = Livewire::test(SalesDocumentBuilder::class)
+            ->set('header.email', 'trip@example.com')
+            ->call('addCard', 'tour')
+            ->call('selectProduct', 0, $tour->id)
+            ->set('cards.0.date', now()->addMonth()->toDateString())
+            ->call('toggleExtra', 0, 'e0')
+            ->call('addCard', 'trip')
+            ->call('selectProduct', 1, $trip->id)
+            ->set('cards.1.date', now()->addMonths(2)->toDateString())
+            ->call('saveDraft')
+            ->call('saveDraft')
+            ->set('cards.1.persons', 4)
+            ->call('saveDraft');
+
+        $document = SalesDocument::findOrFail($component->get('documentId'));
+        $cards = $document->items()->whereNull('parent_item_id')->get();
+
+        $this->assertSame(['tour', 'trip'], $cards->map(fn ($card) => $card->item_type->value)->sort()->values()->all());
+        $this->assertSame(3, $document->items()->count()); // tour + its extra + trip
+
+        // Reopening shows each product once.
+        Livewire::test(SalesDocumentBuilder::class, ['document' => $document])->assertCount('cards', 2);
+    }
+
     public function test_builder_blocks_sending_without_email_or_lines(): void
     {
         $this->actingAs($this->employee, 'employees');

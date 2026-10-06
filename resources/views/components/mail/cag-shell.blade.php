@@ -7,6 +7,8 @@
     'homeUrl' => null,
     // 'auto' follows the reader's light/dark setting (emails); 'light' keeps the brand look (customer page).
     'colorScheme' => 'auto',
+    // Card width: 600 for emails; the customer page uses a wider card on desktop.
+    'maxWidth' => 600,
 ])
 {{--
     CaG system-mail shell: navy header with the centered logo and a white title, white card body
@@ -62,7 +64,7 @@ a:hover{text-decoration:none!important;}
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">{{ $preheader }} &#847; &#847; &#847;</div>
 @endif
 <table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1F1F2;"><tr><td class="wrap" align="center" style="padding:32px 16px;">
-<table role="presentation" class="card" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:12px;border-collapse:separate;overflow:hidden;">
+<table role="presentation" class="card" width="{{ $maxWidth }}" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:{{ $maxWidth }}px;background:#FFFFFF;border-radius:12px;border-collapse:separate;overflow:hidden;">
 
 {{-- Header: logo and title only --}}
 <tr><td align="center" style="background:#1A1B30;padding:28px;">

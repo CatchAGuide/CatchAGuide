@@ -6,7 +6,6 @@
 @php
     $font = "font-family:'Inter',Helvetica,Arial,sans-serif;";
     $copy = fn (string $key, array $replace = []) => __('sales.customer.'.$key, $replace, $doc['locale']);
-    $stripes = ['tour' => '#2F6FDE', 'camp' => '#2E8B57', 'trip' => '#E07A1F', 'custom' => '#7B4FC9'];
 @endphp
 <x-mail.cag-shell :title="$doc['title']" :preheader="$doc['mailText']" :reason="__('sales.customer.footer_reason', ['site' => $site], $doc['locale'])" :home-url="$homeUrl" :imprint-url="$imprintUrl" :privacy-url="$privacyUrl">
 
@@ -23,9 +22,9 @@
 <tr><td class="px t-label" style="padding:24px 32px 10px;{{ $font }}font-size:11px;line-height:1.2;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;color:#3B5583;">{{ $copy('selection') }}</td></tr>
 @foreach($doc['groups'] as $group)
 <tr><td class="px" style="padding:0 32px 10px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bd" style="border:1px solid #E6E8EC;border-left:4px solid {{ $stripes[$group['type']] ?? '#3B5583' }};border-radius:8px;border-collapse:separate;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bd" style="border:1px solid #E6E8EC;border-left:4px solid {{ $group['color'] }};border-radius:8px;border-collapse:separate;">
 <tr><td style="padding:12px 14px 4px;{{ $font }}">
-<span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;color:{{ $stripes[$group['type']] ?? '#3B5583' }};">{{ $group['kind'] }}</span>
+<span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;color:{{ $group['color'] }};">{{ $group['kind'] }}</span>
 <div class="t-main" style="font-size:15px;font-weight:700;color:#1A1B30;margin-top:2px;">{{ $group['title'] }}</div>
 @if($group['location'] !== '')
 <div class="t-soft" style="font-size:12px;color:#6B7489;">{{ $group['location'] }}</div>
@@ -65,6 +64,11 @@
 </td></tr></table>
 </td></tr>
 @endif
+
+{{-- Help or questions? --}}
+<tr><td class="px" style="padding:24px 32px 0;">
+@include('sales.partials.contact', ['locale' => $doc['locale']])
+</td></tr>
 
 <tr><td class="px t-main" style="padding:26px 32px 30px;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">
 {{ $doc['signatureText'] }}<br>
