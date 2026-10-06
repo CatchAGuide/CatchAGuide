@@ -1,4 +1,5 @@
 {{-- Shared Inclusions + Extras panel (tabs + accordion) --}}
+@use('App\Enums\TourExtraUnit')
 @php
     $inclusionItems = collect(!empty(decode_if_json($guiding->inclusions)) ? $guiding->getInclusionNames() : [])
         ->filter(fn ($inclusion) => is_array($inclusion) && filled(trim((string) ($inclusion['name'] ?? ''))))
@@ -47,7 +48,7 @@
                         <span class="tour-panel__extra-name">{{ $pricingExtra['name'] }}</span>
                         <span class="tour-panel__extra-price">
                             {{ $pricingExtra['price'] }}€
-                            <span class="tour-panel__extra-unit">{{ __('booking.per_person') }}</span>
+                            <span class="tour-panel__extra-unit">{{ TourExtraUnit::fromListing($pricingExtra['unit'] ?? null)->label() }}</span>
                         </span>
                     </li>
                 @endforeach

@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\PageAttributeController;
 use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\ProductReportsController;
 use App\Http\Controllers\Admin\ReviewsController;
+use App\Http\Controllers\Admin\SalesDocumentsController;
 use App\Http\Controllers\Admin\ScheduledTasksController;
 use App\Http\Controllers\Admin\SecurityThreatsController;
 use App\Http\Controllers\Admin\SpecialOffersController;
@@ -347,9 +348,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('newsletter-subscribers', [NewsletterSubscribersController::class, 'index'])->name('newsletter-subscribers.index');
         Route::delete('newsletter-subscribers/{newsletter}', [NewsletterSubscribersController::class, 'destroy'])->name('newsletter-subscribers.destroy');
 
+        // Offer & booking confirmation builder (Admin › Sales › Offers).
+        Route::prefix('sales/offers')->name('sales.offers.')->controller(SalesDocumentsController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::get('/{document}', 'edit')->whereNumber('document')->name('edit');
+            Route::post('/{document}/duplicate', 'duplicate')->whereNumber('document')->name('duplicate');
+            Route::post('/{document}/decline', 'decline')->whereNumber('document')->name('decline');
+            Route::post('/{document}/cancel', 'cancel')->whereNumber('document')->name('cancel');
+            Route::post('/from-camp-request/{campVacationBooking}', 'fromCampRequest')->name('from-camp-request');
+            Route::post('/from-trip-request/{tripBooking}', 'fromTripRequest')->name('from-trip-request');
+        });
+
+        // Former camps-only offer prototype: its offers were imported into sales documents
+        // (sales:import-custom-camp-offers), so its pages lead to the new builder.
         Route::prefix('offer-sendout')->name('offer-sendout.')->group(function () {
-            Route::get('/', [OfferSendoutController::class, 'customCampOffers'])->name('index');
-            Route::get('/create', [OfferSendoutController::class, 'create'])->name('create');
+            Route::get('/', fn () => redirect()->route('admin.sales.offers.index'))->name('index');
+            Route::get('/create', fn () => redirect()->route('admin.sales.offers.create'))->name('create');
             Route::get('/custom-camp-offers/{customCampOffer}', [OfferSendoutController::class, 'getCustomCampOffer'])->name('custom-camp-offers.show');
             Route::patch('/custom-camp-offers/{customCampOffer}/status', [OfferSendoutController::class, 'updateStatus'])->name('custom-camp-offers.update-status');
             Route::post('/custom-camp-offers/{customCampOffer}/follow-up', [OfferSendoutController::class, 'sendFollowUp'])->name('custom-camp-offers.follow-up');

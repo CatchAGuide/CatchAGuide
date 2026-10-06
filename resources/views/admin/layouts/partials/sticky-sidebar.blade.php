@@ -111,7 +111,7 @@
                     <a class="side-menu__item {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.newsletter-subscribers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Newsletter subscribers</span></a>
                 </li>
                 <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.offer-sendout.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.offer-sendout.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">Custom camp offers</span></a>
+                    <a class="side-menu__item {{ request()->routeIs('admin.sales.offers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.sales.offers.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">{{ __('sales.list.menu') }}</span></a>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email logs</span></a>

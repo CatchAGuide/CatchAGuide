@@ -174,6 +174,20 @@ return [
             'run_in_background' => true,
         ],
 
+        'sales_expire_offers' => [
+            'label' => 'Expire sales offers',
+            'description' => 'Marks sent/viewed offers past their valid-until date as expired (sales:expire-offers).',
+            'command' => 'sales:expire-offers',
+            'default' => [
+                'enabled' => true,
+                'frequency' => 'daily_at',
+                'schedule_time' => '01:10',
+                'day_of_week' => null,
+                'cron_expression' => null,
+            ],
+            'without_overlapping' => true,
+        ],
+
         'threat_intelligence_cleanup' => [
             'label' => 'Threat intelligence cleanup',
             'description' => 'Deletes threat_intelligence rows older than retention (threat-intelligence:cleanup).',

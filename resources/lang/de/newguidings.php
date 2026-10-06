@@ -284,6 +284,11 @@ return [
     'price' => 'Preis',
     'additional_offer' => 'Zusätzliche Angebote',
     'enter_price_per_person' => 'Preis pro Person eingeben',
+    'enter_price' => 'Preis eingeben',
+    'extra_unit' => 'Berechnung',
+    'extra_unit_per_person' => 'pro Person',
+    'extra_unit_per_booking' => 'pro Buchung',
+    'extra_unit_per_item' => 'pro Stück',
     'select_or_add_value' => 'Wert auswählen oder hinzufügen',
 
     'min_guests_required' => 'Mindestanzahl der Gäste erforderlich',

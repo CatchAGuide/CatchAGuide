@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingRescheduleController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SalesOfferController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/booking-accept/{token}', [BookingController::class, 'accept'])
@@ -44,3 +45,14 @@ Route::permanentRedirect('/all-countries', '/destination')->name('allcountries')
 // fell through to guidings/{slug} and 404'd. Registered here, before catalog.php's catch-all.
 Route::get('guidings/bookingrequest', fn () => redirect()->route('guidings.request', request()->query(), 301))
     ->name('guidings.bookingrequest.legacy');
+
+// Offer / booking confirmation from Admin › Sales › Offers, behind its unguessable token
+// (no login, noindex). The token is 32 random characters.
+Route::get('/offer/{token}', [SalesOfferController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{32}')
+    ->middleware('throttle:30,1')
+    ->name('sales-offers.show');
+Route::post('/offer/{token}/accept', [SalesOfferController::class, 'accept'])
+    ->where('token', '[A-Za-z0-9]{32}')
+    ->middleware('throttle:10,1')
+    ->name('sales-offers.accept');

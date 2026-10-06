@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreManualCampVacationBookingRequest;
 use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\EmailLog;
+use App\Models\SalesDocument;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -21,7 +22,9 @@ class CampVacationBookingsController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.pages.camp-vacation-bookings.index', compact('bookingRequests'));
+        $offers = SalesDocument::forSources(SalesDocument::SOURCE_CAMP_REQUEST, $bookingRequests->modelKeys());
+
+        return view('admin.pages.camp-vacation-bookings.index', compact('bookingRequests', 'offers'));
     }
 
     public function updateStatus(Request $request, CampVacationBooking $campVacationBooking)

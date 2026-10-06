@@ -107,8 +107,8 @@ function tourCheckout() {
                 : [...this.selectedExtras, index];
         },
 
-        extraTotal(price) {
-            return this.money(price * this.persons);
+        extraTotal(index) {
+            return this.money(pricing.extraTotal(index, this.persons));
         },
 
         get basePrice() {

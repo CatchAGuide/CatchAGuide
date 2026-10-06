@@ -316,8 +316,29 @@
                                                     </ul>
                                                 </div>
                                             </td>
-                                            <td class="col-actions cr-td-actions text-end" data-label="Actions">
+                                            <td class="col-actions cr-td-actions text-end text-nowrap" data-label="Actions">
+                                                @unless(isset($offers[$request->id]))
+                                                    <form id="offer-from-request-{{ $request->id }}" method="POST" action="{{ route('admin.sales.offers.from-camp-request', $request) }}" class="d-none">@csrf</form>
+                                                @endunless
                                                 <div class="btn-group btn-group-sm">
+                                                    @if(isset($offers[$request->id]))
+                                                        <a href="{{ route('admin.sales.offers.edit', $offers[$request->id]['id']) }}"
+                                                           class="btn btn-success"
+                                                           data-bs-toggle="tooltip"
+                                                           title="{{ __('sales.request.open_offer', ['number' => $offers[$request->id]['number']]) }}"
+                                                           aria-label="{{ __('sales.request.open_offer', ['number' => $offers[$request->id]['number']]) }}">
+                                                            <i class="fas fa-file-invoice"></i>
+                                                        </a>
+                                                    @else
+                                                        <button type="submit"
+                                                                form="offer-from-request-{{ $request->id }}"
+                                                                class="btn btn-outline-success"
+                                                                data-bs-toggle="tooltip"
+                                                                title="{{ __('sales.request.create_offer') }}"
+                                                                aria-label="{{ __('sales.request.create_offer') }}">
+                                                            <i class="fas fa-file-invoice"></i>
+                                                        </button>
+                                                    @endif
                                                     <button type="button"
                                                             class="btn btn-outline-info js-view-message"
                                                             data-message="{{ e($request->message) }}"

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreManualTripBookingRequest;
 use App\Models\EmailLog;
+use App\Models\SalesDocument;
 use App\Models\Trip;
 use App\Models\TripBooking;
 use Carbon\Carbon;
@@ -21,7 +22,9 @@ class TripBookingsController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.pages.trip-bookings.index', compact('bookingRequests'));
+        $offers = SalesDocument::forSources(SalesDocument::SOURCE_TRIP_REQUEST, $bookingRequests->modelKeys());
+
+        return view('admin.pages.trip-bookings.index', compact('bookingRequests', 'offers'));
     }
 
     public function showComment(TripBooking $tripBooking)

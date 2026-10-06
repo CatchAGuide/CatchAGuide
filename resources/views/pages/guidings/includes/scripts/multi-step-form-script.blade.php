@@ -1,3 +1,4 @@
+@use('App\Enums\TourExtraUnit')
 @push('js_push')
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
@@ -753,8 +754,9 @@
                                 </div>
                                 <div class="price">
                                     <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
-                                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="${extra.price}" placeholder="{{__('newguidings.enter_price_per_person')}}">
-                                    <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
+                                    <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="${extra.price}" placeholder="{{__('newguidings.enter_price')}}">
+                                    <span class="input-group-text">€</span>
+                                    ${extraUnitSelect(extraCount, extra.unit)}
                                 </div>
                             </div>
                             <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
@@ -1071,6 +1073,17 @@
         }
     });
 
+    // Unit select for one extras row (how the extra is charged: per person, once per booking, per item).
+    function extraUnitSelect(index, selected) {
+        const units = @json(collect(TourExtraUnit::cases())->mapWithKeys(fn ($unit) => [$unit->value => $unit->label()]));
+        const current = units[selected] ? selected : 'per_person';
+        const options = Object.entries(units)
+            .map(([value, label]) => `<option value="${value}" ${value === current ? 'selected' : ''}>${label}</option>`)
+            .join('');
+
+        return `<select class="form-select extra-unit" name="extra_unit_${index}" aria-label="{{ __('newguidings.extra_unit') }}">${options}</select>`;
+    }
+
     // Add extra pricing
     window.extraCount = window.extraCount || 0;
     $('#add-extra').click(function() {
@@ -1097,8 +1110,9 @@
                     </div>
                     <div class="price">
                         <span class="input-group-text d-none d-md-block">{{__('newguidings.price')}}</span>
-                        <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="" placeholder="{{__('newguidings.enter_price_per_person')}}">
-                        <span class="input-group-text">€ {{ __('newguidings.per_person') }}</span>
+                        <input type="number" class="form-control mr-2" name="extra_price_${extraCount}" value="" placeholder="{{__('newguidings.enter_price')}}">
+                        <span class="input-group-text">€</span>
+                        ${extraUnitSelect(extraCount, 'per_person')}
                     </div>
                 </div>
                 <button type="button" class="btn btn-danger btn-sm remove-extra"><i class="fas fa-trash"></i></button>
