@@ -6,7 +6,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Mail\Events\MessageSent;
+use App\Listeners\AddPlainTextAlternative;
 use App\Listeners\LogSentEmail;
 
 use App\Events\BookingStatusChanged;
@@ -25,6 +27,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         BookingStatusChanged::class => [
             BookingAcceptedListener::class,
+        ],
+        MessageSending::class => [
+            AddPlainTextAlternative::class,
         ],
         MessageSent::class => [
             LogSentEmail::class,
