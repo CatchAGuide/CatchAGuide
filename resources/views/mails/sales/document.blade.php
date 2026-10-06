@@ -67,7 +67,7 @@
 @endif
 
 <tr><td class="px t-main" style="padding:26px 32px 30px;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">
-{{ $copy('signature') }}<br>
+{{ $doc['signatureText'] }}<br>
 @if($doc['signature'] !== ''){{ $doc['signature'] }}<br>@endif
 Catch A Guide
 </td></tr>

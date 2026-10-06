@@ -10,6 +10,7 @@ use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesFormat;
 use App\Services\Sales\SalesLinks;
 use App\Services\Sales\SalesQuote;
+use App\Services\Sales\SalesTexts;
 use Carbon\CarbonImmutable;
 
 /**
@@ -33,6 +34,7 @@ class SalesDocumentPresenter
         private readonly SalesDocumentCalculator $calculator,
         private readonly SalesDocumentStateMapper $mapper,
         private readonly SalesLinks $links,
+        private readonly SalesTexts $texts,
     ) {}
 
     /**
@@ -78,8 +80,11 @@ class SalesDocumentPresenter
             'isOffer' => $isOffer,
             'title' => $copy($isOffer ? 'title_offer' : 'title_confirmation'),
             'greeting' => $this->greeting($names, $locale),
-            'intro' => $intro !== '' ? $intro : $copy($isOffer ? 'intro_offer' : 'intro_confirmation'),
-            'mailText' => $copy($isOffer ? 'mail_offer' : 'mail_confirmation'),
+            // Default texts may be edited in Admin › Sales › Texts (spec §8.5).
+            'intro' => $intro !== '' ? $intro : $this->texts->get($isOffer ? 'intro_offer' : 'intro_confirmation', $locale),
+            'mailText' => $this->texts->get($isOffer ? 'mail_offer' : 'mail_confirmation', $locale),
+            'signatureText' => $this->texts->get('signature', $locale),
+            'thanks' => $this->texts->get('thanks', $locale),
             // A card without a priced line yet (no product picked) isn't shown to the customer.
             'groups' => array_values(array_map(
                 fn (array $group) => $this->group($group, $locale),
@@ -89,6 +94,11 @@ class SalesDocumentPresenter
             'totalAmount' => $quote->total,
             'period' => $period,
             'notIncluded' => SalesDocumentStateMapper::lines((array) ($header['not_included'] ?? [])),
+            // Hosts' cancellation policies, linked from the acceptance checkbox (spec OQ5).
+            'policies' => array_values(array_map(
+                fn (array $group) => ['title' => $group['title'], 'text' => $group['cancellation_policy']],
+                array_filter($quote->groups, fn (array $group) => filled($group['cancellation_policy'] ?? null) && $group['lines'] !== []),
+            )),
             'goodToKnow' => trim((string) ($header['good_to_know'] ?? '')),
             'paymentNote' => trim((string) ($header['payment_note'] ?? '')),
             'partners' => $isOffer ? [] : array_map(fn (array $partner) => $partner + [

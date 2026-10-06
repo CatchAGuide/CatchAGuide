@@ -46,13 +46,18 @@ Route::permanentRedirect('/all-countries', '/destination')->name('allcountries')
 Route::get('guidings/bookingrequest', fn () => redirect()->route('guidings.request', request()->query(), 301))
     ->name('guidings.bookingrequest.legacy');
 
-// Offer / booking confirmation from Admin › Sales › Offers, behind its unguessable token
-// (no login, noindex). The token is 32 random characters.
-Route::get('/offer/{token}', [SalesOfferController::class, 'show'])
-    ->where('token', '[A-Za-z0-9]{32}')
+// Offer / booking confirmation from Admin › Sales › Offers at /{lang}/offer/{token}
+// (spec §8.2; no login, noindex). The token is 32 random characters; /offer/{token} without
+// the language redirects.
+Route::get('/{lang}/offer/{token}', [SalesOfferController::class, 'show'])
+    ->where(['lang' => 'de|en', 'token' => '[A-Za-z0-9]{32}'])
     ->middleware('throttle:30,1')
     ->name('sales-offers.show');
-Route::post('/offer/{token}/accept', [SalesOfferController::class, 'accept'])
-    ->where('token', '[A-Za-z0-9]{32}')
+Route::post('/{lang}/offer/{token}/accept', [SalesOfferController::class, 'accept'])
+    ->where(['lang' => 'de|en', 'token' => '[A-Za-z0-9]{32}'])
     ->middleware('throttle:10,1')
     ->name('sales-offers.accept');
+Route::get('/offer/{token}', [SalesOfferController::class, 'withoutLanguage'])
+    ->where('token', '[A-Za-z0-9]{32}')
+    ->middleware('throttle:30,1')
+    ->name('sales-offers.legacy');

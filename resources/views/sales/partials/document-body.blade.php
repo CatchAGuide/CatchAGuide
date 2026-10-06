@@ -42,12 +42,6 @@
 @if($group['inclusions'] !== [])
 <tr><td class="t-muted" style="padding:4px 16px 8px;{{ $font }}font-size:13px;line-height:1.5;color:#5A6478;"><strong>{{ $copy('included') }}:</strong> {{ implode(', ', $group['inclusions']) }}</td></tr>
 @endif
-@if($group['subtotal'])
-<tr><td class="bd" style="padding:8px 16px;border-top:1px solid #E6E8EC;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-<td class="t-muted" style="{{ $font }}font-size:13px;color:#5A6478;">{{ $copy('subtotal') }}</td>
-<td align="right" class="t-main" style="{{ $font }}font-size:13px;color:#1A1B30;font-weight:600;">{{ $group['subtotal'] }}</td>
-</tr></table></td></tr>
-@endif
 @if($group['url'] && $group['moreLabel'])
 <tr><td style="padding:2px 16px 14px;"><a href="{{ $group['url'] }}" target="_blank" rel="noopener" style="{{ $font }}font-size:13px;color:#2F6FDE;text-decoration:none;font-weight:600;">{{ $group['moreLabel'] }} ↗</a></td></tr>
 @else
@@ -106,7 +100,7 @@
 @if($doc['isOffer'])
 <tr><td class="px" style="padding:24px 32px 0;{{ $font }}">
 @if($doc['state'] === 'accepted' || ($justAccepted ?? false))
-<div style="background:#E8F5EE;border-radius:10px;padding:16px;font-size:14px;line-height:1.55;color:#1E5E3B;">{{ $copy('thanks') }}</div>
+<div style="background:#E8F5EE;border-radius:10px;padding:16px;font-size:14px;line-height:1.55;color:#1E5E3B;">{{ $doc['thanks'] }}</div>
 @elseif($doc['state'] === 'expired')
 <div style="background:#FDF0E6;border-radius:10px;padding:16px;font-size:14px;line-height:1.55;color:#8A4A12;">{{ $copy('expired') }}</div>
 @elseif($doc['state'] === 'cancelled')
@@ -126,8 +120,18 @@
 <input type="checkbox" name="terms" value="1" style="margin-top:3px;">
 <span>{!! $copy('terms', [
     'terms' => '<a href="'.e($termsUrl ?? '#').'" target="_blank" rel="noopener" style="color:inherit;">'.e($copy('terms_link')).'</a>',
+    'policy' => $doc['policies'] !== []
+        ? '<a href="#cag-policies" style="color:inherit;">'.e($copy('policy_link')).'</a>'
+        : e($copy('policy_link')),
 ]) !!}</span>
 </label>
+<div id="cag-policies" style="margin-top:10px;font-size:13px;line-height:1.5;color:#5A6478;">
+@forelse($doc['policies'] as $policy)
+<details style="margin-top:6px;"><summary style="cursor:pointer;color:#1A1B30;">{{ $copy('policy_of', ['title' => $policy['title']]) }}</summary><p style="margin:6px 0 0;white-space:pre-line;">{{ $policy['text'] }}</p></details>
+@empty
+<p style="margin:0;">{{ $copy('policy_none') }}</p>
+@endforelse
+</div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
 <button type="submit" style="background:#E8604C;color:#FFFFFF;border:0;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:700;cursor:pointer;">{{ $copy('accept_binding') }}</button>
 <button type="button" onclick="this.closest('details').open = false" style="background:transparent;color:#1A1B30;border:1px solid #D5D9E2;border-radius:10px;padding:12px 18px;font-size:15px;cursor:pointer;">{{ $copy('cancel_accept') }}</button>
@@ -139,6 +143,6 @@
 @endif
 
 <tr><td class="px t-main" style="padding:26px 32px 30px;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">
-{{ $copy('signature') }}<br>
+{{ $doc['signatureText'] }}<br>
 @if($doc['signature'] !== '')<strong>{{ $doc['signature'] }}</strong> · @endif Catch A Guide
 </td></tr>

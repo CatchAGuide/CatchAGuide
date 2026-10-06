@@ -12,7 +12,7 @@ class SalesLinks
 {
     public function customerUrl(SalesDocument $document): string
     {
-        return $this->absolute(route('sales-offers.show', $document->public_token, false), $document->locale());
+        return $this->absolute(route('sales-offers.show', ['lang' => $document->locale(), 'token' => $document->public_token], false), $document->locale());
     }
 
     /**

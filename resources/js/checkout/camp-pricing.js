@@ -71,7 +71,9 @@ export class CampPricing {
 
         if (unit) {
             const rate = this.accommodationRate(unit, persons);
-            lines.push({ key: `a${unit.id}`, type: 'accommodation', name: unit.name, quantity: nights, unitPrice: rate.daily, amount: rate.total(nights) });
+            // Mirrors AccommodationPriceUnit::guestFactor(): per-person-night units charge every guest.
+            const factor = unit.unit === 'per_person_night' ? Math.max(1, persons) : 1;
+            lines.push({ key: `a${unit.id}`, type: 'accommodation', name: unit.name, quantity: nights, unitPrice: rate.daily === null ? null : rate.daily * factor, amount: rate.total(nights) * factor });
         }
         if (boat) {
             const rate = new StayRate(boat);

@@ -47,6 +47,7 @@ class Accommodation extends Model
         'policies',
         'rental_conditions',
         'per_person_pricing',
+        'price_unit',
         'extras',
         'inclusives',
     ];

@@ -62,6 +62,26 @@ class CampCheckoutPricingTest extends TestCase
         $this->assertSame(10, $quote->lineId('boat'));
     }
 
+    public function test_per_person_night_accommodation_charges_every_guest(): void
+    {
+        $camp = $this->camp();
+        $camp->accommodations->first()->price_unit = 'per_person_night';
+
+        $quote = CampCheckoutPricing::for($camp)->quote(new CampCheckoutSelection(
+            nights: 3,
+            persons: 2,
+            accommodationId: 1,
+            rentalBoatId: null,
+            guidingId: null,
+            specialOfferId: null,
+        ));
+
+        // 2-guest tier 171 × 3 nights × 2 guests.
+        $this->assertSame(1026.0, $quote->lines[0]['amount']);
+        $this->assertSame(342.0, $quote->lines[0]['unit_price']);
+        $this->assertSame('per_person_night', CampCheckoutPricing::for($camp)->clientConfig()['accommodations'][0]['unit']);
+    }
+
     public function test_quote_ignores_ids_that_do_not_belong_to_the_camp(): void
     {
         $quote = CampCheckoutPricing::for($this->camp())->quote(new CampCheckoutSelection(

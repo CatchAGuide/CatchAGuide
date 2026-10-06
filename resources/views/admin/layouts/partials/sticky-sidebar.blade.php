@@ -9,6 +9,7 @@
         'admin.trips.*',
         'admin.listings.consolidated.*'
     );
+    $salesActive = request()->routeIs('admin.sales.*');
     $financeStrategyActive = request()->routeIs(
         'admin.finance.*',
         'admin.financial.*',
@@ -110,8 +111,16 @@
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.newsletter-subscribers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.newsletter-subscribers.index') }}"><i class="side-menu__icon fe fe-users"></i><span class="side-menu__label">Newsletter subscribers</span></a>
                 </li>
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.sales.offers.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.sales.offers.index') }}"><i class="side-menu__icon fe fe-send"></i><span class="side-menu__label">{{ __('sales.list.menu') }}</span></a>
+                <li class="slide {{ $salesActive ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ $salesActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-send"></i>
+                        <span class="side-menu__label">{{ __('sales.menu') }}</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.sales.offers.index') }}" class="slide-item {{ request()->routeIs('admin.sales.offers.*') ? 'active' : '' }}">{{ __('sales.list.menu') }}</a></li>
+                        <li><a href="{{ route('admin.sales.texts.index') }}" class="slide-item {{ request()->routeIs('admin.sales.texts.*') ? 'active' : '' }}">{{ __('sales.texts.menu') }}</a></li>
+                    </ul>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.email-logs.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.email-logs.index') }}"><i class="side-menu__icon fe fe-mail"></i><span class="side-menu__label">Email logs</span></a>

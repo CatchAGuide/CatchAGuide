@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use App\Services\Sales\SalesTexts;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // One instance per request: it loads the edited offer texts once.
+        $this->app->scoped(SalesTexts::class);
+
         $this->app->bind(LLMClientInterface::class, function () {
             if (!config('booking_assistant.enabled')) {
                 return new UnavailableLLMClient();

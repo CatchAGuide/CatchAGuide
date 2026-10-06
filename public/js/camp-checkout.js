@@ -289,13 +289,15 @@ var CampPricing = /*#__PURE__*/function () {
       var special = this.find(this.specials, specialId);
       if (unit) {
         var rate = this.accommodationRate(unit, persons);
+        // Mirrors AccommodationPriceUnit::guestFactor(): per-person-night units charge every guest.
+        var factor = unit.unit === 'per_person_night' ? Math.max(1, persons) : 1;
         lines.push({
           key: "a".concat(unit.id),
           type: 'accommodation',
           name: unit.name,
           quantity: nights,
-          unitPrice: rate.daily,
-          amount: rate.total(nights)
+          unitPrice: rate.daily === null ? null : rate.daily * factor,
+          amount: rate.total(nights) * factor
         });
       }
       if (boat) {
@@ -430,7 +432,7 @@ var round2 = function round2(value) {
 };
 var TourPricing = /*#__PURE__*/function () {
   /**
-   * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number}> }} config
+   * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number, unit: string}> }} config
    */
   function TourPricing(_ref) {
     var perPerson = _ref.perPerson,
@@ -447,13 +449,33 @@ var TourPricing = /*#__PURE__*/function () {
       var _this$table$persons;
       return Number((_this$table$persons = this.table[persons]) !== null && _this$table$persons !== void 0 ? _this$table$persons : 0);
     }
+
+    /**
+     * Mirrors TourExtraUnit::checkoutQuantity(): per-person extras scale with guests, booking
+     * fees and items are charged once.
+     */
+  }, {
+    key: "extraQuantity",
+    value: function extraQuantity(extra, persons) {
+      var _extra$unit;
+      return ((_extra$unit = extra.unit) !== null && _extra$unit !== void 0 ? _extra$unit : 'per_person') === 'per_person' ? persons : 1;
+    }
+  }, {
+    key: "extraTotal",
+    value: function extraTotal(index, persons) {
+      var extra = this.extras.find(function (candidate) {
+        return candidate.index === index;
+      });
+      return extra ? round2(extra.price * this.extraQuantity(extra, persons)) : 0;
+    }
   }, {
     key: "extrasTotal",
     value: function extrasTotal(persons, selected) {
+      var _this = this;
       return round2(this.extras.filter(function (extra) {
         return selected.includes(extra.index);
       }).reduce(function (sum, extra) {
-        return sum + extra.price * persons;
+        return sum + extra.price * _this.extraQuantity(extra, persons);
       }, 0));
     }
   }, {

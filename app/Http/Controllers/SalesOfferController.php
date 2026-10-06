@@ -19,9 +19,12 @@ use Illuminate\Support\Facades\App;
  */
 class SalesOfferController extends Controller
 {
-    public function show(Request $request, string $token, SalesDocumentPresenter $presenter, SalesDocumentCustomerActions $actions, SalesLinks $links): Response
+    public function show(Request $request, string $lang, string $token, SalesDocumentPresenter $presenter, SalesDocumentCustomerActions $actions, SalesLinks $links): Response|RedirectResponse
     {
         $document = $this->find($token);
+        if ($lang !== $document->locale()) {
+            return redirect()->route('sales-offers.show', ['lang' => $document->locale(), 'token' => $token], 301);
+        }
         App::setLocale($document->locale());
 
         // Team members opening the link from the admin don't count as the customer's first view.
@@ -35,14 +38,24 @@ class SalesOfferController extends Controller
             ->view('sales.offer', [
                 'doc' => $presenter->forDocument($document, $output),
                 'preview' => false,
-                'acceptAction' => route('sales-offers.accept', $document->public_token),
+                'acceptAction' => route('sales-offers.accept', ['lang' => $document->locale(), 'token' => $document->public_token]),
                 'acceptError' => $request->session()->has('errors'),
                 'justAccepted' => (bool) $request->session()->get('sales_offer_accepted'),
             ] + $links->shell($document->locale()))
             ->header('X-Robots-Tag', 'noindex, nofollow');
     }
 
-    public function accept(Request $request, string $token, SalesDocumentCustomerActions $actions): RedirectResponse
+    /**
+     * /offer/{token} without a language segment → the document's own language.
+     */
+    public function withoutLanguage(string $token): RedirectResponse
+    {
+        $document = $this->find($token);
+
+        return redirect()->route('sales-offers.show', ['lang' => $document->locale(), 'token' => $token], 301);
+    }
+
+    public function accept(Request $request, string $lang, string $token, SalesDocumentCustomerActions $actions): RedirectResponse
     {
         $document = $this->find($token);
         App::setLocale($document->locale());
@@ -52,7 +65,7 @@ class SalesOfferController extends Controller
         $accepted = $actions->accept($document, $request->ip());
 
         return redirect()
-            ->route('sales-offers.show', $document->public_token)
+            ->route('sales-offers.show', ['lang' => $document->locale(), 'token' => $document->public_token])
             ->with('sales_offer_accepted', $accepted);
     }
 

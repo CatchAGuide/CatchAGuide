@@ -59,7 +59,6 @@ return [
     ],
 
     'formula' => [
-        'per_week' => '/Woche',
         'tour' => '{1} Listingpreis für :count Person|[2,*] Listingpreis für :count Personen',
     ],
 
@@ -118,7 +117,10 @@ return [
         'takeover' => 'Ab hier übernimmt :name – für Anreise, Schlüsselübergabe, die genaue Adresse, Lizenzen und alles vor Ort.',
         'accept' => 'Angebot annehmen',
         'valid_until' => 'Dieses Angebot ist gültig bis :date.',
-        'terms' => 'Ich akzeptiere die :terms und die Stornobedingungen des Gastgebers.',
+        'terms' => 'Ich akzeptiere die :terms und die :policy.',
+        'policy_link' => 'Stornobedingungen des Gastgebers',
+        'policy_of' => 'Stornobedingungen – :title',
+        'policy_none' => 'Für diese Leistungen gelten die Stornobedingungen aus unseren AGB.',
         'terms_link' => 'AGB',
         'cancel_accept' => 'Abbrechen',
         'accept_binding' => 'Verbindlich annehmen',
@@ -192,6 +194,7 @@ return [
         'payment_note_placeholder' => 'z. B. Die Zahlung erfolgt vor Ort direkt an den Guide.',
         'lines' => '{1} :count Position|[0,*] :count Positionen',
         'no_dates' => 'keine Daten',
+        'autosaved' => 'automatisch gespeichert :time',
         'save_draft' => 'Entwurf speichern',
         'send_offer' => 'Angebot senden',
         'resend_offer' => 'Angebot erneut senden',
@@ -308,5 +311,34 @@ return [
         'estimate' => 'Checkout-Schätzung :amount',
         'received' => 'eingegangen :date',
         'message' => 'Nachricht der Anfrage',
+    ],
+
+    'menu' => 'Vertrieb',
+
+    'texts' => [
+        'menu' => 'Texte',
+        'heading' => 'Angebotstexte',
+        'subheading' => 'Standardtexte für Angebote, Bestätigungen und die Kundenseite, je Sprache.',
+        'edited' => 'angepasst',
+        'default' => 'Standard',
+        'empty_hint' => 'Leeres Feld = Standardtext (grau angezeigt).',
+        'save' => 'Texte speichern',
+        'saved' => 'Texte gespeichert.',
+        'key' => [
+            'intro_offer' => 'Einleitung – Angebot',
+            'intro_confirmation' => 'Einleitung – Bestätigung',
+            'mail_offer' => 'E-Mail-Text – Angebot',
+            'mail_confirmation' => 'E-Mail-Text – Bestätigung',
+            'signature' => 'Grußformel',
+            'thanks' => 'Dankesnachricht nach der Annahme',
+        ],
+        'help' => [
+            'intro_offer' => 'Kundenseite nach der Begrüßung, wenn das Dokument keine eigene Einleitung hat.',
+            'intro_confirmation' => 'Kundenseite einer Bestätigung, wenn das Dokument keine eigene Einleitung hat.',
+            'mail_offer' => 'Angebots-E-Mail nach der Begrüßung.',
+            'mail_confirmation' => 'Bestätigungs-E-Mail nach der Begrüßung.',
+            'signature' => 'Über dem Namen des Mitarbeiters auf der Seite und in E-Mails.',
+            'thanks' => 'Ersetzt den Button „Angebot annehmen“, sobald der Kunde angenommen hat.',
+        ],
     ],
 ];

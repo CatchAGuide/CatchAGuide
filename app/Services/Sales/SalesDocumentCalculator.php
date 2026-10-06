@@ -2,6 +2,7 @@
 
 namespace App\Services\Sales;
 
+use App\Enums\AccommodationPriceUnit;
 use App\Enums\Sales\SalesItemType;
 use App\Enums\Sales\SalesPriceUnit;
 use App\Enums\TourExtraUnit;
@@ -227,8 +228,11 @@ class SalesDocumentCalculator
                     $group['warnings'][] = __('sales.warn.capacity', ['name' => $option['name'], 'persons' => $persons, 'capacity' => $option['capacity'] * $quantity]);
                 }
 
-                $rate = $this->tierRate($option['tiers'] ?? [], $persons);
-                $calculated = round($rate->total(max(0, $nights)) * $quantity, 2);
+                // §5.1: per_night = price × nights × quantity; per_person_night = price × persons × nights.
+                $price = (float) $this->tierRate($option['tiers'] ?? [], $persons)->daily;
+                $unit = AccommodationPriceUnit::fromListing($option['unit'] ?? null);
+                $perPerson = $unit === AccommodationPriceUnit::PerPersonNight;
+                $calculated = round($price * max(0, $nights) * ($perPerson ? $persons : $quantity), 2);
                 $line = $this->priced($calculated, $sub['override'] ?? null);
                 if ($nights > 0 && $line['total'] <= 0 && ! $line['adjusted']) {
                     $group['errors'][] = __('sales.error.price_required', ['title' => $option['name']]);
@@ -237,7 +241,7 @@ class SalesDocumentCalculator
                 $group['lines'][] = $this->line($key, SalesItemType::CampAccommodation, $line, [
                     'title' => __('sales.line.accommodation', ['name' => $option['name']], $locale).' · '.$this->nightsLabel(max(0, $nights), $locale),
                     'detail' => SalesFormat::date($from, $locale).' – '.SalesFormat::date($to, $locale).($quantity > 1 ? ' · '.$quantity.'×' : ''),
-                    'formula' => $this->stayFormula($rate, max(0, $nights), 'n', $quantity),
+                    'formula' => number_format($price, 2, '.', '').' × '.($perPerson ? $persons.' pers. × ' : '').max(0, $nights).' n'.($perPerson ? '' : ' × '.$quantity),
                     'from' => $from,
                     'to' => $to,
                     'listing_type' => 'accommodation',
@@ -246,8 +250,8 @@ class SalesDocumentCalculator
                     'persons' => $persons,
                     'quantity' => $quantity,
                     'days' => max(0, $nights),
-                    'price_unit' => SalesPriceUnit::PerNight,
-                    'unit_price' => (float) $rate->daily,
+                    'price_unit' => $perPerson ? SalesPriceUnit::PerPersonNight : SalesPriceUnit::PerNight,
+                    'unit_price' => $price,
                 ]);
 
                 continue;
@@ -264,8 +268,9 @@ class SalesDocumentCalculator
                     $group['warnings'][] = __('sales.warn.boat_days', ['name' => $option['name'], 'days' => $days, 'stay' => $stayDays]);
                 }
 
-                $rate = StayRate::from($option['daily'] ?? null, $option['weekly'] ?? null);
-                $calculated = round($rate->total($days) * $quantity, 2);
+                // §5.1: price per day × number of days × number of boats.
+                $price = (float) StayRate::from($option['daily'] ?? null, null)->daily;
+                $calculated = round($price * $days * $quantity, 2);
                 $line = $this->priced($calculated, $sub['override'] ?? null);
                 if ($line['total'] <= 0 && ! $line['adjusted']) {
                     $group['errors'][] = __('sales.error.price_required', ['title' => $option['name']]);
@@ -275,7 +280,7 @@ class SalesDocumentCalculator
                     'title' => __('sales.line.boat', ['name' => $option['name']], $locale),
                     'detail' => trans_choice('sales.days', $days, ['count' => $days], $locale)
                         .($quantity > 1 ? ' · '.trans_choice('sales.boats', $quantity, ['count' => $quantity], $locale) : ''),
-                    'formula' => $this->stayFormula($rate, $days, 'd', $quantity),
+                    'formula' => number_format($price, 2, '.', '').' × '.$days.' d × '.$quantity,
                     'from' => null,
                     'to' => null,
                     'listing_type' => 'rental_boat',
@@ -284,7 +289,7 @@ class SalesDocumentCalculator
                     'days' => $days,
                     'quantity' => $quantity,
                     'price_unit' => SalesPriceUnit::PerDay,
-                    'unit_price' => (float) $rate->daily,
+                    'unit_price' => $price,
                 ]);
 
                 continue;
@@ -444,6 +449,7 @@ class SalesDocumentCalculator
             'location' => (string) ($product['location'] ?? ''),
             'url' => $product['url'] ?? null,
             'partner' => $product['partner'] ?? null,
+            'cancellation_policy' => $product['cancellation_policy'] ?? null,
             'listing_id' => $product['id'] ?? null,
             'inclusions' => [],
             'lines' => [],
@@ -511,30 +517,6 @@ class SalesDocumentCalculator
         }
 
         return StayRate::from($match['daily'] ?? null, $match['weekly'] ?? null);
-    }
-
-    /**
-     * "235.00 × 7 n × 1", or with the weekly rate "1 × 1640.00/Woche + 1 n × 235.00 × 1" —
-     * whichever StayRate::total() used, so the formula always explains the amount.
-     */
-    private function stayFormula(StayRate $rate, int $units, string $unit, int $quantity): string
-    {
-        $money = fn (?float $value) => number_format((float) $value, 2, '.', '');
-        $weeks = intdiv($units, 7);
-        $rest = $units % 7;
-        $usesWeekly = $rate->weekly !== null
-            && ($rate->daily === null || ($weeks > 0 && $rate->total($units) < round($units * $rate->daily, 2)));
-
-        if (! $usesWeekly) {
-            return $money($rate->daily).' × '.$units.' '.$unit.' × '.$quantity;
-        }
-
-        if ($rate->daily === null) {
-            return (int) ceil($units / 7).' × '.$money($rate->weekly).__('sales.formula.per_week').' × '.$quantity;
-        }
-
-        return $weeks.' × '.$money($rate->weekly).__('sales.formula.per_week')
-            .($rest > 0 ? ' + '.$rest.' '.$unit.' × '.$money($rate->daily) : '').' × '.$quantity;
     }
 
     private function date(mixed $value): ?string

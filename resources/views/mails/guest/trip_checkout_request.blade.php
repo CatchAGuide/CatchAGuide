@@ -5,55 +5,21 @@
     $mono = "font-family:'IBM Plex Mono',Menlo,Consolas,monospace;";
     $label = 'margin:32px 0 10px;'.$font.'font-size:11px;line-height:1.2;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;color:#3A4466;';
 @endphp
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
-<title>{{ __($copy.'.subject') }}</title>
+{{-- Header, footer and base styles come from the shared CaG mail shell (offer builder spec OQ6). --}}
+<x-mail.cag-shell :title="__($copy.'.title')" :preheader="$preheader" :reason="__($copy.'.footer_reason', ['site' => $site])">
+<x-slot:styles>
 <style>
-body{margin:0;padding:0;}
-a:hover{text-decoration:none!important;}
 @media only screen and (max-width:480px){
- .wrap{padding:0!important;}
- .card{border-radius:0!important;}
- .px{padding-left:20px!important;padding-right:20px!important;}
- .kv-l,.kv-v{display:block!important;width:100%!important;text-align:left!important;}
  .kv-l{font-size:13px!important;}
  .kv-v{padding-top:2px!important;font-size:15px!important;}
- .h1{font-size:24px!important;}
- .btn-t{width:100%!important;}
- .btn-a{display:block!important;min-width:0!important;}
 }
 @media (prefers-color-scheme:dark){
- .bg-page{background:#0E0F1A!important;}
- .card{background:#171928!important;}
  .bg-box{background:#202336!important;}
- .t-main{color:#E7E8EE!important;}
- .t-label{color:#B7BACB!important;}
- .t-muted{color:#9599AE!important;}
  .t-accent{color:#A9B3E0!important;}
- .bd{border-color:#2D3047!important;}
- .rule{background:#2D3047!important;}
  .step{background:#A9B3E0!important;color:#0E0F1A!important;}
 }
 </style>
-</head>
-<body class="bg-page" style="margin:0;padding:0;background:#EFEFEF;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">{{ $preheader }} &#847; &#847; &#847;</div>
-<table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#EFEFEF;"><tr><td class="wrap" align="center" style="padding:32px 24px;">
-<table role="presentation" class="card" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:12px;border-collapse:separate;overflow:hidden;">
-
-{{-- Header --}}
-<tr><td align="center" class="px" style="background:#1B1D36;padding:32px 40px 36px;">
-<a href="{{ route('welcome') }}" target="_blank" style="text-decoration:none;display:inline-block;">
-<img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Catch A Guide" width="150" style="display:block;width:150px;max-width:150px;height:auto;margin:0 auto;border:0;">
-</a>
-<h1 class="h1" style="margin:24px 0 0;{{ $heading }}font-size:28px;line-height:1.2;font-weight:700;color:#FFFFFF;">{{ __($copy.'.title') }}</h1>
-</td></tr>
+</x-slot:styles>
 
 <tr><td class="px" style="padding:36px 40px 40px;{{ $font }}">
 
@@ -124,16 +90,4 @@ a:hover{text-decoration:none!important;}
 
 </td></tr>
 
-{{-- Footer --}}
-<tr><td class="px" style="background:#1B1D36;padding:32px 40px;{{ $font }}font-size:12px;line-height:1.55;color:rgba(255,255,255,0.75);">
-<img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Catch A Guide" width="108" style="display:block;width:108px;max-width:108px;height:auto;border:0;">
-<p style="margin:18px 0 0;font-size:13px;color:#FFFFFF;">Catch A Guide @if($contactEmail !== '')· <a href="mailto:{{ $contactEmail }}" style="color:#FFFFFF;text-decoration:none;">{{ $contactEmail }}</a>@endif @if($contactPhone)· {{ $contactPhone }}@endif</p>
-<p style="margin:8px 0 0;">{{ __($copy.'.footer_reason', ['site' => $site]) }}</p>
-<p style="margin:12px 0 0;"><a href="{{ route('law.imprint') }}" style="color:#FFFFFF;text-decoration:underline;">{{ __($copy.'.imprint') }}</a> · <a href="{{ route('law.data-protection') }}" style="color:#FFFFFF;text-decoration:underline;">{{ __($copy.'.privacy') }}</a></p>
-<p style="margin:12px 0 0;color:rgba(255,255,255,0.6);">© {{ date('Y') }} Catch A Guide</p>
-</td></tr>
-
-</table>
-</td></tr></table>
-</body>
-</html>
+</x-mail.cag-shell>

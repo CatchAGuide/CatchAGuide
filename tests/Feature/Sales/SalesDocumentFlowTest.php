@@ -147,7 +147,7 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertStringContainsString('Ihr persönliches Angebot', $html);
         $this->assertStringContainsString('Hallo Björn, hallo Leo, hallo Max,', $html);
         $this->assertStringContainsString('Angebot ansehen', $html);
-        $this->assertStringContainsString('/offer/'.$document->public_token, $html);
+        $this->assertStringContainsString('/'.$document->locale().'/offer/'.$document->public_token, $html);
         $this->assertStringContainsString('Dieses Angebot ist gültig bis', $html);
         $this->assertStringContainsString('Impressum', $html);
         $this->assertStringNotContainsString($document->number, strip_tags(explode('<body', $html)[1]));
@@ -177,7 +177,7 @@ class SalesDocumentFlowTest extends TestCase
         $document = $this->savedDocument();
         app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Offer, $this->employee);
 
-        $response = $this->get('/offer/'.$document->public_token);
+        $response = $this->get('/'.$document->locale().'/offer/'.$document->public_token);
 
         $response->assertOk()
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
@@ -193,7 +193,7 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(SalesDocumentStatus::Viewed, $document->refresh()->status);
         $this->assertSame(1, $document->events()->where('type', SalesEventType::Viewed)->count());
 
-        $this->get('/offer/'.$document->public_token)->assertOk();
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertOk();
         $this->assertSame(1, $document->events()->where('type', SalesEventType::Viewed)->count());
     }
 
@@ -202,7 +202,7 @@ class SalesDocumentFlowTest extends TestCase
         $document = $this->savedDocument();
         app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Offer, $this->employee);
 
-        $this->actingAs($this->employee, 'employees')->get('/offer/'.$document->public_token)->assertOk();
+        $this->actingAs($this->employee, 'employees')->get('/'.$document->locale().'/offer/'.$document->public_token)->assertOk();
 
         $this->assertSame(SalesDocumentStatus::Sent, $document->refresh()->status);
     }
@@ -218,11 +218,11 @@ class SalesDocumentFlowTest extends TestCase
         $document = $this->savedDocument();
         app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Offer, $this->employee);
 
-        $this->post('/offer/'.$document->public_token.'/accept')->assertSessionHasErrors('terms');
+        $this->post('/'.$document->locale().'/offer/'.$document->public_token.'/accept')->assertSessionHasErrors('terms');
         $this->assertSame(SalesDocumentStatus::Sent, $document->refresh()->status);
 
-        $this->post('/offer/'.$document->public_token.'/accept', ['terms' => '1'])
-            ->assertRedirect('/offer/'.$document->public_token);
+        $this->post('/'.$document->locale().'/offer/'.$document->public_token.'/accept', ['terms' => '1'])
+            ->assertRedirect('/'.$document->locale().'/offer/'.$document->public_token);
 
         $document->refresh();
         $this->assertSame(SalesDocumentStatus::Accepted, $document->status);
@@ -232,7 +232,7 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(1, $event->payload['revision']);
         Mail::assertSent(SalesOfferAcceptedMail::class, fn ($mail) => $mail->hasTo('sales@example.com') && $mail->hasTo($this->employee->email));
 
-        $this->get('/offer/'.$document->public_token)->assertSee('Vielen Dank!')->assertDontSee('Verbindlich annehmen');
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertSee('Vielen Dank!')->assertDontSee('Verbindlich annehmen');
     }
 
     public function test_expired_and_cancelled_offers_cannot_be_accepted(): void
@@ -240,8 +240,8 @@ class SalesDocumentFlowTest extends TestCase
         $document = $this->savedDocument(null, ['valid_until' => now()->subDay()->toDateString()]);
         app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Offer, $this->employee);
 
-        $this->get('/offer/'.$document->public_token)->assertSee('nicht mehr gültig')->assertDontSee('Verbindlich annehmen');
-        $this->post('/offer/'.$document->public_token.'/accept', ['terms' => '1']);
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertSee('nicht mehr gültig')->assertDontSee('Verbindlich annehmen');
+        $this->post('/'.$document->locale().'/offer/'.$document->public_token.'/accept', ['terms' => '1']);
         $this->assertNotSame(SalesDocumentStatus::Accepted, $document->refresh()->status);
 
         $this->artisan('sales:expire-offers')->assertSuccessful();
@@ -249,7 +249,7 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertTrue($document->events()->where('type', SalesEventType::Expired)->exists());
 
         $document->forceFill(['status' => SalesDocumentStatus::Cancelled])->save();
-        $this->get('/offer/'.$document->public_token)->assertSee('nicht mehr gültig');
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertSee('nicht mehr gültig');
     }
 
     public function test_a_confirmed_document_shows_the_confirmation_with_the_host_block(): void
@@ -257,7 +257,7 @@ class SalesDocumentFlowTest extends TestCase
         $document = $this->savedDocument();
         app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
 
-        $this->get('/offer/'.$document->public_token)
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
             ->assertOk()
             ->assertSee('Ihre Buchungsbestätigung')
             ->assertSee('Ihr Gastgeber &amp; Guide vor Ort', false)

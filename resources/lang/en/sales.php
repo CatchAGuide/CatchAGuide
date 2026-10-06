@@ -59,7 +59,6 @@ return [
     ],
 
     'formula' => [
-        'per_week' => '/week',
         'tour' => '{1} Listing price for :count person|[2,*] Listing price for :count persons',
     ],
 
@@ -118,7 +117,10 @@ return [
         'takeover' => 'From here on, :name takes over – arrival, key handover, the exact address, licences and everything on site.',
         'accept' => 'Accept offer',
         'valid_until' => 'This offer is valid until :date.',
-        'terms' => 'I accept the :terms and the host’s cancellation policy.',
+        'terms' => 'I accept the :terms and the :policy.',
+        'policy_link' => 'host’s cancellation policy',
+        'policy_of' => 'Cancellation policy – :title',
+        'policy_none' => 'The cancellation terms in our terms and conditions apply to these services.',
         'terms_link' => 'terms and conditions',
         'cancel_accept' => 'Cancel',
         'accept_binding' => 'Accept binding',
@@ -192,6 +194,7 @@ return [
         'payment_note_placeholder' => 'e.g. Payment is made on site directly to the guide.',
         'lines' => '{1} :count line|[0,*] :count lines',
         'no_dates' => 'no dates',
+        'autosaved' => 'saved automatically :time',
         'save_draft' => 'Save draft',
         'send_offer' => 'Send offer',
         'resend_offer' => 'Resend offer',
@@ -308,5 +311,34 @@ return [
         'estimate' => 'Checkout estimate :amount',
         'received' => 'received :date',
         'message' => 'Request message',
+    ],
+
+    'menu' => 'Sales',
+
+    'texts' => [
+        'menu' => 'Texts',
+        'heading' => 'Offer texts',
+        'subheading' => 'Default texts of offers, confirmations and the customer page, per language.',
+        'edited' => 'edited',
+        'default' => 'default',
+        'empty_hint' => 'Leave a field empty to use the default (shown in grey).',
+        'save' => 'Save texts',
+        'saved' => 'Texts saved.',
+        'key' => [
+            'intro_offer' => 'Intro – offer',
+            'intro_confirmation' => 'Intro – confirmation',
+            'mail_offer' => 'Email text – offer',
+            'mail_confirmation' => 'Email text – confirmation',
+            'signature' => 'Closing line',
+            'thanks' => 'Thank-you message after acceptance',
+        ],
+        'help' => [
+            'intro_offer' => 'Customer page, after the greeting, when the document has no own intro.',
+            'intro_confirmation' => 'Customer page of a confirmation, when the document has no own intro.',
+            'mail_offer' => 'Offer email, after the greeting.',
+            'mail_confirmation' => 'Confirmation email, after the greeting.',
+            'signature' => 'Above the employee name on the page and in emails.',
+            'thanks' => 'Replaces the “accept offer” button once the customer accepted.',
+        ],
     ],
 ];

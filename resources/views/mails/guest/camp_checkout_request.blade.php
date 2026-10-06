@@ -7,53 +7,16 @@
     $kvLabel = $font.'font-size:14px;line-height:1.45;color:#5A6478;';
     $kvValue = $font.'font-size:14px;line-height:1.45;color:#1A1B30;text-align:right;font-weight:500;';
 @endphp
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="x-apple-disable-message-reformatting">
-<meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark">
-<title>{{ __($copy.'.subject', ['camp' => $campTitle]) }}</title>
+{{-- Header, footer and base styles come from the shared CaG mail shell (offer builder spec OQ6). --}}
+<x-mail.cag-shell :title="__($copy.'.title')" :preheader="__($copy.'.preheader')" :reason="__($copy.'.footer_reason', ['site' => $site])">
+<x-slot:styles>
 <style>
-body{margin:0;padding:0;}
-a:hover{text-decoration:none!important;}
 @media only screen and (max-width:480px){
- .wrap{padding:0!important;}
- .card{border-radius:0!important;}
- .px{padding-left:20px!important;padding-right:20px!important;}
- .kv-l,.kv-v{display:block!important;width:100%!important;text-align:left!important;box-sizing:border-box;}
  .kv-l{padding:12px 0 2px!important;font-size:13px!important;}
  .kv-v{padding:0 0 12px!important;border-top:0!important;}
- .btn-t{width:100%!important;}
- .btn-a{display:block!important;min-width:0!important;}
-}
-@media (prefers-color-scheme:dark){
- .bg-page{background:#0B0C16!important;}
- .card{background:#12131F!important;}
- .t-main{color:#E8ECEC!important;}
- .t-muted{color:#B6BCCB!important;}
- .t-soft{color:#969DB0!important;}
- .t-label{color:#9DB4DE!important;}
- .bd{border-color:#2C2F45!important;}
- .bg-soft{background:#1E2032!important;}
- .rule{background:#2C2F45!important;}
 }
 </style>
-</head>
-<body class="bg-page" style="margin:0;padding:0;background:#F1F1F2;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">{{ __($copy.'.preheader') }} &#847; &#847; &#847;</div>
-<table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1F1F2;"><tr><td class="wrap" align="center" style="padding:32px 16px;">
-<table role="presentation" class="card" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#FFFFFF;border-radius:12px;border-collapse:separate;overflow:hidden;">
-
-{{-- Header --}}
-<tr><td align="center" style="background:#1A1B30;padding:28px;">
-<a href="{{ route('welcome') }}" target="_blank" style="text-decoration:none;display:inline-block;">
-<img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Catch A Guide" width="150" style="display:block;width:150px;max-width:150px;height:auto;margin:0 auto;border:0;">
-</a>
-<h1 style="margin:18px 0 0;{{ $heading }}font-size:22px;line-height:1.25;font-weight:700;color:#FFFFFF;">{{ __($copy.'.title') }}</h1>
-</td></tr>
+</x-slot:styles>
 
 {{-- Greeting --}}
 <tr><td class="px t-main" style="padding:28px 32px 0;{{ $font }}font-size:15px;line-height:1.55;color:#1A1B30;">
@@ -119,16 +82,4 @@ a:hover{text-decoration:none!important;}
 @endif
 </td></tr>
 
-{{-- Footer --}}
-<tr><td align="center" class="px" style="background:#1A1B30;padding:28px 32px;{{ $font }}font-size:13px;line-height:1.6;color:rgba(255,255,255,0.72);">
-<img src="{{ asset('assets/images/logo/CatchAGuide2_Logo_PNG.png') }}" alt="Catch A Guide" width="96" style="display:block;width:96px;max-width:96px;height:auto;margin:0 auto;border:0;">
-<p style="margin:16px 0 0;color:#FFFFFF;">Catch A Guide @if($contactEmail !== '')· <a href="mailto:{{ $contactEmail }}" style="color:#FFFFFF;text-decoration:none;">{{ $contactEmail }}</a>@endif @if($contactPhone)· {{ $contactPhone }}@endif</p>
-<p style="margin:8px 0 0;">{{ __($copy.'.footer_reason', ['site' => $site]) }}</p>
-<p style="margin:12px 0 0;"><a href="{{ route('law.imprint') }}" style="color:#FFFFFF;text-decoration:underline;">{{ __($copy.'.imprint') }}</a> &nbsp;·&nbsp; <a href="{{ route('law.data-protection') }}" style="color:#FFFFFF;text-decoration:underline;">{{ __($copy.'.privacy') }}</a></p>
-<p style="margin:12px 0 0;">© {{ date('Y') }} Catch A Guide</p>
-</td></tr>
-
-</table>
-</td></tr></table>
-</body>
-</html>
+</x-mail.cag-shell>

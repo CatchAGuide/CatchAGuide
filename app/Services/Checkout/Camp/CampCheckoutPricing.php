@@ -2,6 +2,7 @@
 
 namespace App\Services\Checkout\Camp;
 
+use App\Enums\AccommodationPriceUnit;
 use App\Models\Accommodation;
 use App\Models\Camp;
 use App\Models\Guiding;
@@ -25,7 +26,7 @@ final class CampCheckoutPricing
     public const CURRENCY = 'EUR';
 
     /**
-     * @param  array<int, array{id: int, name: string, capacity: int, min_nights: int, tiers: list<array{persons: int, rate: StayRate}>}>  $accommodations
+     * @param  array<int, array{id: int, name: string, capacity: int, min_nights: int, unit: string, tiers: list<array{persons: int, rate: StayRate}>}>  $accommodations
      * @param  array<int, array{id: int, name: string, capacity: int, rate: StayRate}>  $boats
      * @param  array<int, array{id: int, name: string, capacity: int, prices: array<int, float>}>  $tours
      * @param  array<int, array{id: int, name: string, price: float}>  $specials
@@ -78,7 +79,7 @@ final class CampCheckoutPricing
     }
 
     /**
-     * @return array<int, array{id: int, name: string, capacity: int, min_nights: int, tiers: list<array{persons: int, rate: StayRate}>}>
+     * @return array<int, array{id: int, name: string, capacity: int, min_nights: int, unit: string, tiers: list<array{persons: int, rate: StayRate}>}>
      */
     public function accommodations(): array
     {
@@ -155,7 +156,9 @@ final class CampCheckoutPricing
 
         if ($unit = $this->accommodations[$selection->accommodationId] ?? null) {
             $rate = $this->accommodationRate($unit['id'], $persons);
-            $lines[] = $this->line('accommodation', $unit['id'], $unit['name'], $nights, $rate->daily, $rate->total($nights));
+            // Per-person-night units charge the nightly price for every guest.
+            $factor = AccommodationPriceUnit::fromListing($unit['unit'] ?? null)->guestFactor($persons);
+            $lines[] = $this->line('accommodation', $unit['id'], $unit['name'], $nights, $rate->daily !== null ? $rate->daily * $factor : null, $rate->total($nights) * $factor);
         }
 
         if ($boat = $this->boats[$selection->rentalBoatId] ?? null) {
@@ -187,6 +190,7 @@ final class CampCheckoutPricing
                 'name' => $unit['name'],
                 'capacity' => $unit['capacity'],
                 'minNights' => $unit['min_nights'],
+                'unit' => $unit['unit'],
                 'tiers' => array_map(fn (array $tier) => ['persons' => $tier['persons'], ...$tier['rate']->toArray()], $unit['tiers']),
             ], $this->accommodations)),
             'boats' => array_values(array_map(fn (array $boat) => [
@@ -221,7 +225,7 @@ final class CampCheckoutPricing
     }
 
     /**
-     * @return array{id: int, name: string, capacity: int, min_nights: int, tiers: list<array{persons: int, rate: StayRate}>}
+     * @return array{id: int, name: string, capacity: int, min_nights: int, unit: string, tiers: list<array{persons: int, rate: StayRate}>}
      */
     private static function mapAccommodation(Accommodation $accommodation): array
     {
@@ -243,6 +247,7 @@ final class CampCheckoutPricing
             'name' => self::name($accommodation->title),
             'capacity' => max(1, (int) $accommodation->max_occupancy),
             'min_nights' => max(1, min(self::MAX_NIGHTS, (int) $accommodation->minimum_stay_nights)),
+            'unit' => AccommodationPriceUnit::fromListing($accommodation->price_unit)->value,
             'tiers' => $tiers,
         ];
     }

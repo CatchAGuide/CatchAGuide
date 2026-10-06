@@ -7,7 +7,7 @@
     <x-slot:styles>
         <style>
             .cag-accept summary::-webkit-details-marker { display: none; }
-            .cag-accept[open] summary { display: none !important; }
+            .cag-accept[open] > summary { display: none !important; }
             [data-accept-terms].is-missing { background: #FBE9E9; color: #8E2424; }
         </style>
     </x-slot:styles>

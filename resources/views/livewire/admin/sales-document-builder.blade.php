@@ -12,7 +12,7 @@
     };
     $money = fn ($amount) => SalesFormat::money($amount, app()->getLocale());
 @endphp
-<div class="sb" x-data x-on:sales-focus.window="$nextTick(() => document.querySelector($event.detail.selector)?.focus())">
+<div class="sb" wire:poll.30s="autosave" x-data x-on:sales-focus.window="$nextTick(() => document.querySelector($event.detail.selector)?.focus())">
     <div class="sb-top">
         <div>
             <h1 class="sb-title">{{ $t('heading') }}</h1>
@@ -161,7 +161,10 @@
             {{-- Totals bar --}}
             <div class="sb-totals">
                 <div>
-                    <div class="sb-totals__meta">{{ trans_choice('sales.builder.lines', $quote->lineCount(), ['count' => $quote->lineCount()]) }} · {{ $periodLabel ?? $t('no_dates') }}</div>
+                    <div class="sb-totals__meta">
+                        {{ trans_choice('sales.builder.lines', $quote->lineCount(), ['count' => $quote->lineCount()]) }} · {{ $periodLabel ?? $t('no_dates') }}
+                        @if($autosavedAt) · {{ $t('autosaved', ['time' => $autosavedAt]) }}@endif
+                    </div>
                     <div class="sb-totals__big">{{ $money($quote->total) }}</div>
                 </div>
                 @if($notice)

@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\PaymentsController as AdminPaymentsController;
 use App\Http\Controllers\Admin\ProductReportsController;
 use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\Admin\SalesDocumentsController;
+use App\Http\Controllers\Admin\SalesTextsController;
 use App\Http\Controllers\Admin\ScheduledTasksController;
 use App\Http\Controllers\Admin\SecurityThreatsController;
 use App\Http\Controllers\Admin\SpecialOffersController;
@@ -359,6 +360,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/from-camp-request/{campVacationBooking}', 'fromCampRequest')->name('from-camp-request');
             Route::post('/from-trip-request/{tripBooking}', 'fromTripRequest')->name('from-trip-request');
         });
+
+        // Editable customer texts of the offer builder (Admin › Sales › Texts).
+        Route::get('sales/texts', [SalesTextsController::class, 'index'])->name('sales.texts.index');
+        Route::put('sales/texts', [SalesTextsController::class, 'update'])->name('sales.texts.update');
 
         // Former camps-only offer prototype: its offers were imported into sales documents
         // (sales:import-custom-camp-offers), so its pages lead to the new builder.

@@ -2,6 +2,7 @@
 
 namespace App\Services\Sales;
 
+use App\Enums\AccommodationPriceUnit;
 use App\Models\Camp;
 use App\Models\Guiding;
 use App\Models\Trip;
@@ -141,6 +142,7 @@ class SalesCatalog
                 'id' => $unit['id'],
                 'name' => $unit['name'],
                 'capacity' => $unit['capacity'],
+                'unit' => AccommodationPriceUnit::fromListing($unit['unit'])->value,
                 'tiers' => array_map(fn (array $tier) => ['persons' => $tier['persons'], ...$tier['rate']->toArray()], $unit['tiers']),
             ];
         }
@@ -165,9 +167,10 @@ class SalesCatalog
             'accommodations' => $accommodations,
             'boats' => $boats,
             'guidings' => $guidings,
+            'cancellation_policy' => $this->policy($camp->policies_regulations),
             'translation_missing' => $missing,
         ], [
-            'accommodations' => array_map(fn ($a) => $a['tiers'], $accommodations),
+            'accommodations' => array_map(fn ($a) => [$a['unit'], $a['tiers']], $accommodations),
             'boats' => array_map(fn ($b) => [$b['daily'], $b['weekly']], $boats),
             'guidings' => array_map(fn ($g) => $g['prices'], $guidings),
         ]);
@@ -212,6 +215,7 @@ class SalesCatalog
             'max' => $max,
             'inclusions' => $inclusions,
             'partner' => $partner,
+            'cancellation_policy' => $this->policy($trip->cancellation_policy),
             'translation_missing' => $missing,
         ], ['price' => $price, 'nights' => (int) $trip->duration_nights]);
     }
@@ -265,6 +269,16 @@ class SalesCatalog
         $parts = array_values(array_unique(array_filter(array_map(fn ($part) => Str::ucfirst(trim((string) $part)), $parts))));
 
         return $parts !== [] ? implode(', ', $parts) : trim((string) $fallback);
+    }
+
+    /**
+     * The host's cancellation policy text from the listing (OQ5), or null when it has none.
+     */
+    private function policy(mixed $text): ?string
+    {
+        $text = trim(strip_tags((string) $text));
+
+        return $text !== '' ? $text : null;
     }
 
     private function tourDuration(Guiding $guiding, string $locale): ?string

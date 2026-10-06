@@ -2,6 +2,7 @@
 
 namespace App\Services\Accommodation;
 
+use App\Enums\AccommodationPriceUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,6 +47,7 @@ class AccommodationDataProcessor
             'extras' => $this->extrasProcessor->processExtras($request),
             'inclusives' => $this->extrasProcessor->processInclusives($request),
             'per_person_pricing' => $this->pricingProcessor->processPerPersonPricing($request),
+            'price_unit' => AccommodationPriceUnit::fromListing($request->input('price_unit'))->value,
         ];
     }
 
@@ -88,6 +90,7 @@ class AccommodationDataProcessor
             'extras' => $accommodation->extras ?? [],
             'inclusives' => $accommodation->inclusives ?? [],
             'per_person_pricing' => $accommodation->per_person_pricing ?? [],
+            'price_unit' => AccommodationPriceUnit::fromListing($accommodation->price_unit)->value,
         ];
 
         return $formData;

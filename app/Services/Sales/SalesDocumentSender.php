@@ -11,6 +11,7 @@ use App\Models\SalesDocument;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use RuntimeException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 /**
  * Sends a saved document as offer or booking confirmation (spec §4.7): emails the customer,
@@ -63,7 +64,18 @@ class SalesDocumentSender
         if ($recipients['bcc'] !== []) {
             $mail->bcc($recipients['bcc']);
         }
-        $mail->send(new SalesDocumentMail($document, $output));
+        try {
+            $mail->send(new SalesDocumentMail($document, $output));
+        } catch (TransportExceptionInterface $exception) {
+            // The mail server refused the message (e.g. unknown recipient): log it on the
+            // document as email_bounced (spec §6.3); status and revisions stay unchanged.
+            $this->writer->event($document, SalesEventType::EmailBounced, $actor, [
+                'output' => $output->value,
+                'error' => mb_substr($exception->getMessage(), 0, 500),
+            ] + $recipients);
+
+            throw $exception;
+        }
 
         return DB::transaction(function () use ($document, $output, $actor, $recipients) {
             $revision = $document->revisions()->create([

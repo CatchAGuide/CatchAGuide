@@ -259,6 +259,10 @@ return [
     'policies_title' => 'Richtlinien',
     
     // Pricing translations
+    'price_unit' => 'Preiseinheit',
+    'price_unit_per_night' => 'Pro Nacht (Preis für die ganze Unterkunft)',
+    'price_unit_per_person_night' => 'Pro Person und Nacht',
+    'tooltip_price_unit' => 'Pro Nacht: Der Staffelpreis gilt für die ganze Unterkunft bei dieser Personenzahl. Pro Person und Nacht: Der Staffelpreis wird für jeden Gast berechnet.',
     'pricing_title' => 'Preise',
     'price_type' => 'Preistyp',
     'per_night' => 'Pro Nacht',

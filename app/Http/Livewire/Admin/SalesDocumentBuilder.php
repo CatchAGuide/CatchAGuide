@@ -17,6 +17,7 @@ use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesDocumentWriter;
 use App\Services\Sales\SalesFormat;
 use App\Services\Sales\SalesLinks;
+use App\Services\Sales\SalesTexts;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Traits\Localizable;
 use Livewire\Component;
@@ -57,6 +58,11 @@ class SalesDocumentBuilder extends Component
 
     public int $nextKey = 1;
 
+    /** Fingerprint of the last saved state, so autosave only writes real changes. */
+    public ?string $savedHash = null;
+
+    public ?string $autosavedAt = null;
+
     public function mount(?SalesDocument $document = null): void
     {
         $mapper = app(SalesDocumentStateMapper::class);
@@ -75,6 +81,8 @@ class SalesDocumentBuilder extends Component
                 }
             }
 
+            $this->savedHash = $this->stateHash();
+
             if ($document->hasUnseenAcceptance()) {
                 $document->forceFill(['acceptance_seen_at' => now()])->saveQuietly();
             }
@@ -83,6 +91,7 @@ class SalesDocumentBuilder extends Component
         }
 
         $this->header = $mapper->blankHeader();
+        $this->savedHash = $this->stateHash();
     }
 
     // ---- Recipient -------------------------------------------------------------------------
@@ -330,6 +339,25 @@ class SalesDocumentBuilder extends Component
         $this->previewOutput = $output === 'confirmation' ? 'confirmation' : 'offer';
     }
 
+    /**
+     * Polled every 30 s (spec §4.7 "autosave acceptable"): saves unsaved changes. A new
+     * document is only created once it has a recipient or a product.
+     */
+    public function autosave(): void
+    {
+        if ($this->stateHash() === $this->savedHash) {
+            return;
+        }
+
+        $hasContent = $this->cards !== [] || filled($this->header['email'] ?? null) || filled($this->header['first_name'] ?? null);
+        if ($this->documentId === null && ! $hasContent) {
+            return;
+        }
+
+        $this->persist();
+        $this->autosavedAt = now()->format('H:i');
+    }
+
     public function saveDraft(): void
     {
         $this->persist();
@@ -379,6 +407,7 @@ class SalesDocumentBuilder extends Component
 
         $document = app(SalesDocumentWriter::class)->save($document, $this->header, $this->cards, $this->employee());
         $this->documentId = $document->id;
+        $this->savedHash = $this->stateHash();
 
         if ($isNew) {
             $this->js('history.replaceState({}, "", '.json_encode(route('admin.sales.offers.edit', $document)).')');
@@ -437,7 +466,7 @@ class SalesDocumentBuilder extends Component
             'periodLabel' => $quote->travelFrom
                 ? SalesFormat::date($quote->travelFrom, app()->getLocale()).' – '.SalesFormat::date($quote->travelTo, app()->getLocale())
                 : null,
-            'introPlaceholder' => __('sales.customer.'.($output === SalesDocumentOutput::Offer ? 'intro_offer' : 'intro_confirmation'), [], $locale),
+            'introPlaceholder' => app(SalesTexts::class)->get($output === SalesDocumentOutput::Offer ? 'intro_offer' : 'intro_confirmation', $locale),
         ]);
     }
 
@@ -476,6 +505,11 @@ class SalesDocumentBuilder extends Component
             ->get(['id', 'firstname', 'lastname', 'email'])
             ->map(fn (User $user) => ['id' => $user->id, 'label' => trim($user->firstname.' '.$user->lastname).' · '.$user->email])
             ->all();
+    }
+
+    private function stateHash(): string
+    {
+        return md5((string) json_encode([$this->header, $this->cards]));
     }
 
     private function locale(): string

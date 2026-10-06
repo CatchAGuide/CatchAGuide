@@ -192,16 +192,30 @@ class SalesDocumentCalculatorTest extends TestCase
         $this->assertSame('2026-11-14', $quote->travelTo);
     }
 
-    public function test_accommodation_week_rate_applies_from_seven_nights(): void
+    public function test_accommodation_is_price_times_nights_even_for_a_week_or_more(): void
     {
         $quote = $this->calculator->calculate([$this->campCard([
             ['key' => 's1', 'kind' => 'accommodation', 'option_id' => 5101, 'from' => '2026-11-01', 'to' => '2026-11-09', 'qty' => 1, 'override' => ''],
         ], 1)], 'en', $this->today);
 
-        // 8 nights at the 1-person tier: one week (600) + one night (100).
+        // Spec §5.1: 8 nights × 100 (1-person tier); the listing's weekly rate is not applied.
         $line = $this->line($quote->groups, 's1');
-        $this->assertSame(700.0, $line['total']);
-        $this->assertSame('1 × 600.00/week + 1 n × 100.00 × 1', $line['formula']);
+        $this->assertSame(800.0, $line['total']);
+        $this->assertSame('100.00 × 8 n × 1', $line['formula']);
+    }
+
+    public function test_per_person_night_accommodation_is_price_times_persons_times_nights(): void
+    {
+        $card = $this->campCard([
+            ['key' => 's1', 'kind' => 'accommodation', 'option_id' => 5101, 'from' => '2026-11-10', 'to' => '2026-11-14', 'qty' => 2, 'override' => ''],
+        ]);
+        $card['product']['accommodations'][5101]['unit'] = 'per_person_night';
+
+        $line = $this->line($this->calculator->calculate([$card], 'en', $this->today)->groups, 's1');
+
+        // Spec §5.1: 116 × 3 persons × 4 nights (the unit count doesn't multiply a per-person price).
+        $this->assertSame(1392.0, $line['total']);
+        $this->assertSame('per_person_night', $line['price_unit']->value);
     }
 
     public function test_camp_without_options_warns(): void
