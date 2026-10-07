@@ -31,6 +31,43 @@ class RobotsAndWwwRedirectTest extends TestCase
         $response->assertDontSee('Allow: /angelmagazin/', false);
     }
 
+    public function test_robots_txt_keeps_search_engines_unslowed_and_blocks_training_crawlers(): void
+    {
+        $robots = $this->get('http://catchaguide.de/robots.txt')->getContent();
+        $groups = array_map('trim', preg_split('/\n\s*\n/', $robots));
+
+        // The "*" group (Google, Bing, social previews) has no Crawl-delay.
+        $this->assertStringStartsWith('User-agent: *', $groups[0]);
+        $this->assertStringNotContainsString('Crawl-delay', $groups[0]);
+        $this->assertStringNotContainsString('Googlebot', $robots);
+        $this->assertStringNotContainsString('bingbot', $robots);
+        $this->assertStringNotContainsString('facebookexternalhit', $robots);
+
+        $slow = $this->groupFor($groups, 'AhrefsBot');
+        $this->assertStringContainsString('Crawl-delay: 2', $slow);
+        // A named group replaces "*" for that bot, so it must repeat the private disallows.
+        $this->assertStringContainsString('Disallow: /admin/', $slow);
+
+        $blocked = $this->groupFor($groups, 'GPTBot');
+        $this->assertStringContainsString('User-agent: CCBot', $blocked);
+        $this->assertMatchesRegularExpression('#^Disallow: /$#m', $blocked);
+        $this->assertStringNotContainsString('OAI-SearchBot', $robots);
+    }
+
+    /**
+     * @param  list<string>  $groups
+     */
+    private function groupFor(array $groups, string $agent): string
+    {
+        foreach ($groups as $group) {
+            if (preg_match('/^User-agent: '.preg_quote($agent, '/').'$/m', $group)) {
+                return $group;
+            }
+        }
+
+        $this->fail("No robots.txt group for {$agent}");
+    }
+
     public function test_www_redirects_to_canonical_non_www_host_in_production(): void
     {
         $this->app['env'] = 'production';

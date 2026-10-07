@@ -387,71 +387,71 @@ return [
     | Crawler Lanes
     |--------------------------------------------------------------------------
     |
-    | Known-good bots get their own rate limits so indexing and link previews
-    | keep working. Limits are per IP. Search engines use many IPs, so these
-    | caps protect the origin without starving a crawl.
+    | Known-good bots get their own lanes so indexing and link previews keep
+    | working. Search engines are verified by reverse + forward DNS and then
+    | never rate limited (a 429 makes Google slow its crawl of the whole site).
+    | Social preview and SEO/AI-search bots are trusted by user agent only, so
+    | they keep a per-IP cap but never collect violations or blocks.
+    | Training-only AI crawlers are not listed: they are disallowed in
+    | robots.txt (config/robots.php) and treated like any other client.
     |
     */
     'crawlers' => [
         'enabled' => true,
         'verify_dns' => env('DDOS_CRAWLER_VERIFY_DNS', true),
         'dns_cache_seconds' => 86400,
+        // A failed lookup may be a DNS hiccup — retry soon instead of treating a
+        // real Googlebot IP as spoofed for a whole day.
+        'dns_failure_cache_seconds' => 900,
         'search_engines' => [
             'Googlebot' => [
-                'ua' => ['Googlebot', 'Google-InspectionTool', 'Google-Read-Aloud', 'AdsBot-Google', 'Mediapartners-Google'],
+                'ua' => [
+                    'Googlebot', 'Google-InspectionTool', 'GoogleOther', 'Storebot-Google',
+                    'Google-Read-Aloud', 'Google-Site-Verification', 'AdsBot-Google',
+                    'Mediapartners-Google', 'APIs-Google', 'FeedFetcher-Google',
+                ],
                 'rdns_suffixes' => ['.googlebot.com', '.google.com', '.googleusercontent.com'],
             ],
             'Bingbot' => [
-                'ua' => ['bingbot', 'BingPreview', 'msnbot'],
+                'ua' => ['bingbot', 'BingPreview', 'msnbot', 'adidxbot'],
                 'rdns_suffixes' => ['.search.msn.com'],
             ],
             'Applebot' => [
                 'ua' => ['Applebot'],
                 'rdns_suffixes' => ['.applebot.apple.com'],
             ],
-            'DuckDuckBot' => [
-                'ua' => ['DuckDuckBot', 'DuckAssistBot'],
-                'rdns_suffixes' => [],
-            ],
-            'Facebook' => [
-                'ua' => ['facebookexternalhit', 'Facebot', 'meta-externalagent'],
-                'rdns_suffixes' => ['.facebook.com', '.fbsv.net'],
-            ],
-            'WhatsApp' => [
-                'ua' => ['WhatsApp'],
-                'rdns_suffixes' => [],
-            ],
-            'LinkedInBot' => [
-                'ua' => ['LinkedInBot'],
-                'rdns_suffixes' => [],
-            ],
-            'Twitterbot' => [
-                'ua' => ['Twitterbot'],
-                'rdns_suffixes' => [],
-            ],
-            'Slackbot' => [
-                'ua' => ['Slackbot'],
-                'rdns_suffixes' => [],
-            ],
         ],
+        // Link previews when someone shares a page. None of these publish
+        // reverse DNS we can verify, so they are matched by user agent only.
+        'social' => [
+            'Facebook' => ['ua' => ['facebookexternalhit', 'Facebot']],
+            'WhatsApp' => ['ua' => ['WhatsApp']],
+            'LinkedInBot' => ['ua' => ['LinkedInBot']],
+            'Twitterbot' => ['ua' => ['Twitterbot']],
+            'Pinterest' => ['ua' => ['Pinterestbot', 'Pinterest/']],
+            'Slackbot' => ['ua' => ['Slackbot']],
+            'TelegramBot' => ['ua' => ['TelegramBot']],
+            'Discordbot' => ['ua' => ['Discordbot']],
+        ],
+        // SEO tools and AI search/answer bots (they cite and link pages).
         'seo' => [
-            'Ahrefs' => ['ua' => ['AhrefsBot']],
+            'Ahrefs' => ['ua' => ['AhrefsBot', 'AhrefsSiteAudit']],
             'Semrush' => ['ua' => ['SemrushBot', 'Semrush']],
             'DataForSEO' => ['ua' => ['DataForSEO', 'dataforseo', 'RSiteAuditor']],
-            'PetalBot' => ['ua' => ['PetalBot']],
+            'DuckDuckBot' => ['ua' => ['DuckDuckBot', 'DuckAssistBot']],
             'Baiduspider' => ['ua' => ['Baiduspider']],
             'Yandex' => ['ua' => ['YandexBot', 'Yandex']],
             'Amazonbot' => ['ua' => ['Amazonbot']],
-            'ChatGPT' => ['ua' => ['ChatGPT-User', 'OAI-SearchBot', 'GPTBot']],
-            'Claude' => ['ua' => ['ClaudeBot', 'Claude-User', 'Anthropic-AI']],
-            'Perplexity' => ['ua' => ['PerplexityBot']],
+            'ChatGPT' => ['ua' => ['ChatGPT-User', 'OAI-SearchBot']],
+            'Claude' => ['ua' => ['Claude-User', 'Claude-SearchBot']],
+            'Perplexity' => ['ua' => ['PerplexityBot', 'Perplexity-User']],
             'Seznam' => ['ua' => ['SeznamBot']],
         ],
         'lanes' => [
-            'search_engine' => [
-                'minute' => 180,
-                'hour' => 4000,
-                'day' => 20000,
+            'social' => [
+                'minute' => 60,
+                'hour' => 1500,
+                'day' => 8000,
             ],
             'seo_crawler' => [
                 'minute' => 40,

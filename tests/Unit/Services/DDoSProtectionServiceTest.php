@@ -45,6 +45,48 @@ class DDoSProtectionServiceTest extends TestCase
         $this->assertFalse($result['blocked']);
     }
 
+    public function test_verified_googlebot_is_never_rate_limited_and_touches_no_counters(): void
+    {
+        $config = $this->searchConfig();
+        $config['limits'] = ['minute' => 1, 'hour' => 1, 'day' => 1];
+        $service = $this->service();
+        $bot = $this->request('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
+
+        for ($i = 0; $i < 300; $i++) {
+            $result = $service->shouldBlockRequest($bot, $config);
+        }
+
+        $this->assertFalse($result['blocked']);
+        $this->assertNull(Cache::get('search_rate_limit_minute_ip_127.0.0.1'));
+    }
+
+    public function test_old_block_on_an_ip_does_not_shut_out_verified_googlebot(): void
+    {
+        Cache::put('search_blocked_ip_127.0.0.1', ['blocked_at' => time(), 'expires_at' => time() + 3600], 3600);
+
+        $result = $this->service()->shouldBlockRequest(
+            $this->request('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'),
+            $this->searchConfig()
+        );
+
+        $this->assertFalse($result['blocked']);
+    }
+
+    public function test_social_preview_bot_is_capped_but_never_blocked(): void
+    {
+        config(['ddos.crawlers.lanes.social' => ['minute' => 2, 'hour' => 100, 'day' => 100]]);
+        $service = $this->service();
+        $bot = $this->request('facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', '31.13.103.1');
+
+        for ($i = 0; $i < 40; $i++) {
+            $result = $service->shouldBlockRequest($bot, $this->searchConfig());
+        }
+
+        $this->assertSame('rate_limit_exceeded', $result['reason']);
+        $this->assertNull(Cache::get('search_violations_ip_31.13.103.1'));
+        $this->assertNull(Cache::get('search_blocked_ip_31.13.103.1'));
+    }
+
     public function test_user_is_rate_limited_without_email_on_first_violation(): void
     {
         $config = $this->searchConfig();

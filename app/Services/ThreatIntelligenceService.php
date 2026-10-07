@@ -10,11 +10,15 @@ use Jenssegers\Agent\Agent;
 
 class ThreatIntelligenceService
 {
-    private Agent $agent;
-    
-    public function __construct()
+    private ?Agent $agentInstance = null;
+
+    /**
+     * Built on first use: this service is resolved on every protected request,
+     * but the parser is only needed when a threat is actually recorded.
+     */
+    private function agent(): Agent
     {
-        $this->agent = new Agent();
+        return $this->agentInstance ??= new Agent();
     }
 
     /**
@@ -84,7 +88,9 @@ class ThreatIntelligenceService
             'is_private' => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false,
             'is_ipv6' => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false,
             'suspicious_patterns' => $suspiciousPatterns,
-            'reverse_dns' => $resolveDns ? @gethostbyaddr($ip) : null,
+            'reverse_dns' => $resolveDns
+                ? Cache::remember('threat_rdns_'.$ip, 86400, fn () => @gethostbyaddr($ip) ?: $ip)
+                : null,
             'headers' => [
                 'x_forwarded_for' => $request->header('x-forwarded-for'),
                 'x_real_ip' => $request->header('x-real-ip'),
@@ -101,16 +107,16 @@ class ThreatIntelligenceService
         $userAgent = $request->userAgent();
         
         return [
-            'browser' => $this->agent->browser(),
-            'browser_version' => $this->agent->version($this->agent->browser()),
-            'platform' => $this->agent->platform(),
-            'platform_version' => $this->agent->version($this->agent->platform()),
-            'device' => $this->agent->device(),
-            'is_mobile' => $this->agent->isMobile(),
-            'is_tablet' => $this->agent->isTablet(),
-            'is_desktop' => $this->agent->isDesktop(),
-            'is_robot' => $this->agent->isRobot(),
-            'robot_name' => $this->agent->robot(),
+            'browser' => $this->agent()->browser(),
+            'browser_version' => $this->agent()->version($this->agent()->browser()),
+            'platform' => $this->agent()->platform(),
+            'platform_version' => $this->agent()->version($this->agent()->platform()),
+            'device' => $this->agent()->device(),
+            'is_mobile' => $this->agent()->isMobile(),
+            'is_tablet' => $this->agent()->isTablet(),
+            'is_desktop' => $this->agent()->isDesktop(),
+            'is_robot' => $this->agent()->isRobot(),
+            'robot_name' => $this->agent()->robot(),
             'user_agent_hash' => hash('sha256', $userAgent),
             'screen_resolution' => $request->input('screen_resolution'),
             'timezone_offset' => $request->input('timezone_offset'),
@@ -393,7 +399,7 @@ class ThreatIntelligenceService
         if (!$request->header('accept-encoding')) $signs[] = 'missing_accept_encoding';
         
         // Check for robot user agents
-        if ($this->agent->isRobot()) $signs[] = 'robot_user_agent';
+        if ($this->agent()->isRobot()) $signs[] = 'robot_user_agent';
         
         // Check for very regular timing
         if (count($activity) > 5) {
