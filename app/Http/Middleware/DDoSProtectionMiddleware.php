@@ -63,11 +63,14 @@ class DDoSProtectionMiddleware
         $response = [
             'error' => $responseConfig['message'],
         ];
+        $headers = [];
 
         if (isset($result['retry_after']) && $result['retry_after'] > 0) {
             $response['retry_after'] = $result['retry_after'];
+            // Crawlers read the header, not the JSON body, to know when to come back.
+            $headers['Retry-After'] = (string) $result['retry_after'];
         }
 
-        return response()->json($response, $responseConfig['status']);
+        return response()->json($response, $responseConfig['status'], $headers);
     }
 }

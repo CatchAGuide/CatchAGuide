@@ -61,8 +61,17 @@ class DDoSProtectionService
             }
         }
 
+        // Verified search engines skip every counter and block check: no cache I/O
+        // per crawl hit, and an old block on a reused IP can't shut Google out.
+        $limits = $this->crawlerClassifier->limitsFor($classification, $config['limits'] ?? []);
+        if ($limits === null) {
+            return ['blocked' => false];
+        }
+
         if ($this->isBlocked($identifier, $context)) {
-            $this->logBlockedAttempt($request, $identifier, $context);
+            if ($this->firstTimeIn("blocked_log_{$context}_{$identifier}", 60)) {
+                $this->logBlockedAttempt($request, $identifier, $context);
+            }
 
             return [
                 'blocked' => true,
@@ -71,18 +80,24 @@ class DDoSProtectionService
             ];
         }
 
-        $limits = $this->crawlerClassifier->limitsFor($classification, $config['limits'] ?? []);
         if (! $this->checkRateLimit($identifier, $context, $limits)) {
-            $this->logRateLimitViolation($request, $identifier, $context);
+            if ($this->firstTimeIn("rate_log_{$context}_{$identifier}", 60)) {
+                $this->logRateLimitViolation($request, $identifier, $context);
+            }
 
             if (! $trustedCrawler) {
                 $violations = $this->recordViolation($identifier, $context, $config);
-                $this->persistThreat($request, $context, [
-                    'type' => 'rate_limit',
-                    'lane' => $classification->lane->value,
-                    'crawler' => $classification->name,
-                    'violations' => $violations,
-                ]);
+                // Persisting runs a reverse DNS lookup and a DB insert; once an hour
+                // per client is enough for the admin panel, and a flood no longer
+                // costs more to reject than to serve.
+                if ($this->firstTimeIn("threat_persist_{$context}_{$identifier}", 3600)) {
+                    $this->persistThreat($request, $context, [
+                        'type' => 'rate_limit',
+                        'lane' => $classification->lane->value,
+                        'crawler' => $classification->name,
+                        'violations' => $violations,
+                    ]);
+                }
                 $this->notificationService->sendRateLimitAlert(
                     $identifier,
                     $violations,
@@ -190,6 +205,14 @@ class DDoSProtectionService
         }
 
         return true;
+    }
+
+    /**
+     * True only for the first call per key within the window.
+     */
+    private function firstTimeIn(string $key, int $seconds): bool
+    {
+        return Cache::add('ddos_once_'.$key, 1, $seconds);
     }
 
     /**
