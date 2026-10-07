@@ -1,3 +1,4 @@
+@use('App\Enums\TourExtraUnit')
 <div class="tc-pricing">
     <div class="tc-pricing__row">
         <span class="tc-pricing__label" x-text="baseLine"></span>
@@ -17,8 +18,12 @@
                     @click="toggleExtra({{ (int) $extra['index'] }})"
                 >
                     <span class="tc-extra__box">@include('pages.modern-checkout.partials.icon', ['name' => 'check', 'size' => 12, 'stroke' => 2.6])</span>
-                    <span class="tc-extra__label">{{ $extra['name'] }} × <span x-text="persons"></span> <span x-text="unitLabel"></span></span>
-                    <span class="tc-extra__price tc-mono" x-text="extraTotal({{ (float) $extra['price'] }})"></span>
+                    @if ($extra['unit'] === TourExtraUnit::PerPerson->value)
+                        <span class="tc-extra__label">{{ $extra['name'] }} × <span x-text="persons"></span> <span x-text="unitLabel"></span></span>
+                    @else
+                        <span class="tc-extra__label">{{ $extra['name'] }}</span>
+                    @endif
+                    <span class="tc-extra__price tc-mono" x-text="extraTotal({{ (int) $extra['index'] }})"></span>
                 </button>
             @endforeach
         </div>

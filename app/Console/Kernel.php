@@ -71,6 +71,9 @@ class Kernel extends ConsoleKernel
                 
         $schedule->command('generate:sitemap')->daily()->runInBackground();
 
+        // Offers past their "valid until" date become expired (Admin › Sales › Offers).
+        $schedule->command('sales:expire-offers')->dailyAt('01:10')->withoutOverlapping();
+
         // Purge threat_intelligence rows older than retention window (default 7 days)
         $schedule->command('threat-intelligence:cleanup')
                 ->dailyAt('03:30')

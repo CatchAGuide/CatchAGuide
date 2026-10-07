@@ -528,4 +528,10 @@ return [
         'reply_hint' => 'Eine Antwort auf diese E-Mail geht direkt an den Gast.',
         'footer' => 'Catch A Guide · interne Benachrichtigung',
     ],
+
+    // Shared header/footer of the CaG system mails (components/mail/cag-shell).
+    'cag_shell' => [
+        'imprint' => 'Impressum',
+        'privacy' => 'Datenschutz',
+    ],
 ];

@@ -1,3 +1,4 @@
+@use('App\Enums\AccommodationPriceUnit')
 @include('components.accommodation-form-styles')
 <div id="accommodation-form" class="card">
     <div class="card-body">
@@ -325,6 +326,20 @@
                         <option value="EUR" {{ (isset($formData['currency']) && $formData['currency'] == 'EUR') ? 'selected' : '' }}>EUR (€)</option>
                         <option value="USD" {{ (isset($formData['currency']) && $formData['currency'] == 'USD') ? 'selected' : '' }}>USD ($)</option>
                         <option value="GBP" {{ (isset($formData['currency']) && $formData['currency'] == 'GBP') ? 'selected' : '' }}>GBP (£)</option>
+                    </select>
+                </div>
+
+                <!-- Price unit: is the tier price for the whole unit or per guest? -->
+                <div class="form-group mb-4">
+                    <label for="price_unit" class="form-label fw-bold fs-5">
+                        {{ __('accommodations.price_unit') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top"
+                           title="{{ __('accommodations.tooltip_price_unit') }}"></i>
+                    </label>
+                    <select class="form-control" id="price_unit" name="price_unit">
+                        @foreach(AccommodationPriceUnit::cases() as $priceUnit)
+                            <option value="{{ $priceUnit->value }}" @selected(($formData['price_unit'] ?? 'per_night') === $priceUnit->value)>{{ $priceUnit->label() }}</option>
+                        @endforeach
                     </select>
                 </div>
 

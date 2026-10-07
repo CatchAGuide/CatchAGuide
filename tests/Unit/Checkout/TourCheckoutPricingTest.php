@@ -94,6 +94,27 @@ class TourCheckoutPricingTest extends TestCase
         $this->assertSame(437.5, $quote->total());
     }
 
+    public function test_quote_charges_booking_and_item_extras_once(): void
+    {
+        $pricing = TourCheckoutPricing::for($this->guiding([
+            'price_type' => 'per_tour',
+            'price' => 400,
+            'pricing_extra' => json_encode([
+                ['name' => 'Licence', 'price' => 15, 'unit' => 'per_person'],
+                ['name' => 'Photo package', 'price' => 49, 'unit' => 'per_booking'],
+                ['name' => 'Wader', 'price' => 10, 'unit' => 'per_item'],
+                ['name' => 'Legacy', 'price' => 5, 'unit' => 'bogus'],
+            ]),
+        ]));
+
+        $this->assertSame(['per_person', 'per_booking', 'per_item', 'per_person'], array_column($pricing->extras(), 'unit'));
+
+        $quote = $pricing->quote(3, [0, 1, 2, 3]);
+
+        $this->assertSame([3, 1, 1, 3], array_column($quote->extras, 'quantity'));
+        $this->assertSame(45.0 + 49.0 + 10.0 + 15.0, $quote->extrasTotal());
+    }
+
     public function test_quote_clamps_guests_to_the_bookable_range(): void
     {
         $pricing = TourCheckoutPricing::for($this->guiding(['price_type' => 'per_tour', 'price' => 100, 'max_guests' => 2]));

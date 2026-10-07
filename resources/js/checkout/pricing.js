@@ -7,7 +7,7 @@ const round2 = (value) => Math.round(value * 100) / 100;
 
 export class TourPricing {
     /**
-     * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number}> }} config
+     * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number, unit: string}> }} config
      */
     constructor({ perPerson, table, extras }) {
         this.perPerson = Boolean(perPerson);
@@ -19,10 +19,24 @@ export class TourPricing {
         return Number(this.table[persons] ?? 0);
     }
 
+    /**
+     * Mirrors TourExtraUnit::checkoutQuantity(): per-person extras scale with guests, booking
+     * fees and items are charged once.
+     */
+    extraQuantity(extra, persons) {
+        return (extra.unit ?? 'per_person') === 'per_person' ? persons : 1;
+    }
+
+    extraTotal(index, persons) {
+        const extra = this.extras.find((candidate) => candidate.index === index);
+
+        return extra ? round2(extra.price * this.extraQuantity(extra, persons)) : 0;
+    }
+
     extrasTotal(persons, selected) {
         return round2(this.extras
             .filter((extra) => selected.includes(extra.index))
-            .reduce((sum, extra) => sum + extra.price * persons, 0));
+            .reduce((sum, extra) => sum + extra.price * this.extraQuantity(extra, persons), 0));
     }
 
     total(persons, selected) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TourExtraUnit;
 use App\Http\Requests\StoreGuidingRequest;
 use App\Http\Requests\StoreNewGuidingRequest;
 use App\Models\Gallery;
@@ -872,7 +873,8 @@ class GuidingsController extends Controller
                 if ($extraname && $request->input($priceKey)) {
                     $pricingExtras[] = [
                         'name' => $extraname,
-                        'price' => $request->input($priceKey)
+                        'price' => $request->input($priceKey),
+                        'unit' => TourExtraUnit::fromListing($request->input('extra_unit_' . $i))->value,
                     ];
                 }
                 $i++;
@@ -1219,7 +1221,8 @@ class GuidingsController extends Controller
                 if ($extraname && $request->input($priceKey)) {
                     $pricingExtras[] = [
                         'name' => $extraname,
-                        'price' => $request->input($priceKey)
+                        'price' => $request->input($priceKey),
+                        'unit' => TourExtraUnit::fromListing($request->input('extra_unit_' . $i))->value,
                     ];
                 }
                 $i++;

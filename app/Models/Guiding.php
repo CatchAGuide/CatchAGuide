@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TourExtraUnit;
 use Akuechler\Geoly;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -1366,7 +1367,8 @@ class Guiding extends Model
                     return [
                         'id' => $extraPrice->id,
                         'name' => $extraPrice->name,
-                        'price' => $item['price']
+                        'price' => $item['price'],
+                        'unit' => TourExtraUnit::fromListing($item['unit'] ?? null)->value,
                     ];
                 }
             }
@@ -1375,7 +1377,8 @@ class Guiding extends Model
             $result = [
                 'id' => $counter, // Use incrementing counter that's guaranteed to not overlap
                 'name' => $item['name'],
-                'price' => $item['price']
+                'price' => $item['price'],
+                'unit' => TourExtraUnit::fromListing($item['unit'] ?? null)->value,
             ];
             $counter++;
             return $result;

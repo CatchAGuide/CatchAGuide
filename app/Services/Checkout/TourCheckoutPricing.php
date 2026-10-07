@@ -2,6 +2,7 @@
 
 namespace App\Services\Checkout;
 
+use App\Enums\TourExtraUnit;
 use App\Models\Guiding;
 use Illuminate\Support\Collection;
 
@@ -17,7 +18,7 @@ final class TourCheckoutPricing
     private const DEFAULT_MAX_GUESTS = 10;
 
     /**
-     * @param  list<array{index: int, name: string, price: float}>  $extras
+     * @param  list<array{index: int, name: string, price: float, unit: string}>  $extras
      */
     private function __construct(
         private readonly Guiding $guiding,
@@ -39,6 +40,7 @@ final class TourCheckoutPricing
                 'index' => $index,
                 'name' => (string) ($item['name'] ?? ''),
                 'price' => round(max(0.0, (float) ($item['price'] ?? 0)), 2),
+                'unit' => TourExtraUnit::fromListing($item['unit'] ?? null)->value,
             ];
         }
 
@@ -56,7 +58,7 @@ final class TourCheckoutPricing
     }
 
     /**
-     * @return list<array{index: int, name: string, price: float}>
+     * @return list<array{index: int, name: string, price: float, unit: string}>
      */
     public function extras(): array
     {
@@ -123,12 +125,13 @@ final class TourCheckoutPricing
                 continue;
             }
 
+            $quantity = TourExtraUnit::from($extra['unit'])->checkoutQuantity($persons);
             $lines[] = [
                 'index' => $extra['index'],
                 'name' => $extra['name'],
                 'price' => $extra['price'],
-                'quantity' => $persons,
-                'total' => round($extra['price'] * $persons, 2),
+                'quantity' => $quantity,
+                'total' => round($extra['price'] * $quantity, 2),
             ];
         }
 

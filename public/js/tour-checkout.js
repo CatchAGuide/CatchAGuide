@@ -491,7 +491,7 @@ var round2 = function round2(value) {
 };
 var TourPricing = /*#__PURE__*/function () {
   /**
-   * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number}> }} config
+   * @param {{ perPerson: boolean, table: Object<string, number>, extras: Array<{index: number, name: string, price: number, unit: string}> }} config
    */
   function TourPricing(_ref) {
     var perPerson = _ref.perPerson,
@@ -508,13 +508,33 @@ var TourPricing = /*#__PURE__*/function () {
       var _this$table$persons;
       return Number((_this$table$persons = this.table[persons]) !== null && _this$table$persons !== void 0 ? _this$table$persons : 0);
     }
+
+    /**
+     * Mirrors TourExtraUnit::checkoutQuantity(): per-person extras scale with guests, booking
+     * fees and items are charged once.
+     */
+  }, {
+    key: "extraQuantity",
+    value: function extraQuantity(extra, persons) {
+      var _extra$unit;
+      return ((_extra$unit = extra.unit) !== null && _extra$unit !== void 0 ? _extra$unit : 'per_person') === 'per_person' ? persons : 1;
+    }
+  }, {
+    key: "extraTotal",
+    value: function extraTotal(index, persons) {
+      var extra = this.extras.find(function (candidate) {
+        return candidate.index === index;
+      });
+      return extra ? round2(extra.price * this.extraQuantity(extra, persons)) : 0;
+    }
   }, {
     key: "extrasTotal",
     value: function extrasTotal(persons, selected) {
+      var _this = this;
       return round2(this.extras.filter(function (extra) {
         return selected.includes(extra.index);
       }).reduce(function (sum, extra) {
-        return sum + extra.price * persons;
+        return sum + extra.price * _this.extraQuantity(extra, persons);
       }, 0));
     }
   }, {
@@ -925,8 +945,8 @@ function tourCheckout() {
         return i !== index;
       }) : [].concat(_toConsumableArray(this.selectedExtras), [index]);
     },
-    extraTotal: function extraTotal(price) {
-      return this.money(price * this.persons);
+    extraTotal: function extraTotal(index) {
+      return this.money(pricing.extraTotal(index, this.persons));
     },
     get basePrice() {
       return pricing.basePrice(this.persons);

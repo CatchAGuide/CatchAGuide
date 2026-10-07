@@ -259,6 +259,10 @@ return [
     'policies_title' => 'Policies',
     
     // Pricing translations
+    'price_unit' => 'Price unit',
+    'price_unit_per_night' => 'Per night (price for the whole unit)',
+    'price_unit_per_person_night' => 'Per person and night',
+    'tooltip_price_unit' => 'Per night: the tier price is the total for the unit and that many guests. Per person and night: the tier price is charged for every guest.',
     'pricing_title' => 'Pricing',
     'price_type' => 'Price Type',
     'per_night' => 'Per Night',

@@ -28,6 +28,7 @@ return [
     'No_Inclusion' => 'Keine Inklusivleistungen angegeben',
     'Additional_Extra' => 'Buchbare Extras',
     'Starting_Time' => 'Startzeit',
+    'Starting_Time_Default' => 'Wir besprechen die Startzeit gemeinsam nach der Reservierung',
     'Meeting_Point' => 'Treffpunkt',
     'Tour_Info' => 'Tour Infos',
     'Boat_Details' => 'Boot Details',

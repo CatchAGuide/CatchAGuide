@@ -317,6 +317,15 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString('Meet at the harbour office, gate 3.', $html);
         $this->assertStringNotContainsString('Bucht Nord - Riba Roja', $html);
         $this->assertStringContainsString('06:00', $html);
+        $this->assertStringNotContainsString(__('guidings.Starting_Time_Default'), $html);
+    }
+
+    public function test_guiding_card_shows_default_starting_time_text_when_none_set(): void
+    {
+        $html = $this->renderGuidingCard();
+
+        $this->assertStringContainsString(__('guidings.Starting_Time'), $html);
+        $this->assertStringContainsString(__('guidings.Starting_Time_Default'), $html);
     }
 
     private function renderGuidingCard(): string

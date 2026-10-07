@@ -1,0 +1,841 @@
+// Admin › Sales › Offers – offer & booking confirmation builder (form left, live preview right)
+// and the offers list. Compiled to public/css/admin-sales-builder.css (webpack.mix.js).
+
+@import "../settings/breakpoints";
+@import "../settings/category-colors";
+
+$sb-line: #dfe2ea;
+$sb-panel: #ffffff;
+$sb-panel-2: #f7f8fb;
+$sb-fg: #1c2233;
+$sb-muted: #5f6880;
+$sb-accent: #2d4fd6;
+$sb-accent-soft: #e8edff;
+$sb-warn: #a15c00;
+$sb-warn-soft: #fff3df;
+$sb-ok: #1d7a4d;
+$sb-ok-soft: #e3f5ec;
+$sb-danger: #b3261e;
+$sb-danger-soft: #fbe9e9;
+$sb-radius: 8px;
+$sb-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+$sb-stack: map-get($breakpoints, "desktop");
+
+// CaG product-type colours (settings/_category-colors.scss); custom lines stay neutral.
+$sb-tags: (
+  tour: (category-color("tour", "soft"), category-color("tour")),
+  camp: (category-color("camp", "soft"), category-color("camp")),
+  trip: (category-color("trip", "soft"), category-color("trip")),
+  custom: (#eceef3, #5a6478),
+);
+
+// The admin theme clips .app-content with overflow:hidden, which turns off position:sticky
+// for the preview and the totals bar. overflow:clip still clips but is no scroll container.
+.app-content:has(.sb),
+.horizontalMenucontainer:has(.sb) {
+  overflow: clip;
+}
+
+.sb {
+  color: $sb-fg;
+  padding-block: 16px 40px;
+
+  [x-cloak] {
+    display: none !important;
+  }
+}
+
+.sb-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sb-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sb-crumbs {
+  color: $sb-muted;
+  font-size: 13px;
+}
+
+.sb-status,
+.sb-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.sb-step {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: $sb-panel;
+  border: 1px solid $sb-line;
+  color: $sb-muted;
+
+  &.is-done {
+    color: $sb-ok;
+    border-color: transparent;
+    background: $sb-ok-soft;
+  }
+
+  &.is-now {
+    color: #fff;
+    background: $sb-accent;
+    border-color: $sb-accent;
+  }
+}
+
+.sb-step-arrow {
+  color: $sb-muted;
+  font-size: 11px;
+}
+
+.sb-notice {
+  margin-bottom: 12px;
+}
+
+.sb-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: $sb-stack) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.sb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sb-panel {
+  background: $sb-panel;
+  border: 1px solid $sb-line;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+
+  h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $sb-muted;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.sb-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.sb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+
+  &--narrow {
+    max-width: 200px;
+  }
+
+  &--qty {
+    max-width: 150px;
+  }
+}
+
+.sb-label {
+  font-size: 12px;
+  color: $sb-muted;
+}
+
+.sb-hint {
+  font-size: 12px;
+  color: $sb-muted;
+}
+
+.sb-seg {
+  display: inline-flex;
+  border: 1px solid $sb-line;
+  border-radius: 6px;
+  overflow: hidden;
+  width: max-content;
+  max-width: 100%;
+
+  button {
+    border: 0;
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 13px;
+    color: $sb-muted;
+    cursor: pointer;
+
+    &.is-on {
+      background: $sb-accent;
+      color: #fff;
+    }
+  }
+}
+
+.sb-x {
+  border: 0;
+  background: transparent;
+  color: $sb-muted;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    color: $sb-danger;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+// Product cards
+.sb-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sb-card {
+  border: 1px solid $sb-line;
+  border-radius: $sb-radius;
+  background: $sb-panel-2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  &__head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid $sb-line;
+  }
+
+  &__link {
+    font-size: 12px;
+    color: $sb-accent;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  &__tools {
+    margin-left: auto;
+    display: flex;
+    gap: 2px;
+  }
+
+  &__body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__subtotal {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-top: 1px solid $sb-line;
+    font-weight: 600;
+    font-family: $sb-mono;
+    font-size: 13px;
+  }
+}
+
+.sb-tag {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  @each $type, $colors in $sb-tags {
+    &--#{$type} {
+      background: nth($colors, 1);
+      color: nth($colors, 2);
+    }
+  }
+}
+
+.sb-fixed {
+  font-size: 12px;
+  color: $sb-muted;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+
+  b {
+    color: $sb-fg;
+    font-weight: 500;
+  }
+}
+
+.sb-stepper {
+  display: flex;
+  align-items: stretch;
+  max-width: 160px;
+
+  button {
+    border: 1px solid $sb-line;
+    background: $sb-panel;
+    width: 34px;
+    font-size: 16px;
+    cursor: pointer;
+
+    &:first-child {
+      border-radius: 6px 0 0 6px;
+    }
+
+    &:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+  }
+
+  input {
+    border-radius: 0;
+    text-align: center;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+.sb-calc {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: $sb-muted;
+  background: $sb-panel;
+  border: 1px dashed $sb-line;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.sb-formula {
+  font-family: $sb-mono;
+}
+
+.sb-amt {
+  font-family: $sb-mono;
+  font-weight: 600;
+  color: $sb-fg;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.sb-override {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  input {
+    width: 96px;
+  }
+}
+
+.sb-subsec {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid $sb-line;
+  padding-top: 10px;
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 13px;
+  }
+}
+
+.sb-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: $sb-panel;
+  border: 1px solid $sb-line;
+  border-radius: 6px;
+
+  &__remove {
+    align-self: flex-end;
+    font-size: 12px;
+  }
+}
+
+.sb-extra {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 90px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+
+  &.is-on {
+    background: $sb-accent-soft;
+  }
+
+  &__label {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 0;
+    font-size: 13px;
+    cursor: pointer;
+
+    small {
+      display: block;
+      color: $sb-muted;
+      font-size: 11px;
+    }
+
+    input {
+      margin-top: 3px;
+    }
+  }
+
+  &__qty {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+
+    small {
+      color: $sb-muted;
+    }
+  }
+
+  .sb-amt {
+    text-align: right;
+  }
+
+  @media (max-width: map-get($breakpoints, "L-phone")) {
+    grid-template-columns: minmax(0, 1fr) 90px;
+
+    .sb-amt {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.sb-adjust {
+  font-size: 12px;
+
+  summary {
+    cursor: pointer;
+    color: $sb-muted;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+
+    input {
+      max-width: 140px;
+    }
+  }
+}
+
+.sb-hint-box {
+  background: $sb-warn-soft;
+  color: $sb-warn;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.sb-warns {
+  padding: 0 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-warn,
+.sb-err {
+  font-size: 12px;
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.sb-warn {
+  background: $sb-warn-soft;
+  color: $sb-warn;
+}
+
+.sb-err {
+  background: $sb-danger-soft;
+  color: $sb-danger;
+}
+
+.sb-adds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sb-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-line {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+// Combobox ("#ID · Name")
+.sb-combo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  &__list {
+    position: absolute;
+    z-index: 30;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 2px 0 0;
+    padding: 4px 0;
+    list-style: none;
+    background: $sb-panel;
+    border: 1px solid $sb-line;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(28, 34, 51, 0.12);
+
+    li {
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+
+      &:hover,
+      &.is-active {
+        background: $sb-accent-soft;
+      }
+
+      &.is-selected {
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.sb-customer__box {
+  position: relative;
+}
+
+// Totals bar
+.sb-totals {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+  background: $sb-fg;
+  color: #fff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 -6px 20px rgba(28, 34, 51, 0.18);
+
+  &__meta {
+    font-size: 12px;
+    opacity: 0.75;
+  }
+
+  &__big {
+    font-family: $sb-mono;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__notice {
+    flex-basis: 100%;
+    order: -1;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 6px 10px;
+
+    &--success {
+      background: $sb-ok-soft;
+      color: $sb-ok;
+    }
+
+    &--danger {
+      background: $sb-danger-soft;
+      color: $sb-danger;
+    }
+  }
+
+  &__jump {
+    border: 0;
+    background: transparent;
+    color: #ffb4ab;
+    font-size: 12px;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  &__warns {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .sb-hint {
+      color: rgba(255, 255, 255, 0.75);
+    }
+  }
+}
+
+.sb-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-family: $sb-mono;
+    color: $sb-muted;
+    font-size: 12px;
+    margin-right: 6px;
+  }
+}
+
+// Preview
+.sb-preview {
+  position: sticky;
+  top: 80px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  @media (max-width: $sb-stack) {
+    position: static;
+  }
+
+  &__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+}
+
+.sb-frame {
+  border: 1px solid $sb-line;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f1f1f2;
+}
+
+.sb-urlbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-family: $sb-mono;
+  font-size: 12px;
+  color: $sb-muted;
+  background: $sb-panel;
+  border-bottom: 1px solid $sb-line;
+  padding: 8px 12px;
+  overflow: hidden;
+  white-space: nowrap;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  a {
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+}
+
+.sb-mailhead {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  padding: 10px 12px;
+  background: $sb-panel;
+  border-bottom: 1px solid $sb-line;
+  font-size: 13px;
+
+  dt {
+    color: $sb-muted;
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.sb-iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 170px);
+  min-height: 420px;
+  border: 0;
+  background: #f1f1f2;
+}
+
+// Source request panel (offer created from a camp/trip request)
+.sb-source {
+  border-color: #b9e3cb;
+  background: #f4fbf7;
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  &__message {
+    font-size: 13px;
+
+    summary {
+      cursor: pointer;
+      color: $sb-muted;
+    }
+
+    p {
+      white-space: pre-line;
+      margin: 8px 0 0;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+  }
+}
+
+// Offers list
+.sb-list {
+  .sb-filters {
+    margin-bottom: 16px;
+  }
+}
+
+// One type size for the whole table (cells, headings, badges, buttons); secondary
+// information is muted by colour, not by a smaller size. Nothing wraps.
+$sb-table-size: 13px;
+
+// Scoped like the admin theme's `.admin-shell .table thead th` (12px, uppercase) so it wins here.
+.admin-shell .table.sb-table,
+.sb-table {
+  font-size: $sb-table-size;
+
+  th,
+  td,
+  .badge,
+  .btn {
+    font-size: $sb-table-size;
+    line-height: 1.4;
+  }
+
+  thead th,
+  th {
+    font-weight: 600;
+    color: $sb-muted;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  td {
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-weight: 500;
+    padding: 0.3em 0.6em;
+  }
+
+  .btn-group .btn {
+    width: 32px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  &__number {
+    font-weight: 600;
+  }
+
+  &__muted {
+    color: $sb-muted;
+  }
+
+  &__amount {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  &__products {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
