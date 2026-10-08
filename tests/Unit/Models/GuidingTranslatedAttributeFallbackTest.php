@@ -117,8 +117,10 @@ class GuidingTranslatedAttributeFallbackTest extends TestCase
         $result = collect($guiding->other_information);
 
         $this->assertSame('Kinderfreundlich (übersetzt)', $result->firstWhere('id', $info->id)['value']);
+        $this->assertSame('Child allowed', $result->firstWhere('id', $info->id)['source_value']);
         $this->assertSame($info->name, $result->firstWhere('id', $info->id)['name']);
         $this->assertSame('No smoking on board', $result->firstWhere('id', $otherInfo->id)['value']);
+        $this->assertSame('No smoking on board', $result->firstWhere('id', $otherInfo->id)['source_value']);
     }
 
     public function test_translated_list_rows_normalizes_both_storage_shapes(): void

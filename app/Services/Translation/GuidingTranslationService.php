@@ -34,6 +34,46 @@ class GuidingTranslationService
     ];
 
     /**
+     * EN/DE guess for a single note. Null when the text has no clear signal.
+     * Short English notes ("the", "will", "guide") count; a lone marker does not.
+     */
+    public function languageOfText(string $text): ?string
+    {
+        $text = mb_strtolower(strip_tags($text));
+        $text = preg_replace('/\s+/u', ' ', trim($text)) ?? $text;
+        if ($text === '') {
+            return null;
+        }
+
+        if (preg_match('/[äöüß]/u', $text)) {
+            return 'de';
+        }
+
+        $tokens = preg_split('/[^a-z]+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $tokenCounts = array_count_values($tokens);
+        $de = 0;
+        $en = 0;
+        foreach (self::DE_SOURCE_WORDS as $word) {
+            $de += $tokenCounts[$word] ?? 0;
+        }
+        foreach (self::EN_SOURCE_WORDS as $word) {
+            $en += $tokenCounts[$word] ?? 0;
+        }
+
+        if ($en >= 2 && $de === 0) {
+            return 'en';
+        }
+        if ($de >= 2 && $en === 0) {
+            return 'de';
+        }
+        if ($en === 0 || $de === 0 || abs($en - $de) < 2) {
+            return null;
+        }
+
+        return $en > $de ? 'en' : 'de';
+    }
+
+    /**
      * Detect source language from guiding main content (heuristic EN/DE).
      * Returns null when uncertain — never forces "de" on failure.
      *

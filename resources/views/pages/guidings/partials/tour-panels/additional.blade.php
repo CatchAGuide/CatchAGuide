@@ -21,7 +21,7 @@
                 @foreach ($panelRequirements as $requirement)
                     <li class="tour-panel__kv">
                         <strong>{{ $requirement['name'] ?? '' }}</strong>
-                        <span>{{ $requirement['value'] ?? '' }}</span>
+                        <span>{{ translated_guiding_note($guiding, $requirement) }}</span>
                     </li>
                 @endforeach
             </ul>
@@ -38,7 +38,7 @@
                 @foreach ($panelOtherInformation as $other)
                     <li class="tour-panel__kv">
                         <strong>{{ $other['name'] ?? '' }}</strong>
-                        <span>{{ $other['value'] ?? '' }}</span>
+                        <span>{{ translated_guiding_note($guiding, $other) }}</span>
                     </li>
                 @endforeach
             </ul>
@@ -55,7 +55,7 @@
                 @foreach ($panelRecommendations as $recommendation)
                     <li class="tour-panel__kv">
                         <strong>{{ $recommendation['name'] ?? '' }}</strong>
-                        <span>{{ $recommendation['value'] ?? '' }}</span>
+                        <span>{{ translated_guiding_note($guiding, $recommendation) }}</span>
                     </li>
                 @endforeach
             </ul>
