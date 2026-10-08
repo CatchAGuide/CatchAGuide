@@ -217,18 +217,22 @@
                             ? implode(' · ', array_map(fn ($time) => translate(trim($time)), $guiding['start_times']))
                             : null;
                         $meetingPoint = trim((string) ($guiding['desc_meeting_point'] ?? ''));
-                        $hasMeetingPoint = $meetingPoint !== '';
+                        $hasMeetingPoint = trim(strip_tags($meetingPoint)) !== '';
                     @endphp
                     <div class="guiding-card__schedule-item">
                         <div class="guiding-card__schedule-label">{{ __('guidings.Starting_Time') }}</div>
                         <div class="guiding-card__schedule-value">{{ $startTimesValue ?: __('guidings.Starting_Time_Default') }}</div>
                     </div>
-                    @if($hasMeetingPoint)
-                        <div class="guiding-card__schedule-item">
-                            <div class="guiding-card__schedule-label">{{ __('guidings.Meeting_Point') }}</div>
-                            <div class="guiding-card__schedule-value">{!! clean_html($meetingPoint) !!}</div>
+                    <div class="guiding-card__schedule-item">
+                        <div class="guiding-card__schedule-label">{{ __('guidings.Meeting_Point') }}</div>
+                        <div class="guiding-card__schedule-value">
+                            @if($hasMeetingPoint)
+                                {!! clean_html($meetingPoint) !!}
+                            @else
+                                {{ __('guidings.Meeting_Point_Default') }}
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>

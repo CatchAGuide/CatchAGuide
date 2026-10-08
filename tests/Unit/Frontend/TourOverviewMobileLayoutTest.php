@@ -36,10 +36,32 @@ class TourOverviewMobileLayoutTest extends TestCase
 
         $this->assertStringContainsString("@lang('guidings.Starting_Time_Default')", $blade);
         $this->assertStringNotContainsString('@if ($guiding->desc_starting_time || $guiding->desc_departure_time)', $blade);
+        // Selected departure-time pills must not suppress the default when the text is empty.
+        $this->assertStringNotContainsString('@elseif(!$departureTimes)', $blade);
+        $this->assertMatchesRegularExpression(
+            '/@if\(\$hasStartingTimeText\).*?@else\s*<div class="tour-overview__body">\s*@lang\(\'guidings\.Starting_Time_Default\'\)/s',
+            $blade
+        );
 
         foreach (['en', 'de'] as $locale) {
             $lang = require $this->projectPath("resources/lang/{$locale}/guidings.php");
             $this->assertNotEmpty($lang['Starting_Time_Default'] ?? null, "Missing {$locale} Starting_Time_Default");
+        }
+    }
+
+    public function test_meeting_point_falls_back_to_default_text_when_not_set(): void
+    {
+        $blade = (string) file_get_contents($this->projectPath('resources/views/pages/guidings/newIndex.blade.php'));
+
+        $this->assertStringNotContainsString('@if ($guiding->desc_meeting_point)', $blade);
+        $this->assertMatchesRegularExpression(
+            '/@if\(\$hasMeetingPointText\).*?@else\s*@lang\(\'guidings\.Meeting_Point_Default\'\)/s',
+            $blade
+        );
+
+        foreach (['en', 'de'] as $locale) {
+            $lang = require $this->projectPath("resources/lang/{$locale}/guidings.php");
+            $this->assertNotEmpty($lang['Meeting_Point_Default'] ?? null, "Missing {$locale} Meeting_Point_Default");
         }
     }
 

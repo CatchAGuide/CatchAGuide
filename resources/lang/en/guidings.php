@@ -30,6 +30,7 @@ return [
     'Starting_Time' => 'Starting time',
     'Starting_Time_Default' => 'Starting time will be discussed after reservation',
     'Meeting_Point' => 'Meeting Point',
+    'Meeting_Point_Default' => 'The meeting point will be shared after reservation depending on the season',
     'Tour_Info' => 'Tour Information',
     'Boat_Details' => 'Boat Details',
     'Additional_Info' => 'Additional Information',
