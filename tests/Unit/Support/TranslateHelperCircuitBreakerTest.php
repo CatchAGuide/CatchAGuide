@@ -60,5 +60,44 @@ class TranslateHelperCircuitBreakerTest extends TestCase
 
         $this->assertSame($a, $b);
         $this->assertNotSame($a, $c);
+        $this->assertSame('translation_en_'.md5('Hallo Welt'), $a);
+    }
+
+    public function test_emoji_review_uses_a_fresh_cache_key_and_strips_symbols_for_the_api(): void
+    {
+        $string = "Ein toller Tag mit einem super Guide\u{1F44D}";
+
+        $this->assertNotSame(
+            'translation_en_'.md5($string),
+            translation_cache_key($string, 'en')
+        );
+        $this->assertSame(
+            'translation_v2_en_'.md5($string),
+            translation_cache_key($string, 'en')
+        );
+        $this->assertSame('Ein toller Tag mit einem super Guide', translation_api_text($string));
+        $this->assertSame("\u{1F44D}", translation_preserved_symbols($string));
+    }
+
+    public function test_emoji_review_does_not_reuse_a_cached_untranslated_original(): void
+    {
+        $string = "Ein toller Tag mit einem super Guide\u{1F44D}";
+        Cache::forever('translation_en_'.md5($string), $string);
+        Cache::forever(translation_cache_key($string, 'en'), 'A great day with a super guide '."\u{1F44D}");
+
+        $this->assertSame('A great day with a super guide '."\u{1F44D}", translate($string, 'en'));
+    }
+
+    public function test_emoji_only_text_is_returned_without_a_live_call(): void
+    {
+        $string = "\u{1F44D}";
+
+        $start = microtime(true);
+        $result = translate($string, 'en');
+        $elapsed = microtime(true) - $start;
+
+        $this->assertSame($string, $result);
+        $this->assertLessThan(1.0, $elapsed);
+        $this->assertNull(Cache::get(translation_cache_key($string, 'en')));
     }
 }

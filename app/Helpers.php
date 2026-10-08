@@ -7,14 +7,55 @@ use App\Models\Faq;
 use App\Models\EmailLog;
 use App\Services\Translation\TranslationCircuitBreaker;
 
+if (! function_exists('translation_has_supplementary_chars')) {
+    /**
+     * True when $string contains a character outside the Basic Multilingual Plane
+     * (emoji such as 👍 / 🎣). The free Google Translate token treats those as
+     * three-byte characters, so the request is rejected and the original text
+     * is what gets cached.
+     */
+    function translation_has_supplementary_chars(string $string): bool
+    {
+        return preg_match('/[\x{10000}-\x{10FFFF}]/u', $string) === 1;
+    }
+}
+
+if (! function_exists('translation_api_text')) {
+    /**
+     * Text actually sent to Google Translate. Supplementary-plane symbols are
+     * removed (and reattached by translate()) so the request token stays valid.
+     */
+    function translation_api_text(string $string): string
+    {
+        $stripped = preg_replace('/[\x{10000}-\x{10FFFF}\x{FE0F}\x{FE0E}\x{200D}]/u', '', $string);
+        $stripped = preg_replace('/[ \t]{2,}/u', ' ', (string) $stripped);
+
+        return trim((string) $stripped);
+    }
+}
+
+if (! function_exists('translation_preserved_symbols')) {
+    function translation_preserved_symbols(string $string): string
+    {
+        preg_match_all('/[\x{10000}-\x{10FFFF}]/u', $string, $matches);
+
+        return implode('', $matches[0] ?? []);
+    }
+}
+
 if (! function_exists('translation_cache_key')) {
     /**
      * Shared with the translations:warm command so it checks/primes exactly the
      * key translate() will look up — any drift here would make warming a no-op.
+     *
+     * Strings with supplementary-plane characters use a v2 key. The previous
+     * key cached the untranslated original after Google rejected the token.
      */
     function translation_cache_key(string $string, string $locale): string
     {
-        return 'translation_'.$locale.'_'.md5($string);
+        $prefix = translation_has_supplementary_chars($string) ? 'translation_v2_' : 'translation_';
+
+        return $prefix.$locale.'_'.md5($string);
     }
 }
 
@@ -41,12 +82,19 @@ if (! function_exists('translate')) {
             return $cached;
         }
 
+        $apiText = translation_api_text((string) $string);
+        if ($apiText === '') {
+            return $string;
+        }
+
+        $preservedSymbols = translation_preserved_symbols((string) $string);
+
         if (TranslationCircuitBreaker::isOpen()) {
             return $string;
         }
 
         try {
-            $translate = GoogleTranslate::trans($string, $currentLocale, null, [
+            $translate = GoogleTranslate::trans($apiText, $currentLocale, null, [
                 'timeout' => 10,
                 'connect_timeout' => 5,
             ]);
@@ -59,7 +107,10 @@ if (! function_exists('translate')) {
                 $translate = str_replace('Führung', 'guiding', $translate);
             }
 
-            $result = ucfirst($translate);
+            $result = ucfirst((string) $translate);
+            if ($preservedSymbols !== '') {
+                $result = rtrim($result).' '.$preservedSymbols;
+            }
 
             Cache::forever($cacheKey, $result);
             TranslationCircuitBreaker::recordSuccess();
