@@ -19,7 +19,7 @@ class TestimonialSelector
      */
     public function latest(int $limit = 15): Collection
     {
-        return Cache::remember("testimonials_latest_v1_{$limit}_".app()->getLocale(), now()->addMinutes(30), function () use ($limit) {
+        return Cache::remember("testimonials_latest_v2_{$limit}_".app()->getLocale(), now()->addMinutes(30), function () use ($limit) {
             $reviews = Review::query()
                 ->with([
                     'guiding:id,title,slug',
