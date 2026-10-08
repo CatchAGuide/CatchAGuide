@@ -190,6 +190,51 @@ actual site/codebase, not just theorized:
 - **Don't serve pages from stored HTML.** Magazine threads used a DB page cache (`App\Models\Cache`) that kept an old
   `<head>` for a week after deploys and shared one visitor's CSRF token; render per request instead.
 
+### Analytics & tracking (GTM → GA4, Clarity, Google Ads)
+
+The page loads **only** Google Tag Manager. Everything else is set up inside the GTM container, which picks each
+domain's IDs from the page hostname. Set up Oct 2026; before that, both domains reported into one GA4 property and one
+Clarity project.
+
+- **Code:** `resources/views/layouts/partials/tag-manager-head.blade.php`, included first in the `<head>` of
+  `layouts/app`, `app-v2` and `app-v2-1`. It sets Google Consent Mode v2 defaults and queues
+  `clarity('consentv2', …)` from the cookie banner's `accept_analytics` / `accept_advertising` cookies, then loads GTM
+  (`config('services.google_tag_manager.container_id')`, env `GTM_CONTAINER_ID`). Never add `gtag.js` or the Clarity
+  snippet to a layout again: that double-counts and breaks the per-domain split (`TagManagerHeadTest` guards it).
+- **IDs** (GTM lookup variables `LT - GA4 Measurement ID` / `LT - Clarity Project ID`, keyed on Page Hostname):
+
+  | | catchaguide.com | catchaguide.de |
+  |---|---|---|
+  | GA4 | `G-XCZ8HKR8Y5` (property 316114407) | `G-SYZ9VBYH3S` (property 404920593) |
+  | Clarity | `i9xet5addk` | `m5bhfyyk71` |
+
+  Shared by both domains: GTM `GTM-K6VGF9NQ`, and Google Ads `AW-10963626787` (account 372-117-8641) with the
+  conversions Booking Request `z6GgCInkssYZEKPW7uso`, Camp Request `54KmCN6G15UdEKPW7uso` and
+  Trip Request `HZnKCPih2ZUdEKPW7uso`. Clarity `iof6zfrxm3` and GTM `GTM-P9V22VH` are dead or unused; don't use them.
+- **Container source of truth:** `docs/analytics/gtm-container-GTM-K6VGF9NQ.json`. After any change in GTM,
+  re-export it and commit it here, so tracking changes get reviewed like code.
+- **Tracking is URL-based on purpose, so it survives template refactors.** `RT - Page Type` (a regex table on Page
+  Path) classifies every page: `tour_product`, `camp_product`, `checkout`, `thank_you`, `magazine_article`, etc. It is
+  sent as the GA4 `content_group` and as the Clarity tag `page_type`. Conversions fire on thank-you pages:
+  `/checkout/thank-you/{id}` (and legacy `/thank-you/{id}`) → `tour_booking_request`;
+  `/checkout/camps/{slug}/thank-you/{id}` → `camp_request`; `/checkout/trips/{slug}/thank-you/{id}` → `trip_request`;
+  `/booking-request/thank-you` → `search_request`. The same names go to GA4, Clarity (`clarity('event')`) and Ads.
+  **When you add or rename a route that one of these rules depends on** (product, checkout or thank-you paths,
+  magazine slugs, hub pages), update the regex table / triggers in GTM in the same change.
+- **Only a few click triggers depend on markup:** `#reserveButton`/`#reserveButtonMobile`, `#contactSubmitBtn`, the
+  tour-page tabs and links (`#nav-*-tab`, `#reviews-link`, `.location-map`, `.js-btn-more-text`, `#personSelect`,
+  `.day-item`), `#login-header`/`#signup-header`, `.become-guide-link`/`#become-guide-homepage`, and
+  `#newsletter-form`. Renaming any of these silently breaks an event.
+- **New custom events:** push `dataLayer.push({event: 'homepage_…' | 'guidings_landing_…' | 'magazine_…', …})` and
+  GTM forwards it to GA4 as-is (trigger `CE - Site dataLayer events`, with params `product_type`, `magazine_slug`,
+  `magazine_category`, `share_channel`, `search_term`). For a new prefix, extend that trigger's regex.
+- **Both GA4 properties must stay in sync:** the same key events (`tour_booking_request`, `camp_request`,
+  `trip_request`, `search_request`, `newsletter_signup`, `contact_message_send`) and the same event-scoped custom
+  dimensions (`product_type`, `page_type`, `interaction`). GA4 can only star a key event after it has received it,
+  so mark new events in **both** properties once they appear. Retire the old .de key events `tour_checkout` (a
+  Reserve click, not a booking) and `complete_checkout` (its checkout no longer exists).
+- **Access:** GA4 and Clarity are in the "SEO Chrome" browser profile; GTM and Google Ads are in "Work Chrome".
+
 ### Guide status
 
 `app/Enums/GuideStatus.php` + `app/Services/Guide/GuideStatusService.php` (with a `HasGuideStatus` trait) model the
