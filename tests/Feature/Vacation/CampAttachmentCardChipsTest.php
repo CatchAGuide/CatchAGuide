@@ -328,6 +328,14 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString(__('guidings.Starting_Time_Default'), $html);
     }
 
+    public function test_guiding_card_shows_default_meeting_point_text_when_none_set(): void
+    {
+        $html = $this->renderGuidingCard();
+
+        $this->assertStringContainsString(__('guidings.Meeting_Point'), $html);
+        $this->assertStringContainsString(__('guidings.Meeting_Point_Default'), $html);
+    }
+
     private function renderGuidingCard(): string
     {
         return View::make('components.guiding.card', [

@@ -934,6 +934,7 @@
             @php
                 $departureTimes = array_filter((array) decode_if_json($guiding->desc_departure_time));
                 $hasStartingTimeText = trim(strip_tags((string) $guiding->desc_starting_time)) !== '';
+                $hasMeetingPointText = trim(strip_tags((string) $guiding->desc_meeting_point)) !== '';
             @endphp
             <div class="tour-overview__facts description-item-row">
                 <div class="description-item tour-overview__fact">
@@ -954,24 +955,26 @@
                         <div class="tour-overview__body">
                             {!! clean_html($guiding->desc_starting_time) !!}
                         </div>
-                    @elseif(!$departureTimes)
+                    @else
                         <div class="tour-overview__body">
                             @lang('guidings.Starting_Time_Default')
                         </div>
                     @endif
                 </div>
 
-                @if ($guiding->desc_meeting_point)
-                    <div class="description-item tour-overview__fact">
-                        <div class="header-container tour-overview__header">
-                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                            <span>@lang('guidings.Meeting_Point')</span>
-                        </div>
-                        <div class="tour-overview__body">
-                            {!! clean_html($guiding->desc_meeting_point) !!}
-                        </div>
+                <div class="description-item tour-overview__fact">
+                    <div class="header-container tour-overview__header">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        <span>@lang('guidings.Meeting_Point')</span>
                     </div>
-                @endif
+                    <div class="tour-overview__body">
+                        @if($hasMeetingPointText)
+                            {!! clean_html($guiding->desc_meeting_point) !!}
+                        @else
+                            @lang('guidings.Meeting_Point_Default')
+                        @endif
+                    </div>
+                </div>
             </div>
 
             @if ($guiding->user->information['languages'])

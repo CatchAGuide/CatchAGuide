@@ -30,6 +30,7 @@ return [
     'Starting_Time' => 'Startzeit',
     'Starting_Time_Default' => 'Wir besprechen die Startzeit gemeinsam nach der Reservierung',
     'Meeting_Point' => 'Treffpunkt',
+    'Meeting_Point_Default' => 'Der Treffpunkt wird nach Reservierung je nach Saison mitgeteilt',
     'Tour_Info' => 'Tour Infos',
     'Boat_Details' => 'Boot Details',
     'Additional_Info' => 'Zusätzliche Infos',
