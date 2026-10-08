@@ -1279,10 +1279,13 @@ class Guiding extends Model
             ->map(function ($requirement) use ($requirementsData) {
                 $data = $requirementsData[$requirement->id];
 
+                $value = is_array($data) && isset($data['value']) ? $data['value'] : $data;
+
                 return [
                     'id' => $requirement->id,
-                    'value' => is_array($data) && isset($data['value']) ? $data['value'] : $data,
-                    'name' => $requirement->name
+                    'value' => $value,
+                    'source_value' => $value,
+                    'name' => $requirement->name,
                 ];
             });
     }
@@ -1299,10 +1302,13 @@ class Guiding extends Model
             ->get()
             ->map(function ($otherInformation) use ($otherInformationData) {
                 $data = $otherInformationData[$otherInformation->id];
+                $value = is_array($data) && isset($data['value']) ? $data['value'] : $data;
+
                 return [
                     'id' => $otherInformation->id,
-                    'value' => isset($data['value']) ? $data['value'] : $data,
-                    'name' => $otherInformation->name
+                    'value' => $value,
+                    'source_value' => $value,
+                    'name' => $otherInformation->name,
                 ];
             });
     }
@@ -1319,10 +1325,13 @@ class Guiding extends Model
             ->get()
             ->map(function ($recommendation) use ($recommendationsData) {
                 $data = $recommendationsData[$recommendation->id];
+                $value = is_array($data) && isset($data['value']) ? $data['value'] : $data;
+
                 return [
                     'id' => $recommendation->id,
-                    'value' => isset($data['value']) ? $data['value'] : $data,
-                    'name' => $recommendation->name
+                    'value' => $value,
+                    'source_value' => $value,
+                    'name' => $recommendation->name,
                 ];
             });
     }

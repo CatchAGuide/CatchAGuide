@@ -5,6 +5,7 @@ use Stichoza\GoogleTranslate\GoogleTranslate;
 
 use App\Models\Faq;
 use App\Models\EmailLog;
+use App\Services\Translation\GuidingTranslationService;
 use App\Services\Translation\TranslationCircuitBreaker;
 
 if (! function_exists('translation_has_supplementary_chars')) {
@@ -178,6 +179,52 @@ if (! function_exists('translated_catalog_label')) {
         }
 
         return html_entity_decode(translate($label), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+}
+
+if (! function_exists('translated_guiding_note')) {
+    /**
+     * Guest note on a guiding list row (requirements, other information, recommendations).
+     *
+     * A stored translation already replaced `value` and must be shown as saved.
+     * Otherwise the note is translated when its own wording is the other language,
+     * including tours saved as German whose notes were written in English.
+     * Notes already in the page language stay as the guide wrote them.
+     *
+     * @param  object  $guiding  Guiding (uses language)
+     * @param  mixed  $row  {value?: mixed, source_value?: mixed}
+     */
+    function translated_guiding_note(object $guiding, mixed $row): string
+    {
+        $value = trim((string) (is_array($row) ? ($row['value'] ?? '') : ''));
+        if ($value === '') {
+            return '';
+        }
+
+        $source = trim((string) (is_array($row) ? ($row['source_value'] ?? $value) : $value));
+        if ($value !== $source) {
+            return $value;
+        }
+
+        $locale = app()->getLocale();
+        $origin = strtolower((string) ($guiding->language ?? ''));
+        $textLanguage = app(GuidingTranslationService::class)->languageOfText($value);
+        $from = $textLanguage ?? ($origin !== '' ? $origin : null);
+
+        if ($from === null || $from === $locale) {
+            return $value;
+        }
+
+        $translated = translate($value, $locale);
+        if ($translated === $value) {
+            // A blocked translator caches the source text. Drop that so the next
+            // view can try again instead of keeping the other language for an hour.
+            Cache::forget(translation_cache_key($value, $locale));
+
+            return $value;
+        }
+
+        return html_entity_decode($translated, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }
 
