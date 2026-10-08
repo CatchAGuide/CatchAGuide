@@ -37,6 +37,11 @@ return [
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/models'),
     ],
 
+    'google_tag_manager' => [
+        // Loads GA4 and Microsoft Clarity for both domains; see layouts/partials/tag-manager-head.
+        'container_id' => env('GTM_CONTAINER_ID', ''),
+    ],
+
     'google_maps' => [
         'api_key' => env('GOOGLE_MAPS_API_KEY'),
         'map_id' => env('GOOGLE_MAPS_MAP_ID', 'DEMO_MAP_ID'),

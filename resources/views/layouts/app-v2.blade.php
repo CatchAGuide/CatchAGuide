@@ -11,13 +11,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/favicon.png') }}">
 
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-K6VGF9NQ');</script>
-    <!-- End Google Tag Manager -->
+    @include('layouts.partials.tag-manager-head')
 
     <!-- Canonical URL to prevent duplicate content -->
     @inject('paginationSeo', 'App\Services\Seo\PaginationSeo')
@@ -176,28 +170,6 @@
     </style>
 
     @include('layouts.includes.styles')
-
-    @if(app()->getLocale() == 'en')
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XCZ8HKR8Y5"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-XCZ8HKR8Y5');
-    </script>
-    @endif
-
-    @if(app()->getLocale() == 'de')
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SYZ9VBYH3S"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SYZ9VBYH3S');
-    </script>
-    @endif
 
 </head>
 
@@ -620,31 +592,6 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#cookie-consent-banner').fadeIn(2000).css('display','flex');
     }
 
-    if(hasAcceptedAnalytics){
-        <?php /*
-        // window.dataLayer = window.dataLayer || [];
-        // function gtag(){dataLayer.push(arguments);}
-        // gtag('js', new Date());
-        // @if(app()->getLocale() == 'en')
-        //     gtag('config', 'G-XCZ8HKR8Y5');
-        //     (function(c,l,a,r,i,t,y){
-        //         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        //         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        //         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        //     })(window, document, "clarity", "script", "i9xet5addk");
-        // @endif
-        //     @if(app()->getLocale() == 'de')
-        //     gtag('config', 'G-SYZ9VBYH3S');
-        //     (function(c,l,a,r,i,t,y){
-        //         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        //         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        //         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        //     })(window, document, "clarity", "script", "iof6zfrxm3");
-        // @endif
-        */ ?>
-    }
-
-
 
     // Handle clicking the Accept button
     $('#cookie-accept').click(function () {
@@ -709,13 +656,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-</script>
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "i9xet5addk");
 </script>
 
 
