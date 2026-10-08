@@ -234,7 +234,8 @@
 .guidings-book-mobile {
     display: none;
 
-    @media screen and (max-width: 980px) {
+    // Phones and tablets. The side card stays for wide desktops only.
+    @media screen and (max-width: 1199.98px) {
         display: block;
         position: fixed;
         left: 0;
@@ -257,7 +258,7 @@
     }
 }
 
-@media screen and (max-width: 980px) {
+@media screen and (max-width: 1199.98px) {
     #guidings-page {
         padding-bottom: 7.25rem;
     }

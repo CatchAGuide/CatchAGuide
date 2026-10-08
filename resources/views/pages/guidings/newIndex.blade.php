@@ -959,6 +959,7 @@
                             @lang('guidings.Starting_Time_Default')
                         </div>
                     @endif
+                </div>
 
                 @if ($guiding->desc_meeting_point)
                     <div class="description-item tour-overview__fact">
@@ -1462,9 +1463,7 @@
     ])
 </div>
 <div class="guidings-book-mobile">
-    @if($agent->ismobile())
-        @include('pages.guidings.content.bookguidingmobile')
-    @endif
+    @include('pages.guidings.content.bookguidingmobile')
 </div>
 
 <!-- Contact Modal -->

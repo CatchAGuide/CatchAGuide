@@ -53,6 +53,23 @@ class TourOverviewMobileLayoutTest extends TestCase
         $this->assertStringNotContainsString('toggle.textContent === "See Less"', $blade);
     }
 
+    public function test_booking_column_stays_beside_the_description_column(): void
+    {
+        $blade = (string) file_get_contents($this->projectPath('resources/views/pages/guidings/newIndex.blade.php'));
+        $start = strpos($blade, '<div class="guidings-descriptions">');
+        $book = strpos($blade, '<div id="book-now" class="guidings-book">');
+        $this->assertNotFalse($start);
+        $this->assertNotFalse($book);
+        $this->assertGreaterThan($start, $book);
+
+        $slice = substr($blade, $start, $book - $start);
+        $depth = preg_match_all('/<div\b/', $slice) - preg_match_all('/<\/div>/', $slice);
+
+        // The description column must be closed before the booking column opens,
+        // otherwise the sidebar is nested inside the left column and shrinks on desktop.
+        $this->assertSame(0, $depth);
+    }
+
     public function test_overview_scss_stacks_facts_on_mobile_and_drops_side_by_side_flex(): void
     {
         $scss = (string) file_get_contents($this->projectPath('resources/sass/page/guiding.scss'));
