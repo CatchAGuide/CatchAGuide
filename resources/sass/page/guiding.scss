@@ -3530,10 +3530,20 @@ div#masonry-grid {
 
   .guidings-descriptions {
     width: calc(65% - 8px);
+
+    @media screen and (max-width: 1199.98px) {
+      width: 100%;
+    }
   }
 
   .guidings-book {
     width: calc(35% - 8px);
+
+    // Tablet and phone: the fixed bar is the reserve control. Hide the side
+    // card so it cannot sit off-screen as a narrow strip.
+    @media screen and (max-width: 1199.98px) {
+      display: none;
+    }
 
     .card-body {
       padding-top: 0;

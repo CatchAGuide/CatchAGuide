@@ -73,6 +73,11 @@ class ListingMobileBookBarTest extends TestCase
         $source = (string) file_get_contents($path);
 
         $this->assertStringContainsString('class="guidings-book-mobile"', $source);
+        $this->assertStringContainsString("@include('pages.guidings.content.bookguidingmobile')", $source);
+        $this->assertDoesNotMatchRegularExpression(
+            '/@if\(\$agent->ismobile\(\)\)\s*@include\(\'pages\.guidings\.content\.bookguidingmobile\'\)/',
+            $source
+        );
     }
 
     public function test_tour_bar_scss_pins_above_footer(): void
@@ -85,5 +90,7 @@ class ListingMobileBookBarTest extends TestCase
         $this->assertStringContainsString('.guidings-book-mobile', $source);
         $this->assertStringContainsString('is-above-footer', $source);
         $this->assertStringContainsString('position: fixed', $source);
+        $this->assertStringContainsString('max-width: 1199.98px', $source);
+        $this->assertStringNotContainsString('max-width: 980px', $source);
     }
 }

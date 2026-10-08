@@ -9609,8 +9609,18 @@ div#masonry-grid img {
 .guidings-description-container .guidings-descriptions {
   width: calc(65% - 8px);
 }
+@media screen and (max-width: 1199.98px) {
+  .guidings-description-container .guidings-descriptions {
+    width: 100%;
+  }
+}
 .guidings-description-container .guidings-book {
   width: calc(35% - 8px);
+}
+@media screen and (max-width: 1199.98px) {
+  .guidings-description-container .guidings-book {
+    display: none;
+  }
 }
 .guidings-description-container .guidings-book .card-body {
   padding-top: 0;
@@ -38972,7 +38982,7 @@ html.booking-assistant-modal-open body {
 .guidings-book-mobile {
   display: none;
 }
-@media screen and (max-width: 980px) {
+@media screen and (max-width: 1199.98px) {
   .guidings-book-mobile {
     display: block;
     position: fixed;
@@ -38993,7 +39003,7 @@ html.booking-assistant-modal-open body {
   }
 }
 
-@media screen and (max-width: 980px) {
+@media screen and (max-width: 1199.98px) {
   #guidings-page {
     padding-bottom: 7.25rem;
   }
