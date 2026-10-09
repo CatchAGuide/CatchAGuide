@@ -12,6 +12,7 @@ final class VacationCountryViewModel
 {
     public function __construct(
         public readonly CategoryEntity $destination,
+        public readonly string $countryName,
         public readonly VacationListingFilter $filter,
         public readonly PillarSectionViewModel $tripsSection,
         public readonly PillarSectionViewModel $campsSection,

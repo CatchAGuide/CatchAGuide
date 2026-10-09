@@ -305,5 +305,14 @@ class HomepageCountrySelectorTest extends TestCase
         $this->assertTrue($modelSlugs->contains($withVacations->slug));
         $this->assertFalse($modelSlugs->contains($toursOnly->slug));
     }
-}
 
+    public function test_label_uses_iso_country_name_not_a_translation_of_the_stored_name(): void
+    {
+        // "Island" is German for Iceland; machine-translating it again yields "Insel".
+        $iceland = new CategoryEntity(['type' => 'country', 'name' => 'Island', 'slug' => 'island', 'countrycode' => 'IS']);
+        $selector = app(HomepageCountrySelector::class);
+
+        $this->assertSame('Island', $selector->labelFor($iceland, 'de'));
+        $this->assertSame('Iceland', $selector->labelFor($iceland, 'en'));
+    }
+}

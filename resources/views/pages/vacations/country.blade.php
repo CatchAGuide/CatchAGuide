@@ -3,7 +3,7 @@
 @php
     $isAllOffers = $isAllOffers ?? false;
     $destination = $vm->destination;
-    $countryName = translate($destination->name);
+    $countryName = $vm->countryName;
     $hasMap = count($vm->mapMarkers) > 0;
     $countrySubtitle = strip_tags($destination->scopedCmsValue('sub_title') ?? '');
     $countryIntro = strip_tags($destination->scopedCmsValue('introduction') ?? '');

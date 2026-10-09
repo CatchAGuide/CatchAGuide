@@ -103,6 +103,21 @@
                     "value": "{{RT - Page Type}}"
                   }
                 ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "site_language"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{CJS - Site Language}}"
+                  }
+                ]
               }
             ]
           }
@@ -129,7 +144,7 @@
           {
             "type": "TEMPLATE",
             "key": "html",
-            "value": "<script>\n(function(c,l,a,r,i,t,y){\n  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n  t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n})(window, document, \"clarity\", \"script\", {{LT - Clarity Project ID}});\nwindow.clarity(\"set\", \"page_type\", {{RT - Page Type}});\n</script>"
+            "value": "<script>\n(function(c,l,a,r,i,t,y){\n  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};\n  t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i;\n  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);\n})(window, document, \"clarity\", \"script\", {{LT - Clarity Project ID}});\nwindow.clarity(\"set\", \"page_type\", {{RT - Page Type}});\n  window.clarity(\"set\", \"site_language\", {{CJS - Site Language}});\n</script>"
           },
           {
             "type": "BOOLEAN",
@@ -1735,7 +1750,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "value",
-                    "value": "G-XCZ8HKR8Y5"
+                    "value": "G-SYZ9VBYH3S"
                   }
                 ]
               },
@@ -1750,7 +1765,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "value",
-                    "value": "G-XCZ8HKR8Y5"
+                    "value": "G-SYZ9VBYH3S"
                   }
                 ]
               },
@@ -1851,7 +1866,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "value",
-                    "value": "m5bhfyyk71"
+                    "value": "i9xet5addk"
                   }
                 ]
               },
@@ -1866,7 +1881,7 @@
                   {
                     "type": "TEMPLATE",
                     "key": "value",
-                    "value": "m5bhfyyk71"
+                    "value": "i9xet5addk"
                   }
                 ]
               }
@@ -2540,6 +2555,20 @@
             "type": "TEMPLATE",
             "key": "name",
             "value": "search_term"
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "variableId": "209",
+        "name": "CJS - Site Language",
+        "type": "jsm",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "javascript",
+            "value": "function(){var l=document.documentElement.lang;return l?l.slice(0,2).toLowerCase():undefined;}"
           }
         ]
       }

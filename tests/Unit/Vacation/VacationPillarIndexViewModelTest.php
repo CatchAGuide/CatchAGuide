@@ -8,6 +8,7 @@ use App\Domain\Vacation\ViewModels\VacationPillarIndexViewModel;
 use App\Models\CategoryEntity;
 use App\Models\Language;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class VacationPillarIndexViewModelTest extends TestCase
@@ -183,5 +184,28 @@ class VacationPillarIndexViewModelTest extends TestCase
         $this->assertStringContainsString('num_guests=3', $urls['all']);
         $this->assertStringContainsString('num_guests=3', $urls['trips']);
         $this->assertStringContainsString('num_guests=3', $urls['camps']);
+    }
+
+    public function test_country_name_uses_the_given_label_without_machine_translation(): void
+    {
+        app()->setLocale('de');
+        Cache::put(translation_cache_key('Island', 'de'), 'Insel');
+
+        $vm = new VacationPillarIndexViewModel(
+            pillar: VacationPillar::Camps,
+            filter: VacationListingFilter::fromRequest([], 'island'),
+            listings: new LengthAwarePaginator([], 0, 9),
+            cards: collect(),
+            countries: collect(),
+            speciesOptions: collect(),
+            accommodationTypeOptions: collect(),
+            tripsTotal: 0,
+            campsTotal: 0,
+            faq: collect(),
+            destination: new CategoryEntity(['type' => 'country', 'slug' => 'island', 'name' => 'Island']),
+            destinationLabel: 'Island',
+        );
+
+        $this->assertSame('Island', $vm->countryName());
     }
 }

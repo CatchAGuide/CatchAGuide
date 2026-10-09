@@ -7,8 +7,8 @@ use Tests\TestCase;
 class TagManagerHeadTest extends TestCase
 {
     /**
-     * GA4 and Clarity come from the GTM container (it maps hostname → property/project), so the page itself must
-     * only ship consent defaults + GTM — inline gtag.js or a hardcoded Clarity ID sent both domains to one project.
+     * GA4 and Clarity come from the GTM container (one property/project for both domains, tagged with
+     * site_language), so the page itself must only ship consent defaults + GTM — inline gtag.js double-counted.
      */
     public function test_layout_loads_only_gtm_with_consent_defaults_on_both_domains(): void
     {
@@ -28,6 +28,15 @@ class TagManagerHeadTest extends TestCase
             $this->assertStringNotContainsString('clarity.ms/tag/', $html);
             $this->assertStringNotContainsString('i9xet5addk', $html);
         }
+    }
+
+    public function test_gtm_still_loads_when_a_stale_config_cache_lacks_the_key(): void
+    {
+        config(['services.google_tag_manager' => []]);
+
+        $html = $this->get('http://catchaguide.de/about-us')->assertOk()->getContent();
+
+        $this->assertStringContainsString('"GTM-K6VGF9NQ"', $html);
     }
 
     public function test_nothing_is_loaded_without_a_container_id(): void
