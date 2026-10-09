@@ -192,25 +192,26 @@ actual site/codebase, not just theorized:
 
 ### Analytics & tracking (GTM → GA4, Clarity, Google Ads)
 
-The page loads **only** Google Tag Manager. Everything else is set up inside the GTM container, which picks each
-domain's IDs from the page hostname. Set up Oct 2026; before that, both domains reported into one GA4 property and one
-Clarity project.
+The page loads **only** Google Tag Manager. Everything else is set up inside the GTM container. Both domains report
+into **one GA4 property and one Clarity project**, because it is one site in two languages. Every hit carries
+`site_language` (`en` = catchaguide.com, `de` = catchaguide.de), read from the page's `<html lang>`; split by that or
+by GA4's Hostname. Set up 9 Oct 2026 (GTM version 21).
 
 - **Code:** `resources/views/layouts/partials/tag-manager-head.blade.php`, included first in the `<head>` of
   `layouts/app`, `app-v2` and `app-v2-1`. It sets Google Consent Mode v2 defaults and queues
   `clarity('consentv2', …)` from the cookie banner's `accept_analytics` / `accept_advertising` cookies, then loads GTM
-  (`config('services.google_tag_manager.container_id')`, env `GTM_CONTAINER_ID`). Never add `gtag.js` or the Clarity
-  snippet to a layout again: that double-counts and breaks the per-domain split (`TagManagerHeadTest` guards it).
-- **IDs** (GTM lookup variables `LT - GA4 Measurement ID` / `LT - Clarity Project ID`, keyed on Page Hostname):
-
-  | | catchaguide.com | catchaguide.de |
-  |---|---|---|
-  | GA4 | `G-XCZ8HKR8Y5` (property 316114407) | `G-SYZ9VBYH3S` (property 404920593) |
-  | Clarity | `i9xet5addk` | `m5bhfyyk71` |
-
-  Shared by both domains: GTM `GTM-K6VGF9NQ`, and Google Ads `AW-10963626787` (account 372-117-8641) with the
-  conversions Booking Request `z6GgCInkssYZEKPW7uso`, Camp Request `54KmCN6G15UdEKPW7uso` and
-  Trip Request `HZnKCPih2ZUdEKPW7uso`. Clarity `iof6zfrxm3` and GTM `GTM-P9V22VH` are dead or unused; don't use them.
+  (`config('services.google_tag_manager.container_id', 'GTM-K6VGF9NQ')`, env `GTM_CONTAINER_ID`; the default covers a
+  production config cache built before the key existed, which once rendered no GTM at all). Never add `gtag.js` or
+  the Clarity snippet to a layout again: that double-counts (`TagManagerHeadTest` guards it). Keep `<html lang>` set
+  from the active locale; `site_language` depends on it.
+- **IDs, all shared by both domains:** GTM `GTM-K6VGF9NQ` · GA4 `G-SYZ9VBYH3S` (property 404920593, account
+  229557358) · Clarity `i9xet5addk` · Google Ads `AW-10963626787` (account 372-117-8641) with the conversions Booking
+  Request `z6GgCInkssYZEKPW7uso`, Camp Request `54KmCN6G15UdEKPW7uso` and Trip Request `HZnKCPih2ZUdEKPW7uso`.
+  GTM still routes through the lookup variables `LT - GA4 Measurement ID` / `LT - Clarity Project ID` (keyed on Page
+  Hostname, all rows the same value), so splitting per domain again is a one-row change. `CJS - Site Language`
+  supplies `site_language` to the Google tag (every GA4 event inherits it) and to Clarity (`clarity('set', …)`).
+- **Retired, don't use:** GA4 `G-XCZ8HKR8Y5` (property 316114407, the old .com property, kept read-only for history
+  up to 9 Oct 2026), Clarity `m5bhfyyk71` and `iof6zfrxm3`, GTM `GTM-P9V22VH`.
 - **Container source of truth:** `docs/analytics/gtm-container-GTM-K6VGF9NQ.json`. After any change in GTM,
   re-export it and commit it here, so tracking changes get reviewed like code.
 - **Tracking is URL-based on purpose, so it survives template refactors.** `RT - Page Type` (a regex table on Page
@@ -228,11 +229,12 @@ Clarity project.
 - **New custom events:** push `dataLayer.push({event: 'homepage_…' | 'guidings_landing_…' | 'magazine_…', …})` and
   GTM forwards it to GA4 as-is (trigger `CE - Site dataLayer events`, with params `product_type`, `magazine_slug`,
   `magazine_category`, `share_channel`, `search_term`). For a new prefix, extend that trigger's regex.
-- **Both GA4 properties must stay in sync:** the same key events (`tour_booking_request`, `camp_request`,
-  `trip_request`, `search_request`, `newsletter_signup`, `contact_message_send`) and the same event-scoped custom
-  dimensions (`product_type`, `page_type`, `interaction`). GA4 can only star a key event after it has received it,
-  so mark new events in **both** properties once they appear. Retire the old .de key events `tour_checkout` (a
-  Reserve click, not a booking) and `complete_checkout` (its checkout no longer exists).
+- **GA4 setup (property 404920593):** key events `tour_booking_request`, `camp_request`, `trip_request`,
+  `search_request`, `newsletter_signup` and `contact_message_send`. GA4 can only star a key event after it has received
+  it. Event-scoped custom dimensions: `site_language`, `product_type`, `page_type`, `interaction`. The old key events
+  `tour_checkout` (a Reserve click, not a booking) and `complete_checkout` (its checkout no longer exists) are retired.
+  Cross-domain measurement must list catchaguide.com and catchaguide.de: Google tag `GT-P3N6TXS` → Configure your
+  domains. Without it, a language switch splits one visit into two.
 - **Access:** GA4 and Clarity are in the "SEO Chrome" browser profile; GTM and Google Ads are in "Work Chrome".
 
 ### Guide status

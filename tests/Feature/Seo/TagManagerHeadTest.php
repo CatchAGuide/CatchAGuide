@@ -7,8 +7,8 @@ use Tests\TestCase;
 class TagManagerHeadTest extends TestCase
 {
     /**
-     * GA4 and Clarity come from the GTM container (it maps hostname → property/project), so the page itself must
-     * only ship consent defaults + GTM — inline gtag.js or a hardcoded Clarity ID sent both domains to one project.
+     * GA4 and Clarity come from the GTM container (one property/project for both domains, tagged with
+     * site_language), so the page itself must only ship consent defaults + GTM — inline gtag.js double-counted.
      */
     public function test_layout_loads_only_gtm_with_consent_defaults_on_both_domains(): void
     {
