@@ -13,6 +13,7 @@ use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Homepage\HomepageCountrySelector;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,6 +26,7 @@ class VacationCountryPageService
         private TripListingRepository $trips,
         private VacationFilterApplicator $filterApplicator,
         private CategoryPageContentService $categoryContent,
+        private HomepageCountrySelector $countryLabels,
     ) {}
 
     public function build(Request $request, string $countrySlug): VacationCountryViewModel
@@ -61,7 +63,8 @@ class VacationCountryPageService
 
         $filter = VacationListingFilter::fromRequest($input, $countrySlug);
         $perPage = (int) config('vacations.country_page_per_page', 6);
-        $countryLabel = translate($country->name);
+        // The stored name is already localized; machine-translating it again turned "Island" into "Insel".
+        $countryLabel = $this->countryLabels->labelFor($country);
 
         $showTripsSection = $filter->pillar !== 'camps';
         $showCampsSection = $filter->pillar !== 'trips';
@@ -123,6 +126,7 @@ class VacationCountryPageService
 
         return new VacationCountryViewModel(
             destination: $country,
+            countryName: $countryLabel,
             filter: $filter,
             tripsSection: $tripsSection,
             campsSection: $campsSection,

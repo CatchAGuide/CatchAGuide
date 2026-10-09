@@ -25,6 +25,7 @@ final class VacationPillarIndexViewModel
         public readonly Collection $faq,
         public readonly ?CategoryEntity $destination = null,
         public readonly array $mapMarkers = [],
+        public readonly ?string $destinationLabel = null,
     ) {}
 
     public function isCountryPage(): bool
@@ -34,7 +35,11 @@ final class VacationPillarIndexViewModel
 
     public function countryName(): ?string
     {
-        return $this->destination ? translate($this->destination->name) : null;
+        if ($this->destination === null) {
+            return null;
+        }
+
+        return $this->destinationLabel ?? $this->destination->name;
     }
 
     public function pageTitle(): string

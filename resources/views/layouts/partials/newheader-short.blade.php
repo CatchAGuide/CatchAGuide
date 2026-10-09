@@ -213,7 +213,7 @@
                                 @foreach($vacationCountryOptions as $country)
                                     <option value="{{ $country->slug }}"
                                         {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
-                                        {{ translate($country->name) }}
+                                        {{ $country->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -264,7 +264,7 @@
                                     @foreach($vacationCountryOptions as $country)
                                         <option value="{{ $country->slug }}"
                                             {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
-                                            {{ translate($country->name) }}
+                                            {{ $country->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1027,7 +1027,7 @@ input[type=number] {
                                     @foreach($vacationCountryOptions as $country)
                                         <option value="{{ $country->slug }}"
                                             {{ strtolower((string) ($currentVacationCountry ?? request()->country)) === strtolower($country->slug) ? 'selected' : '' }}>
-                                            {{ translate($country->name) }}
+                                            {{ $country->name }}
                                         </option>
                                     @endforeach
                                 </select>

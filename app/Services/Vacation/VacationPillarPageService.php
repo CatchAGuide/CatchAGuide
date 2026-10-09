@@ -15,6 +15,7 @@ use App\Repositories\Vacation\CampListingRepository;
 use App\Repositories\Vacation\TripListingRepository;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\CategoryPage\CategoryPageContentService;
+use App\Services\Homepage\HomepageCountrySelector;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ class VacationPillarPageService
         private VacationFilterApplicator $filterApplicator,
         private ListingViewTranslationService $viewTranslation,
         private CategoryPageContentService $categoryContent,
+        private HomepageCountrySelector $countryLabels,
     ) {}
 
     public function buildIndex(Request $request, VacationPillar $pillar): VacationPillarIndexViewModel
@@ -124,6 +126,7 @@ class VacationPillarPageService
             faq: $destination === null ? $this->resolveFaq($pillar) : $destinationFaq,
             destination: $destination,
             mapMarkers: $this->buildMapMarkers($filter, $pillar),
+            destinationLabel: $destination !== null ? $this->countryLabels->labelFor($destination) : null,
         );
     }
 

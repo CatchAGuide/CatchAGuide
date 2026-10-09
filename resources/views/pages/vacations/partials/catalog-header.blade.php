@@ -171,7 +171,7 @@
                                         value="{{ $country->slug }}"
                                         {{ ($currentVacationCountry ?? '') === $country->slug ? 'selected' : '' }}
                                     >
-                                        {{ translate($country->name) }}
+                                        {{ $country->name }}
                                     </option>
                                 @endforeach
                             </select>
