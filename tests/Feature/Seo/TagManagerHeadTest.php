@@ -30,6 +30,15 @@ class TagManagerHeadTest extends TestCase
         }
     }
 
+    public function test_gtm_still_loads_when_a_stale_config_cache_lacks_the_key(): void
+    {
+        config(['services.google_tag_manager' => []]);
+
+        $html = $this->get('http://catchaguide.de/about-us')->assertOk()->getContent();
+
+        $this->assertStringContainsString('"GTM-K6VGF9NQ"', $html);
+    }
+
     public function test_nothing_is_loaded_without_a_container_id(): void
     {
         config(['services.google_tag_manager.container_id' => null]);

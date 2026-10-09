@@ -1,10 +1,13 @@
 {{--
-    Consent defaults + Google Tag Manager. GA4 and Microsoft Clarity are loaded by the GTM container, which picks
-    the per-domain property/project from the page hostname — don't add gtag.js or the Clarity snippet here.
+    Consent defaults + Google Tag Manager. GA4 and Microsoft Clarity are loaded by the GTM container (one GA4
+    property and one Clarity project for both domains; GTM tags each hit with site_language from <html lang>) —
+    don't add gtag.js or the Clarity snippet here.
     Consent comes from the cookie banner (accept_analytics / accept_advertising); the banner reloads the page
     after a choice, so the defaults below always reflect the current choice.
+    The config() default covers a production config cache built before this key existed (that cache once
+    rendered no GTM at all); an explicitly empty GTM_CONTAINER_ID still turns tracking off.
 --}}
-@php($gtmContainerId = config('services.google_tag_manager.container_id'))
+@php($gtmContainerId = config('services.google_tag_manager.container_id', 'GTM-K6VGF9NQ'))
 @if ($gtmContainerId)
     <script>
         (function (w, d) {
