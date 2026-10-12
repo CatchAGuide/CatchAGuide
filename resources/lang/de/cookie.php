@@ -19,5 +19,11 @@ Für die Seite werden Besucher, Webseitenaufrufe und diverse andere Daten anonym
 'few-btn' => 'Einstellungen',
 'close-btn' => 'Schließen',
 'save-preference-btn' => 'Auswahl speichern',
+'intro' => 'Wir verwenden Cookies, um zu sehen, wie unsere Website genutzt wird, und um unsere Werbung zu messen. Sie entscheiden, welche wir verwenden dürfen, und können Ihre Auswahl jederzeit unten auf jeder Seite unter „Cookie-Einstellungen“ ändern.',
+'policy-link' => 'Datenschutzerklärung',
+'accept-all-btn' => 'Alle akzeptieren',
+'reject-all-btn' => 'Alle ablehnen',
+'back-btn' => 'Zurück',
+'settings-link' => 'Cookie-Einstellungen',
 
 ];

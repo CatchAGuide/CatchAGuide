@@ -20,5 +20,11 @@ They may be used by those partners to build a profile of your interests and show
 'few-btn' => 'Settings',
 'close-btn' => 'Close',
 'save-preference-btn' => 'Save Preferences',
+'intro' => 'We use cookies to see how our site is used and to measure our ads. You decide which ones we may use, and you can change your choice any time under "Cookie settings" at the bottom of every page.',
+'policy-link' => 'Privacy policy',
+'accept-all-btn' => 'Accept all',
+'reject-all-btn' => 'Reject all',
+'back-btn' => 'Back',
+'settings-link' => 'Cookie settings',
 
 ];

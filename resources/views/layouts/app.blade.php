@@ -73,25 +73,6 @@
     <link rel="stylesheet" href="{{ asset('assets/css/select2.min.css') }}" />
     @yield('share_tags')
     @yield('custom_style')
-    <style>
-        #cookie-consent-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(20, 20, 20, 0.5); /* Semi-transparent black overlay */
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999; /* Adjust the z-index as needed to ensure it overlays other content */
-        }   
-
-        .consent-preferences{
-            display: none;
-        }
-    </style>
-
     @include('layouts.includes.styles')
 
 </head>
@@ -176,68 +157,7 @@
 </div>
 <!-- /.search-popup -->
 
-<div id="cookie-consent-banner">
-    <div class="bg-white p-4 shadow-lg card border-0 rounded-0" style="max-width:30rem">
-        <div class="mb-2">
-            <h4 class="fw-bolder">@lang('cookie.header')</h4>
-        </div>
-        <div class="consent-main" style="font-size:16px;">
-            <div class="my-2 text-dark text-justify">
-                @if(app()->getLocale() == 'en')
-                <p>We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic.<br>
-                     By clicking <strong>"Yes"</strong>, you consent to our use of cookies.
-                        <a class="color-primary" href="{{route('law.data-protection')}}"><u>Read Our Cookie Policy</u></a>
-                </p>
-                @elseif(app()->getLocale() == 'de')
-                <p>Wir verwenden Cookies, um Ihr Browsing-Erlebnis zu verbessern, personalisierte Werbung oder Inhalte bereitzustellen und unseren Datenverkehr zu analysieren.<br>
-                    Wenn Sie auf <strong>"Ja"</strong> klicken, stimmen Sie unserer Verwendung von Cookies zu.
-                       <a class="color-primary" href="{{route('law.data-protection')}}"><u>Lesen Sie unsere Cookie-Richtlinie</u></a>
-               </p>
-                @endif
-            </div>
-    
-            <div class="d-flex">
-                <div class="me-1">
-                    <button id="cookie-accept" class="btn theme-primary rounded-0">@lang('cookie.yes-btn')</button>
-                </div>
-                <div class="mx-1">
-                    <button id="cookie-decline" class="btn theme-primary rounded-0">@lang('cookie.no-btn')</button>
-                </div>
-                <div class="mx-1">
-                    <button id="cookie-adjust-preferences" class="btn theme-primary rounded-0">@lang('cookie.few-btn')</button>
-                </div>
-            </div>
-        </div>
-        <div class="consent-preferences text-dark my-2">
-            <form id="cookie-preferences-form" style="font-size:16px;">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="functional-cookie" checked disabled>
-                    <label for="functional-cookie"><strong>@lang('cookie.functional')</strong></label>
-                    <p><small>@lang('cookie.functional-msg')</small></p>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="analytics-cookie">
-                    <label class="form-check-label" for="analytics-cookie"><strong>@lang('cookie.analytical')</strong></label>
-                    <p><small>@lang('cookie.analytical-msg')</small></p>
-                    
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="advertising-cookie">
-                    <label class="form-check-label" for="advertising-cookie"><strong>@lang('cookie.advertising')</strong></label>
-                    <p><small>@lang('cookie.advertising-msg')</small></p>
-                </div>
-            </form>
-            <div class="text-center">
-                <button id="preference-close" type="button" class="btn btn-dark rounded-0">@lang('cookie.close-btn')</button>
-                <button id="save-cookie-preferences" type="button" class="btn theme-primary rounded-0">@lang('cookie.save-preference-btn')</button>
-  
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
+@include('layouts.partials.cookie-consent')
 
 
 
@@ -466,119 +386,6 @@
     }
 }
     
-</script>
-<script>
-    function setCookie(name, value, days) {
-    var expires = '';
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = '; expires=' + date.toUTCString();
-    }
-    document.cookie = name + '=' + value + expires + '; path=/';
-}
-
-// Function to delete a cookie
-function deleteCookie(name) {
-    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-}
-
-// Function to get cookies
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var cookies = document.cookie.split(';');
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        while (cookie.charAt(0) === ' ') {
-            cookie = cookie.substring(1, cookie.length);
-        }
-        if (cookie.indexOf(nameEQ) === 0) {
-            return cookie.substring(nameEQ.length, cookie.length);
-        }
-    }
-    return null;
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Check if the user has accepted cookies
-    var hasAcceptedCookies = getCookie('default_cookie');
-    var hasAcceptedAnalytics = getCookie('accept_analytics');
-    var hasAcceptedAdvertising = getCookie('accept_advertising');
-
-    // Check if the user has accepted cookies and hide the banner
-    if (hasAcceptedCookies) {
-        $('#cookie-consent-banner').css('display','none');
-    }
-
-    // Show the Cookie Consent Banner if not accepted
-    if (!hasAcceptedCookies) {
-        $('#cookie-consent-banner').fadeIn(2000).css('display','flex');
-    }
-
-
-    // Handle clicking the Accept button
-    $('#cookie-accept').click(function () {
-        setCookie('default_cookie', 'true', 365); // Set a cookie for accepting all cookies
-        setCookie('accept_analytics', 'true', 365);
-        setCookie('accept_advertising', 'true', 365);
-        $('#cookie-consent-banner').hide(); // Hide the banner
-        window.location.reload();
-    });
-
-    // Handle clicking the Decline button
-    $('#cookie-decline').click(function () {
-        setCookie('default_cookie', 'true'); // Set a cookie for declining all cookies
-        $('#cookie-consent-banner').hide(); // Hide the banner
-    });
-
-    // Handle clicking the Adjust Preferences button
-    $('#cookie-adjust-preferences').click(function () {
-        $('#functional-cookie').prop('checked', true); // Default check the functional cookie
-        // $('#cookie-preferences-modal').modal('show');
-        $('.consent-preferences').css('display','block');
-        $('.consent-main').css('display','none')
-    });
-
-    $('#preference-close').click(function () {
-        $('.consent-main').css('display','block')
-        $('.consent-preferences').css('display','none');
-    });
-
-
-
-    // Initialize the Cookie Preferences Modal
-    $('#cookie-preferences-modal').on('shown.bs.modal', function () {
-        // Check and set the state of the checkboxes based on user preferences
-        if (hasAcceptedAnalytics) {
-            $('#analytics-cookie').prop('checked', true);
-        }
-        if (hasAcceptedAdvertising) {
-            $('#advertising-cookie').prop('checked', true);
-        }
-    });
-
-    // Handle clicking the Save Preferences button in the modal
-    $('#save-cookie-preferences').click(function () {
-        setCookie('default_cookie', 'true', 365); 
-        if ($('#analytics-cookie').prop('checked')) {
-            setCookie('accept_analytics', 'true', 365);
-        } else {
-            deleteCookie('accept_analytics');
-        }
-
-        if ($('#advertising-cookie').prop('checked')) {
-            setCookie('accept_advertising', 'true', 365);
-        } else {
-            deleteCookie('accept_advertising');
-        }
-
-        // Close the modal
-        $('#cookie-consent-banner').css('display','none')
-        window.location.reload();
-    });
-
-});
-
 </script>
 
 

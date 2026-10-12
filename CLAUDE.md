@@ -201,7 +201,9 @@ by GA4's Hostname. Set up 9 Oct 2026 (GTM version 21).
   `layouts/app`, `app-v2` and `app-v2-1`. It sets Google Consent Mode v2 defaults and queues
   `clarity('consentv2', …)` from the cookie banner's `accept_analytics` / `accept_advertising` cookies, then loads GTM
   (`config('services.google_tag_manager.container_id', 'GTM-K6VGF9NQ')`, env `GTM_CONTAINER_ID`; the default covers a
-  production config cache built before the key existed, which once rendered no GTM at all). Never add `gtag.js` or
+  production config cache built before the key existed, which once rendered no GTM at all). The cookie banner is
+  `layouts/partials/cookie-consent.blade.php`, shared by all three layouts; any `#cookie-settings` link reopens it.
+  GA4 only counts visitors who accept, so its accept rate is the visitor count. Never add `gtag.js` or
   the Clarity snippet to a layout again: that double-counts (`TagManagerHeadTest` guards it). Keep `<html lang>` set
   from the active locale; `site_language` depends on it.
 - **IDs, all shared by both domains:** GTM `GTM-K6VGF9NQ` · GA4 `G-SYZ9VBYH3S` (property 404920593, account
