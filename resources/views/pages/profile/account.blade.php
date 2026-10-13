@@ -381,7 +381,13 @@
             </button>
         </div>
     </form>
-    
+
+    <div class="profile-section mt-4" id="cookie-settings">
+        <h3 class="section-title">@lang('cookie.settings-title')</h3>
+        <p class="cag-cookie__text">@lang('cookie.settings-intro')</p>
+        @include('layouts.partials.cookie-settings-panel', ['panelKey' => 'profile'])
+    </div>
+
     <!-- Floating Save Button -->
     <button type="button" class="floating-save-btn" id="floatingSaveBtn" onclick="document.getElementById('profileForm').submit();">
         <i class="fas fa-save"></i> {{ __('profile.save_changes') }}
