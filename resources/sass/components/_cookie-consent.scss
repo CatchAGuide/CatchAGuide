@@ -1,0 +1,302 @@
+// Cookie consent popup (layouts/partials/cookie-consent) and the settings panel on /cookie-settings and in the
+// profile (layouts/partials/cookie-settings-panel) — same light theme as the auth modals
+$cookie-primary: map-get($colors, "primary");
+$cookie-primary-hover: #d4523f;
+$cookie-dark: map-get($colors, "dark");
+$cookie-gray: map-get($colors, "gray");
+$cookie-border: map-get($colors, "border");
+$cookie-soft: #f5f6f8;
+
+.cag-cookie {
+  position: fixed;
+  inset: 0;
+  // Above every sticky bar (header 1300, mobile book bar 1050, vacations header 2100), below the page loader (10050).
+  z-index: 2200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba($cookie-dark, 0.55);
+
+  &.is-open {
+    display: flex;
+    animation: cag-cookie-fade-in 0.2s ease-out;
+  }
+
+  @include media("<tablet") {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  &__card {
+    position: relative;
+    width: 100%;
+    max-width: 30rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: 1.75rem 1.5rem 1.5rem;
+    color: $cookie-dark;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow:
+      0 4px 6px rgba($cookie-dark, 0.04),
+      0 24px 48px rgba($cookie-dark, 0.18);
+
+    @include media("<tablet") {
+      max-width: none;
+      max-height: 90vh;
+      border-radius: 1rem 1rem 0 0;
+      padding: 1.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  &__accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, $cookie-primary 0%, #ff8a74 55%, $cookie-primary 100%);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+
+  &__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.25rem;
+    color: $cookie-primary;
+    background: rgba($cookie-primary, 0.1);
+    border-radius: 50%;
+  }
+
+  &__eyebrow {
+    margin: 0 0 0.15rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $cookie-primary;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: $cookie-dark;
+  }
+
+  &__text {
+    margin: 0 0 1.25rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: $cookie-gray;
+
+    a {
+      color: $cookie-primary;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    &--row {
+      flex-direction: row;
+      margin-top: 1.25rem;
+
+      .cag-cookie__btn {
+        flex: 1 1 0;
+      }
+    }
+  }
+
+  &__btn {
+    min-height: 2.9rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+    border-radius: 0.6rem;
+    border: 2px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:focus-visible {
+      outline: 3px solid rgba($cookie-primary, 0.35);
+      outline-offset: 2px;
+    }
+
+    &--primary {
+      color: #fff;
+      background: $cookie-primary;
+      border-color: $cookie-primary;
+
+      &:hover {
+        background: $cookie-primary-hover;
+        border-color: $cookie-primary-hover;
+      }
+    }
+
+    &--outline {
+      color: $cookie-dark;
+      background: #fff;
+      border-color: $cookie-dark;
+
+      &:hover {
+        color: #fff;
+        background: $cookie-dark;
+      }
+    }
+
+    &--link {
+      min-height: auto;
+      text-align: center;
+      color: $cookie-dark;
+      background: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+
+      &:hover {
+        color: $cookie-primary;
+      }
+    }
+  }
+
+  &__categories {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__category {
+    padding: 0.9rem 1rem;
+    background: $cookie-soft;
+    border: 1px solid $cookie-border;
+    border-radius: 0.75rem;
+  }
+
+  &__category-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__category-name {
+    flex: 1 1 auto;
+    margin: 0;
+    font-weight: 700;
+    color: $cookie-dark;
+  }
+
+  &__always-on {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $cookie-gray;
+  }
+
+  &__category-text {
+    margin: 0.35rem 0 0.6rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: $cookie-gray;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 0.15rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: $cookie-dark;
+      background: #fff;
+      border: 1px solid $cookie-border;
+      border-radius: 999px;
+    }
+  }
+
+  // Toggle switch on a plain checkbox
+  &__switch {
+    flex: 0 0 auto;
+    position: relative;
+    width: 2.75rem;
+    height: 1.5rem;
+    margin: 0;
+    appearance: none;
+    cursor: pointer;
+    background: #c9c8d0;
+    border-radius: 999px;
+    transition: background-color 0.15s ease;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0.1875rem;
+      left: 0.1875rem;
+      width: 1.125rem;
+      height: 1.125rem;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba($cookie-dark, 0.25);
+      transition: transform 0.15s ease;
+    }
+
+    &:checked {
+      background: $cookie-primary;
+
+      &::after {
+        transform: translateX(1.25rem);
+      }
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba($cookie-primary, 0.35);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.cag-cookie-page {
+  max-width: 40rem;
+  padding-bottom: 3rem;
+}
+
+.cag-cookie-panel {
+  .cag-cookie__category {
+    background: #fff;
+  }
+
+  &__saved {
+    margin: 0.85rem 0 0;
+    font-weight: 600;
+    color: #198754;
+  }
+}
+
+@keyframes cag-cookie-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

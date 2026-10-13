@@ -64,7 +64,7 @@
             'items' => [
                 ['label' => __('message.imprint'), 'url' => route('law.imprint')],
                 ['label' => __('message.data-protection'), 'url' => route('law.data-protection')],
-                ['label' => __('cookie.settings-link'), 'url' => '#cookie-settings'],
+                ['label' => __('cookie.settings-link'), 'url' => route('law.cookie-settings')],
                 ['label' => __('message.conditions'), 'url' => route('law.agb')],
                 ['label' => __('message.notice-takedown'), 'url' => route('law.notice-and-takedown')],
             ],

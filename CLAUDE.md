@@ -201,9 +201,12 @@ by GA4's Hostname. Set up 9 Oct 2026 (GTM version 21).
   `layouts/app`, `app-v2` and `app-v2-1`. It sets Google Consent Mode v2 defaults and queues
   `clarity('consentv2', …)` from the cookie banner's `accept_analytics` / `accept_advertising` cookies, then loads GTM
   (`config('services.google_tag_manager.container_id', 'GTM-K6VGF9NQ')`, env `GTM_CONTAINER_ID`; the default covers a
-  production config cache built before the key existed, which once rendered no GTM at all). The cookie banner is
-  `layouts/partials/cookie-consent.blade.php`, shared by all three layouts; any `#cookie-settings` link reopens it.
-  GA4 only counts visitors who accept, so its accept rate is the visitor count. Never add `gtag.js` or
+  production config cache built before the key existed, which once rendered no GTM at all). The cookie popup is
+  `layouts/partials/cookie-consent.blade.php`, shared by all three layouts. It has buttons only: Accept all, Accept
+  necessary only and Go to settings. The switches are in `layouts/partials/cookie-settings-panel.blade.php`, shown on
+  `/cookie-settings` (`law.cookie-settings`, linked in the footer) and in Profile › Settings. Categories: Necessary (always on, and since 13 Oct 2026 it includes GA4), Analytics (Clarity) and Marketing
+  (Google Ads). GA4 being always on (`analytics_storage: 'granted'`) was a business decision, made knowing that
+  GDPR / TDDDG §25 normally require opt-in. Don't revert it without asking. Clarity and Ads still need opt-in. Never add `gtag.js` or
   the Clarity snippet to a layout again: that double-counts (`TagManagerHeadTest` guards it). Keep `<html lang>` set
   from the active locale; `site_language` depends on it.
 - **IDs, all shared by both domains:** GTM `GTM-K6VGF9NQ` · GA4 `G-SYZ9VBYH3S` (property 404920593, account

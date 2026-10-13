@@ -1,123 +1,39 @@
 {{--
-    Cookie consent banner, shared by layouts/app, app-v2 and app-v2-1.
-    Writes default_cookie (a choice was made) plus accept_analytics / accept_advertising, which
-    layouts/partials/tag-manager-head turns into Consent Mode defaults on the next page load. So a choice
-    that changes consent reloads the page. Any link to #cookie-settings (the footer has one) reopens it,
-    because withdrawing consent must be as easy as giving it.
+    Cookie consent popup, shared by layouts/app, app-v2 and app-v2-1 (styles: resources/sass/components/_cookie-consent.scss).
+    The popup only offers Accept all / Accept necessary only / Go to settings; the switches live in
+    layouts/partials/cookie-settings-panel (on /cookie-settings and in Profile › Settings), which this script binds.
+    Writes default_cookie (a choice was made) plus accept_analytics (Clarity) / accept_advertising (Google Ads),
+    which layouts/partials/tag-manager-head turns into Consent Mode defaults on the next page load. So a choice
+    that changes consent reloads the page.
 --}}
-<style>
-    #cookie-consent-banner {
-        position: fixed;
-        inset: 0;
-        background-color: rgba(20, 20, 20, 0.5);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        padding: 1rem;
-        z-index: 999;
-    }
+<div id="cookie-consent-banner" class="cag-cookie" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">
+    <div class="cag-cookie__card">
+        <div class="cag-cookie__accent" aria-hidden="true"></div>
 
-    #cookie-consent-banner.is-open {
-        display: flex;
-        animation: cookie-consent-fade-in 0.2s ease-out;
-    }
-
-    #cookie-consent-banner .cookie-consent__card {
-        max-width: 32rem;
-        width: 100%;
-        max-height: calc(100vh - 2rem);
-        overflow-y: auto;
-        font-size: 16px;
-    }
-
-    #cookie-consent-banner .cookie-consent__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    #cookie-consent-banner .cookie-consent__actions .btn {
-        flex: 1 1 10rem;
-    }
-
-    #cookie-consent-banner .cookie-consent__settings-link {
-        background: none;
-        border: 0;
-        padding: 0;
-        text-decoration: underline;
-    }
-
-    #cookie-consent-banner .consent-preferences {
-        display: none;
-    }
-
-    #cookie-consent-banner.is-preferences .consent-main {
-        display: none;
-    }
-
-    #cookie-consent-banner.is-preferences .consent-preferences {
-        display: block;
-    }
-
-    @keyframes cookie-consent-fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-</style>
-
-<div id="cookie-consent-banner" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">
-    <div class="cookie-consent__card bg-white p-4 shadow-lg card border-0 rounded-0">
-        <h4 id="cookie-consent-title" class="fw-bolder mb-2">@lang('cookie.header')</h4>
-
-        <div class="consent-main">
-            <p class="text-dark my-2">
-                @lang('cookie.intro')
-                <a class="color-primary" href="{{ route('law.data-protection') }}"><u>@lang('cookie.policy-link')</u></a>
-            </p>
-
-            <div class="cookie-consent__actions mt-3">
-                <button type="button" id="cookie-accept" class="btn theme-primary rounded-0">@lang('cookie.accept-all-btn')</button>
-                <button type="button" id="cookie-decline" class="btn btn-outline-dark rounded-0">@lang('cookie.reject-all-btn')</button>
-            </div>
-            <div class="mt-3 text-center">
-                <button type="button" id="cookie-adjust-preferences" class="cookie-consent__settings-link text-dark">@lang('cookie.few-btn')</button>
+        <div class="cag-cookie__head">
+            <span class="cag-cookie__icon" aria-hidden="true"><i class="fas fa-cookie-bite"></i></span>
+            <div>
+                <p class="cag-cookie__eyebrow">@lang('cookie.eyebrow')</p>
+                <h2 id="cookie-consent-title" class="cag-cookie__title">@lang('cookie.header')</h2>
             </div>
         </div>
+        <p class="cag-cookie__text">
+            @lang('cookie.intro')
+            <a href="{{ route('law.data-protection') }}">@lang('cookie.policy-link')</a>
+        </p>
 
-        <div class="consent-preferences text-dark my-2">
-            <form id="cookie-preferences-form">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="functional-cookie" checked disabled>
-                    <label class="form-check-label" for="functional-cookie"><strong>@lang('cookie.functional')</strong></label>
-                    <p><small>@lang('cookie.functional-msg')</small></p>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="analytics-cookie">
-                    <label class="form-check-label" for="analytics-cookie"><strong>@lang('cookie.analytical')</strong></label>
-                    <p><small>@lang('cookie.analytical-msg')</small></p>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="advertising-cookie">
-                    <label class="form-check-label" for="advertising-cookie"><strong>@lang('cookie.advertising')</strong></label>
-                    <p><small>@lang('cookie.advertising-msg')</small></p>
-                </div>
-            </form>
-            <div class="cookie-consent__actions">
-                <button id="preference-close" type="button" class="btn btn-outline-dark rounded-0">@lang('cookie.back-btn')</button>
-                <button id="save-cookie-preferences" type="button" class="btn theme-primary rounded-0">@lang('cookie.save-preference-btn')</button>
-            </div>
+        <div class="cag-cookie__actions">
+            <button type="button" id="cookie-accept" class="cag-cookie__btn cag-cookie__btn--primary">@lang('cookie.accept-all-btn')</button>
+            <button type="button" id="cookie-decline" class="cag-cookie__btn cag-cookie__btn--outline">@lang('cookie.accept-necessary-btn')</button>
+            <a id="cookie-adjust-preferences" class="cag-cookie__btn cag-cookie__btn--link" href="{{ route('law.cookie-settings') }}">@lang('cookie.settings-btn')</a>
         </div>
     </div>
 </div>
 
 <script>
-    (function (d) {
-        var banner = d.getElementById('cookie-consent-banner');
-        if (!banner) {
-            return;
-        }
-
+    (function (w, d) {
         var ONE_YEAR = 365;
+        var SAVED_FLAG = 'cag_cookie_saved';
 
         function getCookie(name) {
             return d.cookie.split('; ').indexOf(name + '=true') !== -1;
@@ -133,57 +49,92 @@
             d.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
         }
 
+        function current() {
+            return { analytics: getCookie('accept_analytics'), marketing: getCookie('accept_advertising') };
+        }
+
         // Consent as this page loaded it (tag-manager-head read the same cookies).
-        var loaded = { analytics: getCookie('accept_analytics'), ads: getCookie('accept_advertising') };
+        var loaded = current();
 
-        function open(preferences) {
-            d.getElementById('analytics-cookie').checked = getCookie('accept_analytics');
-            d.getElementById('advertising-cookie').checked = getCookie('accept_advertising');
-            banner.classList.toggle('is-preferences', !!preferences);
-            banner.classList.add('is-open');
-        }
-
-        function save(analytics, ads) {
+        // Returns true when the page reloads to apply the new consent.
+        function save(choice) {
             setCookie('default_cookie', ONE_YEAR);
-            analytics ? setCookie('accept_analytics', ONE_YEAR) : deleteCookie('accept_analytics');
-            ads ? setCookie('accept_advertising', ONE_YEAR) : deleteCookie('accept_advertising');
-            banner.classList.remove('is-open');
+            choice.analytics ? setCookie('accept_analytics', ONE_YEAR) : deleteCookie('accept_analytics');
+            choice.marketing ? setCookie('accept_advertising', ONE_YEAR) : deleteCookie('accept_advertising');
 
-            if (analytics !== loaded.analytics || ads !== loaded.ads) {
-                window.location.reload();
+            if (choice.analytics !== loaded.analytics || choice.marketing !== loaded.marketing) {
+                w.location.reload();
+                return true;
+            }
+            return false;
+        }
+
+        function bindPopup(banner) {
+            d.getElementById('cookie-accept').addEventListener('click', function () {
+                banner.classList.remove('is-open');
+                save({ analytics: true, marketing: true });
+            });
+            d.getElementById('cookie-decline').addEventListener('click', function () {
+                banner.classList.remove('is-open');
+                save({ analytics: false, marketing: false });
+            });
+
+            // The settings page/profile show the switches themselves, so the popup would only cover them.
+            if (!getCookie('default_cookie') && !d.querySelector('[data-cookie-settings-panel]')) {
+                banner.classList.add('is-open');
             }
         }
 
-        d.getElementById('cookie-accept').addEventListener('click', function () {
-            save(true, true);
-        });
+        function bindPanel(panel) {
+            var toggles = panel.querySelectorAll('[data-cookie-consent]');
+            var saved = panel.querySelector('[data-cookie-saved]');
+            var state = current();
 
-        d.getElementById('cookie-decline').addEventListener('click', function () {
-            save(false, false);
-        });
+            toggles.forEach(function (toggle) {
+                toggle.checked = state[toggle.getAttribute('data-cookie-consent')];
+            });
 
-        d.getElementById('cookie-adjust-preferences').addEventListener('click', function () {
-            open(true);
-        });
-
-        d.getElementById('preference-close').addEventListener('click', function () {
-            banner.classList.remove('is-preferences');
-        });
-
-        d.getElementById('save-cookie-preferences').addEventListener('click', function () {
-            save(d.getElementById('analytics-cookie').checked, d.getElementById('advertising-cookie').checked);
-        });
-
-        d.addEventListener('click', function (event) {
-            var link = event.target.closest && event.target.closest('a[href="#cookie-settings"]');
-            if (link) {
-                event.preventDefault();
-                open(false);
+            function done(choice) {
+                if (save(choice)) {
+                    try { sessionStorage.setItem(SAVED_FLAG, '1'); } catch (e) {}
+                } else {
+                    saved.hidden = false;
+                }
             }
-        });
 
-        if (!getCookie('default_cookie')) {
-            open(false);
+            panel.querySelector('[data-cookie-save]').addEventListener('click', function () {
+                var choice = {};
+                toggles.forEach(function (toggle) {
+                    choice[toggle.getAttribute('data-cookie-consent')] = toggle.checked;
+                });
+                done(choice);
+            });
+
+            panel.querySelector('[data-cookie-accept-all]').addEventListener('click', function () {
+                toggles.forEach(function (toggle) { toggle.checked = true; });
+                done({ analytics: true, marketing: true });
+            });
+
+            try {
+                if (sessionStorage.getItem(SAVED_FLAG)) {
+                    sessionStorage.removeItem(SAVED_FLAG);
+                    saved.hidden = false;
+                }
+            } catch (e) {}
         }
-    })(document);
+
+        function init() {
+            var banner = d.getElementById('cookie-consent-banner');
+            if (banner) {
+                bindPopup(banner);
+            }
+            d.querySelectorAll('[data-cookie-settings-panel]').forEach(bindPanel);
+        }
+
+        if (d.readyState === 'loading') {
+            d.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })(window, document);
 </script>
