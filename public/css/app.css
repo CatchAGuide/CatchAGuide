@@ -25025,10 +25025,6 @@ input:-webkit-autofill:active {
   animation: cag-site-nav-shake 0.5s ease-in-out;
 }
 
-html {
-  background-color: #fff;
-}
-
 .has-cag-bottom-nav {
   padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
 }
