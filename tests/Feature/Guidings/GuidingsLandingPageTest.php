@@ -48,6 +48,11 @@ class GuidingsLandingPageTest extends TestCase
         $response->assertSee('data-category-header-shell', false);
     }
 
+    public function test_guidings_landing_with_only_tracking_tags_is_not_redirected(): void
+    {
+        $this->get('/guidings?utm_source=newsletter&gclid=abc')->assertOk();
+    }
+
     public function test_guidings_landing_renders_in_english(): void
     {
         app()->setLocale('en');

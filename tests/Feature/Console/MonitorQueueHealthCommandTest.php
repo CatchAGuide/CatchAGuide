@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Console;
 
+use App\Jobs\TranslateStringJob;
 use App\Mail\QueueStalledAlertMail;
 use App\Services\Queue\QueueRecoveryService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -31,6 +32,22 @@ class MonitorQueueHealthCommandTest extends TestCase
         $this->recoveryDoes(fn () => $this->fail('Recovery should not run when nothing is stale.'));
 
         DB::table('jobs')->insert($this->job(now()->subMinutes(2)->getTimestamp()));
+
+        $this->artisan('queue:monitor-health', ['--stale-minutes' => 15])
+            ->assertSuccessful();
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_a_backlog_of_background_translations_is_not_a_stuck_queue(): void
+    {
+        Mail::fake();
+        $this->recoveryDoes(fn () => $this->fail('Recovery should not run for translation jobs.'));
+
+        DB::table('jobs')->insert(array_merge($this->job(now()->subMinutes(30)->getTimestamp()), [
+            'queue' => TranslateStringJob::QUEUE,
+            'payload' => json_encode(['displayName' => TranslateStringJob::class]),
+        ]));
 
         $this->artisan('queue:monitor-health', ['--stale-minutes' => 15])
             ->assertSuccessful();

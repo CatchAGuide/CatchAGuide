@@ -13,8 +13,11 @@ use Throwable;
  */
 class QueueRecoveryService
 {
-    /** Shared with the scheduler in App\Console\Kernel so both run the worker the same way. */
-    public const WORKER_COMMAND = 'queue:work --queue=default --stop-when-empty --tries=3 --max-time=50';
+    /**
+     * Shared with the scheduler in App\Console\Kernel so both run the worker the same way.
+     * Queues are drained in order: "translations" (TranslateStringJob) only once "default" is empty.
+     */
+    public const WORKER_COMMAND = 'queue:work --queue=default,translations --stop-when-empty --tries=3 --max-time=50';
 
     public function __construct(private readonly Schedule $schedule)
     {

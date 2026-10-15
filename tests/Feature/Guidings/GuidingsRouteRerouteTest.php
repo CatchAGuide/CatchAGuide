@@ -55,6 +55,35 @@ class GuidingsRouteRerouteTest extends TestCase
         $response->assertStatus(301);
     }
 
+    public function test_legacy_id_slug_redirect_drops_listing_query_params(): void
+    {
+        $guiding = Guiding::query()
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->first();
+
+        if (! $guiding) {
+            $this->markTestSkipped('No guiding with a slug in the test database.');
+        }
+
+        $response = $this->get('/guidings/'.$guiding->id.'/'.$guiding->slug.'?from_destination=1&destination_id=43');
+
+        $response->assertStatus(301);
+        $response->assertRedirect($guiding->publicShowUrl());
+        $this->assertStringNotContainsString('?', $response->headers->get('Location'));
+    }
+
+    public function test_old_guidings_listing_urls_move_to_alloffers(): void
+    {
+        $this->get('/guidings?guide_id=1190&page=14')
+            ->assertStatus(301)
+            ->assertRedirect('http://localhost/guidings/alloffers?guide_id=1190&page=14');
+
+        $this->get('/guidings?page=18')
+            ->assertStatus(301)
+            ->assertRedirect('http://localhost/guidings/alloffers?page=18');
+    }
+
     public function test_legacy_id_with_stale_slug_still_redirects_to_canonical_offer(): void
     {
         $guiding = Guiding::query()

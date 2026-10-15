@@ -87,6 +87,18 @@ return [
         // by a burst of rapid saves on the same listing — an autosave flurry, or someone
         // hammering an edit form. Set to 0 to disable (dispatch on every save).
         'dispatch_cooldown_seconds' => env('TRANSLATION_DISPATCH_COOLDOWN', 120),
+
+        // Live translate() calls during one web request. A cold page used to make dozens of
+        // calls to the free Google endpoint at up to 10s each, so Googlebot saw 15–50s responses
+        // and 5xx timeouts. Past this budget a string renders untranslated once and
+        // TranslateStringJob fills its cache in the background. Console commands and queued
+        // jobs are not limited.
+        'live_budget' => [
+            'max_calls' => (int) env('TRANSLATION_LIVE_MAX_CALLS', 3),
+            'max_ms' => (int) env('TRANSLATION_LIVE_MAX_MS', 2000),
+            'timeout' => (int) env('TRANSLATION_LIVE_TIMEOUT', 3),
+            'connect_timeout' => (int) env('TRANSLATION_LIVE_CONNECT_TIMEOUT', 2),
+        ],
     ],
 
     'stripe' => [

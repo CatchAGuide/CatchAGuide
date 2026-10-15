@@ -23,9 +23,11 @@ use App\Services\Assistant\GroqHttpClient;
 use App\Services\Assistant\UnavailableLLMClient;
 use App\Services\AdminNotificationService;
 use App\Services\Asset;
+use App\Services\Guiding\GuidingMasterDataLookup;
 use App\Services\GuidingService;
 use App\Services\LanguageService;
 use App\Services\Translation\ListingTranslationService;
+use App\Services\Translation\LiveTranslationBudget;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -46,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // One instance per request: it loads the edited offer texts once.
         $this->app->scoped(SalesTexts::class);
+        // One live-translation budget per request and per queued job.
+        $this->app->scoped(LiveTranslationBudget::class);
+        // Small master tables behind Guiding's name getters, loaded once per request.
+        $this->app->scoped(GuidingMasterDataLookup::class);
 
         $this->app->bind(LLMClientInterface::class, function () {
             if (!config('booking_assistant.enabled')) {

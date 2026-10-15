@@ -16,6 +16,7 @@ use App\Traits\MethodTraits;
 use App\Traits\ModelImageTrait;
 use App\Traits\Cacheable;
 use App\Traits\ScopesPubliclyVisibleGuidings;
+use App\Services\Guiding\GuidingMasterDataLookup;
 
 use App\Models\GuidingInclussion;
 use App\Models\GuidingExtras;
@@ -1090,7 +1091,7 @@ class Guiding extends Model
                 if ($methodsMap && $methodsMap->has($item)) {
                     $method = $methodsMap[$item];
                 } else {
-                    $method = Method::find($item);
+                    $method = app(GuidingMasterDataLookup::class)->find(Method::class, $item);
                 }
                 if ($method && $method->name) {
                     return [
@@ -1124,7 +1125,7 @@ class Guiding extends Model
                 if ($targetsMap && $targetsMap->has($item)) {
                     $target = $targetsMap[$item];
                 } else {
-                    $target = Target::find($item);
+                    $target = app(GuidingMasterDataLookup::class)->find(Target::class, $item);
                 }
                 if ($target && $target->name) {
                     return [
@@ -1158,7 +1159,7 @@ class Guiding extends Model
                 if ($inclussionsMap && $inclussionsMap->has($item)) {
                     $inclusion = $inclussionsMap[$item];
                 } else {
-                    $inclusion = Inclussion::find($item);
+                    $inclusion = app(GuidingMasterDataLookup::class)->find(Inclussion::class, $item);
                 }
                 if ($inclusion && $inclusion->name) {
                     return [
@@ -1193,7 +1194,7 @@ class Guiding extends Model
                 if ($watersMap && $watersMap->has($waterId)) {
                     $water = $watersMap[$waterId];
                 } else {
-                    $water = Water::find($waterId);
+                    $water = app(GuidingMasterDataLookup::class)->find(Water::class, $waterId);
                 }
                 if ($water && $water->name) {
                     $attributes = $water->getAttributes();
@@ -1225,7 +1226,7 @@ class Guiding extends Model
 
         return collect($boatExtras)->map(function($item) {
             if (is_numeric($item)) {
-                $extra = BoatExtras::find($item);
+                $extra = app(GuidingMasterDataLookup::class)->find(BoatExtras::class, $item);
                 if ($extra && $extra->name) {
                     return [
                         'id' => $extra->id,
