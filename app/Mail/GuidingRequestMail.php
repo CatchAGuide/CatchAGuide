@@ -25,7 +25,7 @@ class GuidingRequestMail extends Mailable
     public function __construct(SearchRequest $request)
     {
         $this->request = $request;
-        $this->language = $request->user->language;
+        $this->language = $request->user?->language ?? app()->getLocale();
         $this->target = 'guiding_request_mail';
     }
 
