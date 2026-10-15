@@ -1543,7 +1543,7 @@ class GuidingsController extends Controller
         ]);
     }
 
-    public function redirectLegacyShow(int $id, string $slug, Request $request)
+    public function redirectLegacyShow(int $id, string $slug)
     {
         $guiding = Guiding::query()->where('id', $id)->first()
             ?? Guiding::query()->where('slug', $slug)->first();
@@ -1552,11 +1552,9 @@ class GuidingsController extends Controller
             abort(404);
         }
 
-        return redirect()->route(
-            'guidings.show',
-            array_merge(['slug' => $guiding->slug], $request->query()),
-            301
-        );
+        // No query string: listing params (?from_destination=1&destination_id=43) on a detail
+        // page made URL variants Google crawled but didn't index.
+        return redirect()->route('guidings.show', ['slug' => $guiding->slug], 301);
     }
 
     public function redirectToNewFormat($slug)

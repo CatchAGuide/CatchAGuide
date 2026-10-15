@@ -105,9 +105,9 @@ class SpecialOfferCacheService
     {
         $this->clearSpecialOffersListCache();
         $this->clearFormDataCache();
-        
-        // Clear individual special offer caches (this is a bit heavy, but ensures consistency)
-        Cache::flush(); // In production, you might want to be more specific
+
+        // No Cache::flush() here: it also wiped every cached translation, page cache and rate
+        // counter, so the next crawl of every page made live Google Translate calls and timed out.
     }
 
     /**

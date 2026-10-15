@@ -2,10 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\TranslateStringJob;
 use App\Mail\QueueStalledAlertMail;
 use App\Services\Queue\QueueRecoveryService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -46,7 +48,7 @@ class MonitorQueueHealth extends Command
             return 0;
         }
 
-        $oldestTimestamp = DB::table('jobs')->min('created_at');
+        $oldestTimestamp = $this->watchedJobs()->min('created_at');
         $oldestAgeMinutes = now()->diffInMinutes(Carbon::createFromTimestamp($oldestTimestamp), absolute: true);
 
         Log::critical("Queue health check: {$staleCount} job(s) still stuck after an automatic restart (oldest: {$oldestAgeMinutes} min).");
@@ -70,6 +72,15 @@ class MonitorQueueHealth extends Command
 
     private function staleJobCount(int $cutoff): int
     {
-        return DB::table('jobs')->where('created_at', '<', $cutoff)->count();
+        return $this->watchedJobs()->where('created_at', '<', $cutoff)->count();
+    }
+
+    /**
+     * Background translation jobs run after everything else and may legitimately wait, so a
+     * backlog of them is not a stuck queue.
+     */
+    private function watchedJobs(): Builder
+    {
+        return DB::table('jobs')->where('queue', '!=', TranslateStringJob::QUEUE);
     }
 }

@@ -156,6 +156,26 @@ class OffersCatalogTest extends TestCase
         $this->assertStringNotContainsString('offers-filters__region is-locked', $html);
     }
 
+    public function test_filtered_offers_page_is_noindexed(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel());
+
+        $html = $this->get(route('offers.index', ['country_short' => 'de', 'place' => 'Deutschland', 'page' => 2]))->getContent();
+
+        $this->assertStringContainsString('<meta name="robots" content="NOINDEX, NOFOLLOW" />', $html);
+        $this->assertStringNotContainsString('content="INDEX,FOLLOW"', $html);
+    }
+
+    public function test_unfiltered_offers_page_stays_indexable(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel());
+
+        $html = $this->get(route('offers.index', ['page' => 2]))->getContent();
+
+        $this->assertStringContainsString('content="INDEX,FOLLOW"', $html);
+        $this->assertStringNotContainsString('NOINDEX', $html);
+    }
+
     public function test_region_filter_enabled_when_place_is_empty_with_leftover_coords(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

@@ -9,6 +9,15 @@
 @section('header_sub_title', $vm->pageSubtitle())
 @section('description', \Illuminate\Support\Str::limit($vm->pageSubtitle(), 155))
 
+@php
+    $seoRobots = app(\App\Services\Seo\SeoRobotsPolicy::class);
+@endphp
+@if($seoRobots->shouldNoindexOffers(request()))
+    @section('meta_robots')
+    <meta name="robots" content="{{ $seoRobots->robotsContentForOffers(request()) }}" />
+    @endsection
+@endif
+
 @section('content')
 <div class="offers-catalog-page" data-offers-page>
     @include('pages.offers.partials.catalog-header')

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Guiding;
 use App\Services\Guidings\GuidingsLandingService;
 use App\Services\Homepage\HomepageLandingService;
+use App\Services\Seo\SeoRobotsPolicy;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -23,9 +25,17 @@ class WelcomeController extends Controller
     /**
      * Former production homepage — now the Guidings marketing landing
      * reached from the homepage product chooser.
+     *
+     * /guidings used to be the listing, and Google still crawls its old filter and page URLs
+     * (?guide_id=…&page=14). Those rendered this landing page as indexable duplicates, so they
+     * move to the listing, which noindexes filtered views.
      */
-    public function guidingsLanding(): View
+    public function guidingsLanding(Request $request, SeoRobotsPolicy $robots): View|RedirectResponse
     {
+        if ($robots->hasListingParams($request)) {
+            return redirect()->route('guidings.index', $request->query(), 301);
+        }
+
         return view('pages.newhome-latest', $this->guidingsLandingService->build());
     }
 

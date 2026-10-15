@@ -80,6 +80,23 @@ class SeoRobotsPolicyTest extends TestCase
         $this->assertTrue($this->policy->shouldNoindexVacations(Request::create('/vacations/norwegen', 'GET', ['num_guests' => '2'])));
     }
 
+    public function test_filtered_offers_are_noindexed_but_plain_pages_stay_indexable(): void
+    {
+        $filtered = Request::create('/offers', 'GET', ['country_short' => 'de', 'place' => 'Deutschland', 'page' => '45']);
+        $this->assertTrue($this->policy->shouldNoindexOffers($filtered));
+        $this->assertSame('NOINDEX, NOFOLLOW', $this->policy->robotsContentForOffers($filtered));
+        $this->assertFalse($this->policy->shouldNoindexOffers(Request::create('/offers', 'GET', ['page' => '2', 'utm_source' => 'ads'])));
+    }
+
+    public function test_listing_params_include_pagination_but_not_tracking_tags(): void
+    {
+        $this->assertTrue($this->policy->hasListingParams(Request::create('/guidings', 'GET', ['page' => '14'])));
+        $this->assertTrue($this->policy->hasListingParams(Request::create('/guidings', 'GET', ['guide_id' => '1190'])));
+        $this->assertFalse($this->policy->hasListingParams(Request::create('/guidings', 'GET', ['utm_source' => 'newsletter', 'gclid' => 'abc'])));
+        $this->assertFalse($this->policy->hasListingParams(Request::create('/guidings', 'GET', ['page' => ''])));
+        $this->assertFalse($this->policy->hasListingParams(Request::create('/guidings', 'GET')));
+    }
+
     public function test_tracking_tags_and_empty_arrays_do_not_trigger_noindex(): void
     {
         $this->assertFalse($this->policy->shouldNoindexGuidings(Request::create('/guidings', 'GET', ['utm_source' => 'newsletter', 'gclid' => 'abc', 'page' => '2'])));

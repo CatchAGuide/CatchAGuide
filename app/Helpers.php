@@ -1,11 +1,13 @@
 <?php
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Stichoza\GoogleTranslate\GoogleTranslate;
 
 use App\Models\Faq;
 use App\Models\EmailLog;
+use App\Jobs\TranslateStringJob;
 use App\Services\Translation\GuidingTranslationService;
+use App\Services\Translation\FreeGoogleTranslateClient;
+use App\Services\Translation\LiveTranslationBudget;
 use App\Services\Translation\TranslationCircuitBreaker;
 
 if (! function_exists('translation_has_supplementary_chars')) {
@@ -68,6 +70,8 @@ if (! function_exists('translate')) {
      * ~10s HTTP call — with no guard, a single degraded/rate-limited window turns into a full
      * page timeout instead of one fast fallback. TranslationCircuitBreaker trips after repeated
      * failures and skips live calls for a cooldown period, returning the original string instead.
+     * In a web request LiveTranslationBudget also caps the live calls per request; strings past
+     * the cap render untranslated once and are translated in the background by TranslateStringJob.
      */
     function translate($string, $language = '')
     {
@@ -94,11 +98,22 @@ if (! function_exists('translate')) {
             return $string;
         }
 
+        // Past the per-request budget the page renders the original once and the cache is
+        // filled in the background, so a cold page never waits on dozens of live calls.
+        $budget = app(LiveTranslationBudget::class);
+        if ($budget->isEnforced() && TranslateStringJob::isQueued((string) $string, $currentLocale)) {
+            return $string;
+        }
+        if (! $budget->allowsLiveCall()) {
+            TranslateStringJob::dispatchOnce((string) $string, $currentLocale);
+
+            return $string;
+        }
+
+        $startedAt = microtime(true);
         try {
-            $translate = GoogleTranslate::trans($apiText, $currentLocale, null, [
-                'timeout' => 10,
-                'connect_timeout' => 5,
-            ]);
+            $translate = app(FreeGoogleTranslateClient::class)->translate($apiText, $currentLocale, $budget->httpOptions());
+            $budget->record((microtime(true) - $startedAt) * 1000);
 
             if (strpos($translate, 'Führungen')) {
                 $translate = str_replace('Führungen', 'Angelguidings', $translate);
@@ -118,6 +133,7 @@ if (! function_exists('translate')) {
 
             return $result;
         } catch (\Throwable $e) {
+            $budget->record((microtime(true) - $startedAt) * 1000);
             Log::error('Translation failed: ' . $e->getMessage(), [
                 'string' => $string,
                 'locale' => $currentLocale
