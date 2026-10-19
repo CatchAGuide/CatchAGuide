@@ -35,5 +35,5 @@
         <span class="tc-pricing__total-label">{{ __('checkout.tour.total') }}</span>
         <span class="tc-pricing__total-value tc-mono" x-text="money(total)"></span>
     </div>
-    <p class="tc-muted">{{ __('checkout.tour.pay_nothing_today') }}</p>
+    <p class="tc-muted">{{ $priceNote ?? __('checkout.tour.pay_nothing_today') }}</p>
 </div>

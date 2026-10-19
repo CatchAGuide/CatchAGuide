@@ -121,7 +121,8 @@ class Guiding extends Model
         'desc_meeting_point',
         'desc_starting_time',
         'desc_departure_time',
-        'desc_tour_unique'
+        'desc_tour_unique',
+        'voucher_enabled',
     ];
 
     public const LATITUDE  = 'lat';
@@ -136,6 +137,15 @@ class Guiding extends Model
     ];
 
     public $translated = null;
+
+    /**
+     * Whether guests can buy this tour as a gift voucher (on by default; the guide can switch
+     * it off per tour). Callers still check that the tour itself is publicly visible.
+     */
+    public function acceptsVouchers(): bool
+    {
+        return (bool) ($this->voucher_enabled ?? true);
+    }
 
     /**
      * List fields whose translation is a set of id-keyed rows (checkbox

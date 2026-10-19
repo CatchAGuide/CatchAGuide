@@ -412,6 +412,7 @@
 
                             if (Auth::user()->canViewGuideTools()) {
                                 $profileNavItems->push(['route' => 'profile.myguidings', 'routeIs' => ['profile.myguidings', 'guidings.edit'], 'icon' => 'fas fa-list-alt', 'label' => __('profile.all_guidings')]);
+                                $profileNavItems->push(['route' => 'profile.vouchers', 'routeIs' => ['profile.vouchers'], 'icon' => 'fas fa-gift', 'label' => __('profile.vouchers.title')]);
 
                                 if (Auth::user()->canAccessGuideDashboard()) {
                                     $profileNavItems->push(['route' => 'profile.newguiding', 'routeIs' => ['profile.newguiding'], 'icon' => 'fas fa-plus-circle', 'label' => __('profile.create_new_guiding'), 'highlight' => true]);
@@ -507,6 +508,12 @@
                                         <a href="{{ route('profile.myguidings') }}" class="nav-link {{ Request::routeIs('profile.myguidings') || Request::routeIs('guidings.edit') ? 'active' : '' }}">
                                             <i class="fas fa-list-alt"></i>
                                             <span>{{ __('profile.all_guidings') }}</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('profile.vouchers') }}" class="nav-link {{ Request::routeIs('profile.vouchers') ? 'active' : '' }}">
+                                            <i class="fas fa-gift"></i>
+                                            <span>{{ __('profile.vouchers.title') }}</span>
                                         </a>
                                     </li>
                                     @if(Auth::user()->canAccessGuideDashboard())

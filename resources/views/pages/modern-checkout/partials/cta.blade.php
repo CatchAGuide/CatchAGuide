@@ -32,9 +32,11 @@
         </p>
     @endif
 
+    {{-- $trustItems (optional): translation keys for the two check items; the SSL item always follows. --}}
     <ul class="tc-trust">
-        <li>@include('pages.modern-checkout.partials.icon', ['name' => 'check', 'size' => 13, 'stroke' => 2]){{ __('checkout.tour.trust_free') }}</li>
-        <li>@include('pages.modern-checkout.partials.icon', ['name' => 'check', 'size' => 13, 'stroke' => 2]){{ __('checkout.tour.trust_non_binding') }}</li>
+        @foreach ($trustItems ?? ['checkout.tour.trust_free', 'checkout.tour.trust_non_binding'] as $trustKey)
+            <li>@include('pages.modern-checkout.partials.icon', ['name' => 'check', 'size' => 13, 'stroke' => 2]){{ __($trustKey) }}</li>
+        @endforeach
         <li>@include('pages.modern-checkout.partials.icon', ['name' => 'lock', 'size' => 13, 'stroke' => 1.7]){{ __('checkout.tour.trust_ssl') }}</li>
     </ul>
 </div>

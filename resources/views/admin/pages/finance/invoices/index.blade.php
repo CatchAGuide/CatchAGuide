@@ -118,16 +118,18 @@
                                             $invoiceSent = (bool) ($row['invoice_sent'] ?? false);
                                             $paidStatus = $row['paid_status'] ?? 'unpaid';
 
-                                            $routeSource = $row['source_key'] === 'booking'
-                                                ? 'booking'
-                                                : ($row['source_key'] === 'trip' ? 'trip' : 'camp_vacation');
+                                            $routeSource = in_array($row['source_key'], ['booking', 'trip', 'voucher'], true)
+                                                ? $row['source_key']
+                                                : 'camp_vacation';
 
                                             $manageUrlInvoice = route('admin.finance.update-invoice', ['source' => $routeSource, 'id' => $row['id']]);
                                             $manageUrlPaid = route('admin.finance.update-paid', ['source' => $routeSource, 'id' => $row['id']]);
 
+                                            // Voucher orders have no admin list yet (spec P1).
                                             $sourceListUrl = match ($routeSource) {
                                                 'booking' => route('admin.bookings.index'),
                                                 'trip' => route('admin.trip-bookings.index'),
+                                                'voucher' => null,
                                                 default => route('admin.camp-vacation-bookings.index'),
                                             };
                                         @endphp
@@ -142,6 +144,8 @@
                                                             $badgeClass = 'bg-primary';
                                                         } elseif ($routeSource === 'trip') {
                                                             $badgeClass = 'bg-info';
+                                                        } elseif ($routeSource === 'voucher') {
+                                                            $badgeClass = 'bg-dark';
                                                         } else {
                                                             $badgeLower = strtolower((string) $badgeText);
                                                             $badgeClass = str_contains($badgeLower, 'vacation')
@@ -234,11 +238,13 @@
                                                 <span class="js-booking-date" data-date="{{ $bookIso }}">{{ $bookDate }}</span>
                                             </td>
                                             <td class="text-end">
+                                                @if($sourceListUrl)
                                                 <div class="btn-group btn-group-sm">
                                                     <a class="btn btn-outline-secondary" href="{{ $sourceListUrl }}" title="Open source list">
                                                         <i class="fa fa-external-link-alt"></i>
                                                     </a>
                                                 </div>
+                                                @endif
                                             </td>
                                         </tr>
                                     @empty

@@ -4,6 +4,7 @@ use App\Http\Controllers\CampCheckoutController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ModernCheckoutController;
 use App\Http\Controllers\TripCheckoutController;
+use App\Http\Controllers\VoucherCheckoutController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,12 @@ Route::prefix('checkout')->group(function () {
     Route::get('trips/{slug}', [TripCheckoutController::class, 'show'])->name('checkout.trip.show')->middleware(['throttle:10,1,checkout-page:', 'ddos:checkout']);
     Route::post('trips/{slug}', [TripCheckoutController::class, 'store'])->name('checkout.trip.store')->middleware(['throttle:checkout-submit', 'ddos:checkout']);
     Route::get('trips/{slug}/thank-you/{requestId}', [TripCheckoutController::class, 'thankYou'])->name('checkout.trip.thank-you')->whereNumber('requestId');
+
+    // Gift voucher checkout (a tour bought without a date; the guide handles payment and the voucher).
+    Route::post('vouchers', [VoucherCheckoutController::class, 'start'])->name('checkout.voucher.start')->middleware(['throttle:10,1,checkout-page:', 'ddos:checkout']);
+    Route::get('vouchers/{slug}', [VoucherCheckoutController::class, 'show'])->name('checkout.voucher.show')->middleware(['throttle:10,1,checkout-page:', 'ddos:checkout']);
+    Route::post('vouchers/{slug}', [VoucherCheckoutController::class, 'store'])->name('checkout.voucher.store')->middleware(['throttle:checkout-submit', 'ddos:checkout']);
+    Route::get('vouchers/{slug}/thank-you/{orderId}', [VoucherCheckoutController::class, 'thankYou'])->name('checkout.voucher.thank-you')->whereNumber('orderId');
 });
 
 // Former /vacations/{camps|trips}/{slug}/checkout URLs (bookmarks, open tabs) 301 to the new

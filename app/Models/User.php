@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\VoucherDesign;
 use Auth;
 use Bavix\Wallet\Traits\HasWallet;
 use Bavix\Wallet\Interfaces\Wallet;
@@ -47,7 +48,8 @@ class User extends Authenticatable
         'language',
         'taxId',
         'is_temp_password',
-        'profil_image'
+        'profil_image',
+        'voucher_design',
     ];
 
     /**
@@ -218,6 +220,14 @@ class User extends Authenticatable
     public function getFullNameAttribute(): string
     {
         return $this->firstname . ' ' . $this->lastname;
+    }
+
+    /**
+     * The guide's gift voucher design; unknown or missing values fall back to the CaG standard.
+     */
+    public function voucherDesign(): VoucherDesign
+    {
+        return VoucherDesign::tryFrom((string) $this->voucher_design) ?? VoucherDesign::CagStandard;
     }
 
     public function ifuserisblocked($day)

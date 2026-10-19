@@ -27,4 +27,6 @@ return [
     'cash' => 'Cash',
     'bank_transfer' => 'Bank transfer',
     'paypal' => 'PayPal',
+    'buy_as_voucher' => 'Buy as gift voucher',
+    'voucher_hint' => 'No date needed — the recipient books it with the guide later.',
 ];

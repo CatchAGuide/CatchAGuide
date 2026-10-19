@@ -179,10 +179,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('invoices', [FinanceController::class, 'invoices'])->name('invoices');
             Route::get('invoices/export', [FinanceController::class, 'exportInvoices'])->name('invoices.export');
             Route::patch('{source}/{id}/invoice', [FinanceController::class, 'updateInvoice'])
-                ->where('source', '^(booking|trip|camp_vacation)$')
+                ->where('source', '^(booking|trip|camp_vacation|voucher)$')
                 ->name('update-invoice');
             Route::patch('{source}/{id}/paid', [FinanceController::class, 'updatePaid'])
-                ->where('source', '^(booking|trip|camp_vacation)$')
+                ->where('source', '^(booking|trip|camp_vacation|voucher)$')
                 ->name('update-paid');
         });
 

@@ -69,6 +69,16 @@
             <span class="guidings-book-card__cta-text" data-guidings-book-cta-text>{{ __('booking.choose_date_and_reserve') }}</span>
             <span class="guidings-book-card__cta-arrow" aria-hidden="true">→</span>
         </button>
+
+        @if ($guiding->acceptsVouchers())
+            {{-- Same form, other target: the guest count goes to the voucher checkout (no date). --}}
+            <button
+                type="submit"
+                formaction="{{ route('checkout.voucher.start') }}"
+                class="guidings-book-card__voucher"
+                id="{{ $isMobileInstance ? 'voucherButtonMobile' : 'voucherButton' }}"
+            >{{ __('booking.buy_as_voucher') }}</button>
+        @endif
     </form>
 </div>
 

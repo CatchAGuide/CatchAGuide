@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\EventsController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\GuideOnboardingController;
+use App\Http\Controllers\GuideVoucherSettingsController;
 use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WishlistController;
@@ -27,6 +28,9 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/becomeguide', [ProfileController::class, 'becomeguide'])->name('becomeguide');
     Route::get('/guide-profile', [ProfileController::class, 'guideProfile'])->name('guide-profile');
     Route::put('/guide-profile', [ProfileController::class, 'guideProfileUpdate'])->name('guide-profile.update');
+    Route::get('/vouchers', [GuideVoucherSettingsController::class, 'edit'])->name('vouchers');
+    Route::put('/vouchers', [GuideVoucherSettingsController::class, 'update'])->name('vouchers.update');
+    Route::get('/vouchers/sample', [GuideVoucherSettingsController::class, 'sample'])->name('vouchers.sample')->middleware('throttle:10,1');
     Route::put('/account', [ProfileController::class, 'accountUpdate'])->name('account');
     Route::get('/favoriteguides', [ProfileController::class, 'favoriteguides'])->name('favoriteguides');
     Route::get('/myguidings', [ProfileController::class, 'myguidings'])->name('myguidings');
