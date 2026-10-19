@@ -8,6 +8,7 @@ use App\Models\EmailLog;
 use App\Models\SalesDocument;
 use App\Models\Trip;
 use App\Models\TripBooking;
+use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,7 @@ class TripBookingsController extends Controller
     {
         $bookingRequests = TripBooking::query()
             ->where('source_type', TripBooking::SOURCE_TRIP)
+            ->with('review')
             ->latest()
             ->get();
 
@@ -222,6 +224,25 @@ class TripBookingsController extends Controller
         return redirect()
             ->route('admin.trip-bookings.index')
             ->with('success', 'Reply sent successfully to ' . e($booking->email) . '.');
+    }
+
+    public function sendReviewRequest(TripBooking $tripBooking, VacationReviewService $reviews)
+    {
+        try {
+            $sent = $reviews->sendRequest($tripBooking);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('admin.trip-bookings.index')->with('error', __('admin.vacation_reviews.request_failed'));
+        }
+
+        if (! $sent) {
+            return redirect()->route('admin.trip-bookings.index')->with('error', __('admin.vacation_reviews.request_not_sent'));
+        }
+
+        return redirect()
+            ->route('admin.trip-bookings.index')
+            ->with('success', __('admin.vacation_reviews.request_sent', ['email' => e($tripBooking->email)]));
     }
 
     public function emailHistory(TripBooking $tripBooking)

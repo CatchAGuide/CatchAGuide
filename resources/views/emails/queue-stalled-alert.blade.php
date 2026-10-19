@@ -79,7 +79,7 @@
                 <ul>
                     <li><code>cd ~/www/catchaguide.de/public_html</code></li>
                     <li><code>php artisan schedule:clear-cache</code></li>
-                    <li><code>php artisan queue:work --queue=default --stop-when-empty --tries=3 --max-time=50</code></li>
+                    <li><code>php artisan queue:work --queue=default,translations --stop-when-empty --tries=3 --max-time=50</code></li>
                 </ul>
             </details>
         </div>

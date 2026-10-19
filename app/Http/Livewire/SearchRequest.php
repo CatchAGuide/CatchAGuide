@@ -115,8 +115,10 @@ class SearchRequest extends Component
         }
 
 
+        // fishing_type is NOT NULL: the tour path never set it, so every tour request failed to save.
+        $searchRequest->fishing_type = $this->fishingType == 'holiday' ? 'Fishing Holiday' : 'Fishing Tour';
+
         if($this->fishingType == 'holiday'){
-            $searchRequest->fishing_type = "Fishing Holiday";
             if($this->guided){
                 $searchRequest->is_guided = 1;
                 if($this->daysofguiding == 'everyday'){
@@ -158,19 +160,19 @@ class SearchRequest extends Component
         if($this->letmeknow){
           
             $this->letmeknow = false;
-            $this->dispatchBrowserEvent('dispatchLetMeKnow');
+            $this->dispatch('dispatchLetMeKnow');
             $this->calendar = true;
         
           
         }else{
-            $this->dispatchBrowserEvent('dispatchLetMeKnow');
+            $this->dispatch('dispatchLetMeKnow');
             $this->letmeknow = true;
             $this->calendar = false;
           
         }   
 
         if($this->calendar){
-            $this->dispatchBrowserEvent('initDatePicker');
+            $this->dispatch('initDatePicker');
         }
     }
 
@@ -196,7 +198,7 @@ class SearchRequest extends Component
                 ]);
     
                 if($this->calendar){
-                    $this->dispatchBrowserEvent('initDatePicker');
+                    $this->dispatch('initDatePicker');
                 }
 
                 $this->counter++;
@@ -285,7 +287,7 @@ class SearchRequest extends Component
                 ]);
     
                 if($this->calendar){
-                    $this->dispatchBrowserEvent('initDatePicker');
+                    $this->dispatch('initDatePicker');
                 }
             }
     
@@ -316,7 +318,7 @@ class SearchRequest extends Component
     public function prev()
     {
         if($this->calendar){
-            $this->dispatchBrowserEvent('initDatePicker');
+            $this->dispatch('initDatePicker');
         }
 
         $this->page--;

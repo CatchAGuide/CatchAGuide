@@ -309,6 +309,7 @@
                                                 @unless(isset($offers[$request->id]))
                                                     <form id="offer-from-request-{{ $request->id }}" method="POST" action="{{ route('admin.sales.offers.from-trip-request', $request) }}" class="d-none">@csrf</form>
                                                 @endunless
+                                                @include('admin.pages.vacation-reviews.partials.request-button', ['booking' => $request, 'url' => route('admin.trip-bookings.review-request', $request), 'part' => 'form'])
                                                 <div class="btn-group btn-group-sm">
                                                     @if(isset($offers[$request->id]))
                                                         <a href="{{ route('admin.sales.offers.edit', $offers[$request->id]['id']) }}"
@@ -362,6 +363,7 @@
                                                                 title="Email history">
                                                             <i class="fa fa-history"></i>
                                                         </button>
+                                                        @include('admin.pages.vacation-reviews.partials.request-button', ['booking' => $request, 'url' => route('admin.trip-bookings.review-request', $request)])
                                                     @endif
                                                 </div>
                                             </td>

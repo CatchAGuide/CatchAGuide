@@ -24,7 +24,7 @@ class SearchRequestUserMail extends Mailable
     public function __construct($mailData)
     {
         $this->mailData = $mailData;
-        $this->language = $mailData->user->language;
+        $this->language = $mailData->user?->language ?? app()->getLocale();
         $this->target = 'search_request_user_mail';
     }
 

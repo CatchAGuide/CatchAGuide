@@ -392,6 +392,25 @@ return [
             'pdf_ref' => null,
         ],
 
+        'guest_vacation_review_request' => [
+            'name' => 'Camp/Trip Review Request (Guest)',
+            'category' => 'guest',
+            'description' => 'Asks a camp or trip guest to review their stay (overall, accommodation, fishing & region, value for money + comment). Links to /ratings/{camp|trip}/{token} on the domain of the guest language. Reviews are listed under Admin › Camp & trip reviews.',
+            'view' => 'mails.guest.vacation_review_request',
+            'log_type' => 'guest_vacation_review_request',
+            'status' => 'active',
+            'trigger_type' => 'manual',
+            'schedule' => 'Sent by an admin (star button in Bookings › Camps / Trips)',
+            'scheduler_command' => null,
+            'recipient' => 'Guest',
+            'trigger_conditions' => [
+                'Booking request status is Done',
+                'Booking has an email address and no review yet',
+                'Resend allowed; a second click within 2 minutes is ignored',
+            ],
+            'pdf_ref' => null,
+        ],
+
         'admin_camp_checkout_request' => [
             'name' => 'Camp Request (Admin Notify)',
             'category' => 'admin',

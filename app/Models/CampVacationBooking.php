@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasVacationReview;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class CampVacationBooking extends Model
 {
-    use HasFactory;
+    use HasFactory, HasVacationReview;
 
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROCESS = 'in_process';
@@ -43,6 +44,8 @@ class CampVacationBooking extends Model
         'phone',
         'message',
         'status',
+        'review_token',
+        'review_requested_at',
     ];
 
     protected $casts = [

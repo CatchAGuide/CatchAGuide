@@ -8,6 +8,7 @@ use App\Http\Controllers\BookingAssistantPreviewController;
 use App\Http\Controllers\FAQController;
 use App\Http\Controllers\ProductReportController;
 use App\Http\Controllers\RatingsController;
+use App\Http\Controllers\VacationRatingsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\ZoisController;
@@ -63,6 +64,9 @@ Route::post('sendnewsletter', [ZoisController::class, 'sendnewsletter'])
 Route::name('ratings.')->prefix('ratings')->group(function () {
     Route::get('/notified', [RatingsController::class, 'notified'])->name('notified');
     Route::get('/review/{id}', [RatingsController::class, 'review'])->name('review');
+    // Camp/trip reviews (review request email, VacationReviewService)
+    Route::get('/{type}/{token}', [VacationRatingsController::class, 'show'])->whereIn('type', ['camp', 'trip'])->name('vacation.show');
+    Route::post('/{type}/{token}', [VacationRatingsController::class, 'store'])->whereIn('type', ['camp', 'trip'])->middleware('throttle:10,1')->name('vacation.store');
     Route::get('/{token}', [RatingsController::class, 'show'])->name('show');
     Route::post('/{token}', [RatingsController::class, 'store'])->name('store');
 });
