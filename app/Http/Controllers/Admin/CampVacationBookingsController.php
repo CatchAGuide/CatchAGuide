@@ -8,6 +8,7 @@ use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\EmailLog;
 use App\Models\SalesDocument;
+use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -19,6 +20,7 @@ class CampVacationBookingsController extends Controller
     {
         $bookingRequests = CampVacationBooking::query()
             ->whereIn('source_type', [CampVacationBooking::SOURCE_CAMP, CampVacationBooking::SOURCE_VACATION])
+            ->with('review')
             ->latest()
             ->get();
 
@@ -205,6 +207,25 @@ class CampVacationBookingsController extends Controller
         return redirect()
             ->route('admin.camp-vacation-bookings.index')
             ->with('success', 'Reply sent successfully to ' . e($booking->email) . '.');
+    }
+
+    public function sendReviewRequest(CampVacationBooking $campVacationBooking, VacationReviewService $reviews)
+    {
+        try {
+            $sent = $reviews->sendRequest($campVacationBooking);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('admin.camp-vacation-bookings.index')->with('error', __('admin.vacation_reviews.request_failed'));
+        }
+
+        if (! $sent) {
+            return redirect()->route('admin.camp-vacation-bookings.index')->with('error', __('admin.vacation_reviews.request_not_sent'));
+        }
+
+        return redirect()
+            ->route('admin.camp-vacation-bookings.index')
+            ->with('success', __('admin.vacation_reviews.request_sent', ['email' => e($campVacationBooking->email)]));
     }
 
     public function emailHistory(CampVacationBooking $campVacationBooking)

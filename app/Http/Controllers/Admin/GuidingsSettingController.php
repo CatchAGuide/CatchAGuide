@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\Admin\CampCheckoutAdminMail;
 use App\Mail\Admin\TripCheckoutAdminMail;
 use App\Mail\Guest\CampCheckoutGuestMail;
+use App\Mail\Guest\VacationReviewRequestMail;
 use App\Mail\Guest\TripCheckoutGuestMail;
 use App\Models\Method;
 use App\Models\Target;
@@ -774,6 +775,9 @@ HTML;
 
             case 'guest_trip_checkout_request':
                 return TripCheckoutGuestMail::sample()->viewData();
+
+            case 'guest_vacation_review_request':
+                return VacationReviewRequestMail::sample()->viewData();
 
             case 'admin_camp_checkout_request':
                 return CampCheckoutAdminMail::sample()->viewData();

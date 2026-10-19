@@ -43,6 +43,7 @@ use App\Http\Controllers\Admin\StrategyController;
 use App\Http\Controllers\Admin\AdminTermsSectionController;
 use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\TripBookingsController;
+use App\Http\Controllers\Admin\VacationReviewsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\VacationTestimonialsController;
@@ -162,6 +163,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('camp-vacation-bookings/{campVacationBooking}/status', [CampVacationBookingsController::class, 'updateStatus'])->name('camp-vacation-bookings.update-status');
         Route::post('camp-vacation-bookings/reply', [CampVacationBookingsController::class, 'sendReply'])->name('camp-vacation-bookings.reply');
         Route::get('camp-vacation-bookings/{campVacationBooking}/email-history', [CampVacationBookingsController::class, 'emailHistory'])->name('camp-vacation-bookings.email-history');
+        Route::post('camp-vacation-bookings/{campVacationBooking}/review-request', [CampVacationBookingsController::class, 'sendReviewRequest'])->name('camp-vacation-bookings.review-request');
 
         Route::get('trip-bookings', [TripBookingsController::class, 'index'])->name('trip-bookings.index');
         Route::get('trip-bookings/{tripBooking}/comment', [TripBookingsController::class, 'showComment'])->name('trip-bookings.comment.show');
@@ -169,6 +171,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::match(['patch', 'post'], 'trip-bookings/{tripBooking}/status', [TripBookingsController::class, 'updateStatus'])->name('trip-bookings.update-status');
         Route::post('trip-bookings/reply', [TripBookingsController::class, 'sendReply'])->name('trip-bookings.reply');
         Route::get('trip-bookings/{tripBooking}/email-history', [TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
+        Route::post('trip-bookings/{tripBooking}/review-request', [TripBookingsController::class, 'sendReviewRequest'])->name('trip-bookings.review-request');
+        Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');
 
         Route::prefix('finance')->name('finance.')->group(function () {
             Route::get('analytics', [FinanceController::class, 'analytics'])->name('analytics');
