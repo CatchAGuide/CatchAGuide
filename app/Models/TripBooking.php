@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasStatusHistory;
 use App\Traits\HasVacationReview;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class TripBooking extends Model
 {
-    use HasFactory, HasVacationReview;
+    use HasFactory, HasStatusHistory, HasVacationReview;
 
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROCESS = 'in_process';

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Sales;
 
 use App\Http\Livewire\Admin\SalesDocumentBuilder;
+use App\Models\BookingStatusChange;
 use App\Models\CampVacationBooking;
 use App\Models\SalesDocument;
 use App\Models\TripBooking;
@@ -59,6 +60,12 @@ class SalesFromRequestTest extends TestCase
             ->post(route('admin.sales.offers.from-camp-request', $request));
 
         $document = SalesDocument::query()->where('source_type', SalesDocument::SOURCE_CAMP_REQUEST)->where('source_id', $request->id)->firstOrFail();
+
+        // An open request moves to "in process", logged as done by the employee because of the offer.
+        $change = $request->statusChanges()->sole();
+        $this->assertSame(CampVacationBooking::STATUS_IN_PROCESS, $change->to_status);
+        $this->assertSame(BookingStatusChange::REASON_OFFER_CREATED, $change->reason);
+        $this->assertSame($this->employee->id, $change->employee_id);
         $response->assertRedirect(route('admin.sales.offers.edit', $document));
 
         $this->assertSame('Lena', $document->first_name);

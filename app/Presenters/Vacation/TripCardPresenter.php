@@ -5,11 +5,14 @@ namespace App\Presenters\Vacation;
 use App\Models\Trip;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
+use App\Services\Vacation\VacationReviewService;
+use App\Services\Vacation\VacationReviewStats;
 
 class TripCardPresenter
 {
     public function __construct(
         private ListingViewTranslationService $viewTranslation,
+        private VacationReviewStats $reviewStats,
     ) {}
 
     /**
@@ -31,6 +34,7 @@ class TripCardPresenter
         $methods = collect($trip->getFishingMethodNames())->pluck('name')->filter()->take(2)->values()->all();
         $included = $this->includedHighlights($trip);
         $sliderTags = array_slice($speciesAll, 0, 2);
+        $reviews = $this->reviewStats->forListing(VacationReviewService::TYPE_TRIP, (int) $trip->id);
 
         return [
             'type' => 'trip',
@@ -72,10 +76,10 @@ class TripCardPresenter
             'slider_cta' => __('vacations.inquire_trip'),
             'cta' => __('vacations.request_trip'),
             'cta_class' => 'trip',
-            // Trips have no guest review flow; do not borrow guiding Review scores onto cards.
+            // Trip reviews only (vacation_reviews); never borrow guiding Review scores onto cards.
             'trust' => null,
-            'rating' => null,
-            'review_count' => 0,
+            'rating' => $reviews['rating'] ?? null,
+            'review_count' => $reviews['count'] ?? 0,
         ];
     }
 

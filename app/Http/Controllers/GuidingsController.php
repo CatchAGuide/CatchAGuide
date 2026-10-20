@@ -28,6 +28,7 @@ use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\ExtrasPrice;
+use App\Presenters\Reviews\ReviewSectionPresenter;
 use App\Services\CalendarScheduleService;
 use App\Models\BoatExtras;
 use App\Models\CategoryEntity;
@@ -197,6 +198,7 @@ class GuidingsController extends Controller
         private OfferCatalogPageService $offerCatalog,
         private SimilarGuidingsService $similarGuidings,
         private ListingSearchStateService $searchState,
+        private ReviewSectionPresenter $reviewSections,
     )
     {
         $this->initializeOptimizationServices();
@@ -401,6 +403,12 @@ class GuidingsController extends Controller
             'average_guide_score' => $average_guide_score,
             'average_region_water_score' => $average_region_water_score,
             'average_grandtotal_score' => $average_grandtotal_score,
+            'reviewSection' => $this->reviewSections->tour($reviews, $reviews_count, [
+                'grandtotal' => (float) $average_grandtotal_score,
+                'overall' => (float) $average_overall_score,
+                'guide' => (float) $average_guide_score,
+                'region_water' => (float) $average_region_water_score,
+            ]),
             'other_guidings' => $similar['guidings'],
             'similar_guidings_see_all_url' => $similar['see_all_url'],
             'destination' => $destination,
@@ -1261,6 +1269,10 @@ class GuidingsController extends Controller
         }
         // If not provided, keep existing values (don't overwrite)
 
+        if ($request->has('voucher_enabled')) {
+            $guiding->voucher_enabled = $request->boolean('voucher_enabled');
+        }
+
         return $pathsToDelete;
     }
 
@@ -1658,6 +1670,7 @@ class GuidingsController extends Controller
             'other_boat_info' => $guiding->additional_information,
             'weekday_availability' => $guiding->weekday_availability,
             'weekdays' => json_decode($guiding->weekdays, true),
+            'voucher_enabled' => $guiding->acceptsVouchers(),
         ];
 
         $locale = Config::get('app.locale');

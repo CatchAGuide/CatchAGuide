@@ -1,30 +1,26 @@
 {{--
-    Mobile-only tour reviews (≤767px): navy score band + metric ticks + swipeable guest comments.
-    Desktop keeps the overview card and horizontal rail in newIndex.blade.php; see
-    resources/sass/components/_tour-reviews-mobile.scss for the show/hide switch.
+    Mobile-only reviews (≤767px) for tours, trips and camps: navy score band + metric ticks +
+    swipeable guest comments. Included by partials.reviews.section with its $section
+    (ReviewSectionPresenter); the desktop block there is hidden below 768px.
 --}}
 @php
-    $mobileReviews = $reviews ?? collect();
-    $mobileReviewCount = (int) ($reviews_count ?? $mobileReviews->count());
-    $mobileSlideCount = $mobileReviews->count();
-    $mobileMetrics = [
-        ['label' => __('guidings.Overall'), 'value' => (float) $average_overall_score],
-        ['label' => __('guidings.Guide'), 'value' => (float) $average_guide_score],
-        ['label' => __('guidings.Region_Water'), 'value' => (float) $average_region_water_score],
-    ];
+    $mobileReviews = $section['reviews'] ?? [];
+    $mobileReviewCount = (int) $section['count'];
+    $mobileSlideCount = count($mobileReviews);
+    $mobileMetrics = $section['categories'];
     // Dots stop scaling past a handful of slides; fall back to a "1 / N" counter.
     $mobileUseDots = $mobileSlideCount <= 8;
 @endphp
 
-<section class="tour-reviews-m" id="ratings-container-mobile" data-tour-reviews-m aria-label="{{ __('guidings.Reviews') }}">
+<div class="tour-reviews-m" id="ratings-container-mobile" data-tour-reviews-m>
     <div class="tour-reviews-m__card">
         <div class="tour-reviews-m__hero">
             <div class="tour-reviews-m__score">
-                <span class="tour-reviews-m__score-val">{{ one($average_grandtotal_score) }}</span>
+                <span class="tour-reviews-m__score-val">{{ one($section['score']) }}</span>
                 <span class="tour-reviews-m__score-den">/10</span>
             </div>
             <div class="tour-reviews-m__hero-meta">
-                <div class="tour-reviews-m__label">{{ getRatingLabel($average_grandtotal_score) }}</div>
+                <div class="tour-reviews-m__label">{{ $section['label'] }}</div>
                 <div class="tour-reviews-m__count">{{ trans_choice('guidings.reviews_based_on', $mobileReviewCount, ['count' => $mobileReviewCount]) }}</div>
             </div>
         </div>
@@ -69,34 +65,24 @@
             </div>
 
             <div class="tour-reviews-m__track" data-track>
-                @foreach($mobileReviews as $review)
-                    @php
-                        $reviewBooking = $review->booking;
-                        $reviewDate = $reviewBooking
-                            ? $reviewBooking->getFormattedBookingDate('M j, Y')
-                            : ($review->created_at ? \Carbon\Carbon::parse($review->created_at)->format('M j, Y') : null);
-                        $reviewerName = $review->user->firstname ?? null;
-                        $reviewerInitial = $reviewerName
-                            ? mb_strtoupper(mb_substr($reviewerName, 0, 1, 'UTF-8'), 'UTF-8')
-                            : '?';
-                    @endphp
+                @foreach($mobileReviews as $item)
                     <article class="tour-reviews-m__slide" data-slide>
                         <div class="tour-reviews-m__person">
-                            <div class="tour-reviews-m__avatar" aria-hidden="true">{{ $reviewerInitial }}</div>
+                            <div class="tour-reviews-m__avatar" aria-hidden="true">{{ $item['initial'] }}</div>
                             <div class="tour-reviews-m__person-meta">
-                                <div class="tour-reviews-m__name">{{ $reviewerName ?? '—' }}</div>
-                                <div class="tour-reviews-m__date">{{ $reviewDate ? strtoupper($reviewDate) : '—' }}</div>
+                                <div class="tour-reviews-m__name">{{ $item['name'] ?? '—' }}</div>
+                                <div class="tour-reviews-m__date">{{ $item['date'] ?? '—' }}</div>
                             </div>
-                            <span class="tour-reviews-m__pill">{{ number_format($review->grandtotal_score, 1) }}<small>/10</small></span>
+                            <span class="tour-reviews-m__pill">{{ number_format($item['score'], 1) }}<small>/10</small></span>
                         </div>
-                        @if(filled($review->comment))
-                            <p class="tour-reviews-m__text" data-text>&ldquo;{{ translate($review->comment) }}&rdquo;</p>
+                        @if(!empty($item['text']))
+                            <p class="tour-reviews-m__text" data-text>&ldquo;{{ $item['text'] }}&rdquo;</p>
                             <button type="button" class="tour-reviews-m__more" data-more hidden
                                     data-label-more="{{ __('guidings.See_More') }}"
                                     data-label-less="{{ __('guidings.Show_Less') }}"
                                     aria-expanded="false">{{ __('guidings.See_More') }}</button>
                         @endif
-                        @if($review->is_automatic)
+                        @if(!empty($item['automatic']))
                             <span class="tour-reviews-m__badge">{{ __('guidings.automatic_review_badge') }}</span>
                         @endif
                     </article>
@@ -118,7 +104,7 @@
             @endif
         </div>
     @endif
-</section>
+</div>
 
 <script>
 (function () {

@@ -1,0 +1,460 @@
+// Tour, trip and camp PDP reviews — DESKTOP (≥768px) + the shared section card.
+// Markup: resources/views/partials/reviews/section.blade.php
+// Below 768px the desktop block is hidden and partials/reviews/mobile.blade.php
+// (_tour-reviews-mobile.scss) takes over; the card chrome is dropped there.
+// Also: .listing-review-badge, the score pill beside a camp/trip product title.
+
+$lr-navy: $guidings-header-slate;
+$lr-coral: $primary-color;
+$lr-coral-dark: #c4411f;
+$lr-coral-tint: #fdebe6;
+$lr-ink: #2b2a35;
+$lr-muted: #6b6e78;
+$lr-faint: #9a9ca5;
+$lr-on-navy-muted: #b9b8c6;
+$lr-border: #e6e8ec;
+$lr-line: #eef0f3;
+$lr-outline: #dcdfe4;
+$lr-green: #2f7d5b;
+
+.listing-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid $lr-border;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(20, 20, 40, 0.04);
+  color: $lr-ink;
+  text-align: left;
+
+  &__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $lr-ink;
+  }
+
+  &__desktop {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  // --- Score panel + category bars ----------------------------------------
+  &__overview {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    border: 1px solid $lr-border;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  &__hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px 20px;
+    background: $lr-navy;
+    color: #fff;
+    text-align: center;
+  }
+
+  &__ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 104px;
+    height: 104px;
+    border: 2px solid $lr-coral;
+    border-radius: 50%;
+    box-shadow: 0 0 0 6px rgba($lr-coral, 0.12);
+  }
+
+  &__score {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__outof,
+  &__count {
+    font-size: 11px;
+    line-height: 1.3;
+    color: $lr-on-navy-muted;
+    white-space: nowrap;
+  }
+
+  &__hero-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__label {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: $lr-coral;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  &__breakdown {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 22px 16px;
+  }
+
+  &__metrics {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__metric {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid $lr-line;
+  }
+
+  &__metric-label {
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__ticks {
+    display: flex;
+    gap: 3px;
+
+    i {
+      flex: 1;
+      height: 8px;
+      border-radius: 1.5px;
+      background: $lr-border;
+
+      &.is-on {
+        background: $lr-coral;
+      }
+    }
+  }
+
+  &__metric-value {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+
+    small {
+      font-size: inherit;
+      font-weight: 400;
+      color: $lr-faint;
+    }
+  }
+
+  &__trust {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-top: 14px;
+    font-size: 12px;
+    color: $lr-green;
+
+    svg {
+      flex: none;
+    }
+  }
+
+  &__disclaimer {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: $lr-muted;
+    text-wrap: pretty;
+  }
+
+  // --- Guest comment rail -------------------------------------------------
+  &__comments {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__comments-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  &__comments-title {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $lr-ink;
+  }
+
+  &__arrows {
+    display: flex;
+    gap: 6px;
+  }
+
+  &__arrow {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid $lr-outline;
+    border-radius: 50%;
+    background: #fff;
+    color: $lr-ink;
+    cursor: pointer;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+  }
+
+  &__rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 220px;
+    align-items: start;
+    gap: 12px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid $lr-border;
+    border-radius: 14px;
+    scroll-snap-align: start;
+  }
+
+  &__person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: $lr-navy;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__person-meta {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__date {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $lr-faint;
+    white-space: nowrap;
+  }
+
+  &__pill {
+    flex: none;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: $lr-coral-tint;
+    color: $lr-coral;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+
+    small {
+      font-size: inherit;
+      font-weight: 500;
+      color: #c99a90;
+    }
+  }
+
+  &__text {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-size: 13px;
+    line-height: 1.5;
+    text-wrap: pretty;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+
+    &.is-open {
+      display: block;
+    }
+  }
+
+  &__more {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: $lr-coral;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__badge {
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f1f2f4;
+    color: #5d606a;
+    font-size: 11px;
+  }
+}
+
+// Trip PDP: sections in the main column are spaced by their top margin.
+.trip-offer-page__main > .listing-reviews {
+  margin-top: 24px;
+}
+
+@media (max-width: 767px) {
+  .listing-reviews {
+    gap: 12px;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+
+    &__desktop {
+      display: none;
+    }
+  }
+}
+
+// Camp/trip list cards (components/vacation/*-list-row): title left, score pill right.
+.listing-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  > h3 {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > .listing-review-badge {
+    margin-top: 2px;
+  }
+}
+
+// --- Score pill beside a camp/trip product title (matches .offers-card__score) ---
+.listing-review-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.12rem 0.4rem 0.12rem 0.12rem;
+  border: 1px solid rgba($lr-navy, 0.08);
+  border-radius: 999px;
+  background: rgba($lr-navy, 0.05);
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: middle;
+
+  &:hover {
+    border-color: rgba($lr-navy, 0.2);
+    text-decoration: none;
+  }
+
+  &__value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 1.4rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: $lr-navy;
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  &__count {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: $lr-muted;
+    white-space: nowrap;
+  }
+
+  // Mobile product hero (vacations catalog header, dark band); like the hero's
+  // product title it only shows below 768px.
+  &--on-dark {
+    display: none;
+    margin-top: 0.5rem;
+
+    @media (max-width: 767.98px) {
+      display: inline-flex;
+    }
+    border-color: rgba(#fff, 0.25);
+    background: rgba(#fff, 0.14);
+
+    .listing-review-badge__value {
+      background: #fff;
+      color: $lr-navy;
+    }
+
+    .listing-review-badge__count {
+      color: #fff;
+    }
+  }
+}

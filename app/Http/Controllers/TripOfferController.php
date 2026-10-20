@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Trip;
 use App\Domain\Vacation\VacationListingFilter;
-use App\Presenters\Vacation\TripTrustSignalResolver;
+use App\Presenters\Reviews\ReviewSectionPresenter;
 use App\Services\Search\ListingSearchStateService;
 use App\Services\Checkout\Trip\TripCheckoutOffer;
 use App\Services\Seo\StructuredDataBuilder;
@@ -12,6 +12,8 @@ use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
 use App\Services\Trip\TripCacheService;
 use App\Services\Trip\TripOfferViewMapper;
+use App\Services\Vacation\VacationReviewService;
+use App\Services\Vacation\VacationReviewStats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
@@ -27,10 +29,12 @@ class TripOfferController extends Controller
     public function __construct(
         private TripOfferViewMapper $mapper,
         private TripCacheService $cache,
-        private TripTrustSignalResolver $tripTrust,
         private ListingViewTranslationService $viewTranslation,
         private ListingSearchStateService $searchState,
         private StructuredDataBuilder $structuredData,
+        private VacationReviewService $vacationReviews,
+        private VacationReviewStats $vacationReviewStats,
+        private ReviewSectionPresenter $reviewSections,
     ) {}
 
     public function show(Request $request, string $slug): View
@@ -88,7 +92,8 @@ class TripOfferController extends Controller
             'minBookingDate' => now()->toDateString(),
             'initialBookingDate' => $selectedDate ?? '',
             'contactModalTitle' => !empty($tripView['title']) ? '' . $tripView['title'] : '',
-            'reviewTrust' => $this->tripTrust->resolve($trip),
+            'reviewSection' => $this->reviewSections->vacation($this->vacationReviews->listingReviews(VacationReviewService::TYPE_TRIP, $trip->id)),
+            'reviewStats' => $this->vacationReviewStats->forListing(VacationReviewService::TYPE_TRIP, $trip->id),
             'canonicalUrl' => $isDraft ? null : route('vacations.trips.show', $slug),
             'structuredData' => $isDraft ? null : $this->structuredData->trip($trip, route('vacations.trips.show', $trip->slug)),
             'preselectedGuests' => $preselectedGuests,

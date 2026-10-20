@@ -75,6 +75,7 @@
 @import "./components/listing-gallery-modal"; // Shared listing gallery lightbox (dock)
 @import "./components/listing-mobile-book-bar"; // Mobile PDP book bar (camps / vacations)
 @import "./components/guidings-book-card"; // Guiding PDP booking card (desktop + floating mobile)
-@import "./components/tour-reviews-mobile"; // Tour PDP reviews — mobile-only (≤767px) score band + comment slider
+@import "./components/tour-reviews-mobile"; // Tour/trip/camp PDP reviews — mobile-only (≤767px) score band + comment slider
+@import "./components/listing-reviews"; // Tour/trip/camp PDP reviews — desktop section card + title review badge
 @import "./components/scroll-reveal"; // [data-reveal] entrance animation for listing cards / PDP sections
 @import "./components/cookie-consent"; // Cookie consent banner + settings (layouts/partials/cookie-consent)

@@ -252,6 +252,7 @@ class GuidingsController extends Controller
             'other_boat_info' => $guiding->additional_information,
             'weekday_availability' => $guiding->weekday_availability,
             'weekdays' => json_decode($guiding->weekdays, true),
+            'voucher_enabled' => $guiding->acceptsVouchers(),
         ];
 
         $locale = Config::get('app.locale');

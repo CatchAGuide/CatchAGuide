@@ -8,6 +8,7 @@ use App\Models\EmailLog;
 use App\Models\SalesDocument;
 use App\Models\Trip;
 use App\Models\TripBooking;
+use App\Services\Booking\BookingStatusHistory;
 use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,17 +17,19 @@ use Illuminate\Support\Str;
 
 class TripBookingsController extends Controller
 {
-    public function index()
+    public function index(BookingStatusHistory $history)
     {
         $bookingRequests = TripBooking::query()
             ->where('source_type', TripBooking::SOURCE_TRIP)
-            ->with('review')
+            ->with(['review', 'latestStatusChange.employee'])
             ->latest()
             ->get();
 
+        $statusSummaries = $bookingRequests->mapWithKeys(fn (TripBooking $booking) => [$booking->id => $history->summary($booking)]);
+
         $offers = SalesDocument::forSources(SalesDocument::SOURCE_TRIP_REQUEST, $bookingRequests->modelKeys());
 
-        return view('admin.pages.trip-bookings.index', compact('bookingRequests', 'offers'));
+        return view('admin.pages.trip-bookings.index', compact('bookingRequests', 'offers', 'statusSummaries'));
     }
 
     public function showComment(TripBooking $tripBooking)
@@ -53,19 +56,20 @@ class TripBookingsController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, TripBooking $tripBooking)
+    public function updateStatus(Request $request, TripBooking $tripBooking, BookingStatusHistory $history)
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:open,in_process,done'],
         ]);
 
-        $tripBooking->update(['status' => $validated['status']]);
+        $history->change($tripBooking, $validated['status'], $request->user('employees'));
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'status' => $tripBooking->status,
                 'status_label' => TripBooking::statusOptions()[$tripBooking->status] ?? $tripBooking->status,
+                'status_summary' => $history->summary($tripBooking),
             ]);
         }
 
@@ -74,7 +78,7 @@ class TripBookingsController extends Controller
             ->with('success', 'Status updated.');
     }
 
-    public function storeManual(StoreManualTripBookingRequest $request)
+    public function storeManual(StoreManualTripBookingRequest $request, BookingStatusHistory $history)
     {
         $data = $request->validated();
 
@@ -95,7 +99,7 @@ class TripBookingsController extends Controller
             ->exists();
 
         if (!$recentDuplicate) {
-            TripBooking::create([
+            $booking = TripBooking::create([
                 'source_type' => TripBooking::SOURCE_TRIP,
                 'source_id' => $trip->id,
                 'preferred_date' => $data['preferred_date'],
@@ -107,6 +111,8 @@ class TripBookingsController extends Controller
                 'message' => $data['message'] ?? null,
                 'status' => $data['status'] ?? TripBooking::STATUS_OPEN,
             ]);
+
+            $history->created($booking, $request->user('employees'));
         }
 
         return redirect()
@@ -226,23 +232,36 @@ class TripBookingsController extends Controller
             ->with('success', 'Reply sent successfully to ' . e($booking->email) . '.');
     }
 
-    public function sendReviewRequest(TripBooking $tripBooking, VacationReviewService $reviews)
+    public function sendReviewRequest(Request $request, TripBooking $tripBooking, VacationReviewService $reviews)
     {
+        // Sent from Admin › Reviews › Open for review: go back there.
+        $back = $request->input('return') === 'reviews'
+            ? route('admin.vacation-reviews.index', ['tab' => 'open'])
+            : route('admin.trip-bookings.index');
+
         try {
             $sent = $reviews->sendRequest($tripBooking);
         } catch (\Throwable $exception) {
             report($exception);
 
-            return redirect()->route('admin.trip-bookings.index')->with('error', __('admin.vacation_reviews.request_failed'));
+            return redirect()->to($back)->with('error', __('admin.vacation_reviews.request_failed'));
         }
 
         if (! $sent) {
-            return redirect()->route('admin.trip-bookings.index')->with('error', __('admin.vacation_reviews.request_not_sent'));
+            return redirect()->to($back)->with('error', __('admin.vacation_reviews.request_not_sent'));
         }
 
         return redirect()
-            ->route('admin.trip-bookings.index')
+            ->to($back)
             ->with('success', __('admin.vacation_reviews.request_sent', ['email' => e($tripBooking->email)]));
+    }
+
+    public function statusHistory(TripBooking $tripBooking, BookingStatusHistory $history)
+    {
+        return response()->json([
+            'success' => true,
+            'items' => $history->timeline($tripBooking),
+        ]);
     }
 
     public function emailHistory(TripBooking $tripBooking)

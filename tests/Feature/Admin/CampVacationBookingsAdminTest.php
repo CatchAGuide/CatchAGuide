@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\CampVacationBooking;
+use App\Models\BookingStatusChange;
 use App\Models\Employee;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
@@ -99,5 +100,68 @@ class CampVacationBookingsAdminTest extends TestCase
             CampVacationBooking::STATUS_IN_PROCESS,
             $booking->fresh()->status
         );
+    }
+
+    public function test_status_change_is_logged_with_the_employee(): void
+    {
+        $employee = $this->actingAsEmployee();
+        $booking = $this->createBooking();
+
+        $response = $this->patchJson(
+            route('admin.camp-vacation-bookings.update-status', $booking),
+            ['status' => CampVacationBooking::STATUS_DONE]
+        );
+
+        $response->assertOk();
+        $this->assertStringContainsString($employee->name, (string) $response->json('status_summary'));
+
+        $change = BookingStatusChange::query()
+            ->where('bookable_type', $booking->getMorphClass())
+            ->where('bookable_id', $booking->id)
+            ->sole();
+        $this->assertSame(CampVacationBooking::STATUS_OPEN, $change->from_status);
+        $this->assertSame(CampVacationBooking::STATUS_DONE, $change->to_status);
+        $this->assertSame($employee->id, $change->employee_id);
+    }
+
+    public function test_setting_the_same_status_logs_nothing(): void
+    {
+        $this->actingAsEmployee();
+        $booking = $this->createBooking();
+
+        $this->patchJson(route('admin.camp-vacation-bookings.update-status', $booking), ['status' => CampVacationBooking::STATUS_OPEN])->assertOk();
+
+        $this->assertSame(0, $booking->statusChanges()->count());
+    }
+
+    public function test_status_history_lists_changes_newest_first_then_the_request(): void
+    {
+        $employee = $this->actingAsEmployee();
+        $booking = $this->createBooking();
+
+        $this->patchJson(route('admin.camp-vacation-bookings.update-status', $booking), ['status' => CampVacationBooking::STATUS_IN_PROCESS]);
+        $this->patchJson(route('admin.camp-vacation-bookings.update-status', $booking), ['status' => CampVacationBooking::STATUS_DONE]);
+
+        $items = $this->getJson(route('admin.camp-vacation-bookings.status-history', $booking))
+            ->assertOk()
+            ->json('items');
+
+        $this->assertCount(3, $items);
+        $this->assertSame([CampVacationBooking::STATUS_DONE, CampVacationBooking::STATUS_IN_PROCESS, 'created'], array_column($items, 'to'));
+        $this->assertSame($employee->name, $items[0]['by']);
+        $this->assertSame(__('admin.booking_status_history.received'), $items[2]['to_label']);
+    }
+
+    public function test_list_shows_who_last_changed_the_status(): void
+    {
+        $employee = $this->actingAsEmployee();
+        $booking = $this->createBooking();
+        $this->patchJson(route('admin.camp-vacation-bookings.update-status', $booking), ['status' => CampVacationBooking::STATUS_IN_PROCESS]);
+
+        $this->get(route('admin.camp-vacation-bookings.index'))
+            ->assertOk()
+            ->assertSee(route('admin.camp-vacation-bookings.status-history', $booking), false)
+            ->assertSee(__('admin.booking_status_history.last_changed', ['name' => $employee->name, 'date' => '']), false)
+            ->assertSee('id="statusHistoryModal"', false);
     }
 }

@@ -151,4 +151,82 @@ class GuideVoucherSettingsTest extends TestCase
         $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
+
+    public function test_create_tour_form_offers_vouchers_switched_on_by_default(): void
+    {
+        $this->actingAs($this->guide())
+            ->get(route('profile.newguiding'))
+            ->assertOk()
+            ->assertSee(__('newguidings.voucher_enabled'))
+            ->assertSee('id="voucher_enabled_yes" checked', false)
+            ->assertDontSee('id="voucher_enabled_no" checked', false);
+    }
+
+    public function test_edit_tour_form_shows_the_tours_voucher_setting(): void
+    {
+        $guide = $this->guide();
+        $tour = $this->tour($guide, ['voucher_enabled' => false]);
+
+        $this->actingAs($guide)
+            ->get(route('guidings.edit_newguiding', $tour))
+            ->assertOk()
+            ->assertSee('id="voucher_enabled_no" checked', false)
+            ->assertDontSee('id="voucher_enabled_yes" checked', false);
+    }
+
+    public function test_saving_the_tour_form_updates_the_voucher_setting(): void
+    {
+        $guide = $this->guide();
+        $tour = $this->tour($guide);
+
+        $this->actingAs($guide)
+            ->postJson(route('profile.newguiding.save-draft-sync'), $this->draftPayload($tour, ['voucher_enabled' => '0']))
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertFalse($tour->fresh()->acceptsVouchers());
+
+        $this->actingAs($guide)
+            ->postJson(route('profile.newguiding.save-draft-sync'), $this->draftPayload($tour, ['voucher_enabled' => '1']))
+            ->assertOk();
+
+        $this->assertTrue($tour->fresh()->acceptsVouchers());
+    }
+
+    public function test_saving_the_tour_form_without_the_field_keeps_the_voucher_setting(): void
+    {
+        $guide = $this->guide();
+        $tour = $this->tour($guide, ['voucher_enabled' => false]);
+
+        $this->actingAs($guide)
+            ->postJson(route('profile.newguiding.save-draft-sync'), $this->draftPayload($tour))
+            ->assertOk();
+
+        $this->assertFalse($tour->fresh()->acceptsVouchers());
+    }
+
+    public function test_saving_the_tour_form_rejects_an_invalid_voucher_value(): void
+    {
+        $guide = $this->guide();
+        $tour = $this->tour($guide);
+
+        $this->actingAs($guide)
+            ->postJson(route('profile.newguiding.save-draft-sync'), $this->draftPayload($tour, ['voucher_enabled' => 'maybe']))
+            ->assertJsonValidationErrors('voucher_enabled');
+
+        $this->assertTrue($tour->fresh()->acceptsVouchers());
+    }
+
+    private function draftPayload(Guiding $tour, array $overrides = []): array
+    {
+        return array_merge([
+            'is_draft' => 1,
+            'is_update' => 1,
+            'guiding_id' => $tour->id,
+            'title' => $tour->title,
+            'location' => $tour->location,
+            'latitude' => '49.3172',
+            'longitude' => '8.4412',
+        ], $overrides);
+    }
 }

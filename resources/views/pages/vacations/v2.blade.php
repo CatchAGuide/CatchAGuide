@@ -78,6 +78,7 @@
         'heroProductTitle' => translate($camp['title'] ?? ''),
         'heroLocationLabel' => $campPlaceLabel,
         'heroMapHref' => '#map',
+        'heroReviewStats' => $reviewStats ?? null,
         'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_camp'),
         'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_camp'),
     ])
@@ -110,6 +111,7 @@
                         <span class="camp-topbar__dot">•</span>
                     @endif
                     <a class="camp-topbar__link" href="#map">{{ __('vacations.show_on_map') }}</a>
+                    @include('partials.reviews.badge', ['stats' => $reviewStats ?? null, 'href' => '#reviews'])
                 </div>
             </div>
             {{-- <div class="camp-topbar__actions"> --}}
@@ -204,6 +206,8 @@
         type="camp"
         :badge="__('offers.badge_camp')"
         :location="$campLocation"
+        :rating="$reviewStats['rating'] ?? null"
+        :review-count="$reviewStats['count'] ?? 0"
     />
 
     <!-- Main Content with Sidebar -->
@@ -411,6 +415,8 @@
                         </div>
                     </section>
                     @endif
+
+                    @include('partials.reviews.section', ['section' => $reviewSection ?? null])
                 </div>
             </main>
         </div>

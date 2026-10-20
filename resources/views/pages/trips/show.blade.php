@@ -53,6 +53,7 @@
             'heroProductTitle' => $tripView['title'] ?? __('trips.page_title_fallback'),
             'heroLocationLabel' => $tripPlaceLabel,
             'heroMapHref' => '#tripOfferMap',
+            'heroReviewStats' => $reviewStats ?? null,
             'mobileSearchTriggerLabel' => __('vacations.catalog_header_mobile_trigger_trip'),
             'mobileSearchSheetTitle' => __('vacations.catalog_header_mobile_sheet_title_trip'),
         ])
@@ -80,6 +81,7 @@
                         <i class="fas fa-map-marker-alt"></i>
                         {{ __('vacations.show_on_map') }}
                     </button>
+                    @include('partials.reviews.badge', ['stats' => $reviewStats ?? null, 'href' => '#reviews'])
                 </div>
             </div>
 
@@ -148,6 +150,8 @@
                 :location="$tripLocation"
                 :price-display="$tripPriceDisplay"
                 :price-suffix="$tripPriceDisplay ? __('trips.per_person_suffix') : null"
+                :rating="$reviewStats['rating'] ?? null"
+                :review-count="$reviewStats['count'] ?? 0"
             />
 
             {{-- Feature cards: full-width row below gallery; two-column layout starts below --}}
@@ -706,6 +710,8 @@
                     </section>
                 @endif
 
+                @include('partials.reviews.section', ['section' => $reviewSection ?? null])
+
                 @if(!empty($additionalInfoItems))
                     <section class="trip-offer-page__additional-info-section" data-reveal id="additional-info">
                         <div class="trip-offer-page__additional-info-card">
@@ -887,8 +893,6 @@
                 @endif
             </aside>
         </div>
-
-        @include('pages.trips.partials.reviews', ['reviewTrust' => $reviewTrust ?? null])
 
         @unless($isDraft)
         <x-vacation.mobile-book-bar

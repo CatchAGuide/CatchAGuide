@@ -10,6 +10,7 @@
         'admin.listings.consolidated.*'
     );
     $salesActive = request()->routeIs('admin.sales.*');
+    $reviewsActive = request()->routeIs('admin.reviews.*', 'admin.vacation-reviews.*', 'admin.vacation-testimonials.*');
     $financeStrategyActive = request()->routeIs(
         'admin.finance.*',
         'admin.financial.*',
@@ -99,11 +100,18 @@
                 <li class="sub-category">
                     <h3>Communications</h3>
                 </li>
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.reviews.index') }}"><i class="side-menu__icon fe fe-star"></i><span class="side-menu__label">{{ __('admin.reviews.nav') }}</span></a>
-                </li>
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.vacation-reviews.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.vacation-reviews.index') }}"><i class="side-menu__icon fe fe-star"></i><span class="side-menu__label">{{ __('admin.vacation_reviews.nav') }}</span></a>
+                <li class="slide {{ $reviewsActive ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ $reviewsActive ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                        <i class="side-menu__icon fe fe-star"></i>
+                        <span class="side-menu__label">{{ __('admin.vacation_reviews.nav_group') }}</span>
+                        <i class="angle fe fe-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a href="{{ route('admin.reviews.index') }}" class="slide-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">{{ __('admin.vacation_reviews.nav_tours') }}</a></li>
+                        <li><a href="{{ route('admin.vacation-reviews.index') }}" class="slide-item {{ request()->routeIs('admin.vacation-reviews.index') && request('tab') !== 'open' ? 'active' : '' }}">{{ __('admin.vacation_reviews.nav') }}</a></li>
+                        <li><a href="{{ route('admin.vacation-reviews.index', ['tab' => 'open']) }}" class="slide-item {{ request()->routeIs('admin.vacation-reviews.index') && request('tab') === 'open' ? 'active' : '' }}">{{ __('admin.vacation_reviews.tab_open') }}</a></li>
+                        <li><a href="{{ route('admin.vacation-testimonials.index') }}" class="slide-item {{ request()->routeIs('admin.vacation-testimonials.*') ? 'active' : '' }}">{{ __('admin.vacation_testimonials.nav') }}</a></li>
+                    </ul>
                 </li>
                 <li class="slide">
                     <a class="side-menu__item {{ request()->routeIs('admin.contact-requests.*') ? 'active' : '' }}" data-bs-toggle="slide" href="{{ route('admin.contact-requests.index') }}"><i class="side-menu__icon fe fe-inbox"></i><span class="side-menu__label">Contact requests</span></a>
@@ -185,13 +193,6 @@
                        href="{{ route('admin.monthly-highlights.index') }}">
                         <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Monthly Highlights</span>
-                    </a>
-                </li>
-                <li class="slide">
-                    <a class="side-menu__item {{ request()->routeIs('admin.vacation-testimonials.*') ? 'active' : '' }}"
-                       href="{{ route('admin.vacation-testimonials.index') }}">
-                        <i class="side-menu__icon fe fe-star"></i>
-                        <span class="side-menu__label">{{ __('admin.vacation_testimonials.nav') }}</span>
                     </a>
                 </li>
                 <li class="slide {{ request()->routeIs('admin.blog.*') ? 'is-expanded' : '' }}">

@@ -315,6 +315,14 @@
                                                         @endforeach
                                                     </ul>
                                                 </div>
+                                                <button type="button"
+                                                        class="btn btn-link p-0 text-muted js-status-summary"
+                                                        data-url="{{ route('admin.camp-vacation-bookings.status-history', $request) }}"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#statusHistoryModal"
+                                                        title="{{ __('admin.booking_status_history.button') }}">
+                                                    <i class="fa fa-stream me-1"></i><span class="js-status-summary-text">{{ $statusSummaries[$request->id] ?? __('admin.booking_status_history.button') }}</span>
+                                                </button>
                                             </td>
                                             <td class="col-actions cr-td-actions text-end text-nowrap" data-label="Actions">
                                                 @unless(isset($offers[$request->id]))
@@ -599,6 +607,7 @@
         </div>
     </div>
 </div>
+@include('admin.partials.booking-status-history')
 @endsection
 
 @section('js_after')
@@ -668,6 +677,8 @@
                     btn.setAttribute('data-status', data.status);
                     const label = btn.querySelector('.js-status-btn-text');
                     if (label) label.textContent = data.status_label || data.status;
+                    const summary = btn.closest('td') ? btn.closest('td').querySelector('.js-status-summary-text') : null;
+                    if (summary && data.status_summary) summary.textContent = data.status_summary;
                     dropdown.querySelectorAll('.js-status-option').forEach(function (item) {
                         item.classList.toggle('active', item.getAttribute('data-status') === data.status);
                     });

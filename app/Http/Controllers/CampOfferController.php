@@ -11,10 +11,13 @@ use App\Models\Camp;
 use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
+use App\Presenters\Reviews\ReviewSectionPresenter;
 use App\Services\Search\ListingSearchStateService;
 use App\Services\Seo\StructuredDataBuilder;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
+use App\Services\Vacation\VacationReviewService;
+use App\Services\Vacation\VacationReviewStats;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 
@@ -24,6 +27,9 @@ class CampOfferController extends Controller
         private ListingViewTranslationService $viewTranslation,
         private ListingSearchStateService $searchState,
         private StructuredDataBuilder $structuredData,
+        private VacationReviewService $vacationReviews,
+        private VacationReviewStats $vacationReviewStats,
+        private ReviewSectionPresenter $reviewSections,
     ) {}
 
     private function getImageUrl($path)
@@ -246,6 +252,9 @@ class CampOfferController extends Controller
             $preselectedGuests = $sessionGuests !== '' ? (int) $sessionGuests : null;
         }
 
+        $reviewSection = $this->reviewSections->vacation($this->vacationReviews->listingReviews(VacationReviewService::TYPE_CAMP, $camp->id));
+        $reviewStats = $this->vacationReviewStats->forListing(VacationReviewService::TYPE_CAMP, $camp->id);
+
         return view('pages.vacations.v2', compact(
             'campData',
             'guiding',
@@ -262,7 +271,9 @@ class CampOfferController extends Controller
             'remainingGalleryCount',
             'galleryImages',
             'isDraft',
-            'preselectedGuests'
+            'preselectedGuests',
+            'reviewSection',
+            'reviewStats'
         ))->with('camp', $campData)
             ->with('structuredData', $isDraft ? null : $this->structuredData->camp($camp, route('vacations.camps.show', $camp->slug)));
     }
