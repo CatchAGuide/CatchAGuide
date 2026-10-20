@@ -29,6 +29,18 @@
             :pillar="$pillar"
             :badge="$card['badge'] ?? null"
         />
+        @if(!empty($card['review_count']) && !empty($card['rating']))
+            @php $reviewsLabel = trans_choice('offers.reviews_count', $card['review_count'], ['count' => $card['review_count']]); @endphp
+            <div
+                class="vacation-slider-card__rating"
+                title="{{ $reviewsLabel }}"
+                aria-label="{{ number_format((float) $card['rating'], 1) }}/10, {{ $reviewsLabel }}"
+            >
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <span class="vacation-slider-card__rating-value">{{ number_format((float) $card['rating'], 1) }}</span>
+                <span class="vacation-slider-card__rating-count">({{ $card['review_count'] }})</span>
+            </div>
+        @endif
     </div>
 
     <div class="vacation-slider-card__body">

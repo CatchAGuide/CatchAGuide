@@ -13733,6 +13733,36 @@ div#masonry-grid img {
   position: relative;
   overflow: hidden;
 }
+.vacation-slider-card__rating {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 8px rgba(49, 48, 65, 0.22);
+  color: #313041;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  pointer-events: none;
+}
+.vacation-slider-card__rating i {
+  color: #ffb400;
+  font-size: 0.62rem;
+}
+.vacation-slider-card__rating-value {
+  font-weight: 800;
+}
+.vacation-slider-card__rating-count {
+  color: #64748b;
+  font-size: 0.64rem;
+  font-weight: 600;
+}
 .vacation-slider-card__gallery {
   position: relative;
   width: 100%;

@@ -91,4 +91,21 @@ class OfferCardPartialTest extends TestCase
             $html
         );
     }
+
+    public function test_camp_and_trip_review_scores_show_with_one_decimal(): void
+    {
+        foreach (['camp', 'trip'] as $type) {
+            $html = $this->render($this->card([
+                'type' => $type,
+                'rating' => 9.0,
+                'review_count' => 2,
+            ]));
+
+            $this->assertStringContainsString('<p class="cag-home-offer__rating">★ 9.0 <span>(2)</span></p>', $html);
+            $this->assertStringContainsString('cag-home-offer__rating-badge', $html);
+        }
+
+        $html = $this->render($this->card(['type' => 'camp']));
+        $this->assertStringNotContainsString('cag-home-offer__rating', $html);
+    }
 }
