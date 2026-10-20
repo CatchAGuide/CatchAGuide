@@ -36,6 +36,8 @@ class VoucherOrderPresenter
             'tourLocation' => (string) ($summary['location'] ?? ''),
             'tourDuration' => $summary['duration'] ?? null,
             'tourUrl' => $summary['url'] ?? null,
+            'tourFishingType' => $guiding ? __('checkout.voucher.pdf.'.($guiding->is_boat ? 'boat' : 'shore')) : '',
+            'guestCount' => $guests,
             'guests' => trans_choice('checkout.voucher.guests_count', $guests, ['count' => $guests]),
             'price' => $this->money->money((float) $order->price_total),
             'recipients' => (string) $order->recipient_names,

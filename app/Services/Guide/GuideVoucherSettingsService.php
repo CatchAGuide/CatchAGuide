@@ -3,17 +3,55 @@
 namespace App\Services\Guide;
 
 use App\Enums\VoucherDesign;
+use App\Mail\Guest\VoucherOrderGuestMail;
 use App\Models\Guiding;
 use App\Models\User;
+use App\Models\VoucherOrder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * A guide's gift voucher settings (profile › Gift vouchers): which of their tours can be bought
  * as a voucher (per tour, on by default) and which voucher design buyers get (per guide).
- * Changes only affect new voucher orders; existing orders keep their snapshot.
+ * Changes only affect new voucher orders; existing orders keep their snapshot. The page also
+ * lists the guide's voucher orders, so they can confirm payments there.
  */
 class GuideVoucherSettingsService
 {
+    /** Orders shown on the page: open payments first, then the most recent paid ones. */
+    private const ORDER_LIMIT = 50;
+
+    /**
+     * @return Collection<int, VoucherOrder>
+     */
+    public function orders(User $guide): Collection
+    {
+        return VoucherOrder::where('guide_id', $guide->id)
+            ->orderByRaw('paid_at IS NOT NULL')
+            ->latest()
+            ->limit(self::ORDER_LIMIT)
+            ->get(['id', 'voucher_code', 'tour_title_snapshot', 'number_of_guests', 'price_total', 'recipient_names',
+                'buyer_first_name', 'buyer_last_name', 'buyer_email', 'design_type', 'paid_at', 'valid_until', 'created_at']);
+    }
+
+    /**
+     * Unsaved sample order for a voucher preview: the guide's own name and contact details, and
+     * the given tour (title, location, duration, fishing type, QR code) or a made-up one.
+     */
+    public function sampleOrder(User $guide, ?Guiding $tour = null): VoucherOrder
+    {
+        $order = VoucherOrderGuestMail::sample()->order;
+        $order->setRelation('guide', $guide->loadMissing('information'));
+        $order->language = app()->getLocale();
+
+        if ($tour !== null) {
+            $order->setRelation('guiding', $tour);
+            $order->tour_title_snapshot = (string) $tour->title;
+            $order->number_of_guests = max(1, min(2, (int) $tour->max_guests));
+        }
+
+        return $order;
+    }
+
     /**
      * The guide's tours for the settings page: published ones first (the only ones guests can
      * buy), each group sorted by the title as displayed.

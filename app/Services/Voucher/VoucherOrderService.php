@@ -2,16 +2,13 @@
 
 namespace App\Services\Voucher;
 
-use App\Mail\Guest\VoucherOrderGuestMail;
-use App\Mail\Guide\VoucherOrderGuideMail;
-use App\Models\EmailLog;
 use App\Models\Guiding;
 use App\Models\User;
 use App\Models\VoucherOrder;
 use App\Services\Checkout\TourCheckoutQuote;
 use App\Services\HelperService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -19,8 +16,8 @@ use Throwable;
  * voucher design and the commission (same rate as a booking of that tour), fills the standard
  * voucher PDF when the guide uses it, and emails the buyer and the guide.
  *
- * CaG takes no payment and never sends the voucher to the buyer: the guide collects payment
- * and then sends the voucher themselves.
+ * CaG takes no payment. The voucher only goes to the buyer once the guide has confirmed the
+ * payment (VoucherPaymentService), so neither of these first emails carries the PDF.
  */
 class VoucherOrderService
 {
@@ -28,6 +25,7 @@ class VoucherOrderService
         private readonly VoucherCodeGenerator $codes,
         private readonly VoucherPdfGenerator $pdfs,
         private readonly HelperService $helper,
+        private readonly VoucherMailer $mailer,
     ) {}
 
     /**
@@ -48,6 +46,7 @@ class VoucherOrderService
 
         $order = VoucherOrder::create([
             'voucher_code' => $this->codes->generate(),
+            'payment_token' => Str::random(32),
             'guiding_id' => $guiding->id,
             'guide_id' => $guiding->user_id,
             'user_id' => $currentUser?->getKey(),
@@ -78,59 +77,22 @@ class VoucherOrderService
         }
 
         if (! app()->environment('local')) {
-            $this->notify($order);
+            $this->mailer->orderPlaced($order);
         }
 
         return $order;
     }
 
     /**
-     * A failed PDF never loses the order: the guide email then falls back to the "fill in a
-     * voucher yourself" instructions, and the BCC copy lets operations follow up.
+     * A failed PDF never loses the order: VoucherPaymentService tries again when the payment is
+     * confirmed, and the BCC copy of the guide email lets operations follow up.
      */
-    private function attachPdf(VoucherOrder $order): void
+    public function attachPdf(VoucherOrder $order): void
     {
         try {
             $order->forceFill(['pdf_path' => $this->pdfs->generate($order)])->save();
         } catch (Throwable $e) {
             Log::error('Voucher PDF generation failed', ['voucher_order_id' => $order->id, 'error' => $e->getMessage()]);
         }
-    }
-
-    private function notify(VoucherOrder $order): void
-    {
-        $guide = $order->guide;
-        $mails = [[$order->buyer_email, (new VoucherOrderGuestMail($order))->locale($order->language), null]];
-
-        if ($guide?->email) {
-            $mails[] = [
-                $guide->email,
-                (new VoucherOrderGuideMail($order))->locale($this->guideLocale($guide->language, $order->language)),
-                config('mail.admin_email'),
-            ];
-        }
-
-        foreach ($mails as [$recipient, $mail, $bcc]) {
-            try {
-                $pending = Mail::to($recipient);
-                if ($bcc) {
-                    $pending->bcc($bcc);
-                }
-                $pending->send($mail);
-            } catch (Throwable $e) {
-                Log::error('Voucher order mail failed', [
-                    'voucher_order_id' => $order->id,
-                    'mail' => $mail::class,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-    }
-
-    private function guideLocale(?string $guideLanguage, string $fallback): string
-    {
-        $locale = EmailLog::normalizeLanguage($guideLanguage);
-
-        return in_array($locale, array_values(config('app.locales', [])), true) ? $locale : $fallback;
     }
 }

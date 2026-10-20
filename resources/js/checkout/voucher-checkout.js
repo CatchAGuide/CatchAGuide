@@ -91,7 +91,7 @@ function voucherCheckout() {
         },
 
         get messageCounter() {
-            return `${String(this.voucher.message || '').length} / ${limits.message || 200}`;
+            return `${String(this.voucher.message || '').length} / ${limits.message || 100}`;
         },
 
         money(amount) {

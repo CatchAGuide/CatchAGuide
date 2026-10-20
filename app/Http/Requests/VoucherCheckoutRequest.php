@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Domain\Checkout\ViewModels\VoucherCheckoutViewModel;
 use App\Models\Guiding;
 use App\Rules\Recaptcha;
 use App\Services\Checkout\TourCheckoutPricing;
 use App\Services\Checkout\TourCheckoutQuote;
 use App\Services\Voucher\VoucherTourFinder;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -40,7 +42,14 @@ class VoucherCheckoutRequest extends FormRequest
             'persons' => ['required', 'integer', 'min:1', 'max:'.($this->pricing()?->maxGuests() ?? 1)],
             'recipient_names' => ['required', 'string', 'max:100'],
             'sender_name' => ['nullable', 'string', 'max:100'],
-            'personal_message' => ['nullable', 'string', 'max:200'],
+            'personal_message' => [
+                'nullable', 'string', 'max:'.VoucherCheckoutViewModel::MESSAGE_MAX,
+                function (string $attribute, mixed $value, Closure $fail) {
+                    if (is_string($value) && substr_count($value, "\n") >= VoucherCheckoutViewModel::MESSAGE_MAX_LINES) {
+                        $fail(__('checkout.voucher.errors.message_too_long'));
+                    }
+                },
+            ],
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'email', 'max:255'],
@@ -127,7 +136,7 @@ class VoucherCheckoutRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge(array_map(
-            fn ($value) => is_string($value) ? trim($value) : $value,
+            fn ($value) => is_string($value) ? trim(str_replace(["\r\n", "\r"], "\n", $value)) : $value,
             $this->only(['recipient_names', 'sender_name', 'personal_message', 'first_name', 'last_name', 'email', 'phone'])
         ));
     }

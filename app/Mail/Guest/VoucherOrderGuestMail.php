@@ -14,8 +14,8 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Thank-you to the buyer of a gift voucher: order summary, and that the guide gets in touch with
- * payment details and then sends the voucher. No PDF is attached and nothing is charged; CaG
- * neither takes the payment nor sends the voucher.
+ * payment details. No PDF is attached and nothing is charged: CaG takes no payment and emails
+ * the voucher only once the guide has confirmed the payment (VoucherPaidGuestMail).
  */
 class VoucherOrderGuestMail extends Mailable
 {
@@ -55,6 +55,7 @@ class VoucherOrderGuestMail extends Mailable
             'duration' => 6,
             'duration_type' => 'hours',
             'slug' => 'zanderangeln-am-rhein',
+            'is_boat' => 1,
         ]);
 
         $order = (new VoucherOrder)->forceFill([
@@ -100,6 +101,7 @@ class VoucherOrderGuestMail extends Mailable
     public function viewData(): array
     {
         return app(VoucherOrderPresenter::class)->details($this->order) + [
+            'ownDesign' => $this->order->design_type === VoucherDesign::GuideOwn,
             'contactEmail' => (string) config('mail.admin_email'),
             'site' => preg_replace('/^www\./', '', (string) parse_url(url('/'), PHP_URL_HOST)),
         ];

@@ -8,13 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * A tour bought as a gift voucher (see the voucher_orders migration). Final once created: CaG
- * takes no payment and releases nothing; the guide collects payment and sends the voucher.
+ * A tour bought as a gift voucher (see the voucher_orders migrations). CaG takes no payment:
+ * the guide collects it and confirms it (paid_at, via the payment_token link or the profile);
+ * CaG then emails the voucher to the buyer (VoucherPaymentService).
  */
 class VoucherOrder extends Model
 {
     protected $fillable = [
         'voucher_code',
+        'payment_token',
         'guiding_id',
         'guide_id',
         'user_id',
@@ -32,6 +34,7 @@ class VoucherOrder extends Model
         'buyer_phone',
         'design_type',
         'pdf_path',
+        'paid_at',
         'language',
         'valid_until',
         'commission_rate',
@@ -45,6 +48,7 @@ class VoucherOrder extends Model
         'commission_rate' => 'decimal:4',
         'commission_amount' => 'decimal:2',
         'valid_until' => 'date',
+        'paid_at' => 'datetime',
     ];
 
     public function guiding(): BelongsTo
@@ -75,6 +79,11 @@ class VoucherOrder extends Model
     public function buyerPhone(): string
     {
         return trim($this->buyer_phone_country_code.' '.$this->buyer_phone);
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->paid_at !== null;
     }
 
     public function hasPdf(): bool

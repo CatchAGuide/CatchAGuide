@@ -1,118 +1,227 @@
 {{--
-    Catch a Guide standard gift voucher, A4 portrait, rendered by dompdf (VoucherPdfGenerator).
-    dompdf supports CSS 2.1 only: layout is tables, fonts are DejaVu (covers umlauts), images are
-    data URIs. Placeholder design until the final branded template is delivered; the dynamic
-    fields follow spec section 7. The price is deliberately not printed.
+    Catch a Guide standard gift voucher, A4 portrait (794 × 1123 px at dompdf's 96 dpi), rendered by
+    dompdf (VoucherPdfGenerator). Branded design "Gutschein / Voucher" (Claude Design, Oct 2026).
+    dompdf supports CSS 2.1 only, so the design's flex/grid layout is rebuilt with tables and
+    absolute positioning; px values are the design's. Fonts are the Barlow TTFs in resources/fonts,
+    images are data URIs. The price is deliberately not printed.
 
-    Expects: $voucher (VoucherOrderPresenter::details), $logo and $guidePhoto (data URI|null).
+    The personal message is capped at three lines (VoucherCheckoutViewModel::MESSAGE_MAX[_LINES]);
+    older, longer messages get a smaller size so they still fit. dompdf renders line-heights 4/3
+    too tall (35px comes out as ~47px), so the big lines set theirs through $lineHeight().
+
+    Expects: $voucher (VoucherOrderPresenter::details), $logo and $qr (data URI|null), $fontDir.
 --}}
-@php($copy = 'checkout.voucher.pdf')
+@php
+    $copy = 'checkout.voucher.pdf';
+    $lineHeight = fn (float $px): string => round($px * .75).'px';
+
+    $recipients = $voucher['recipients'];
+    $recipientSize = match (true) {
+        mb_strlen($recipients) <= 14 => 96,
+        mb_strlen($recipients) <= 24 => 64,
+        mb_strlen($recipients) <= 40 => 46,
+        default => 34,
+    };
+
+    $lines = preg_split('/\n/', $voucher['personalMessage']) ?: [];
+    $messageLines = count($lines) > 3 ? [implode(' ', $lines)] : $lines;
+    $messageLength = mb_strlen($voucher['personalMessage']);
+    $messageSize = match (true) {
+        $messageLength <= 60 => 30,
+        $messageLength <= 100 => 26,
+        $messageLength <= 150 => 22,
+        default => 18,
+    };
+
+    $tourSize = mb_strlen($voucher['tourTitle']) <= 50 ? 32 : 24;
+    $facts = [
+        // City only, as in the design: the fact row stays one line high.
+        ['location', trim(explode(',', $voucher['tourLocation'])[0])],
+        ['duration', $voucher['tourDuration']],
+        ['fishing_type', $voucher['tourFishingType']],
+        ['persons', (string) $voucher['guestCount']],
+    ];
+@endphp
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>
 <meta charset="utf-8">
 <title>{{ __($copy.'.title') }} {{ $voucher['code'] }}</title>
 <style>
+    @font-face { font-family: 'Barlow'; font-weight: 400; font-style: normal; src: url('{{ $fontDir }}/Barlow-Regular.ttf') format('truetype'); }
+    @font-face { font-family: 'Barlow'; font-weight: 400; font-style: italic; src: url('{{ $fontDir }}/Barlow-Italic.ttf') format('truetype'); }
+    @font-face { font-family: 'Barlow'; font-weight: 500; font-style: normal; src: url('{{ $fontDir }}/Barlow-Medium.ttf') format('truetype'); }
+    @font-face { font-family: 'Barlow'; font-weight: 600; font-style: normal; src: url('{{ $fontDir }}/Barlow-SemiBold.ttf') format('truetype'); }
+    @font-face { font-family: 'Barlow Condensed'; font-weight: 600; font-style: normal; src: url('{{ $fontDir }}/BarlowCondensed-SemiBold.ttf') format('truetype'); }
+    @font-face { font-family: 'Barlow Condensed'; font-weight: 700; font-style: normal; src: url('{{ $fontDir }}/BarlowCondensed-Bold.ttf') format('truetype'); }
+
     @page { margin: 0; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'DejaVu Sans', sans-serif; color: #1A1B30; font-size: 11pt; }
-    .sheet { padding: 0; }
-    .band { background: #313041; padding: 26pt 40pt; }
-    .band td { color: #FFFFFF; vertical-align: middle; }
-    .band-logo { height: 34pt; }
-    .band-label { text-align: right; font-size: 9pt; letter-spacing: 2pt; text-transform: uppercase; color: #F3C7BF; }
-    .hero { padding: 40pt 40pt 8pt; text-align: center; }
-    .eyebrow { font-size: 10pt; letter-spacing: 3pt; text-transform: uppercase; color: #E8604C; margin: 0 0 8pt; }
-    .title { font-size: 34pt; font-weight: bold; margin: 0; color: #313041; }
-    .for { font-size: 13pt; color: #5A6478; margin: 18pt 0 4pt; }
-    .recipients { font-size: 24pt; font-weight: bold; margin: 0; color: #1A1B30; }
-    .tour { margin: 26pt 40pt 0; border: 1.5pt solid #E8604C; border-radius: 10pt; padding: 18pt 22pt; text-align: center; }
-    .tour-title { font-size: 16pt; font-weight: bold; margin: 0 0 6pt; }
-    .tour-meta { font-size: 10.5pt; color: #5A6478; margin: 0; }
-    .message { margin: 22pt 60pt 0; text-align: center; font-style: italic; font-size: 12pt; line-height: 1.5; color: #1A1B30; }
-    .from { margin: 10pt 40pt 0; text-align: center; font-size: 11pt; color: #5A6478; }
-    .wrap { padding: 0 40pt; }
-    .guide { margin-top: 30pt; background: #F6F7F9; border-radius: 10pt; }
-    .guide td { padding: 16pt 0 16pt 20pt; }
-    .guide td { vertical-align: middle; }
-    .guide-photo { width: 58pt; height: 58pt; border-radius: 29pt; }
-    .guide-label { font-size: 8.5pt; letter-spacing: 1.5pt; text-transform: uppercase; color: #3B5583; margin: 0 0 4pt; }
-    .guide-name { font-size: 13pt; font-weight: bold; margin: 0 0 3pt; }
-    .guide-contact { font-size: 10pt; color: #5A6478; margin: 0; }
-    .facts { margin-top: 22pt; }
-    .facts td { width: 33.33%; padding: 0 6pt; text-align: center; }
-    .fact-label { font-size: 8.5pt; letter-spacing: 1.5pt; text-transform: uppercase; color: #5A6478; margin: 0 0 4pt; }
-    .fact-value { font-size: 12.5pt; font-weight: bold; margin: 0; }
-    .code { font-family: 'DejaVu Sans Mono', monospace; color: #E8604C; }
-    .note { margin: 24pt 40pt 0; text-align: center; font-size: 11pt; font-weight: bold; color: #313041; }
-    .footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 12pt 40pt; background: #313041; color: #C9CBD6; font-size: 8pt; text-align: center; }
+    body { margin: 0; font-family: 'Barlow', 'DejaVu Sans', sans-serif; color: #2d2b42; background: #fff; }
+    p { margin: 0; }
+    table { border-collapse: collapse; }
+    td { padding: 0; vertical-align: top; }
+    .heading { font-family: 'Barlow Condensed', 'DejaVu Sans', sans-serif; }
+    .label { font-size: 10px; line-height: 1; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: #6b6980; }
+
+    .head { background: #2d2b42; padding: 40px 56px 36px; }
+    .head-title { height: 141px; font-size: 176px; line-height: 141px; font-weight: 700; letter-spacing: -.03em; text-transform: uppercase; color: #fff; }
+    .head-sub { font-size: 26px; line-height: 1.1; font-weight: 600; letter-spacing: .02em; margin-top: 16px; color: #e5604d; }
+
+    /* Between the 262px header and the ~466px bottom block (card, cut-off part, footer). */
+    .hero { position: absolute; top: 286px; left: 56px; width: 682px; }
+    .hero td { vertical-align: middle; text-align: center; }
+    .for { font-size: 14px; line-height: 10px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: #e5604d; }
+    .name { font-weight: 700; letter-spacing: -.01em; margin-top: 14px; }
+    .quote-rule { width: 40px; height: 2px; background: #e5604d; }
+    .quote-mark { font-size: 30px; line-height: 22px; font-weight: 700; color: #e5604d; padding: 0 14px; }
+    .message { font-style: italic; margin: 10px 61px 0; }
+    .from { font-size: 14px; line-height: 10px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: #6b6980; margin-top: 16px; }
+
+    .bottom { position: absolute; left: 0; right: 0; bottom: 0; }
+    .card-wrap { padding: 0 56px 36px; }
+    .card { position: relative; }
+    .card table { width: 100%; border: 1px solid #e5604d; }
+    .card .tour { padding: 20px 22px; border-bottom: 1px solid #f0c3bb; }
+    .card .tour-label { color: #e5604d; }
+    .card .tour-title { font-weight: 600; line-height: 1.1; margin-top: 8px; }
+    .card .fact { width: 25%; padding: 14px 22px; white-space: nowrap; }
+    .card .fact + .fact { border-left: 1px solid #f0c3bb; }
+    .card .fact-value { font-size: 21px; line-height: 1.3; font-weight: 600; margin-top: 6px; white-space: nowrap; }
+    .card .qr { width: 150px; padding: 14px 16px; border-left: 1px solid #f0c3bb; text-align: center; vertical-align: middle; }
+    .card .qr img, .card .qr-empty { width: 104px; height: 104px; }
+    .card .qr-empty { border: 1px solid #d9d8e0; margin: 0 auto; }
+    .card .qr-label { font-size: 9px; line-height: 1.3; font-weight: 500; letter-spacing: .12em; margin-top: 8px; }
+    .corner { position: absolute; width: 11px; height: 11px; }
+    .corner .v { position: absolute; left: 5px; top: 0; width: 1px; height: 11px; background: #e5604d; }
+    .corner .h { position: absolute; top: 5px; left: 0; width: 11px; height: 1px; background: #e5604d; }
+    .tl { top: -6px; left: -6px; } .tr { top: -6px; right: -6px; } .bl { bottom: -6px; left: -6px; } .br { bottom: -6px; right: -6px; }
+
+    .cut { position: relative; border-top: 2px dashed #2d2b42; padding: 30px 56px 28px; }
+    .scissors { position: absolute; top: -9px; left: 20px; font-family: 'DejaVu Sans', sans-serif; font-size: 12px; line-height: 1; color: #8a889b; background: #fff; padding: 0 6px; }
+    .issuer-label { color: #e5604d; }
+    .issuer-name { font-size: 24px; line-height: 1.1; font-weight: 600; margin-top: 7px; }
+    .issuer-contact { font-size: 13px; line-height: 1.45; color: #6b6980; margin-top: 4px; }
+    .redeem { font-size: 13px; line-height: 1.45; font-weight: 600; margin-top: 12px; }
+    .code-box { width: 100%; border: 1px solid #d9d8e0; }
+    .code-box .code { padding: 12px 16px; background: #fdf0ee; border-bottom: 1px solid #d9d8e0; }
+    .code-box .code-value { font-family: 'DejaVu Sans Mono', monospace; font-size: 19px; line-height: 1.2; font-weight: bold; color: #e5604d; margin-top: 7px; }
+    .code-box .date { width: 50%; padding: 10px 16px; }
+    .code-box .date + .date { border-left: 1px solid #d9d8e0; }
+    .code-box .label { font-size: 9px; }
+    .code-box .date-value { font-size: 17px; line-height: 1.2; font-weight: 600; margin-top: 5px; }
+
+    .foot { background: #2d2b42; color: #c9c7d6; padding: 14px 56px; font-size: 10px; line-height: 1.5; }
+    .foot td { vertical-align: middle; }
+    .foot img { height: 34px; }
 </style>
 </head>
 <body>
-<div class="sheet">
-    <table class="band" width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-            <td>@if($logo)<img class="band-logo" src="{{ $logo }}" alt="Catch a Guide">@else<strong>Catch a Guide</strong>@endif</td>
-            <td class="band-label">{{ __($copy.'.title') }}</td>
-        </tr>
-    </table>
+    <div class="head heading">
+        <div class="head-title">{{ __($copy.'.title') }}</div>
+        <div class="head-sub">{{ __($copy.'.subtitle') }}</div>
+    </div>
 
     <div class="hero">
-        <p class="eyebrow">{{ __($copy.'.eyebrow') }}</p>
-        <h1 class="title">{{ __($copy.'.title') }}</h1>
-        <p class="for">{{ __($copy.'.for') }}</p>
-        <p class="recipients">{{ $voucher['recipients'] }}</p>
-    </div>
-
-    <div class="tour">
-        <p class="tour-title">{{ $voucher['tourTitle'] }}</p>
-        <p class="tour-meta">
-            {{ implode(' · ', array_filter([$voucher['tourLocation'], $voucher['tourDuration'], $voucher['guests']])) }}
-        </p>
-    </div>
-
-    @if($voucher['personalMessage'] !== '')
-        <p class="message">{{ __('emails.voucher_order_guest.quote', ['message' => $voucher['personalMessage']]) }}</p>
-    @endif
-    @if($voucher['sender'] !== '')
-        <p class="from">{{ __($copy.'.from', ['name' => $voucher['sender']]) }}</p>
-    @endif
-
-    <div class="wrap">
-    <table class="guide" width="100%" cellpadding="0" cellspacing="0">
+    <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            @if($guidePhoto)
-                <td style="width: 58pt;"><img class="guide-photo" src="{{ $guidePhoto }}" alt=""></td>
-            @endif
-            <td style="padding-right: 20pt;">
-                <p class="guide-label">{{ __($copy.'.your_guide') }}</p>
-                <p class="guide-name">{{ $voucher['guideName'] }}</p>
-                <p class="guide-contact">{{ implode('  ·  ', array_filter([$voucher['guidePhone'], $voucher['guideEmail']])) }}</p>
-            </td>
-        </tr>
-    </table>
+            <td style="height: 340px;">
+                <p class="for heading">{{ __($copy.'.for') }}</p>
+                <p class="name heading" style="font-size: {{ $recipientSize }}px; line-height: {{ $lineHeight($recipientSize * .95) }};">{{ $recipients }}</p>
 
-    <table class="facts" width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-            <td>
-                <p class="fact-label">{{ __($copy.'.code') }}</p>
-                <p class="fact-value code">{{ $voucher['code'] }}</p>
-            </td>
-            <td>
-                <p class="fact-label">{{ __($copy.'.issued') }}</p>
-                <p class="fact-value">{{ $voucher['purchasedOn'] }}</p>
-            </td>
-            <td>
-                <p class="fact-label">{{ __($copy.'.valid_until') }}</p>
-                <p class="fact-value">{{ $voucher['validUntil'] }}</p>
+                @if($voucher['personalMessage'] !== '')
+                    <table cellpadding="0" cellspacing="0" style="margin: 20px auto 0;">
+                        <tr>
+                            <td style="vertical-align: middle;"><div class="quote-rule"></div></td>
+                            <td class="quote-mark heading">{{ app()->getLocale() === 'de' ? '„' : '“' }}</td>
+                            <td style="vertical-align: middle;"><div class="quote-rule"></div></td>
+                        </tr>
+                    </table>
+                    <p class="message" style="font-size: {{ $messageSize }}px; line-height: {{ $lineHeight($messageSize * 1.35) }};">{!! implode('<br>', array_map('e', $messageLines)) !!}</p>
+                @endif
+                @if($voucher['sender'] !== '')
+                    <p class="from heading">{{ __($copy.'.from', ['name' => $voucher['sender']]) }}</p>
+                @endif
             </td>
         </tr>
     </table>
     </div>
 
-    <p class="note">{{ __($copy.'.redeem_note') }}</p>
+    <div class="bottom">
+        <div class="card-wrap">
+            <div class="card">
+                <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="tour" colspan="4">
+                            <p class="label tour-label">{{ __($copy.'.tour') }}</p>
+                            <p class="tour-title heading" style="font-size: {{ $tourSize }}px;">{{ $voucher['tourTitle'] }}</p>
+                        </td>
+                        <td class="qr" rowspan="2">
+                            @if($qr)
+                                <img src="{{ $qr }}" alt="QR">
+                            @else
+                                <div class="qr-empty"></div>
+                            @endif
+                            <p class="label qr-label">{{ __($copy.'.qr') }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        @foreach($facts as [$key, $value])
+                            <td class="fact">
+                                <p class="label">{{ __($copy.'.'.$key) }}</p>
+                                <p class="fact-value heading">{{ filled($value) ? $value : '–' }}</p>
+                            </td>
+                        @endforeach
+                    </tr>
+                </table>
+                @foreach(['tl', 'tr', 'bl', 'br'] as $corner)
+                    <div class="corner {{ $corner }}"><div class="v"></div><div class="h"></div></div>
+                @endforeach
+            </div>
+        </div>
 
-    <div class="footer">{{ __($copy.'.footer') }}</div>
-</div>
+        <div class="cut">
+            <span class="scissors">&#9986;</span>
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="width: 381px; padding-right: 28px;">
+                        <p class="label issuer-label">{{ __($copy.'.issuer') }}</p>
+                        <p class="issuer-name heading">{{ $voucher['guideName'] }}</p>
+                        <p class="issuer-contact">{{ implode(' · ', array_filter([$voucher['guidePhone'], $voucher['guideEmail']])) }}</p>
+                        <p class="redeem">{{ __($copy.'.redeem_note') }}</p>
+                    </td>
+                    <td>
+                        <table class="code-box" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="code" colspan="2">
+                                    <p class="label">{{ __($copy.'.code') }}</p>
+                                    <p class="code-value">{{ $voucher['code'] }}</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="date">
+                                    <p class="label">{{ __($copy.'.issued') }}</p>
+                                    <p class="date-value heading">{{ $voucher['purchasedOn'] }}</p>
+                                </td>
+                                <td class="date">
+                                    <p class="label">{{ __($copy.'.valid_until') }}</p>
+                                    <p class="date-value heading">{{ $voucher['validUntil'] !== '' ? $voucher['validUntil'] : '–' }}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="foot" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>{{ __($copy.'.footer') }}</td>
+                @if($logo)
+                    <td style="width: 106px; padding-left: 20px; text-align: right;"><img src="{{ $logo }}" alt="Catch A Guide"></td>
+                @endif
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

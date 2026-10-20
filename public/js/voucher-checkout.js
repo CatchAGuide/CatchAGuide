@@ -678,7 +678,7 @@ function voucherCheckout() {
       return this.participantsLabel;
     },
     get messageCounter() {
-      return "".concat(String(this.voucher.message || '').length, " / ").concat(limits.message || 200);
+      return "".concat(String(this.voucher.message || '').length, " / ").concat(limits.message || 100);
     },
     money: function money(amount) {
       return _money.format(amount);

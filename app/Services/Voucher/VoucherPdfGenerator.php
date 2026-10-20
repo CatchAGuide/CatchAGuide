@@ -4,8 +4,13 @@ namespace App\Services\Voucher;
 
 use App\Models\VoucherOrder;
 use App\Presenters\Voucher\VoucherOrderPresenter;
+use App\Services\Sales\SalesLinks;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Http;
+use chillerlan\QRCode\Common\EccLevel;
+use chillerlan\QRCode\Output\QRGdImagePNG;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Traits\Localizable;
 use Throwable;
@@ -13,26 +18,22 @@ use Throwable;
 /**
  * Fills the Catch a Guide standard voucher (A4, resources/views/vouchers/pdf/cag-standard) for
  * an order, in the order's checkout language, and stores it on the private voucher disk. The
- * price is deliberately not printed: the voucher is a gift.
+ * price is deliberately not printed: the voucher is a gift. The QR code opens the tour page on
+ * the domain of the order's language.
  */
 class VoucherPdfGenerator
 {
     use Localizable;
 
-    /** Light logo variant (as in the site footer and mail header), for the dark band. */
+    /** Light logo variant (as in the site footer and mail header), for the dark footer band. */
     private const LOGO = 'assets/images/logo/CatchAGuide2_Logo_PNG.png';
 
-    /** Guide photo download limit; the voucher renders without it when it's slow or missing. */
-    private const PHOTO_TIMEOUT_SECONDS = 4;
-
-    /**
-     * The photo prints at 58pt; dompdf stores images uncompressed, so a full-size tour photo
-     * made the PDF (and the guide's email attachment) several MB. Shrink it first.
-     */
-    private const PHOTO_MAX_PX = 240;
+    /** Barlow / Barlow Condensed TTFs (OFL) of the branded design; dompdf can't read woff2. */
+    private const FONT_DIR = 'fonts/barlow';
 
     public function __construct(
         private readonly VoucherOrderPresenter $presenter,
+        private readonly SalesLinks $links,
     ) {}
 
     /**
@@ -49,10 +50,16 @@ class VoucherPdfGenerator
 
     public function render(VoucherOrder $order): string
     {
-        return $this->withLocale($order->language ?: app()->getLocale(), fn () => Pdf::loadView('vouchers.pdf.cag-standard', [
+        $locale = $order->language ?: app()->getLocale();
+
+        // dompdf caches the Barlow metrics there and fails when the folder is missing.
+        File::ensureDirectoryExists((string) config('dompdf.options.font_cache', storage_path('fonts')));
+
+        return $this->withLocale($locale, fn () => Pdf::loadView('vouchers.pdf.cag-standard', [
             'voucher' => $this->presenter->details($order),
             'logo' => $this->localImage(public_path(self::LOGO)),
-            'guidePhoto' => $this->guidePhoto($order),
+            'qr' => $this->tourQr($order, $locale),
+            'fontDir' => str_replace('\\', '/', resource_path(self::FONT_DIR)),
         ])->setPaper('a4')->setOption('isFontSubsettingEnabled', true)->output());
     }
 
@@ -70,6 +77,16 @@ class VoucherPdfGenerator
         return $this->withLocale($order->language ?: app()->getLocale(), fn () => __('checkout.voucher.pdf.file_name', ['code' => $order->voucher_code]));
     }
 
+    /**
+     * Clean tour URL (no query string) on the order language's domain.
+     */
+    public function tourUrl(VoucherOrder $order, string $locale): ?string
+    {
+        $slug = $order->guiding?->slug;
+
+        return $slug ? $this->links->listing('guidings.show', ['slug' => $slug], $locale) : null;
+    }
+
     private function disk(): string
     {
         return (string) config('vouchers.pdf_disk', 'local');
@@ -81,57 +98,24 @@ class VoucherPdfGenerator
     }
 
     /**
-     * The guide's profile photo as a data URI, so dompdf never fetches remote files itself.
+     * PNG data URI of a QR code for the tour page, or null without a tour (the slot stays empty).
      */
-    private function guidePhoto(VoucherOrder $order): ?string
+    private function tourQr(VoucherOrder $order, string $locale): ?string
     {
-        $guide = $order->guide;
-        if ($guide === null || empty($guide->profil_image)) {
+        $url = $this->tourUrl($order, $locale);
+        if ($url === null) {
             return null;
         }
 
         try {
-            $response = Http::timeout(self::PHOTO_TIMEOUT_SECONDS)->get(guide_profile_photo_url($guide));
-            $type = strtolower((string) $response->header('Content-Type'));
-
-            if (! $response->successful() || ! preg_match('#^image/(jpeg|png|webp|gif)#', $type)) {
-                return null;
-            }
-
-            return $this->thumbnail($response->body())
-                ?? 'data:'.explode(';', $type)[0].';base64,'.base64_encode($response->body());
+            return (new QRCode(new QROptions([
+                'outputInterface' => QRGdImagePNG::class,
+                'eccLevel' => EccLevel::M,
+                'scale' => 8,
+                'quietzoneSize' => 0,
+            ])))->render($url);
         } catch (Throwable) {
             return null;
         }
-    }
-
-    /**
-     * Square-cropped JPEG data URI of at most PHOTO_MAX_PX, or null when GD can't read the image.
-     */
-    private function thumbnail(string $bytes): ?string
-    {
-        if (! function_exists('imagecreatefromstring')) {
-            return null;
-        }
-
-        $source = @imagecreatefromstring($bytes);
-        if ($source === false) {
-            return null;
-        }
-
-        $side = min(imagesx($source), imagesy($source));
-        $size = min($side, self::PHOTO_MAX_PX);
-        $thumb = imagecreatetruecolor($size, $size);
-        imagefill($thumb, 0, 0, imagecolorallocate($thumb, 255, 255, 255));
-        imagecopyresampled(
-            $thumb, $source, 0, 0,
-            intdiv(imagesx($source) - $side, 2), intdiv(imagesy($source) - $side, 2),
-            $size, $size, $side, $side,
-        );
-
-        ob_start();
-        imagejpeg($thumb, null, 82);
-
-        return 'data:image/jpeg;base64,'.base64_encode((string) ob_get_clean());
     }
 }

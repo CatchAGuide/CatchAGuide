@@ -113,3 +113,6 @@ storage/debugbar/
 /playwright/.cache/
 .cursor/
 public/production/
+
+# dompdf font metrics cache (voucher PDF)
+/storage/fonts/

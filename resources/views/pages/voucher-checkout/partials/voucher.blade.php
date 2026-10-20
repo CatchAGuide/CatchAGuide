@@ -52,6 +52,7 @@
                 placeholder="{{ __('checkout.voucher.message_placeholder') }}"
                 x-model="voucher.message"
                 @input="clearError('message')"
+                @keydown.enter="if ((voucher.message.match(/\n/g) || []).length >= {{ VoucherCheckoutViewModel::MESSAGE_MAX_LINES - 1 }}) $event.preventDefault()"
                 :class="{ 'is-invalid': errors.message }"
                 aria-describedby="tc-message-error tc-message-count"
             ></textarea>

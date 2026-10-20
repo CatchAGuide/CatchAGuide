@@ -11,6 +11,7 @@ use App\Models\Guiding;
 use App\Models\User;
 use App\Models\VoucherOrder;
 use App\Services\HelperService;
+use App\Services\Voucher\VoucherPdfGenerator;
 use App\Services\Voucher\VoucherValidity;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Mail;
@@ -164,10 +165,42 @@ class VoucherCheckoutTest extends TestCase
 
         $this->postJson(route('checkout.voucher.store', ['slug' => $guiding->slug]), $this->payload([
             'persons' => 4,
-            'personal_message' => str_repeat('x', 201),
+            'personal_message' => str_repeat('x', 101),
         ]))
             ->assertStatus(422)
             ->assertJsonValidationErrors(['persons', 'personal_message' => __('checkout.voucher.errors.message_too_long')]);
+    }
+
+    public function test_personal_message_fits_three_lines_on_the_voucher(): void
+    {
+        Mail::fake();
+        $guiding = $this->guiding();
+        $url = route('checkout.voucher.store', ['slug' => $guiding->slug]);
+
+        $this->postJson($url, $this->payload(['personal_message' => "One\nTwo\nThree\nFour"]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['personal_message' => __('checkout.voucher.errors.message_too_long')]);
+
+        $this->postJson($url, $this->payload(['personal_message' => "One\r\nTwo\r\n".str_repeat('x', 90)]))->assertOk();
+
+        $this->assertSame("One\nTwo\n".str_repeat('x', 90), VoucherOrder::where('guiding_id', $guiding->id)->value('personal_message'));
+    }
+
+    public function test_voucher_qr_code_opens_the_clean_tour_url_on_the_order_language_domain(): void
+    {
+        config([
+            'sales_documents.language_domains' => true,
+            'cag.en_app_url' => 'https://catchaguide.com',
+            'cag.de_app_url' => 'https://catchaguide.de',
+        ]);
+        $guiding = $this->guiding();
+        $order = new VoucherOrder(['guiding_id' => $guiding->id]);
+        $path = route('guidings.show', ['slug' => $guiding->slug], false);
+        $pdfs = app(VoucherPdfGenerator::class);
+
+        $this->assertSame('https://catchaguide.de'.$path, $pdfs->tourUrl($order, 'de'));
+        $this->assertSame('https://catchaguide.com'.$path, $pdfs->tourUrl($order, 'en'));
+        $this->assertNull($pdfs->tourUrl(new VoucherOrder(), 'de'));
     }
 
     public function test_store_creates_the_order_from_server_side_prices_and_snapshots(): void
@@ -213,7 +246,7 @@ class VoucherCheckoutTest extends TestCase
         $this->assertSame('vouchers/'.$order->voucher_code.'.pdf', $order->pdf_path);
         Storage::disk('local')->assertExists($order->pdf_path);
         $this->assertStringStartsWith('%PDF', Storage::disk('local')->get($order->pdf_path));
-        // It's emailed to the guide: fonts are subset and photos shrunk (full fonts alone were ~1.5 MB).
+        // It's emailed to the guide: fonts are subset (full fonts alone were ~1.5 MB).
         $this->assertLessThan(300 * 1024, Storage::disk('local')->size($order->pdf_path));
 
         Mail::assertSent(VoucherOrderGuestMail::class, fn (VoucherOrderGuestMail $mail) => $mail->hasTo('lena@example.com')

@@ -31,6 +31,8 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
     Route::get('/vouchers', [GuideVoucherSettingsController::class, 'edit'])->name('vouchers');
     Route::put('/vouchers', [GuideVoucherSettingsController::class, 'update'])->name('vouchers.update');
     Route::get('/vouchers/sample', [GuideVoucherSettingsController::class, 'sample'])->name('vouchers.sample')->middleware('throttle:10,1');
+    Route::get('/vouchers/preview/{guiding}', [GuideVoucherSettingsController::class, 'preview'])->name('vouchers.preview')->whereNumber('guiding')->middleware('throttle:10,1');
+    Route::post('/vouchers/orders/{voucherOrder}/paid', [GuideVoucherSettingsController::class, 'confirmPayment'])->name('vouchers.orders.paid')->whereNumber('voucherOrder');
     Route::put('/account', [ProfileController::class, 'accountUpdate'])->name('account');
     Route::get('/favoriteguides', [ProfileController::class, 'favoriteguides'])->name('favoriteguides');
     Route::get('/myguidings', [ProfileController::class, 'myguidings'])->name('myguidings');

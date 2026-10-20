@@ -50,3 +50,19 @@
     grid-column: 1;
   }
 }
+
+// Guide's "Confirm payment received" page (pages/voucher-payment): the confirm button is the
+// filled variant of the thank-you page's outline button.
+.cc-done__confirm {
+  border-color: var(--cc-petrol);
+  background: var(--cc-petrol);
+  color: #fff;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--cc-petrol);
+    color: #fff;
+    opacity: .9;
+  }
+}

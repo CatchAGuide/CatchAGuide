@@ -19,7 +19,10 @@ final class VoucherCheckoutViewModel
 
     public const SENDER_MAX = 100;
 
-    public const MESSAGE_MAX = 200;
+    /** The standard voucher PDF prints the message in at most three lines at this length. */
+    public const MESSAGE_MAX = 100;
+
+    public const MESSAGE_MAX_LINES = 3;
 
     private readonly TourCheckoutPricing $pricing;
 

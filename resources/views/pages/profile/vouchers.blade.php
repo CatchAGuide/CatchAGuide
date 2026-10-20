@@ -31,6 +31,44 @@
         @endforeach
     </ol>
 
+    {{-- Voucher orders: the guide confirms each payment here or via the link in their email. Outside
+         the settings form, because every row has its own form. --}}
+    @if ($orders->isNotEmpty())
+        <section class="gv-card" aria-labelledby="gv-orders-title">
+            <header class="gv-card__head">
+                <h2 class="gv-card__title" id="gv-orders-title">{{ __('profile.vouchers.orders_title') }}</h2>
+                <p class="gv-card__text">{{ __('profile.vouchers.orders_text') }}</p>
+            </header>
+            <ul class="gv-orders">
+                @foreach ($orders as $order)
+                    <li class="gv-order">
+                        <div class="gv-order__main">
+                            <p class="gv-order__title">{{ $order->tour_title_snapshot }}</p>
+                            <p class="gv-order__meta">
+                                <span class="gv-order__code">{{ $order->voucher_code }}</span>
+                                · {{ __('profile.vouchers.order_for', ['names' => $order->recipient_names]) }}
+                                · {{ $order->buyerName() }} ({{ $order->buyer_email }})
+                                · {{ $order->created_at->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'M j, Y') }}
+                            </p>
+                        </div>
+                        @if ($order->isPaid())
+                            <span class="gv-order__status gv-order__status--paid">
+                                {{ __('profile.vouchers.order_paid', ['date' => $order->paid_at->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'M j, Y')]) }}
+                            </span>
+                        @else
+                            <span class="gv-order__status">{{ __('profile.vouchers.order_open') }}</span>
+                            <form class="gv-order__form" method="post" action="{{ route('profile.vouchers.orders.paid', $order) }}"
+                                onsubmit="return confirm(@js(__('profile.vouchers.order_confirm_prompt', ['name' => $order->buyerName()])))">
+                                @csrf
+                                <button type="submit" class="gv-order__btn"><i class="fas fa-check"></i>{{ __('profile.vouchers.order_confirm') }}</button>
+                            </form>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     <form action="{{ route('profile.vouchers.update') }}" method="post" class="gv-form" id="gv-form">
         @csrf
         @method('PUT')

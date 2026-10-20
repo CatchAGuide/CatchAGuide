@@ -23759,6 +23759,101 @@ input:-webkit-autofill:active {
   background: rgb(228.5158415842, 71.9138613861, 48.8841584158);
 }
 
+.gv-tour__preview {
+  flex-shrink: 0;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid #e9ecef;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #313041;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.gv-tour__preview:hover {
+  border-color: #e8604c;
+  color: #e8604c;
+}
+
+.gv-orders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gv-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid #e9ecef;
+}
+@media (min-width: 768px) {
+  .gv-order {
+    padding: 14px 24px;
+  }
+}
+.gv-order:first-child {
+  border-top: 0;
+}
+.gv-order__main {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.gv-order__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #313041;
+  overflow-wrap: anywhere;
+}
+.gv-order__meta {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: #787780;
+  overflow-wrap: anywhere;
+}
+.gv-order__code {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  color: #313041;
+}
+.gv-order__status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #fff4e5;
+  color: #8a5300;
+}
+.gv-order__status--paid {
+  background: #eaf6ee;
+  color: #1f6b3a;
+}
+.gv-order__form {
+  margin: 0;
+}
+.gv-order__btn {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #e8604c;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+.gv-order__btn:hover {
+  background: rgb(228.5158415842, 71.9138613861, 48.8841584158);
+}
+
 .tour-search-box {
   position: relative;
 }
@@ -28181,6 +28276,18 @@ body.is-mobile-search-open .pac-container {
     grid-column: 1;
   }
 }
+.cc-done__confirm {
+  border-color: var(--cc-petrol);
+  background: var(--cc-petrol);
+  color: #fff;
+  cursor: pointer;
+}
+.cc-done__confirm:hover, .cc-done__confirm:focus-visible {
+  background: var(--cc-petrol);
+  color: #fff;
+  opacity: 0.9;
+}
+
 .cc {
   --cc-surface: #fff;
   --cc-ink: #0a2f35;

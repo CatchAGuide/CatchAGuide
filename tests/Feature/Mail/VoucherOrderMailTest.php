@@ -4,7 +4,9 @@ namespace Tests\Feature\Mail;
 
 use App\Enums\VoucherDesign;
 use App\Mail\Guest\VoucherOrderGuestMail;
+use App\Mail\Guest\VoucherPaidGuestMail;
 use App\Mail\Guide\VoucherOrderGuideMail;
+use App\Mail\Guide\VoucherPaidGuideMail;
 use App\Models\User;
 use App\Models\VoucherOrder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -67,32 +69,67 @@ class VoucherOrderMailTest extends TestCase
 
         $this->assertStringContainsString(e(__('emails.voucher_order_guide.step_3_pdf', ['buyer' => 'Lena Schmidt'])), $standard);
         $this->assertStringContainsString(e(__('emails.voucher_order_guide.step_3_own', ['buyer' => 'Lena Schmidt'])), $own);
-        $this->assertStringNotContainsString(e(__('emails.voucher_order_guide.pdf_missing')), $own);
     }
 
-    public function test_guide_mail_attaches_the_stored_voucher_pdf(): void
+    public function test_guide_order_mail_attaches_nothing_and_links_the_payment_confirmation(): void
     {
         $order = $this->order(VoucherDesign::CagStandard, 'vouchers/CAG-V-TEST22.pdf');
         Storage::disk('local')->put($order->pdf_path, '%PDF-1.7 test');
 
         $mail = (new VoucherOrderGuideMail($order))->locale('en');
-        $mail->render();
+        $html = $mail->render();
 
-        $mail->assertHasAttachedData('%PDF-1.7 test', 'Gift-voucher-CAG-V-TEST22.pdf', ['mime' => 'application/pdf']);
+        $this->assertSame([], $mail->rawAttachments, 'The voucher only goes out after the payment is confirmed.');
+        $this->assertStringContainsString(e(route('voucher-payment.show', ['token' => $order->payment_token])), $html);
+        $this->assertStringContainsString(e(__('emails.voucher_order_guide.cta_confirm', [], 'en')), $html);
         $mail->assertHasReplyTo('buyer@example.com');
         $mail->assertHasSubject(__('emails.voucher_order_guide.subject', ['tour' => 'Snapshot Tour'], 'en'));
     }
 
-    public function test_guide_mail_falls_back_to_own_voucher_instructions_when_the_pdf_is_missing(): void
+    public function test_paid_mails_attach_the_stored_voucher_pdf_for_the_standard_design(): void
     {
-        $order = $this->order(VoucherDesign::CagStandard, null);
+        $order = $this->order(VoucherDesign::CagStandard, 'vouchers/CAG-V-TEST22.pdf');
+        Storage::disk('local')->put($order->pdf_path, '%PDF-1.7 test');
 
-        $mail = (new VoucherOrderGuideMail($order))->locale('en');
-        $html = $mail->render();
+        foreach ([new VoucherPaidGuestMail($order), new VoucherPaidGuideMail($order)] as $mail) {
+            $html = $mail->locale('en')->render();
 
-        $this->assertSame([], $mail->rawAttachments);
-        $this->assertStringContainsString(e(__('emails.voucher_order_guide.pdf_missing', [], 'en')), $html);
-        $this->assertStringContainsString(e(__('emails.voucher_order_guide.step_3_own', ['buyer' => 'Bea Buyer'], 'en')), $html);
+            $mail->assertHasAttachedData('%PDF-1.7 test', 'Gift-voucher-CAG-V-TEST22.pdf', ['mime' => 'application/pdf']);
+            $this->assertStringContainsString('CAG-V-TEST22', $html);
+            $this->assertStringNotContainsString('emails.voucher_paid_', $html, 'No untranslated keys.');
+        }
+    }
+
+    public function test_paid_mails_for_the_own_design_attach_nothing_and_ask_the_guide_to_send_theirs(): void
+    {
+        $order = $this->order(VoucherDesign::GuideOwn, null);
+
+        $guest = (new VoucherPaidGuestMail($order))->locale('en');
+        $guestHtml = $guest->render();
+        $guide = (new VoucherPaidGuideMail($order))->locale('en');
+        $guideHtml = $guide->render();
+
+        $this->assertSame([], $guest->rawAttachments);
+        $this->assertSame([], $guide->rawAttachments);
+        $this->assertStringContainsString(e(__('emails.voucher_paid_guest.title_own', [], 'en')), $guestHtml);
+        $this->assertStringContainsString(e(__('emails.voucher_paid_guide.step_own', ['buyer' => 'Bea Buyer', 'code' => 'CAG-V-TEST22'], 'en')), $guideHtml);
+    }
+
+    /**
+     * @dataProvider locales
+     */
+    public function test_paid_mail_previews_render_both_designs(string $locale): void
+    {
+        app()->setLocale($locale);
+
+        foreach ([VoucherDesign::CagStandard, VoucherDesign::GuideOwn] as $design) {
+            $guest = VoucherPaidGuestMail::sample($design)->render();
+            $guide = VoucherPaidGuideMail::sample($design)->render();
+
+            $this->assertStringContainsString(e(__('emails.voucher_paid_guest.any_day_title')), $guest);
+            $this->assertStringContainsString('CAG-V-7KQ3PX', $guide);
+            $this->assertStringNotContainsString('emails.voucher_paid_', $guest.$guide, 'No untranslated keys.');
+        }
     }
 
     private function order(VoucherDesign $design, ?string $pdfPath): VoucherOrder
@@ -101,6 +138,7 @@ class VoucherOrderMailTest extends TestCase
 
         return VoucherOrder::create([
             'voucher_code' => 'CAG-V-TEST22',
+            'payment_token' => str_repeat('a', 32),
             'guiding_id' => 0,
             'guide_id' => $guide->id,
             'tour_title_snapshot' => 'Snapshot Tour',
