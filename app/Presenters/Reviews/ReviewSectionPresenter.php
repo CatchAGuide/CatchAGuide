@@ -4,6 +4,7 @@ namespace App\Presenters\Reviews;
 
 use App\Models\Review;
 use App\Models\VacationReview;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -66,15 +67,17 @@ class ReviewSectionPresenter
                 ['label' => __('guidings.Region_Water'), 'value' => (float) $averages['region_water']],
             ],
             __('guidings.Real_experiences_description'),
-            $reviews->map(fn (Review $review) => $this->review(
-                $review->user->firstname ?? null,
-                $review->booking
-                    ? $review->booking->getFormattedBookingDate('M j, Y')
-                    : ($review->created_at ? Carbon::parse($review->created_at)->format('M j, Y') : null),
-                (float) $review->grandtotal_score,
-                filled($review->comment) ? translate($review->comment) : null,
-                (bool) $review->is_automatic,
-            ))->all(),
+            $reviews->map(function (Review $review) {
+                $date = $review->booking?->getBookingDate() ?? ($review->created_at ? Carbon::parse($review->created_at) : null);
+
+                return $this->review(
+                    $review->user->firstname ?? null,
+                    $date ? $this->formatDate($date) : null,
+                    (float) $review->grandtotal_score,
+                    filled($review->comment) ? translate($review->comment) : null,
+                    (bool) $review->is_automatic,
+                );
+            })->all(),
         );
     }
 
@@ -117,7 +120,7 @@ class ReviewSectionPresenter
         return $language === app()->getLocale() ? $comment : translate($comment);
     }
 
-    private function formatDate(Carbon $date): string
+    private function formatDate(CarbonInterface $date): string
     {
         return $date->copy()->locale(app()->getLocale())->translatedFormat('M j, Y');
     }

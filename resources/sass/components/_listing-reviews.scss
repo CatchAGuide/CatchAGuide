@@ -361,9 +361,40 @@ $lr-green: #2f7d5b;
   }
 }
 
-// Trip PDP: sections in the main column are spaced by their top margin.
+// Trip and camp PDPs: take the card padding and title style of the sections around the reviews,
+// so the "Reviews" heading lines up with theirs (trip: .trip-offer-page__additional-info-card,
+// camp: .camp-section). Below 768px the card chrome is dropped and only the title keeps the
+// indent, so it still lines up with the headings inside the neighbouring cards.
 .trip-offer-page__main > .listing-reviews {
+  // Sections in the trip main column are spaced by their top margin.
   margin-top: 24px;
+  gap: 20px;
+  padding: 24px 28px;
+  border-color: rgba(49, 48, 65, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+
+  .listing-reviews__title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 24px;
+    color: #313041;
+  }
+}
+
+.camp-sections > .listing-reviews {
+  gap: 18px;
+  padding: 26px;
+  border-color: rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 18px 48px -34px rgba(15, 23, 42, 0.3);
+
+  .listing-reviews__title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #1f2937;
+  }
 }
 
 @media (max-width: 767px) {
@@ -376,6 +407,24 @@ $lr-green: #2f7d5b;
 
     &__desktop {
       display: none;
+    }
+  }
+
+  .trip-offer-page__main > .listing-reviews {
+    padding: 0;
+    box-shadow: none;
+
+    .listing-reviews__title {
+      padding-left: 29px;
+    }
+  }
+
+  .camp-sections > .listing-reviews {
+    padding: 0;
+    box-shadow: none;
+
+    .listing-reviews__title {
+      padding-left: 27px;
     }
   }
 }

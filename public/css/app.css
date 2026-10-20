@@ -18958,6 +18958,7 @@ div#masonry-grid img {
   flex-direction: column;
   gap: 16px;
   flex: 1;
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -19171,6 +19172,7 @@ div#masonry-grid img {
 
 .camp-sections {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
 }
 
@@ -40060,6 +40062,31 @@ html.booking-assistant-modal-open body {
 
 .trip-offer-page__main > .listing-reviews {
   margin-top: 24px;
+  gap: 20px;
+  padding: 24px 28px;
+  border-color: rgba(49, 48, 65, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.trip-offer-page__main > .listing-reviews .listing-reviews__title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #313041;
+}
+
+.camp-sections > .listing-reviews {
+  gap: 18px;
+  padding: 26px;
+  border-color: rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 18px 48px -34px rgba(15, 23, 42, 0.3);
+}
+.camp-sections > .listing-reviews .listing-reviews__title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #1f2937;
 }
 
 @media (max-width: 767px) {
@@ -40072,6 +40099,20 @@ html.booking-assistant-modal-open body {
   }
   .listing-reviews__desktop {
     display: none;
+  }
+  .trip-offer-page__main > .listing-reviews {
+    padding: 0;
+    box-shadow: none;
+  }
+  .trip-offer-page__main > .listing-reviews .listing-reviews__title {
+    padding-left: 29px;
+  }
+  .camp-sections > .listing-reviews {
+    padding: 0;
+    box-shadow: none;
+  }
+  .camp-sections > .listing-reviews .listing-reviews__title {
+    padding-left: 27px;
   }
 }
 .listing-title-row {

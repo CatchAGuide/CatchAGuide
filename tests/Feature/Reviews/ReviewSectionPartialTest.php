@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Reviews;
 
+use App\Models\Booking;
 use App\Models\Review;
 use App\Models\User;
 use App\Models\VacationReview;
@@ -194,6 +195,18 @@ class ReviewSectionPartialTest extends TestCase
 
         $this->assertStringContainsString('id="ratings-container"', $html);
         $this->assertStringNotContainsString('class="listing-reviews__arrow"', $html);
+    }
+
+    public function test_tour_review_date_is_the_booked_day_in_the_current_language(): void
+    {
+        $review = $this->review();
+        $review->setRelation('booking', new Booking(['book_date' => '2026-10-03']));
+        app()->setLocale('de');
+
+        $this->assertSame(
+            Carbon::parse('2026-10-03')->locale('de')->translatedFormat('M j, Y'),
+            $this->section(collect([$review]))['reviews'][0]['date'],
+        );
     }
 
     public function test_no_section_renders_nothing(): void
