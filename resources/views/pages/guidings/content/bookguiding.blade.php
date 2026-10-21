@@ -83,7 +83,6 @@
                         @if($guiding->acceptsVouchers())
                             {{-- Same form, other target: the guest count goes to the voucher checkout (no date). --}}
                             <button type="submit" formaction="{{ route('checkout.voucher.start') }}" class="btn w-100 voucher-btn" id="voucherButton">{{ __('booking.buy_as_voucher') }}</button>
-                            <small class="voucher-hint">{{ __('booking.voucher_hint') }}</small>
                         @endif
                     </div>
                 </form>

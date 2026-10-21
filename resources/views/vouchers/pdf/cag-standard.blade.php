@@ -33,7 +33,14 @@
         default => 18,
     };
 
-    $tourSize = mb_strlen($voucher['tourTitle']) <= 50 ? 32 : 24;
+    // The card is pinned to the page bottom and grows upwards, so the title stays within two lines
+    // (one at 32px) or it runs into the sender line. Roughly 36 / 48 / 58 characters fit per line.
+    $tourTitle = Str::limit($voucher['tourTitle'], 112);
+    $tourSize = match (true) {
+        mb_strlen($tourTitle) <= 34 => 32,
+        mb_strlen($tourTitle) <= 90 => 24,
+        default => 20,
+    };
     $facts = [
         // City only, as in the design: the fact row stays one line high.
         ['location', trim(explode(',', $voucher['tourLocation'])[0])],
@@ -154,7 +161,7 @@
                     <tr>
                         <td class="tour" colspan="4">
                             <p class="label tour-label">{{ __($copy.'.tour') }}</p>
-                            <p class="tour-title heading" style="font-size: {{ $tourSize }}px;">{{ $voucher['tourTitle'] }}</p>
+                            <p class="tour-title heading" style="font-size: {{ $tourSize }}px; line-height: {{ $lineHeight($tourSize * 1.1) }};">{{ $tourTitle }}</p>
                         </td>
                         <td class="qr" rowspan="2">
                             @if($qr)

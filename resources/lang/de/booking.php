@@ -28,5 +28,4 @@ return [
     'bank_transfer' => 'Banküberweisung',
     'paypal' => 'PayPal',
     'buy_as_voucher' => 'Als Gutschein verschenken',
-    'voucher_hint' => 'Ohne Termin – der Termin wird später direkt mit dem Guide vereinbart.',
 ];

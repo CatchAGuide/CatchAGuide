@@ -10,6 +10,7 @@ use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
 use App\Models\VoucherOrder;
+use App\Presenters\Voucher\VoucherOrderPresenter;
 use App\Services\HelperService;
 use App\Services\Voucher\VoucherPdfGenerator;
 use App\Services\Voucher\VoucherValidity;
@@ -201,6 +202,23 @@ class VoucherCheckoutTest extends TestCase
         $this->assertSame('https://catchaguide.de'.$path, $pdfs->tourUrl($order, 'de'));
         $this->assertSame('https://catchaguide.com'.$path, $pdfs->tourUrl($order, 'en'));
         $this->assertNull($pdfs->tourUrl(new VoucherOrder(), 'de'));
+    }
+
+    public function test_pdf_keeps_long_tour_titles_to_two_lines(): void
+    {
+        $html = function (string $title): string {
+            $voucher = app(VoucherOrderPresenter::class)->details(VoucherOrderGuestMail::sample()->order);
+            $voucher['tourTitle'] = $title;
+
+            return view('vouchers.pdf.cag-standard', ['voucher' => $voucher, 'logo' => null, 'qr' => null, 'fontDir' => ''])->render();
+        };
+
+        $this->assertStringContainsString('font-size: 32px; line-height: 26px;">Zanderangeln am Rhein<', $html('Zanderangeln am Rhein'));
+        $this->assertStringContainsString('font-size: 24px;', $html('Angeltour auf dem Stausee Riba-Roja auf Raubfisch'));
+
+        $long = $html(str_repeat('Angeltour am See ', 10));
+        $this->assertStringContainsString('font-size: 20px;', $long);
+        $this->assertStringNotContainsString(str_repeat('Angeltour am See ', 7), $long);
     }
 
     public function test_store_creates_the_order_from_server_side_prices_and_snapshots(): void
