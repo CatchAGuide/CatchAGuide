@@ -13,9 +13,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Thank-you to the buyer of a gift voucher: order summary, and that the guide gets in touch with
- * payment details. No PDF is attached and nothing is charged: CaG takes no payment and emails
- * the voucher only once the guide has confirmed the payment (VoucherPaidGuestMail).
+ * Thank-you to the buyer of a gift voucher: order summary and the next steps. The guide gets in
+ * touch with payment details and sends the voucher once paid. Nothing is attached and nothing is
+ * charged: CaG takes no payment.
  */
 class VoucherOrderGuestMail extends Mailable
 {
@@ -74,6 +74,7 @@ class VoucherOrderGuestMail extends Mailable
             'buyer_phone' => '151 2345678',
             'design_type' => $design,
             'language' => app()->getLocale(),
+            'voucher_language' => app()->getLocale(),
             'valid_until' => now()->addYears(3)->endOfYear()->startOfDay(),
             'created_at' => now(),
         ]);

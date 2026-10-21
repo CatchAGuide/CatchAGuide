@@ -31,6 +31,7 @@ use App\Events\BookingStatusChanged;
 use App\Models\Inclussion;
 use App\Models\ExtrasPrice;
 use App\Models\BoatExtras;
+use App\Services\Voucher\GuideVoucherOrders;
 
 class ProfileController extends Controller
 {
@@ -308,7 +309,7 @@ class ProfileController extends Controller
         return view('pages.profile.newguiding', array_merge($collections, ['pageTitle' => $pageTitle]));
     }
 
-    public function bookings()
+    public function bookings(GuideVoucherOrders $voucherOrders)
     {
         // Get user's own bookings with pagination (5 items per page) - pending first
         $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event', 'calendar_schedule'])
@@ -344,7 +345,9 @@ class ProfileController extends Controller
 
         return view('pages.profile.bookings', [
            'bookings' => $bookings,
-           'guideBookings' => $guideBookings
+           'guideBookings' => $guideBookings,
+           // Gift voucher orders have no date or status, so they get their own list below the bookings.
+           'voucherOrders' => auth()->user()->canAccessGuideDashboard() ? $voucherOrders->forGuide(auth()->user()) : null,
         ]);
     }
 

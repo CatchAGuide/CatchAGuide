@@ -645,6 +645,28 @@
                     <div id="extras-container"></div>
                 </div>
 
+                {{-- Gift vouchers are sold at this tour price, so the switch sits with the pricing. --}}
+                <hr>
+                @php($voucherEnabled = (bool) ($formData['voucher_enabled'] ?? true))
+                <div class="form-group">
+                    <label class="form-label fw-bold fs-5">
+                        {{ __('newguidings.voucher_enabled') }}
+                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
+                           title="{{ __('newguidings.tooltip_voucher_enabled') }}"></i>
+                    </label>
+                    <div class="d-flex flex-wrap btn-group-toggle">
+                        <input type="radio" name="voucher_enabled" value="1" id="voucher_enabled_yes" @checked($voucherEnabled)>
+                        <label for="voucher_enabled_yes" @class(['btn btn-outline-primary m-2 flex-fill btn-checkbox', 'active' => $voucherEnabled]) style="flex-basis: calc(50% - 20px);">
+                            {{ __('newguidings.voucher_enabled_yes') }}
+                        </label>
+                        
+                        <input type="radio" name="voucher_enabled" value="0" id="voucher_enabled_no" @checked(! $voucherEnabled)>
+                        <label for="voucher_enabled_no" @class(['btn btn-outline-primary m-2 flex-fill btn-checkbox', 'active' => ! $voucherEnabled]) style="flex-basis: calc(50% - 20px);">
+                            {{ __('newguidings.voucher_enabled_no') }}
+                        </label>
+                    </div>
+                </div>
+
                 <div class="button-group">
                     <div class="left-buttons">
                         <button type="button" class="btn btn-secondary" id="saveDraftBtn6">
@@ -793,28 +815,6 @@
                                 </div>
                             @endforeach
                         </div>
-                    </div>
-                </div>
-
-                <hr>
-
-                @php($voucherEnabled = (bool) ($formData['voucher_enabled'] ?? true))
-                <div class="form-group">
-                    <label class="form-label fw-bold fs-5">
-                        {{ __('newguidings.voucher_enabled') }}
-                        <i class="fas fa-info-circle ms-2 fs-6" data-bs-toggle="tooltip" data-bs-placement="top" 
-                           title="{{ __('newguidings.tooltip_voucher_enabled') }}"></i>
-                    </label>
-                    <div class="d-flex flex-wrap btn-group-toggle">
-                        <input type="radio" name="voucher_enabled" value="1" id="voucher_enabled_yes" @checked($voucherEnabled)>
-                        <label for="voucher_enabled_yes" @class(['btn btn-outline-primary m-2 flex-fill btn-checkbox', 'active' => $voucherEnabled]) style="flex-basis: calc(50% - 20px);">
-                            {{ __('newguidings.voucher_enabled_yes') }}
-                        </label>
-                        
-                        <input type="radio" name="voucher_enabled" value="0" id="voucher_enabled_no" @checked(! $voucherEnabled)>
-                        <label for="voucher_enabled_no" @class(['btn btn-outline-primary m-2 flex-fill btn-checkbox', 'active' => ! $voucherEnabled]) style="flex-basis: calc(50% - 20px);">
-                            {{ __('newguidings.voucher_enabled_no') }}
-                        </label>
                     </div>
                 </div>
 

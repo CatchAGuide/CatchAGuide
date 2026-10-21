@@ -4,9 +4,12 @@ namespace Tests\Feature\Guidings;
 
 use App\Enums\GuideStatus;
 use App\Enums\VoucherDesign;
+use App\Models\Employee;
 use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
+use App\Presenters\Voucher\VoucherOrderPresenter;
+use App\Services\Guide\GuideVoucherSettingsService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -35,6 +38,16 @@ class GuideVoucherSettingsTest extends TestCase
             'is_guide' => 1,
             'guide_status' => GuideStatus::VERIFIED,
         ])->fresh();
+    }
+
+    private function actingAsEmployee(): void
+    {
+        $employee = Employee::query()->first();
+        if (! $employee) {
+            $this->markTestSkipped('No employee available for admin auth.');
+        }
+
+        $this->actingAs($employee, 'employees');
     }
 
     private function tour(User $guide, array $overrides = []): Guiding
@@ -142,7 +155,7 @@ class GuideVoucherSettingsTest extends TestCase
         $this->assertSame(VoucherDesign::CagStandard, $guide->fresh()->voucherDesign());
     }
 
-    public function test_sample_voucher_is_a_pdf_with_the_guides_name(): void
+    public function test_sample_voucher_is_a_pdf(): void
     {
         $guide = $this->guide();
 
@@ -150,6 +163,18 @@ class GuideVoucherSettingsTest extends TestCase
 
         $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF', $response->getContent());
+    }
+
+    public function test_sample_voucher_uses_placeholder_names_and_guide_contact(): void
+    {
+        $order = app(GuideVoucherSettingsService::class)->sampleOrder($this->guide());
+        $details = app(VoucherOrderPresenter::class)->details($order);
+
+        $this->assertSame('Max Mustermann', $order->recipient_names);
+        $this->assertSame('Martina Mustermann', $order->sender_name);
+        $this->assertSame('Martin Mustermann', $details['guideName']);
+        $this->assertSame('+49 1234567890', $details['guidePhone']);
+        $this->assertSame('beispiel@beispiel.com', $details['guideEmail']);
     }
 
     public function test_create_tour_form_offers_vouchers_switched_on_by_default(): void
@@ -162,6 +187,16 @@ class GuideVoucherSettingsTest extends TestCase
             ->assertDontSee('id="voucher_enabled_no" checked', false);
     }
 
+    public function test_voucher_switch_sits_on_the_pricing_step(): void
+    {
+        $html = $this->actingAs($this->guide())->get(route('profile.newguiding'))->assertOk()->getContent();
+
+        $switch = strpos($html, 'id="voucher_enabled_yes"');
+        $this->assertNotFalse($switch);
+        $this->assertGreaterThan(strpos($html, 'id="step6"'), $switch);
+        $this->assertLessThan(strpos($html, 'id="step7"'), $switch);
+    }
+
     public function test_edit_tour_form_shows_the_tours_voucher_setting(): void
     {
         $guide = $this->guide();
@@ -169,6 +204,28 @@ class GuideVoucherSettingsTest extends TestCase
 
         $this->actingAs($guide)
             ->get(route('guidings.edit_newguiding', $tour))
+            ->assertOk()
+            ->assertSee('id="voucher_enabled_no" checked', false)
+            ->assertDontSee('id="voucher_enabled_yes" checked', false);
+    }
+
+    public function test_admin_create_tour_form_offers_vouchers_switched_on_by_default(): void
+    {
+        $this->actingAsEmployee();
+
+        $this->get(route('admin.guidings.create'))
+            ->assertOk()
+            ->assertSee(__('newguidings.voucher_enabled'))
+            ->assertSee('id="voucher_enabled_yes" checked', false)
+            ->assertDontSee('id="voucher_enabled_no" checked', false);
+    }
+
+    public function test_admin_edit_tour_form_shows_the_tours_voucher_setting(): void
+    {
+        $tour = $this->tour($this->guide(), ['voucher_enabled' => false]);
+        $this->actingAsEmployee();
+
+        $this->get(route('admin.guidings.edit', $tour))
             ->assertOk()
             ->assertSee('id="voucher_enabled_no" checked', false)
             ->assertDontSee('id="voucher_enabled_yes" checked', false);

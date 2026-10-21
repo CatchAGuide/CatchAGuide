@@ -1,5 +1,6 @@
 // Profile › Gift vouchers (resources/views/pages/profile/vouchers.blade.php): how-it-works
-// strip, voucher design cards, per-tour switches and a sticky save bar.
+// strip, voucher design cards, per-tour switches and a sticky save bar. The voucher orders list
+// (.gv-orders) is shown in Profile › Bookings (pages/profile/partials/voucher-orders).
 
 $gv-dark: map-get($colors, "dark");
 $gv-primary: map-get($colors, "primary");
@@ -523,17 +524,19 @@ $gv-soft: #f6f7f9;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
-    background: #fff4e5;
-    color: #8a5300;
-
-    &--paid {
-      background: #eaf6ee;
-      color: #1f6b3a;
-    }
+    background: $gv-soft;
+    color: $gv-dark;
   }
 
-  &__form {
-    margin: 0;
+  &__meta a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   &__btn {
@@ -547,10 +550,52 @@ $gv-soft: #f6f7f9;
     font-size: 13.5px;
     font-weight: 600;
     color: #fff;
+    text-decoration: none;
     cursor: pointer;
 
     &:hover {
       background: darken($gv-primary, 6%);
+      color: #fff;
     }
+
+    &--ghost {
+      border: 1px solid $gv-line;
+      background: #fff;
+      color: $gv-dark;
+
+      &:hover {
+        background: $gv-soft;
+        color: $gv-dark;
+      }
+    }
+  }
+}
+
+.gv-orders__pages {
+  padding: 12px 20px 4px;
+  border-top: 1px solid $gv-line;
+
+  .pagination {
+    margin: 0;
+  }
+}
+
+.gv-card--bookings .gv-card__title i {
+  margin-right: 6px;
+  color: $gv-primary;
+}
+
+.gv-orders-link {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: $gv-gray;
+
+  i {
+    margin-right: 6px;
+  }
+
+  a {
+    font-weight: 600;
+    color: $gv-primary;
   }
 }

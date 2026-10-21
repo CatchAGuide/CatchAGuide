@@ -8,16 +8,16 @@ use App\Models\VoucherOrder;
 use App\Services\Checkout\TourCheckoutQuote;
 use App\Services\HelperService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Throwable;
 
 /**
  * Turns a validated voucher checkout into a voucher order: snapshots tour, price, the guide's
  * voucher design and the commission (same rate as a booking of that tour), fills the standard
- * voucher PDF when the guide uses it, and emails the buyer and the guide.
+ * voucher PDF (in the guide's language) when the guide uses it, and emails the buyer and the guide.
  *
- * CaG takes no payment. The voucher only goes to the buyer once the guide has confirmed the
- * payment (VoucherPaymentService), so neither of these first emails carries the PDF.
+ * CaG takes no payment and is done once the emails are out: the guide gets the PDF with their
+ * email, collects the payment and sends the voucher to the buyer. Commission is invoiced from
+ * Admin › Finance.
  */
 class VoucherOrderService
 {
@@ -46,7 +46,6 @@ class VoucherOrderService
 
         $order = VoucherOrder::create([
             'voucher_code' => $this->codes->generate(),
-            'payment_token' => Str::random(32),
             'guiding_id' => $guiding->id,
             'guide_id' => $guiding->user_id,
             'user_id' => $currentUser?->getKey(),
@@ -64,6 +63,7 @@ class VoucherOrderService
             'buyer_phone' => $contact['phone'],
             'design_type' => $guide?->voucherDesign(),
             'language' => $locale,
+            'voucher_language' => VoucherLanguage::forGuide($guide, $locale),
             'valid_until' => VoucherValidity::until(now()),
             'commission_rate' => $quote->basePrice > 0 ? round($commission / $quote->basePrice, 4) : 0,
             'commission_amount' => $commission,
@@ -84,8 +84,9 @@ class VoucherOrderService
     }
 
     /**
-     * A failed PDF never loses the order: VoucherPaymentService tries again when the payment is
-     * confirmed, and the BCC copy of the guide email lets operations follow up.
+     * A failed PDF never loses the order: the guide email goes out without it, the guide can
+     * download it later from Profile › Bookings (which retries), and the BCC copy lets operations
+     * follow up.
      */
     public function attachPdf(VoucherOrder $order): void
     {

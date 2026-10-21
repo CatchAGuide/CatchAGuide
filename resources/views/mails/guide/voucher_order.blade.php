@@ -23,8 +23,8 @@
             [__($copy.'.buyer_phone'), $buyerPhone],
         ],
     ];
-    // CaG emails its PDF after the confirmation; with their own design the guide sends theirs.
-    $deliveryKey = $ownDesign ? 'step_3_own' : 'step_3_pdf';
+    // The CaG PDF is attached; with their own design the guide fills in and sends theirs.
+    $deliveryKey = $withPdf ? 'step_3_pdf' : 'step_3_own';
 @endphp
 {{-- Header, footer and base styles come from the shared CaG mail shell. --}}
 <x-mail.cag-shell :title="__($copy.'.title')" :preheader="__($copy.'.preheader', ['tour' => $tourTitle])" :reason="__($copy.'.footer_reason', ['site' => $site])">
@@ -43,10 +43,10 @@
 <p style="margin:0;">{{ __($copy.'.intro', ['tour' => $tourTitle, 'buyer' => $buyerName]) }}</p>
 </td></tr>
 
-{{-- Only send the voucher after payment --}}
+{{-- Payment and delivery are the guide's: send the voucher once paid --}}
 <tr><td class="px" style="padding:22px 32px 0;"><table role="presentation" class="bg-note" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFF4E5;border-radius:12px;border-collapse:separate;"><tr><td style="padding:16px 18px;">
 <p class="t-main" style="margin:0 0 6px;{{ $font }}font-size:15px;line-height:1.4;font-weight:700;color:#1A1B30;">{{ __($copy.'.payment_title') }}</p>
-<p class="t-main" style="margin:0;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">{{ __($copy.'.payment_text') }}</p>
+<p class="t-main" style="margin:0;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">{{ __($copy.'.payment_text_'.($withPdf ? 'pdf' : 'own')) }}</p>
 </td></tr></table></td></tr>
 
 @foreach($sections as $section => $rows)
@@ -76,12 +76,12 @@
 </table>
 </td></tr>
 
-{{-- CTA: confirm the payment (opens a page with the confirm button), then reply to the buyer --}}
+{{-- CTA: reply to the buyer; the order also sits in Profile › Bookings --}}
 <tr><td class="px" align="center" style="padding:16px 32px 8px;">
 <table role="presentation" class="btn-t" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#E8604C" style="background:#E8604C;border-radius:10px;">
-<a class="btn-a" href="{{ $confirmUrl }}" target="_blank" style="display:inline-block;min-width:220px;height:48px;line-height:48px;padding:0 28px;box-sizing:border-box;{{ $font }}font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;text-align:center;">{{ __($copy.'.cta_confirm') }}</a>
+<a class="btn-a" href="mailto:{{ $buyerEmail }}?subject={{ rawurlencode(__($copy.'.cta_subject', ['code' => $code])) }}" style="display:inline-block;min-width:220px;height:48px;line-height:48px;padding:0 28px;box-sizing:border-box;{{ $font }}font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;text-align:center;">{{ __($copy.'.cta') }}</a>
 </td></tr></table>
-<p class="t-muted" style="margin:14px 0 0;{{ $font }}font-size:14px;line-height:1.5;color:#5A6478;"><a href="mailto:{{ $buyerEmail }}?subject={{ rawurlencode(__($copy.'.cta_subject', ['code' => $code])) }}" style="color:#3B5583;text-decoration:underline;">{{ __($copy.'.cta') }}</a></p>
+<p class="t-muted" style="margin:14px 0 0;{{ $font }}font-size:14px;line-height:1.5;color:#5A6478;"><a href="{{ $bookingsUrl }}" target="_blank" style="color:#3B5583;text-decoration:underline;">{{ __($copy.'.cta_bookings') }}</a></p>
 </td></tr>
 
 {{-- Responsibilities, commission, contact --}}

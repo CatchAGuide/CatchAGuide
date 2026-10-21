@@ -7,14 +7,15 @@ use App\Http\Requests\Guide\UpdateVoucherSettingsRequest;
 use App\Models\Guiding;
 use App\Models\VoucherOrder;
 use App\Services\Guide\GuideVoucherSettingsService;
-use App\Services\Voucher\VoucherPaymentService;
+use App\Services\Voucher\GuideVoucherOrders;
 use App\Services\Voucher\VoucherPdfGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 
 /**
- * Profile › Gift vouchers: the guide switches voucher sales per tour, picks the voucher design,
- * previews the voucher per tour and confirms the payments of their voucher orders.
+ * Profile › Gift vouchers: the guide switches voucher sales per tour, picks the voucher design
+ * and previews the voucher per tour. Their voucher orders are listed in Profile › Bookings, which
+ * links here to download each order's voucher.
  */
 class GuideVoucherSettingsController extends Controller
 {
@@ -34,7 +35,6 @@ class GuideVoucherSettingsController extends Controller
             'tours' => $this->settings->tours($guide),
             'design' => $guide->voucherDesign(),
             'designs' => VoucherDesign::cases(),
-            'orders' => $this->settings->orders($guide),
         ]);
     }
 
@@ -60,16 +60,21 @@ class GuideVoucherSettingsController extends Controller
         return $this->pdf($pdfs, $this->settings->sampleOrder($guide, $guiding));
     }
 
-    public function confirmPayment(VoucherOrder $voucherOrder, VoucherPaymentService $payments): RedirectResponse
+    /**
+     * The voucher of one of the guide's orders, to send to the buyer.
+     */
+    public function orderPdf(VoucherOrder $voucherOrder, GuideVoucherOrders $orders, VoucherPdfGenerator $pdfs): Response|RedirectResponse
     {
         abort_unless((int) $voucherOrder->guide_id === (int) auth()->id(), 404);
 
-        $confirmed = $payments->confirm($voucherOrder);
+        if (($pdf = $orders->pdf($voucherOrder)) === null) {
+            return redirect()->route('profile.bookings')->with('error', __('profile.vouchers.order_pdf_missing'));
+        }
 
-        return redirect()->route('profile.vouchers')->with('message', __(
-            'profile.vouchers.'.($confirmed ? 'payment_confirmed' : 'payment_already'),
-            ['code' => $voucherOrder->voucher_code],
-        ));
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$pdfs->fileName($voucherOrder).'"',
+        ]);
     }
 
     private function pdf(VoucherPdfGenerator $pdfs, VoucherOrder $order): Response

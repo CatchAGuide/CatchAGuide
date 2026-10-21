@@ -17,9 +17,9 @@ use Throwable;
 
 /**
  * Fills the Catch a Guide standard voucher (A4, resources/views/vouchers/pdf/cag-standard) for
- * an order, in the order's checkout language, and stores it on the private voucher disk. The
- * price is deliberately not printed: the voucher is a gift. The QR code opens the tour page on
- * the domain of the order's language.
+ * an order, in the guide's language (VoucherOrder::voucherLocale), and stores it on the private
+ * voucher disk. The price is deliberately not printed: the voucher is a gift. The QR code opens
+ * the tour page on the domain of that language.
  */
 class VoucherPdfGenerator
 {
@@ -50,7 +50,7 @@ class VoucherPdfGenerator
 
     public function render(VoucherOrder $order): string
     {
-        $locale = $order->language ?: app()->getLocale();
+        $locale = $order->voucherLocale();
 
         // dompdf caches the Barlow metrics there and fails when the folder is missing.
         File::ensureDirectoryExists((string) config('dompdf.options.font_cache', storage_path('fonts')));
@@ -74,11 +74,11 @@ class VoucherPdfGenerator
 
     public function fileName(VoucherOrder $order): string
     {
-        return $this->withLocale($order->language ?: app()->getLocale(), fn () => __('checkout.voucher.pdf.file_name', ['code' => $order->voucher_code]));
+        return $this->withLocale($order->voucherLocale(), fn () => __('checkout.voucher.pdf.file_name', ['code' => $order->voucher_code]));
     }
 
     /**
-     * Clean tour URL (no query string) on the order language's domain.
+     * Clean tour URL (no query string) on the domain of the given language.
      */
     public function tourUrl(VoucherOrder $order, string $locale): ?string
     {

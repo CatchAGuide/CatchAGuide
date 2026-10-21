@@ -4,7 +4,6 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingRescheduleController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\SalesOfferController;
-use App\Http\Controllers\VoucherPaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/booking-accept/{token}', [BookingController::class, 'accept'])
@@ -16,16 +15,6 @@ Route::get('/booking-reject/{token}', [BookingController::class, 'reject'])
 Route::post('/update/reject/{token}', [BookingController::class, 'rejectProcess'])
     ->middleware('throttle:10,1')
     ->name('booking.rejection');
-// Gift voucher: the guide confirms the buyer's payment from the link in their order email; GET
-// only shows the order, the POST confirms it and emails the voucher to the buyer.
-Route::get('/voucher-payment/{token}', [VoucherPaymentController::class, 'show'])
-    ->where('token', '[A-Za-z0-9]{32}')
-    ->middleware('throttle:10,1')
-    ->name('voucher-payment.show');
-Route::post('/voucher-payment/{token}', [VoucherPaymentController::class, 'confirm'])
-    ->where('token', '[A-Za-z0-9]{32}')
-    ->middleware('throttle:10,1')
-    ->name('voucher-payment.confirm');
 // Customer reschedule after a guide declined: the emailed /{token} link is exchanged for a
 // session and redirected to the token-free page (see BookingRescheduleController).
 Route::get('/booking/reschedule', [BookingRescheduleController::class, 'show'])

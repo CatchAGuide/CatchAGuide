@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
  * A tour bought as a gift voucher (see the voucher_orders migrations). CaG takes no payment:
- * the guide collects it and confirms it (paid_at, via the payment_token link or the profile);
- * CaG then emails the voucher to the buyer (VoucherPaymentService).
+ * the guide gets the order (with the CaG voucher PDF, if they use it), collects the payment and
+ * sends the voucher to the buyer. language is the buyer's checkout language, voucher_language
+ * the guide's, in which the voucher is written.
  */
 class VoucherOrder extends Model
 {
     protected $fillable = [
         'voucher_code',
-        'payment_token',
         'guiding_id',
         'guide_id',
         'user_id',
@@ -34,8 +34,8 @@ class VoucherOrder extends Model
         'buyer_phone',
         'design_type',
         'pdf_path',
-        'paid_at',
         'language',
+        'voucher_language',
         'valid_until',
         'commission_rate',
         'commission_amount',
@@ -48,7 +48,6 @@ class VoucherOrder extends Model
         'commission_rate' => 'decimal:4',
         'commission_amount' => 'decimal:2',
         'valid_until' => 'date',
-        'paid_at' => 'datetime',
     ];
 
     public function guiding(): BelongsTo
@@ -81,9 +80,10 @@ class VoucherOrder extends Model
         return trim($this->buyer_phone_country_code.' '.$this->buyer_phone);
     }
 
-    public function isPaid(): bool
+    /** Locale the voucher (PDF, file name, QR domain) is written in. */
+    public function voucherLocale(): string
     {
-        return $this->paid_at !== null;
+        return $this->voucher_language ?: ($this->language ?: app()->getLocale());
     }
 
     public function hasPdf(): bool

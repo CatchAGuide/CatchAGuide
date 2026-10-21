@@ -23827,15 +23827,17 @@ input:-webkit-autofill:active {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  background: #fff4e5;
-  color: #8a5300;
+  background: #f6f7f9;
+  color: #313041;
 }
-.gv-order__status--paid {
-  background: #eaf6ee;
-  color: #1f6b3a;
+.gv-order__meta a {
+  color: inherit;
+  text-decoration: underline;
 }
-.gv-order__form {
-  margin: 0;
+.gv-order__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .gv-order__btn {
   display: inline-flex;
@@ -23848,10 +23850,47 @@ input:-webkit-autofill:active {
   font-size: 13.5px;
   font-weight: 600;
   color: #fff;
+  text-decoration: none;
   cursor: pointer;
 }
 .gv-order__btn:hover {
   background: rgb(228.5158415842, 71.9138613861, 48.8841584158);
+  color: #fff;
+}
+.gv-order__btn--ghost {
+  border: 1px solid #e9ecef;
+  background: #fff;
+  color: #313041;
+}
+.gv-order__btn--ghost:hover {
+  background: #f6f7f9;
+  color: #313041;
+}
+
+.gv-orders__pages {
+  padding: 12px 20px 4px;
+  border-top: 1px solid #e9ecef;
+}
+.gv-orders__pages .pagination {
+  margin: 0;
+}
+
+.gv-card--bookings .gv-card__title i {
+  margin-right: 6px;
+  color: #e8604c;
+}
+
+.gv-orders-link {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #787780;
+}
+.gv-orders-link i {
+  margin-right: 6px;
+}
+.gv-orders-link a {
+  font-weight: 600;
+  color: #e8604c;
 }
 
 .tour-search-box {
@@ -28276,18 +28315,6 @@ body.is-mobile-search-open .pac-container {
     grid-column: 1;
   }
 }
-.cc-done__confirm {
-  border-color: var(--cc-petrol);
-  background: var(--cc-petrol);
-  color: #fff;
-  cursor: pointer;
-}
-.cc-done__confirm:hover, .cc-done__confirm:focus-visible {
-  background: var(--cc-petrol);
-  color: #fff;
-  opacity: 0.9;
-}
-
 .cc {
   --cc-surface: #fff;
   --cc-ink: #0a2f35;

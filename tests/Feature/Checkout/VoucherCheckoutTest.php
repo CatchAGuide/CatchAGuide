@@ -243,6 +243,10 @@ class VoucherCheckoutTest extends TestCase
 
         $order = VoucherOrder::where('guiding_id', $guiding->id)->firstOrFail();
 
+        // The buyer ordered on the English site; the voucher is in the (German) guide's language.
+        $this->assertSame('en', $order->language);
+        $this->assertSame('de', $order->voucher_language);
+        $this->assertSame('Gutschein-'.$order->voucher_code.'.pdf', app(VoucherPdfGenerator::class)->fileName($order));
         $this->assertSame('vouchers/'.$order->voucher_code.'.pdf', $order->pdf_path);
         Storage::disk('local')->assertExists($order->pdf_path);
         $this->assertStringStartsWith('%PDF', Storage::disk('local')->get($order->pdf_path));
@@ -256,6 +260,21 @@ class VoucherCheckoutTest extends TestCase
             && $mail->hasBcc('ops@example.com')
             && $mail->order->is($order)
             && $mail->locale === 'de');
+    }
+
+    public function test_voucher_falls_back_to_the_order_language_when_the_guide_has_none(): void
+    {
+        Mail::fake();
+        $guiding = $this->guiding([], ['language' => null]);
+
+        $this->withSession(['locale' => 'en'])
+            ->postJson(route('checkout.voucher.store', ['slug' => $guiding->slug]), $this->payload())
+            ->assertOk();
+
+        $order = VoucherOrder::where('guiding_id', $guiding->id)->firstOrFail();
+        $this->assertSame('en', $order->voucher_language);
+        $this->assertSame('en', $order->voucherLocale());
+        Mail::assertSent(VoucherOrderGuideMail::class, fn (VoucherOrderGuideMail $mail) => $mail->locale === 'en');
     }
 
     public function test_own_design_creates_no_pdf(): void
