@@ -486,8 +486,8 @@ return [
     'voucher' => [
         'title' => 'Gutschein bestellen',
         'step_send' => 'Bestellung senden',
-        'step_contact' => 'Der Guide meldet sich',
-        'step_pay' => 'Guide bezahlen, Gutschein erhalten',
+        'step_pay' => 'Guide bezahlen',
+        'step_voucher' => 'Gutschein erhalten',
         'intro' => 'Verschenke diese Tour – ganz ohne Termin. :guide bekommt deine Bestellung, meldet sich bei dir wegen der Zahlung und schickt dir danach den Gutschein. Den Termin vereinbart die beschenkte Person später direkt mit dem Guide.',
         'details_title' => 'Dein Gutschein',
         'details_text' => 'Diese Angaben stehen auf dem Gutschein.',

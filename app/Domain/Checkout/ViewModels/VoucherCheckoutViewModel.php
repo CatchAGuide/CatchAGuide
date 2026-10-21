@@ -43,9 +43,12 @@ final class VoucherCheckoutViewModel
         return $this->presenter->presentCheckoutSummary($this->guiding);
     }
 
+    /** First name only on the checkout; the full name / company stays on the voucher itself. */
     public function guideName(): string
     {
-        return app(VoucherOrderPresenter::class)->guideName($this->guiding->user);
+        $firstName = trim((string) ($this->guiding->user?->firstname ?? ''));
+
+        return $firstName !== '' ? $firstName : app(VoucherOrderPresenter::class)->guideName($this->guiding->user);
     }
 
     public function isReschedule(): bool

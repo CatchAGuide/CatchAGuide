@@ -33,7 +33,7 @@
             <h1 class="cc-done__title">{{ __('checkout.voucher.success_title') }}</h1>
             <p class="cc-done__text">
                 {!! __('checkout.voucher.success_text', [
-                    'guide' => '<strong>'.e($voucher['guideName']).'</strong>',
+                    'guide' => '<strong>'.e($voucher['guideFirstName'] ?: $voucher['guideName']).'</strong>',
                     'email' => '<strong>'.e($order->buyer_email).'</strong>',
                 ]) !!}
             </p>

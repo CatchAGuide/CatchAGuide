@@ -21,7 +21,7 @@
             <div class="tc__grid">
                 @include($partials.'.head', [
                     'title' => __('checkout.voucher.title'),
-                    'steps' => ['send' => 'checkout.voucher.step_send', 'message' => 'checkout.voucher.step_contact', 'coin' => 'checkout.voucher.step_pay'],
+                    'steps' => ['send' => 'checkout.voucher.step_send', 'coin' => 'checkout.voucher.step_pay', 'gift' => 'checkout.voucher.step_voucher'],
                     'intro' => 'pages.voucher-checkout.partials.intro',
                     'introData' => ['guideName' => $checkout->guideName()],
                 ])

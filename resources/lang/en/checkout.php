@@ -484,8 +484,8 @@ return [
     'voucher' => [
         'title' => 'Order a gift voucher',
         'step_send' => 'Send your order',
-        'step_contact' => 'The guide contacts you',
-        'step_pay' => 'Pay the guide, get the voucher',
+        'step_pay' => 'Pay the guide',
+        'step_voucher' => 'Get the voucher',
         'intro' => 'Give this tour as a gift — no date needed. :guide gets your order, contacts you to arrange payment and then sends you the voucher. The recipient books the date with the guide later.',
         'details_title' => 'Your voucher',
         'details_text' => 'These details are printed on the voucher.',

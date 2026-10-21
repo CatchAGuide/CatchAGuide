@@ -323,6 +323,21 @@ class VoucherCheckoutTest extends TestCase
         $this->assertSame($buyer->id, VoucherOrder::where('guiding_id', $guiding->id)->value('user_id'));
     }
 
+    public function test_checkout_shows_the_voucher_steps_and_only_the_guide_first_name(): void
+    {
+        $guiding = $this->guiding();
+
+        $this->get(route('checkout.voucher.show', ['slug' => $guiding->slug]))
+            ->assertOk()
+            ->assertSeeInOrder([
+                __('checkout.voucher.step_send'),
+                __('checkout.voucher.step_pay'),
+                __('checkout.voucher.step_voucher'),
+            ])
+            ->assertSee(__('checkout.voucher.intro', ['guide' => 'Thomas']))
+            ->assertDontSee('Berger');
+    }
+
     public function test_thank_you_page_is_only_shown_to_the_session_that_ordered(): void
     {
         Mail::fake();
