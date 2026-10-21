@@ -89,6 +89,11 @@ class VoucherOrderMailTest extends TestCase
             $this->assertStringNotContainsString('emails.voucher_order_guide.', $html, 'No untranslated keys.');
         }
 
+        $this->assertLessThan(
+            strpos($standard, e(__('emails.voucher_order_guide.section_order'))),
+            strpos($standard, e(__('emails.voucher_order_guide.next_title'))),
+            'The instructions come before the order details.',
+        );
         $this->assertStringContainsString(e(__('emails.voucher_order_guide.step_3_pdf', ['buyer' => 'Lena Schmidt'])), $standard);
         $this->assertStringContainsString(e(__('emails.voucher_order_guide.step_3_own', ['buyer' => 'Lena Schmidt'])), $own);
     }

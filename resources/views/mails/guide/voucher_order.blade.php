@@ -49,6 +49,24 @@
 <p class="t-main" style="margin:0;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">{{ __($copy.'.payment_text_'.($withPdf ? 'pdf' : 'own')) }}</p>
 </td></tr></table></td></tr>
 
+{{-- What to do --}}
+<tr><td class="px" style="padding:28px 32px 0;">
+<h2 class="t-main" style="margin:0 0 16px;{{ $heading }}font-size:17px;line-height:1.3;font-weight:700;color:#1A1B30;">{{ __($copy.'.next_title') }}</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+@foreach(['step_1', 'step_2', $deliveryKey] as $i => $stepKey)
+<tr><td valign="top" width="36" style="padding:0 0 14px;width:36px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="24" height="24" align="center" style="width:24px;height:24px;border-radius:12px;background:#3B5583;{{ $font }}font-size:12px;font-weight:700;line-height:24px;color:#FFFFFF;">{{ $i + 1 }}</td></tr></table></td><td class="t-main" valign="top" style="padding:2px 0 14px;{{ $font }}font-size:14px;line-height:1.5;color:#1A1B30;">{{ __($copy.'.'.$stepKey, ['buyer' => $buyerName]) }}</td></tr>
+@endforeach
+</table>
+</td></tr>
+
+{{-- CTA: reply to the buyer; the order also sits in Profile › Bookings --}}
+<tr><td class="px" align="center" style="padding:8px 32px 8px;">
+<table role="presentation" class="btn-t" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#E8604C" style="background:#E8604C;border-radius:10px;">
+<a class="btn-a" href="mailto:{{ $buyerEmail }}?subject={{ rawurlencode(__($copy.'.cta_subject', ['code' => $code])) }}" style="display:inline-block;min-width:220px;height:48px;line-height:48px;padding:0 28px;box-sizing:border-box;{{ $font }}font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;text-align:center;">{{ __($copy.'.cta') }}</a>
+</td></tr></table>
+<p class="t-muted" style="margin:14px 0 0;{{ $font }}font-size:14px;line-height:1.5;color:#5A6478;"><a href="{{ $bookingsUrl }}" target="_blank" style="color:#3B5583;text-decoration:underline;">{{ __($copy.'.cta_bookings') }}</a></p>
+</td></tr>
+
 @foreach($sections as $section => $rows)
 <tr><td class="px t-label" style="{{ $label }}">{{ __($copy.'.'.$section) }}</td></tr>
 <tr><td class="px" style="padding:0 32px;"><table role="presentation" class="bd" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E6E8EC;border-radius:12px;border-collapse:separate;"><tr><td style="padding:6px 18px;">
@@ -66,26 +84,8 @@
 <tr><td class="px" style="padding:0 32px;"><table role="presentation" class="bd" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E6E8EC;border-radius:12px;border-collapse:separate;"><tr><td style="padding:16px 18px;"><p class="t-main" style="margin:0;{{ $font }}font-size:15px;line-height:1.55;font-style:italic;color:#1A1B30;">{!! nl2br(e(__($copy.'.quote', ['message' => $personalMessage]))) !!}</p></td></tr></table></td></tr>
 @endif
 
-{{-- What to do --}}
-<tr><td class="px" style="padding:32px 32px 0;">
-<h2 class="t-main" style="margin:0 0 16px;{{ $heading }}font-size:17px;line-height:1.3;font-weight:700;color:#1A1B30;">{{ __($copy.'.next_title') }}</h2>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-@foreach(['step_1', 'step_2', $deliveryKey] as $i => $stepKey)
-<tr><td valign="top" width="36" style="padding:0 0 14px;width:36px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="24" height="24" align="center" style="width:24px;height:24px;border-radius:12px;background:#3B5583;{{ $font }}font-size:12px;font-weight:700;line-height:24px;color:#FFFFFF;">{{ $i + 1 }}</td></tr></table></td><td class="t-main" valign="top" style="padding:2px 0 14px;{{ $font }}font-size:14px;line-height:1.5;color:#1A1B30;">{{ __($copy.'.'.$stepKey, ['buyer' => $buyerName]) }}</td></tr>
-@endforeach
-</table>
-</td></tr>
-
-{{-- CTA: reply to the buyer; the order also sits in Profile › Bookings --}}
-<tr><td class="px" align="center" style="padding:16px 32px 8px;">
-<table role="presentation" class="btn-t" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#E8604C" style="background:#E8604C;border-radius:10px;">
-<a class="btn-a" href="mailto:{{ $buyerEmail }}?subject={{ rawurlencode(__($copy.'.cta_subject', ['code' => $code])) }}" style="display:inline-block;min-width:220px;height:48px;line-height:48px;padding:0 28px;box-sizing:border-box;{{ $font }}font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;text-align:center;">{{ __($copy.'.cta') }}</a>
-</td></tr></table>
-<p class="t-muted" style="margin:14px 0 0;{{ $font }}font-size:14px;line-height:1.5;color:#5A6478;"><a href="{{ $bookingsUrl }}" target="_blank" style="color:#3B5583;text-decoration:underline;">{{ __($copy.'.cta_bookings') }}</a></p>
-</td></tr>
-
 {{-- Responsibilities, commission, contact --}}
-<tr><td class="px" style="padding:16px 32px 36px;">
+<tr><td class="px" style="padding:28px 32px 36px;">
 <p class="t-soft" style="margin:0 0 10px;{{ $font }}font-size:12px;line-height:1.55;color:#6B7489;">{{ __($copy.'.responsibility') }}</p>
 <p class="t-soft" style="margin:0;{{ $font }}font-size:12px;line-height:1.55;color:#6B7489;">{{ __($copy.'.commission') }}</p>
 @if($contactEmail !== '')
