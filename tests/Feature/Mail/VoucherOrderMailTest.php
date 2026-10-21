@@ -41,11 +41,35 @@ class VoucherOrderMailTest extends TestCase
         $this->assertStringContainsString(e(__('emails.voucher_order_guest.payment_title')), $html);
         $this->assertStringContainsString(e(__('emails.voucher_order_guest.disclaimer')), $html);
         $this->assertStringContainsString('CAG-V-7KQ3PX', $html);
-        $this->assertStringContainsString('Berger Angelguiding', $html);
+        $this->assertStringContainsString(e(__('emails.voucher_order_guest.payment_text', ['guide' => 'Thomas'])), $html);
+        $this->assertStringNotContainsString('Berger Angelguiding', $html, 'The guest sees only the guide first name.');
         // The personal message must not collide with the $message every mail view receives.
         $this->assertStringContainsString(e($mail->order->personal_message), $html);
         $this->assertStringNotContainsString('emails.voucher_order_guest.', $html, 'No untranslated keys.');
         $this->assertSame([], $mail->rawAttachments);
+    }
+
+    /**
+     * @dataProvider locales
+     */
+    public function test_guest_mail_shows_next_steps_first_and_the_guides_contact_details(string $locale): void
+    {
+        app()->setLocale($locale);
+
+        $html = VoucherOrderGuestMail::sample()->render();
+
+        $this->assertLessThan(
+            strpos($html, e(__('emails.voucher_order_guest.section_order'))),
+            strpos($html, e(__('emails.voucher_order_guest.next_title'))),
+            'The next steps come before the order details.',
+        );
+        $this->assertMatchesRegularExpression('/>\s*Thomas\s*</', $html, 'The guide row shows the first name only.');
+        $this->assertStringNotContainsString('Berger</td>', $html);
+        $this->assertStringContainsString(e(__('emails.voucher_order_guest.guide_phone')), $html);
+        $this->assertStringContainsString('+49 170 1234567', $html);
+        $this->assertStringContainsString(e(__('emails.voucher_order_guest.guide_email')), $html);
+        $this->assertStringContainsString('thomas.berger@example.com', $html);
+        $this->assertStringNotContainsString('Köln', $html, 'The location row is gone.');
     }
 
     /**
