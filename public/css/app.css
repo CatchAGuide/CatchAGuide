@@ -23834,6 +23834,9 @@ input:-webkit-autofill:active {
   color: inherit;
   text-decoration: underline;
 }
+.gv-order__meta a[href^="tel:"] {
+  white-space: nowrap;
+}
 .gv-order__actions {
   display: flex;
   flex-wrap: wrap;

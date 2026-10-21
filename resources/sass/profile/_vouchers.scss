@@ -533,6 +533,11 @@ $gv-soft: #f6f7f9;
     text-decoration: underline;
   }
 
+  // Keep a phone number on one line; long emails may still break.
+  &__meta a[href^="tel:"] {
+    white-space: nowrap;
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;
