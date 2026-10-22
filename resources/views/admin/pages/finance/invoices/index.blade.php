@@ -125,11 +125,10 @@
                                             $manageUrlInvoice = route('admin.finance.update-invoice', ['source' => $routeSource, 'id' => $row['id']]);
                                             $manageUrlPaid = route('admin.finance.update-paid', ['source' => $routeSource, 'id' => $row['id']]);
 
-                                            // Voucher orders have no admin list yet (spec P1).
                                             $sourceListUrl = match ($routeSource) {
                                                 'booking' => route('admin.bookings.index'),
                                                 'trip' => route('admin.trip-bookings.index'),
-                                                'voucher' => null,
+                                                'voucher' => route('admin.voucher-orders.index', ['q' => $row['booking_no'] ?? null]),
                                                 default => route('admin.camp-vacation-bookings.index'),
                                             };
                                         @endphp

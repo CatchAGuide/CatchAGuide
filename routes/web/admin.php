@@ -47,6 +47,7 @@ use App\Http\Controllers\Admin\VacationReviewsController;
 use App\Http\Controllers\Admin\TripsController as AdminTripsController;
 use App\Http\Controllers\Admin\VacationsController as AdminVacationsController;
 use App\Http\Controllers\Admin\VacationTestimonialsController;
+use App\Http\Controllers\Admin\VoucherOrdersController;
 use App\Http\Controllers\Admin\Blog\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
@@ -174,6 +175,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('trip-bookings/{tripBooking}/status-history', [TripBookingsController::class, 'statusHistory'])->name('trip-bookings.status-history');
         Route::get('trip-bookings/{tripBooking}/email-history', [TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
         Route::post('trip-bookings/{tripBooking}/review-request', [TripBookingsController::class, 'sendReviewRequest'])->name('trip-bookings.review-request');
+        Route::get('voucher-orders', [VoucherOrdersController::class, 'index'])->name('voucher-orders.index');
+        Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
+
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');
         Route::get('vacation-reviews/create', [VacationReviewsController::class, 'create'])->name('vacation-reviews.create');
         Route::post('vacation-reviews', [VacationReviewsController::class, 'store'])->name('vacation-reviews.store');

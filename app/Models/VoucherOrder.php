@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\VoucherDesign;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -68,6 +69,22 @@ class VoucherOrder extends Model
     public function financeItem(): MorphOne
     {
         return $this->morphOne(FinanceItem::class, 'billable');
+    }
+
+    /** Matches the voucher code, tour title or buyer name/email; a blank term matches all. */
+    public function scopeSearch(Builder $query, string $term): Builder
+    {
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%'.$term.'%';
+
+        return $query->where(fn (Builder $q) => $q
+            ->where('voucher_code', 'like', $like)
+            ->orWhere('tour_title_snapshot', 'like', $like)
+            ->orWhere('buyer_email', 'like', $like)
+            ->orWhereRaw("CONCAT(buyer_first_name, ' ', buyer_last_name) like ?", [$like]));
     }
 
     public function buyerName(): string

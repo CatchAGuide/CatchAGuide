@@ -51,8 +51,8 @@
                         <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide analytics</a></li>
                     </ul>
                 </li>
-                <li class="slide {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'is-expanded' : '' }}">
-                    <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
+                <li class="slide {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') || request()->routeIs('admin.voucher-orders.*') ? 'is-expanded' : '' }}">
+                    <a class="side-menu__item {{ request()->routeIs('admin.bookings.*') || request()->routeIs('admin.vacations.bookings') || request()->routeIs('admin.camp-vacation-bookings.*') || request()->routeIs('admin.trip-bookings.*') || request()->routeIs('admin.voucher-orders.*') ? 'active' : '' }}" data-bs-toggle="slide" href="#">
                         <i class="side-menu__icon fe fe-calendar"></i>
                         <span class="side-menu__label">Bookings</span>
                         <i class="angle fe fe-chevron-right"></i>
@@ -61,6 +61,7 @@
                         <li><a href="{{ route('admin.bookings.index') }}" class="slide-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">Guidings</a></li>
                         <li><a href="{{ route('admin.camp-vacation-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.camp-vacation-bookings.*') ? 'active' : '' }}">Camps / vacations</a></li>
                         <li><a href="{{ route('admin.trip-bookings.index') }}" class="slide-item {{ request()->routeIs('admin.trip-bookings.*') ? 'active' : '' }}">Trips</a></li>
+                        <li><a href="{{ route('admin.voucher-orders.index') }}" class="slide-item {{ request()->routeIs('admin.voucher-orders.*') ? 'active' : '' }}">Vouchers</a></li>
                     </ul>
                 </li>
                 <li class="slide {{ $financeStrategyActive ? 'is-expanded' : '' }}">
