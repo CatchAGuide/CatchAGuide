@@ -60,9 +60,15 @@
 
         <div class="vacation-camp-list-card__main">
             <div class="vacation-camp-list-card__headline">
-                <h3 class="vacation-camp-list-card__title">
-                    <a href="{{ $card['url'] }}">{{ $card['title'] }}</a>
-                </h3>
+                <div class="listing-title-row">
+                    <h3 class="vacation-camp-list-card__title">
+                        <a href="{{ $card['url'] }}">{{ $card['title'] }}</a>
+                    </h3>
+                    @include('partials.reviews.badge', [
+                        'stats' => ['rating' => $card['rating'] ?? null, 'count' => $card['review_count'] ?? 0],
+                        'href' => $card['url'].'#reviews',
+                    ])
+                </div>
 
                 @if(!empty($card['location']))
                     <p class="vacation-camp-list-card__location">

@@ -1402,6 +1402,41 @@ $vac-country-panel: #313041;
         overflow: hidden;
     }
 
+    // Camp/trip review score on the image, top-left (pillar badge sits top-right).
+    &__rating {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 4;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.22rem;
+        padding: 0.22rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(#fff, .94);
+        box-shadow: 0 2px 8px rgba(49, 48, 65, .22);
+        color: #313041;
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 1.2;
+        pointer-events: none;
+
+        i {
+            color: #ffb400;
+            font-size: 0.62rem;
+        }
+    }
+
+    &__rating-value {
+        font-weight: 800;
+    }
+
+    &__rating-count {
+        color: #64748b;
+        font-size: 0.64rem;
+        font-weight: 600;
+    }
+
     &__gallery {
         position: relative;
         width: 100%;

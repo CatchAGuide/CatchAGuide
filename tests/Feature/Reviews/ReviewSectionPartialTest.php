@@ -1,9 +1,12 @@
 <?php
 
-namespace Tests\Feature\Guidings;
+namespace Tests\Feature\Reviews;
 
+use App\Models\Booking;
 use App\Models\Review;
 use App\Models\User;
+use App\Models\VacationReview;
+use App\Presenters\Reviews\ReviewSectionPresenter;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -11,9 +14,12 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\View;
 use Tests\TestCase;
 
-class ReviewsMobilePartialTest extends TestCase
+/**
+ * Shared product page review partials (partials/reviews/*) fed by ReviewSectionPresenter.
+ */
+class ReviewSectionPartialTest extends TestCase
 {
-    private const VIEW = 'pages.guidings.partials.reviews-mobile';
+    private const VIEW = 'partials.reviews.mobile';
 
     protected function setUp(): void
     {
@@ -50,16 +56,19 @@ class ReviewsMobilePartialTest extends TestCase
     /**
      * @param  Collection<int, Review>  $reviews
      */
-    private function render(Collection $reviews, array $scores = []): string
+    private function section(Collection $reviews): array
     {
-        return View::make(self::VIEW, array_merge([
-            'reviews' => $reviews,
-            'reviews_count' => $reviews->count(),
-            'average_grandtotal_score' => 9.7,
-            'average_overall_score' => 10,
-            'average_guide_score' => 10,
-            'average_region_water_score' => 4.4,
-        ], $scores))->render();
+        return app(ReviewSectionPresenter::class)->tour($reviews, $reviews->count(), [
+            'grandtotal' => 9.7,
+            'overall' => 10,
+            'guide' => 10,
+            'region_water' => 4.4,
+        ]);
+    }
+
+    private function render(Collection $reviews, string $view = self::VIEW): string
+    {
+        return View::make($view, ['section' => $this->section($reviews)])->render();
     }
 
     public function test_renders_score_band_metrics_and_first_comment(): void
@@ -78,7 +87,7 @@ class ReviewsMobilePartialTest extends TestCase
 
         $this->assertStringContainsString('Guest comments', $html);
         $this->assertStringContainsString('NIKLAS', strtoupper($html));
-        $this->assertStringContainsString('OCT 26, 2023', $html);
+        $this->assertStringContainsString('Oct 26, 2023', $html);
         $this->assertStringContainsString('&ldquo;Hugely instructive day.&rdquo;', $html);
         $this->assertStringContainsString('9.7<small>/10</small>', $html);
     }
@@ -150,5 +159,93 @@ class ReviewsMobilePartialTest extends TestCase
             '18 verifizierte Bewertungen',
             trans_choice('guidings.reviews_based_on', 18, ['count' => 18], 'de')
         );
+
+        foreach (['en', 'de'] as $locale) {
+            $this->assertTrue(Lang::has('vacations.reviews_disclaimer', $locale), "Missing vacations.reviews_disclaimer for {$locale}");
+        }
+    }
+
+    public function test_desktop_section_renders_score_ring_bars_and_comment_rail(): void
+    {
+        $html = $this->render(collect([
+            $this->review(['comment' => 'Hugely instructive day.']),
+            $this->review(['firstname' => 'Marie', 'is_automatic' => true]),
+        ]), 'partials.reviews.section');
+
+        $this->assertStringContainsString('class="listing-reviews"', $html);
+        $this->assertStringContainsString('listing-reviews__ring', $html);
+        $this->assertStringContainsString('Excellent', $html);
+        $this->assertStringContainsString('Based on 2 verified reviews', $html);
+        $this->assertStringContainsString('id="ratings-container-mobile"', $html);
+        // Desktop and mobile block each fill 10 + 10 + 4 ticks.
+        $this->assertSame(2 * (10 + 10 + 4), substr_count($html, '<i class="is-on">'));
+        $this->assertSame(2, substr_count($html, 'class="listing-reviews__item"'));
+        $this->assertSame(2, substr_count($html, 'class="listing-reviews__arrow"'));
+        $this->assertStringContainsString('&ldquo;Hugely instructive day.&rdquo;', $html);
+        $this->assertStringContainsString('Automatic review by Catch A Guide', $html);
+        $this->assertStringContainsString(e(__('guidings.Real_experiences_description')), $html);
+    }
+
+    public function test_section_rail_id_can_be_set_for_existing_anchors(): void
+    {
+        $html = View::make('partials.reviews.section', [
+            'section' => $this->section(collect([$this->review()])),
+            'railId' => 'ratings-container',
+        ])->render();
+
+        $this->assertStringContainsString('id="ratings-container"', $html);
+        $this->assertStringNotContainsString('class="listing-reviews__arrow"', $html);
+    }
+
+    public function test_tour_review_date_is_the_booked_day_in_the_current_language(): void
+    {
+        $review = $this->review();
+        $review->setRelation('booking', new Booking(['book_date' => '2026-10-03']));
+        app()->setLocale('de');
+
+        $this->assertSame(
+            Carbon::parse('2026-10-03')->locale('de')->translatedFormat('M j, Y'),
+            $this->section(collect([$review]))['reviews'][0]['date'],
+        );
+    }
+
+    public function test_no_section_renders_nothing(): void
+    {
+        $this->assertSame('', trim(View::make('partials.reviews.section', ['section' => null])->render()));
+        $this->assertNull(app(ReviewSectionPresenter::class)->vacation(null));
+        $this->assertNull(app(ReviewSectionPresenter::class)->tour(collect(), 0, ['grandtotal' => 0, 'overall' => 0, 'guide' => 0, 'region_water' => 0]));
+    }
+
+    public function test_vacation_section_uses_camp_trip_categories_and_guest_first_name(): void
+    {
+        $review = new VacationReview([
+            'guest_name' => 'Lea',
+            'overall_score' => 9,
+            'accommodation_score' => 8,
+            'fishing_score' => 10,
+            'value_score' => 7,
+            'comment' => 'Super Hütte am See.',
+            'language' => 'en',
+        ]);
+        $review->grandtotal_score = 8.5;
+        $review->created_at = Carbon::parse('2026-02-28');
+
+        $section = app(ReviewSectionPresenter::class)->vacation([
+            'count' => 1,
+            'averages' => ['grandtotal' => 8.5, 'overall' => 9, 'accommodation' => 8, 'fishing' => 10, 'value' => 7],
+            'reviews' => collect([$review]),
+        ]);
+
+        $this->assertSame(['Overall', 'Accommodation', 'Fishing & region', 'Value for money'], array_column($section['categories'], 'label'));
+        $this->assertSame(__('vacations.reviews_disclaimer'), $section['disclaimer']);
+        $this->assertSame(__('guidings.Very_Good'), $section['label']);
+        $this->assertSame([
+            'name' => 'Lea',
+            'initial' => 'L',
+            'date' => 'Feb 28, 2026',
+            'score' => 8.5,
+            'text' => 'Super Hütte am See.',
+            'automatic' => false,
+        ], $section['reviews'][0]);
     }
 }

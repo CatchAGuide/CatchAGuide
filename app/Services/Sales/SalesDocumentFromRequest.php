@@ -2,10 +2,12 @@
 
 namespace App\Services\Sales;
 
+use App\Models\BookingStatusChange;
 use App\Models\CampVacationBooking;
 use App\Models\Employee;
 use App\Models\SalesDocument;
 use App\Models\TripBooking;
+use App\Services\Booking\BookingStatusHistory;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -22,6 +24,7 @@ class SalesDocumentFromRequest
         private readonly SalesCatalog $catalog,
         private readonly SalesDocumentWriter $writer,
         private readonly SalesDocumentStateMapper $mapper,
+        private readonly BookingStatusHistory $statusHistory,
     ) {}
 
     public function existing(string $sourceType, int $requestId): ?SalesDocument
@@ -89,7 +92,7 @@ class SalesDocumentFromRequest
             $document->forceFill(['source_type' => $sourceType, 'source_id' => $request->id])->save();
 
             if ($request->status === $request::STATUS_OPEN) {
-                $request->forceFill(['status' => $request::STATUS_IN_PROCESS])->save();
+                $this->statusHistory->change($request, $request::STATUS_IN_PROCESS, $actor, BookingStatusChange::REASON_OFFER_CREATED);
             }
 
             return $document;

@@ -36,7 +36,7 @@ class VacationHubNewSectionsTest extends TestCase
                 currency: 'EUR',
                 url: route('vacations.trips.index'),
             ),
-            popularListings: collect(),
+            popularListings: $overrides['popularListings'] ?? collect(),
             newListings: $overrides['newListings'] ?? collect(),
             showNewListingsRail: $overrides['showNewListingsRail'] ?? false,
             countryGrid: collect(),
@@ -324,5 +324,35 @@ class VacationHubNewSectionsTest extends TestCase
             '/@media \(max-width:\s*991px\) \{[\s\S]*?\.vacation-hub__interlude-head \{\s*flex:\s*0 0 auto;/',
             $source
         );
+    }
+
+    public function test_hub_slider_cards_show_review_score_only_when_reviewed(): void
+    {
+        $card = fn (string $type, int $id, ?float $rating, int $count) => [
+            'type' => $type,
+            'id' => $id,
+            'title' => ucfirst($type).' '.$id,
+            'url' => 'http://localhost/'.$type.'/'.$id,
+            'image' => '',
+            'gallery_images' => [],
+            'slider_tags' => [],
+            'slider_cta' => 'Book',
+            'cta' => 'Book',
+            'rating' => $rating,
+            'review_count' => $count,
+        ];
+
+        $this->mockHubService($this->makeHub(['popularListings' => collect([
+            $card('camp', 1, 8.7, 3),
+            $card('trip', 2, null, 0),
+        ])]));
+
+        $response = $this->get(route('vacations.index'));
+
+        $response->assertOk();
+        $response->assertSee('vacation-slider-card__rating', false);
+        $response->assertSee('<span class="vacation-slider-card__rating-value">8.7</span>', false);
+        $response->assertSee('<span class="vacation-slider-card__rating-count">(3)</span>', false);
+        $this->assertSame(1, substr_count($response->getContent(), 'class="vacation-slider-card__rating"'));
     }
 }

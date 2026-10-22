@@ -306,9 +306,6 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'inquiry_dietary' => 'Ernährungswünsche',
     'inquiry_experience' => 'Erfahrungslevel',
     'inquiry_addons' => 'Add-ons oder Sonderwünsche',
-    'reviews_title' => 'Bewertungen',
-    'reviews_empty' => 'Noch keine Gästebewertungen für diesen Trip.',
-    'reviews_guide_fallback' => 'Dieser Trip wird von :name geleitet (:rating★ aus :count Guiding-Bewertungen).',
     'draft_review_banner_title' => 'Entwurf — nicht veröffentlicht',
     'draft_review_banner_text' => 'Dieses Angebot dient nur zur Prüfung. Es erscheint nicht in der Suche oder in den Urlaubslisten, und Buchungen sind deaktiviert.',
     'draft_booking_rejected' => 'Dieses Angebot ist noch nicht veröffentlicht. Buchungsanfragen können daher nicht gesendet werden.',
@@ -446,4 +443,5 @@ Italien: Ein Schatz an Kunst, Geschichte und kulinarischen Köstlichkeiten, Ital
     'rating_value' => 'Preis-Leistung',
     'rating_comment_help' => 'Was hat dir gefallen, und was könnte besser sein? Andere Angler werden es dir danken.',
     'rating_already_submitted' => 'Du hast diesen Aufenthalt bereits bewertet. Vielen Dank!',
+    'reviews_disclaimer' => 'Bewertungen können nur von Gästen abgegeben werden, die diesen Angelurlaub über Catch A Guide gebucht und daran teilgenommen haben.',
 ];

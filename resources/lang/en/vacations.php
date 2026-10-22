@@ -306,9 +306,6 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'inquiry_dietary' => 'Dietary requirements',
     'inquiry_experience' => 'Experience level',
     'inquiry_addons' => 'Add-ons or special requests',
-    'reviews_title' => 'Reviews',
-    'reviews_empty' => 'No guest reviews yet for this trip.',
-    'reviews_guide_fallback' => 'This trip is led by :name (:rating★ from :count guiding reviews).',
     'draft_review_banner_title' => 'Draft — not published',
     'draft_review_banner_text' => 'This listing is for review only. It is not visible in search or vacation listings, and bookings are disabled.',
     'draft_booking_rejected' => 'This listing is not published yet, so booking requests cannot be submitted.',
@@ -446,4 +443,5 @@ Italy: A treasure trove of art, history, and culinary delights, Italy captivates
     'rating_value' => 'Value for money',
     'rating_comment_help' => 'What did you like, and what could be better? Other anglers will thank you.',
     'rating_already_submitted' => 'You have already reviewed this stay. Thank you!',
+    'reviews_disclaimer' => 'Reviews can only be submitted by guests who booked this fishing holiday through Catch A Guide and took part in it.',
 ];

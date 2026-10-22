@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\FinanceItem;
 use App\Models\FinanceItemEvent;
 use App\Models\TripBooking;
+use App\Models\VoucherOrder;
 use App\Services\Finance\FinanceAggregationService;
 use App\Services\Finance\FinanceAnalyticsService;
 use Illuminate\Http\Request;
@@ -175,6 +176,7 @@ class FinanceController extends Controller
             'booking' => Booking::query()->findOrFail($id),
             'trip' => TripBooking::query()->findOrFail($id),
             'camp_vacation' => CampVacationBooking::query()->findOrFail($id),
+            'voucher' => VoucherOrder::query()->findOrFail($id),
             default => abort(404),
         };
     }

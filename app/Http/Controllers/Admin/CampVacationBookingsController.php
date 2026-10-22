@@ -8,6 +8,7 @@ use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\EmailLog;
 use App\Models\SalesDocument;
+use App\Services\Booking\BookingStatusHistory;
 use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,32 +17,35 @@ use Illuminate\Support\Str;
 
 class CampVacationBookingsController extends Controller
 {
-    public function index()
+    public function index(BookingStatusHistory $history)
     {
         $bookingRequests = CampVacationBooking::query()
             ->whereIn('source_type', [CampVacationBooking::SOURCE_CAMP, CampVacationBooking::SOURCE_VACATION])
-            ->with('review')
+            ->with(['review', 'latestStatusChange.employee'])
             ->latest()
             ->get();
 
+        $statusSummaries = $bookingRequests->mapWithKeys(fn (CampVacationBooking $booking) => [$booking->id => $history->summary($booking)]);
+
         $offers = SalesDocument::forSources(SalesDocument::SOURCE_CAMP_REQUEST, $bookingRequests->modelKeys());
 
-        return view('admin.pages.camp-vacation-bookings.index', compact('bookingRequests', 'offers'));
+        return view('admin.pages.camp-vacation-bookings.index', compact('bookingRequests', 'offers', 'statusSummaries'));
     }
 
-    public function updateStatus(Request $request, CampVacationBooking $campVacationBooking)
+    public function updateStatus(Request $request, CampVacationBooking $campVacationBooking, BookingStatusHistory $history)
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:open,in_process,done'],
         ]);
 
-        $campVacationBooking->update(['status' => $validated['status']]);
+        $history->change($campVacationBooking, $validated['status'], $request->user('employees'));
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'status' => $campVacationBooking->status,
                 'status_label' => CampVacationBooking::statusOptions()[$campVacationBooking->status] ?? $campVacationBooking->status,
+                'status_summary' => $history->summary($campVacationBooking),
             ]);
         }
 
@@ -50,7 +54,7 @@ class CampVacationBookingsController extends Controller
             ->with('success', 'Status updated.');
     }
 
-    public function storeManual(StoreManualCampVacationBookingRequest $request)
+    public function storeManual(StoreManualCampVacationBookingRequest $request, BookingStatusHistory $history)
     {
         $data = $request->validated();
 
@@ -75,7 +79,7 @@ class CampVacationBookingsController extends Controller
             ->exists();
 
         if (!$recentDuplicate) {
-            CampVacationBooking::create([
+            $booking = CampVacationBooking::create([
                 'source_type' => CampVacationBooking::SOURCE_CAMP,
                 'source_id' => $sourceId,
                 'preferred_date' => $data['preferred_date'],
@@ -87,6 +91,8 @@ class CampVacationBookingsController extends Controller
                 'message' => $data['message'] ?? null,
                 'status' => $data['status'] ?? CampVacationBooking::STATUS_OPEN,
             ]);
+
+            $history->created($booking, $request->user('employees'));
         }
 
         return redirect()
@@ -209,23 +215,36 @@ class CampVacationBookingsController extends Controller
             ->with('success', 'Reply sent successfully to ' . e($booking->email) . '.');
     }
 
-    public function sendReviewRequest(CampVacationBooking $campVacationBooking, VacationReviewService $reviews)
+    public function sendReviewRequest(Request $request, CampVacationBooking $campVacationBooking, VacationReviewService $reviews)
     {
+        // Sent from Admin › Reviews › Open for review: go back there.
+        $back = $request->input('return') === 'reviews'
+            ? route('admin.vacation-reviews.index', ['tab' => 'open'])
+            : route('admin.camp-vacation-bookings.index');
+
         try {
             $sent = $reviews->sendRequest($campVacationBooking);
         } catch (\Throwable $exception) {
             report($exception);
 
-            return redirect()->route('admin.camp-vacation-bookings.index')->with('error', __('admin.vacation_reviews.request_failed'));
+            return redirect()->to($back)->with('error', __('admin.vacation_reviews.request_failed'));
         }
 
         if (! $sent) {
-            return redirect()->route('admin.camp-vacation-bookings.index')->with('error', __('admin.vacation_reviews.request_not_sent'));
+            return redirect()->to($back)->with('error', __('admin.vacation_reviews.request_not_sent'));
         }
 
         return redirect()
-            ->route('admin.camp-vacation-bookings.index')
+            ->to($back)
             ->with('success', __('admin.vacation_reviews.request_sent', ['email' => e($campVacationBooking->email)]));
+    }
+
+    public function statusHistory(CampVacationBooking $campVacationBooking, BookingStatusHistory $history)
+    {
+        return response()->json([
+            'success' => true,
+            'items' => $history->timeline($campVacationBooking),
+        ]);
     }
 
     public function emailHistory(CampVacationBooking $campVacationBooking)

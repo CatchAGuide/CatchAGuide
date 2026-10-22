@@ -787,6 +787,10 @@
         </div>
     </div>
 
+    @if(($voucherOrders ?? null)?->isNotEmpty())
+        @include('pages.profile.partials.voucher-orders')
+    @endif
+
     <!-- Filters Section -->
     <div class="booking-filters">
         @if(auth()->user()->canAccessGuideDashboard())

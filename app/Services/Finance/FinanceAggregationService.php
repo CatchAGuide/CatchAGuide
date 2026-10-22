@@ -8,6 +8,7 @@ use App\Models\CampVacationBooking;
 use App\Models\Trip;
 use App\Models\TripBooking;
 use App\Models\Vacation;
+use App\Models\VoucherOrder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -28,8 +29,9 @@ class FinanceAggregationService
         $bookingRows = $this->getGuidingBookingRows($from, $to, $dateFilter);
         $tripRows = $this->getTripRequestRows($from, $to, $dateFilter);
         $campVacationRows = $this->getCampVacationRequestRows($from, $to, $dateFilter);
+        $voucherRows = $this->getVoucherOrderRows($from, $to);
 
-        $rows = array_merge($bookingRows, $tripRows, $campVacationRows);
+        $rows = array_merge($bookingRows, $tripRows, $campVacationRows, $voucherRows);
 
         usort($rows, function (array $a, array $b) {
             return ($b['booking_date_sort'] ?? 0) <=> ($a['booking_date_sort'] ?? 0);
@@ -361,6 +363,71 @@ class FinanceAggregationService
                 'overdue_days' => $overdueDays,
                 'reservation_date' => optional($req->preferred_date)->format('Y-m-d') ?: '—',
                 'reservation_date_iso' => optional($req->preferred_date)->format('Y-m-d') ?: null,
+            ];
+        })->values()->all();
+    }
+
+    /**
+     * Gift voucher orders. The purchase itself triggers the commission, so every order is
+     * billable and both date filters use the purchase date (a voucher has no tour date).
+     * Provision is the commission snapshotted on the order.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function getVoucherOrderRows(?Carbon $from, ?Carbon $to): array
+    {
+        $ordersQuery = VoucherOrder::query()
+            ->with(['financeItem', 'guide'])
+            ->latest();
+
+        if ($from && $to) {
+            $ordersQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        return $ordersQuery->get()->map(function (VoucherOrder $order) {
+            $finance = $order->financeItem;
+            $provision = (float) $order->commission_amount;
+            $tax = $this->provisionCalculator->getTaxAmount($provision);
+
+            $invoiceSentAt = $finance?->invoice_sent_at;
+            $invoiceDueAt = $finance?->invoice_due_at;
+            $paidAt = $finance?->paid_at;
+            $paidStatus = $finance?->paid_status ?? 'unpaid';
+            $overdueDays = 0;
+            if ($paidStatus !== 'paid' && $invoiceDueAt && $invoiceDueAt->isPast()) {
+                $overdueDays = $invoiceDueAt->diffInDays(now());
+            }
+
+            $purchaseDate = optional($order->created_at)->format('Y-m-d');
+
+            return [
+                'source_key' => 'voucher',
+                'id' => $order->id,
+                'booking_no' => $order->voucher_code,
+                'source' => 'Gift voucher '.$order->voucher_code,
+                'booking_date' => optional($order->created_at)->format('Y-m-d H:i') ?? '—',
+                'booking_date_iso' => $purchaseDate,
+                'booking_date_sort' => optional($order->created_at)->timestamp ?? 0,
+                'guest_name' => $order->buyerName() ?: '—',
+                'guest_email' => $order->buyer_email ?: '—',
+                'guest_phone' => $order->buyerPhone() ?: '—',
+                'guide_name' => $order->guide ? (trim($order->guide->firstname.' '.$order->guide->lastname) ?: '—') : '—',
+                'guide_email' => $order->guide?->email ?: '—',
+                'price' => (float) $order->price_total,
+                'provision' => $provision,
+                'tax' => $tax,
+                'acceptance_status' => 'ordered',
+                'invoice_sent' => (bool) ($finance && $finance->invoice_status === 'sent'),
+                'invoice_sent_at' => $invoiceSentAt,
+                'invoice_sent_at_iso' => $invoiceSentAt ? $invoiceSentAt->toDateTimeString() : null,
+                'invoice_due_at' => $invoiceDueAt,
+                'invoice_due_at_iso' => $invoiceDueAt ? $invoiceDueAt->toDateTimeString() : null,
+                'paid_status' => $paidStatus,
+                'paid_at' => $paidAt,
+                'paid_at_iso' => $paidAt ? $paidAt->toDateTimeString() : null,
+                'overdue_days' => $overdueDays,
+                'reservation_date' => $purchaseDate ?? '—',
+                'reservation_date_iso' => $purchaseDate,
             ];
         })->values()->all();
     }

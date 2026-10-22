@@ -1,7 +1,6 @@
-// Tour (guiding) PDP reviews — MOBILE ONLY (≤767px).
-// Markup: resources/views/pages/guidings/partials/reviews-mobile.blade.php
-// Desktop keeps the existing overview card + horizontal review rail untouched; below 768px
-// those are hidden and this block replaces them (same 767px cut-off the page already uses).
+// Tour, trip and camp PDP reviews — MOBILE ONLY (≤767px).
+// Markup: resources/views/partials/reviews/mobile.blade.php
+// The desktop block (_listing-reviews.scss) is hidden below 768px and this one replaces it.
 
 $tr-navy: $guidings-header-slate;
 $tr-coral: $primary-color;
@@ -21,14 +20,6 @@ $tr-green-ink: #41805f;
 }
 
 @media (max-width: 767px) {
-  .guidings-rating {
-    > .ratings-head,
-    > .ratings-container,
-    > .ratings-nav {
-      display: none;
-    }
-  }
-
   .tour-reviews-m {
     display: flex;
     flex-direction: column;

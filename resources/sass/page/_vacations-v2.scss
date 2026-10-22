@@ -186,6 +186,8 @@
         flex-direction: column;
         gap: 16px;
         flex: 1;
+        // Grid item: without this, wide children (the reviews comment rail) stretch the column past the viewport.
+        min-width: 0;
     }
 }
 
@@ -408,6 +410,8 @@
 // Camp Sections
 .camp-sections {
     display: grid;
+    // minmax(0, …) keeps scrolling rails (reviews) from widening the column past the viewport.
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
 

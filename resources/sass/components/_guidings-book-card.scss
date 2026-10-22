@@ -134,6 +134,27 @@
         line-height: 1;
     }
 
+    // "Buy as gift voucher": secondary text button under the CTA.
+    &__voucher {
+        display: block;
+        width: 100%;
+        margin: 0.3rem 0 0;
+        padding: 0.2rem 0;
+        border: 0;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            color: #fff;
+        }
+    }
+
     &__note {
         margin: 0.55rem 0 0;
         font-size: 0.78rem;
@@ -224,6 +245,29 @@
         font-weight: 700;
     }
 
+    .voucher-btn {
+        margin-top: 0.6rem;
+        padding: 0.6rem 1rem;
+        border: 1.5px solid rgba(255, 255, 255, 0.4);
+        border-radius: 0.75rem;
+        background: transparent;
+        color: #fff;
+        font-weight: 600;
+
+        &:hover,
+        &:focus-visible {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+    }
+
+    small.voucher-hint {
+        margin: 0.45rem 0 0;
+        text-align: center;
+        font-size: 0.78rem;
+    }
+
     small {
         display: block;
         margin: 0.35rem 0 0.75rem;
@@ -261,5 +305,10 @@
 @media screen and (max-width: 1199.98px) {
     #guidings-page {
         padding-bottom: 7.25rem;
+    }
+
+    // Room for the floating bar's extra voucher line.
+    body:has(.guidings-book-card__voucher) #guidings-page {
+        padding-bottom: 8.6rem;
     }
 }

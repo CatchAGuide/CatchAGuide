@@ -80,6 +80,10 @@
                         <input type="hidden" name="guiding_id" value="{{ $guiding->id }}">
                         <input type="hidden" name="selected_date" id="selectedDateInput" value="">
                         <button type="submit" class="btn btn-orange w-100 py-3 mb-3 reserve-now-btn" id="reserveButton">{{ __('booking.reserve_now') }}</button>
+                        @if($guiding->acceptsVouchers())
+                            {{-- Same form, other target: the guest count goes to the voucher checkout (no date). --}}
+                            <button type="submit" formaction="{{ route('checkout.voucher.start') }}" class="btn w-100 voucher-btn" id="voucherButton">{{ __('booking.buy_as_voucher') }}</button>
+                        @endif
                     </div>
                 </form>
             </div>

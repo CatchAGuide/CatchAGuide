@@ -1,0 +1,52 @@
+// Gift voucher checkout (resources/views/pages/voucher-checkout). Builds on the tour checkout
+// (`.tc`, page/_tour-checkout.scss): the voucher card takes the calendar's slot in both layouts,
+// and a "no payment now" note sits above the submit button.
+
+.tc--voucher {
+  .tc-voucher__grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .tc-voucher .tc-textarea {
+    min-height: 96px;
+    margin-top: 0;
+  }
+
+  .tc-voucher__help {
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
+
+  .tc-voucher-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--tc-teal-tint);
+    color: var(--tc-ink);
+    font-size: 13.5px;
+    line-height: 1.45;
+
+    .tc-icon {
+      flex: 0 0 auto;
+      margin-top: 2px;
+      color: var(--tc-teal);
+    }
+  }
+}
+
+@include media("<desktop") {
+  .tc--voucher .tc-voucher {
+    order: 3;
+  }
+}
+
+@include media(">=desktop") {
+  .tc--voucher .tc-voucher {
+    grid-column: 1;
+  }
+}

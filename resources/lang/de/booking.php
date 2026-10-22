@@ -27,4 +27,5 @@ return [
     'cash' => 'Bar',
     'bank_transfer' => 'Banküberweisung',
     'paypal' => 'PayPal',
+    'buy_as_voucher' => 'Als Gutschein verschenken',
 ];

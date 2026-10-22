@@ -1,0 +1,606 @@
+// Profile › Gift vouchers (resources/views/pages/profile/vouchers.blade.php): how-it-works
+// strip, voucher design cards, per-tour switches and a sticky save bar. The voucher orders list
+// (.gv-orders) is shown in Profile › Bookings (pages/profile/partials/voucher-orders).
+
+$gv-dark: map-get($colors, "dark");
+$gv-primary: map-get($colors, "primary");
+$gv-gray: map-get($colors, "gray");
+$gv-line: #e9ecef;
+$gv-soft: #f6f7f9;
+
+.gv-steps {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+
+  @include media(">=tablet") {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  &__item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid $gv-line;
+    border-radius: 12px;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba($gv-primary, 0.1);
+    color: $gv-primary;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: $gv-gray;
+
+    strong {
+      font-size: 14px;
+      color: $gv-dark;
+    }
+  }
+}
+
+.gv-card {
+  margin-bottom: 24px;
+  background: #fff;
+  border: 1px solid $gv-line;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+
+  &__head {
+    padding: 20px 20px 0;
+
+    @include media(">=tablet") {
+      padding: 24px 24px 0;
+    }
+
+    &--split {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid $gv-line;
+    }
+  }
+
+  &__title {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: $gv-dark;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 14px;
+    color: $gv-gray;
+  }
+}
+
+// Voucher design: two selectable cards (radio inputs).
+.gv-designs {
+  display: grid;
+  gap: 12px;
+  padding: 16px 20px 20px;
+
+  @include media(">=tablet") {
+    grid-template-columns: 1fr 1fr;
+    padding: 20px 24px 24px;
+  }
+}
+
+.gv-design {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__label {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 18px 18px 18px;
+    border: 1.5px solid $gv-line;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      border-color: rgba($gv-dark, 0.35);
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    background: $gv-soft;
+    color: $gv-dark;
+    font-size: 18px;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 700;
+    color: $gv-dark;
+  }
+
+  &__text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: $gv-gray;
+  }
+
+  &__check {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid $gv-line;
+    border-radius: 50%;
+    color: transparent;
+    font-size: 11px;
+  }
+
+  &__sample {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 6px;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $gv-primary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__input:checked + &__label {
+    border-color: $gv-primary;
+    background: rgba($gv-primary, 0.04);
+    box-shadow: 0 0 0 3px rgba($gv-primary, 0.12);
+
+    .gv-design__icon {
+      background: $gv-primary;
+      color: #fff;
+    }
+
+    .gv-design__check {
+      border-color: $gv-primary;
+      background: $gv-primary;
+      color: #fff;
+    }
+  }
+
+  &__input:focus-visible + &__label {
+    outline: 2px solid $gv-dark;
+    outline-offset: 2px;
+  }
+}
+
+// Tours: bulk actions, rows with a switch, drafts collapsed.
+.gv-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+
+  &__count {
+    margin-right: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $gv-dark;
+  }
+
+  &__btn {
+    padding: 6px 12px;
+    border: 1px solid $gv-line;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: $gv-dark;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $gv-dark;
+    }
+  }
+}
+
+.gv-tours {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gv-tour {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid $gv-line;
+
+  @include media(">=tablet") {
+    padding: 12px 24px;
+  }
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $gv-dark;
+    overflow-wrap: anywhere;
+  }
+
+  &__badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: $gv-soft;
+    font-size: 11.5px;
+    color: $gv-gray;
+    white-space: nowrap;
+  }
+
+  &__link {
+    flex-shrink: 0;
+    padding: 6px;
+    font-size: 13px;
+    color: $gv-gray;
+
+    &:hover {
+      color: $gv-primary;
+    }
+  }
+}
+
+.gv-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 24px;
+
+  &__input {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  &__track {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #d5d8de;
+    transition: background-color 0.15s;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s;
+    }
+  }
+
+  &__input:checked + &__track {
+    background: $gv-primary;
+
+    &::after {
+      transform: translateX(20px);
+    }
+  }
+
+  &__input:focus-visible + &__track {
+    outline: 2px solid $gv-dark;
+    outline-offset: 2px;
+  }
+}
+
+.gv-drafts {
+  border-top: 1px solid $gv-line;
+
+  &__summary {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: $gv-gray;
+    cursor: pointer;
+    list-style: none;
+
+    @include media(">=tablet") {
+      padding: 14px 24px;
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    i {
+      font-size: 11px;
+      transition: transform 0.15s;
+    }
+  }
+
+  &[open] &__summary i {
+    transform: rotate(90deg);
+  }
+
+  .gv-tours--drafts {
+    background: $gv-soft;
+
+    .gv-tour {
+      border-top-color: darken($gv-soft, 4%);
+    }
+  }
+}
+
+.gv-empty {
+  margin: 0;
+  padding: 20px 24px 24px;
+  color: $gv-gray;
+}
+
+.gv-savebar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid $gv-line;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  &__hint {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0;
+    font-size: 13px;
+    color: $gv-gray;
+  }
+
+  &__btn {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+    padding: 10px 22px;
+    border: 0;
+    border-radius: 10px;
+    background: $gv-primary;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+
+    &:hover {
+      background: darken($gv-primary, 6%);
+    }
+  }
+}
+
+// Per-tour "Preview PDF" link (shown when the guide uses the CaG voucher).
+.gv-tour__preview {
+  flex-shrink: 0;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid $gv-line;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: $gv-dark;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: $gv-primary;
+    color: $gv-primary;
+  }
+}
+
+// Voucher orders: open payments first, each with a "Payment received" button.
+.gv-orders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gv-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid $gv-line;
+
+  @include media(">=tablet") {
+    padding: 14px 24px;
+  }
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  &__main {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: $gv-dark;
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: $gv-gray;
+    overflow-wrap: anywhere;
+  }
+
+  &__code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    color: $gv-dark;
+  }
+
+  &__status {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: $gv-soft;
+    color: $gv-dark;
+  }
+
+  &__meta a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  // Keep a phone number on one line; long emails may still break.
+  &__meta a[href^="tel:"] {
+    white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: $gv-primary;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background: darken($gv-primary, 6%);
+      color: #fff;
+    }
+
+    &--ghost {
+      border: 1px solid $gv-line;
+      background: #fff;
+      color: $gv-dark;
+
+      &:hover {
+        background: $gv-soft;
+        color: $gv-dark;
+      }
+    }
+  }
+}
+
+.gv-orders__pages {
+  padding: 12px 20px 4px;
+  border-top: 1px solid $gv-line;
+
+  .pagination {
+    margin: 0;
+  }
+}
+
+.gv-card--bookings .gv-card__title i {
+  margin-right: 6px;
+  color: $gv-primary;
+}
+
+.gv-orders-link {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: $gv-gray;
+
+  i {
+    margin-right: 6px;
+  }
+
+  a {
+    font-weight: 600;
+    color: $gv-primary;
+  }
+}

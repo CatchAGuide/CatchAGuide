@@ -53,6 +53,7 @@ a:hover{text-decoration:none!important;}
  .t-label{color:#9DB4DE!important;}
  .bd{border-color:#2C2F45!important;}
  .bg-soft{background:#1E2032!important;}
+ .bg-note{background:#3A2C17!important;}
  .rule{background:#2C2F45!important;}
 }
 @endif

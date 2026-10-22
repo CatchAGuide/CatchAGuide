@@ -131,6 +131,7 @@
                                 <a href="{{ $heroMapHref }}">{{ __('vacations.show_on_map') }}</a>
                             </p>
                         @endif
+                        @include('partials.reviews.badge', ['stats' => $heroReviewStats ?? null, 'href' => '#reviews', 'class' => 'listing-review-badge--on-dark'])
                     @endif
                 </div>
             </div>

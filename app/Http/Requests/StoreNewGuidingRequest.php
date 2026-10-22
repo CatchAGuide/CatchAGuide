@@ -45,6 +45,7 @@ class StoreNewGuidingRequest extends FormRequest
             'booking_window' => 'required|string',
             'seasonal_trip' => 'required|string',
             'months' => 'required_if:seasonal_trip,season_monthly|nullable|array',
+            'voucher_enabled' => 'sometimes|boolean',
         ];
 
         // If it's a draft submission, make all fields optional

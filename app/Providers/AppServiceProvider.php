@@ -28,6 +28,7 @@ use App\Services\GuidingService;
 use App\Services\LanguageService;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\LiveTranslationBudget;
+use App\Services\Vacation\VacationReviewStats;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -52,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(LiveTranslationBudget::class);
         // Small master tables behind Guiding's name getters, loaded once per request.
         $this->app->scoped(GuidingMasterDataLookup::class);
+        // Camp/trip review averages for listing cards, loaded once per request.
+        $this->app->scoped(VacationReviewStats::class);
 
         $this->app->bind(LLMClientInterface::class, function () {
             if (!config('booking_assistant.enabled')) {

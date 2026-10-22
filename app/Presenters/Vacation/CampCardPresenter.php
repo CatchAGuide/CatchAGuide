@@ -5,11 +5,14 @@ namespace App\Presenters\Vacation;
 use App\Models\Camp;
 use App\Services\Translation\ListingTranslationService;
 use App\Services\Translation\ListingViewTranslationService;
+use App\Services\Vacation\VacationReviewService;
+use App\Services\Vacation\VacationReviewStats;
 
 class CampCardPresenter
 {
     public function __construct(
         private ListingViewTranslationService $viewTranslation,
+        private VacationReviewStats $reviewStats,
     ) {}
 
     /**
@@ -29,6 +32,7 @@ class CampCardPresenter
         $targetFishAll = $this->targetFishTags($camp);
         $targetFish = array_slice($targetFishAll, 0, 3);
         $sliderTags = array_slice($targetFishAll, 0, 2);
+        $reviews = $this->reviewStats->forListing(VacationReviewService::TYPE_CAMP, (int) $camp->id);
 
         return [
             'type' => 'camp',
@@ -63,10 +67,10 @@ class CampCardPresenter
             'slider_cta' => __('vacations.book_now'),
             'cta' => __('vacations.book_now'),
             'cta_class' => 'camp',
-            // Camps have no guest review flow; do not borrow guiding Review scores onto cards.
+            // Camp reviews only (vacation_reviews); never borrow guiding Review scores onto cards.
             'trust' => null,
-            'rating' => null,
-            'review_count' => 0,
+            'rating' => $reviews['rating'] ?? null,
+            'review_count' => $reviews['count'] ?? 0,
         ];
     }
 

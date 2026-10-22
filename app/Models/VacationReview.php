@@ -19,6 +19,7 @@ class VacationReview extends Model
         'listing_type',
         'listing_id',
         'user_id',
+        'guest_name',
         'overall_score',
         'accommodation_score',
         'fishing_score',
@@ -26,6 +27,7 @@ class VacationReview extends Model
         'grandtotal_score',
         'comment',
         'language',
+        'is_manual',
     ];
 
     protected $casts = [
@@ -34,6 +36,7 @@ class VacationReview extends Model
         'fishing_score' => 'integer',
         'value_score' => 'integer',
         'grandtotal_score' => 'float',
+        'is_manual' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -45,7 +48,8 @@ class VacationReview extends Model
     }
 
     /**
-     * The CampVacationBooking or TripBooking this review belongs to.
+     * The CampVacationBooking or TripBooking this review belongs to (null for a manual review
+     * without a booking).
      */
     public function reviewable(): MorphTo
     {
@@ -55,5 +59,24 @@ class VacationReview extends Model
     public function scopeNewestFirst($query)
     {
         return $query->orderByDesc('created_at')->orderByDesc('id');
+    }
+
+    public function scopeForListing($query, string $listingType, int $listingId)
+    {
+        return $query->where('listing_type', $listingType)->where('listing_id', $listingId);
+    }
+
+    /**
+     * First name shown on the public page: the stored name of a manual review, else the
+     * booking's first name (or the first word of its full name).
+     */
+    public function displayName(): ?string
+    {
+        $name = trim((string) ($this->guest_name ?: ($this->reviewable?->first_name ?: $this->reviewable?->name)));
+        if ($name === '') {
+            return null;
+        }
+
+        return $this->guest_name ? $name : strtok($name, ' ');
     }
 }

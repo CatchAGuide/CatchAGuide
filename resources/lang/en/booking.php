@@ -27,4 +27,5 @@ return [
     'cash' => 'Cash',
     'bank_transfer' => 'Bank transfer',
     'paypal' => 'PayPal',
+    'buy_as_voucher' => 'Buy as gift voucher',
 ];

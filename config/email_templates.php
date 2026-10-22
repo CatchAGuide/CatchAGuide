@@ -449,6 +449,44 @@ return [
             'pdf_ref' => null,
         ],
 
+        'guest_voucher_order' => [
+            'name' => 'Gift Voucher Order Confirmation (Guest)',
+            'category' => 'guest',
+            'description' => 'Confirmation to the buyer of a gift voucher: order summary, voucher code and validity, and that payment goes directly to the guide. No PDF attached: the guide sends the voucher once paid. CaG takes no payment. Language: the language of the page they ordered on.',
+            'view' => 'mails.guest.voucher_order',
+            'log_type' => 'guest_voucher_order',
+            'status' => 'active',
+            'trigger_type' => 'immediate',
+            'schedule' => 'Sent on voucher checkout submit',
+            'scheduler_command' => null,
+            'recipient' => 'Guest',
+            'trigger_conditions' => [
+                'Guest submits the voucher checkout (/checkout/vouchers/{slug})',
+                'Creates a VoucherOrder row',
+                'Guide also receives Gift Voucher Order (Guide Notify)',
+            ],
+            'pdf_ref' => null,
+        ],
+
+        'guide_voucher_order' => [
+            'name' => 'Gift Voucher Order (Guide Notify)',
+            'category' => 'guide',
+            'description' => 'Tells the guide about a new gift voucher order: buyer contact, recipient, price and voucher code, and to collect the payment and then send the voucher to the buyer. CaG standard design: the voucher PDF (in the guide\'s language) is attached. Guide\'s own design: no attachment. CaG does nothing further; the commission is invoiced from Admin › Finance. Reply-To is the buyer, BCC to CaG. Language: the guide account language if set, otherwise the order language.',
+            'view' => 'mails.guide.voucher_order',
+            'log_type' => 'guide_voucher_order',
+            'status' => 'active',
+            'trigger_type' => 'immediate',
+            'schedule' => 'Sent on voucher checkout submit',
+            'scheduler_command' => null,
+            'recipient' => 'Guide',
+            'trigger_conditions' => [
+                'Guest submits the voucher checkout (/checkout/vouchers/{slug})',
+                'Creates a VoucherOrder row',
+                'Sent alongside Gift Voucher Order Confirmation (Guest)',
+            ],
+            'pdf_ref' => null,
+        ],
+
         'vacation_booking_admin_mail' => [
             'name' => 'Trip/Camp Booking Request (Admin Notify)',
             'category' => 'other',
