@@ -60,6 +60,32 @@ class CookieConsentBannerTest extends TestCase
         $this->assertStringContainsString('id="cookie-panel-profile-necessary" checked disabled', $html);
     }
 
+    /**
+     * The privacy policy names the tools that really run, says GA4 runs for everyone, and links the cookie settings.
+     */
+    public function test_privacy_policy_describes_the_tracking_tools(): void
+    {
+        $cases = [
+            'en' => ['Analytics tools and advertising', 'including when you choose "Accept necessary only"', 'Google Ads conversion tracking'],
+            'de' => ['Analyse-Tools und Werbung', 'auch wenn Sie „Nur notwendige akzeptieren“ wählen', 'Google Ads Conversion-Tracking'],
+        ];
+
+        foreach ($cases as $locale => [$title, $ga4AlwaysOn, $ads]) {
+            $html = html_entity_decode(
+                $this->withSession(['locale' => $locale])->get('http://catchaguide.com/data-protection')->assertOk()->getContent()
+            );
+
+            $this->assertStringContainsString('<h2>6. '.$title.'</h2>', $html, $locale);
+            $this->assertStringContainsString('<h3>Google Analytics 4</h3>', $html);
+            $this->assertStringContainsString($ga4AlwaysOn, $html);
+            $this->assertStringContainsString('<h3>Microsoft Clarity</h3>', $html);
+            $this->assertStringContainsString('<h3>'.$ads.'</h3>', $html);
+            $this->assertStringContainsString('<h3>Google Tag Manager</h3>', $html);
+            $this->assertStringContainsString('href="http://catchaguide.com/cookie-settings"', $html);
+            $this->assertStringNotContainsString('Matomo', $html, 'Matomo is not used on the site.');
+        }
+    }
+
     public function test_choices_are_remembered_for_a_year(): void
     {
         $html = $this->get('http://catchaguide.com/about-us')->assertOk()->getContent();
