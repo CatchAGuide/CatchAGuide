@@ -731,7 +731,7 @@ return [
         'col_actions' => 'Actions',
         'recipients' => 'For: :names',
         'design_cag_standard' => 'CaG voucher',
-        'design_guide_own' => 'Guide's own voucher',
+        'design_guide_own' => 'Guide\'s own voucher',
         'paid' => 'Paid',
         'unpaid' => 'Open',
         'download_pdf' => 'Download voucher PDF',
