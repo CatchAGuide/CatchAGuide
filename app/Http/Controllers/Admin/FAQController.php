@@ -20,15 +20,6 @@ class FAQController extends Controller
         ]);
     }
 
-    public function searchRequest(){
-        $frequentlyAskedQuestions = Faq::where('page','=','search-request')->get();
-       
-        return view('admin.pages.faq.index', [
-            'frequentlyAskedQuestions' => $frequentlyAskedQuestions,
-            'page' => 'search-request'
-        ]);
-    }
-
     public function vacations()
     {
         $frequentlyAskedQuestions = Faq::where('page', '=', 'vacations')->get();
@@ -91,10 +82,6 @@ class FAQController extends Controller
             return redirect()->route('admin.faq.home')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
 
-        if($data['page'] == 'search-request'){
-            return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
-        }
-
         if ($data['page'] === 'vacations') {
             return redirect()->route('admin.faq.vacations')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
@@ -134,10 +121,6 @@ class FAQController extends Controller
 
         if($data['page'] == 'home'){
             return redirect()->route('admin.faq.home')->with('success', 'Das FAQ wurde erfolgreich editiert!');
-        }
-
-        if($data['page'] == 'search-request'){
-            return redirect()->route('admin.faq.searchrequest')->with('success', 'Das FAQ wurde erfolgreich editiert!');
         }
 
         if ($data['page'] === 'vacations') {

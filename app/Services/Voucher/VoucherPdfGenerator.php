@@ -51,9 +51,7 @@ class VoucherPdfGenerator
     public function render(VoucherOrder $order): string
     {
         $locale = $order->voucherLocale();
-
-        // dompdf caches the Barlow metrics there and fails when the folder is missing.
-        File::ensureDirectoryExists((string) config('dompdf.options.font_cache', storage_path('fonts')));
+        $this->useProjectPdfWorkspace();
 
         return $this->withLocale($locale, fn () => Pdf::loadView('vouchers.pdf.cag-standard', [
             'voucher' => $this->presenter->details($order),
@@ -85,6 +83,26 @@ class VoucherPdfGenerator
         $slug = $order->guiding?->slug;
 
         return $slug ? $this->links->listing('guidings.show', ['slug' => $slug], $locale) : null;
+    }
+
+    /**
+     * Dompdf subsets the Barlow fonts with tempnam() in its temp directory, and
+     * caches the font metrics beside that. The package default is the system
+     * temp dir. Production (open_basedir) rejects that path, tempnam() returns
+     * false, and the preview dies with "ValueError: Path must not be empty".
+     * Keep both directories inside the project, where the app can write.
+     * Set this before Pdf::loadView: Cpdf copies the temp dir in its constructor.
+     */
+    private function useProjectPdfWorkspace(): void
+    {
+        $workDir = storage_path('framework/dompdf');
+        File::ensureDirectoryExists($workDir);
+
+        config([
+            'dompdf.options.temp_dir' => $workDir,
+            'dompdf.options.font_dir' => $workDir,
+            'dompdf.options.font_cache' => $workDir,
+        ]);
     }
 
     private function disk(): string

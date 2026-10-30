@@ -272,6 +272,7 @@ class OfferCatalogPageService
         $suggestedItems = collect();
         if ($shouldSuggest && $nearbyOrigin !== null) {
             $suggestedItems = $this->buildNearbySuggestedItems(
+                $filter,
                 $nearbyOrigin['lat'],
                 $nearbyOrigin['lng'],
                 $nearbyOrigin['country_scope'],
@@ -1027,6 +1028,8 @@ class OfferCatalogPageService
     /**
      * Nearby suggestions across tours + trips + camps (merged, nearest first).
      * Always includes every product type so a camps tab can still surface nearby tours.
+     * Guest count, species, and the active type's facets still apply, so a listing
+     * rejected by those filters is not offered again as a "nearby" place.
      *
      * @param  array<int, int>  $excludeTourIds
      * @param  array<int, int>  $excludeTripIds
@@ -1034,6 +1037,7 @@ class OfferCatalogPageService
      * @return Collection<int, array{type: string, model: mixed, distance: float|null}>
      */
     private function buildNearbySuggestedItems(
+        OfferListingFilter $filter,
         float $latitude,
         float $longitude,
         bool $countryScope = false,
@@ -1047,6 +1051,7 @@ class OfferCatalogPageService
         return collect()
             ->concat(
                 $this->nearbySuggestedTours(
+                    $filter,
                     $latitude,
                     $longitude,
                     $excludeTourIds,
@@ -1060,6 +1065,7 @@ class OfferCatalogPageService
             )
             ->concat(
                 $this->nearbySuggestedTrips(
+                    $filter,
                     $latitude,
                     $longitude,
                     $excludeTripIds,
@@ -1073,6 +1079,7 @@ class OfferCatalogPageService
             )
             ->concat(
                 $this->nearbySuggestedCamps(
+                    $filter,
                     $latitude,
                     $longitude,
                     $excludeCampIds,
@@ -1134,13 +1141,14 @@ class OfferCatalogPageService
      * @return Collection<int, Guiding>
      */
     private function nearbySuggestedTours(
+        OfferListingFilter $filter,
         float $latitude,
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
         int $radiusMeters = 200000,
     ): Collection {
-        return Guiding::query()
+        $query = Guiding::query()
             ->select(['guidings.*'])
             ->selectRaw('ST_Distance_Sphere(point(lng, lat), point(?, ?)) as distance', [
                 $longitude,
@@ -1154,7 +1162,19 @@ class OfferCatalogPageService
                 $radiusMeters,
             ])
             ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('guidings.id', $excludeIds))
-            ->publiclyVisible()
+            ->publiclyVisible();
+
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'tours', 'guidings.id', 'target_fish');
+        }
+
+        if ($filter->numGuests !== null) {
+            $query->where('max_guests', '>=', $filter->numGuests);
+        }
+
+        $this->applyTourFacets($query, $filter);
+
+        return $query
             ->with(['user.reviews', 'boatType'])
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance')
@@ -1167,13 +1187,14 @@ class OfferCatalogPageService
      * @return Collection<int, Trip>
      */
     private function nearbySuggestedTrips(
+        OfferListingFilter $filter,
         float $latitude,
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
         int $radiusMeters = 200000,
     ): Collection {
-        return Trip::query()
+        $query = Trip::query()
             ->select(['trips.*'])
             ->selectRaw('ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) as distance', [
                 $longitude,
@@ -1187,7 +1208,23 @@ class OfferCatalogPageService
                 $latitude,
                 $radiusMeters,
             ])
-            ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds))
+            ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds));
+
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'trips', 'trips.id', 'target_species');
+        }
+
+        if ($filter->numGuests !== null) {
+            $guests = $filter->numGuests;
+            $query->where(function (Builder $q) use ($guests) {
+                $q->whereNull('group_size_max')
+                    ->orWhere('group_size_max', '>=', $guests);
+            });
+        }
+
+        $this->applyTripFacets($query, $filter);
+
+        return $query
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance')
             ->limit($limit)
@@ -1199,13 +1236,14 @@ class OfferCatalogPageService
      * @return Collection<int, Camp>
      */
     private function nearbySuggestedCamps(
+        OfferListingFilter $filter,
         float $latitude,
         float $longitude,
         array $excludeIds = [],
         int $limit = 10,
         int $radiusMeters = 200000,
     ): Collection {
-        return Camp::query()
+        $query = Camp::query()
             ->select(['camps.*'])
             ->selectRaw('ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) as distance', [
                 $longitude,
@@ -1219,7 +1257,15 @@ class OfferCatalogPageService
                 $latitude,
                 $radiusMeters,
             ])
-            ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds))
+            ->when($excludeIds !== [], fn (Builder $q) => $q->whereNotIn('id', $excludeIds));
+
+        if ($filter->hasSpeciesFilter()) {
+            $this->applyOptimizedSpeciesFilter($query, $filter, 'camps', 'camps.id', 'target_fish');
+        }
+
+        $this->applyCampFacets($query, $filter);
+
+        return $query
             ->with(['rentalBoats', 'facilities', 'guidings.guidingMethods', 'accommodations', 'specialOffers'])
             ->orderByRaw('CASE WHEN distance IS NULL THEN 1 ELSE 0 END')
             ->orderBy('distance')

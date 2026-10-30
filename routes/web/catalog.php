@@ -112,10 +112,9 @@ Route::get('trips/{slug}', [TripOfferController::class, 'show'])
     ->name('trips.show')
     ->middleware('ddos:search');
 
-Route::get('searchrequest', [GuidingsController::class, 'bookingrequest'])->name('guidings.request');
-Route::post('searchrequest/store', [GuidingsController::class, 'bookingRequestStore'])
-    ->middleware('throttle:5,1')
-    ->name('store.request');
+// Retired search-request form (Oct 2026): the old multi-step wish form was replaced by direct
+// checkouts and the contact form. Magazine articles still link it, so it redirects.
+Route::permanentRedirect('searchrequest', '/contact')->name('guidings.request');
 
 Route::redirect('destinationen', '/destination', 301)->name('destination_de');
 Route::get('destination', [DestinationCountryController::class, 'index'])->name('destination')->middleware('ddos:search');
