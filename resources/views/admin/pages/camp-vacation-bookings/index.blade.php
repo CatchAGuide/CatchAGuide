@@ -207,7 +207,7 @@
                         <span class="meta-pill"><i class="fa fa-inbox"></i> Total: <strong>{{ $bookingRequests->count() }}</strong></span>
                         <span class="meta-pill"><i class="fa fa-folder-open"></i> Open: <strong>{{ $statsOpen }}</strong></span>
                         <span class="meta-pill"><i class="fa fa-spinner"></i> In process: <strong>{{ $statsInProcess }}</strong></span>
-                        <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong></span>
+                        <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong> @include('admin.partials.done-split', ['requests' => $bookingRequests])</span>
                     </div>
                     <div class="ms-auto">
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#manualCampVacationBookingModal">
@@ -294,35 +294,12 @@
                                                 {{ optional($request->created_at)->format('M j, Y g:i A') }}
                                             </td>
                                             <td class="col-status" data-label="Status">
-                                                <div class="dropdown">
-                                                    <button type="button"
-                                                            class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}"
-                                                            data-bs-toggle="dropdown"
-                                                            data-bs-boundary="viewport"
-                                                            data-url="{{ route('admin.camp-vacation-bookings.update-status', $request) }}"
-                                                            data-status="{{ $rowStatus }}"
-                                                            aria-expanded="false">
-                                                        <span class="js-status-btn-text">{{ \App\Models\CampVacationBooking::statusOptions()[$rowStatus] ?? $rowStatus }}</span>
-                                                        <i class="fa fa-caret-down ms-1"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        @foreach(\App\Models\CampVacationBooking::statusOptions() as $value => $label)
-                                                            <li>
-                                                                <a class="dropdown-item js-status-option {{ $rowStatus === $value ? 'active' : '' }}"
-                                                                   href="#"
-                                                                   data-status="{{ $value }}">{{ $label }}</a>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                                <button type="button"
-                                                        class="btn btn-link p-0 text-muted js-status-summary"
-                                                        data-url="{{ route('admin.camp-vacation-bookings.status-history', $request) }}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#statusHistoryModal"
-                                                        title="{{ __('admin.booking_status_history.button') }}">
-                                                    <i class="fa fa-stream me-1"></i><span class="js-status-summary-text">{{ $statusSummaries[$request->id] ?? __('admin.booking_status_history.button') }}</span>
-                                                </button>
+                                                @include('admin.partials.request-status-dropdown', [
+                                                    'item' => $request,
+                                                    'updateUrl' => route('admin.camp-vacation-bookings.update-status', $request),
+                                                    'historyUrl' => route('admin.camp-vacation-bookings.status-history', $request),
+                                                    'summary' => $statusSummaries[$request->id] ?? null,
+                                                ])
                                             </td>
                                             <td class="col-actions cr-td-actions text-end text-nowrap" data-label="Actions">
                                                 @unless(isset($offers[$request->id]))
@@ -355,6 +332,12 @@
                                                             data-bs-target="#messageModal"
                                                             title="View message">
                                                         <i class="fa fa-eye"></i>
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn {{ $request->admin_comment ? 'btn-warning' : 'btn-outline-secondary' }}"
+                                                            onclick="showCampBookingCommentModal({{ $request->id }})"
+                                                            title="Admin comment (internal)">
+                                                        <i class="fa fa-comment"></i>
                                                     </button>
                                                     @if(!empty($request->email))
                                                         <button type="button"
@@ -607,11 +590,77 @@
         </div>
     </div>
 </div>
+<!-- Admin comment modal (camp/vacation booking request) -->
+<div class="modal fade" id="campBookingCommentModal" tabindex="-1" aria-labelledby="campBookingCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="campBookingCommentModalLabel">Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="camp-booking-comment-id" value="">
+                <label for="camp-booking-comment-text" class="form-label">Internal notes (plain text)</label>
+                <textarea class="form-control" id="camp-booking-comment-text" rows="6" placeholder="Contacted guest, follow-ups, open todos…"></textarea>
+                <p class="form-text text-muted small mb-0">Not sent to guests.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveCampBookingComment()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 @include('admin.partials.booking-status-history')
 @endsection
 
 @section('js_after')
 <script>
+function campBookingCommentUrl(id) {
+    return `{{ url('/admin/camp-vacation-bookings') }}/${id}/comment`;
+}
+
+function showCampBookingCommentModal(id) {
+    fetch(campBookingCommentUrl(id), {
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
+        document.getElementById('camp-booking-comment-id').value = data.id;
+        document.getElementById('camp-booking-comment-text').value = data.admin_comment || '';
+        new bootstrap.Modal(document.getElementById('campBookingCommentModal')).show();
+    })
+    .catch(function () { alert('Failed to load comment.'); });
+}
+
+function saveCampBookingComment() {
+    var id = document.getElementById('camp-booking-comment-id').value;
+    var text = document.getElementById('camp-booking-comment-text').value;
+    var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    fetch(campBookingCommentUrl(id), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({ admin_comment: text })
+    })
+    .then(function (r) {
+        if (!r.ok) return r.text().then(function (t) { throw new Error(t || r.status); });
+        return r.json();
+    })
+    .then(function (data) {
+        if (data && data.success) {
+            var inst = bootstrap.Modal.getInstance(document.getElementById('campBookingCommentModal'));
+            if (inst) inst.hide();
+            window.location.reload();
+        }
+    })
+    .catch(function () { alert('Failed to save comment.'); });
+}
+
     function validateManualCampVacationBookingForm() {
         const typeVal = document.getElementById('source-type-input')?.value;
         const idVal = document.getElementById('source-id-input')?.value;
@@ -646,50 +695,6 @@
             });
         });
 
-        // status updates (AJAX)
-        document.querySelectorAll('#camp-vacation-bookings-datatable .js-status-option').forEach(option => {
-            option.addEventListener('click', function (e) {
-                e.preventDefault();
-                const newStatus = this.getAttribute('data-status');
-                const dropdown = this.closest('.dropdown');
-                const btn = dropdown ? dropdown.querySelector('.js-status-dropdown-btn') : null;
-                const url = btn ? btn.getAttribute('data-url') : null;
-                if (!url || !btn) return;
-
-                const tokenEl = document.querySelector('meta[name="csrf-token"]');
-                const token = tokenEl ? tokenEl.getAttribute('content') : null;
-                if (!token) return;
-
-                fetch(url, {
-                    method: 'PATCH',
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.success) return;
-                    btn.classList.remove('btn-status-open', 'btn-status-in_process', 'btn-status-done');
-                    btn.classList.add('btn-status-' + data.status);
-                    btn.setAttribute('data-status', data.status);
-                    const label = btn.querySelector('.js-status-btn-text');
-                    if (label) label.textContent = data.status_label || data.status;
-                    const summary = btn.closest('td') ? btn.closest('td').querySelector('.js-status-summary-text') : null;
-                    if (summary && data.status_summary) summary.textContent = data.status_summary;
-                    dropdown.querySelectorAll('.js-status-option').forEach(function (item) {
-                        item.classList.toggle('active', item.getAttribute('data-status') === data.status);
-                    });
-                    const instance = typeof bootstrap !== 'undefined' && bootstrap.Dropdown
-                        ? bootstrap.Dropdown.getInstance(btn)
-                        : null;
-                    if (instance) instance.hide();
-                })
-                .catch(() => {});
-            });
-        });
 
         // Reply modal + CKEditor
         let replyEditorInitialized = false;

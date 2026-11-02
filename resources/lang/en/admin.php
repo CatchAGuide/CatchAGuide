@@ -712,6 +712,19 @@ return [
         'reason_offer_created' => 'Offer created',
     ],
 
+    'done_reason' => [
+        'heading' => 'Done — outcome',
+        'booked' => 'Booked',
+        'booked_hint' => 'The guest booked',
+        'no_reply' => 'No reply',
+        'no_reply_hint' => 'The guest never answered',
+        'count_booked' => ':count booked',
+        'count_no_reply' => ':count no reply',
+        'rate' => ':rate% booked',
+        'rate_hint' => 'Share of closed requests (with an outcome) that booked',
+        'update_failed' => 'Failed to update the status.',
+    ],
+
     'voucher_orders' => [
         'title' => 'Gift voucher orders',
         'intro' => 'Tours bought as gift vouchers. The guide collects the payment and sends the voucher; there is no date or status. Commission is tracked under Finance › Invoices.',

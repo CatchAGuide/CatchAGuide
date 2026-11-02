@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\Booking\HasDoneReasonContract;
+use App\Traits\HasDoneReason;
 use App\Traits\HasStatusHistory;
 use App\Traits\HasVacationReview;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,9 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class TripBooking extends Model
+class TripBooking extends Model implements HasDoneReasonContract
 {
-    use HasFactory, HasStatusHistory, HasVacationReview;
+    use HasDoneReason, HasFactory, HasStatusHistory, HasVacationReview;
 
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROCESS = 'in_process';

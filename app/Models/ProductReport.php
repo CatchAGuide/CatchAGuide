@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\Booking\HasStatusHistoryContract;
+use App\Traits\HasStatusHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductReport extends Model
+class ProductReport extends Model implements HasStatusHistoryContract
 {
-    use HasFactory;
+    use HasFactory, HasStatusHistory;
 
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROCESS = 'in_process';

@@ -93,6 +93,7 @@
             <div class="cr-stat">
                 <div class="cr-stat__value">{{ $statsDone }}</div>
                 <div class="cr-stat__label">{{ \App\Models\ContactSubmission::statusOptions()['done'] ?? 'Done' }}</div>
+                <div class="mt-1">@include('admin.partials.done-split', ['requests' => $contactRequests])</div>
             </div>
         </div>
 
@@ -163,19 +164,12 @@
                                                 {{ optional($request->created_at)->format('M j, Y g:i A') }}
                                             </td>
                                             <td>
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}" data-bs-toggle="dropdown" data-id="{{ $request->id }}" data-url="{{ route('admin.contact-requests.update-status', $request) }}" data-status="{{ $rowStatus }}" data-options='@json(\App\Models\ContactSubmission::statusOptions())' aria-expanded="false">
-                                                        <span class="js-status-btn-text">{{ \App\Models\ContactSubmission::statusOptions()[$rowStatus] ?? $rowStatus }}</span>
-                                                        <i class="fa fa-caret-down ms-1"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        @foreach(\App\Models\ContactSubmission::statusOptions() as $value => $label)
-                                                            <li>
-                                                                <a class="dropdown-item js-status-option {{ $rowStatus === $value ? 'active' : '' }}" href="#" data-status="{{ $value }}">{{ $label }}</a>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
+                                                @include('admin.partials.request-status-dropdown', [
+                                                    'item' => $request,
+                                                    'updateUrl' => route('admin.contact-requests.update-status', $request),
+                                                    'historyUrl' => route('admin.contact-requests.status-history', $request),
+                                                    'summary' => $statusSummaries[$request->id] ?? null,
+                                                ])
                                             </td>
                                             <td class="pe-3 text-end">
                                                 <div class="btn-group btn-group-sm">
@@ -284,6 +278,7 @@
         </div>
     </div>
 </div>
+@include('admin.partials.booking-status-history')
 @endsection
 
 @section('js_after')
@@ -364,41 +359,6 @@
             $('#messageModalContent').text(message);
         });
 
-        $(document).on('click', '.js-status-option', function (e) {
-                e.preventDefault();
-                var newStatus = $(this).data('status');
-                var $dropdown = $(this).closest('.dropdown');
-                var $btn = $dropdown.find('.js-status-dropdown-btn');
-                var currentStatus = $btn.data('status');
-                if (newStatus === currentStatus) {
-                    var d = bootstrap.Dropdown.getOrCreateInstance($btn[0]); if (d) d.hide();
-                    return;
-                }
-                var url = $btn.data('url');
-                var options = $btn.data('options');
-                var $row = $btn.closest('tr');
-                $.ajax({
-                    url: url,
-                    method: 'PATCH',
-                    data: { status: newStatus, _token: '{{ csrf_token() }}' },
-                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-                    success: function (res) {
-                        var status = res.status || newStatus;
-                        var label = (res.status_label) ? res.status_label : (options && options[status]) ? options[status] : status;
-                        $btn.removeClass('btn-status-open btn-status-in_process btn-status-done').addClass('btn-status-' + status).data('status', status);
-                        $btn.find('.js-status-btn-text').text(label);
-                        $row.removeClass('contact-request-status-open contact-request-status-in_process contact-request-status-done').addClass('contact-request-status-' + status).attr('data-status', status);
-                        $dropdown.find('.dropdown-item').removeClass('active').filter('[data-status="' + status + '"]').addClass('active');
-                        $row.addClass('table-success');
-                        setTimeout(function () { $row.removeClass('table-success'); }, 600);
-                        var dd = bootstrap.Dropdown.getOrCreateInstance($btn[0]); if (dd) dd.hide();
-                    },
-                    error: function (xhr) {
-                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to update status.';
-                        alert(msg);
-                    }
-                });
-            });
 
         $('.js-reply-btn').on('click', function () {
             const id = $(this).data('id');

@@ -712,6 +712,19 @@ return [
         'reason_offer_created' => 'Angebot erstellt',
     ],
 
+    'done_reason' => [
+        'heading' => 'Erledigt — Ergebnis',
+        'booked' => 'Gebucht',
+        'booked_hint' => 'Der Gast hat gebucht',
+        'no_reply' => 'Keine Antwort',
+        'no_reply_hint' => 'Der Gast hat nie geantwortet',
+        'count_booked' => ':count gebucht',
+        'count_no_reply' => ':count ohne Antwort',
+        'rate' => ':rate % gebucht',
+        'rate_hint' => 'Anteil der erledigten Anfragen (mit Ergebnis), die gebucht haben',
+        'update_failed' => 'Der Status konnte nicht geändert werden.',
+    ],
+
     'voucher_orders' => [
         'title' => 'Gutscheinbestellungen',
         'intro' => 'Als Gutschein gekaufte Touren. Der Guide kassiert und verschickt den Gutschein; es gibt kein Datum und keinen Status. Die Provision steht unter Finanzen › Rechnungen.',

@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Enums\DoneReason;
 use App\Models\VacationReview;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
@@ -23,12 +24,13 @@ trait HasVacationReview
     }
 
     /**
-     * An admin can ask for a review once the request is done and the guest has an email
-     * address, until the guest has reviewed.
+     * An admin can ask for a review once the request is done (and not closed as "no reply")
+     * and the guest has an email address, until the guest has reviewed.
      */
     public function canRequestReview(): bool
     {
         return $this->status === static::STATUS_DONE
+            && $this->doneReason() !== DoneReason::NoReply
             && ! empty($this->email)
             && $this->review === null;
     }
