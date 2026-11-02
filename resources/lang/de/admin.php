@@ -182,6 +182,7 @@ return [
         'lang_es' => 'Español (ES)',
         'lang_fr' => 'Français (FR)',
         'lang_it' => 'Italiano (IT)',
+        'lang_nl' => 'Nederlands (NL)',
         'modal_cancel' => 'Abbrechen',
         'modal_save' => 'Speichern',
         'modal_translate_confirm_title' => 'Übersetzung bestätigen',

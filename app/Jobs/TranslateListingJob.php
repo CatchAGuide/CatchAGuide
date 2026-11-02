@@ -99,6 +99,9 @@ class TranslateListingJob implements ShouldQueue
             return;
         }
 
+        // A corrected source marks the stored translations stale, so the loop below redoes them.
+        $service->correctSourceLanguage($guiding);
+
         $source = $guiding->language ?: 'de';
 
         foreach (GuidingTranslationService::defaultTargetLanguages() as $target) {

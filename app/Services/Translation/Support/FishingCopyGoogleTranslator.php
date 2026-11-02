@@ -21,6 +21,26 @@ class FishingCopyGoogleTranslator
     }
 
     /**
+     * Two-letter code of the language Google detects in $text, or null when it can't tell or
+     * the call fails. One request; the text is "translated" to English only to read the
+     * detected source.
+     */
+    public function detectLanguage(string $text): ?string
+    {
+        try {
+            $translator = new GoogleTranslate('en');
+            $translator->translate($text);
+            $detected = strtolower((string) $translator->getLastDetectedSource());
+        } catch (\Throwable $e) {
+            Log::warning('Google language detection failed', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+
+        return preg_match('/^[a-z]{2}$/', $detected) ? $detected : null;
+    }
+
+    /**
      * @param  array<string, string>  $fields
      * @return array<string, string>
      */

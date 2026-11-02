@@ -15,6 +15,18 @@ Locales live under `resources/lang/{en,de}/`. User-facing copy must go through t
 - Prefer extending an existing lang file over creating a new one unless the domain is clearly new.
 - Validation messages belong in lang files / Form Request `messages()` that reference translation keys.
 
+## Listing content translation (guide-written text)
+
+- Automatic translation (`TranslateListingJob`, observers, page renders, scheduled tasks) must use the **free** Google
+  engine (`FishingCopyGoogleTranslator`). Gemini is paid: only use it when someone runs it explicitly
+  (`--engine=gemini`), never as a default.
+- Skip the call when the stored content hash is unchanged, and cache detection results. The free endpoint answers 429
+  when overused.
+- `guidings.language` is the language the text is written in (can be `nl`, `en`, `de`, …), not the domain locale.
+  Change it only via `GuidingTranslationService::changeSourceLanguage()`, which marks old translations stale.
+- One `languages` row per (`source_id`, `type`, `language`). Don't add `title` or other columns to the
+  `updateOrCreate` match.
+
 ```blade
 {{-- ❌ BAD --}}
 <button>Submit application</button>

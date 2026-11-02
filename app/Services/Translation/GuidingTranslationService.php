@@ -33,6 +33,93 @@ class GuidingTranslationService
         'coast', 'lake', 'river', 'sea', 'big', 'game', 'predator', 'bottom',
     ];
 
+    /** Characters of title + description sent to Google for source-language detection. */
+    private const DETECTION_SAMPLE_LENGTH = 500;
+
+    private FishingCopyGoogleTranslator $translator;
+
+    public function __construct(?FishingCopyGoogleTranslator $translator = null)
+    {
+        $this->translator = $translator ?? new FishingCopyGoogleTranslator();
+    }
+
+    /**
+     * Check guidings.language against the content and fix it when Google detects another
+     * language. The column defaults to "de" and the EN/DE heuristics can't see any other
+     * language, so a tour written in Dutch was stored as "de": catchaguide.de served the Dutch
+     * original as if it were German, and the English translation was made from the wrong
+     * source. Detection is cached per content version, so a save that didn't change the title
+     * or description costs no request.
+     *
+     * @return bool True when the source language was changed
+     */
+    public function correctSourceLanguage(Guiding $guiding): bool
+    {
+        $sample = $this->detectionSample($guiding);
+        if ($sample === '') {
+            return false;
+        }
+
+        $detected = Cache::rememberForever(
+            $this->detectionCacheKey($guiding, $sample),
+            fn () => $this->translator->detectLanguage($sample)
+        );
+
+        if ($detected === null || $detected === strtolower((string) $guiding->language)) {
+            return false;
+        }
+
+        Log::info('Guiding source language corrected', [
+            'guiding_id' => $guiding->id,
+            'from' => $guiding->language,
+            'to' => $detected,
+        ]);
+
+        $this->changeSourceLanguage($guiding, $detected, quietly: true);
+
+        return true;
+    }
+
+    /**
+     * Set guidings.language and mark every stored translation stale, since each was made from
+     * the old source language; the next TranslateListingJob run redoes them. The choice is
+     * also pinned for the current content, so correctSourceLanguage() leaves an admin's pick
+     * alone until the text changes.
+     */
+    public function changeSourceLanguage(Guiding $guiding, string $language, bool $quietly = false): void
+    {
+        $language = strtolower($language);
+
+        Language::where('source_id', $guiding->id)
+            ->where('type', 'guidings')
+            ->update(['content' => null]);
+
+        $guiding->language = $language;
+        $quietly ? $guiding->saveQuietly() : $guiding->save();
+
+        $sample = $this->detectionSample($guiding);
+        if ($sample !== '') {
+            Cache::forever($this->detectionCacheKey($guiding, $sample), $language);
+        }
+
+        foreach (['en', 'de', 'es', 'fr', 'it', 'nl'] as $code) {
+            Cache::forget('guiding_translation_'.$guiding->id.'_'.$code);
+        }
+    }
+
+    private function detectionSample(Guiding $guiding): string
+    {
+        $text = strip_tags($guiding->getRawOriginal('title').' '.$guiding->getRawOriginal('description'));
+        $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode($text)) ?? $text);
+
+        return mb_substr($text, 0, self::DETECTION_SAMPLE_LENGTH);
+    }
+
+    private function detectionCacheKey(Guiding $guiding, string $sample): string
+    {
+        return 'guiding_source_language_'.$guiding->id.'_'.md5($sample);
+    }
+
     /**
      * EN/DE guess for a single note. Null when the text has no clear signal.
      * Short English notes ("the", "will", "guide") count; a lone marker does not.
@@ -363,19 +450,22 @@ class GuidingTranslationService
         // Reconstruct JSON fields from individual translated fields
         $reconstructedFields = $this->reconstructJsonFields($guiding, $translatedFields);
         
-        Language::updateOrCreate(
-            [
-                'source_id' => $guiding->id,
-                'type' => 'guidings',
-                'language' => $targetLanguage,
-                'title' => $reconstructedFields['title'],
-            ],
-            [
-                'json_data' => json_encode($reconstructedFields),
-                'content' => md5(serialize($this->getTranslatableFields($guiding))),
-                'updated_at' => now()
-            ]
-        );
+        $key = [
+            'source_id' => $guiding->id,
+            'type' => 'guidings',
+            'language' => $targetLanguage,
+        ];
+
+        $translation = Language::updateOrCreate($key, [
+            'title' => $reconstructedFields['title'] ?? null,
+            'json_data' => json_encode($reconstructedFields),
+            'content' => md5(serialize($this->getTranslatableFields($guiding))),
+            'updated_at' => now()
+        ]);
+
+        // This row used to be matched on the title too, so renaming a tour added a second
+        // row while the page kept reading the first one.
+        Language::where($key)->whereKeyNot($translation->getKey())->delete();
 
         // Clear cache for this translation
         $cacheKey = 'guiding_translation_' . $guiding->id . '_' . $targetLanguage;
@@ -740,6 +830,6 @@ class GuidingTranslationService
             }
         }
 
-        return (new FishingCopyGoogleTranslator())->batchTranslate($fields, $toLanguage, $fromLanguage);
+        return $this->translator->batchTranslate($fields, $toLanguage, $fromLanguage);
     }
 }

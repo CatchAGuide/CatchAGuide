@@ -56,7 +56,7 @@ class GuidingsController extends Controller
     /**
      * Allowed source/target language codes for guidings (must match translation service).
      */
-    private const ALLOWED_LANGUAGES = ['de', 'en', 'es', 'fr', 'it'];
+    private const ALLOWED_LANGUAGES = ['de', 'en', 'es', 'fr', 'it', 'nl'];
 
     /**
      * Display a listing of the resource.
@@ -657,8 +657,9 @@ class GuidingsController extends Controller
             'language' => ['required', 'string', 'size:2', Rule::in(self::ALLOWED_LANGUAGES)],
         ]);
 
-        $guiding->language = $validated['language'];
-        $guiding->save();
+        if ($guiding->language !== $validated['language']) {
+            app(GuidingTranslationService::class)->changeSourceLanguage($guiding, $validated['language']);
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
