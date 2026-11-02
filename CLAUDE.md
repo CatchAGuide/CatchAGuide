@@ -242,6 +242,24 @@ by GA4's Hostname. Set up 9 Oct 2026 (GTM version 21).
   domains. Without it, a language switch splits one visit into two.
 - **Access:** GA4 and Clarity are in the "SEO Chrome" browser profile; GTM and Google Ads are in "Work Chrome".
 
+### Listing content translation (cost: keep it free)
+
+Guide-written listing text (guidings, trips, camps, vacations, …) is translated into `en`/`de` and stored in the
+`languages` table (`type` = `guidings`, `camps`, …; `content` = hash of the source fields).
+
+- **Automatic paths use only the free Google endpoint** (`FishingCopyGoogleTranslator`, Stichoza; no key, no
+  billing). That covers `TranslateListingJob` (queued on save, debounced by `services.translation.dispatch_cooldown_seconds`)
+  and its source-language detection. Gemini (`GOOGLE_GEMINI_API_KEY`) is paid; use it only when someone runs it
+  explicitly (`--engine=gemini`). Never make it the default for a job, observer, page render or scheduled task.
+  The free endpoint answers 429 when hammered, so keep calls cached and skip them when the content hash is unchanged.
+- **A guiding's `language` is the language its text is written in, not the domain's.** It defaults to `de`.
+  `TranslateListingJob` checks it with Google detection, cached per content version, so a Dutch tour becomes `nl`
+  and gets both `de` and `en` translations. Change it only through
+  `GuidingTranslationService::changeSourceLanguage()`. That marks the stored translations stale so they are redone,
+  and keeps an admin's manual choice until the text changes. Never set it from the request locale.
+- Translation rows are one per (`source_id`, `type`, `language`). Don't add other columns to the
+  `updateOrCreate` match. Matching on `title` once left duplicate rows, and pages kept showing the stale one.
+
 ### Guide status
 
 `app/Enums/GuideStatus.php` + `app/Services/Guide/GuideStatusService.php` (with a `HasGuideStatus` trait) model the

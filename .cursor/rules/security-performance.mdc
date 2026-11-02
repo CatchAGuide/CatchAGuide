@@ -17,6 +17,8 @@ alwaysApply: true
 - Avoid unbounded loops, retries, or bulk calls that can spike usage.
 - Prefer caching, batching, and “call only when needed” (on-demand) over eager/always-on requests.
 - If a change could increase paid API volume, call it out and confirm before shipping.
+- Translation: automated paths use the free Google engine only. The paid Gemini engine is for explicit one-off runs
+  only (see `i18n-translations.mdc`).
 
 ## Image / media uploads
 
