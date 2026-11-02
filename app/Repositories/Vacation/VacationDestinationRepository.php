@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class VacationDestinationRepository
 {
-    /** Per-request memo so repeated calls (middleware + controller + nav) don't even hit the cache store. */
-    private static array $hubGridMemo = [];
+    /** Per-request memo (the class is bound scoped) so repeated calls (middleware + controller + nav) don't even hit the cache store. */
+    private array $hubGridMemo = [];
 
     public function __construct(
         private CampListingRepository $camps,
@@ -147,14 +147,14 @@ class VacationDestinationRepository
     {
         $locale = $locale ?? app()->getLocale();
 
-        if (isset(self::$hubGridMemo[$locale])) {
-            return self::$hubGridMemo[$locale];
+        if (isset($this->hubGridMemo[$locale])) {
+            return $this->hubGridMemo[$locale];
         }
 
         // This aggregate (country counts + per-country translation lookups) costs 100+ queries.
         // It backs isKnownCountrySlug(), which the redirect middleware, the pillar controller, and
         // the nav both call per request, so it must be cached rather than rebuilt each time.
-        return self::$hubGridMemo[$locale] = Cache::remember(
+        return $this->hubGridMemo[$locale] = Cache::remember(
             'vacation_hub_grid_countries_v1_'.$locale,
             now()->addMinutes(30),
             function () use ($locale) {

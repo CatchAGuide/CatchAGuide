@@ -15,6 +15,7 @@ use App\Models\RentalBoat;
 use App\Models\SpecialOffer;
 use App\Models\Trip;
 use App\Models\Vacation;
+use App\Repositories\Vacation\VacationDestinationRepository;
 use App\Services\Assistant\AssistantUiEnvelopeParser;
 use App\Services\Assistant\AssistantUiPayloadNormalizer;
 use App\Services\Assistant\AssistantVisibleReplySanitizer;
@@ -55,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(GuidingMasterDataLookup::class);
         // Camp/trip review averages for listing cards, loaded once per request.
         $this->app->scoped(VacationReviewStats::class);
+        // Hub-grid country list, memoized once per request (also resolved by middleware and nav).
+        $this->app->scoped(VacationDestinationRepository::class);
 
         $this->app->bind(LLMClientInterface::class, function () {
             if (!config('booking_assistant.enabled')) {
