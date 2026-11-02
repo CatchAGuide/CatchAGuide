@@ -272,8 +272,7 @@ class GuidingTranslationCommand extends Command
                 }
 
                 if (! $dryRun) {
-                    $guiding->language = $detected;
-                    $guiding->save();
+                    $this->translationService->changeSourceLanguage($guiding, $detected);
                     $stats['updated']++;
                 }
             }

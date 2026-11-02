@@ -554,6 +554,7 @@
                             <option value="es">{{ __('admin.guidings.lang_es') }}</option>
                             <option value="fr">{{ __('admin.guidings.lang_fr') }}</option>
                             <option value="it">{{ __('admin.guidings.lang_it') }}</option>
+                            <option value="nl">{{ __('admin.guidings.lang_nl') }}</option>
                         </select>
                     </div>
                 </div>
