@@ -69,6 +69,7 @@ class VacationDestinationRepositoryTest extends TestCase
     public function test_search_dropdown_uses_vacations_category_pages_not_tours(): void
     {
         $marker = 'test-vac-dropdown-'.uniqid();
+        $user = User::factory()->create();
 
         $vacationCountry = CategoryEntity::countries()->create([
             'type' => 'country',
@@ -76,6 +77,14 @@ class VacationDestinationRepositoryTest extends TestCase
             'slug' => $marker.'-vacations',
             'countrycode' => 'V7',
             'thumbnail_path' => 'assets/images/'.$marker.'-vacations.jpg',
+        ]);
+
+        $emptyCountry = CategoryEntity::countries()->create([
+            'type' => 'country',
+            'name' => 'Emptyland',
+            'slug' => $marker.'-empty',
+            'countrycode' => 'E8',
+            'thumbnail_path' => 'assets/images/'.$marker.'-empty.jpg',
         ]);
 
         $toursCountry = CategoryEntity::countries()->create([
@@ -86,17 +95,19 @@ class VacationDestinationRepositoryTest extends TestCase
             'thumbnail_path' => 'assets/images/'.$marker.'-tours.jpg',
         ]);
 
-        Language::query()->create([
-            'source_id' => (string) $vacationCountry->id,
-            'type' => CategoryPageEntityType::GEO_COUNTRY,
-            'scope' => CategoryPageScope::VACATIONS,
-            'language' => 'en',
-            'title' => 'Fishing vacation in Vacationland',
-            'sub_title' => 'Vacation subtitle',
-            'introduction' => 'Vacation intro',
-            'content' => 'Vacation body',
-            'faq_title' => '',
-        ]);
+        foreach ([$vacationCountry, $emptyCountry] as $country) {
+            Language::query()->create([
+                'source_id' => (string) $country->id,
+                'type' => CategoryPageEntityType::GEO_COUNTRY,
+                'scope' => CategoryPageScope::VACATIONS,
+                'language' => 'en',
+                'title' => 'Fishing vacation in '.$country->name,
+                'sub_title' => 'Vacation subtitle',
+                'introduction' => 'Vacation intro',
+                'content' => 'Vacation body',
+                'faq_title' => '',
+            ]);
+        }
 
         Language::query()->create([
             'source_id' => (string) $toursCountry->id,
@@ -110,10 +121,20 @@ class VacationDestinationRepositoryTest extends TestCase
             'faq_title' => '',
         ]);
 
+        Trip::query()->create([
+            'title' => 'Trip '.$marker,
+            'slug' => $marker.'-trip',
+            'location' => 'Somewhere',
+            'country' => $vacationCountry->slug,
+            'status' => 'active',
+            'user_id' => $user->id,
+        ]);
+
         $options = app(VacationDestinationRepository::class)->countriesForSearch();
         $slugs = $options->pluck('slug');
 
         $this->assertTrue($slugs->contains($vacationCountry->slug));
+        $this->assertFalse($slugs->contains($emptyCountry->slug));
         $this->assertFalse($slugs->contains($toursCountry->slug));
     }
 }

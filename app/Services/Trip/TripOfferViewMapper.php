@@ -176,7 +176,9 @@ class TripOfferViewMapper
             'target_species'             => $targetSpecies,
             'fishing_methods'            => $fishingMethods,
             'water_types'                => $waterTypes,
-            'trip_schedule'              => is_array($trip->trip_schedule) ? $trip->trip_schedule : [],
+            'trip_schedule'              => $this->localizeSchedule(
+                is_array($trip->trip_schedule) ? $trip->trip_schedule : []
+            ),
             'included'                   => $included,
             'excluded'                  => $excluded,
             'additional_info'           => $additionalInfoList,
@@ -194,6 +196,44 @@ class TripOfferViewMapper
             ],
             'trip_highlights'            => $highlightItems,
         ];
+    }
+
+    /**
+     * Schedule rows store the day marker in German ("Tag 1", "Tag 2-6") in the time field.
+     * That field is not sent to the translator, so English pages would keep "Tag".
+     *
+     * @param  array<int, mixed>  $schedule
+     * @return array<int, mixed>
+     */
+    private function localizeSchedule(array $schedule): array
+    {
+        if (app()->getLocale() === 'de') {
+            return $schedule;
+        }
+
+        foreach ($schedule as $index => $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            foreach (['time', 'day_label'] as $key) {
+                $value = $item[$key] ?? null;
+                if (! is_string($value) || $value === '') {
+                    continue;
+                }
+
+                $schedule[$index][$key] = $this->localizeScheduleDayMarker($value);
+            }
+        }
+
+        return $schedule;
+    }
+
+    private function localizeScheduleDayMarker(string $value): string
+    {
+        $localized = preg_replace('/^Tag(?=\s*\d)/u', __('trips.day'), $value, 1);
+
+        return is_string($localized) ? $localized : $value;
     }
 
     /** Resolve target species IDs to names in one query. */

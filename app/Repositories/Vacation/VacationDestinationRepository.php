@@ -115,20 +115,27 @@ class VacationDestinationRepository
     }
 
     /**
-     * Vacation WHERE dropdown: countries with filled vacations category-page copy.
-     * Tour/global destination pages are excluded so the list is not the guidings catalog.
+     * Vacation WHERE dropdown: countries with filled vacations category-page copy
+     * and at least one active camp or trip. Tour/global destination pages are
+     * excluded so the list is not the guidings catalog.
      *
      * @return Collection<int, object{slug: string, name: string}>
      */
     public function countriesForSearch(?string $locale = null): Collection
     {
         $locale = $locale ?? app()->getLocale();
+        $withListings = $this->canonicalCountryCounts('camps')
+            ->keys()
+            ->merge($this->canonicalCountryCounts('trips')->keys())
+            ->unique()
+            ->flip();
 
         return $this->homepageCountries->uniqueModelsForScope(CategoryPageScope::VACATIONS, $locale)
             ->map(fn (CategoryEntity $country) => (object) [
                 'slug' => CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug),
                 'name' => $this->homepageCountries->labelFor($country, $locale),
             ])
+            ->filter(fn (object $country) => $withListings->has($country->slug))
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values();
     }

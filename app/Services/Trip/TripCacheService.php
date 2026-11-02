@@ -13,9 +13,9 @@ class TripCacheService
     private const TRIPS_LIST_CACHE_KEY = 'trips_list';
     private const TRIP_CACHE_KEY = 'trip_';
     private const TRIP_OFFER_VIEW_CACHE_KEY = 'trip_offer_view_';
-    private const TRIP_OFFER_VIEW_CACHE_VERSION = 'v3';
+    private const TRIP_OFFER_VIEW_CACHE_VERSION = 'v4';
     private const TRIP_OFFER_PRESENTATION_CACHE_KEY = 'trip_offer_presentation_';
-    private const TRIP_OFFER_PRESENTATION_CACHE_VERSION = 'v1';
+    private const TRIP_OFFER_PRESENTATION_CACHE_VERSION = 'v2';
     private const FORM_DATA_CACHE_KEY = 'trip_form_data';
 
     public function getTripsList(int $perPage = 15): LengthAwarePaginator
