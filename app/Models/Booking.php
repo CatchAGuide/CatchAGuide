@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Contracts\Booking\HasStatusHistoryContract;
 use App\Mail\BookingConfirmationMail;
 use App\Mail\BookingConfirmationMailGuest;
 use App\Mail\MailToCEO;
@@ -12,12 +13,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use App\Services\Booking\GuidingBookingStatusLogger;
+use App\Traits\HasStatusHistory;
 use Illuminate\Support\Facades\Mail;
 
-class Booking extends Model
+class Booking extends Model implements HasStatusHistoryContract
 {
-    use HasFactory;
-    
+    use HasFactory, HasStatusHistory;
+
+    protected static function booted(): void
+    {
+        // Logged here because the status changes in many places (admin, guide, guest, expiry).
+        static::updated(function (Booking $booking) {
+            if ($booking->wasChanged('status')) {
+                app(GuidingBookingStatusLogger::class)->log($booking, $booking->getOriginal('status'));
+            }
+        });
+    }
+
+    public static function statusOptions(): array
+    {
+        return [
+            'pending' => __('admin.guiding_booking_status.pending'),
+            'accepted' => __('admin.guiding_booking_status.accepted'),
+            'rejected' => __('admin.guiding_booking_status.rejected'),
+            'cancelled' => __('admin.guiding_booking_status.cancelled'),
+        ];
+    }
+
     protected $fillable = [
         'price',
         'cag_percent',

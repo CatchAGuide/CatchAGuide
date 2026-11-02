@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Changes the status of an admin request (camp/vacation and trip requests, contact requests,
- * product reports) and logs who did it, so the admin lists can show "last changed by" and the
+ * product reports, guiding bookings) and logs who did it, so the admin lists can show "last changed by" and the
  * full history.
  */
 class BookingStatusHistory
@@ -45,7 +45,6 @@ class BookingStatusHistory
 
         return true;
     }
-
 
     /**
      * First entry for a request an employee created by hand, with its initial status.
@@ -82,7 +81,9 @@ class BookingStatusHistory
                     'to_label' => $this->label($labels, $change->to_status, $doneReason),
                     'variant' => $doneReason ? 'done-'.$doneReason->value : $change->to_status,
                     'by' => $change->actorName(),
-                    'reason' => $change->reason && ! $doneReason ? __('admin.booking_status_history.reason_'.$change->reason) : null,
+                    'reason' => $change->reason && ! $doneReason && ! in_array($change->reason, BookingStatusChange::ACTOR_REASONS, true)
+                        ? __('admin.booking_status_history.reason_'.$change->reason)
+                        : null,
                     'at' => $change->created_at?->format('M j, Y g:i A'),
                 ];
             })
@@ -131,6 +132,15 @@ class BookingStatusHistory
         $label = $labels[$status] ?? $status;
 
         return $doneReason ? $label.' · '.$doneReason->label() : $label;
+    }
+
+    /**
+     * Logs a status change that was already saved elsewhere (guiding bookings change status in many
+     * places, see App\Services\Booking\GuidingBookingStatusLogger).
+     */
+    public function record(HasStatusHistoryContract&Model $booking, ?string $from, string $to, ?Employee $actor, ?string $reason = null): void
+    {
+        $this->log($booking, $from, $to, $actor, $reason);
     }
 
     private function log(HasStatusHistoryContract&Model $booking, ?string $from, string $to, ?Employee $actor, ?string $reason): void

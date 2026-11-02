@@ -40,6 +40,7 @@ class VoucherOrder extends Model
         'valid_until',
         'commission_rate',
         'commission_amount',
+        'admin_comment',
     ];
 
     protected $casts = [

@@ -38,6 +38,29 @@ class VoucherOrdersController extends Controller
         return view('admin.pages.voucher-orders.index', compact('orders', 'search', 'totals'));
     }
 
+    public function showComment(VoucherOrder $voucherOrder)
+    {
+        return response()->json([
+            'id' => $voucherOrder->id,
+            'admin_comment' => $voucherOrder->admin_comment,
+        ]);
+    }
+
+    public function updateComment(Request $request, VoucherOrder $voucherOrder)
+    {
+        $validated = $request->validate([
+            'admin_comment' => ['nullable', 'string'],
+        ]);
+
+        $voucherOrder->update([
+            'admin_comment' => $validated['admin_comment'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
     public function pdf(VoucherOrder $voucherOrder, GuideVoucherOrders $orders, VoucherPdfGenerator $pdfs): Response|RedirectResponse
     {
         if (($pdf = $orders->pdf($voucherOrder)) === null) {

@@ -710,6 +710,15 @@ return [
         'by' => 'von :name',
         'reason_created' => 'Manuell angelegt',
         'reason_offer_created' => 'Angebot erstellt',
+        'reason_expired' => 'Abgelaufen (keine Antwort vom Guide)',
+        'guide' => 'Guide',
+    ],
+
+    'guiding_booking_status' => [
+        'pending' => 'Offen',
+        'accepted' => 'Angenommen',
+        'rejected' => 'Abgelehnt',
+        'cancelled' => 'Storniert',
     ],
 
     'done_reason' => [
@@ -754,6 +763,14 @@ return [
         'download_pdf' => 'Gutschein-PDF herunterladen',
         'view_message' => 'Persönliche Nachricht',
         'empty' => 'Noch keine Gutscheinbestellungen.',
+        'comment' => 'Admin-Kommentar (intern)',
+        'comment_label' => 'Interne Notizen (nur Text)',
+        'comment_placeholder' => 'Interne Notizen für das Team…',
+        'comment_hint' => 'Wird weder an den Käufer noch an den Guide gesendet.',
+        'comment_close' => 'Schließen',
+        'comment_save' => 'Speichern',
+        'comment_load_failed' => 'Kommentar konnte nicht geladen werden.',
+        'comment_save_failed' => 'Kommentar konnte nicht gespeichert werden.',
         'pdf_missing' => 'Das Gutschein-PDF konnte nicht erstellt werden.',
     ],
 ];

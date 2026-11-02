@@ -147,6 +147,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/bookings/{booking}/reschedule', [BookingsController::class, 'rescheduleInPlace'])->name('bookings.reschedule');
         Route::resource('bookings', BookingsController::class);
         Route::post('/bookings/{booking}/save', [BookingsController::class, 'update'])->name('bookings.save');
+        Route::get('/bookings/{booking}/status-history', [BookingsController::class, 'statusHistory'])->name('bookings.status-history');
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::get('/bookings/{booking}/guide-invoice-preview', [BookingsController::class, 'guideInvoicePreview'])->name('bookings.guide-invoice-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
@@ -177,6 +178,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('trip-bookings/{tripBooking}/email-history', [TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
         Route::post('trip-bookings/{tripBooking}/review-request', [TripBookingsController::class, 'sendReviewRequest'])->name('trip-bookings.review-request');
         Route::get('voucher-orders', [VoucherOrdersController::class, 'index'])->name('voucher-orders.index');
+        Route::get('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'showComment'])->name('voucher-orders.comment.show')->whereNumber('voucherOrder');
+        Route::post('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'updateComment'])->name('voucher-orders.comment.update')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
 
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');

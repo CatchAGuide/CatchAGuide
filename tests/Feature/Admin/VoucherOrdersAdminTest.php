@@ -101,6 +101,35 @@ class VoucherOrdersAdminTest extends TestCase
             ->assertDontSee(route('admin.voucher-orders.pdf', $own), false);
     }
 
+    public function test_admin_can_save_and_read_an_internal_comment(): void
+    {
+        $this->actingAsEmployee();
+        $order = $this->order('Commentbuyer');
+
+        $this->get(route('admin.voucher-orders.index'))
+            ->assertOk()
+            ->assertSee(route('admin.voucher-orders.comment.show', $order), false);
+
+        $this->postJson(route('admin.voucher-orders.comment.update', $order), ['admin_comment' => 'Guide confirmed payment'])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->getJson(route('admin.voucher-orders.comment.show', $order))
+            ->assertOk()
+            ->assertJson(['id' => $order->id, 'admin_comment' => 'Guide confirmed payment']);
+
+        $this->postJson(route('admin.voucher-orders.comment.update', $order), ['admin_comment' => null])->assertOk();
+        $this->assertNull($order->fresh()->admin_comment);
+    }
+
+    public function test_guests_cannot_comment(): void
+    {
+        $order = $this->order('Nocomment');
+
+        $this->post(route('admin.voucher-orders.comment.update', $order), ['admin_comment' => 'x'])->assertRedirect();
+        $this->assertNull($order->fresh()->admin_comment);
+    }
+
     public function test_pdf_for_an_order_without_one_redirects_back(): void
     {
         $this->actingAsEmployee();

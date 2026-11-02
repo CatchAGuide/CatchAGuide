@@ -1,5 +1,6 @@
 {{--
-    Status UI shared by the admin request lists (camp/trip requests, contact requests, product reports):
+    Status UI shared by the admin request lists (camp/trip requests, contact requests, product reports,
+    guiding bookings):
     - the status history modal, opened by any .js-status-summary button with a data-url;
     - styles and the click handler for admin.partials.request-status-dropdown (incl. done reasons).
     Include once per page.
@@ -16,6 +17,11 @@
     .status-history-list li.is-done::before,
     .status-history-list li.is-done-booked::before { background: #198754; }
     .status-history-list li.is-done-no_reply::before { background: #64748b; }
+    /* Guiding bookings */
+    .status-history-list li.is-pending::before { background: #ffc107; }
+    .status-history-list li.is-accepted::before { background: #198754; }
+    .status-history-list li.is-rejected::before,
+    .status-history-list li.is-cancelled::before { background: #dc3545; }
 
     /* Status button: "Done · No reply" is a closed-but-lost request, so it is slate instead of green. */
     .js-status-dropdown-btn.btn-status-done.btn-done-no_reply { background-color: #64748b; border-color: #64748b; color: #fff; }
