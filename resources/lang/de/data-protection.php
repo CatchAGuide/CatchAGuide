@@ -336,4 +336,32 @@ return [
     'ownServicesMsg4' => 'Die Verwendung von OneDrive erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes Interesse an einem zuverlässigen Uploadbereich auf seiner Website. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.',
 
     'restrictionOfProcessingMsg6' => 'Wenn Sie die Verarbeitung Ihrer personenbezogenen Daten eingeschränkt haben, dürfen diese Daten – von ihrer Speicherung abgesehen – nur mit Ihrer Einwilligung oder zur Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen oder zum Schutz der Rechte einer anderen natürlichen oder juristischen Person oder aus Gründen eines wichtigen öffentlichen Interesses der Europäischen Union oder eines Mitgliedstaats verarbeitet werden.',
+
+    // Abschnitt 6: was tatsächlich läuft (GTM → GA4, Clarity, Google Ads) und wie die Cookie-Auswahl wirkt
+    'tracking' => [
+        'title' => 'Analyse-Tools und Werbung',
+        'choice' => 'In unserem Cookie-Banner können Sie zwischen „Alle akzeptieren“ und „Nur notwendige akzeptieren“ wählen. Ihre Auswahl können Sie jederzeit auf unserer Seite Cookie-Einstellungen ändern oder, wenn Sie ein Konto haben, unter Profil › Einstellungen. Die Kategorien sind: Notwendig (immer aktiv, einschließlich Google Analytics 4), Analyse (Microsoft Clarity) und Marketing (Google Ads).',
+        'choice-link' => 'Cookie-Einstellungen öffnen',
+
+        'gtm' => 'Google Tag Manager',
+        'gtm-1' => 'Wir nutzen den Google Tag Manager. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland („Google“). Der Tag Manager lädt die unten beschriebenen Tools auf unseren Seiten. Er setzt selbst keine Cookies und wertet Ihre Nutzung der Website nicht aus; beim Laden erhält Google jedoch Ihre IP-Adresse.',
+        'gtm-2' => 'Der Einsatz des Tag Managers erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse daran, die Tools auf unserer Website schnell und an einer Stelle zu verwalten.',
+
+        'ga4' => 'Google Analytics 4',
+        'ga4-1' => 'Wir nutzen Google Analytics 4, um Besuche auf unserer Website zu zählen und zu verstehen. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.',
+        'ga4-2' => 'Google Analytics läuft für alle Besucher, auch wenn Sie „Nur notwendige akzeptieren“ wählen. Erfasst werden unter anderem die aufgerufenen Seiten und die Verweildauer, die Website, von der Sie kommen, Ihr Gerät, Browser und ungefährer Standort (aus Ihrer IP-Adresse abgeleitet) sowie Aktionen wie Klicks und Buchungsanfragen. Google Analytics 4 protokolliert und speichert keine IP-Adressen.',
+        'ga4-3' => 'Dazu speichert Google Analytics die Cookies _ga und _ga_SYZ9VBYH3S auf Ihrem Gerät, die Ihren Browser bis zu 2 Jahre wiedererkennen. In Google Analytics werden Ereignisdaten nach 2 Monaten und Nutzerdaten nach 14 Monaten gelöscht.',
+        'ga4-4' => 'Die Nutzung von Google Analytics erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein berechtigtes Interesse daran zu wissen, wie viele Menschen unsere Website besuchen und welche Seiten sie nutzen, um unser Angebot zu verbessern. Sie können dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO): Blockieren oder löschen Sie Cookies in Ihrem Browser oder installieren Sie das Browser-Add-on von Google:',
+        'ga4-5' => 'Die Google LLC ist nach dem EU-US Data Privacy Framework zertifiziert, das die Übermittlung von Daten in die USA abdeckt. Weitere Informationen finden Sie in der Datenschutzerklärung von Google:',
+
+        'clarity' => 'Microsoft Clarity',
+        'clarity-1' => 'Wir nutzen Microsoft Clarity, um zu sehen, wie unsere Seiten genutzt werden und wo wir sie verbessern können. Anbieter ist die Microsoft Ireland Operations Limited, One Microsoft Place, South County Business Park, Leopardstown, Dublin 18, Irland. Clarity erfasst Klicks, Mausbewegungen und Scrollen und erstellt daraus Heatmaps und Sitzungsaufzeichnungen.',
+        'clarity-2' => 'Clarity wird auf jeder Seite geladen. Ohne Ihre Einwilligung in „Analyse“ speichert Clarity keine Cookies auf unserer Domain und kann Sie von einem Seitenaufruf zum nächsten nicht wiedererkennen; Microsoft kann jedoch eigene Cookies auf seinen Domains (clarity.ms, bing.com) setzen. Nur mit Ihrer Einwilligung speichert Clarity die Cookies _clck (bis zu 1 Jahr) und _clsk (1 Tag) auf unserer Domain.',
+        'clarity-3' => 'Mit Ihrer Einwilligung erfolgt der Einsatz von Clarity auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG, ohne sie auf Grundlage unseres berechtigten Interesses an der Verbesserung unserer Website (Art. 6 Abs. 1 lit. f DSGVO). Ihre Einwilligung können Sie jederzeit in den Cookie-Einstellungen widerrufen. Microsoft ist nach dem EU-US Data Privacy Framework zertifiziert. Weitere Informationen:',
+
+        'ads' => 'Google Ads Conversion-Tracking',
+        'ads-1' => 'Wir werben mit Google Ads und messen, ob Besucher, die über eine unserer Anzeigen kommen, eine Buchungsanfrage senden. Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.',
+        'ads-2' => 'Nur mit Ihrer Einwilligung in „Marketing“ speichert Google Ads das Cookie _gcl_au (90 Tage) auf Ihrem Gerät. Ohne Einwilligung werden keine Google-Ads-Cookies gespeichert; Google erhält dann nur anonyme Signale ohne Cookies (Google Consent Mode).',
+        'ads-3' => 'Das Google Ads Conversion-Tracking erfolgt auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG), die Sie jederzeit in den Cookie-Einstellungen widerrufen können. Die Google LLC ist nach dem EU-US Data Privacy Framework zertifiziert.',
+    ],
 ];

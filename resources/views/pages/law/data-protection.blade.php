@@ -194,16 +194,25 @@
                         <p>Wenn Sie eine Seite aufrufen, die ein solches Plugin enth&auml;lt, stellt Ihr Browser eine direkte Verbindung zu den Servern von Pinterest her. Das Plugin &uuml;bermittelt dabei Protokolldaten an den Server von Pinterest in die USA. Diese Protokolldaten enthalten m&ouml;glicherweise Ihre IP-Adresse, die Adresse der besuchten Websites, die ebenfalls Pinterest-Funktionen enthalten, Art und Einstellungen des Browsers, Datum und Zeitpunkt der Anfrage, Ihre Verwendungsweise von Pinterest sowie Cookies.</p> 
                         <p>Die Speicherung und Analyse der Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes Interesse an einer m&ouml;glichst umfangreichen Sichtbarkeit in den Sozialen Medien. Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschlie&szlig;lich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.</p> 
                         <p>Weitere Informationen zu Zweck, Umfang und weiterer Verarbeitung und Nutzung der Daten durch Pinterest sowie Ihre diesbez&uuml;glichen Rechte und M&ouml;glichkeiten zum Schutz Ihrer Privatsph&auml;re finden Sie in den Datenschutzhinweisen von Pinterest: <a href="https://policy.pinterest.com/de/privacy-policy" target="_blank" rel="noopener noreferrer">https://policy.pinterest.com/de/privacy-policy</a>.</p>
-                        <h2>6. Analyse-Tools und Werbung</h2>
-                        <h3>Matomo (ehemals Piwik)</h3> 
-                        <p>Diese Website benutzt den Open Source Webanalysedienst Matomo. Matomo verwendet Technologien, die die seiten&uuml;bergreifende Wiedererkennung des Nutzers zur Analyse des Nutzerverhaltens erm&ouml;glichen (z.&nbsp;B. Cookies oder Device-Fingerprinting). Die durch Matomo erfassten Informationen &uuml;ber die Benutzung dieser Website werden auf unserem Server gespeichert. Die IP-Adresse wird vor der Speicherung anonymisiert.</p> 
-                        <p>Mit Hilfe von Matomo sind wir in der Lage Daten &uuml;ber die Nutzung unserer Website durch die Websitebesucher zu erfassen und zu analysieren. Hierdurch k&ouml;nnen wir u. a. herausfinden, wann welche Seitenaufrufe get&auml;tigt wurden und aus welcher Region sie kommen. Au&szlig;erdem erfassen wir verschiedene Logdateien (z.&nbsp;B. IP-Adresse, Referrer, verwendete Browser und Betriebssysteme) und k&ouml;nnen messen, ob unsere Websitebesucher bestimmte Aktionen durchf&uuml;hren (z.&nbsp;B. Klicks, K&auml;ufe u. &Auml;.).</p> 
-                        <p>Die Nutzung dieses Analyse-Tools erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Der Websitebetreiber hat ein berechtigtes Interesse an der anonymisierten Analyse des Nutzerverhaltens, um sowohl sein Webangebot als auch seine Werbung zu optimieren. Sofern eine entsprechende Einwilligung abgefragt wurde (z.&nbsp;B. eine Einwilligung zur Speicherung von Cookies), erfolgt die Verarbeitung ausschlie&szlig;lich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.</p>
-                        <h4>Hosting</h4> 
-                        <p>Wir hosten Matomo bei folgendem Drittanbieter:</p>
-                        <p>Netcup</p>
-                        <h4>Abschluss eines Vertrags &uuml;ber Auftragsverarbeitung</h4> 
-                        <p>Wir haben einen Vertrag &uuml;ber Auftragsverarbeitung mit diesen Drittanbietern abgeschlossen, der gew&auml;hrleistet, dass die mit Matomo erfassten Daten ausschlie&szlig;lich nach unseren Weisungen und im Einklang mit der DSGVO verarbeitet werden.</p>
+                        <h2>6. @lang('data-protection.tracking.title')</h2>
+                        <p>@lang('data-protection.tracking.choice') <a href="{{ route('law.cookie-settings') }}">@lang('data-protection.tracking.choice-link')</a></p>
+                        <h3>@lang('data-protection.tracking.ga4')</h3>
+                        <p>@lang('data-protection.tracking.ga4-1')</p>
+                        <p>@lang('data-protection.tracking.ga4-2')</p>
+                        <p>@lang('data-protection.tracking.ga4-3')</p>
+                        <p>@lang('data-protection.tracking.ga4-4') <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">https://tools.google.com/dlpage/gaoptout</a></p>
+                        <p>@lang('data-protection.tracking.ga4-5') <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></p>
+                        <h3>@lang('data-protection.tracking.clarity')</h3>
+                        <p>@lang('data-protection.tracking.clarity-1')</p>
+                        <p>@lang('data-protection.tracking.clarity-2')</p>
+                        <p>@lang('data-protection.tracking.clarity-3') <a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener noreferrer">https://privacy.microsoft.com/privacystatement</a></p>
+                        <h3>@lang('data-protection.tracking.ads')</h3>
+                        <p>@lang('data-protection.tracking.ads-1')</p>
+                        <p>@lang('data-protection.tracking.ads-2')</p>
+                        <p>@lang('data-protection.tracking.ads-3')</p>
+                        <h3>@lang('data-protection.tracking.gtm')</h3>
+                        <p>@lang('data-protection.tracking.gtm-1')</p>
+                        <p>@lang('data-protection.tracking.gtm-2')</p>
                         <h2>7. Newsletter</h2>
                         <h3>Newsletter&shy;daten</h3> 
                         <p>Wenn Sie den auf der Website angebotenen Newsletter beziehen m&ouml;chten, ben&ouml;tigen wir von Ihnen eine E-Mail-Adresse sowie Informationen, welche uns die &Uuml;berpr&uuml;fung gestatten, dass Sie der Inhaber der angegebenen E-Mail-Adresse sind und mit dem Empfang des Newsletters einverstanden sind. Weitere Daten werden nicht bzw. nur auf freiwilliger Basis erhoben. Diese Daten verwenden wir ausschlie&szlig;lich f&uuml;r den Versand der angeforderten Informationen und geben diese nicht an Dritte weiter.</p> 
