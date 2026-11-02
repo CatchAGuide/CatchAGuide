@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class VacationDestinationRepository
 {
-    /** Per-request memo so repeated calls (middleware + controller + nav) don't even hit the cache store. */
-    private static array $hubGridMemo = [];
+    /** Per-request memo (the class is bound scoped) so repeated calls (middleware + controller + nav) don't even hit the cache store. */
+    private array $hubGridMemo = [];
 
     public function __construct(
         private CampListingRepository $camps,
@@ -115,20 +115,27 @@ class VacationDestinationRepository
     }
 
     /**
-     * Vacation WHERE dropdown: countries with filled vacations category-page copy.
-     * Tour/global destination pages are excluded so the list is not the guidings catalog.
+     * Vacation WHERE dropdown: countries with filled vacations category-page copy
+     * and at least one active camp or trip. Tour/global destination pages are
+     * excluded so the list is not the guidings catalog.
      *
      * @return Collection<int, object{slug: string, name: string}>
      */
     public function countriesForSearch(?string $locale = null): Collection
     {
         $locale = $locale ?? app()->getLocale();
+        $withListings = $this->canonicalCountryCounts('camps')
+            ->keys()
+            ->merge($this->canonicalCountryCounts('trips')->keys())
+            ->unique()
+            ->flip();
 
         return $this->homepageCountries->uniqueModelsForScope(CategoryPageScope::VACATIONS, $locale)
             ->map(fn (CategoryEntity $country) => (object) [
                 'slug' => CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug),
                 'name' => $this->homepageCountries->labelFor($country, $locale),
             ])
+            ->filter(fn (object $country) => $withListings->has($country->slug))
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values();
     }
@@ -140,14 +147,14 @@ class VacationDestinationRepository
     {
         $locale = $locale ?? app()->getLocale();
 
-        if (isset(self::$hubGridMemo[$locale])) {
-            return self::$hubGridMemo[$locale];
+        if (isset($this->hubGridMemo[$locale])) {
+            return $this->hubGridMemo[$locale];
         }
 
         // This aggregate (country counts + per-country translation lookups) costs 100+ queries.
         // It backs isKnownCountrySlug(), which the redirect middleware, the pillar controller, and
         // the nav both call per request, so it must be cached rather than rebuilt each time.
-        return self::$hubGridMemo[$locale] = Cache::remember(
+        return $this->hubGridMemo[$locale] = Cache::remember(
             'vacation_hub_grid_countries_v1_'.$locale,
             now()->addMinutes(30),
             function () use ($locale) {

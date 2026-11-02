@@ -31,9 +31,6 @@ Route::get('/reject/success', function () {
     return view('pages.additional.reject_success');
 })->name('booking.rejectsuccess');
 
-Route::get('/booking-request/thank-you', function () {
-    return view('pages.additional.thank_you_request');
-})->name('request.thank-you');
 
 Route::get('thank-you/{booking}', [CheckoutController::class, 'thankYou'])->name('thank-you');
 
@@ -43,8 +40,8 @@ Route::permanentRedirect('/all-countries', '/destination')->name('allcountries')
 
 // Legacy booking-request URL: still the call to action in ~20 magazine/guide articles, but it
 // fell through to guidings/{slug} and 404'd. Registered here, before catalog.php's catch-all.
-Route::get('guidings/bookingrequest', fn () => redirect()->route('guidings.request', request()->query(), 301))
-    ->name('guidings.bookingrequest.legacy');
+// The search-request form it pointed at is retired, so it goes straight to the contact form.
+Route::permanentRedirect('guidings/bookingrequest', '/contact')->name('guidings.bookingrequest.legacy');
 
 // Offer / booking confirmation from Admin › Sales › Offers at /{lang}/offer/{token}
 // (spec §8.2; no login, noindex). The token is 32 random characters; /offer/{token} without

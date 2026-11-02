@@ -165,6 +165,32 @@ class GuideVoucherSettingsTest extends TestCase
         $this->assertStringStartsWith('%PDF', $response->getContent());
     }
 
+    /**
+     * Production's open_basedir blocks the system temp dir. Dompdf subsets fonts
+     * there; when tempnam() fails the voucher preview is a 500. The renderer has
+     * to switch to a project directory before it builds the PDF.
+     */
+    public function test_sample_voucher_renders_for_a_german_guide_without_the_system_temp_dir(): void
+    {
+        $guide = $this->guide();
+        $guide->forceFill(['language' => 'Deutsch'])->save();
+        $workDir = storage_path('framework/dompdf');
+        config([
+            'dompdf.options.temp_dir' => sys_get_temp_dir(),
+            'dompdf.options.font_dir' => storage_path('fonts'),
+            'dompdf.options.font_cache' => storage_path('fonts'),
+        ]);
+
+        $response = $this->actingAs($guide)->get(route('profile.vouchers.sample'));
+
+        $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+        $this->assertSame($workDir, config('dompdf.options.temp_dir'));
+        $this->assertSame($workDir, config('dompdf.options.font_dir'));
+        $this->assertSame($workDir, config('dompdf.options.font_cache'));
+        $this->assertFileExists($workDir.DIRECTORY_SEPARATOR.'installed-fonts.json');
+    }
+
     public function test_sample_voucher_uses_placeholder_names_and_guide_contact(): void
     {
         $order = app(GuideVoucherSettingsService::class)->sampleOrder($this->guide());

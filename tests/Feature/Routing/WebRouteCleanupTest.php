@@ -120,7 +120,6 @@ class WebRouteCleanupTest extends TestCase
         $this->assertMiddlewareContains('booking.reject', 'throttle:10,1');
         $this->assertMiddlewareContains('booking.rejection', 'throttle:10,1');
         $this->assertMiddlewareContains('booking.reschedule', 'throttle:10,1');
-        $this->assertMiddlewareContains('store.request', 'throttle:5,1');
         $this->assertMiddlewareContains('product-reports.store', 'throttle:5,1');
         $this->assertMiddlewareContains('sendcontactmail', 'throttle:10,1');
         $this->assertMiddlewareContains('sendnewsletter', 'throttle:5,1');

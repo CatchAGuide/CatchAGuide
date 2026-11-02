@@ -1805,59 +1805,6 @@ class GuidingsController extends Controller
         return redirect()->back()->with('error', 'Du hast keine Berechtigung das Guiding zu löschen.. bitte wende Dich an einen Administrator');
     }
 
-    // request
-    public function bookingrequest(){
-        return view('pages.guidings.search-request');
-    }
-
-    public function bookingRequestStore(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required',
-            'g-recaptcha-response' => \App\Rules\Recaptcha::production(),
-        ]);
-
-        $guideRequest = new GuidingRequest;
-        
-        $guideRequest->guide_type = $request->guideType;
-        $guideRequest->rentaboat = $request->rentaboat;
-        $guideRequest->fishing_duration = $request->fishingDuration;
-
-        $guideRequest->country = $request->country;
-        $guideRequest->city = $request->city;
-        $guideRequest->days_of_tour = $request->tripDays;
-        $guideRequest->days_of_fishing = $request->daysOfFishing;
-        $guideRequest->accomodation = $request->accomodation;
-        $guideRequest->targets = json_encode($request->target_fish);
-        $guideRequest->methods = json_encode($request->methods);
-        $guideRequest->fishing_from = $request->fishing_from;
-        $guideRequest->number_of_guest = $request->numberofguest;
-        $guideRequest->from_date = date("Y-m-d", strtotime($request->date_of_tour_from));  
-        $guideRequest->to_date = date("Y-m-d", strtotime($request->date_of_tour_to));  
-        $guideRequest->name = $request->name;
-        $guideRequest->phone = $request->phone;
-        $guideRequest->email = $request->email;
-
-        $guideRequest->save();
-
-        if($request->locale == 'en'){
-            \App::setLocale('en');
-        }else{
-            \App::setLocale('de');
-        }
-        $email = config('mail.admin_email');
-        if (!CheckEmailLog('guiding_request_mail', 'guiding_request_mail', $email)) {
-            Mail::to($email)->queue(new GuidingRequestMail($guideRequest));
-        }
-        if (!CheckEmailLog('search_request_user_mail', 'search_request_user_mail', $request->email)) {
-            Mail::to($request->email)->queue(new SearchRequestUserMail($guideRequest));
-        }
-
-        return redirect()->back()->with('message', "Email Has been Sent");
-    }
-
     /**
      * Alternative synchronous version of saveDraft for immediate feedback
      * Use this if you need immediate response with guiding_id

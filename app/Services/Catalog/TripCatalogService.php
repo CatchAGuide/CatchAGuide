@@ -654,11 +654,7 @@ class TripCatalogService
 
     protected function buildCampUrl(Camp $camp): string
     {
-        try {
-            return route('vacations.v2', ['campId' => $camp->id]);
-        } catch (\Throwable) {
-            return url('/vacations-v2/' . $camp->id);
-        }
+        return route('vacations.camps.show', ['slug' => $camp->slug]);
     }
 
     /**

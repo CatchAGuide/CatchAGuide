@@ -6,6 +6,8 @@ use App\Domain\CategoryPage\CategoryPageEntityType;
 use App\Domain\CategoryPage\CategoryPageScope;
 use App\Models\CategoryEntity;
 use App\Models\Language;
+use App\Models\Trip;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -60,6 +62,16 @@ class VacationCountryCategorySourceTest extends TestCase
             'introduction' => 'Vacation intro',
             'content' => 'Vacation body',
             'faq_title' => '',
+        ]);
+
+        // The search dropdown only lists countries with at least one active camp or trip.
+        Trip::query()->create([
+            'title' => 'Trip '.$slug,
+            'slug' => $slug.'-trip',
+            'location' => 'Somewhere',
+            'country' => $slug,
+            'status' => 'active',
+            'user_id' => User::factory()->create()->id,
         ]);
 
         $response = $this->get(route('vacations.country', $slug));

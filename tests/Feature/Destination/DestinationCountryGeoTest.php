@@ -89,6 +89,38 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertSee('<meta name="description" content="'.e(__('destination.meta_description_all', ['place' => 'Catalonia'])).'"', false);
     }
 
+    public function test_destination_region_uses_global_scoped_content(): void
+    {
+        $country = $this->createCountry('spanien-global-region');
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Catalonia',
+            'slug' => 'catalonia-'.$country->slug,
+        ]);
+        foreach ([CategoryPageScope::GLOBAL => 'Global Catalonia Title', CategoryPageScope::TOURS => 'Tours Catalonia Title'] as $scope => $title) {
+            Language::query()->create([
+                'source_id' => (string) $region->id,
+                'type' => CategoryPageEntityType::GEO_REGION,
+                'scope' => $scope,
+                'language' => app()->getLocale(),
+                'title' => $title,
+                'sub_title' => '',
+                'introduction' => '',
+                'content' => '',
+                'faq_title' => '',
+            ]);
+        }
+
+        $this->bindDestinationOffers();
+
+        $response = $this->get('/destination/'.$country->slug.'/'.$region->slug);
+
+        $response->assertOk();
+        $response->assertSee('Global Catalonia Title', false);
+        $response->assertDontSee('Tours Catalonia Title', false);
+    }
+
     public function test_destination_region_below_inventory_gate_is_noindexed(): void
     {
         $country = $this->createCountry('spanien-gated-region');

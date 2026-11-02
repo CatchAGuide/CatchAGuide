@@ -38,7 +38,6 @@ test.describe('smoke', () => {
     { name: 'guide onboarding', path: '/guide/onboarding' },
     { name: 'login redirect', path: '/login' },
     { name: 'password reset', path: '/password/reset' },
-    { name: 'search request', path: '/searchrequest' },
     { name: 'contact', path: '/contact' },
     { name: 'about us', path: '/about-us' },
     { name: 'for agents', path: '/for-agents' },

@@ -124,6 +124,38 @@ class TripMobileLayoutTest extends TestCase
         $response->assertSee('+€450', false);
     }
 
+    public function test_english_trip_schedule_shows_day_instead_of_tag(): void
+    {
+        $trip = $this->makeTrip([
+            'trip_schedule' => [
+                ['time' => 'Tag 1', 'day_label' => 'Anreise', 'description' => 'Transfer'],
+                ['time' => 'Tag 2-6', 'day_label' => 'Angeln', 'description' => 'Fünf Tage'],
+                ['time' => 'Tag 7', 'day_label' => 'Abreise', 'description' => 'Heimreise'],
+            ],
+        ]);
+
+        $english = $this->withSession(['locale' => 'en'])
+            ->get(route('vacations.trips.show', $trip->slug))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Day 1', $english);
+        $this->assertStringContainsString('Day 2-6', $english);
+        $this->assertStringContainsString('Day 7', $english);
+        $this->assertStringNotContainsString('>Tag 1<', $english);
+        $this->assertStringNotContainsString('>Tag 2-6<', $english);
+
+        $german = $this->withSession(['locale' => 'de'])
+            ->get(route('vacations.trips.show', $trip->slug))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Tag 1', $german);
+        $this->assertStringContainsString('Tag 2-6', $german);
+        $this->assertStringContainsString('Tag 7', $german);
+        $this->assertStringNotContainsString('>Day 1<', $german);
+    }
+
     public function test_trip_without_duration_omits_the_days_and_nights_note(): void
     {
         $trip = $this->makeTrip([
