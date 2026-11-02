@@ -117,6 +117,9 @@ return [
     // Admin payments page translations
     'all_payments' => 'All Payments',
     'administration' => 'Administration',
+    'listing_owner' => [
+        'admin' => 'Staff',
+    ],
     'payments' => 'Payments',
     'transaction_id' => 'Transaction-ID',
     'user' => 'User',

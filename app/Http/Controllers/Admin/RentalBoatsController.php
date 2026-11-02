@@ -12,7 +12,6 @@ use App\Services\RentalBoat\RentalBoatCacheService;
 use App\Services\Media\ListingGalleryImageProcessor;
 use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class RentalBoatsController extends Controller
@@ -30,7 +29,7 @@ class RentalBoatsController extends Controller
      */
     public function index()
     {
-        $rentalBoats = RentalBoat::with('user')->orderByDesc('id')->get();
+        $rentalBoats = RentalBoat::with(['user.information', 'employee'])->orderByDesc('id')->get();
         $listingStats = AdminListingStats::cardsForRentalBoats($rentalBoats);
 
         return view('admin.pages.rental-boats.index', compact('rentalBoats', 'listingStats'));
@@ -43,7 +42,6 @@ class RentalBoatsController extends Controller
     {
         $formData = [
             'is_update' => 0,
-            'user_id' => Auth::id(),
             'status' => 'active'
         ];
         

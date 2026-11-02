@@ -26,7 +26,7 @@ class CampCacheService
         $cacheKey = self::CAMPS_LIST_CACHE_KEY . '_page_' . request('page', 1);
         
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($perPage) {
-            return Camp::with('user')
+            return Camp::with(['user', 'employee'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         });
@@ -40,7 +40,7 @@ class CampCacheService
         $cacheKey = self::CAMP_CACHE_KEY . $campId;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($campId) {
-            return Camp::with(['user', 'facilities', 'accommodations', 'rentalBoats', 'guidings', 'specialOffers'])
+            return Camp::with(['user', 'employee', 'facilities', 'accommodations', 'rentalBoats', 'guidings', 'specialOffers'])
                 ->find($campId);
         });
     }

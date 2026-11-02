@@ -17,7 +17,6 @@ use App\Services\Media\ListingGalleryImageProcessor;
 use App\Services\Media\ListingMediaRelocator;
 use App\Services\Trip\TripSeoService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +33,7 @@ class TripsController extends Controller
 
     public function index()
     {
-        $trips = Trip::with('user')
+        $trips = Trip::with(['user.information', 'employee'])
             ->orderByDesc('id')
             ->get();
         $listingStats = AdminListingStats::cardsForTrips($trips);
@@ -46,7 +45,6 @@ class TripsController extends Controller
     {
         $formData = [
             'is_update' => 0,
-            'user_id'   => Auth::id(),
             'status'    => 'active',
         ];
 

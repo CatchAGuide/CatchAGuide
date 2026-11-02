@@ -23,7 +23,7 @@ class SpecialOfferCacheService
         $cacheKey = self::SPECIAL_OFFERS_LIST_CACHE_KEY . '_page_' . request('page', 1);
         
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($perPage) {
-            return SpecialOffer::with('user')
+            return SpecialOffer::with(['user', 'employee'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         });
@@ -37,7 +37,7 @@ class SpecialOfferCacheService
         $cacheKey = self::SPECIAL_OFFER_CACHE_KEY . $specialOfferId;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($specialOfferId) {
-            return SpecialOffer::with(['user', 'accommodations', 'rentalBoats', 'guidings'])
+            return SpecialOffer::with(['user', 'employee', 'accommodations', 'rentalBoats', 'guidings'])
                 ->find($specialOfferId);
         });
     }

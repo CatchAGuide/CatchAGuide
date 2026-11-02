@@ -453,11 +453,16 @@
                         <div class="card-body">
                             <div class="info-item">
                                 <label>Owner</label>
-                                <p>{{ $accommodation->user->name ?? 'N/A' }}</p>
+                                <p>
+                                    {{ $accommodation->creatorName() ?? 'N/A' }}
+                                    @if($accommodation->employee && ! $accommodation->user)
+                                        <span class="text-muted">({{ __('admin.listing_owner.admin') }})</span>
+                                    @endif
+                                </p>
                             </div>
                             <div class="info-item">
                                 <label>Email</label>
-                                <p>{{ $accommodation->user->email ?? 'N/A' }}</p>
+                                <p>{{ $accommodation->creatorEmail() ?? 'N/A' }}</p>
                             </div>
                         </div>
                     </div>

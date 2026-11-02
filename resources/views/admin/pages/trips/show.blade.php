@@ -58,7 +58,12 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Created By:</strong></td>
-                                            <td>{{ $trip->user->name ?? 'Unknown' }}</td>
+                                            <td>
+                                                {{ $trip->creatorName() ?? 'Unknown' }}
+                                                @if($trip->employee && ! $trip->user)
+                                                    <span class="text-muted">({{ __('admin.listing_owner.admin') }})</span>
+                                                @endif
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Created At:</strong></td>

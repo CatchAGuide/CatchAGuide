@@ -156,14 +156,21 @@
                                         <tr>
                                             <td><strong>Name:</strong></td>
                                             <td>
-                                                <a href="{{ route('admin.guides.edit', $rentalBoat->user->id) }}" class="text-decoration-none">
-                                                    {{ $rentalBoat->user->full_name ?? $rentalBoat->user->name }}
-                                                </a>
+                                                @if($rentalBoat->user)
+                                                    <a href="{{ route('admin.guides.edit', $rentalBoat->user->id) }}" class="text-decoration-none">
+                                                        {{ $rentalBoat->creatorName() }}
+                                                    </a>
+                                                @else
+                                                    {{ $rentalBoat->creatorName() ?? '—' }}
+                                                    @if($rentalBoat->employee)
+                                                        <div class="text-muted small">{{ __('admin.listing_owner.admin') }}</div>
+                                                    @endif
+                                                @endif
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Email:</strong></td>
-                                            <td>{{ $rentalBoat->user->email }}</td>
+                                            <td>{{ $rentalBoat->creatorEmail() ?? '—' }}</td>
                                         </tr>
                                     </table>
                                 </div>

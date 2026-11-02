@@ -3,8 +3,8 @@
 namespace App\Services\Camp;
 
 use App\Domain\Vacation\CountrySlug;
+use App\Services\Listings\ListingOwnerAssignment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CampDataProcessor
 {
@@ -20,7 +20,7 @@ class CampDataProcessor
         $extras = $this->processTagifyData($request->extras);
 
         return [
-            'user_id' => $request->user_id ?? Auth::id(),
+            ...(new ListingOwnerAssignment())->forRequest($request, $existingCamp),
             'title' => $request->title ?? 'Untitled',
             'location' => $request->location ?? '',
             'description_camp' => $request->description_camp ?? '',

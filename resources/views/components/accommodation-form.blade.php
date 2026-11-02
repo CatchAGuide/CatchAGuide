@@ -52,7 +52,7 @@
             <input type="hidden" name="accommodation_id" id="accommodation_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
             <input type="hidden" name="existing_images" id="existing_images" value="{{ isset($formData['gallery_images']) && is_array($formData['gallery_images']) ? json_encode($formData['gallery_images']) : (isset($formData['gallery_images']) ? $formData['gallery_images'] : '') }}">
-            <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? auth()->id() }}">
+            <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? '' }}">
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
 

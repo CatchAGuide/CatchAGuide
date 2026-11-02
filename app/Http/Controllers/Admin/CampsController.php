@@ -13,7 +13,6 @@ use App\Services\Camp\CampCacheService;
 use App\Services\Media\ListingGalleryImageProcessor;
 use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class CampsController extends Controller
@@ -30,7 +29,7 @@ class CampsController extends Controller
      */
     public function index()
     {
-        $camps = Camp::with('user')
+        $camps = Camp::with(['user.information', 'employee'])
             ->orderByDesc('id')
             ->get();
         $listingStats = AdminListingStats::cardsForStatusListings($camps, 'Total camps');
@@ -45,7 +44,6 @@ class CampsController extends Controller
     {
         $formData = [
             'is_update' => 0,
-            'user_id' => Auth::id(),
             'status' => 'active'
         ];
         

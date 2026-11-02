@@ -5,17 +5,15 @@ namespace App\Services\Trip;
 use App\Domain\Vacation\CountrySlug;
 use App\Models\Trip;
 use App\Models\TripAvailabilityDate;
+use App\Services\Listings\ListingOwnerAssignment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class TripDataProcessor
 {
     public function processRequestData(Request $request, ?Trip $existingTrip = null): array
     {
-        $userId = $request->user_id ?? Auth::id();
-
         return [
-            'user_id'                     => $userId,
+            ...(new ListingOwnerAssignment())->forRequest($request, $existingTrip),
             'title'                       => $request->title ?? 'Untitled',
             'location'                    => $request->location ?? '',
             'latitude'                    => $request->latitude ?? null,
