@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\Booking\HasDoneReasonContract;
+use App\Traits\HasDoneReason;
+use App\Traits\HasStatusHistory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ContactSubmission extends Model
+class ContactSubmission extends Model implements HasDoneReasonContract
 {
-    use HasFactory;
+    use HasDoneReason, HasFactory, HasStatusHistory;
 
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROCESS = 'in_process';

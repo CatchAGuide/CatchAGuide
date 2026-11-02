@@ -2,8 +2,8 @@
 
 namespace App\Services\SpecialOffer;
 
+use App\Services\Listings\ListingOwnerAssignment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SpecialOfferDataProcessor
 {
@@ -19,7 +19,7 @@ class SpecialOfferDataProcessor
         $pricing = $this->processPricingData($request);
 
         return [
-            'user_id' => $request->user_id ?? Auth::id(),
+            ...(new ListingOwnerAssignment())->forRequest($request, $existingSpecialOffer),
             'title' => $request->title ?? 'Untitled',
             'location' => $request->location ?? '',
             'latitude' => $request->latitude ?? null,

@@ -794,6 +794,26 @@ class OffersCatalogTest extends TestCase
         $this->assertStringNotContainsString('vacation=', $vacationUrls['all']);
         $this->assertStringContainsString('vacation=trip', $vacationUrls['trip']);
         $this->assertStringContainsString('vacation=camp', $vacationUrls['camp']);
+        $this->assertStringContainsString('num_guests=2', $urls['tour']);
+    }
+
+    public function test_toggle_urls_omit_default_guest_count(): void
+    {
+        $vm = $this->viewModel(type: 'all');
+
+        $urls = $vm->typeToggleUrls();
+        $this->assertSame(route('offers.index'), $urls['all']);
+        $this->assertSame(route('offers.index').'?type=tour', $urls['tour']);
+        $this->assertStringNotContainsString('num_guests', $vm->vacationToggleUrls()['trip']);
+    }
+
+    public function test_toggle_urls_keep_explicitly_chosen_single_guest(): void
+    {
+        // A visitor who picked 1 guest must keep it, or the header falls back to an older
+        // session search (ListingSearchStateService) with more guests.
+        $vm = $this->viewModel(type: 'all', numGuests: 1);
+
+        $this->assertStringContainsString('num_guests=1', $vm->typeToggleUrls()['tour']);
     }
 
     public function test_type_toggle_urls_use_custom_catalog_base_url(): void

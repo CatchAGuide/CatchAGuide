@@ -121,6 +121,37 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertDontSee('Tours Catalonia Title', false);
     }
 
+    public function test_destination_region_without_global_content_does_not_show_tours_copy(): void
+    {
+        // Showing the /guidings copy on /destination too would be duplicate content.
+        $country = $this->createCountry('spanien-no-global-region');
+        $region = CategoryEntity::regions()->create([
+            'type' => 'region',
+            'country_id' => $country->id,
+            'name' => 'Catalonia',
+            'slug' => 'catalonia-'.$country->slug,
+        ]);
+        Language::query()->create([
+            'source_id' => (string) $region->id,
+            'type' => CategoryPageEntityType::GEO_REGION,
+            'scope' => CategoryPageScope::TOURS,
+            'language' => app()->getLocale(),
+            'title' => 'Tours Only Catalonia Title',
+            'sub_title' => '',
+            'introduction' => 'Tours only Catalonia introduction',
+            'content' => '',
+            'faq_title' => '',
+        ]);
+
+        $this->bindDestinationOffers();
+
+        $response = $this->get('/destination/'.$country->slug.'/'.$region->slug);
+
+        $response->assertOk();
+        $response->assertDontSee('Tours Only Catalonia Title', false);
+        $response->assertDontSee('Tours only Catalonia introduction', false);
+    }
+
     public function test_destination_region_below_inventory_gate_is_noindexed(): void
     {
         $country = $this->createCountry('spanien-gated-region');

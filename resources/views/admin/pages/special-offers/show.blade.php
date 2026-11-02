@@ -58,7 +58,12 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Created By:</strong></td>
-                                            <td>{{ $specialOffer->user->name ?? 'Unknown' }}</td>
+                                            <td>
+                                                {{ $specialOffer->creatorName() ?? 'Unknown' }}
+                                                @if($specialOffer->employee && ! $specialOffer->user)
+                                                    <span class="text-muted">({{ __('admin.listing_owner.admin') }})</span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasListingOwner;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SpecialOffer extends Model
 {
-    use HasFactory;
+    use HasFactory, HasListingOwner;
 
     protected $fillable = [
         'title',
@@ -28,6 +29,7 @@ class SpecialOffer extends Model
         'currency',
         'status',
         'user_id',
+        'employee_id',
     ];
 
     protected $casts = [

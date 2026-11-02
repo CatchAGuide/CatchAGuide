@@ -195,7 +195,13 @@ class SalesCatalog
         )));
 
         $partner = $this->partner($trip->user);
-        if ($partner !== null && filled($trip->provider_name)) {
+        if (filled($trip->provider_name)) {
+            $partner ??= [
+                'id' => null,
+                'name' => '',
+                'email' => '',
+                'phone' => '',
+            ];
             $partner['name'] = trim((string) $trip->provider_name);
         }
 

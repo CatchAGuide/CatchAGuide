@@ -10,6 +10,7 @@ use App\Models\Trip;
 use App\Models\User;
 use App\Repositories\Vacation\VacationDestinationRepository;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Mockery;
 use Tests\TestCase;
 
 class VacationDestinationRepositoryTest extends TestCase
@@ -136,5 +137,16 @@ class VacationDestinationRepositoryTest extends TestCase
         $this->assertTrue($slugs->contains($vacationCountry->slug));
         $this->assertFalse($slugs->contains($emptyCountry->slug));
         $this->assertFalse($slugs->contains($toursCountry->slug));
+    }
+
+    public function test_has_vacations_for_country_matches_a_differently_spelled_stored_country(): void
+    {
+        // Trips store "island" (German) while the destination row is "iceland" — the
+        // sitemap listed /destination/iceland from geo counts but the page 404'd.
+        $repo = Mockery::mock(VacationDestinationRepository::class)->makePartial();
+        $repo->shouldReceive('countriesForHubGrid')->andReturn(collect([['slug' => 'island']]));
+
+        $this->assertTrue($repo->hasVacationsForCountry('iceland', 'IS'));
+        $this->assertFalse($repo->hasVacationsForCountry('finland', 'FI'));
     }
 }

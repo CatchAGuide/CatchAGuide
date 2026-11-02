@@ -23,7 +23,7 @@ class TripCacheService
         $cacheKey = self::TRIPS_LIST_CACHE_KEY . '_page_' . request('page', 1);
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($perPage) {
-            return Trip::with('user')
+            return Trip::with(['user', 'employee'])
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
         });
@@ -34,7 +34,7 @@ class TripCacheService
         $cacheKey = self::TRIP_CACHE_KEY . $tripId;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($tripId) {
-            return Trip::with(['user', 'availabilityDates'])->find($tripId);
+            return Trip::with(['user', 'employee', 'availabilityDates'])->find($tripId);
         });
     }
 

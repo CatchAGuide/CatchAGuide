@@ -22,18 +22,28 @@ use App\Mail\Guide\GuideBookingRequestMail;
 use App\Mail\Guide\GuideInvoiceMail;
 use App\Events\BookingStatusChanged;
 use App\Services\BookingService;
+use App\Services\Booking\BookingStatusHistory;
 use App\Services\Booking\QueuedBookingJobPurger;
 
 class BookingsController extends Controller
 {
-    public function index()
+    public function index(BookingStatusHistory $history)
     {
-        $booking = Booking::with('employee', 'guiding.user', 'blocked_event', 'calendar_schedule')
+        $booking = Booking::with('employee', 'guiding.user', 'blocked_event', 'calendar_schedule', 'latestStatusChange.employee')
             ->orderBy('created_at', 'DESC')
             ->get();
 
         return view('admin.pages.bookings.index', [
             'bookings' => $booking,
+            'statusSummaries' => $booking->mapWithKeys(fn (Booking $item) => [$item->id => $history->summary($item)]),
+        ]);
+    }
+
+    public function statusHistory(Booking $booking, BookingStatusHistory $history)
+    {
+        return response()->json([
+            'success' => true,
+            'items' => $history->timeline($booking),
         ]);
     }
 
@@ -48,7 +58,7 @@ class BookingsController extends Controller
         ]);
     }
 
-    public function store(StoreManualBookingRequest $request, BookingService $bookingService)
+    public function store(StoreManualBookingRequest $request, BookingService $bookingService, BookingStatusHistory $history)
     {
         $data = $request->validated();
 
@@ -94,6 +104,9 @@ class BookingsController extends Controller
             createdById: auth('employees')->id(),
             createdSource: 'admin'
         );
+
+        $employee = auth('employees')->user();
+        $history->created($booking, $employee instanceof Employee ? $employee : null);
 
         return redirect()
             ->route('admin.bookings.index')

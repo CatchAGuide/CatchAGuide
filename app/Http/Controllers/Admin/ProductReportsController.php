@@ -4,17 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProductReport;
+use App\Services\Booking\BookingStatusHistory;
 use Illuminate\Http\Request;
 
 class ProductReportsController extends Controller
 {
-    public function index()
+    public function index(BookingStatusHistory $history)
     {
         $productReports = ProductReport::query()
+            ->with('latestStatusChange.employee')
             ->latest()
             ->get();
 
-        return view('admin.pages.product-reports.index', compact('productReports'));
+        $statusSummaries = $productReports->mapWithKeys(fn (ProductReport $item) => [$item->id => $history->summary($item)]);
+
+        return view('admin.pages.product-reports.index', compact('productReports', 'statusSummaries'));
     }
 
     public function showComment(ProductReport $productReport)
@@ -41,24 +45,33 @@ class ProductReportsController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, ProductReport $productReport)
+    public function updateStatus(Request $request, ProductReport $productReport, BookingStatusHistory $history)
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:open,in_process,done'],
         ]);
 
-        $productReport->update(['status' => $validated['status']]);
+        $history->change($productReport, $validated['status'], $request->user('employees'));
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'status' => $productReport->status,
-                'status_label' => ProductReport::statusOptions()[$productReport->status] ?? $productReport->status,
+                'status_label' => $productReport->statusLabel(),
+                'status_summary' => $history->summary($productReport),
             ]);
         }
 
         return redirect()
             ->route('admin.product-reports.index')
             ->with('success', 'Status updated.');
+    }
+
+    public function statusHistory(ProductReport $productReport, BookingStatusHistory $history)
+    {
+        return response()->json([
+            'success' => true,
+            'items' => $history->timeline($productReport),
+        ]);
     }
 }

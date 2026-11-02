@@ -3,6 +3,7 @@
 namespace App\Services\RentalBoat;
 
 use App\Models\GuidingBoatType;
+use App\Services\Listings\ListingOwnerAssignment;
 use Illuminate\Http\Request;
 
 class RentalBoatDataProcessor
@@ -25,7 +26,7 @@ class RentalBoatDataProcessor
         unset($pricing['pricing_extra']);
         $prices = $pricing;
         return [
-            'user_id' => $request->user_id ?? auth()->id(),
+            ...(new ListingOwnerAssignment())->forRequest($request, $existingRentalBoat),
             'title' => $request->title ?? 'Untitled',
             'location' => $request->location ?? '',
             'city' => $request->city ?? '',

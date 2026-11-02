@@ -12,7 +12,6 @@ use App\Services\SpecialOffer\SpecialOfferCacheService;
 use App\Services\Media\ListingGalleryImageProcessor;
 use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class SpecialOffersController extends Controller
@@ -30,7 +29,7 @@ class SpecialOffersController extends Controller
      */
     public function index()
     {
-        $specialOffers = SpecialOffer::with('user')
+        $specialOffers = SpecialOffer::with(['user.information', 'employee'])
             ->orderByDesc('id')
             ->get();
         $listingStats = AdminListingStats::cardsForStatusListings($specialOffers, 'Total offers');
@@ -45,7 +44,6 @@ class SpecialOffersController extends Controller
     {
         $formData = [
             'is_update' => 0,
-            'user_id' => Auth::id(),
             'status' => 'active'
         ];
         

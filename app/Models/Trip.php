@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\BoatExtras;
+use App\Models\Concerns\HasListingOwner;
 use App\Models\Method;
 use App\Models\Target;
 use App\Models\Water;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Trip extends Model
 {
-    use HasFactory;
+    use HasFactory, HasListingOwner;
 
     protected static function booted(): void
     {
@@ -83,6 +84,7 @@ class Trip extends Model
         'year_round_availability',
         'status',
         'user_id',
+        'employee_id',
     ];
 
     protected $casts = [

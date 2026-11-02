@@ -12,7 +12,6 @@ use App\Services\Accommodation\AccommodationCacheService;
 use App\Services\Media\ListingGalleryImageProcessor;
 use App\Services\Media\ListingMediaRelocator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class AccommodationsController extends Controller
@@ -29,7 +28,7 @@ class AccommodationsController extends Controller
      */
     public function index()
     {
-        $accommodations = Accommodation::with(['user', 'accommodationType'])
+        $accommodations = Accommodation::with(['user.information', 'accommodationType', 'employee'])
             ->orderByDesc('id')
             ->get();
         $listingStats = AdminListingStats::cardsForStatusListings($accommodations, 'Total accommodations');
@@ -44,7 +43,6 @@ class AccommodationsController extends Controller
     {
         $formData = [
             'is_update' => 0,
-            'user_id' => Auth::id(),
             'status' => 'active'
         ];
         

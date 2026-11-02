@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DoneReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreManualTripBookingRequest;
 use App\Models\EmailLog;
@@ -12,6 +13,7 @@ use App\Services\Booking\BookingStatusHistory;
 use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -60,15 +62,22 @@ class TripBookingsController extends Controller
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:open,in_process,done'],
+            'done_reason' => ['nullable', Rule::enum(DoneReason::class)],
         ]);
 
-        $history->change($tripBooking, $validated['status'], $request->user('employees'));
+        $history->change(
+            $tripBooking,
+            $validated['status'],
+            $request->user('employees'),
+            doneReason: DoneReason::tryFrom((string) ($validated['done_reason'] ?? '')),
+        );
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'status' => $tripBooking->status,
-                'status_label' => TripBooking::statusOptions()[$tripBooking->status] ?? $tripBooking->status,
+                'status_label' => $tripBooking->statusLabel(),
+                'done_reason' => $tripBooking->doneReason()?->value,
                 'status_summary' => $history->summary($tripBooking),
             ]);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasListingOwner;
 use App\Services\Vacation\TargetFishNameResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class Camp extends Model
 {
-    use HasFactory;
+    use HasFactory, HasListingOwner;
 
     protected $fillable = [
         'title',
@@ -38,6 +39,7 @@ class Camp extends Model
         'gallery_images',
         'status',
         'user_id',
+        'employee_id',
     ];
 
     protected $casts = [

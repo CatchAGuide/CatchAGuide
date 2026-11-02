@@ -42,13 +42,9 @@ class DestinationCountryController extends Controller
 
         // A country card must not show with zero tours AND zero active
         // camps/trips — listings on either side keep it eligible.
-        $vacationCountrySlugs = $this->destinations->countriesForHubGrid()
-            ->map(fn (array $row) => CountrySlug::canonicalize($row['slug']) ?? $row['slug'])
-            ->flip();
-
         $countries = CategoryEntity::countries()->get()
             ->filter(fn (CategoryEntity $country) => $this->guidingAvailability->hasGuidingsForCountry($country->slug, $country->countrycode)
-                || $vacationCountrySlugs->has(CountrySlug::canonicalize($country->slug) ?? strtolower((string) $country->slug)))
+                || $this->destinations->hasVacationsForCountry((string) $country->slug, $country->countrycode))
             ->values();
 
         return view('pages.countries.index', [
@@ -91,7 +87,7 @@ class DestinationCountryController extends Controller
         // regions/cities — they're all subsets of the same country's availability. Mirrors
         // the destination hub filtering in index().
         $hasTours = $this->guidingAvailability->hasGuidingsForCountry($countryRow->slug, $countryRow->countrycode);
-        $hasVacations = $this->destinations->hubGridCountry($countryRow->slug) !== null;
+        $hasVacations = $this->destinations->hasVacationsForCountry($countryRow->slug, $countryRow->countrycode);
 
         if (! $hasTours && ! $hasVacations) {
             abort(404);

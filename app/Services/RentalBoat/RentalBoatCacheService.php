@@ -60,7 +60,7 @@ class RentalBoatCacheService
     public function getRentalBoatsList(): \Illuminate\Database\Eloquent\Collection
     {
         return Cache::remember(self::RENTAL_BOATS_CACHE_KEY, self::CACHE_TTL, function () {
-            return RentalBoat::with('user')
+            return RentalBoat::with(['user', 'employee'])
                 ->where('status', 'active')
                 ->orderBy('title')
                 ->get();
@@ -76,7 +76,7 @@ class RentalBoatCacheService
             self::RENTAL_BOAT_CACHE_KEY . $id, 
             self::CACHE_TTL, 
             function () use ($id) {
-                return RentalBoat::with('user')->find($id);
+                return RentalBoat::with(['user', 'employee'])->find($id);
             }
         );
     }

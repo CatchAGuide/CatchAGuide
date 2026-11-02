@@ -51,6 +51,21 @@ class VacationDestinationRepository
             ->first(fn (array $row) => CountrySlug::canonicalize($row['slug']) === $slug);
     }
 
+    /**
+     * Whether camps/trips exist for a destination country row. Camps/trips store their own
+     * spelling of the country (e.g. "island" for the "iceland" row), so every storage variant
+     * of the row's slug is matched, not just the slug itself.
+     */
+    public function hasVacationsForCountry(string $slug, ?string $countryCode = null): bool
+    {
+        $variants = collect(CountrySlug::storageVariants($slug, $countryCode))
+            ->map(fn (string $variant) => CountrySlug::canonicalize($variant) ?? $variant)
+            ->flip();
+
+        return $this->countriesForHubGrid()
+            ->contains(fn (array $row) => $variants->has(CountrySlug::canonicalize($row['slug']) ?? $row['slug']));
+    }
+
     public function isKnownCountrySlug(string $slug, ?string $pillar = null): bool
     {
         $slug = CountrySlug::canonicalize($slug) ?? strtolower($slug);

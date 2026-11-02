@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DoneReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreManualCampVacationBookingRequest;
 use App\Models\Camp;
@@ -12,6 +13,7 @@ use App\Services\Booking\BookingStatusHistory;
 use App\Services\Vacation\VacationReviewService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -32,19 +34,50 @@ class CampVacationBookingsController extends Controller
         return view('admin.pages.camp-vacation-bookings.index', compact('bookingRequests', 'offers', 'statusSummaries'));
     }
 
+    public function showComment(CampVacationBooking $campVacationBooking)
+    {
+        return response()->json([
+            'id' => $campVacationBooking->id,
+            'admin_comment' => $campVacationBooking->admin_comment,
+        ]);
+    }
+
+    public function updateComment(Request $request, CampVacationBooking $campVacationBooking)
+    {
+        $validated = $request->validate([
+            'admin_comment' => ['nullable', 'string'],
+        ]);
+
+        $campVacationBooking->update([
+            'admin_comment' => $validated['admin_comment'] ?? null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment saved.',
+        ]);
+    }
+
     public function updateStatus(Request $request, CampVacationBooking $campVacationBooking, BookingStatusHistory $history)
     {
         $validated = $request->validate([
             'status' => ['required', 'string', 'in:open,in_process,done'],
+            'done_reason' => ['nullable', Rule::enum(DoneReason::class)],
         ]);
 
-        $history->change($campVacationBooking, $validated['status'], $request->user('employees'));
+        $history->change(
+            $campVacationBooking,
+            $validated['status'],
+            $request->user('employees'),
+            doneReason: DoneReason::tryFrom((string) ($validated['done_reason'] ?? '')),
+        );
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'status' => $campVacationBooking->status,
-                'status_label' => CampVacationBooking::statusOptions()[$campVacationBooking->status] ?? $campVacationBooking->status,
+                'status_label' => $campVacationBooking->statusLabel(),
+                'done_reason' => $campVacationBooking->doneReason()?->value,
                 'status_summary' => $history->summary($campVacationBooking),
             ]);
         }

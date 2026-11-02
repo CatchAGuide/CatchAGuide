@@ -117,6 +117,9 @@ return [
     // Admin payments page translations
     'all_payments' => 'Alle Zahlungen',
     'administration' => 'Verwaltung',
+    'listing_owner' => [
+        'admin' => 'Team',
+    ],
     'payments' => 'Zahlungen',
     'transaction_id' => 'Transaction-ID',
     'user' => 'Benutzer',
@@ -707,6 +710,28 @@ return [
         'by' => 'von :name',
         'reason_created' => 'Manuell angelegt',
         'reason_offer_created' => 'Angebot erstellt',
+        'reason_expired' => 'Abgelaufen (keine Antwort vom Guide)',
+        'guide' => 'Guide',
+    ],
+
+    'guiding_booking_status' => [
+        'pending' => 'Offen',
+        'accepted' => 'Angenommen',
+        'rejected' => 'Abgelehnt',
+        'cancelled' => 'Storniert',
+    ],
+
+    'done_reason' => [
+        'heading' => 'Erledigt — Ergebnis',
+        'booked' => 'Gebucht',
+        'booked_hint' => 'Der Gast hat gebucht',
+        'no_reply' => 'Keine Antwort',
+        'no_reply_hint' => 'Der Gast hat nie geantwortet',
+        'count_booked' => ':count gebucht',
+        'count_no_reply' => ':count ohne Antwort',
+        'rate' => ':rate % gebucht',
+        'rate_hint' => 'Anteil der erledigten Anfragen (mit Ergebnis), die gebucht haben',
+        'update_failed' => 'Der Status konnte nicht geändert werden.',
     ],
 
     'voucher_orders' => [
@@ -738,6 +763,14 @@ return [
         'download_pdf' => 'Gutschein-PDF herunterladen',
         'view_message' => 'Persönliche Nachricht',
         'empty' => 'Noch keine Gutscheinbestellungen.',
+        'comment' => 'Admin-Kommentar (intern)',
+        'comment_label' => 'Interne Notizen (nur Text)',
+        'comment_placeholder' => 'Interne Notizen für das Team…',
+        'comment_hint' => 'Wird weder an den Käufer noch an den Guide gesendet.',
+        'comment_close' => 'Schließen',
+        'comment_save' => 'Speichern',
+        'comment_load_failed' => 'Kommentar konnte nicht geladen werden.',
+        'comment_save_failed' => 'Kommentar konnte nicht gespeichert werden.',
         'pdf_missing' => 'Das Gutschein-PDF konnte nicht erstellt werden.',
     ],
 ];

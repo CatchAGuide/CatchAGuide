@@ -187,6 +187,7 @@ class VacationReviewService
     {
         $query = fn (string $model) => $model::query()
             ->where('status', $model::STATUS_DONE)
+            ->excludingNoReply()
             ->whereDoesntHave('review')
             ->orderByDesc('updated_at')
             ->limit($limit)

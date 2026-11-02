@@ -163,6 +163,13 @@
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_actions') }}" class="text-end text-nowrap">
                                                 <div class="btn-group btn-group-sm">
+                                                    <button type="button"
+                                                            class="btn {{ $order->admin_comment ? 'btn-warning' : 'btn-outline-secondary' }} js-voucher-comment"
+                                                            data-url="{{ route('admin.voucher-orders.comment.show', $order) }}"
+                                                            title="{{ __('admin.voucher_orders.comment') }}"
+                                                            aria-label="{{ __('admin.voucher_orders.comment') }}">
+                                                        <i class="fa fa-sticky-note"></i>
+                                                    </button>
                                                     @if($order->personal_message)
                                                         <button type="button"
                                                                 class="btn btn-outline-info"
@@ -202,6 +209,26 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="voucherCommentModal" tabindex="-1" aria-labelledby="voucherCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voucherCommentModalLabel">{{ __('admin.voucher_orders.comment') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('admin.voucher_orders.comment_close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <label for="voucher-comment-text" class="form-label">{{ __('admin.voucher_orders.comment_label') }}</label>
+                <textarea class="form-control" id="voucher-comment-text" rows="6" placeholder="{{ __('admin.voucher_orders.comment_placeholder') }}"></textarea>
+                <p class="form-text text-muted small mb-0">{{ __('admin.voucher_orders.comment_hint') }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('admin.voucher_orders.comment_close') }}</button>
+                <button type="button" class="btn btn-primary" id="voucher-comment-save">{{ __('admin.voucher_orders.comment_save') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('js_after')
@@ -209,5 +236,53 @@
     document.querySelectorAll('#voucher-orders-table [data-bs-toggle="popover"]').forEach(function (el) {
         new bootstrap.Popover(el);
     });
+
+    (function () {
+        var modalEl = document.getElementById('voucherCommentModal');
+        var textEl = document.getElementById('voucher-comment-text');
+        var text = {{ Js::from([
+            'load_failed' => __('admin.voucher_orders.comment_load_failed'),
+            'save_failed' => __('admin.voucher_orders.comment_save_failed'),
+        ]) }};
+        var current = null;
+
+        document.querySelectorAll('.js-voucher-comment').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                fetch(btn.dataset.url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                    .then(function (data) {
+                        current = btn;
+                        textEl.value = data.admin_comment || '';
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    })
+                    .catch(function () { alert(text.load_failed); });
+            });
+        });
+
+        document.getElementById('voucher-comment-save').addEventListener('click', function () {
+            if (!current) return;
+            var btn = current;
+            var token = document.querySelector('meta[name="csrf-token"]');
+            fetch(btn.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': token ? token.getAttribute('content') : ''
+                },
+                body: JSON.stringify({ admin_comment: textEl.value })
+            })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.success) throw new Error('failed');
+                    var hasComment = textEl.value.trim() !== '';
+                    btn.classList.toggle('btn-warning', hasComment);
+                    btn.classList.toggle('btn-outline-secondary', !hasComment);
+                    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                })
+                .catch(function () { alert(text.save_failed); });
+        });
+    })();
 </script>
 @endsection

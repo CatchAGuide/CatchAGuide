@@ -10,6 +10,7 @@ use App\Models\Guiding;
 use App\Models\Trip;
 use App\Models\TripBooking;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -264,7 +265,7 @@ class ConsolidatedListingsController extends Controller
     private function accommodationRows(array $filters): Collection
     {
         $items = Accommodation::query()
-            ->with(['user.information', 'accommodationType'])
+            ->with(['user.information', 'employee', 'accommodationType'])
             ->get();
 
         return $items->map(function (Accommodation $a) {
@@ -331,11 +332,7 @@ class ConsolidatedListingsController extends Controller
                 'price_low' => $low,
                 'price_high' => $high,
                 'currency' => (string) ($a->currency ?? 'EUR'),
-                'owner_name' => (string) ($a->user->full_name ?? $a->user->name ?? ''),
-                'owner_photo_url' => $this->guideOwnerPhotoUrl($a->user, $a),
-                'owner_email' => (string) ($a->user->email ?? ''),
-                'owner_phone' => method_exists($a->user, 'getFullPhoneNumber') ? $a->user->getFullPhoneNumber() : ((string) ($a->user->phone ?? '')),
-                'owner_city' => (string) ($a->user->information->city ?? ''),
+                ...$this->listingOwner($a),
                 'images_count' => $imagesCount,
                 'status' => (string) ($a->status ?? ''),
                 'status_label' => ucfirst((string) ($a->status ?? '')),
@@ -352,7 +349,7 @@ class ConsolidatedListingsController extends Controller
     private function campRows(array $filters): Collection
     {
         $camps = Camp::query()
-            ->with(['user.information'])
+            ->with(['user.information', 'employee'])
             ->withCount(['accommodations', 'rentalBoats', 'guidings', 'specialOffers'])
             ->get();
 
@@ -422,11 +419,7 @@ class ConsolidatedListingsController extends Controller
                 'price_low' => $low !== null ? round((float) $low, 2) : null,
                 'price_high' => $high,
                 'currency' => 'EUR',
-                'owner_name' => (string) ($c->user->full_name ?? $c->user->name ?? ''),
-                'owner_photo_url' => $this->guideOwnerPhotoUrl($c->user, $c),
-                'owner_email' => (string) ($c->user->email ?? ''),
-                'owner_phone' => method_exists($c->user, 'getFullPhoneNumber') ? $c->user->getFullPhoneNumber() : ((string) ($c->user->phone ?? '')),
-                'owner_city' => (string) ($c->user->information->city ?? ''),
+                ...$this->listingOwner($c),
                 'images_count' => $imagesCount,
                 'status' => (string) ($c->status ?? ''),
                 'status_label' => ucfirst((string) ($c->status ?? '')),
@@ -443,7 +436,7 @@ class ConsolidatedListingsController extends Controller
     private function tripRows(array $filters): Collection
     {
         $trips = Trip::query()
-            ->with(['user.information'])
+            ->with(['user.information', 'employee'])
             ->get();
 
         $counts = TripBooking::query()
@@ -504,11 +497,7 @@ class ConsolidatedListingsController extends Controller
                 'price_low' => $low,
                 'price_high' => $high,
                 'currency' => (string) ($t->currency ?? 'EUR'),
-                'owner_name' => (string) ($t->provider_name ?? $t->user->full_name ?? $t->user->name ?? ''),
-                'owner_photo_url' => $this->tripProviderPhotoUrl($t->provider_photo ?? null) ?: $this->guideOwnerPhotoUrl($t->user, $t),
-                'owner_email' => (string) ($t->user->email ?? ''),
-                'owner_phone' => method_exists($t->user, 'getFullPhoneNumber') ? $t->user->getFullPhoneNumber() : ((string) ($t->user->phone ?? '')),
-                'owner_city' => (string) ($t->user->information->city ?? ''),
+                ...$this->tripOwner($t),
                 'images_count' => $imagesCount,
                 'status' => (string) ($t->status ?? ''),
                 'status_label' => ucfirst((string) ($t->status ?? '')),
@@ -520,6 +509,40 @@ class ConsolidatedListingsController extends Controller
                 'public_url' => $t->slug ? route('vacations.trips.show', $t->slug) : null,
             ];
         })->values();
+    }
+
+    /**
+     * @return array{owner_name: string, owner_photo_url: ?string, owner_email: string, owner_phone: string, owner_city: string}
+     */
+    private function listingOwner(Model $listing): array
+    {
+        $user = $listing->user;
+
+        return [
+            'owner_name' => (string) ($listing->creatorName() ?? ''),
+            'owner_photo_url' => $this->guideOwnerPhotoUrl($user, $listing),
+            'owner_email' => (string) ($listing->creatorEmail() ?? ''),
+            'owner_phone' => $user && method_exists($user, 'getFullPhoneNumber') ? $user->getFullPhoneNumber() : '',
+            'owner_city' => (string) ($user?->information->city ?? ''),
+        ];
+    }
+
+    /**
+     * @return array{owner_name: string, owner_photo_url: ?string, owner_email: string, owner_phone: string, owner_city: string}
+     */
+    private function tripOwner(Trip $trip): array
+    {
+        $owner = $this->listingOwner($trip);
+        if (filled($trip->provider_name)) {
+            $owner['owner_name'] = trim((string) $trip->provider_name);
+        }
+
+        $providerPhoto = $this->tripProviderPhotoUrl($trip->provider_photo ?? null);
+        if ($providerPhoto) {
+            $owner['owner_photo_url'] = $providerPhoto;
+        }
+
+        return $owner;
     }
 
     private function guideOwnerPhotoUrl(?User $user, mixed $listing = null): ?string

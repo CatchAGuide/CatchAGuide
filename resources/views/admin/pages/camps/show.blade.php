@@ -58,7 +58,12 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Created By:</strong></td>
-                                            <td>{{ $camp->user->name ?? 'Unknown' }}</td>
+                                            <td>
+                                                {{ $camp->creatorName() ?? 'Unknown' }}
+                                                @if($camp->employee && ! $camp->user)
+                                                    <span class="text-muted">({{ __('admin.listing_owner.admin') }})</span>
+                                                @endif
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Created At:</strong></td>

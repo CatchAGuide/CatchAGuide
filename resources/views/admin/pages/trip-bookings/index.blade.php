@@ -201,7 +201,7 @@
                         <span class="meta-pill"><i class="fa fa-inbox"></i> Total: <strong>{{ $bookingRequests->count() }}</strong></span>
                         <span class="meta-pill"><i class="fa fa-folder-open"></i> Open: <strong>{{ $statsOpen }}</strong></span>
                         <span class="meta-pill"><i class="fa fa-spinner"></i> In process: <strong>{{ $statsInProcess }}</strong></span>
-                        <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong></span>
+                        <span class="meta-pill"><i class="fa fa-check-circle"></i> Done: <strong>{{ $statsDone }}</strong> @include('admin.partials.done-split', ['requests' => $bookingRequests])</span>
                     </div>
                     <div class="ms-auto">
                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#manualTripBookingModal">
@@ -283,35 +283,12 @@
                                             <td class="col-persons" data-label="Persons">{{ $request->number_of_persons ?: '—' }}</td>
                                             <td class="col-created cr-created" data-order="{{ optional($request->created_at)->timestamp }}" data-label="Requested">{{ optional($request->created_at)->format('M j, Y g:i A') }}</td>
                                             <td class="col-status" data-label="Status">
-                                                <div class="dropdown">
-                                                    <button type="button"
-                                                            class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}"
-                                                            data-bs-toggle="dropdown"
-                                                            data-bs-boundary="viewport"
-                                                            data-url="{{ route('admin.trip-bookings.update-status', $request) }}"
-                                                            data-status="{{ $rowStatus }}"
-                                                            aria-expanded="false">
-                                                        <span class="js-status-btn-text">{{ \App\Models\TripBooking::statusOptions()[$rowStatus] ?? $rowStatus }}</span>
-                                                        <i class="fa fa-caret-down ms-1"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        @foreach(\App\Models\TripBooking::statusOptions() as $value => $label)
-                                                            <li>
-                                                                <a class="dropdown-item js-status-option {{ $rowStatus === $value ? 'active' : '' }}"
-                                                                   href="#"
-                                                                   data-status="{{ $value }}">{{ $label }}</a>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                                <button type="button"
-                                                        class="btn btn-link p-0 text-muted js-status-summary"
-                                                        data-url="{{ route('admin.trip-bookings.status-history', $request) }}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#statusHistoryModal"
-                                                        title="{{ __('admin.booking_status_history.button') }}">
-                                                    <i class="fa fa-stream me-1"></i><span class="js-status-summary-text">{{ $statusSummaries[$request->id] ?? __('admin.booking_status_history.button') }}</span>
-                                                </button>
+                                                @include('admin.partials.request-status-dropdown', [
+                                                    'item' => $request,
+                                                    'updateUrl' => route('admin.trip-bookings.update-status', $request),
+                                                    'historyUrl' => route('admin.trip-bookings.status-history', $request),
+                                                    'summary' => $statusSummaries[$request->id] ?? null,
+                                                ])
                                             </td>
                                             <td class="col-actions cr-td-actions text-end text-nowrap" data-label="Actions">
                                                 @unless(isset($offers[$request->id]))
@@ -738,52 +715,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Status dropdown update (AJAX)
-    document.querySelectorAll('#trip-bookings-datatable .js-status-option').forEach(function(option) {
-        option.addEventListener('click', function(e) {
-            e.preventDefault();
-            var newStatus = option.getAttribute('data-status');
-            var dropdown = option.closest('.dropdown');
-            var btn = dropdown ? dropdown.querySelector('.js-status-dropdown-btn') : null;
-            if (!btn) return;
-            var url = btn.getAttribute('data-url');
-            var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            if (!url || !token) return;
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(function(r){
-                if (!r.ok) return r.text().then(function(t){ throw new Error(t || r.status); });
-                return r.json();
-            })
-            .then(function(data){
-                if (!data || !data.success) return;
-                btn.classList.remove('btn-status-open', 'btn-status-in_process', 'btn-status-done');
-                btn.classList.add('btn-status-' + data.status);
-                btn.setAttribute('data-status', data.status);
-                var label = btn.querySelector('.js-status-btn-text');
-                if (label) label.textContent = data.status_label || data.status;
-                var summary = btn.closest('td') ? btn.closest('td').querySelector('.js-status-summary-text') : null;
-                if (summary && data.status_summary) summary.textContent = data.status_summary;
-                dropdown.querySelectorAll('.js-status-option').forEach(function (item) {
-                    item.classList.toggle('active', item.getAttribute('data-status') === data.status);
-                });
-                var instance = typeof bootstrap !== 'undefined' && bootstrap.Dropdown
-                    ? bootstrap.Dropdown.getInstance(btn)
-                    : null;
-                if (instance) instance.hide();
-            })
-            .catch(function(){});
-        });
-    });
 
     // History modal loader
     var historyModal = document.getElementById('historyModal');

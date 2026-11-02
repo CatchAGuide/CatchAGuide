@@ -164,4 +164,35 @@ class CampVacationBookingsAdminTest extends TestCase
             ->assertSee(__('admin.booking_status_history.last_changed', ['name' => $employee->name, 'date' => '']), false)
             ->assertSee('id="statusHistoryModal"', false);
     }
+
+    public function test_admin_can_save_and_load_a_camp_booking_comment(): void
+    {
+        $this->actingAsEmployee();
+        $booking = $this->createBooking();
+
+        $this->postJson(route('admin.camp-vacation-bookings.comment.update', $booking), ['admin_comment' => 'Called guest, waiting for dates.'])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertSame('Called guest, waiting for dates.', $booking->fresh()->admin_comment);
+
+        $this->getJson(route('admin.camp-vacation-bookings.comment.show', $booking))
+            ->assertOk()
+            ->assertJson(['id' => $booking->id, 'admin_comment' => 'Called guest, waiting for dates.']);
+
+        $this->get(route('admin.camp-vacation-bookings.index'))
+            ->assertOk()
+            ->assertSee('showCampBookingCommentModal('.$booking->id.')', false)
+            ->assertSee('id="campBookingCommentModal"', false);
+    }
+
+    public function test_guest_cannot_save_a_camp_booking_comment(): void
+    {
+        $booking = $this->createBooking();
+
+        $this->post(route('admin.camp-vacation-bookings.comment.update', $booking), ['admin_comment' => 'x'])
+            ->assertRedirect();
+
+        $this->assertNull($booking->fresh()->admin_comment);
+    }
 }

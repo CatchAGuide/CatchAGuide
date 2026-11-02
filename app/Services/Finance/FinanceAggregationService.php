@@ -200,6 +200,7 @@ class FinanceAggregationService
         $requestsQuery = TripBooking::query()
             ->with(['financeItem'])
             ->where('status', TripBooking::STATUS_DONE)
+            ->excludingNoReply()
             ->latest();
 
         if ($from && $to) {
@@ -282,6 +283,7 @@ class FinanceAggregationService
         $requestsQuery = CampVacationBooking::query()
             ->with(['financeItem'])
             ->where('status', CampVacationBooking::STATUS_DONE)
+            ->excludingNoReply()
             ->latest();
 
         if ($from && $to) {

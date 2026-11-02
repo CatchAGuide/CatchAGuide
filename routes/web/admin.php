@@ -147,6 +147,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/bookings/{booking}/reschedule', [BookingsController::class, 'rescheduleInPlace'])->name('bookings.reschedule');
         Route::resource('bookings', BookingsController::class);
         Route::post('/bookings/{booking}/save', [BookingsController::class, 'update'])->name('bookings.save');
+        Route::get('/bookings/{booking}/status-history', [BookingsController::class, 'statusHistory'])->name('bookings.status-history');
         Route::get('/bookings/{booking}/email-preview', [BookingsController::class, 'emailPreview'])->name('bookings.email-preview');
         Route::get('/bookings/{booking}/guide-invoice-preview', [BookingsController::class, 'guideInvoicePreview'])->name('bookings.guide-invoice-preview');
         Route::post('/bookings/{booking}/send-booking-request-emails', [BookingsController::class, 'sendBookingRequestEmails'])->name('bookings.send-booking-request-emails');
@@ -160,6 +161,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('camp-vacation-bookings', [CampVacationBookingsController::class, 'storeManual'])->name('camp-vacation-bookings.store');
 
         Route::get('camp-vacation-bookings', [CampVacationBookingsController::class, 'index'])->name('camp-vacation-bookings.index');
+        Route::get('camp-vacation-bookings/{campVacationBooking}/comment', [CampVacationBookingsController::class, 'showComment'])->name('camp-vacation-bookings.comment.show');
+        Route::post('camp-vacation-bookings/{campVacationBooking}/comment', [CampVacationBookingsController::class, 'updateComment'])->name('camp-vacation-bookings.comment.update');
         Route::patch('camp-vacation-bookings/{campVacationBooking}/status', [CampVacationBookingsController::class, 'updateStatus'])->name('camp-vacation-bookings.update-status');
         Route::post('camp-vacation-bookings/reply', [CampVacationBookingsController::class, 'sendReply'])->name('camp-vacation-bookings.reply');
         Route::get('camp-vacation-bookings/{campVacationBooking}/status-history', [CampVacationBookingsController::class, 'statusHistory'])->name('camp-vacation-bookings.status-history');
@@ -175,6 +178,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('trip-bookings/{tripBooking}/email-history', [TripBookingsController::class, 'emailHistory'])->name('trip-bookings.email-history');
         Route::post('trip-bookings/{tripBooking}/review-request', [TripBookingsController::class, 'sendReviewRequest'])->name('trip-bookings.review-request');
         Route::get('voucher-orders', [VoucherOrdersController::class, 'index'])->name('voucher-orders.index');
+        Route::get('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'showComment'])->name('voucher-orders.comment.show')->whereNumber('voucherOrder');
+        Route::post('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'updateComment'])->name('voucher-orders.comment.update')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
 
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');
@@ -351,11 +356,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('contact-requests/{contactSubmission}/comment', [ContactRequestsController::class, 'updateComment'])->name('contact-requests.comment.update');
         Route::post('contact-requests/reply', [ContactRequestsController::class, 'sendReply'])->name('contact-requests.reply');
         Route::patch('contact-requests/{contactSubmission}/status', [ContactRequestsController::class, 'updateStatus'])->name('contact-requests.update-status');
+        Route::get('contact-requests/{contactSubmission}/status-history', [ContactRequestsController::class, 'statusHistory'])->name('contact-requests.status-history');
 
         Route::get('product-reports', [ProductReportsController::class, 'index'])->name('product-reports.index');
         Route::get('product-reports/{productReport}/comment', [ProductReportsController::class, 'showComment'])->name('product-reports.comment.show');
         Route::post('product-reports/{productReport}/comment', [ProductReportsController::class, 'updateComment'])->name('product-reports.comment.update');
         Route::patch('product-reports/{productReport}/status', [ProductReportsController::class, 'updateStatus'])->name('product-reports.update-status');
+        Route::get('product-reports/{productReport}/status-history', [ProductReportsController::class, 'statusHistory'])->name('product-reports.status-history');
 
         Route::get('newsletter-subscribers', [NewsletterSubscribersController::class, 'index'])->name('newsletter-subscribers.index');
         Route::delete('newsletter-subscribers/{newsletter}', [NewsletterSubscribersController::class, 'destroy'])->name('newsletter-subscribers.destroy');

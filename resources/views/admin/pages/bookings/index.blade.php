@@ -132,9 +132,17 @@
                                                         {{ strtoupper($booking->status) }}
                                                     </span>
                                                     <div class="booking-table__status-meta">
-                                                        @if($booking->last_employee_id)
+                                                        @if(empty($statusSummaries[$booking->id]) && $booking->last_employee_id && $booking->employee)
                                                             <span>by {{ $booking->employee->name }}</span>
                                                         @endif
+                                                        <button type="button"
+                                                                class="btn btn-link p-0 text-muted js-status-summary"
+                                                                data-url="{{ route('admin.bookings.status-history', $booking) }}"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#statusHistoryModal"
+                                                                title="{{ __('admin.booking_status_history.button') }}">
+                                                            <i class="fa fa-stream me-1"></i><span class="js-status-summary-text">{{ $statusSummaries[$booking->id] ?? __('admin.booking_status_history.button') }}</span>
+                                                        </button>
                                                         @if($booking->status === 'accepted' && $booking->isBookingOver())
                                                             @if($booking->is_guide_billed)
                                                                 <span>Billed to guide</span>
@@ -902,6 +910,7 @@
     </style>
 
     @include('admin.pages.bookings.partials.reschedule-modal')
+    @include('admin.partials.booking-status-history')
 
     <!-- Edit Booking Modal -->
     <div class="modal fade" id="editBookingModal" tabindex="-1" role="dialog" aria-labelledby="editBookingModalLabel" aria-hidden="true">

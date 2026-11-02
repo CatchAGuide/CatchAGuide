@@ -115,19 +115,12 @@
                                                 {{ optional($report->created_at)->format('M j, Y g:i A') }}
                                             </td>
                                             <td>
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm dropdown-toggle js-status-dropdown-btn btn-status-{{ $rowStatus }}" data-bs-toggle="dropdown" data-id="{{ $report->id }}" data-url="{{ route('admin.product-reports.update-status', $report) }}" data-status="{{ $rowStatus }}" data-options='@json(\App\Models\ProductReport::statusOptions())' aria-expanded="false">
-                                                        <span class="js-status-btn-text">{{ \App\Models\ProductReport::statusOptions()[$rowStatus] ?? $rowStatus }}</span>
-                                                        <i class="fa fa-caret-down ms-1"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        @foreach(\App\Models\ProductReport::statusOptions() as $value => $label)
-                                                            <li>
-                                                                <a class="dropdown-item js-status-option {{ $rowStatus === $value ? 'active' : '' }}" href="#" data-status="{{ $value }}">{{ $label }}</a>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
+                                                @include('admin.partials.request-status-dropdown', [
+                                                    'item' => $report,
+                                                    'updateUrl' => route('admin.product-reports.update-status', $report),
+                                                    'historyUrl' => route('admin.product-reports.status-history', $report),
+                                                    'summary' => $statusSummaries[$report->id] ?? null,
+                                                ])
                                             </td>
                                             <td class="pe-3 text-end">
                                                 <div class="btn-group btn-group-sm">
@@ -193,6 +186,7 @@
         </div>
     </div>
 </div>
+@include('admin.partials.booking-status-history')
 @endsection
 
 @section('js_after')
@@ -259,39 +253,6 @@
             document.getElementById('messageModalContent').textContent = $(this).data('message') || '';
         });
 
-        $(document).on('click', '.js-status-option', function (e) {
-            e.preventDefault();
-            var $option = $(this);
-            var $btn = $option.closest('.dropdown').find('.js-status-dropdown-btn');
-            var status = $option.data('status');
-            var url = $btn.data('url');
-            var token = $('meta[name="csrf-token"]').attr('content');
-
-            fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (!data || !data.success) {
-                    throw new Error('Status update failed');
-                }
-                $btn
-                    .removeClass('btn-status-open btn-status-in_process btn-status-done')
-                    .addClass('btn-status-' + data.status)
-                    .attr('data-status', data.status);
-                $btn.find('.js-status-btn-text').text(data.status_label || data.status);
-                $option.closest('.dropdown-menu').find('.js-status-option').removeClass('active');
-                $option.addClass('active');
-            })
-            .catch(function () { alert('Failed to update status.'); });
-        });
     });
 </script>
 @endsection

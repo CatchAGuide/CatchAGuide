@@ -117,6 +117,9 @@ return [
     // Admin payments page translations
     'all_payments' => 'All Payments',
     'administration' => 'Administration',
+    'listing_owner' => [
+        'admin' => 'Staff',
+    ],
     'payments' => 'Payments',
     'transaction_id' => 'Transaction-ID',
     'user' => 'User',
@@ -707,6 +710,28 @@ return [
         'by' => 'by :name',
         'reason_created' => 'Created by hand',
         'reason_offer_created' => 'Offer created',
+        'reason_expired' => 'Expired (no answer from the guide)',
+        'guide' => 'Guide',
+    ],
+
+    'guiding_booking_status' => [
+        'pending' => 'Pending',
+        'accepted' => 'Accepted',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Cancelled',
+    ],
+
+    'done_reason' => [
+        'heading' => 'Done — outcome',
+        'booked' => 'Booked',
+        'booked_hint' => 'The guest booked',
+        'no_reply' => 'No reply',
+        'no_reply_hint' => 'The guest never answered',
+        'count_booked' => ':count booked',
+        'count_no_reply' => ':count no reply',
+        'rate' => ':rate% booked',
+        'rate_hint' => 'Share of closed requests (with an outcome) that booked',
+        'update_failed' => 'Failed to update the status.',
     ],
 
     'voucher_orders' => [
@@ -738,6 +763,14 @@ return [
         'download_pdf' => 'Download voucher PDF',
         'view_message' => 'Personal message',
         'empty' => 'No gift voucher orders yet.',
+        'comment' => 'Admin comment (internal)',
+        'comment_label' => 'Internal notes (plain text)',
+        'comment_placeholder' => 'Internal notes for the team…',
+        'comment_hint' => 'Not sent to the buyer or the guide.',
+        'comment_close' => 'Close',
+        'comment_save' => 'Save',
+        'comment_load_failed' => 'Failed to load comment.',
+        'comment_save_failed' => 'Failed to save comment.',
         'pdf_missing' => 'The voucher PDF could not be created.',
     ],
 ];

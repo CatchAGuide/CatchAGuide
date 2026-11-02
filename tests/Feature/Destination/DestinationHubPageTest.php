@@ -76,7 +76,7 @@ class DestinationHubPageTest extends TestCase
 
     private function mockHubGrid(array $rows): void
     {
-        $mock = Mockery::mock(VacationDestinationRepository::class);
+        $mock = Mockery::mock(VacationDestinationRepository::class)->makePartial();
         $mock->shouldReceive('countriesForHubGrid')->andReturn(collect($rows));
         $this->app->instance(VacationDestinationRepository::class, $mock);
     }
