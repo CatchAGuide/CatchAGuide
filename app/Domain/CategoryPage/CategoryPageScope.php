@@ -34,7 +34,8 @@ final class CategoryPageScope
             CategoryPageDimension::TARGETS => [self::GLOBAL, self::TOURS, self::VACATIONS],
             CategoryPageDimension::METHODS => [self::TOURS],
             CategoryPageDimension::COUNTRY => [self::GLOBAL, self::TOURS, self::VACATIONS, self::TRIPS, self::CAMPS],
-            CategoryPageDimension::REGION, CategoryPageDimension::CITY => [self::TOURS],
+            // Global feeds /destination/{country}/{region}/{city}; tours feeds /guidings/{country}/{region}/{city}.
+            CategoryPageDimension::REGION, CategoryPageDimension::CITY => [self::GLOBAL, self::TOURS],
             default => [],
         };
     }

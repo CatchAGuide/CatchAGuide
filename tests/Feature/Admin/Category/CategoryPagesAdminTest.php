@@ -332,6 +332,76 @@ class CategoryPagesAdminTest extends TestCase
         ]);
     }
 
+    public function test_region_and_city_editors_render_global_and_tours_tabs(): void
+    {
+        $this->actingAsEmployee();
+
+        $region = CategoryEntity::regions()->first();
+        $city = CategoryEntity::cities()->first();
+        if (! $region || ! $city) {
+            $this->markTestSkipped('No region/city available.');
+        }
+
+        foreach ([route('admin.category.region.edit', $region->id), route('admin.category.city.edit', $city->id)] as $url) {
+            $response = $this->get($url);
+
+            $response->assertOk();
+            $response->assertSee('data-scope="'.CategoryPageScope::GLOBAL.'"', false);
+            $response->assertSee('data-scope="'.CategoryPageScope::TOURS.'"', false);
+        }
+    }
+
+    public function test_admin_can_save_global_region_and_city_content(): void
+    {
+        $this->actingAsEmployee();
+
+        $city = CategoryEntity::cities()->whereNotNull('region_id')->with('region')->first();
+        if (! $city || ! $city->region) {
+            $this->markTestSkipped('No city with a region available.');
+        }
+        $region = $city->region;
+
+        $fields = [
+            'language' => 'de',
+            'sub_title' => 'Global Sub',
+            'introduction' => 'Intro',
+            'content' => 'Body',
+            'faq_title' => 'FAQ',
+            'languageSwitch' => 'de',
+            'content_scope' => CategoryPageScope::GLOBAL,
+        ];
+
+        $this->put(route('admin.category.region.update', $region->id), $fields + [
+            'country_id' => $region->country_id,
+            'name' => $region->name,
+            'filters' => $region->filters ?? ['place' => 'Test'],
+            'title' => 'Global Region Title',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->put(route('admin.category.city.update', $city->id), $fields + [
+            'country_id' => $city->country_id,
+            'region_id' => $city->region_id,
+            'name' => $city->name,
+            'filters' => $city->filters ?? ['place' => 'Test'],
+            'title' => 'Global City Title',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('languages', [
+            'source_id' => (string) $region->id,
+            'type' => CategoryPageEntityType::GEO_REGION,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'de',
+            'title' => 'Global Region Title',
+        ]);
+        $this->assertDatabaseHas('languages', [
+            'source_id' => (string) $city->id,
+            'type' => CategoryPageEntityType::GEO_CITY,
+            'scope' => CategoryPageScope::GLOBAL,
+            'language' => 'de',
+            'title' => 'Global City Title',
+        ]);
+    }
+
     public function test_target_fish_index_shows_language_flags(): void
     {
         $this->actingAsEmployee();

@@ -244,6 +244,44 @@ class CategoryPageContentService
     }
 
     /**
+     * Copy one locale's content + FAQs from one scope to another. Returns false (and writes
+     * nothing) when the source is empty, or when the target already has content and
+     * $overwrite is off.
+     */
+    public function copyEntityScope(
+        string $entityType,
+        int|string $sourceId,
+        string $fromScope,
+        string $toScope,
+        string $locale,
+        bool $overwrite = false,
+    ): bool {
+        $source = $this->findForEntity($entityType, $sourceId, $fromScope, $locale);
+
+        if (! $this->hasMeaningfulContent($source)) {
+            return false;
+        }
+
+        if (! $overwrite && $this->hasMeaningfulContent($this->findForEntity($entityType, $sourceId, $toScope, $locale))) {
+            return false;
+        }
+
+        $fields = $source->only([
+            'title', 'sub_title', 'introduction', 'content', 'faq_title',
+            'fish_avail_title', 'fish_avail_intro', 'size_limit_title',
+            'size_limit_intro', 'time_limit_title', 'time_limit_intro',
+        ]);
+
+        $faqs = $this->faqsForEntity($entityType, $sourceId, $fromScope, $locale)
+            ->map(fn (Faq $faq) => ['question' => $faq->question, 'answer' => $faq->answer])
+            ->all();
+
+        $this->upsertEntity($entityType, $sourceId, $toScope, $locale, $fields, $faqs);
+
+        return true;
+    }
+
+    /**
      * @param  list<string>  $scopes
      * @return array<string, array{de: bool, en: bool}>
      */
