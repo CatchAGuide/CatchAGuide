@@ -116,6 +116,8 @@ final class OfferListingFilter
         public readonly ?bool $hasRentalBoat = null,
         public readonly ?float $userLat = null,
         public readonly ?float $userLng = null,
+        // numGuests falls back to DEFAULT_GUESTS; this says whether the visitor actually chose it.
+        public readonly bool $guestsFromInput = false,
     ) {}
 
     public static function fromRequest(array $input): self
@@ -225,6 +227,7 @@ final class OfferListingFilter
             hasRentalBoat: $hasRentalBoat,
             userLat: $userLat,
             userLng: $userLng,
+            guestsFromInput: self::nullableGuests($input['num_guests'] ?? $input['num_persons'] ?? null) !== null,
         );
     }
 

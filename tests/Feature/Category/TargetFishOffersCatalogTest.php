@@ -342,6 +342,10 @@ class TargetFishOffersCatalogTest extends TestCase
         $this->assertStringStartsWith('http://localhost/vacations/trips/targets/pike', $urls['trip']);
         $this->assertStringNotContainsString('vacation=', $urls['camp']);
         $this->assertStringNotContainsString('type=', $urls['trip']);
+        // The path already fixes the species and one guest is the default — no query copies.
+        $this->assertSame('http://localhost/vacations/camps/targets/pike', $urls['camp']);
+        $this->assertSame('http://localhost/vacations/trips/targets/pike', $urls['trip']);
+        $this->assertSame('http://localhost/vacations/targets/pike', $urls['all']);
     }
 
     public function test_vacations_target_fish_page_404s_when_content_missing_for_scope(): void

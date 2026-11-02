@@ -258,7 +258,9 @@ final class OfferCatalogViewModel
             'placeLng' => $this->filter->placeLng,
             'city' => $this->filter->city,
             'region' => $this->filter->region,
-            'num_guests' => $this->filter->numGuests,
+            // Only a guest count the visitor chose; the filter's default of one would mint
+            // crawlable ?num_guests=1 duplicates of every toggle target.
+            'num_guests' => $this->filter->guestsFromInput ? $this->filter->numGuests : null,
             'country_short' => $this->filter->countryShort,
             'user_lat' => $this->filter->userLat,
             'user_lng' => $this->filter->userLng,
@@ -308,9 +310,13 @@ final class OfferCatalogViewModel
             $params = $query;
 
             // Pages where the vacation filter is a path segment (/vacations/camps/targets/{slug})
-            // link to that path instead of carrying ?vacation=, which would just 301.
+            // link to that path instead of carrying ?vacation=, which would just 301. The path
+            // also fixes the species, so a ?species[]= copy would only be a duplicate URL.
             if (isset($this->vacationToggleBaseUrls[$vacation])) {
                 unset($params['type'], $params['vacation']);
+                if ($this->lockSpeciesScope) {
+                    unset($params['species']);
+                }
                 $base = $this->vacationToggleBaseUrls[$vacation];
 
                 return $params === [] ? $base : $base.'?'.http_build_query($params);
