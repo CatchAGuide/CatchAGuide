@@ -27,6 +27,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Email Logs</h3>
+                            <span class="ms-auto small text-muted">Latest {{ number_format($listLimit) }} emails</span>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">

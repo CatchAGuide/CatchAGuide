@@ -10,14 +10,23 @@ use Illuminate\View\View;
 
 class EmailLogsController extends Controller
 {
+    /** The list renders client-side (DataTables), so cap it to keep the page fast. */
+    public const LIST_LIMIT = 1500;
+
     public function index(): View
     {
+        // additional_info holds the full sent HTML; the list never shows it, the preview loads it per row.
         $emailLogs = EmailLog::query()
+            ->select(['id', 'email', 'subject', 'type', 'language', 'target', 'created_at'])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
+            ->limit(self::LIST_LIMIT)
             ->get();
 
-        return view('admin.pages.email.index', compact('emailLogs'));
+        return view('admin.pages.email.index', [
+            'emailLogs' => $emailLogs,
+            'listLimit' => self::LIST_LIMIT,
+        ]);
     }
 
     public function show(EmailLog $emailLog, EmailLogPreviewService $preview): JsonResponse
