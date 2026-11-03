@@ -7,6 +7,7 @@ use App\Http\Requests\TourCheckoutRequest;
 use App\Models\Booking;
 use App\Models\Guiding;
 use App\Presenters\Offers\TourCardPresenter;
+use App\Services\Analytics\ConversionDataLayer;
 use App\Services\Checkout\BookingConfirmationAccess;
 use App\Services\Checkout\TourBookingSubmissionService;
 use Illuminate\Http\JsonResponse;
@@ -86,12 +87,15 @@ class ModernCheckoutController extends Controller
      * Booking confirmation. Only the session that created the booking or its signed-in owner
      * may see it; everyone else gets the same 404 as for a missing id, so ids can't be probed.
      */
-    public function thankYou(int $bookingId, BookingConfirmationAccess $confirmations)
+    public function thankYou(int $bookingId, BookingConfirmationAccess $confirmations, ConversionDataLayer $conversions)
     {
         $booking = Booking::with(['guiding.user'])->find($bookingId);
 
         abort_unless($booking && $confirmations->allows($booking, auth()->user()), 404);
 
-        return view('pages.modern-checkout.thank-you', compact('booking'));
+        return view('pages.modern-checkout.thank-you', [
+            'booking' => $booking,
+            'conversion' => $conversions->forTourBooking($booking),
+        ]);
     }
 }

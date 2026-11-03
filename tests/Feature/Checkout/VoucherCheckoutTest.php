@@ -340,6 +340,7 @@ class VoucherCheckoutTest extends TestCase
 
     public function test_thank_you_page_is_only_shown_to_the_session_that_ordered(): void
     {
+        config(['services.google_tag_manager.container_id' => 'GTM-TEST123']);
         Mail::fake();
         $guiding = $this->guiding();
 
@@ -352,7 +353,8 @@ class VoucherCheckoutTest extends TestCase
             ->assertOk()
             ->assertSee($order->voucher_code)
             ->assertSee(__('checkout.voucher.success_title'))
-            ->assertSee('<meta name="robots" content="noindex,nofollow">', false);
+            ->assertSee('<meta name="robots" content="noindex,nofollow">', false)
+            ->assertSee('"transaction_id":"voucher-'.$order->id.'"', false);
 
         $this->get(route('checkout.voucher.thank-you', ['slug' => 'other-slug', 'orderId' => $order->id]))->assertNotFound();
 

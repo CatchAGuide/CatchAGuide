@@ -7,6 +7,7 @@ use App\Http\Requests\VoucherCheckoutRequest;
 use App\Models\VoucherOrder;
 use App\Presenters\Offers\TourCardPresenter;
 use App\Presenters\Voucher\VoucherOrderPresenter;
+use App\Services\Analytics\ConversionDataLayer;
 use App\Services\Voucher\VoucherConfirmationAccess;
 use App\Services\Voucher\VoucherOrderService;
 use App\Services\Voucher\VoucherTourFinder;
@@ -92,7 +93,7 @@ class VoucherCheckoutController extends Controller
      * Only the session that placed the order or its signed-in buyer may see it; everyone else
      * gets the same 404 as for a missing id.
      */
-    public function thankYou(string $slug, int $orderId, VoucherConfirmationAccess $confirmations, VoucherOrderPresenter $presenter)
+    public function thankYou(string $slug, int $orderId, VoucherConfirmationAccess $confirmations, VoucherOrderPresenter $presenter, ConversionDataLayer $conversions)
     {
         $order = VoucherOrder::with(['guiding', 'guide.information'])->find($orderId);
 
@@ -101,6 +102,7 @@ class VoucherCheckoutController extends Controller
         return view('pages.voucher-checkout.thank-you', [
             'order' => $order,
             'voucher' => $presenter->details($order),
+            'conversion' => $conversions->forVoucherOrder($order),
         ]);
     }
 }

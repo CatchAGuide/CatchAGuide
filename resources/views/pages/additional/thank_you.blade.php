@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@include('layouts.partials.conversion-datalayer')
+
 @section('title', __('thank-you.thank_you'))
 
 @section('content')
