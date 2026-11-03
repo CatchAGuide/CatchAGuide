@@ -36,7 +36,8 @@ class CookieConsentBannerTest extends TestCase
     }
 
     /**
-     * GA4 is listed under Necessary (always on); Clarity (Analytics) and Google Ads (Marketing) are opt-in switches.
+     * GA4 is listed under Necessary (always on); Google Ads (Marketing) is the only opt-in switch.
+     * There is no Statistics category, and Clarity is not mentioned in the form (it still runs).
      */
     public function test_settings_page_shows_the_switches(): void
     {
@@ -45,9 +46,13 @@ class CookieConsentBannerTest extends TestCase
         $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow">', $html);
         $this->assertStringContainsString('<div class="cag-cookie-panel" data-cookie-settings-panel>', $html);
         $this->assertStringContainsString('id="cookie-panel-page-necessary" checked disabled', $html);
-        $this->assertStringContainsString('data-cookie-consent="analytics"', $html);
+        $this->assertStringNotContainsString('data-cookie-consent="analytics"', $html);
         $this->assertStringContainsString('data-cookie-consent="marketing"', $html);
-        $this->assertMatchesRegularExpression('/cookie-panel-page-necessary.*?<li>Google Analytics 4<\/li>.*?cookie-panel-page-analytics.*?<li>Microsoft Clarity<\/li>.*?<li>Google Ads<\/li>/s', $html);
+        preg_match('/<div class="cag-cookie-panel" data-cookie-settings-panel>.*?<\/div>\s*<p class="cag-cookie-panel__saved"/s', $html, $panel);
+        $this->assertNotEmpty($panel, 'Cookie settings panel markup missing.');
+        $this->assertStringNotContainsString('Clarity', $panel[0]);
+        $this->assertStringNotContainsString('Statistik', $panel[0]);
+        $this->assertMatchesRegularExpression('/cookie-panel-page-necessary.*?<li>Google Analytics 4<\/li>.*?<li>Google Ads<\/li>/s', $html);
     }
 
     public function test_profile_settings_show_the_switches(): void
