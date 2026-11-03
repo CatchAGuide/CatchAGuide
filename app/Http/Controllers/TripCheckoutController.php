@@ -6,6 +6,7 @@ use App\Domain\Checkout\ViewModels\TripCheckoutViewModel;
 use App\Http\Requests\TripCheckoutRequest;
 use App\Models\TripBooking;
 use App\Presenters\Vacation\TripQuotePresenter;
+use App\Services\Analytics\ConversionDataLayer;
 use App\Services\Checkout\Trip\BookableTripFinder;
 use App\Services\Checkout\Trip\TripBookingConfirmationAccess;
 use App\Services\Checkout\Trip\TripBookingSubmissionService;
@@ -76,6 +77,7 @@ class TripCheckoutController extends Controller
         int $requestId,
         TripBookingConfirmationAccess $confirmations,
         TripQuotePresenter $presenter,
+        ConversionDataLayer $conversions,
     ) {
         $booking = TripBooking::with('trip')->find($requestId);
 
@@ -96,6 +98,7 @@ class TripCheckoutController extends Controller
             'fixedDate' => $fixedDate,
             'date' => $presenter->date($booking->preferred_date?->toDateString()),
             'total' => $presenter->total($booking->estimated_total !== null ? (float) $booking->estimated_total : null, $fixedDate),
+            'conversion' => $conversions->forTripRequest($booking),
         ]);
     }
 }

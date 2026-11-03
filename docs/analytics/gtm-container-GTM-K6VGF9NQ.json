@@ -215,6 +215,21 @@
             "type": "BOOLEAN",
             "key": "rdp",
             "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "conversionValue",
+            "value": "{{DLV - conversion.value}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "orderId",
+            "value": "{{DLV - conversion.transaction_id}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "currencyCode",
+            "value": "{{DLV - conversion.currency}}"
           }
         ],
         "fingerprint": "1722250824510",
@@ -280,6 +295,21 @@
             "type": "BOOLEAN",
             "key": "rdp",
             "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "conversionValue",
+            "value": "{{DLV - conversion.value}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "orderId",
+            "value": "{{DLV - conversion.transaction_id}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "currencyCode",
+            "value": "{{DLV - conversion.currency}}"
           }
         ],
         "firingTriggerId": [
@@ -344,6 +374,21 @@
             "type": "BOOLEAN",
             "key": "rdp",
             "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "conversionValue",
+            "value": "{{DLV - conversion.value}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "orderId",
+            "value": "{{DLV - conversion.transaction_id}}"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "currencyCode",
+            "value": "{{DLV - conversion.currency}}"
           }
         ],
         "firingTriggerId": [
@@ -383,7 +428,8 @@
           "204",
           "205",
           "206",
-          "119"
+          "119",
+          "210"
         ],
         "tagFiringOption": "ONCE_PER_EVENT",
         "monitoringMetadata": {
@@ -533,6 +579,51 @@
                     "value": "{{RT - Product Type}}"
                   }
                 ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "value"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.value}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "currency"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.currency}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "transaction_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.transaction_id}}"
+                  }
+                ]
               }
             ]
           },
@@ -588,6 +679,51 @@
                     "value": "{{RT - Product Type}}"
                   }
                 ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "value"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.value}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "currency"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.currency}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "transaction_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.transaction_id}}"
+                  }
+                ]
               }
             ]
           },
@@ -641,6 +777,51 @@
                     "type": "TEMPLATE",
                     "key": "parameterValue",
                     "value": "{{RT - Product Type}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "value"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.value}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "currency"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.currency}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "transaction_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.transaction_id}}"
                   }
                 ]
               }
@@ -1222,6 +1403,106 @@
         "consentSettings": {
           "consentStatus": "NOT_SET"
         }
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "tagId": "224",
+        "name": "GA4 - voucher_purchase",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "sendEcommerceData",
+            "value": "false"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "product_type"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{RT - Product Type}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "value"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.value}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "currency"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.currency}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "transaction_id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{DLV - conversion.transaction_id}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "voucher_purchase"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "measurementIdOverride",
+            "value": "{{LT - GA4 Measurement ID}}"
+          }
+        ],
+        "firingTriggerId": [
+          "210"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "consentSettings": {
+          "consentStatus": "NOT_SET"
+        }
       }
     ],
     "trigger": [
@@ -1711,6 +1992,45 @@
                 "type": "TEMPLATE",
                 "key": "arg1",
                 "value": "^(homepage_|guidings_landing_|magazine_)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "triggerId": "210",
+        "name": "PV - Thank you - voucher order",
+        "type": "PAGEVIEW",
+        "filter": [
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{Page Path}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^/checkout/vouchers/[^/]+/thank-you/"
+              }
+            ]
+          },
+          {
+            "type": "MATCH_REGEX",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{Page Hostname}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "^(www\\.)?catchaguide\\.(com|de)$"
               }
             ]
           }
@@ -2262,6 +2582,21 @@
                   {
                     "type": "TEMPLATE",
                     "key": "key",
+                    "value": "^/checkout/vouchers/[^/]+/thank-you/"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "thank_you"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "key",
                     "value": "^/checkout(/|$)"
                   },
                   {
@@ -2397,6 +2732,21 @@
                   {
                     "type": "TEMPLATE",
                     "key": "key",
+                    "value": "^/checkout/vouchers/"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "value",
+                    "value": "voucher"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "key",
                     "value": "^/booking-request/"
                   },
                   {
@@ -2420,7 +2770,7 @@
           {
             "type": "TEMPLATE",
             "key": "javascript",
-            "value": "function(){var e={{Event}},p={{Page Path}}||'',t={{RT - Page Type}};if(e==='gtm.formSubmit')return 'newsletter_signup';if(e==='gtm.click')return 'contact_message_send';if(/^\\/checkout\\/camps\\/[^\\/]+\\/thank-you\\//.test(p))return 'camp_request';if(/^\\/checkout\\/trips\\/[^\\/]+\\/thank-you\\//.test(p))return 'trip_request';if(/^\\/(checkout\\/)?thank-you\\//.test(p))return 'tour_booking_request';if(/^\\/booking-request\\/thank-you/.test(p))return 'search_request';if(t==='checkout')return 'begin_checkout';if(/_product$/.test(t))return 'view_item';}"
+            "value": "function(){var e={{Event}},p={{Page Path}}||'',t={{RT - Page Type}};if(e==='gtm.formSubmit')return 'newsletter_signup';if(e==='gtm.click')return 'contact_message_send';if(/^\\/checkout\\/camps\\/[^\\/]+\\/thank-you\\//.test(p))return 'camp_request';if(/^\\/checkout\\/trips\\/[^\\/]+\\/thank-you\\//.test(p))return 'trip_request';if(/^\\/(checkout\\/)?thank-you\\//.test(p))return 'tour_booking_request';if(/^\\/booking-request\\/thank-you/.test(p))return 'search_request';if(/^\\/checkout\\/vouchers\\/[^\\/]+\\/thank-you\\//.test(p))return 'voucher_purchase';if(t==='checkout')return 'begin_checkout';if(/_product$/.test(t))return 'view_item';}"
           }
         ]
       },
@@ -2569,6 +2919,102 @@
             "type": "TEMPLATE",
             "key": "javascript",
             "value": "function(){var l=document.documentElement.lang;return l?l.slice(0,2).toLowerCase():undefined;}"
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "variableId": "210",
+        "name": "DLV - conversion.value",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "conversion.value"
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "variableId": "211",
+        "name": "DLV - conversion.transaction_id",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "conversion.transaction_id"
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "variableId": "212",
+        "name": "DLV - conversion.currency",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "conversion.currency"
+          }
+        ]
+      },
+      {
+        "accountId": "6243602924",
+        "containerId": "192036922",
+        "variableId": "213",
+        "name": "DLV - user_data.sha256_email_address",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "user_data.sha256_email_address"
           }
         ]
       }

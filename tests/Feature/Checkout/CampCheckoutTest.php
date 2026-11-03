@@ -439,6 +439,7 @@ class CampCheckoutTest extends TestCase
 
     public function test_thank_you_page_is_only_visible_to_the_session_that_sent_the_request(): void
     {
+        config(['services.google_tag_manager.container_id' => 'GTM-TEST123']);
         [$camp, $accommodation] = $this->makeCampWithOptions();
 
         $this->postJson(route('checkout.camp.store', $camp->slug), $this->payload([
@@ -451,7 +452,9 @@ class CampCheckoutTest extends TestCase
         $this->get($url)
             ->assertOk()
             ->assertSee(__('checkout.camp.success_title'))
-            ->assertSee('anna@example.com');
+            ->assertSee('anna@example.com')
+            ->assertSee('"transaction_id":"camp-'.$booking->id.'"', false)
+            ->assertSee(hash('sha256', 'anna@example.com'), false);
 
         // A fresh session (someone guessing ids) gets a 404, as does a mismatched camp slug.
         $this->flushSession();

@@ -96,6 +96,26 @@ class BookingConfirmationAccessTest extends TestCase
             ->assertOk();
     }
 
+    /**
+     * @dataProvider confirmationRoutes
+     */
+    public function test_the_confirmation_hands_gtm_the_booking_value_before_it_loads(string $route): void
+    {
+        config(['services.google_tag_manager.container_id' => 'GTM-TEST123']);
+        $booking = $this->booking();
+
+        $html = $this->withSession([self::SESSION_KEY => [$booking->id]])
+            ->get(route($route, [$booking->id]))
+            ->assertOk()
+            ->getContent();
+
+        $push = strpos($html, '"transaction_id":"tour-'.$booking->id.'"');
+        $this->assertNotFalse($push);
+        $this->assertLessThan(strpos($html, '"GTM-TEST123"'), $push, 'The conversion data must be in the dataLayer before GTM loads.');
+        $this->assertStringContainsString('"value":300', $html);
+        $this->assertStringContainsString('"sha256_email_address":"'.hash('sha256', 'guest@example.com').'"', $html);
+    }
+
     public function test_a_signed_in_customer_can_see_their_own_booking_but_not_others(): void
     {
         $customer = User::factory()->create();

@@ -224,7 +224,12 @@ by GA4's Hostname. Set up 9 Oct 2026 (GTM version 21).
   sent as the GA4 `content_group` and as the Clarity tag `page_type`. Conversions fire on thank-you pages:
   `/checkout/thank-you/{id}` (and legacy `/thank-you/{id}`) → `tour_booking_request`;
   `/checkout/camps/{slug}/thank-you/{id}` → `camp_request`; `/checkout/trips/{slug}/thank-you/{id}` → `trip_request`;
-  `/booking-request/thank-you` → `search_request`. The same names go to GA4, Clarity (`clarity('event')`) and Ads.
+  `/booking-request/thank-you` → `search_request`; `/checkout/vouchers/{slug}/thank-you/{id}` → `voucher_purchase`
+  (GA4/Clarity only, no Ads conversion yet). The same names go to GA4, Clarity (`clarity('event')`) and Ads.
+  Each thank-you page also pushes `{conversion: {product_type, transaction_id, value, currency}, user_data:
+  {sha256_email_address}}` (`App\Services\Analytics\ConversionDataLayer`, via the `datalayer` stack that
+  `tag-manager-head` renders **before** GTM loads), so the Page View tags read the real booking value, de-duplicate on
+  `transaction_id` (`tour-123`, `camp-45`, …) and can send the hashed email for Ads enhanced conversions.
   **When you add or rename a route that one of these rules depends on** (product, checkout or thank-you paths,
   magazine slugs, hub pages), update the regex table / triggers in GTM in the same change.
 - **Only a few click triggers depend on markup:** `#reserveButton`/`#reserveButtonMobile`, `#contactSubmitBtn`, the

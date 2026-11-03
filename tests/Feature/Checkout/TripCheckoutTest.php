@@ -433,6 +433,7 @@ class TripCheckoutTest extends TestCase
 
     public function test_thank_you_page_is_only_visible_to_the_session_that_sent_the_request(): void
     {
+        config(['services.google_tag_manager.container_id' => 'GTM-TEST123']);
         $trip = $this->makeTrip();
         $departure = now()->addDays(10)->toDateString();
         $this->addDeparture($trip, $departure, 4);
@@ -446,7 +447,8 @@ class TripCheckoutTest extends TestCase
             ->assertOk()
             ->assertSee(__('checkout.trip.success_title'))
             ->assertSee('anna@example.com')
-            ->assertSee('ca. 2.580', false);
+            ->assertSee('ca. 2.580', false)
+            ->assertSee('"conversion":{"product_type":"trip","transaction_id":"trip-'.$booking->id.'","currency":"EUR","value":2580', false);
 
         $otherTrip = $this->makeTrip();
         $this->get(route('checkout.trip.thank-you', [$otherTrip->slug, $booking->id]))->assertNotFound();

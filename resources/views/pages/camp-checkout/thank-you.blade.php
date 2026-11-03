@@ -1,5 +1,7 @@
 @extends('layouts.app-v2-1')
 
+@include('layouts.partials.conversion-datalayer')
+
 @section('title', __('checkout.camp.success_title'))
 
 @section('meta_robots')

@@ -6,6 +6,7 @@ use App\Domain\Checkout\ViewModels\CampCheckoutViewModel;
 use App\Http\Requests\CampCheckoutRequest;
 use App\Models\CampVacationBooking;
 use App\Presenters\Vacation\CampQuotePresenter;
+use App\Services\Analytics\ConversionDataLayer;
 use App\Services\Checkout\Camp\BookableCampFinder;
 use App\Services\Checkout\Camp\CampBookingConfirmationAccess;
 use App\Services\Checkout\Camp\CampBookingSubmissionService;
@@ -81,6 +82,7 @@ class CampCheckoutController extends Controller
         int $requestId,
         CampBookingConfirmationAccess $confirmations,
         CampQuotePresenter $presenter,
+        ConversionDataLayer $conversions,
     ) {
         $booking = CampVacationBooking::with('camp')->find($requestId);
 
@@ -98,6 +100,7 @@ class CampCheckoutController extends Controller
             'campTitle' => (string) $booking->camp->title,
             'arrival' => $presenter->date($booking->preferred_date),
             'total' => $presenter->total($booking->estimated_total !== null ? (float) $booking->estimated_total : null),
+            'conversion' => $conversions->forCampRequest($booking),
         ]);
     }
 }
