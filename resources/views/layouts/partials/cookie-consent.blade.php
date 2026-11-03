@@ -2,8 +2,9 @@
     Cookie consent popup, shared by layouts/app, app-v2 and app-v2-1 (styles: resources/sass/components/_cookie-consent.scss).
     The popup only offers Accept all / Accept necessary only / Go to settings; the switches live in
     layouts/partials/cookie-settings-panel (on /cookie-settings and in Profile › Settings), which this script binds.
-    Writes default_cookie (a choice was made) plus accept_analytics (Clarity) / accept_advertising (Google Ads),
-    which layouts/partials/tag-manager-head turns into Consent Mode defaults on the next page load. So a choice
+    Writes default_cookie (a choice was made) plus accept_advertising (Google Ads). GA4 is listed under Necessary;
+    Clarity also runs always but is not mentioned in the form. No separate Statistics category.
+    layouts/partials/tag-manager-head turns these into Consent Mode defaults on the next page load; a choice
     that changes consent reloads the page.
 --}}
 <div id="cookie-consent-banner" class="cag-cookie" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">
@@ -50,7 +51,7 @@
         }
 
         function current() {
-            return { analytics: getCookie('accept_analytics'), marketing: getCookie('accept_advertising') };
+            return { marketing: getCookie('accept_advertising') };
         }
 
         // Consent as this page loaded it (tag-manager-head read the same cookies).
@@ -59,10 +60,11 @@
         // Returns true when the page reloads to apply the new consent.
         function save(choice) {
             setCookie('default_cookie', ONE_YEAR);
-            choice.analytics ? setCookie('accept_analytics', ONE_YEAR) : deleteCookie('accept_analytics');
+            // Legacy Clarity opt-in cookie — no longer used (Clarity is always on under Necessary).
+            deleteCookie('accept_analytics');
             choice.marketing ? setCookie('accept_advertising', ONE_YEAR) : deleteCookie('accept_advertising');
 
-            if (choice.analytics !== loaded.analytics || choice.marketing !== loaded.marketing) {
+            if (choice.marketing !== loaded.marketing) {
                 w.location.reload();
                 return true;
             }
@@ -72,11 +74,11 @@
         function bindPopup(banner) {
             d.getElementById('cookie-accept').addEventListener('click', function () {
                 banner.classList.remove('is-open');
-                save({ analytics: true, marketing: true });
+                save({ marketing: true });
             });
             d.getElementById('cookie-decline').addEventListener('click', function () {
                 banner.classList.remove('is-open');
-                save({ analytics: false, marketing: false });
+                save({ marketing: false });
             });
 
             // The settings page/profile show the switches themselves, so the popup would only cover them.
@@ -112,7 +114,7 @@
 
             panel.querySelector('[data-cookie-accept-all]').addEventListener('click', function () {
                 toggles.forEach(function (toggle) { toggle.checked = true; });
-                done({ analytics: true, marketing: true });
+                done({ marketing: true });
             });
 
             try {

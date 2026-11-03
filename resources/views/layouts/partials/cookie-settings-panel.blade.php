@@ -2,12 +2,12 @@
     Cookie on/off switches, used on /cookie-settings (pages.law.cookie-settings) and in Profile › Settings.
     The behaviour lives in layouts/partials/cookie-consent (it binds every [data-cookie-settings-panel]), and the
     popup stays closed on any page that shows this panel.
-    GA4 is listed under Necessary on purpose (business decision, see tag-manager-head).
+    GA4 is listed under Necessary on purpose (business decision, see tag-manager-head). Clarity still runs
+    (always granted) but is not shown in this form. No separate Statistics category — only Marketing is opt-in.
 --}}
 @php
     $cookieCategories = [
         ['key' => 'necessary', 'consent' => null],
-        ['key' => 'analytics', 'consent' => 'analytics'],
         ['key' => 'marketing', 'consent' => 'marketing'],
     ];
     $panelId = 'cookie-panel-'.($panelKey ?? 'page');

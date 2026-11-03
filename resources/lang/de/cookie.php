@@ -21,10 +21,6 @@ return [
 'necessary-msg' => 'Betreiben die Website und zählen ihre Besuche: Ihre Sitzung und Anmeldung, Schutz vor gefälschten Anfragen, Ihre Sprache, Ihre Cookie-Auswahl und Besucherstatistiken mit Google Analytics 4.',
 'necessary-tags' => 'Sitzung und Anmeldung|Sicherheit|Sprache|Cookie-Auswahl|Google Analytics 4',
 
-'analytics' => 'Statistik',
-'analytics-msg' => 'Zeichnen auf, wie sich Besucher durch unsere Seiten bewegen (Klicks, Scrollen, Heatmaps), damit wir die Website einfacher machen können.',
-'analytics-tags' => 'Microsoft Clarity',
-
 'marketing' => 'Marketing',
 'marketing-msg' => 'Messen, welche unserer Anzeigen zu Buchungen und Anfragen führen, und erlauben unseren Werbepartnern, Ihnen passende Angebote auf anderen Websites zu zeigen.',
 'marketing-tags' => 'Google Ads',

@@ -23,9 +23,9 @@ class TagManagerHeadTest extends TestCase
             $this->assertNotFalse($gtm, $url);
             $this->assertLessThan($gtm, $consent, "Consent defaults must be set before GTM loads ({$url}).");
             $this->assertStringContainsString("clarity('consentv2'", $html);
-            // GA4 runs for everyone (business decision, Oct 2026); Clarity and Ads still follow the banner.
+            // GA4 and Clarity run for everyone (Necessary); Ads follow the banner.
             $this->assertStringContainsString("analytics_storage: 'granted'", $html);
-            $this->assertStringContainsString("analytics_Storage: clarity, ad_Storage: ads", $html);
+            $this->assertStringContainsString("analytics_Storage: 'granted', ad_Storage: ads", $html);
             $this->assertStringContainsString("ad_storage: ads", $html);
 
             $this->assertStringNotContainsString('googletagmanager.com/gtag/js', $html);

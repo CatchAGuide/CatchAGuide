@@ -2,10 +2,11 @@
     Consent defaults + Google Tag Manager. GA4 and Microsoft Clarity are loaded by the GTM container (one GA4
     property and one Clarity project for both domains; GTM tags each hit with site_language from <html lang>) —
     don't add gtag.js or the Clarity snippet here.
-    GA4 (analytics_storage) is granted for every visitor: a business decision of 13 Oct 2026, taken knowing
-    that GDPR / TDDDG §25 normally require opt-in, and the banner lists GA4 under "Necessary". Clarity and Google
-    Ads still follow the cookie banner (accept_analytics / accept_advertising); the banner reloads the page
-    after a choice, so the defaults below always reflect the current choice.
+    GA4 (analytics_storage) and Clarity are granted for every visitor: a business decision (GA4 13 Oct 2026;
+    Clarity when the Statistics notice was removed), taken knowing that GDPR / TDDDG §25 normally require
+    opt-in. GA4 is listed under "Necessary"; Clarity is not shown in the cookie form. Google Ads still follows
+    the cookie banner (accept_advertising); the banner reloads the page after a choice, so the defaults below
+    always reflect the current choice.
     The config() default covers a production config cache built before this key existed (that cache once
     rendered no GTM at all); an explicitly empty GTM_CONTAINER_ID still turns tracking off.
 --}}
@@ -16,7 +17,6 @@
             function accepted(name) {
                 return d.cookie.split('; ').indexOf(name + '=true') !== -1;
             }
-            var clarity = accepted('accept_analytics') ? 'granted' : 'denied';
             var ads = accepted('accept_advertising') ? 'granted' : 'denied';
 
             w.dataLayer = w.dataLayer || [];
@@ -30,7 +30,7 @@
 
             // Queued until GTM loads Clarity; without it EU visitors get cookieless one-page sessions.
             w.clarity = w.clarity || function () { (w.clarity.q = w.clarity.q || []).push(arguments); };
-            w.clarity('consentv2', { analytics_Storage: clarity, ad_Storage: ads });
+            w.clarity('consentv2', { analytics_Storage: 'granted', ad_Storage: ads });
         })(window, document);
     </script>
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

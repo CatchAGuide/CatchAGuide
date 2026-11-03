@@ -21,10 +21,6 @@ return [
 'necessary-msg' => 'Run the website and count its visits: your session and login, security against forged requests, your language, your cookie choice, and visitor statistics with Google Analytics 4.',
 'necessary-tags' => 'Session and login|Security|Language|Cookie choice|Google Analytics 4',
 
-'analytics' => 'Analytics',
-'analytics-msg' => 'Record how visitors move through our pages (clicks, scrolling, heatmaps), so we can make the website easier to use.',
-'analytics-tags' => 'Microsoft Clarity',
-
 'marketing' => 'Marketing',
 'marketing-msg' => 'Measure which of our ads lead to bookings and requests, and let our ad partners show you relevant offers on other websites.',
 'marketing-tags' => 'Google Ads',
