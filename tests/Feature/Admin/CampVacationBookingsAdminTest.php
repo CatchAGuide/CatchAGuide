@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Camp;
 use App\Models\CampVacationBooking;
 use App\Models\BookingStatusChange;
 use App\Models\Employee;
@@ -184,6 +185,35 @@ class CampVacationBookingsAdminTest extends TestCase
             ->assertOk()
             ->assertSee('showCampBookingCommentModal('.$booking->id.')', false)
             ->assertSee('id="campBookingCommentModal"', false);
+    }
+
+    public function test_admin_can_create_a_manual_camp_booking_without_a_message(): void
+    {
+        $this->actingAsEmployee();
+        $camp = Camp::query()->where('status', 'active')->first();
+        if (! $camp) {
+            $this->markTestSkipped('No active camp available.');
+        }
+
+        $this->post(route('admin.camp-vacation-bookings.store'), [
+            'source_type' => CampVacationBooking::SOURCE_CAMP,
+            'source_id' => $camp->id,
+            'name' => 'Manual No Message Guest',
+            'email' => 'manual-no-message@example.com',
+            'phone_country_code' => '+49',
+            'phone' => '1600000000',
+            'preferred_date' => now()->addMonths(5)->toDateString(),
+            'number_of_persons' => 7,
+            'message' => '',
+            'status' => CampVacationBooking::STATUS_DONE,
+        ])->assertRedirect(route('admin.camp-vacation-bookings.index'));
+
+        $booking = CampVacationBooking::query()
+            ->where('email', 'manual-no-message@example.com')
+            ->sole();
+        $this->assertNull($booking->message);
+        $this->assertSame(CampVacationBooking::STATUS_DONE, $booking->status);
+        $this->assertSame($camp->id, (int) $booking->source_id);
     }
 
     public function test_guest_cannot_save_a_camp_booking_comment(): void
