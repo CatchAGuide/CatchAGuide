@@ -7,6 +7,7 @@ use App\Models\Vacation;
 use App\Models\VacationBooking;
 use App\Services\AdminChangeTracker;
 use App\Services\Media\ListingMediaRelocator;
+use App\Services\Vacation\VacationComponentSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class VacationsController extends Controller
 {
     public function __construct(
         private ListingMediaRelocator $mediaRelocator,
+        private VacationComponentSync $componentSync,
     ) {}
 
     public function index()
@@ -88,11 +90,46 @@ class VacationsController extends Controller
         }
     }
 
+    /**
+     * City, country, region and coordinates are only filled by picking a Google suggestion.
+     * When the admin keeps the stored location, they arrive empty (null after the request
+     * middleware), and country/latitude/longitude are NOT NULL, so the whole save failed.
+     * Keep what is stored instead.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function keepStoredLocation(array $data, ?Vacation $vacation = null): array
+    {
+        foreach (['location', 'city', 'country', 'region', 'latitude', 'longitude'] as $field) {
+            if (! array_key_exists($field, $data) || filled($data[$field])) {
+                continue;
+            }
+
+            $data[$field] = $vacation?->getRawOriginal($field) ?? '';
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function galleryPaths(mixed $existingGallery): array
+    {
+        $paths = is_string($existingGallery) ? json_decode($existingGallery, true) : $existingGallery;
+
+        return array_values(array_filter(
+            is_array($paths) ? $paths : [],
+            static fn ($path) => is_string($path) && trim($path) !== ''
+        ));
+    }
+
     public function store(Request $request)
     {
         try {
-            $formattedData = $this->formatRequestData($request);
-            
+            $formattedData = $this->keepStoredLocation($this->formatRequestData($request));
+
             // Handle gallery images
             $galleryImages = null;
             if ($request->hasFile('gallery')) {
@@ -112,77 +149,7 @@ class VacationsController extends Controller
                     $this->relocateVacationMediaFromTemp($vacation, $galleryImages);
                 }
 
-                // Handle Accommodations
-                if ($request->has('accommodations')) {
-                    foreach ($request->accommodations as $accommodation) {
-                        $vacation->accommodations()->create([
-                            'title' => $accommodation['title'] ?? null,
-                            'description' => $accommodation['description'],
-                            'capacity' => $accommodation['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($accommodation['prices'] ?? []),
-                                'bed_count' => $accommodation['bed_count'] ?? '',
-                                'living_area' => $accommodation['living_area'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? ''
-                            ])
-                        ]);
-                    }
-                }
-
-                // Handle Boats
-                if ($request->has('boats')) {
-                    foreach ($request->boats as $boat) {
-                        $vacation->boats()->create([
-                            'title' => $boat['title'] ?? null,
-                            'description' => $boat['description'],
-                            'capacity' => $boat['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($boat['prices'] ?? []),
-                                'facilities' => $boat['facilities'] ?? ''
-                            ])
-                        ]);
-                    }
-                }
-
-                // Handle Packages
-                if ($request->has('packages')) {
-                    foreach ($request->packages as $package) {
-                        $vacation->packages()->create([
-                            'title' => $package['title'] ?? null,
-                            'description' => $package['description'],
-                            'capacity' => $package['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($package['prices'] ?? [])
-                            ])
-                        ]);
-                    }
-                }
-
-                // Handle Guidings
-                if ($request->has('guidings')) {
-                    foreach ($request->guidings as $guiding) {
-                        $vacation->guidings()->create([
-                            'title' => $guiding['title'] ?? null,
-                            'description' => $guiding['description'],
-                            'capacity' => $guiding['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($guiding['prices'] ?? [])
-                            ])
-                        ]);
-                    }
-                }
-
-                // Handle Extras
-                if ($request->has('extras')) {
-                    foreach ($request->extras as $extra) {
-                        $vacation->extras()->create([
-                            'description' => $extra['description'],
-                            'price' => $extra['price'],
-                            'type' => $extra['price_type']
-                        ]);
-                    }
-                }
+                $this->componentSync->sync($vacation, $request);
 
                 DB::commit();
 
@@ -258,22 +225,19 @@ class VacationsController extends Controller
             $vacation = Vacation::findOrFail($id);
             
             // Format the request data
-            $formattedData = $this->formatRequestData($request);
-            
+            $formattedData = $this->keepStoredLocation($this->formatRequestData($request), $vacation);
+
             // Handle gallery images
             if ($request->hasFile('gallery')) {
-                $galleryImages = $this->saveImages($request, (int) $id);
-                
-                // Merge with existing images if any
-                if ($request->has('existing_gallery')) {
-                    $existingGallery = json_decode($request->existing_gallery, true) ?? [];
-                    $galleryImages = array_merge($existingGallery, $galleryImages);
-                }
-                
+                $galleryImages = array_merge(
+                    $this->galleryPaths($request->input('existing_gallery')),
+                    $this->saveImages($request, (int) $id)
+                );
+
                 $formattedData['gallery'] = json_encode($galleryImages);
             } else if ($request->has('existing_gallery')) {
                 // Only update with existing gallery
-                $formattedData['gallery'] = $request->existing_gallery;
+                $formattedData['gallery'] = json_encode($this->galleryPaths($request->input('existing_gallery')));
             }
 
             DB::beginTransaction();
@@ -286,83 +250,7 @@ class VacationsController extends Controller
                 // Update the vacation
                 $vacation->update($formattedData);
 
-                // Update Accommodations
-                $vacation->accommodations()->delete(); // Remove existing
-                if ($request->has('accommodations')) {
-                    foreach ($request->accommodations as $accommodation) {
-                        $data = $vacation->accommodations()->create([
-                            'title' => $accommodation['title'] ?? null,
-                            'description' => $accommodation['description'],
-                            'capacity' => $accommodation['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($accommodation['prices'] ?? []),
-                                'bed_count' => $accommodation['bed_count'] ?? '',
-                                'living_area' => $accommodation['living_area'] ?? '',
-                                'min_rental_days' => $accommodation['min_rental_days'] ?? '',
-                                'facilities' => $accommodation['facilities'] ?? ''
-                            ])
-                        ]);
-                    }
-                }
-
-                // Update Boats
-                $vacation->boats()->delete(); // Remove existing
-                if ($request->has('boats')) {
-                    foreach ($request->boats as $boat) {
-                        $vacation->boats()->create([
-                            'title' => $boat['title'] ?? null,
-                            'description' => $boat['description'],
-                            'capacity' => $boat['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($boat['prices'] ?? []),
-                                'facilities' => $boat['facilities'] ?? ''
-                            ])
-                        ]);
-                    }
-                }
-
-                // Update Packages
-                $vacation->packages()->delete(); // Remove existing
-                if ($request->has('packages')) {
-                    foreach ($request->packages as $package) {
-                        $vacation->packages()->create([
-                            'title' => $package['title'] ?? null,
-                            'description' => $package['description'],
-                            'capacity' => $package['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($package['prices'] ?? []),
-                                'catering_info' => $package['catering_info'] ?? ''
-                            ])
-                        ]);
-                    }
-                }
-
-                // Update Guidings
-                $vacation->guidings()->delete(); // Remove existing
-                if ($request->has('guidings')) {
-                    foreach ($request->guidings as $guiding) {
-                        $vacation->guidings()->create([
-                            'title' => $guiding['title'] ?? null,
-                            'description' => $guiding['description'],
-                            'capacity' => $guiding['capacity'],
-                            'dynamic_fields' => json_encode([
-                                'prices' => array_values($guiding['prices'] ?? [])
-                            ])
-                        ]);
-                    }
-                }
-
-                // Update Extras
-                $vacation->extras()->delete(); // Remove existing
-                if ($request->has('extras')) {
-                    foreach ($request->extras as $extra) {
-                        $vacation->extras()->create([
-                            'description' => $extra['description'],
-                            'price' => $extra['price'],
-                            'type' => $extra['price_type']
-                        ]);
-                    }
-                }
+                $this->componentSync->sync($vacation, $request);
 
                 DB::commit();
 
