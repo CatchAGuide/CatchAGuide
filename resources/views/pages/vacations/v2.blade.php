@@ -84,10 +84,10 @@
     ])
 <div 
     x-data="campConfigurator({
-        camp: @json($camp),
-        accommodations: @json($accommodations),
-        boats: @json($boats),
-        guidings: @json($guidingsDropdown),
+        camp: @js($camp),
+        accommodations: @js($accommodations),
+        boats: @js($boats),
+        guidings: @js($guidingsDropdown),
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
