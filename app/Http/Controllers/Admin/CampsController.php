@@ -344,7 +344,7 @@ class CampsController extends Controller
             $facilities = $request->input('camp_facilities');
             if (!empty($facilities)) {
                 $facilityNames = array_filter(array_map('trim', explode(',', $facilities)));
-                $facilityIds = CampFacility::whereIn('name', $facilityNames)->pluck('id')->toArray();
+                $facilityIds = CampFacility::whereAnyName($facilityNames)->pluck('id')->toArray();
                 $camp->facilities()->sync($facilityIds);
             } else {
                 $camp->facilities()->sync([]);
