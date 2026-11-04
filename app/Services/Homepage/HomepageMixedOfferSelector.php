@@ -37,11 +37,11 @@ class HomepageMixedOfferSelector
     public function byModule(?int $perType = null): array
     {
         $perType = $perType ?? 8;
-        $cacheKey = 'homepage_offer_modules_v2_'.app()->getLocale().'_'.$perType;
+        $cacheKey = 'homepage_offer_modules_v3_'.app()->getLocale().'_'.$perType;
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($perType) {
             return [
-                'tour' => $this->popularGuidings($perType)
+                'tour' => $this->newestGuidings($perType)
                     ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
                     ->values(),
                 'camp' => $this->camps->listForHub($perType)
@@ -55,7 +55,7 @@ class HomepageMixedOfferSelector
     }
 
     /**
-     * Popular rails scoped to a destination country (and optional region/city).
+     * Newest rails scoped to a destination country (and optional region/city).
      *
      * @return array{tour: Collection, camp: Collection, trip: Collection}
      */
@@ -67,7 +67,7 @@ class HomepageMixedOfferSelector
     ): array {
         $perType = $perType ?? 8;
         $cacheKey = implode('_', [
-            'destination_offer_modules_v2',
+            'destination_offer_modules_v3',
             app()->getLocale(),
             (string) $country->id,
             (string) ($region?->id ?? '0'),
@@ -77,7 +77,7 @@ class HomepageMixedOfferSelector
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($country, $region, $city, $perType) {
             return [
-                'tour' => $this->popularGuidingsForDestination($perType, $country, $region, $city)
+                'tour' => $this->newestGuidingsForDestination($perType, $country, $region, $city)
                     ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
                     ->values(),
                 'camp' => $this->campsForDestination($perType, $country, $region, $city)
@@ -91,7 +91,7 @@ class HomepageMixedOfferSelector
     }
 
     /**
-     * Popular rails scoped to a target fish species (global target-fish category page).
+     * Newest rails scoped to a target fish species (global target-fish category page).
      *
      * @return array{tour: Collection, camp: Collection, trip: Collection}
      */
@@ -99,7 +99,7 @@ class HomepageMixedOfferSelector
     {
         $perType = $perType ?? 8;
         $cacheKey = implode('_', [
-            'target_fish_offer_modules_v1',
+            'target_fish_offer_modules_v2',
             app()->getLocale(),
             (string) $speciesId,
             (string) $perType,
@@ -107,7 +107,7 @@ class HomepageMixedOfferSelector
 
         return Cache::remember($cacheKey, now()->addMinutes(20), function () use ($speciesId, $perType) {
             return [
-                'tour' => $this->popularGuidingsForSpecies($perType, $speciesId)
+                'tour' => $this->newestGuidingsForSpecies($perType, $speciesId)
                     ->map(fn (Guiding $g) => $this->tourPresenter->present($g))
                     ->values(),
                 'camp' => $this->campsForSpecies($perType, $speciesId)
@@ -136,12 +136,11 @@ class HomepageMixedOfferSelector
             ->values();
     }
 
-    private function popularGuidings(int $limit): Collection
+    private function newestGuidings(int $limit): Collection
     {
         return Guiding::query()
-            ->withCount('bookings')
             ->publiclyVisible()
-            ->orderByDesc('bookings_count')
+            ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
     }
@@ -173,15 +172,14 @@ class HomepageMixedOfferSelector
             ->sum(fn (Builder $query) => $query->count());
     }
 
-    private function popularGuidingsForDestination(
+    private function newestGuidingsForDestination(
         int $limit,
         CategoryEntity $country,
         ?CategoryEntity $region,
         ?CategoryEntity $city,
     ): Collection {
         return $this->destinationTourQuery($country, $region, $city)
-            ->withCount('bookings')
-            ->orderByDesc('bookings_count')
+            ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
     }
@@ -226,7 +224,7 @@ class HomepageMixedOfferSelector
         return $this->destinationQueries($country, $region, $city)['trip'];
     }
 
-    private function popularGuidingsForSpecies(int $limit, int $speciesId): Collection
+    private function newestGuidingsForSpecies(int $limit, int $speciesId): Collection
     {
         $ids = $this->offerFilters->listingIdsForSpecies('tours', [$speciesId]) ?? [];
         if ($ids === []) {
@@ -234,10 +232,9 @@ class HomepageMixedOfferSelector
         }
 
         return Guiding::query()
-            ->withCount('bookings')
             ->publiclyVisible()
             ->whereIn('guidings.id', $ids)
-            ->orderByDesc('bookings_count')
+            ->orderByDesc('created_at')
             ->limit($limit)
             ->get();
     }

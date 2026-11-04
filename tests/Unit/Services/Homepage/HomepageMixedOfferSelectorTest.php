@@ -2,19 +2,68 @@
 
 namespace Tests\Unit\Services\Homepage;
 
+use App\Enums\GuideStatus;
 use App\Models\CategoryEntity;
+use App\Models\FishingType;
+use App\Models\Guiding;
 use App\Models\Target;
+use App\Models\User;
 use App\Services\Homepage\HomepageMixedOfferSelector;
 use App\Services\Offers\OfferCatalogPageService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 
 class HomepageMixedOfferSelectorTest extends TestCase
 {
     use DatabaseTransactions;
+
+    private function createTour(string $createdAt): Guiding
+    {
+        $user = User::factory()->create([
+            'is_guide' => 1,
+            'guide_status' => GuideStatus::VERIFIED,
+        ]);
+
+        $guiding = new Guiding();
+        $guiding->forceFill([
+            'title' => 'Homepage Tour '.uniqid(),
+            'slug' => 'homepage-tour-'.uniqid(),
+            'location' => 'Somewhere',
+            'status' => 1,
+            'max_guests' => 4,
+            'duration' => 4,
+            'fishing_type_id' => FishingType::query()->value('id'),
+            'user_id' => $user->id,
+        ])->save();
+
+        DB::table('guidings')
+            ->where('id', $guiding->id)
+            ->update(['created_at' => $createdAt]);
+
+        return $guiding->fresh();
+    }
+
+    public function test_by_module_orders_tours_newest_first_like_camps_and_trips(): void
+    {
+        Cache::flush();
+
+        $older = $this->createTour(now()->addDays(2)->toDateTimeString());
+        $newer = $this->createTour(now()->addDays(3)->toDateTimeString());
+
+        $this->assertTrue($newer->created_at->greaterThan($older->created_at));
+
+        $tours = app(HomepageMixedOfferSelector::class)->byModule(8)['tour'];
+        $ids = $tours->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertSame(
+            [$newer->id, $older->id],
+            array_values(array_intersect($ids, [$newer->id, $older->id])),
+        );
+    }
 
     public function test_mixed_returns_collection_with_expected_keys_when_data_exists(): void
     {
