@@ -20,6 +20,16 @@ class RobotsAndWwwRedirectTest extends TestCase
         $response->assertSee('Disallow: /wishlist/', false);
     }
 
+    public function test_robots_txt_blocks_duplicate_making_query_params_but_not_pagination(): void
+    {
+        $body = $this->get('http://catchaguide.de/robots.txt')->getContent();
+
+        foreach (['/*placeLat=', '/*guide_id=', '/*from_destination=', '/*num_guests='] as $pattern) {
+            $this->assertStringContainsString("Disallow: {$pattern}\n", $body);
+        }
+        $this->assertStringNotContainsString('page=', $body);
+    }
+
     public function test_robots_txt_on_com_advertises_com_sitemap_and_english_magazine_path(): void
     {
         $response = $this->get('http://catchaguide.com/robots.txt');

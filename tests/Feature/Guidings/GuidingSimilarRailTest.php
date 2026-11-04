@@ -76,7 +76,14 @@ class GuidingSimilarRailTest extends TestCase
 
         $seeAll = $response->viewData('similar_guidings_see_all_url');
         $this->assertIsString($seeAll);
-        $this->assertStringContainsString('city=Ludwigshafen', $seeAll);
+        // A clean geo page or the listing, never a noindexed ?place=…&placeLat=… URL per tour.
+        $this->assertStringNotContainsString('?', $seeAll);
+        $this->assertStringStartsWith('http://localhost/guidings', $seeAll);
+
+        // The breadcrumb links up to the same geo pages the "view all" link uses.
+        foreach ($response->viewData('destination_trail') as $crumb) {
+            $response->assertSee('href="'.$crumb['url'].'"', false);
+        }
 
         $guidings = $response->viewData('other_guidings');
         $this->assertTrue($guidings->contains(fn ($guiding) => $guiding->id === $nearby->id));
