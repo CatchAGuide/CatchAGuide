@@ -166,10 +166,10 @@
 @section('content')
 <div
     x-data="campConfigurator({
-        camp: @json($camp),
-        accommodations: @json($accommodations),
-        boats: @json($boats),
-        guidings: @json($guidings),
+        camp: @js($camp),
+        accommodations: @js($accommodations),
+        boats: @js($boats),
+        guidings: @js($guidings),
         showCategories: {{ $showCategories ? 'true' : 'false' }}
     })"
     x-init="init()"
