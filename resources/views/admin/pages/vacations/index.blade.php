@@ -225,13 +225,17 @@
     document.querySelector('#addVacationModal').addEventListener('shown.bs.modal', function () {
         CKEDITOR.replace('surroundings_description');
         initializeDynamicCKEditors();
-        
-        // Initialize add item buttons
-        const addButtons = document.querySelectorAll('.add-item');
-        addButtons.forEach(button => {
-            button.removeEventListener('click', addItemHandler);
-            button.addEventListener('click', function(e) {
-                console.log('Button clicked');
+
+        if (window.google && window.google.maps) {
+            initAutocomplete();
+        }
+    });
+
+    // Bound once. Binding on every modal open stacked a listener per open, so one click
+    // added several cards.
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('#addVacationModal .add-item').forEach(button => {
+            button.addEventListener('click', function (e) {
                 addItemHandler.call(this, e);
                 // Initialize CKEditor for newly added textarea
                 setTimeout(() => {
@@ -239,25 +243,37 @@
                 }, 100);
             });
         });
-
-        if (window.google && window.google.maps) {
-            initAutocomplete();
-        }
     });
 
     // Handler function for adding items
     function addItemHandler(e) {
         e.preventDefault();
-        
+
         const type = this.dataset.type;
-        
+
         const container = document.getElementById(`${type}-items`);
         if (container) {
-            const index = container.children.length;
+            const index = nextItemIndex(container, type);
             container.insertAdjacentHTML('beforeend', getItemTemplate(type, index));
         } else {
             console.error('Container not found for type:', type);
         }
+    }
+
+    // One past the highest index in use. The card count reused an index after a removal,
+    // and two cards posting the same packages[3][...] keys overwrote each other on save.
+    function nextItemIndex(container, type) {
+        const pattern = new RegExp(`^${type}s\\[(\\d+)\\]`);
+        let highest = -1;
+
+        container.querySelectorAll('[name]').forEach(field => {
+            const match = field.name.match(pattern);
+            if (match) {
+                highest = Math.max(highest, parseInt(match[1], 10));
+            }
+        });
+
+        return highest + 1;
     }
 
     // Template for dynamic items
@@ -354,6 +370,9 @@
         return `
             <div class="card mb-3 item-card">
                 <div class="card-body">
+                    <!-- Saved rows keep their id, so bookings and translations stay linked -->
+                    <input type="hidden" name="${type}s[${index}][id]" class="item-id" value="">
+
                     <!-- Header -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="card-title mb-0">${type.charAt(0).toUpperCase() + type.slice(1)} Option ${index + 1}</h6>
@@ -733,6 +752,7 @@
                                 capacityField.dispatchEvent(event);
                             }
                             if (titleField) titleField.value = item.title || '';
+                            card.querySelector('.item-id').value = item.id || '';
                             
                             // Handle dynamic fields
                             if (item.dynamic_fields) {
@@ -810,21 +830,8 @@
                     modal.querySelector('.modal-content').style.opacity = '1';
                 }
 
-                // Clear location field if coordinates are null
-                const locationField = form.querySelector('#location');
-                if (locationField) {
-                    if (!data.latitude || !data.longitude) {
-                        locationField.value = '';
-                        
-                        // Also clear related hidden fields
-                        ['city', 'country', 'region', 'latitude', 'longitude'].forEach(field => {
-                            const hiddenField = form.querySelector(`input[name="${field}"]`);
-                            if (hiddenField) {
-                                hiddenField.value = '';
-                            }
-                        });
-                    }
-                }
+                // The stored location stays in the field even without coordinates. Blanking it
+                // (to force a new Google pick) left a required field empty, so Save did nothing.
 
                 // Handle extras separately
                 if (data.extras && Array.isArray(data.extras)) {
@@ -847,6 +854,7 @@
                             if (descriptionField) descriptionField.value = extra.description || '';
                             if (priceField) priceField.value = extra.price || '';
                             if (priceTypeField) priceTypeField.value = extra.type || 'per_person';
+                            card.querySelector('.item-id').value = extra.id || '';
                         });
                     }
                 }

@@ -282,11 +282,21 @@ class VacationTranslationService
             $relations = ['accommodations', 'boats', 'packages', 'guidings', 'extras'];
             
             foreach ($relations as $relationName) {
-                $relationItems = $vacation->$relationName;
-                
-                            foreach ($relationItems as $item) {
-                $this->translateRelationItem($item, $relationName, $targetLanguage, $vacation->language, $force);
-            }
+                foreach ($vacation->$relationName as $item) {
+                    // A failed Google call is usually a 429: stop here rather than send one more
+                    // request per remaining item. Items already done are stored; a later run
+                    // skips them and picks up the rest.
+                    if (! $this->translateRelationItem($item, $relationName, $targetLanguage, $vacation->language ?: 'de', $force)) {
+                        Log::warning('Vacation relations translation stopped after a failed call', [
+                            'vacation_id' => $vacation->id,
+                            'relation' => $relationName,
+                            'item_id' => $item->id,
+                            'target_language' => $targetLanguage,
+                        ]);
+
+                        return false;
+                    }
+                }
             }
 
             return true;
@@ -303,8 +313,12 @@ class VacationTranslationService
     /**
      * Translate individual relation item
      */
-    private function translateRelationItem($item, string $relationType, string $targetLanguage, string $sourceLanguage, bool $force = false): void
+    private function translateRelationItem($item, string $relationType, string $targetLanguage, string $sourceLanguage, bool $force = false): bool
     {
+        if ($sourceLanguage === $targetLanguage) {
+            return true;
+        }
+
         $relationTypeClean = rtrim($relationType, 's'); // Remove 's' from plural
         
         $existingTranslation = Language::where([
@@ -314,38 +328,79 @@ class VacationTranslationService
         ])->first();
 
         // Skip if translation exists and is recent (unless forced)
-        if (!$force && $existingTranslation && $existingTranslation->updated_at > $item->updated_at) {
-            return;
+        // ">=": an item and its translation written in the same second count as up to date;
+        // ">" re-requested them on every run.
+        if (!$force && $existingTranslation && $existingTranslation->updated_at >= $item->updated_at) {
+            return true;
         }
 
         // Prepare data based on model type
         $dataToTranslate = $this->getTranslatableFieldsForRelation($item, $relationTypeClean);
-        
+
         if (empty($dataToTranslate)) {
-            return;
+            return true;
         }
 
-        // $translatedData = TranslationHelper::batchTranslate(
-        //     $dataToTranslate,
-        //     $targetLanguage,
-        //     $sourceLanguage,
-        //     'vacation_relations'
-        // );
+        // Free engine only. Field by field rather than batchTranslate(), which swallows a failed
+        // call and returns the source text: that can't be told apart from a name that
+        // translates to itself ("Sauna"), so it would either store German as English or
+        // re-request those items on every run.
+        $translatedData = $this->translateRelationFields($dataToTranslate, $targetLanguage, $sourceLanguage);
+
+        if ($translatedData === null) {
+            return false;
+        }
+
+        $title = (string) ($translatedData['title'] ?? $translatedData['description'] ?? '');
 
         if ($existingTranslation) {
             $existingTranslation->update([
-                'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
-                // 'json_data' => json_encode($translatedData)
+                'title' => $title,
+                'json_data' => $translatedData,
             ]);
         } else {
             Language::create([
                 'source_id' => $item->id,
                 'type' => 'vacation_' . $relationTypeClean,
                 'language' => $targetLanguage,
-                'title' => $translatedData['title'] ?? $translatedData['description'] ?? null,
-                // 'json_data' => json_encode($translatedData)
+                'title' => $title,
+                'json_data' => $translatedData,
             ]);
         }
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, string>  $fields
+     * @return array<string, string>|null  null when Google failed or the circuit breaker is open
+     */
+    private function translateRelationFields(array $fields, string $targetLanguage, string $sourceLanguage): ?array
+    {
+        if (TranslationCircuitBreaker::isOpen()) {
+            return null;
+        }
+
+        $translator = app(FishingCopyGoogleTranslator::class);
+        $translated = [];
+
+        foreach ($fields as $key => $text) {
+            try {
+                $translated[$key] = $translator->translate($text, $targetLanguage, $sourceLanguage);
+                TranslationCircuitBreaker::recordSuccess();
+            } catch (\Throwable $e) {
+                TranslationCircuitBreaker::recordFailure();
+                Log::warning('Vacation relation field translation failed', [
+                    'field' => $key,
+                    'target_language' => $targetLanguage,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return null;
+            }
+        }
+
+        return $translated;
     }
 
     /**

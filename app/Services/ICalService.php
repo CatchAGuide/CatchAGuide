@@ -82,7 +82,8 @@ class ICalService
             $vcalendar = Reader::read($icalContent);
             $events = [];
 
-            foreach ($vcalendar->VEVENT as $vevent) {
+            // A calendar with no bookings has no VEVENT at all, and Sabre returns null for it.
+            foreach ($vcalendar->VEVENT ?? [] as $vevent) {
                 $event = $this->parseVEvent($vevent, $feed);
                 
                 if ($event) {
