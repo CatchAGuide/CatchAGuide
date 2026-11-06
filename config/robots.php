@@ -25,6 +25,16 @@ return [
         '/api/catalog/',
         // Auth-only action links (add/remove from wishlist) rendered on public cards.
         '/wishlist/',
+        // Query params that only make noindexed or canonicalised duplicates: geo searches
+        // (one URL per place), the old per-guide filter, legacy destination links and guest
+        // counts. Google knew thousands of these and kept recrawling them, while hundreds of
+        // tour pages sat in "Discovered – currently not indexed". Longer than "Allow: /guidings",
+        // so these win under Google's longest-match rule. Never put a param here that a sitemap
+        // or canonical URL uses.
+        '/*placeLat=',
+        '/*guide_id=',
+        '/*from_destination=',
+        '/*num_guests=',
     ],
 
     // SEO audit tools are useful but crawl hard, and they honour Crawl-delay.

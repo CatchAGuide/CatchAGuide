@@ -689,6 +689,7 @@
         'searchAction' => listing_search_action(),
         'breadcrumbItems' => [
             ['label' => __('homepage.filter-fishing-near-me'), 'url' => route('guidings.index')],
+            ...($destination_trail ?? []),
             ['label' => $guiding->title, 'url' => null],
         ],
         'locationLabel' => implode(', ', array_unique(array_filter([

@@ -411,6 +411,7 @@ class GuidingsController extends Controller
             ]),
             'other_guidings' => $similar['guidings'],
             'similar_guidings_see_all_url' => $similar['see_all_url'],
+            'destination_trail' => $similar['destination_trail'],
             'destination' => $destination,
             'blocked_events' => $guiding->getBlockedEvents(),
             'preselectedGuests' => $preselectedGuests,

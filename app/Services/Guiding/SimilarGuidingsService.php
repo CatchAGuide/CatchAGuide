@@ -14,21 +14,26 @@ class SimilarGuidingsService
 
     public function __construct(
         private GuidingTranslationService $translationService,
+        private GuidingDestinationTrail $destinationTrail,
     ) {}
 
     /**
      * Nearby tours for a product page (catalog list rows on desktop, homepage carousel on mobile).
      *
-     * @return array{guidings: Collection<int, Guiding>, see_all_url: string}
+     * @return array{guidings: Collection<int, Guiding>, see_all_url: string, destination_trail: list<array{label: string, url: string}>}
      */
     public function forProductPage(Guiding $guiding, int $limit = self::LIMIT): array
     {
         $models = $this->queryFor($guiding, $limit);
         $this->applyTranslations($models);
+        // "View all" goes to the tour's most specific indexable geo page, never the listing with
+        // place/lat/lng params: that was a noindexed URL per tour, and Google crawled them all.
+        $trail = $this->destinationTrail->for($guiding);
 
         return [
             'guidings' => $models,
-            'see_all_url' => $this->catalogUrl($guiding),
+            'see_all_url' => $trail === [] ? route('guidings.index') : $trail[array_key_last($trail)]['url'],
+            'destination_trail' => $trail,
         ];
     }
 
@@ -45,23 +50,6 @@ class SimilarGuidingsService
         }
 
         return $this->rank($guiding, $candidates)->take($limit)->values();
-    }
-
-    public function catalogUrl(Guiding $guiding): string
-    {
-        $params = array_filter([
-            'place' => listing_place_label([
-                $guiding->city ?: $guiding->location,
-                $guiding->country,
-            ]) ?: null,
-            'city' => $guiding->city ?: null,
-            'region' => $guiding->region ?: null,
-            'country' => $guiding->country ?: null,
-            'placeLat' => $this->floatOrNull($guiding->lat),
-            'placeLng' => $this->floatOrNull($guiding->lng),
-        ], fn ($value) => $value !== null && $value !== '');
-
-        return route('guidings.index', $params);
     }
 
     /**

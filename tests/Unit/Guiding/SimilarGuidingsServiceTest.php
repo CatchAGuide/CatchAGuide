@@ -6,6 +6,7 @@ use App\Enums\GuideStatus;
 use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
+use App\Services\Guiding\GuidingDestinationTrail;
 use App\Services\Guiding\SimilarGuidingsService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Cache;
@@ -131,7 +132,7 @@ class SimilarGuidingsServiceTest extends TestCase
         $this->assertNotContains($otherCountry->id, $ids);
     }
 
-    public function test_catalog_url_keeps_the_source_location(): void
+    public function test_see_all_url_is_the_deepest_destination_page_without_query_params(): void
     {
         $source = $this->createTour([
             'city' => 'Ludwigshafen',
@@ -139,12 +140,26 @@ class SimilarGuidingsServiceTest extends TestCase
             'lat' => 49.477,
             'lng' => 8.445,
         ]);
+        $trail = [
+            ['label' => 'Deutschland', 'url' => 'http://localhost/guidings/deutschland'],
+            ['label' => 'Pfalz', 'url' => 'http://localhost/guidings/deutschland/pfalz'],
+        ];
+        $this->mock(GuidingDestinationTrail::class)->shouldReceive('for')->andReturn($trail);
 
-        $url = app(SimilarGuidingsService::class)->catalogUrl($source);
+        $payload = app(SimilarGuidingsService::class)->forProductPage($source);
 
-        $this->assertStringContainsString('city=Ludwigshafen', $url);
-        $this->assertStringContainsString('country=Germany', $url);
-        $this->assertStringContainsString('placeLat=49.477', $url);
+        $this->assertSame('http://localhost/guidings/deutschland/pfalz', $payload['see_all_url']);
+        $this->assertSame($trail, $payload['destination_trail']);
+    }
+
+    public function test_see_all_url_falls_back_to_the_listing_without_query_params(): void
+    {
+        $source = $this->createTour(['city' => 'Nowhere', 'country' => 'Nowhere']);
+        $this->mock(GuidingDestinationTrail::class)->shouldReceive('for')->andReturn([]);
+
+        $payload = app(SimilarGuidingsService::class)->forProductPage($source);
+
+        $this->assertSame(route('guidings.index'), $payload['see_all_url']);
     }
 
     public function test_product_page_payload_uses_listing_cards_and_city_country(): void
