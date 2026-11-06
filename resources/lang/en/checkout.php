@@ -535,7 +535,10 @@ return [
             'code' => 'Voucher code',
             'issued' => 'Issued',
             'valid_until' => 'Valid until',
-            'footer' => 'Purchased via Catch A Guide. Issued, redeemed and invoiced by the guide named above. Catch A Guide arranged the order and is not the provider of the tour.',
+            'footer_terms' => 'Scope of service as per the offer dated :date. Date to be arranged with the guide, subject to availability; seasonal restrictions (e.g. closed seasons) may apply. If a trip is cancelled due to weather, a replacement date will be arranged. This voucher is transferable. If the guide no longer offers the trip, the guide will refund the amount paid.',
+            'footer_issuer' => 'The issuer, contracting party and recipient of payment is solely the guide named above.',
+            'footer_broker' => 'The order was placed via Catch A Guide. Catch A Guide acted only as an intermediary and is neither the provider of the trip nor a party to this voucher.',
+            'footer_more' => 'More fishing trips at catchaguide.com',
         ],
     ],
 ];

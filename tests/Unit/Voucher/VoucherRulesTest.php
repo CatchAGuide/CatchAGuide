@@ -19,11 +19,11 @@ class VoucherRulesTest extends TestCase
 {
     use DatabaseTransactions;
 
-    public function test_validity_runs_three_years_to_the_end_of_the_purchase_year(): void
+    public function test_validity_runs_two_years_to_the_end_of_the_year(): void
     {
-        $this->assertSame('2029-12-31', VoucherValidity::until(Carbon::parse('2026-10-16'))->toDateString());
-        $this->assertSame('2029-12-31', VoucherValidity::until(Carbon::parse('2026-01-01'))->toDateString());
-        $this->assertSame('2030-12-31', VoucherValidity::until(Carbon::parse('2027-12-31 23:59'))->toDateString());
+        $this->assertSame('2028-12-31', VoucherValidity::until(Carbon::parse('2026-10-16'))->toDateString());
+        $this->assertSame('2028-12-31', VoucherValidity::until(Carbon::parse('2026-01-01'))->toDateString());
+        $this->assertSame('2029-12-31', VoucherValidity::until(Carbon::parse('2027-12-31 23:59'))->toDateString());
     }
 
     public function test_codes_use_the_prefix_and_an_unambiguous_alphabet(): void

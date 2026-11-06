@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserInformation;
 use App\Models\VoucherOrder;
 use App\Presenters\Voucher\VoucherOrderPresenter;
+use App\Services\Voucher\VoucherValidity;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -47,7 +48,13 @@ class VoucherOrderGuestMail extends Mailable
             'phone_country_code' => '+49',
             'phone' => '170 1234567',
         ]);
-        $guide->setRelation('information', (new UserInformation)->forceFill(['company_name' => 'Berger Angelguiding']));
+        $guide->setRelation('information', (new UserInformation)->forceFill([
+            'company_name' => 'Berger Angelguiding',
+            'address' => 'Rheinuferstraße',
+            'address_number' => '12',
+            'postal' => '50668',
+            'city' => 'Köln',
+        ]));
 
         $guiding = (new Guiding)->forceFill([
             'title' => $de ? 'Zanderangeln am Rhein' : 'Zander fishing on the Rhine',
@@ -75,7 +82,7 @@ class VoucherOrderGuestMail extends Mailable
             'design_type' => $design,
             'language' => app()->getLocale(),
             'voucher_language' => app()->getLocale(),
-            'valid_until' => now()->addYears(3)->endOfYear()->startOfDay(),
+            'valid_until' => VoucherValidity::until(now()),
             'created_at' => now(),
         ]);
         $order->setRelation('guiding', $guiding);

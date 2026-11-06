@@ -75,7 +75,8 @@
     .head-title { height: 141px; font-size: 176px; line-height: 141px; font-weight: 700; letter-spacing: -.03em; text-transform: uppercase; color: #fff; }
     .head-sub { font-size: 26px; line-height: 1.1; font-weight: 600; letter-spacing: .02em; margin-top: 16px; color: #e5604d; }
 
-    /* Between the 262px header and the ~466px bottom block (card, cut-off part, footer). */
+    /* Between the 262px header and the ~490px bottom block (card, cut-off part with the guide's
+       address, the five-line legal footer). */
     .hero { position: absolute; top: 286px; left: 56px; width: 682px; }
     .hero td { vertical-align: middle; text-align: center; }
     .for { font-size: 14px; line-height: 10px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: #e5604d; }
@@ -86,7 +87,7 @@
     .from { font-size: 14px; line-height: 10px; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: #6b6980; margin-top: 16px; }
 
     .bottom { position: absolute; left: 0; right: 0; bottom: 0; }
-    .card-wrap { padding: 0 56px 36px; }
+    .card-wrap { padding: 0 56px 30px; }
     .card { position: relative; }
     .card table { width: 100%; border: 1px solid #e5604d; }
     .card .tour { padding: 20px 22px; border-bottom: 1px solid #f0c3bb; }
@@ -104,10 +105,12 @@
     .corner .h { position: absolute; top: 5px; left: 0; width: 11px; height: 1px; background: #e5604d; }
     .tl { top: -6px; left: -6px; } .tr { top: -6px; right: -6px; } .bl { bottom: -6px; left: -6px; } .br { bottom: -6px; right: -6px; }
 
-    .cut { position: relative; border-top: 2px dashed #2d2b42; padding: 30px 56px 28px; }
+    .cut { position: relative; border-top: 2px dashed #2d2b42; padding: 26px 56px 24px; }
     .scissors { position: absolute; top: -9px; left: 20px; font-family: 'DejaVu Sans', sans-serif; font-size: 12px; line-height: 1; color: #8a889b; background: #fff; padding: 0 6px; }
     .issuer-label { color: #e5604d; }
     .issuer-name { font-size: 24px; line-height: 1.1; font-weight: 600; margin-top: 7px; }
+    .issuer-address { font-size: 13px; line-height: 1.45; color: #2d2b42; margin-top: 4px; }
+    .issuer-address + .issuer-contact { margin-top: 0; }
     .issuer-contact { font-size: 13px; line-height: 1.45; color: #6b6980; margin-top: 4px; }
     .redeem { font-size: 13px; line-height: 1.45; font-weight: 600; margin-top: 12px; }
     .code-box { width: 100%; border: 1px solid #d9d8e0; }
@@ -118,9 +121,13 @@
     .code-box .label { font-size: 9px; }
     .code-box .date-value { font-size: 17px; line-height: 1.2; font-weight: 600; margin-top: 5px; }
 
-    .foot { background: #2d2b42; color: #c9c7d6; padding: 14px 56px; font-size: 10px; line-height: 1.5; }
+    .foot { background: #2d2b42; color: #c9c7d6; padding: 12px 56px; font-size: 9px; line-height: {{ $lineHeight(13) }}; }
     .foot td { vertical-align: middle; }
+    .foot strong { font-weight: 600; color: #fff; margin-right: 2px; }
+    .foot-legal { margin-top: 5px; }
+    .foot-brand { width: 150px; padding-left: 20px; text-align: right; }
     .foot img { height: 34px; }
+    .foot-more { margin-top: 6px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -132,7 +139,7 @@
     <div class="hero">
     <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
-            <td style="height: 340px;">
+            <td style="height: 310px;">
                 <p class="for heading">{{ __($copy.'.for') }}</p>
                 <p class="name heading" style="font-size: {{ $recipientSize }}px; line-height: {{ $lineHeight($recipientSize * .95) }};">{{ $recipients }}</p>
 
@@ -194,6 +201,9 @@
                     <td style="width: 381px; padding-right: 28px;">
                         <p class="label issuer-label">{{ __($copy.'.issuer') }}</p>
                         <p class="issuer-name heading">{{ $voucher['guideName'] }}</p>
+                        @if($voucher['guideAddress'] !== '')
+                            <p class="issuer-address">{{ $voucher['guideAddress'] }}</p>
+                        @endif
                         <p class="issuer-contact">{{ implode(' · ', array_filter([$voucher['guidePhone'], $voucher['guideEmail']])) }}</p>
                         <p class="redeem">{{ __($copy.'.redeem_note') }}</p>
                     </td>
@@ -223,10 +233,16 @@
 
         <table class="foot" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-                <td>{{ __($copy.'.footer') }}</td>
-                @if($logo)
-                    <td style="width: 106px; padding-left: 20px; text-align: right;"><img src="{{ $logo }}" alt="Catch A Guide"></td>
-                @endif
+                <td>
+                    <p>{{ __($copy.'.footer_terms', ['date' => $voucher['purchasedOn']]) }}</p>
+                    <p class="foot-legal"><strong>{{ __($copy.'.footer_issuer') }}</strong>&nbsp;{{ __($copy.'.footer_broker') }}</p>
+                </td>
+                <td class="foot-brand">
+                    @if($logo)
+                        <img src="{{ $logo }}" alt="Catch A Guide">
+                    @endif
+                    <p class="foot-more">{{ __($copy.'.footer_more') }}</p>
+                </td>
             </tr>
         </table>
     </div>
