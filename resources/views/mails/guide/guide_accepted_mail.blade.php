@@ -40,7 +40,7 @@
             <p style="font-size: 14px;"><strong>{{__('emails.extras')}} </strong></p>
             <ul>
                 @php
-                    $extras = $booking->extras ? unserialize($booking->extras) : [];
+                    $extras = $booking->extrasList();
                 @endphp
                 @foreach($extras as $extra)
                     <li>

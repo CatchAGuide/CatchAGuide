@@ -4,8 +4,8 @@
             $navIcon = match ($item['key'] ?? '') {
                 'home' => 'nav-home',
                 'offers' => 'nav-grid',
-                'tours' => 'nav-rod',
-                'vacations' => 'nav-camp',
+                'tours' => 'day-tours',
+                'vacations' => 'vacations',
                 default => 'nav-user',
             };
         @endphp

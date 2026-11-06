@@ -41,7 +41,7 @@
             <ul>
                 @if($booking->extras)
                     @php
-                        $extras = $booking->extras ? unserialize($booking->extras) : [];
+                        $extras = $booking->extrasList();
                     @endphp
                     @foreach($extras as $extra)
                         <li style="font-size: 14px;">{{$extra['extra_name']}}: ({{$extra['extra_quantity']}})</li>

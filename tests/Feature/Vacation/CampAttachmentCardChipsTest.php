@@ -254,6 +254,64 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringNotContainsString('✅ WLAN', $html);
     }
 
+    public function test_accommodation_card_hides_price_when_amount_is_zero(): void
+    {
+        app()->setLocale('de');
+        $html = $this->renderAccommodationCard([
+            'price' => ['amount' => 0, 'type' => 'per_night'],
+        ]);
+
+        $this->assertStringNotContainsString('accommodation-card__pricing', $html);
+        $this->assertStringNotContainsString('accommodation-card__price-amount', $html);
+        $this->assertStringNotContainsString('€0.00', $html);
+        $this->assertStringContainsString(__('vacations.show_more'), $html);
+    }
+
+    public function test_accommodation_card_hides_price_when_amount_is_null(): void
+    {
+        app()->setLocale('de');
+        $html = $this->renderAccommodationCard([
+            'price' => ['amount' => null, 'type' => 'per_night'],
+        ]);
+
+        $this->assertStringNotContainsString('accommodation-card__pricing', $html);
+        $this->assertStringNotContainsString('€0.00', $html);
+        $this->assertStringContainsString(__('vacations.show_more'), $html);
+    }
+
+    public function test_accommodation_card_shows_price_when_amount_is_positive(): void
+    {
+        app()->setLocale('de');
+        $html = $this->renderAccommodationCard([
+            'price' => ['amount' => 120, 'type' => 'per_night'],
+        ]);
+
+        $this->assertStringContainsString('accommodation-card__pricing', $html);
+        $this->assertStringContainsString('€120.00', $html);
+        $this->assertStringContainsString(__('rental_boats.per_day'), $html);
+    }
+
+    public function test_rental_boat_card_hides_price_when_amount_is_zero(): void
+    {
+        app()->setLocale('de');
+        $html = $this->renderRentalBoatCard(['amount' => 0]);
+
+        $this->assertStringNotContainsString('rental-boat-card__price"', $html);
+        $this->assertStringNotContainsString('rental-boat-card__price-amount', $html);
+        $this->assertStringNotContainsString('€0.00', $html);
+        $this->assertStringContainsString(__('vacations.show_more'), $html);
+    }
+
+    public function test_guiding_card_hides_price_when_amount_is_zero(): void
+    {
+        app()->setLocale('en');
+        $html = $this->renderGuidingCard(['amount' => 0]);
+
+        $this->assertStringNotContainsString('guiding-card__pricing', $html);
+        $this->assertStringNotContainsString('€0.00', $html);
+        $this->assertStringContainsString(__('vacations.show_more'), $html);
+    }
+
     private function renderAccommodationCard(array $overrides = []): string
     {
         return View::make('components.accommodation.card', [
@@ -336,7 +394,7 @@ class CampAttachmentCardChipsTest extends TestCase
         $this->assertStringContainsString(__('guidings.Meeting_Point_Default'), $html);
     }
 
-    private function renderGuidingCard(): string
+    private function renderGuidingCard(array $priceOverrides = []): string
     {
         return View::make('components.guiding.card', [
             'guiding' => [
@@ -356,12 +414,12 @@ class CampAttachmentCardChipsTest extends TestCase
                     ['id' => 2, 'name' => 'See', 'name_en' => 'Lake'],
                 ],
                 'start_times' => [],
-                'price' => ['amount' => 250, 'display_type' => 'Per tour'],
+                'price' => array_merge(['amount' => 250, 'display_type' => 'Per tour'], $priceOverrides),
             ],
         ])->render();
     }
 
-    private function renderRentalBoatCard(): string
+    private function renderRentalBoatCard(array $priceOverrides = []): string
     {
         return View::make('components.rental-boat.card', [
             'boat' => [
@@ -378,7 +436,7 @@ class CampAttachmentCardChipsTest extends TestCase
                     ['key' => 'capacity', 'label' => __('rental_boats.capacity'), 'value' => 5],
                     ['key' => 'engine', 'label' => __('rental_boats.engine'), 'value' => '40 HP'],
                 ],
-                'price' => ['amount' => 90, 'display_type' => 'Per day'],
+                'price' => array_merge(['amount' => 90, 'display_type' => 'Per day'], $priceOverrides),
             ],
         ])->render();
     }

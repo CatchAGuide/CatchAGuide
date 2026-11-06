@@ -11,6 +11,7 @@
         $boatGalleryId = 'rental-boat-card-'.($boat['id'] ?? uniqid());
         $price = $boat['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
+        $hasPrice = $priceAmount > 0;
         $displayPriceType = $price['display_type'] ?? __('rental_boats.per_day');
         $inclusiveItems = $boat['inclusives'] ?? [];
         $extraItems = $boat['extras'] ?? [];
@@ -23,7 +24,7 @@
             fn ($chip) => $chip['value'] ?? null,
             $boatChips
         )));
-        $boatPriceDisplay = '€'.number_format($priceAmount, 2);
+        $boatPriceDisplay = $hasPrice ? '€'.number_format($priceAmount, 2) : null;
     @endphp
 
     <div class="rental-boat-card__grid">
@@ -183,13 +184,12 @@
 
                 <div class="rental-boat-card__actions">
                     <div class="rental-boat-card__actions-column">
-                        <div class="rental-boat-card__price">
-                            <div class="rental-boat-card__price-type">{{ __('rental_boats.per_day') }}</div>
-                            <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
-                        </div>
-                        {{-- <button class="rental-boat-card__select-btn">
-                            {{ __('Select Boat') }}
-                        </button> --}}
+                        @if($hasPrice)
+                            <div class="rental-boat-card__price">
+                                <div class="rental-boat-card__price-type">{{ __('rental_boats.per_day') }}</div>
+                                <div class="rental-boat-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                            </div>
+                        @endif
                         <button class="attachment-expand-btn rental-boat-card__expand-btn rental-boat-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
@@ -235,7 +235,7 @@
         type="tour"
         :badge="__('vacations.rental_boat')"
         :specs="$boatModalSpecs"
-        :price-prefix="$displayPriceType"
+        :price-prefix="$hasPrice ? $displayPriceType : null"
         :price-display="$boatPriceDisplay"
     />
 </div>

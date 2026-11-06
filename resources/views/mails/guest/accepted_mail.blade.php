@@ -31,7 +31,7 @@
                     <p><strong>{{__('emails.number_of_guests')}}:</strong> {{$booking->count_of_users}}</p>
                     <p><strong>{{__('emails.date')}}:</strong> {{date('d F Y', strtotime($booking->book_date))}}</p>
                     @php
-                        $extras = $booking->extras ? unserialize($booking->extras) : [];
+                        $extras = $booking->extrasList();
                     @endphp
                     @if(count($extras) > 0)
                         <p><strong>{{__('emails.extras')}}:</strong></p>

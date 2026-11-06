@@ -159,7 +159,7 @@ class CampDataProcessor
             'distance_to_ferry_port' => $camp->distance_to_ferry_port,
             'policies_regulations' => $camp->policies_regulations,
             'target_fish' => collect($camp->getTargetFishNames())->pluck('name')->filter()->values()->all(),
-            'best_travel_times' => $camp->best_travel_times,
+            'best_travel_times' => $this->stringifyBestTravelTimes($camp->best_travel_times),
             'travel_information' => $camp->travel_information,
             'extras' => $camp->extras,
             'status' => $camp->status,
@@ -232,5 +232,42 @@ class CampDataProcessor
         }
 
         return CountrySlug::canonicalize($country) ?? '';
+    }
+
+    /**
+     * Textarea expects a string; array-cast / legacy JSON may yield a list.
+     */
+    private function stringifyBestTravelTimes(mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (! is_array($value)) {
+            return (string) $value;
+        }
+
+        $lines = [];
+        foreach ($value as $item) {
+            if (is_string($item) && trim($item) !== '') {
+                $lines[] = trim($item);
+                continue;
+            }
+            if (! is_array($item)) {
+                continue;
+            }
+            $title = trim((string) ($item['title'] ?? $item['month'] ?? ''));
+            $description = trim((string) ($item['description'] ?? $item['note'] ?? ''));
+            if ($title === '' && $description === '') {
+                continue;
+            }
+            $lines[] = $description === '' ? $title : ($title === '' ? $description : "{$title}: {$description}");
+        }
+
+        return implode("\n\n", $lines);
     }
 }

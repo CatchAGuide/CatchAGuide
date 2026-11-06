@@ -32,7 +32,11 @@
             is_numeric($bathroomChipDisplay) ? ($bathroomChipDisplay.$bathroomChipSuffix) : null,
             is_numeric($livingAreaChipDisplay) ? ($livingAreaChipDisplay.$livingAreaChipSuffix) : null,
         ]));
-        $accommodationPriceDisplay = '€'.number_format((float) ($accommodation['price']['amount'] ?? 0), 2);
+        $accommodationPriceAmount = (float) ($accommodation['price']['amount'] ?? 0);
+        $accommodationHasPrice = $accommodationPriceAmount > 0;
+        $accommodationPriceDisplay = $accommodationHasPrice
+            ? '€'.number_format($accommodationPriceAmount, 2)
+            : null;
     @endphp
 
     <div class="accommodation-card__grid">
@@ -111,22 +115,12 @@
 
                 <div class="accommodation-card__actions">
                     <div class="accommodation-card__actions-column">
-                        <div class="accommodation-card__pricing">
-                            @php
-                                $priceType = $accommodation['price']['type'] ?? 'per_night';
-                                $translatedPriceType = match($priceType) {
-                                    'per_person' => __('vacations.per_person'),
-                                    'per_night' => __('accommodations.per_night'),
-                                    default => ucfirst(str_replace('_', ' ', $priceType))
-                                };
-                            @endphp
-                            {{-- <div class="accommodation-card__price-type">{{ $translatedPriceType }}</div> --}}
-                            <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
-                            <div class="accommodation-card__price-amount">€{{ number_format($accommodation['price']['amount'] ?? 0, 2) }}</div>
-                        </div>
-                        {{-- <button class="accommodation-card__select-btn">
-                            Select Accommodation
-                        </button> --}}
+                        @if($accommodationHasPrice)
+                            <div class="accommodation-card__pricing">
+                                <div class="accommodation-card__price-type">{{ __('rental_boats.per_day') }}</div>
+                                <div class="accommodation-card__price-amount">€{{ number_format($accommodationPriceAmount, 2) }}</div>
+                            </div>
+                        @endif
                         <button class="attachment-expand-btn accommodation-card__expand-btn accommodation-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
@@ -240,7 +234,7 @@
         type="camp"
         :badge="__('vacations.accommodation')"
         :specs="$accommodationModalSpecs"
-        :price-prefix="__('rental_boats.per_day')"
+        :price-prefix="$accommodationHasPrice ? __('rental_boats.per_day') : null"
         :price-display="$accommodationPriceDisplay"
     />
 </div>

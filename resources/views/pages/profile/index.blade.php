@@ -257,7 +257,7 @@
                                         @if($booking->extras)
                                             <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> {{ __('profile.additional_services') }}</h6>
                                             @php
-                                                $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                $extras = $booking->extrasList();
                                             @endphp
                                             @if(is_array($extras) && count($extras) > 0)
                                                 @foreach($extras as $extra)
@@ -451,7 +451,7 @@
                                         @if($booking->extras)
                                             <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle"></i> {{ __('profile.additional_services') }}</h6>
                                             @php
-                                                $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                $extras = $booking->extrasList();
                                             @endphp
                                             @if(is_array($extras) && count($extras) > 0)
                                                 @foreach($extras as $extra)

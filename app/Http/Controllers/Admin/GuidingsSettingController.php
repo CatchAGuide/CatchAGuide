@@ -603,6 +603,12 @@ HTML;
                 ]);
             }
 
+            // Mirrors Booking::extrasList(), which the mail templates call.
+            public function extrasList(): array
+            {
+                return unserialize($this->extras, ['allowed_classes' => false]);
+            }
+
             public function getFormattedBookingDate($format = 'd.m.Y')
             {
                 return date($format, strtotime($this->book_date));

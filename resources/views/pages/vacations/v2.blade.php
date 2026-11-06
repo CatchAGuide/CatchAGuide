@@ -348,7 +348,7 @@
                     @if(!empty($camp['best_travel_times']) || !empty($camp['best_travel_times_parsed']))
                     <section id="best-travel-times" data-reveal class="camp-section">
                         <h2 class="camp-section__title">{{ __('vacations.best_travel_times') }}</h2>
-                        
+
                         @if(!empty($camp['best_travel_times']))
                             <ul class="camp-section__list">
                                 @foreach($camp['best_travel_times'] as $time)
@@ -356,13 +356,17 @@
                                 @endforeach
                             </ul>
                         @elseif(!empty($camp['best_travel_times_parsed']))
-                            @foreach($camp['best_travel_times_parsed'] as $item)
-                                @if(!empty($item['description']))
-                                    <ul class="camp-section__list">
-                                        <li><b>{{ translate($item['title']) }}:</b> {{ translate($item['description']) }}</li>
-                                    </ul>
-                                @endif
-                            @endforeach
+                            <ul class="camp-section__list">
+                                @foreach($camp['best_travel_times_parsed'] as $item)
+                                    <li>
+                                        @if(!empty($item['description']))
+                                            <b>{{ translate($item['title']) }}:</b> {{ translate($item['description']) }}
+                                        @else
+                                            {{ translate($item['title']) }}
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
                         @endif
                     </section>
                     @endif

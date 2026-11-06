@@ -200,8 +200,8 @@ class SiteNavTest extends TestCase
         $this->assertStringContainsString('cag-home-bottom-nav__item', $html);
         $this->assertStringContainsString('cag-icon--nav-home', $html);
         $this->assertStringContainsString('cag-icon--nav-grid', $html);
-        $this->assertStringContainsString('cag-icon--nav-rod', $html);
-        $this->assertStringContainsString('cag-icon--nav-camp', $html);
+        $this->assertStringContainsString('cag-icon--day-tours', $html);
+        $this->assertStringContainsString('cag-icon--vacations', $html);
         $this->assertStringNotContainsString('cag-icon--nav-pin', $html);
         $this->assertStringContainsString('cag-icon--nav-user', $html);
         $this->assertStringContainsString('data-bs-target="#loginModal"', $html);
