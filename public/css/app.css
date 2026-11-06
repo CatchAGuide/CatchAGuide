@@ -28699,15 +28699,16 @@ body.is-mobile-search-open .pac-container {
 }
 .vl-card__side {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 50%;
   left: calc(72% + 3cqw);
-  display: flex;
-  align-items: center;
+  max-height: calc(100% - 40px);
+  overflow: hidden;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: clamp(8px, 2.2cqw, 11px);
-  letter-spacing: 0.18em;
+  white-space: nowrap;
+  transform: translateY(-50%) rotate(180deg);
+  font-size: clamp(7px, 2cqw, 11px);
+  letter-spacing: 0.16em;
+  line-height: 1;
   color: rgba(255, 255, 255, 0.75);
 }
 .vl-card__stamp {

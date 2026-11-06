@@ -414,17 +414,20 @@ $vl-night: darken($vl-slate, 8%);
     border-left: 2px dashed rgba(#fff, 0.4);
   }
 
+  // Vertical "valid for 1 fishing trip" on the stub: centred on the ticket and kept clear of the
+  // top/bottom notches (13px circles), so neither language is clipped.
   &__side {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 50%;
     left: calc(72% + 3cqw);
-    display: flex;
-    align-items: center;
+    max-height: calc(100% - 40px);
+    overflow: hidden;
     writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-size: clamp(8px, 2.2cqw, 11px);
-    letter-spacing: 0.18em;
+    white-space: nowrap;
+    transform: translateY(-50%) rotate(180deg);
+    font-size: clamp(7px, 2cqw, 11px);
+    letter-spacing: 0.16em;
+    line-height: 1;
     color: rgba(#fff, 0.75);
   }
 
