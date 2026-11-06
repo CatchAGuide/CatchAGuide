@@ -8,6 +8,8 @@
     $kvValue = $font.'font-size:14px;line-height:1.45;color:#1A1B30;text-align:right;font-weight:500;';
     // The guest only ever sees the guide's first name.
     $guide = $guideFirstName !== '' ? $guideFirstName : $guideName;
+    // No voucher code or valid-until date (Trello #971): the buyer gets both on the voucher the
+    // guide sends once paid, so the code isn't usable before the guide has been paid.
     $rows = array_values(array_filter([
         [__($copy.'.tour'), $tourTitle],
         [__($copy.'.guests'), $guests],
@@ -16,8 +18,6 @@
         [__($copy.'.guide'), $guide],
         $guidePhone !== '' ? [__($copy.'.guide_phone'), $guidePhone] : null,
         $guideEmail !== '' ? [__($copy.'.guide_email'), $guideEmail] : null,
-        [__($copy.'.code'), $code],
-        [__($copy.'.valid_until'), $validUntil],
     ]));
 @endphp
 {{-- Header, footer and base styles come from the shared CaG mail shell. --}}

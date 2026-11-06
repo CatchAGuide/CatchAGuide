@@ -568,8 +568,6 @@ return [
         'guide' => 'Guide',
         'guide_phone' => 'Telefon Guide',
         'guide_email' => 'E-Mail Guide',
-        'code' => 'Gutscheincode',
-        'valid_until' => 'Gültig bis',
         'price' => 'Gutscheinwert',
         'section_message' => 'Deine Nachricht',
         'quote' => '„:message“',

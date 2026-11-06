@@ -537,7 +537,10 @@ return [
             'code' => 'Gutscheincode',
             'issued' => 'Ausgestellt',
             'valid_until' => 'Gültig bis',
-            'footer' => 'Gekauft über Catch A Guide. Ausgestellt, eingelöst und abgerechnet vom oben genannten Guide. Catch A Guide hat die Bestellung vermittelt und ist nicht Anbieter der Tour.',
+            'footer_terms' => 'Leistungsumfang gemäß Angebot vom :date. Termin nach Absprache und Verfügbarkeit des Guides, saisonale Einschränkungen (z. B. Schonzeiten) möglich. Bei wetterbedingter Absage wird ein Ersatztermin vereinbart. Der Gutschein ist übertragbar. Bietet der Guide die Tour nicht mehr an, erstattet er den gezahlten Betrag.',
+            'footer_issuer' => 'Aussteller, Vertragspartner und Zahlungsempfänger ist ausschließlich der oben genannte Guide.',
+            'footer_broker' => 'Die Bestellung erfolgte über Catch A Guide. Catch A Guide hat sie lediglich vermittelt und ist weder Anbieter der Tour noch Vertragspartei dieses Gutscheins.',
+            'footer_more' => 'Mehr Angeltouren auf catchaguide.de',
         ],
     ],
 ];

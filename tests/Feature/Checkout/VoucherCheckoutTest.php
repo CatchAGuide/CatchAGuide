@@ -9,6 +9,7 @@ use App\Mail\Guide\VoucherOrderGuideMail;
 use App\Models\FishingType;
 use App\Models\Guiding;
 use App\Models\User;
+use App\Models\UserInformation;
 use App\Models\VoucherOrder;
 use App\Presenters\Voucher\VoucherOrderPresenter;
 use App\Services\HelperService;
@@ -219,6 +220,33 @@ class VoucherCheckoutTest extends TestCase
         $long = $html(str_repeat('Angeltour am See ', 10));
         $this->assertStringContainsString('font-size: 20px;', $long);
         $this->assertStringNotContainsString(str_repeat('Angeltour am See ', 7), $long);
+    }
+
+    public function test_pdf_shows_the_guide_address_and_the_order_date_in_the_footer(): void
+    {
+        app()->setLocale('de');
+        $order = VoucherOrderGuestMail::sample()->order;
+        $order->created_at = now()->setDate(2026, 11, 4);
+        $voucher = app(VoucherOrderPresenter::class)->details($order);
+
+        $html = view('vouchers.pdf.cag-standard', ['voucher' => $voucher, 'logo' => null, 'qr' => null, 'fontDir' => ''])->render();
+
+        $this->assertSame('Rheinuferstraße 12 · 50668 Köln', $voucher['guideAddress']);
+        $this->assertStringContainsString('<p class="issuer-address">Rheinuferstraße 12 · 50668 Köln</p>', $html);
+        $this->assertStringContainsString('Leistungsumfang gemäß Angebot vom 04.11.2026.', $html);
+        $this->assertStringContainsString('<strong>Aussteller, Vertragspartner und Zahlungsempfänger ist ausschließlich der oben genannte Guide.</strong>&nbsp;Die Bestellung erfolgte', $html);
+        $this->assertStringContainsString('Mehr Angeltouren auf catchaguide.de', $html);
+    }
+
+    public function test_guide_address_skips_missing_parts(): void
+    {
+        $presenter = app(VoucherOrderPresenter::class);
+        $guide = fn (array $info) => (new User)->setRelation('information', (new UserInformation)->forceFill($info));
+
+        $this->assertSame('', $presenter->guideAddress(null));
+        $this->assertSame('', $presenter->guideAddress((new User)->setRelation('information', null)));
+        $this->assertSame('40213 Düsseldorf', $presenter->guideAddress($guide(['postal' => '40213', 'city' => 'Düsseldorf'])));
+        $this->assertSame('Musterstraße 12 · Düsseldorf', $presenter->guideAddress($guide(['address' => 'Musterstraße', 'address_number' => '12', 'city' => 'Düsseldorf'])));
     }
 
     public function test_store_creates_the_order_from_server_side_prices_and_snapshots(): void
