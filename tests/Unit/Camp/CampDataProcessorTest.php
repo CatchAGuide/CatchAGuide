@@ -31,6 +31,34 @@ class CampDataProcessorTest extends TestCase
         $this->assertSame([12, 'Custom carp'], $data['target_fish']);
     }
 
+    public function test_edit_form_stringifies_array_best_travel_times_for_textarea(): void
+    {
+        $camp = new \App\Models\Camp();
+        $camp->forceFill([
+            'id' => 1,
+            'title' => 'Camp',
+            'best_travel_times' => [
+                ['month' => 'Mar', 'note' => 'Pike active'],
+                ['month' => 'Oct', 'note' => 'Perch peak'],
+            ],
+            'gallery_images' => [],
+            'target_fish' => [],
+            'extras' => '',
+        ]);
+        $camp->syncOriginal();
+        $camp->setRelation('facilities', collect());
+        $camp->setRelation('accommodations', collect());
+        $camp->setRelation('rentalBoats', collect());
+        $camp->setRelation('guidings', collect());
+        $camp->setRelation('specialOffers', collect());
+
+        $form = $this->processor()->prepareEditFormData($camp);
+
+        $this->assertIsString($form['best_travel_times']);
+        $this->assertStringContainsString('Mar: Pike active', $form['best_travel_times']);
+        $this->assertStringContainsString('Oct: Perch peak', $form['best_travel_times']);
+    }
+
     private function processor(): CampDataProcessor
     {
         return new CampDataProcessor();
