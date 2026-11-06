@@ -21,6 +21,7 @@ final class PagesSitemapContributor implements SitemapContributorInterface
         '/offers',
         '/guidings',
         '/guidings/alloffers',
+        '/guidings/voucher',
         '/vacations',
         '/vacations/trips',
         '/vacations/camps',

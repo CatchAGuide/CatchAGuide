@@ -16,6 +16,7 @@
                 ['label' => __('homepage.footer_by_country'), 'url' => route('guidings.countries')],
                 ['label' => __('homepage.footer_by_fish'), 'url' => route('guidings.targets.index')],
                 ['label' => __('homepage.footer_by_method'), 'url' => route('guidings.methods')],
+                ['label' => __('guidings.voucher_landing.footer_link'), 'url' => route('guidings.voucher')],
             ],
         ],
         [

@@ -57,6 +57,45 @@ class VoucherOrderPresenter
         ];
     }
 
+    /**
+     * A /guidings/voucher request in the current locale, for its success page and both emails.
+     *
+     * @return array<string, string>
+     */
+    public function request(VoucherOrder $order): array
+    {
+        $recipient = trim((string) $order->recipient_names);
+
+        return [
+            'code' => (string) $order->voucher_code,
+            'amount' => $this->money->money((float) $order->price_total),
+            'where' => $this->requestWhere($order),
+            'recipient' => $recipient,
+            'recipientOrDefault' => $recipient !== '' ? $recipient : __('guidings.voucher_landing.summary_for_default'),
+            'buyerName' => $order->buyerName(),
+            'buyerFirstName' => (string) $order->buyer_first_name,
+            'buyerEmail' => (string) $order->buyer_email,
+            'buyerPhone' => $order->buyerPhone(),
+            'requestedOn' => $this->date($order->created_at ?? now()),
+        ];
+    }
+
+    /** "Fishing trip in Småland, Sweden · Växjö", or "Fishing trip of your choice" when left open. */
+    public function requestWhere(VoucherOrder $order): string
+    {
+        $copy = 'guidings.voucher_landing.';
+        $country = (string) $order->request_country;
+        $region = (string) $order->request_region;
+
+        $where = match (true) {
+            $country === '' => __($copy.'card_where_open'),
+            $region === '' => __($copy.'card_where_country', ['country' => $country]),
+            default => __($copy.'card_where_region', ['region' => $region, 'country' => $country]),
+        };
+
+        return $order->request_city ? $where.' · '.$order->request_city : $where;
+    }
+
     public function guideName(?User $guide): string
     {
         if ($guide === null) {

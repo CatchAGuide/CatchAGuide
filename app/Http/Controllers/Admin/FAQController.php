@@ -60,6 +60,16 @@ class FAQController extends Controller
         ]);
     }
 
+    public function giftVoucher()
+    {
+        $frequentlyAskedQuestions = Faq::where('page', '=', 'gift-voucher')->get();
+
+        return view('admin.pages.faq.index', [
+            'frequentlyAskedQuestions' => $frequentlyAskedQuestions,
+            'page' => 'gift-voucher',
+        ]);
+    }
+
     // public function index()
     // {
     //     return view('admin.pages.faq.index', [
@@ -96,6 +106,10 @@ class FAQController extends Controller
 
         if ($data['page'] === 'offers') {
             return redirect()->route('admin.faq.offers')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
+        }
+
+        if ($data['page'] === 'gift-voucher') {
+            return redirect()->route('admin.faq.gift-voucher')->with('success', 'Das FAQ wurde erfolgreich angelegt!');
         }
     }
 
@@ -137,6 +151,10 @@ class FAQController extends Controller
 
         if ($data['page'] === 'offers') {
             return redirect()->route('admin.faq.offers')->with('success', 'Das FAQ wurde erfolgreich editiert!');
+        }
+
+        if ($data['page'] === 'gift-voucher') {
+            return redirect()->route('admin.faq.gift-voucher')->with('success', 'Das FAQ wurde erfolgreich editiert!');
         }
     }
 

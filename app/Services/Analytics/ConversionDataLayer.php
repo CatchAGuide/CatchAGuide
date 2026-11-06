@@ -34,6 +34,12 @@ class ConversionDataLayer
         return $this->payload('voucher', $order->id, $order->price_total, $order->currency, $order->buyer_email);
     }
 
+    /** A /guidings/voucher request; the value is the amount asked for, not money taken. */
+    public function forVoucherRequest(VoucherOrder $order): array
+    {
+        return $this->payload('voucher_request', $order->id, $order->price_total, $order->currency, $order->buyer_email);
+    }
+
     /**
      * The transaction id carries the type so a tour and a camp request with the same row id stay two
      * conversions. A missing value is left out, so the Ads conversion falls back to its default value.
