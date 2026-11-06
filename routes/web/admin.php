@@ -90,6 +90,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/vacation-trips', [AdminFaqController::class, 'vacationTrips'])->name('vacation-trips');
             Route::get('/vacation-camps', [AdminFaqController::class, 'vacationCamps'])->name('vacation-camps');
             Route::get('/offers', [AdminFaqController::class, 'offers'])->name('offers');
+            Route::get('/gift-voucher', [AdminFaqController::class, 'giftVoucher'])->name('gift-voucher');
             Route::get('/create/{page}', [AdminFaqController::class, 'create'])->name('create');
             Route::get('/edit/{faq}/{page}', [AdminFaqController::class, 'edit'])->name('edit');
             Route::post('/store', [AdminFaqController::class, 'store'])->name('store');
@@ -180,6 +181,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('voucher-orders', [VoucherOrdersController::class, 'index'])->name('voucher-orders.index');
         Route::get('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'showComment'])->name('voucher-orders.comment.show')->whereNumber('voucherOrder');
         Route::post('voucher-orders/{voucherOrder}/comment', [VoucherOrdersController::class, 'updateComment'])->name('voucher-orders.comment.update')->whereNumber('voucherOrder');
+        Route::patch('voucher-orders/{voucherOrder}/status', [VoucherOrdersController::class, 'updateStatus'])->name('voucher-orders.update-status')->whereNumber('voucherOrder');
+        Route::get('voucher-orders/{voucherOrder}/status-history', [VoucherOrdersController::class, 'statusHistory'])->name('voucher-orders.status-history')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
 
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');

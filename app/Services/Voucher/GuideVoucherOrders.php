@@ -23,7 +23,8 @@ class GuideVoucherOrders
 
     public function forGuide(User $guide): LengthAwarePaginator
     {
-        return VoucherOrder::where('guide_id', $guide->id)
+        return VoucherOrder::orders()
+            ->where('guide_id', $guide->id)
             ->latest()
             ->paginate(self::PER_PAGE, ['id', 'voucher_code', 'tour_title_snapshot', 'number_of_guests', 'price_total',
                 'recipient_names', 'buyer_first_name', 'buyer_last_name', 'buyer_email', 'buyer_phone_country_code',

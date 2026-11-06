@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Contracts\Booking\HasDoneReasonContract;
 use App\Enums\VoucherDesign;
+use App\Enums\VoucherOrderKind;
+use App\Traits\HasDoneReason;
+use App\Traits\HasStatusHistory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,15 +17,33 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * the guide gets the order (with the CaG voucher PDF, if they use it), collects the payment and
  * sends the voucher to the buyer. language is the buyer's checkout language, voucher_language
  * the guide's, in which the voucher is written.
+ *
+ * Requests from the /guidings/voucher landing page live here too (kind Request): a destination
+ * (request_country/region/city) and an amount (price_total), but no tour, guide, design or
+ * commission. CaG contacts the buyer and issues the voucher, and moves the request through
+ * open → in process → done (booked / no reply) in Admin › Bookings › Vouchers; every change is
+ * logged (HasStatusHistory). Orders have no status.
  */
-class VoucherOrder extends Model
+class VoucherOrder extends Model implements HasDoneReasonContract
 {
+    use HasDoneReason, HasStatusHistory;
+
+    public const STATUS_OPEN = 'open';
+    public const STATUS_IN_PROCESS = 'in_process';
+    public const STATUS_DONE = 'done';
+
     protected $fillable = [
         'voucher_code',
+        'kind',
+        'status',
+        'done_reason',
         'guiding_id',
         'guide_id',
         'user_id',
         'tour_title_snapshot',
+        'request_country',
+        'request_region',
+        'request_city',
         'number_of_guests',
         'price_total',
         'currency',
@@ -44,6 +66,7 @@ class VoucherOrder extends Model
     ];
 
     protected $casts = [
+        'kind' => VoucherOrderKind::class,
         'design_type' => VoucherDesign::class,
         'number_of_guests' => 'integer',
         'price_total' => 'decimal:2',
@@ -72,6 +95,41 @@ class VoucherOrder extends Model
         return $this->morphOne(FinanceItem::class, 'billable');
     }
 
+    /** Same labels as the other admin request lists. */
+    public static function statusOptions(): array
+    {
+        return [
+            self::STATUS_OPEN => __('message.contact_request_status.open'),
+            self::STATUS_IN_PROCESS => __('message.contact_request_status.in_process'),
+            self::STATUS_DONE => __('message.contact_request_status.done'),
+        ];
+    }
+
+    /** Tour vouchers bought at checkout; finance and the guide's lists only ever see these. */
+    public function scopeOrders(Builder $query): Builder
+    {
+        return $query->where('kind', VoucherOrderKind::Order->value);
+    }
+
+    /** Landing page requests (no tour yet). */
+    public function scopeRequests(Builder $query): Builder
+    {
+        return $query->where('kind', VoucherOrderKind::Request->value);
+    }
+
+    public function isRequest(): bool
+    {
+        return $this->kind === VoucherOrderKind::Request;
+    }
+
+    /** "Region, Country" (or "City · Region, Country") the request names; '' when left open. */
+    public function requestDestination(): string
+    {
+        $place = implode(', ', array_filter([$this->request_region, $this->request_country]));
+
+        return $this->request_city && $place !== '' ? $this->request_city.' · '.$place : $place;
+    }
+
     /** Matches the voucher code, tour title or buyer name/email; a blank term matches all. */
     public function scopeSearch(Builder $query, string $term): Builder
     {
@@ -84,6 +142,8 @@ class VoucherOrder extends Model
         return $query->where(fn (Builder $q) => $q
             ->where('voucher_code', 'like', $like)
             ->orWhere('tour_title_snapshot', 'like', $like)
+            ->orWhere('request_region', 'like', $like)
+            ->orWhere('request_country', 'like', $like)
             ->orWhere('buyer_email', 'like', $like)
             ->orWhereRaw("CONCAT(buyer_first_name, ' ', buyer_last_name) like ?", [$like]));
     }

@@ -487,6 +487,44 @@ return [
             'pdf_ref' => null,
         ],
 
+        'guest_voucher_request' => [
+            'name' => 'Gift Voucher Request Confirmation (Guest)',
+            'category' => 'guest',
+            'description' => 'Confirmation to someone who requested a gift voucher on the /guidings/voucher landing page: the request (amount, destination, recipient) and that CaG gets in touch. Interim copy until the final text is ready. Nothing is charged. Language: the language of the page they requested on.',
+            'view' => 'mails.guest.voucher_request',
+            'log_type' => 'guest_voucher_request',
+            'status' => 'active',
+            'trigger_type' => 'immediate',
+            'schedule' => 'Sent on voucher landing page request',
+            'scheduler_command' => null,
+            'recipient' => 'Guest',
+            'trigger_conditions' => [
+                'Guest submits the request form on /guidings/voucher',
+                'Creates a VoucherOrder row with status "requested"',
+                'CaG also receives Gift Voucher Request (Admin Notify)',
+            ],
+            'pdf_ref' => null,
+        ],
+
+        'admin_voucher_request' => [
+            'name' => 'Gift Voucher Request (Admin Notify)',
+            'category' => 'admin',
+            'description' => 'Tells CaG (mail.admin_email, the same address that gets the voucher order BCCs) about a new gift voucher request from the landing page: amount, destination, recipient and the buyer contact details, with a link to Admin › Bookings › Vouchers. Reply-To is the buyer. Language: the request language.',
+            'view' => 'mails.admin.voucher_request',
+            'log_type' => 'admin_voucher_request',
+            'status' => 'active',
+            'trigger_type' => 'immediate',
+            'schedule' => 'Sent on voucher landing page request',
+            'scheduler_command' => null,
+            'recipient' => 'Admin',
+            'trigger_conditions' => [
+                'Guest submits the request form on /guidings/voucher',
+                'Creates a VoucherOrder row with status "requested"',
+                'Sent alongside Gift Voucher Request Confirmation (Guest)',
+            ],
+            'pdf_ref' => null,
+        ],
+
         'vacation_booking_admin_mail' => [
             'name' => 'Trip/Camp Booking Request (Admin Notify)',
             'category' => 'other',

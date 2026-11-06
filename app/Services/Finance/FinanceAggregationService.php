@@ -378,7 +378,9 @@ class FinanceAggregationService
      */
     private function getVoucherOrderRows(?Carbon $from, ?Carbon $to): array
     {
+        // Landing page requests carry no tour and no commission until CaG issues them.
         $ordersQuery = VoucherOrder::query()
+            ->orders()
             ->with(['financeItem', 'guide'])
             ->latest();
 
