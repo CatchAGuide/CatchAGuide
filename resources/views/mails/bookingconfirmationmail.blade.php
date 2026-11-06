@@ -113,7 +113,7 @@
                                         @endif
 
                                         </li>
-                                        <li>Extras: {{$booking->extras ? implode(',',unserialize($booking->extras)) : null}}</li>
+                                        <li>Extras: {{ implode(', ', array_column($booking->extrasList(), 'extra_name')) }}</li>
                                     </ul>
                                     <p>@lang('mailing.atTheEnd').</p>
 

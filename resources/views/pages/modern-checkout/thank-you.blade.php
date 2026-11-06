@@ -134,7 +134,7 @@
                 </div>
                 <div class="p-3">
                     @php
-                        $extras = unserialize($booking->extras);
+                        $extras = $booking->extrasList();
                     @endphp
                     @if($extras && is_array($extras))
                         <div class="extras-list">

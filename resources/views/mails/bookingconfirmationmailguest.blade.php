@@ -195,7 +195,7 @@
                                             </div>
                                             <div class="text">
                                                 <p><b>Extras:</b>
-                                                    {{implode(',',unserialize($booking->extras))}};
+                                                    {{ implode(', ', array_column($booking->extrasList(), 'extra_name')) }}
                                                 </p>
                                             </div>
                                         </li>

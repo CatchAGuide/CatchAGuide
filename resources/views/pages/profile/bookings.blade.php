@@ -1040,7 +1040,7 @@
                                                 
                                                 @if($booking->extras)
                                                     @php
-                                                        $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                        $extras = $booking->extrasList();
                                                     @endphp
                                                     @if(is_array($extras) && count($extras) > 0)
                                                         <div class="additional-services mt-2">
@@ -1418,7 +1418,7 @@
                                             </div>
                                             @if($booking->extras)
                                                 @php
-                                                    $extras = is_string($booking->extras) ? unserialize($booking->extras) : $booking->extras;
+                                                    $extras = $booking->extrasList();
                                                 @endphp
                                                 @if(is_array($extras) && count($extras) > 0)
                                                     <div class="detail-row">

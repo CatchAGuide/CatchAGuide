@@ -262,6 +262,45 @@ class Booking extends Model implements HasStatusHistoryContract
         Mail::send(new MailToCEO($this, $this->guiding, $this->guiding->user, $this->user));
     }
 
+    /**
+     * The booked extras as a list of arrays (extra_name, extra_total_price, …).
+     *
+     * `extras` is a PHP-serialized string. Some old rows were double-UTF-8-encoded during a charset
+     * migration ("Köerpaket" stored as "KÃ¶erpaket"), so the string lengths in the payload no longer
+     * match and a plain unserialize() throws. Repair those instead of failing the whole page.
+     */
+    public function extrasList(): array
+    {
+        $raw = $this->extras;
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (! is_string($raw) || $raw === '') {
+            return [];
+        }
+
+        $decoded = self::unserializeQuietly($raw);
+
+        if ($decoded === false && mb_check_encoding($raw, 'UTF-8')) {
+            $decoded = self::unserializeQuietly(mb_convert_encoding($raw, 'ISO-8859-1', 'UTF-8'));
+        }
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private static function unserializeQuietly(string $value): mixed
+    {
+        set_error_handler(static fn () => true);
+
+        try {
+            return unserialize($value, ['allowed_classes' => false]);
+        } finally {
+            restore_error_handler();
+        }
+    }
+
     public function getTotalExtraPrice(){
         $prices = unserialize($this->extras);
 
