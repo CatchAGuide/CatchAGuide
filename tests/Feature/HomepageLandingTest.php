@@ -215,8 +215,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-hero__door-icon', false);
         $response->assertSee('cag-home-hero__eyebrow', false);
         $response->assertSee('cag-home-hero__rule', false);
-        $response->assertSee('cag-icon--fish', false);
-        $response->assertSee('cag-icon--camp', false);
+        $response->assertSee('cag-icon--day-tours', false);
+        $response->assertSee('cag-icon--vacations', false);
         $response->assertSee('cag-home-ph', false);
         $response->assertDontSee('cag-home-destinations__tile cag-home-ph', false);
         $response->assertDontSee('cag-home-species__card cag-home-ph', false);

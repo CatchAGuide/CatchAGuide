@@ -101,7 +101,7 @@
                 data-home-analytics="homepage_chooser_guidings_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
-                    @include('pages.home.partials.cag-icon', ['name' => 'fish', 'size' => 40])
+                    @include('pages.home.partials.cag-icon', ['name' => 'day-tours', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
                     <span class="cag-home-hero__door-title">{{ __('homepage.chooser_tour_label') }}</span>
@@ -118,7 +118,7 @@
                 data-home-analytics="homepage_chooser_vacations_click"
             >
                 <span class="cag-home-hero__door-icon" aria-hidden="true">
-                    @include('pages.home.partials.cag-icon', ['name' => 'camp', 'size' => 40])
+                    @include('pages.home.partials.cag-icon', ['name' => 'vacations', 'size' => 40])
                 </span>
                 <span class="cag-home-hero__door-body">
                     <span class="cag-home-hero__door-title">{{ __('homepage.chooser_vacation_label') }}</span>
