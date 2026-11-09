@@ -4,9 +4,9 @@
     $reviews = $landing->reviews();
 @endphp
 @if($gallery !== [] || $reviews !== [])
-<section class="vl-section vl-section--paper">
+<section class="vl-section vl-section--paper vl-section--quiet">
     <div class="vl-container vl-stack">
-        <h2 class="vl-h2 vl-h2--narrow">{{ __($copy.'gallery_title') }}</h2>
+        <h2 class="vl-h2">{{ __($copy.'gallery_title') }}</h2>
         @if($gallery !== [])
             <div class="vl-gallery">
                 @foreach($gallery as $image)

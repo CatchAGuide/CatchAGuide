@@ -1,7 +1,7 @@
 @php($copy = 'guidings.voucher_landing.')
-<section class="vl-section vl-section--sand">
+<section class="vl-section vl-section--sand vl-section--quiet">
     <div class="vl-container vl-stack">
-        <h2 class="vl-h2 vl-h2--narrow">{{ __($copy.'why_title') }}</h2>
+        <h2 class="vl-h2">{{ __($copy.'why_title') }}</h2>
         <div class="vl-why">
             @foreach([1 => 'gift', 2 => 'compass', 3 => 'fish'] as $n => $icon)
                 <div class="vl-why__card">

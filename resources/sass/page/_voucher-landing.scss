@@ -549,38 +549,67 @@ $vl-night: darken($vl-slate, 8%);
 
 // ---------------------------------------------------------------- why
 
+// Quieter content sections (Why / Where to / gallery): closer to homepage
+// section titles (1.25–1.5rem) than the display .vl-h2 used on form / FAQ.
+.vl-section--quiet {
+  .vl-container { padding-block: clamp(48px, 7vw, 80px); }
+
+  .vl-stack { gap: 28px; }
+
+  .vl-h2 {
+    max-width: none;
+    font-size: clamp(1.35rem, 2.8vw, 1.75rem); // ~22–28px
+    line-height: 1.15;
+    text-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .vl-intro {
+    gap: 8px;
+
+    p {
+      font-size: 0.95rem; // homepage subtitle scale
+      line-height: 1.5;
+    }
+  }
+}
+
 .vl-why {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
 
   &__card {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 28px;
-    border-radius: 16px;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 14px;
     background: var(--vl-white);
     box-shadow: var(--vl-shadow);
 
-    .vl-h3 { color: var(--vl-ink); }
+    .vl-h3 {
+      color: var(--vl-ink);
+      font-size: 20px;
+      line-height: 1.1;
+    }
 
     p {
-      font-size: 16px;
-      line-height: 1.55;
+      font-size: 14px;
+      line-height: 1.5;
       text-wrap: pretty;
     }
   }
 
   &__icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     background: var(--vl-slate);
     color: var(--vl-white);
     display: grid;
     place-items: center;
-    font-size: 26px;
+    font-size: 20px;
   }
 }
 
@@ -664,8 +693,8 @@ $vl-night: darken($vl-slate, 8%);
     font-family: var(--vl-heading);
     font-stretch: 78%;
     font-weight: 900;
-    font-size: 30px;
-    line-height: 1;
+    font-size: 24px;
+    line-height: 1.05;
   }
 
   &__foot {
@@ -692,7 +721,7 @@ $vl-night: darken($vl-slate, 8%);
   &--open {
     grid-column: 1 / -1;
     height: auto;
-    padding: 28px;
+    padding: 22px 24px;
     border: 2px dashed rgba($vl-slate, 0.45);
     background: var(--vl-sand);
     box-shadow: none;
@@ -701,7 +730,9 @@ $vl-night: darken($vl-slate, 8%);
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    gap: 14px;
+    gap: 10px;
+
+    .vl-tile__title { font-size: 1.25rem; } // homepage section-title scale
 
     &:hover,
     &:focus-visible { background: var(--vl-sand-hover); }
@@ -710,19 +741,19 @@ $vl-night: darken($vl-slate, 8%);
   }
 
   &__open-icon {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--vl-slate);
     color: var(--vl-white);
     display: grid;
     place-items: center;
-    font-size: 26px;
+    font-size: 20px;
   }
 
   &__text {
     max-width: 28em;
-    font-size: 16px;
+    font-size: 0.95rem;
     line-height: 1.5;
   }
 
@@ -1358,33 +1389,45 @@ $vl-gallery-ratios: ("3 / 4", "1 / 1", "4 / 5", "3 / 2", "2 / 3", "5 / 4", "9 / 
 .vl-review {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.85rem;
   margin: 0;
-  padding: 26px;
-  border-radius: 16px;
+  padding: 1.25rem 1.35rem 1.35rem;
+  border-radius: 1rem;
   background: var(--vl-sand);
 
   &__stars {
     color: var(--vl-yellow);
-    font-size: 20px;
-    letter-spacing: 3px;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    line-height: 1;
   }
 
+  // Match homepage review quote / author / tour scale.
   blockquote {
     margin: 0;
-    font-size: 17px;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--vl-ink);
     text-wrap: pretty;
   }
 
   figcaption {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 14px;
+    gap: 0.15rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
 
-    strong { color: var(--vl-ink); }
-    span { color: rgba($vl-slate, 0.7); }
+    strong {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--vl-ink);
+    }
+
+    span {
+      font-size: 0.8rem;
+      color: rgba($vl-slate, 0.7);
+    }
   }
 }
 

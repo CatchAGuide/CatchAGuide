@@ -3,7 +3,7 @@
     $tiles = $landing->tiles();
 @endphp
 @if($tiles !== [] && ! $success)
-<section class="vl-section vl-section--paper">
+<section class="vl-section vl-section--paper vl-section--quiet">
     <div class="vl-container vl-stack">
         <div class="vl-intro">
             <h2 class="vl-h2">{{ __($copy.'where_title') }}</h2>

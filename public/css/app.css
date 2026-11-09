@@ -28830,37 +28830,60 @@ body.is-mobile-search-open .pac-container {
   animation: vlShineB 0.9s ease;
 }
 
+.vl-section--quiet .vl-container {
+  padding-block: clamp(48px, 7vw, 80px);
+}
+.vl-section--quiet .vl-stack {
+  gap: 28px;
+}
+.vl-section--quiet .vl-h2 {
+  max-width: none;
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  line-height: 1.15;
+  text-wrap: nowrap;
+  white-space: nowrap;
+}
+.vl-section--quiet .vl-intro {
+  gap: 8px;
+}
+.vl-section--quiet .vl-intro p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .vl-why {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
 }
 .vl-why__card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 28px;
-  border-radius: 16px;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 14px;
   background: var(--vl-white);
   box-shadow: var(--vl-shadow);
 }
 .vl-why__card .vl-h3 {
   color: var(--vl-ink);
+  font-size: 20px;
+  line-height: 1.1;
 }
 .vl-why__card p {
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 14px;
+  line-height: 1.5;
   text-wrap: pretty;
 }
 .vl-why__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: var(--vl-slate);
   color: var(--vl-white);
   display: grid;
   place-items: center;
-  font-size: 26px;
+  font-size: 20px;
 }
 
 .vl-tiles {
@@ -28942,8 +28965,8 @@ body.is-mobile-search-open .pac-container {
   font-family: var(--vl-heading);
   font-stretch: 78%;
   font-weight: 900;
-  font-size: 30px;
-  line-height: 1;
+  font-size: 24px;
+  line-height: 1.05;
 }
 .vl-tile__foot {
   display: flex;
@@ -28967,7 +28990,7 @@ body.is-mobile-search-open .pac-container {
 .vl-tile--open {
   grid-column: 1/-1;
   height: auto;
-  padding: 28px;
+  padding: 22px 24px;
   border: 2px dashed rgba(49, 48, 65, 0.45);
   background: var(--vl-sand);
   box-shadow: none;
@@ -28976,7 +28999,10 @@ body.is-mobile-search-open .pac-container {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 14px;
+  gap: 10px;
+}
+.vl-tile--open .vl-tile__title {
+  font-size: 1.25rem;
 }
 .vl-tile--open:hover, .vl-tile--open:focus-visible {
   background: var(--vl-sand-hover);
@@ -28987,18 +29013,18 @@ body.is-mobile-search-open .pac-container {
   }
 }
 .vl-tile__open-icon {
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--vl-slate);
   color: var(--vl-white);
   display: grid;
   place-items: center;
-  font-size: 26px;
+  font-size: 20px;
 }
 .vl-tile__text {
   max-width: 28em;
-  font-size: 16px;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 .vl-tile__cta {
@@ -29664,33 +29690,39 @@ body.is-mobile-search-open .pac-container {
 .vl-review {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0.85rem;
   margin: 0;
-  padding: 26px;
-  border-radius: 16px;
+  padding: 1.25rem 1.35rem 1.35rem;
+  border-radius: 1rem;
   background: var(--vl-sand);
 }
 .vl-review__stars {
   color: var(--vl-yellow);
-  font-size: 20px;
-  letter-spacing: 3px;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  line-height: 1;
 }
 .vl-review blockquote {
   margin: 0;
-  font-size: 17px;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--vl-ink);
   text-wrap: pretty;
 }
 .vl-review figcaption {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
+  gap: 0.15rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
 }
 .vl-review figcaption strong {
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--vl-ink);
 }
 .vl-review figcaption span {
+  font-size: 0.8rem;
   color: rgba(49, 48, 65, 0.7);
 }
 
