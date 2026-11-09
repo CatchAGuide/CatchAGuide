@@ -28,12 +28,6 @@
     <meta property="og:image" content="{{ asset('assets/images/vouchers/landing-hero.jpg') }}" />
 @endsection
 
-@section('custom_style')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,700..900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
-@endsection
-
 @section('content')
 <div class="vl" x-data="voucherLanding" data-analytics-page="voucher-landing">
     @include('pages.voucher-landing.partials.hero')

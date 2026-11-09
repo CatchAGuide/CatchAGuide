@@ -3,16 +3,14 @@
 namespace App\Http\Requests;
 
 use App\Rules\Recaptcha;
-use App\Services\Voucher\VoucherLandingCatalog;
 use App\Services\Voucher\VoucherRequestService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 /**
- * Gift voucher request from the /guidings/voucher landing page. Country, region and city must be
- * places the form offered (VoucherLandingCatalog) or VoucherRequestService::OPEN ("still open");
- * a country without regions needs no region. Same phone rule as the checkouts.
+ * Gift voucher request from the /guidings/voucher landing page. Destination comes from the
+ * Google Places search (country / region / city hidden fields) or VoucherRequestService::OPEN
+ * ("still open"). Same phone rule as the checkouts.
  */
 class VoucherLandingRequest extends FormRequest
 {
@@ -64,37 +62,6 @@ class VoucherLandingRequest extends FormRequest
             'email.required' => __(self::COPY.'email'),
             'email.email' => __(self::COPY.'email_invalid'),
             'consent.accepted' => __(self::COPY.'consent'),
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                if ($validator->errors()->hasAny(['country', 'region', 'city'])) {
-                    return;
-                }
-
-                $catalog = app(VoucherLandingCatalog::class);
-                [$country, $region, $city] = $this->place();
-
-                if ($country === null) {
-                    return;
-                }
-
-                if (! $catalog->offers($country)) {
-                    $validator->errors()->add('country', __(self::COPY.'country'));
-                } elseif ($region === null) {
-                    // "Still open" is a real choice; a blank region only passes for a country without regions.
-                    if ($this->input('region') !== VoucherRequestService::OPEN && $catalog->hasRegions($country)) {
-                        $validator->errors()->add('region', __(self::COPY.'region'));
-                    }
-                } elseif (! $catalog->offers($country, $region)) {
-                    $validator->errors()->add('region', __(self::COPY.'region'));
-                } elseif ($city !== null && ! $catalog->offers($country, $region, $city)) {
-                    $validator->errors()->add('city', __(self::COPY.'region'));
-                }
-            },
         ];
     }
 

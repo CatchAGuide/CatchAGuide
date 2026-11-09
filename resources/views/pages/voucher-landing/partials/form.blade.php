@@ -26,7 +26,7 @@
                 <span class="vl-strip__copy">
                     <span class="vl-strip__kicker vl-mono">{{ __($copy.'card_preview') }}</span>
                     <span class="vl-strip__where" x-text="whereText">{{ $preview['where'] }}</span>
-                    <span class="vl-strip__for" x-text="forText">{{ $preview['for'] }}</span>
+                    <span class="vl-strip__for" x-show="forText" x-text="forText" @if($preview['for'] === '') x-cloak @endif>{{ $preview['for'] }}</span>
                 </span>
             </div>
 
@@ -53,63 +53,33 @@
                     <form method="POST" action="{{ route('guidings.voucher.store') }}" class="vl-form" novalidate x-ref="form" @submit.prevent="submit">
                         @csrf
 
-                        <div class="vl-flash" x-show="flash" x-transition x-cloak role="status">
-                            <span class="vl-flash__check">@include($icon, ['name' => 'check'])</span>
-                            <span x-text="flash"></span>
+                        <div class="vl-field">
+                            <span class="vl-label" id="vl-place-label">{{ __($copy.'place') }} <span class="vl-req">*</span></span>
+                            <div class="vl-place" :class="{ 'is-error': errors.country }">
+                                <span class="vl-place__icon">@include($icon, ['name' => 'search'])</span>
+                                <input
+                                    id="voucherLandingSearchPlace"
+                                    type="text"
+                                    class="vl-input"
+                                    autocomplete="off"
+                                    placeholder="{{ __($copy.'place_placeholder') }}"
+                                    aria-labelledby="vl-place-label"
+                                    value="{{ old('place', '') }}"
+                                    @input="onPlaceInput"
+                                    :class="{ 'is-error': errors.country }"
+                                >
+                            </div>
+                            <input type="hidden" name="country" x-model="country" value="{{ old('country', '') }}">
+                            <input type="hidden" name="region" x-model="region" value="{{ old('region', '') }}">
+                            <input type="hidden" name="city" x-model="city" value="{{ old('city', '') }}">
+                            <input type="hidden" id="LocationLatVoucherLanding" value="">
+                            <input type="hidden" id="LocationLngVoucherLanding" value="">
+                            <input type="hidden" id="LocationCityVoucherLanding" value="">
+                            <input type="hidden" id="LocationCountryVoucherLanding" value="">
+                            <input type="hidden" id="LocationRegionVoucherLanding" value="">
+                            <button type="button" class="vl-place__open" @click="pickOpenDestination">{{ __($copy.'country_open') }}</button>
+                            <span class="vl-error" x-show="errors.country" x-text="errors.country" @error('country') @else x-cloak @enderror>@error('country'){{ $message }}@enderror</span>
                         </div>
-
-                        <div class="vl-grid">
-                            <label class="vl-field">
-                                <span class="vl-label">{{ __($copy.'country') }} <span class="vl-req">*</span></span>
-                                <span class="vl-select" :class="{ 'is-error': errors.country, 'is-flash': flash && !errors.country }">
-                                    <select name="country" x-model="country" @change="onCountry" required>
-                                        <option value="">{{ __($copy.'country_placeholder') }}</option>
-                                        <template x-for="option in destinations" :key="option.name">
-                                            <option :value="option.name" x-text="option.name" :selected="option.name === country"></option>
-                                        </template>
-                                        <option value="{{ $landing->openValue() }}">{{ __($copy.'country_open') }}</option>
-                                    </select>
-                                    @include($icon, ['name' => 'chevron'])
-                                </span>
-                                <span class="vl-error" x-show="errors.country" x-text="errors.country" @error('country') @else x-cloak @enderror>@error('country'){{ $message }}@enderror</span>
-                            </label>
-
-                            <label class="vl-field">
-                                <span class="vl-label">{{ __($copy.'region') }} <span class="vl-req" x-show="regionRequired">*</span></span>
-                                <span class="vl-select" :class="{ 'is-error': errors.region, 'is-flash': flash && !errors.region, 'is-disabled': regionDisabled }">
-                                    <select name="region" x-model="region" @change="onRegion" :disabled="regionDisabled">
-                                        <template x-if="!country">
-                                            <option value="">{{ __($copy.'region_first') }}</option>
-                                        </template>
-                                        <template x-if="country && !isOpen(country)">
-                                            <option value="">{{ __($copy.'region_placeholder') }}</option>
-                                        </template>
-                                        <template x-for="option in regionOptions" :key="option.name">
-                                            <option :value="option.name" x-text="option.name" :selected="option.name === region"></option>
-                                        </template>
-                                        <template x-if="country">
-                                            <option value="{{ $landing->openValue() }}" :selected="isOpen(region)">{{ __($copy.'open') }}</option>
-                                        </template>
-                                    </select>
-                                    @include($icon, ['name' => 'chevron'])
-                                </span>
-                                <span class="vl-error" x-show="errors.region" x-text="errors.region" @error('region') @else x-cloak @enderror>@error('region'){{ $message }}@enderror</span>
-                            </label>
-                        </div>
-
-                        <label class="vl-field">
-                            <span class="vl-label">{{ __($copy.'city') }} <span class="vl-optional">{{ __($copy.'optional') }}</span></span>
-                            <span class="vl-select" :class="{ 'is-disabled': cityOptions.length === 0, 'is-error': errors.city }">
-                                <select name="city" x-model="city" @change="bumpPreview" :disabled="cityOptions.length === 0">
-                                    <option value="">{{ __($copy.'city_any') }}</option>
-                                    <template x-for="option in cityOptions" :key="option">
-                                        <option :value="option" x-text="option" :selected="option === city"></option>
-                                    </template>
-                                </select>
-                                @include($icon, ['name' => 'chevron'])
-                            </span>
-                            <span class="vl-error" x-show="errors.city" x-text="errors.city" @error('city') @else x-cloak @enderror>@error('city'){{ $message }}@enderror</span>
-                        </label>
 
                         <div class="vl-field">
                             <span class="vl-label" id="vl-amount-label">{{ __($copy.'amount') }} <span class="vl-req">*</span></span>
@@ -134,7 +104,7 @@
 
                         <label class="vl-field">
                             <span class="vl-label">{{ __($copy.'recipient') }} <span class="vl-optional">{{ __($copy.'optional') }}</span></span>
-                            <input type="text" name="recipient" maxlength="100" class="vl-input" x-model="recipient" @input="bumpPreview" placeholder="{{ __($copy.'recipient_placeholder') }}">
+                            <textarea name="recipient" maxlength="100" rows="3" class="vl-textarea" x-model="recipient" @input="bumpPreview" placeholder="{{ __($copy.'recipient_placeholder') }}"></textarea>
                         </label>
 
                         <div class="vl-divider"></div>

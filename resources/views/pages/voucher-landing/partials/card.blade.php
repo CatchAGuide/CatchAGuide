@@ -32,7 +32,7 @@
                 @if($variant === 'form')
                     <span class="vl-card__city" x-show="cityText" x-text="cityText" @if($values['city'] === '') x-cloak @endif>{{ $values['city'] }}</span>
                 @endif
-                <span class="vl-card__for" x-text="forText">{{ $values['for'] }}</span>
+                <span class="vl-card__for" x-show="forText" x-text="forText" @if($values['for'] === '') x-cloak @endif>{{ $values['for'] }}</span>
                 <span class="vl-card__serial vl-mono">{{ __($copy.'card_number', ['code' => $serial]) }}</span>
             </div>
         </div>

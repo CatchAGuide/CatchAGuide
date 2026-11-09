@@ -141,7 +141,7 @@ final class VoucherLandingViewModel
                 'amount' => $this->money((float) $this->submitted->price_total),
                 'where' => $this->presenter->requestWhere($this->submitted),
                 'city' => '',
-                'for' => $recipient !== '' ? __(self::COPY.'card_for', ['name' => $recipient]) : __(self::COPY.'card_for_default'),
+                'for' => $recipient !== '' ? __(self::COPY.'card_for', ['name' => $recipient]) : '',
             ];
         }
 
@@ -149,7 +149,7 @@ final class VoucherLandingViewModel
             'amount' => $this->money(VoucherRequestService::DEFAULT_AMOUNT),
             'where' => __(self::COPY.'card_where_open'),
             'city' => '',
-            'for' => __(self::COPY.'card_for_default'),
+            'for' => '',
         ];
     }
 
@@ -164,15 +164,30 @@ final class VoucherLandingViewModel
     {
         $amount = (int) round((float) $this->submitted->price_total);
         $preset = in_array($amount, VoucherRequestService::PRESET_AMOUNTS, true);
+        $country = (string) $this->submitted->request_country;
+        $region = (string) $this->submitted->request_region;
+        $city = (string) $this->submitted->request_city;
 
         return [
-            'country' => (string) $this->submitted->request_country,
-            'region' => (string) $this->submitted->request_region,
-            'city' => (string) $this->submitted->request_city,
+            'country' => $country !== '' ? $country : VoucherRequestService::OPEN,
+            'region' => $country !== '' ? $region : VoucherRequestService::OPEN,
+            'city' => $city,
+            'place' => $country === ''
+                ? __(self::COPY.'country_open')
+                : $this->placeLabel($country, $region, $city),
             'amount' => $preset ? (string) $amount : 'custom',
             'custom_amount' => $preset ? '' : (string) $amount,
             'recipient' => (string) $this->submitted->recipient_names,
         ];
+    }
+
+    private function placeLabel(string $country, string $region, string $city): string
+    {
+        if ($country === '' || $country === VoucherRequestService::OPEN) {
+            return $country === VoucherRequestService::OPEN ? __(self::COPY.'country_open') : '';
+        }
+
+        return collect([$city, $region, $country])->filter()->implode(', ');
     }
 
     public function serial(): string
@@ -204,6 +219,11 @@ final class VoucherLandingViewModel
                 'country' => (string) ($old['country'] ?? ''),
                 'region' => (string) ($old['region'] ?? ''),
                 'city' => (string) ($old['city'] ?? ''),
+                'place' => (string) ($old['place'] ?? $this->placeLabel(
+                    (string) ($old['country'] ?? ''),
+                    (string) ($old['region'] ?? ''),
+                    (string) ($old['city'] ?? ''),
+                )),
                 'amount' => (string) ($old['amount'] ?? VoucherRequestService::DEFAULT_AMOUNT),
                 'customAmount' => (string) ($old['custom_amount'] ?? ''),
                 'recipient' => (string) ($old['recipient'] ?? ''),
@@ -219,10 +239,7 @@ final class VoucherLandingViewModel
                 'whereCountry' => $copy('card_where_country'),
                 'whereRegion' => $copy('card_where_region'),
                 'city' => $copy('card_city'),
-                'for' => $copy('card_for'),
-                'forDefault' => $copy('card_for_default'),
-                'flashRegion' => $copy('flash_region'),
-                'flashOpen' => $copy('flash_open'),
+                'placeOpen' => $copy('country_open'),
                 'errors' => __(self::COPY.'errors'),
                 'customRange' => __(self::COPY.'errors.custom_amount_range', [
                     'min' => $this->money(VoucherRequestService::MIN_AMOUNT),

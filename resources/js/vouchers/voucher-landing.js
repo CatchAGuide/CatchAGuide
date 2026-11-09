@@ -1,7 +1,7 @@
 /**
  * Gift voucher landing page (resources/views/pages/voucher-landing). Registers the
- * `voucherLanding` Alpine component: the live voucher preview, the country → region → city
- * selects, the region tiles, the amount chips and the same checks the server runs
+ * `voucherLanding` Alpine component: the live voucher preview, Google Places destination
+ * search, region tiles, amount chips and the same checks the server runs
  * (VoucherLandingRequest). The form then posts normally. Boot data comes from
  * VoucherLandingViewModel::clientConfig().
  */
@@ -9,11 +9,12 @@ import { readConfig, trans } from '../checkout/support';
 
 const CONFIG_ELEMENT_ID = 'voucher-landing-config';
 const RECAPTCHA_SELECTOR = '#voucher-landing-recaptcha';
+const PLACE_INPUT_ID = 'voucherLandingSearchPlace';
 const MOBILE_MEDIA = '(max-width: 1023px)'; // include-media "<desktop"
-const FLASH_MS = 2600;
+const HERO_SLIDE_MS = 7000;
 const PHONE_PATTERN = /^[0-9][0-9 ()/.-]{2,24}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ERROR_ORDER = ['country', 'region', 'city', 'custom_amount', 'name', 'phone', 'email', 'consent'];
+const ERROR_ORDER = ['country', 'custom_amount', 'name', 'phone', 'email', 'consent'];
 
 function voucherLanding() {
     const config = readConfig(CONFIG_ELEMENT_ID);
@@ -28,6 +29,7 @@ function voucherLanding() {
 
     return {
         destinations,
+        place: values.place || '',
         country: values.country || '',
         region: values.region || '',
         city: values.city || '',
@@ -40,7 +42,6 @@ function voucherLanding() {
         email: values.email || '',
         consent: Boolean(values.consent),
         errors: { ...(config.errors || {}) },
-        flash: '',
         submitting: false,
         pulses: 0,
         showBar: false,
@@ -48,38 +49,21 @@ function voucherLanding() {
         init() {
             this.watchViewport();
             this.watchNav();
-            this.parallax();
+            this.watchPlaceSearch();
+            this.startHeroCarousel();
+
+            if (this.place && document.getElementById(PLACE_INPUT_ID)) {
+                document.getElementById(PLACE_INPUT_ID).value = this.place;
+            }
 
             const firstError = ERROR_ORDER.find((field) => this.errors[field]);
             if (firstError) {
-                this.$nextTick(() => this.reveal(firstError));
+                this.$nextTick(() => this.reveal(firstError === 'country' ? PLACE_INPUT_ID : firstError));
             }
         },
 
         isOpen(value) {
             return value === open;
-        },
-
-        get countryOption() {
-            return this.destinations.find((option) => option.name === this.country) || null;
-        },
-
-        get regionOptions() {
-            return this.countryOption ? this.countryOption.regions : [];
-        },
-
-        get cityOptions() {
-            const region = this.regionOptions.find((option) => option.name === this.region);
-
-            return region ? region.cities : [];
-        },
-
-        get regionDisabled() {
-            return !this.country || this.isOpen(this.country) || this.regionOptions.length === 0;
-        },
-
-        get regionRequired() {
-            return !this.regionDisabled;
         },
 
         get amountLabel() {
@@ -106,9 +90,7 @@ function voucherLanding() {
         },
 
         get forText() {
-            const name = this.recipient.trim();
-
-            return name ? trans(i18n.for, { name }) : i18n.forDefault;
+            return this.recipient.trim();
         },
 
         get pulseClass() {
@@ -130,18 +112,57 @@ function voucherLanding() {
             }
         },
 
-        onCountry() {
-            this.region = this.isOpen(this.country) ? open : '';
-            this.city = '';
+        formatPlaceLabel(country, region, city) {
+            return [city, region, country].filter(Boolean).join(', ');
+        },
+
+        setPlaceInput(value) {
+            const input = document.getElementById(PLACE_INPUT_ID);
+            if (input) {
+                input.value = value;
+            }
+            this.place = value;
+        },
+
+        applyDestination(country, region = '', city = '') {
+            this.country = country;
+            this.region = region;
+            this.city = city;
+            this.setPlaceInput(this.isOpen(country) ? (i18n.placeOpen || '') : this.formatPlaceLabel(country, region, city));
             this.clearError('country');
-            this.clearError('region');
             this.bumpPreview();
         },
 
-        onRegion() {
-            this.city = '';
-            this.clearError('region');
+        onPlaceInput(event) {
+            this.place = event?.target?.value ?? document.getElementById(PLACE_INPUT_ID)?.value ?? '';
+            if (!this.isOpen(this.country)) {
+                this.country = '';
+                this.region = '';
+                this.city = '';
+            }
+            this.clearError('country');
             this.bumpPreview();
+        },
+
+        syncPlaceFromHidden() {
+            const country = document.getElementById('LocationCountryVoucherLanding')?.value || '';
+            const region = document.getElementById('LocationRegionVoucherLanding')?.value || '';
+            const city = document.getElementById('LocationCityVoucherLanding')?.value || '';
+            const input = document.getElementById(PLACE_INPUT_ID);
+            if (!country) {
+                return;
+            }
+
+            this.country = country;
+            this.region = region;
+            this.city = city;
+            this.place = input?.value || this.formatPlaceLabel(country, region, city);
+            this.clearError('country');
+            this.bumpPreview();
+        },
+
+        watchPlaceSearch() {
+            document.addEventListener('cag:place-search-changed', () => this.syncPlaceFromHidden());
         },
 
         pickAmount(value) {
@@ -152,24 +173,17 @@ function voucherLanding() {
 
         /** A region tile, or the "no idea yet" tile (null, null): fill the form and scroll to it. */
         pickTile(country, region) {
-            if (country && this.destinations.some((option) => option.name === country)) {
-                this.country = country;
-                this.region = region || '';
-                this.flash = trans(i18n.flashRegion, { region, country });
+            if (country) {
+                this.applyDestination(country, region || '', '');
             } else {
-                this.country = open;
-                this.region = open;
-                this.flash = i18n.flashOpen;
+                this.pickOpenDestination();
             }
-            this.city = '';
-            this.clearError('country');
-            this.clearError('region');
-            this.bumpPreview();
-
-            clearTimeout(this.flashTimer);
-            this.flashTimer = setTimeout(() => { this.flash = ''; }, FLASH_MS);
 
             document.getElementById('gutschein')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+
+        pickOpenDestination() {
+            this.applyDestination(open, open, '');
         },
 
         validate() {
@@ -178,8 +192,6 @@ function voucherLanding() {
 
             if (!this.country) {
                 errors.country = messages.country;
-            } else if (!this.regionDisabled && !this.region) {
-                errors.region = messages.region;
             }
             if (this.amount === 'custom') {
                 if (!(amount > 0)) {
@@ -216,7 +228,7 @@ function voucherLanding() {
             this.errors = this.validate();
             const firstError = ERROR_ORDER.find((field) => this.errors[field]);
             if (firstError) {
-                this.reveal(firstError);
+                this.reveal(firstError === 'country' ? PLACE_INPUT_ID : firstError);
                 return;
             }
 
@@ -233,7 +245,9 @@ function voucherLanding() {
         },
 
         reveal(field) {
-            const input = this.$root.querySelector(`[name="${field}"]`);
+            const input = field === PLACE_INPUT_ID
+                ? document.getElementById(PLACE_INPUT_ID)
+                : this.$root.querySelector(`[name="${field}"]`);
             input?.closest('.vl-field')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             input?.focus({ preventScroll: true });
         },
@@ -277,22 +291,18 @@ function voucherLanding() {
             window.addEventListener('resize', sync);
         },
 
-        parallax() {
-            const image = document.querySelector('[data-vl-parallax]');
-            if (!image || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        startHeroCarousel() {
+            const slides = [...document.querySelectorAll('[data-vl-hero-slide]')];
+            if (slides.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 return;
             }
 
-            let frame = null;
-            window.addEventListener('scroll', () => {
-                if (frame) {
-                    return;
-                }
-                frame = requestAnimationFrame(() => {
-                    frame = null;
-                    image.style.transform = `translate3d(0, ${Math.min(window.scrollY, 900) * 0.25}px, 0)`;
-                });
-            }, { passive: true });
+            let index = 0;
+            window.setInterval(() => {
+                slides[index].classList.remove('is-active');
+                index = (index + 1) % slides.length;
+                slides[index].classList.add('is-active');
+            }, HERO_SLIDE_MS);
         },
     };
 }

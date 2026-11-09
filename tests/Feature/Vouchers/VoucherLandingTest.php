@@ -87,9 +87,12 @@ class VoucherLandingTest extends TestCase
             ->assertOk()
             ->assertSee(__('guidings.voucher_landing.hero_title'))
             ->assertSee(route('guidings.voucher.store'), false)
+            ->assertSee('voucherLandingSearchPlace', false)
+            ->assertSee(__('guidings.voucher_landing.recipient'))
             ->assertSee('Ebro')
             ->assertSee('Angeltouren ab 63 €')
             ->assertSee('https://cdn.example.com/regions/ebro.webp', false)
+            ->assertSee('assets/images/vouchers/landing-hero-a.webp', false)
             ->assertDontSee('noindex', false);
     }
 
@@ -161,27 +164,35 @@ class VoucherLandingTest extends TestCase
         $this->assertSame('', $order->requestDestination());
     }
 
-    public function test_a_country_without_regions_needs_no_region(): void
+    public function test_a_google_place_destination_does_not_need_catalog_membership(): void
     {
         Mail::fake();
 
-        $this->post(route('guidings.voucher.store'), $this->payload(['country' => 'Ungarn', 'region' => '', 'city' => '']))
-            ->assertSessionHasNoErrors();
+        $this->post(route('guidings.voucher.store'), $this->payload([
+            'country' => 'Schweden',
+            'region' => 'Småland',
+            'city' => 'Växjö',
+            'email' => 'place.one@example.com',
+        ]))->assertSessionHasNoErrors();
+
+        $order = VoucherOrder::query()->where('buyer_email', 'place.one@example.com')->latest('id')->firstOrFail();
+        $this->assertSame(['Schweden', 'Småland', 'Växjö'], [$order->request_country, $order->request_region, $order->request_city]);
+
+        $this->post(route('guidings.voucher.store'), $this->payload([
+            'country' => 'Ungarn',
+            'region' => '',
+            'city' => '',
+            'email' => 'place.two@example.com',
+        ]))->assertSessionHasNoErrors();
+
+        $countryOnly = VoucherOrder::query()->where('buyer_email', 'place.two@example.com')->latest('id')->firstOrFail();
+        $this->assertSame(['Ungarn', null, null], [$countryOnly->request_country, $countryOnly->request_region, $countryOnly->request_city]);
     }
 
-    public function test_the_destination_must_be_one_the_form_offered(): void
+    public function test_a_destination_is_required_unless_left_open(): void
     {
-        $this->post(route('guidings.voucher.store'), $this->payload(['country' => 'Atlantis']))
+        $this->post(route('guidings.voucher.store'), $this->payload(['country' => '', 'region' => '', 'city' => '']))
             ->assertSessionHasErrors('country');
-
-        $this->post(route('guidings.voucher.store'), $this->payload(['region' => '']))
-            ->assertSessionHasErrors('region');
-
-        $this->post(route('guidings.voucher.store'), $this->payload(['region' => 'Mallorca']))
-            ->assertSessionHasErrors('region');
-
-        $this->post(route('guidings.voucher.store'), $this->payload(['city' => 'Madrid']))
-            ->assertSessionHasErrors('city');
     }
 
     public function test_contact_amount_and_consent_are_required(): void
