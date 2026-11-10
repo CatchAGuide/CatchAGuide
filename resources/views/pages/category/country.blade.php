@@ -652,6 +652,7 @@
                         <x-offers.catalog-listing
                             :vm="$vm"
                             :show-faq="false"
+                            :show-voucher-promo="true"
                             analytics-page="destination-offers-catalog"
                             :region-redirect-options="$useToursHeroSearch ? ($countryOptions ?? collect()) : collect()"
                             :region-redirect-current="$currentCountrySlug"

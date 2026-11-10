@@ -736,7 +736,7 @@ return [
 
     'voucher_orders' => [
         'title' => 'Gutscheinbestellungen',
-        'intro' => 'Als Gutschein gekaufte Touren. Der Guide kassiert und verschickt den Gutschein; es gibt kein Datum und keinen Status. Die Provision steht unter Finanzen › Rechnungen.',
+        'intro' => 'Als Gutschein gekaufte Touren (Bestellung: der Guide kassiert und schickt den Gutschein) und Anfragen von der Gutschein-Landingpage /guidings/voucher (Anfrage: noch keine Tour, CaG meldet sich beim Käufer und stellt den Gutschein aus). Die Provision auf Bestellungen läuft über Finanzen › Rechnungen.',
         'total' => 'Gesamt',
         'volume' => 'Bestellwert',
         'commission' => 'Provision',
@@ -772,5 +772,14 @@ return [
         'comment_load_failed' => 'Kommentar konnte nicht geladen werden.',
         'comment_save_failed' => 'Kommentar konnte nicht gespeichert werden.',
         'pdf_missing' => 'Das Gutschein-PDF konnte nicht erstellt werden.',
+        'filter_all' => 'Alle',
+        'col_kind' => 'Art',
+        'kind_order' => 'Bestellung',
+        'kind_request' => 'Anfrage',
+        'filter_orders' => 'Bestellungen',
+        'filter_requests' => 'Anfragen',
+        'col_status' => 'Status',
+        'request_tour' => 'Gutschein-Anfrage',
+        'request_open' => 'Region offen',
     ],
 ];

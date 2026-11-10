@@ -53,9 +53,17 @@ class LocationSearchAutocompleteTest extends TestCase
         $source = file_get_contents(resource_path('views/layouts/includes/scripts.blade.php'));
 
         $this->assertStringContainsString('MapsManager.initAutocomplete(config.input, callback);', $source);
+        $this->assertStringContainsString('voucherLandingSearchPlace', $source);
         $this->assertStringNotContainsString("types: ['(regions)']", $source);
         $this->assertStringNotContainsString("types: ['geocode']", $source);
         $this->assertStringNotContainsString("types: ['(cities)']", $source);
+    }
+
+    public function test_voucher_landing_place_input_is_bound_for_deferred_places_init(): void
+    {
+        $source = file_get_contents(resource_path('js/maps/places-entry.js'));
+
+        $this->assertStringContainsString("'voucherLandingSearchPlace'", $source);
     }
 
     public function test_places_service_treats_empty_types_as_unrestricted(): void

@@ -80,7 +80,8 @@ class TripLocationCatalogService
 
         $trips_total = (clone $base)->count();
 
-        $trips = $this->applyListingSort($base, $request)->paginate(9)->appends($request->except('page'));
+        $perPage = (int) config('vacations.pillar_index_per_page', 18);
+        $trips = $this->applyListingSort($base, $request)->paginate($perPage)->appends($request->except('page'));
 
         return [
             'row_data' => $row_data,

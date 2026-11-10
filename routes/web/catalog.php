@@ -17,6 +17,7 @@ use App\Http\Controllers\Vacation\VacationInterestController;
 use App\Http\Controllers\Vacation\VacationPillarController;
 use App\Http\Controllers\VacationBookingController;
 use App\Http\Controllers\VacationsController;
+use App\Http\Controllers\VoucherLandingController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,10 @@ Route::get('guidings/methods', [CategoryController::class, 'methodsIndex'])
 Route::get('guidings/methods/{slug}', [CategoryController::class, 'methodsShow'])
     ->name('guidings.methods.show')
     ->middleware('ddos:search');
+// Gift voucher landing page; before the {country} / {slug} catch-alls below.
+Route::get('guidings/voucher', [VoucherLandingController::class, 'show'])->name('guidings.voucher');
+Route::post('guidings/voucher', [VoucherLandingController::class, 'store'])->name('guidings.voucher.store')->middleware(['throttle:checkout-submit', 'ddos:checkout']);
+Route::get('guidings/voucher/thank-you/{orderId}', [VoucherLandingController::class, 'thankYou'])->name('guidings.voucher.thank-you')->whereNumber('orderId');
 Route::get('guidings/offer/{slug}', [GuidingsController::class, 'newShow'])
     ->where('slug', '[\p{L}0-9\-]+')
     ->name('guidings.show');

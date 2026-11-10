@@ -236,7 +236,7 @@ class OfferCatalogPageService
         $filter = OfferListingFilter::fromRequest($input);
         $vacationFilter = $filter->toVacationFilter();
         $vacationGeoFilter = $this->vacationFilterWithoutSpecies($vacationFilter);
-        $perPage = (int) config('offers.per_page', 9);
+        $perPage = $this->perPageFor($filter);
         $hasGeo = $filter->placeLat !== null && $filter->placeLng !== null;
 
         $tourQuery = $this->queryTours($filter, $request);
@@ -355,6 +355,15 @@ class OfferCatalogPageService
             $filter->type === 'vacation' && $filter->vacation === 'camp' => $campsTotal,
             $filter->type === 'vacation' => $tripsTotal + $campsTotal,
             default => $toursTotal + $tripsTotal + $campsTotal,
+        };
+    }
+
+    private function perPageFor(OfferListingFilter $filter): int
+    {
+        return match ($filter->type) {
+            'tour' => (int) config('offers.tour_per_page', 24),
+            'vacation' => (int) config('offers.vacation_per_page', 18),
+            default => (int) config('offers.per_page', 9),
         };
     }
 

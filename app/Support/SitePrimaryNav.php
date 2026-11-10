@@ -164,6 +164,8 @@ final class SitePrimaryNav
             'vacations.trips.targets',
             'vacations.camps.targets',
             'guidings.landing',
+            'guidings.voucher',
+            'guidings.voucher.thank-you',
             'guidings.index',
             'guidings.destination',
             'guidings.countries',

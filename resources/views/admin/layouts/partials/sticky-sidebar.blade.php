@@ -179,6 +179,7 @@
                         <li><a href="{{ route('admin.faq.vacation-trips') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-trips') ? 'active' : '' }}">Vacation trips</a></li>
                         <li><a href="{{ route('admin.faq.vacation-camps') }}" class="slide-item {{ request()->routeIs('admin.faq.vacation-camps') ? 'active' : '' }}">Vacation camps</a></li>
                         <li><a href="{{ route('admin.faq.offers') }}" class="slide-item {{ request()->routeIs('admin.faq.offers') ? 'active' : '' }}">Offers (Angebote)</a></li>
+                        <li><a href="{{ route('admin.faq.gift-voucher') }}" class="slide-item {{ request()->routeIs('admin.faq.gift-voucher') ? 'active' : '' }}">Gift voucher (Gutschein)</a></li>
                     </ul>
                 </li>
                 <li class="slide">

@@ -280,6 +280,8 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-home-species__card', false);
         $response->assertSee('data-species-spotlight', false);
         $response->assertSee('data-species-viewport', false);
+        $response->assertSee("speciesViewport.addEventListener('mouseenter'", false);
+        $response->assertSee("speciesViewport.addEventListener('touchstart', pauseForInteract", false);
         $response->assertSee('data-dest-rail', false);
         $response->assertSee('enableDragScroll', false);
         $response->assertSee('Pike', false);
@@ -307,6 +309,16 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('cag-footer__accordion', false);
         $response->assertSee('cag-footer__group', false);
         $response->assertSee('info.catchaguide@gmail.com', false);
+    }
+
+    public function test_homepage_shows_gift_voucher_banner_linking_to_voucher_landing(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('data-analytics-section="voucher-promo-banner"', false);
+        $response->assertSee('href="'.route('guidings.voucher').'"', false);
+        $response->assertSee(__('guidings.voucher_landing.promo_title'), false);
     }
 
     public function test_homepage_mixed_offers_include_type_markers(): void

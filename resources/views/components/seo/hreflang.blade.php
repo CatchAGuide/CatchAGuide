@@ -5,8 +5,9 @@
     // Magazine articles and root-level guide articles are written per language with unrelated
     // slugs, so the same path on the other domain doesn't exist — declaring it sent Google to
     // 302s/404s (Search Console "Page with redirect"/"Not found"). Those pages get no alternates,
-    // matching their sitemap entries (localized: false).
-    $hasCounterpart = ! request()->routeIs('blog.thread.show', 'blogde.thread.show', 'category.thread');
+    // matching their sitemap entries (localized: false). The voucher request thank-you page only
+    // opens for the session that sent the request, so the other domain would 404 too.
+    $hasCounterpart = ! request()->routeIs('blog.thread.show', 'blogde.thread.show', 'category.thread', 'guidings.voucher.thank-you');
 
     if ($hasCounterpart) {
         $path = request()->path();

@@ -1,7 +1,14 @@
 <?php
 
 return [
+    // Mixed catalogs (/offers, destination pages) keep a shorter page.
     'per_page' => 9,
+
+    // Tours-only catalogs: /guidings, geo tour pages, methods, tour target pages.
+    'tour_per_page' => 24,
+
+    // Vacation-only catalogs on the offers listing (type=vacation, vacation target pages).
+    'vacation_per_page' => 18,
 
     /*
     |--------------------------------------------------------------------------

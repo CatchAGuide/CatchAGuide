@@ -62,7 +62,7 @@ class VacationCountryPageService
         }
 
         $filter = VacationListingFilter::fromRequest($input, $countrySlug);
-        $perPage = (int) config('vacations.country_page_per_page', 6);
+        $perPage = (int) config('vacations.country_page_per_page', 18);
         // The stored name is already localized; machine-translating it again turned "Island" into "Insel".
         $countryLabel = $this->countryLabels->labelFor($country);
 

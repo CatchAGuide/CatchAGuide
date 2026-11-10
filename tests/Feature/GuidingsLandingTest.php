@@ -50,6 +50,15 @@ class GuidingsLandingTest extends TestCase
         $response->assertDontSee('navbar-custom short-header long-header', false);
     }
 
+    public function test_guidings_landing_shows_gift_voucher_banner(): void
+    {
+        $response = $this->get(route('guidings.landing'));
+
+        $response->assertOk();
+        $response->assertSee('data-analytics-section="voucher-promo-banner"', false);
+        $response->assertSee('href="'.route('guidings.voucher').'"', false);
+    }
+
     public function test_guidings_landing_is_not_captured_by_slug_redirect(): void
     {
         $response = $this->get('/guidings');

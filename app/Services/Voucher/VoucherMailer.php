@@ -2,7 +2,9 @@
 
 namespace App\Services\Voucher;
 
+use App\Mail\Admin\VoucherRequestAdminMail;
 use App\Mail\Guest\VoucherOrderGuestMail;
+use App\Mail\Guest\VoucherRequestGuestMail;
 use App\Mail\Guide\VoucherOrderGuideMail;
 use App\Models\VoucherOrder;
 use Illuminate\Mail\Mailable;
@@ -29,6 +31,15 @@ class VoucherMailer
 
         foreach ($mails as [$recipient, $mail, $bcc]) {
             $this->send($order, $recipient, $mail, $bcc);
+        }
+    }
+
+    public function requestReceived(VoucherOrder $order): void
+    {
+        $this->send($order, $order->buyer_email, (new VoucherRequestGuestMail($order))->locale($order->language), null);
+
+        if ($admin = (string) config('mail.admin_email')) {
+            $this->send($order, $admin, (new VoucherRequestAdminMail($order))->locale($order->language), null);
         }
     }
 

@@ -46,6 +46,7 @@ mix.js("resources/js/checkout/booking-reject.js", "public/js/booking-reject.js")
 mix.js("resources/js/checkout/camp-checkout.js", "public/js/camp-checkout.js");
 mix.js("resources/js/checkout/trip-checkout.js", "public/js/trip-checkout.js");
 mix.js("resources/js/checkout/voucher-checkout.js", "public/js/voucher-checkout.js");
+mix.js("resources/js/vouchers/voucher-landing.js", "public/js/voucher-landing.js");
 mix.sass("resources/sass/maps.scss", "public/css/maps.css");
 
 mix.version();

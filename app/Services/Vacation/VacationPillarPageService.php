@@ -74,7 +74,7 @@ class VacationPillarPageService
             array_merge($request->all(), ['pillar' => $pillar->value]),
             $countrySlug,
         );
-        $perPage = (int) config('vacations.pillar_index_per_page', 9);
+        $perPage = (int) config('vacations.pillar_index_per_page', 18);
 
         [$listings, $cards] = match ($pillar) {
             VacationPillar::Trips => $this->tripListings($filter, $perPage),

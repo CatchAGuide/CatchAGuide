@@ -1,6 +1,7 @@
 @props([
     'vm',
     'showFaq' => true,
+    'showVoucherPromo' => false,
     'analyticsPage' => 'offers-catalog',
     'wrapperClass' => 'offers-catalog',
     'regionRedirectOptions' => null,
@@ -162,6 +163,10 @@
                         @endforeach
                     </div>
                 </section>
+            @endif
+
+            @if($showVoucherPromo)
+                @include('pages.voucher-landing.partials.promo-row')
             @endif
         </div>
     </div>

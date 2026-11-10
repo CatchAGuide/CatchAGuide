@@ -25,6 +25,17 @@
     .vo-muted { font-size: 0.8rem; color: #6c757d; }
     .vo-ellipsis { display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .vo-code { font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; }
+    .vo-kind { font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 999px; display: inline-block; }
+    .vo-kind--order { background: #e7f1ff; color: #1d4ed8; }
+    .vo-kind--request { background: #fde8e4; color: #b4412e; }
+    /* Request status button, same colours as the other request lists. */
+    .js-status-dropdown-btn.btn-status-open { background-color: #0d6efd; border-color: #0d6efd; color: #fff; }
+    .js-status-dropdown-btn.btn-status-open:hover { background-color: #0b5ed7; border-color: #0a58ca; color: #fff; }
+    .js-status-dropdown-btn.btn-status-in_process { background-color: #ffc107; border-color: #ffc107; color: #000; }
+    .js-status-dropdown-btn.btn-status-in_process:hover { background-color: #e0a800; border-color: #d39e00; color: #000; }
+    .js-status-dropdown-btn.btn-status-done { background-color: #198754; border-color: #198754; color: #fff; }
+    .js-status-dropdown-btn.btn-status-done:hover { background-color: #157347; border-color: #146c43; color: #fff; }
+    .vo-status-cell { min-width: 9.5rem; }
     .vo-badge { font-size: 0.65rem; font-weight: 600; padding: 0.1rem 0.35rem; border-radius: 3px; display: inline-block; background: #fef3c7; color: #92400e; }
     .meta-pill { display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .5rem; border:1px solid #dee2e6; border-radius:999px; font-size:.8rem; color:#495057; background:#fff; }
     .meta-pill i { color:#6c757d; }
@@ -83,16 +94,39 @@
         <div class="row row-sm mb-3">
             <div class="col-12">
                 <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('admin.voucher_orders.col_kind') }}">
+                            @foreach(['' => 'filter_all', 'order' => 'filter_orders', 'request' => 'filter_requests'] as $value => $label)
+                                <a href="{{ route('admin.voucher-orders.index', array_filter(['kind' => $value, 'q' => $search])) }}"
+                                   class="btn {{ ($kind?->value ?? '') === $value ? 'btn-primary' : 'btn-outline-primary' }}">{{ __('admin.voucher_orders.'.$label) }}</a>
+                            @endforeach
+                        </div>
+                        @if($kind?->value === 'request')
+                            {{-- Second click on the active status clears it. --}}
+                            <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('admin.voucher_orders.col_status') }}">
+                                @foreach($statusOptions as $value => $label)
+                                    <a href="{{ route('admin.voucher-orders.index', array_filter(['kind' => 'request', 'status' => $status === $value ? null : $value, 'q' => $search])) }}"
+                                       class="btn {{ $status === $value ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ $label }}</a>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
                     <div class="d-flex flex-wrap gap-3">
                         <span class="meta-pill"><i class="fa fa-gift"></i> {{ __('admin.voucher_orders.total') }}: <strong>{{ (int) $totals->orders }}</strong></span>
                         <span class="meta-pill"><i class="fa fa-euro-sign"></i> {{ __('admin.voucher_orders.volume') }}: <strong>{{ number_format((float) $totals->volume, 2, ',', '.') }} €</strong></span>
                         <span class="meta-pill"><i class="fa fa-percent"></i> {{ __('admin.voucher_orders.commission') }}: <strong>{{ number_format((float) $totals->commission, 2, ',', '.') }} €</strong></span>
                     </div>
                     <form method="GET" action="{{ route('admin.voucher-orders.index') }}" class="d-flex gap-2 ms-auto">
+                        @if($kind)
+                            <input type="hidden" name="kind" value="{{ $kind->value }}">
+                        @endif
+                        @if($status)
+                            <input type="hidden" name="status" value="{{ $status }}">
+                        @endif
                         <input type="search" name="q" value="{{ $search }}" class="form-control form-control-sm" placeholder="{{ __('admin.voucher_orders.search_placeholder') }}" aria-label="{{ __('admin.voucher_orders.search') }}">
                         <button type="submit" class="btn btn-sm btn-primary">{{ __('admin.voucher_orders.search') }}</button>
                         @if($search !== '')
-                            <a href="{{ route('admin.voucher-orders.index') }}" class="btn btn-sm btn-outline-secondary">{{ __('admin.voucher_orders.reset') }}</a>
+                            <a href="{{ route('admin.voucher-orders.index', array_filter(['kind' => $kind?->value, 'status' => $status])) }}" class="btn btn-sm btn-outline-secondary">{{ __('admin.voucher_orders.reset') }}</a>
                         @endif
                     </form>
                 </div>
@@ -108,6 +142,8 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('admin.voucher_orders.col_code') }}</th>
+                                        <th>{{ __('admin.voucher_orders.col_kind') }}</th>
+                                        <th>{{ __('admin.voucher_orders.col_status') }}</th>
                                         <th>{{ __('admin.voucher_orders.col_buyer') }}</th>
                                         <th>{{ __('admin.voucher_orders.col_contact') }}</th>
                                         <th>{{ __('admin.voucher_orders.col_tour') }}</th>
@@ -124,6 +160,7 @@
                                 <tbody>
                                     @forelse($orders as $order)
                                         @php
+                                            $isRequest = $order->isRequest();
                                             $commissionPaid = $order->financeItem?->paid_status === 'paid';
                                         @endphp
                                         <tr>
@@ -131,17 +168,39 @@
                                                 <span class="vo-code fw-semibold">{{ $order->voucher_code }}</span>
                                                 <div class="vo-muted">#{{ $order->id }}</div>
                                             </td>
+                                            <td data-label="{{ __('admin.voucher_orders.col_kind') }}">
+                                                <span class="vo-kind vo-kind--{{ $order->kind->value }}">{{ __('admin.voucher_orders.kind_'.$order->kind->value) }}</span>
+                                            </td>
+                                            <td data-label="{{ __('admin.voucher_orders.col_status') }}" class="vo-status-cell">
+                                                @if($isRequest)
+                                                    @include('admin.partials.request-status-dropdown', [
+                                                        'item' => $order,
+                                                        'updateUrl' => route('admin.voucher-orders.update-status', $order),
+                                                        'historyUrl' => route('admin.voucher-orders.status-history', $order),
+                                                        'summary' => $statusHistory->summary($order),
+                                                    ])
+                                                @else
+                                                    <span class="vo-muted">&mdash;</span>
+                                                @endif
+                                            </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_buyer') }}">
                                                 <span class="vo-ellipsis">{{ $order->buyerName() ?: '—' }}</span>
-                                                <span class="vo-muted vo-ellipsis" title="{{ $order->recipient_names }}">{{ __('admin.voucher_orders.recipients', ['names' => $order->recipient_names]) }}</span>
+                                                @if($order->recipient_names)
+                                                    <span class="vo-muted vo-ellipsis" title="{{ $order->recipient_names }}">{{ __('admin.voucher_orders.recipients', ['names' => $order->recipient_names]) }}</span>
+                                                @endif
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_contact') }}">
                                                 <a href="mailto:{{ $order->buyer_email }}" class="vo-ellipsis" title="{{ $order->buyer_email }}">{{ $order->buyer_email }}</a>
                                                 <span class="vo-muted">{{ $order->buyerPhone() ?: '—' }}</span>
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_tour') }}">
-                                                <a href="{{ route('admin.guidings.edit', $order->guiding_id) }}" class="vo-ellipsis" title="{{ $order->tour_title_snapshot }}">{{ $order->tour_title_snapshot }}</a>
-                                                <span class="vo-badge">{{ __('admin.voucher_orders.design_'.($order->design_type?->value ?? 'cag_standard')) }}</span>
+                                                @if($isRequest)
+                                                    <span class="vo-ellipsis">{{ __('admin.voucher_orders.request_tour') }}</span>
+                                                    <span class="vo-muted vo-ellipsis" title="{{ $order->requestDestination() }}">{{ $order->requestDestination() ?: __('admin.voucher_orders.request_open') }}</span>
+                                                @else
+                                                    <a href="{{ route('admin.guidings.edit', $order->guiding_id) }}" class="vo-ellipsis" title="{{ $order->tour_title_snapshot }}">{{ $order->tour_title_snapshot }}</a>
+                                                    <span class="vo-badge">{{ __('admin.voucher_orders.design_'.($order->design_type?->value ?? 'cag_standard')) }}</span>
+                                                @endif
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_guide') }}">
                                                 @if($order->guide)
@@ -150,16 +209,24 @@
                                                     —
                                                 @endif
                                             </td>
-                                            <td data-label="{{ __('admin.voucher_orders.col_guests') }}">{{ $order->number_of_guests }}</td>
+                                            <td data-label="{{ __('admin.voucher_orders.col_guests') }}">{{ $order->number_of_guests ?? '—' }}</td>
                                             <td data-label="{{ __('admin.voucher_orders.col_price') }}" class="text-end text-nowrap">{{ number_format((float) $order->price_total, 2, ',', '.') }} {{ $order->currency }}</td>
                                             <td data-label="{{ __('admin.voucher_orders.col_commission') }}" class="text-end text-nowrap">
-                                                {{ number_format((float) $order->commission_amount, 2, ',', '.') }} {{ $order->currency }}
-                                                <div class="vo-muted">{{ rtrim(rtrim(number_format((float) $order->commission_rate * 100, 2, ',', '.'), '0'), ',') }} %</div>
+                                                @if($isRequest)
+                                                    —
+                                                @else
+                                                    {{ number_format((float) $order->commission_amount, 2, ',', '.') }} {{ $order->currency }}
+                                                    <div class="vo-muted">{{ rtrim(rtrim(number_format((float) $order->commission_rate * 100, 2, ',', '.'), '0'), ',') }} %</div>
+                                                @endif
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_valid_until') }}" class="text-nowrap">{{ $order->valid_until?->format('Y-m-d') ?? '—' }}</td>
                                             <td data-label="{{ __('admin.voucher_orders.col_ordered') }}" class="text-nowrap vo-muted">{{ $order->created_at?->format('M j, Y g:i A') }}</td>
                                             <td data-label="{{ __('admin.voucher_orders.col_commission_paid') }}">
-                                                <span class="badge {{ $commissionPaid ? 'bg-success' : 'bg-secondary' }}">{{ $commissionPaid ? __('admin.voucher_orders.paid') : __('admin.voucher_orders.unpaid') }}</span>
+                                                @if($isRequest)
+                                                    —
+                                                @else
+                                                    <span class="badge {{ $commissionPaid ? 'bg-success' : 'bg-secondary' }}">{{ $commissionPaid ? __('admin.voucher_orders.paid') : __('admin.voucher_orders.unpaid') }}</span>
+                                                @endif
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_actions') }}" class="text-end text-nowrap">
                                                 <div class="btn-group btn-group-sm">
@@ -194,7 +261,7 @@
                                             </td>
                                         </tr>
                                     @empty
-                                        <tr><td colspan="12" class="vo-empty text-center text-muted py-4">{{ __('admin.voucher_orders.empty') }}</td></tr>
+                                        <tr><td colspan="14" class="vo-empty text-center text-muted py-4">{{ __('admin.voucher_orders.empty') }}</td></tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -229,6 +296,7 @@
         </div>
     </div>
 </div>
+@include('admin.partials.booking-status-history')
 @endsection
 
 @section('js_after')

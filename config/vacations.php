@@ -11,9 +11,9 @@ return [
 
     'hub_testimonials_limit' => 6,
 
-    'country_page_per_page' => 6,
+    'country_page_per_page' => 18,
 
-    'pillar_index_per_page' => 9,
+    'pillar_index_per_page' => 18,
 
     'reserved_country_segments' => ['trips', 'camps', 'countries', 'targets'],
 

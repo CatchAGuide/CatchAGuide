@@ -309,8 +309,8 @@ class VacationsController extends Controller
         // Use select distinct on id to ensure no duplicates
         $query->select('camps.*')->distinct('id');
         
-        // Apply pagination - use a smaller number like 5 for testing
-        $vacations = $query->paginate(6)->appends(request()->except('page'));
+        $vacations = $query->paginate((int) config('vacations.country_page_per_page', 18))
+            ->appends(request()->except('page'));
 
         $data = compact('row_data', 'faq', 'fish_chart', 'fish_size_limit', 'fish_time_limit', 'vacations', 'allVacations', 'othervacations', 'title', 'vacations_total');
 

@@ -176,7 +176,7 @@ class FinanceController extends Controller
             'booking' => Booking::query()->findOrFail($id),
             'trip' => TripBooking::query()->findOrFail($id),
             'camp_vacation' => CampVacationBooking::query()->findOrFail($id),
-            'voucher' => VoucherOrder::query()->findOrFail($id),
+            'voucher' => VoucherOrder::query()->orders()->findOrFail($id),
             default => abort(404),
         };
     }
