@@ -54,6 +54,7 @@ class VoucherOrderPresenter
             'guideFirstName' => (string) ($guide?->firstname ?? ''),
             'guideEmail' => (string) ($guide?->email ?? ''),
             'guidePhone' => $this->guidePhone($guide),
+            'guideAddress' => $this->guideAddress($guide),
         ];
     }
 
@@ -94,6 +95,22 @@ class VoucherOrderPresenter
         };
 
         return $order->request_city ? $where.' · '.$order->request_city : $where;
+    }
+
+    /**
+     * One line, "Street 12 · 40213 City"; empty parts (or the whole line) are left out.
+     */
+    public function guideAddress(?User $guide): string
+    {
+        $info = $guide?->information;
+        if ($info === null) {
+            return '';
+        }
+
+        $street = trim(trim((string) $info->address).' '.trim((string) $info->address_number));
+        $place = trim(trim((string) $info->postal).' '.trim((string) $info->city));
+
+        return implode(' · ', array_filter([$street, $place], fn (string $part) => $part !== ''));
     }
 
     public function guideName(?User $guide): string

@@ -146,7 +146,7 @@
                                 
                             </tr>
                             @if($booking->extras)
-                                @foreach(unserialize($booking->extras) as $extra)
+                                @foreach($booking->extrasList() as $extra)
                                 <tr>
                                     <td scope="row"></td>
                                     <td><strong>{{ucfirst($extra['extra_name'])}}:</strong></td>

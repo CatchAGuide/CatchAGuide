@@ -84,16 +84,20 @@
             <path d="M4 13h7v7H4z"></path>
             <path d="M13 13h7v7h-7z"></path>
             @break
-        @case('nav-rod')
-            <path d="M5 4c6 .8 9.8 4.5 11.2 10.5"></path>
-            <path d="M15.8 14.3l1.2 3"></path>
-            <path d="M17 17.3c-1.8.5-3-.3-3.3-1.5"></path>
-            <path d="M3 20c2 0 2-1.4 4-1.4S9 20 11 20s2-1.4 4-1.4S17 20 19 20"></path>
+        {{-- Trello #881: designer icons (angel-icon-5b / -6b). Mixed fill + stroke, so each
+             path sets its own paint and stroke width instead of inheriting the outline style. --}}
+        @case('day-tours')
+            <path d="M2.5 21Q5 7 14 3.5" stroke-width="2"></path>
+            <circle cx="4.4" cy="17.2" r="1.4" fill="currentColor" stroke="none"></circle>
+            <path d="M14 3.5q.8 7-3.7 12.1" stroke-width="1.25"></path>
+            <path fill="currentColor" stroke="none" fill-rule="evenodd" d="M10 16c2.6-3 7-3 10 0-3 3-7.4 3-10 0zM12.6 14.9a.65.65 0 1 0 0 1.3.65.65 0 1 0 0-1.3z"></path>
+            <path fill="currentColor" stroke="none" d="M19.6 16 22 13.8v4.4z"></path>
             @break
-        @case('nav-camp')
-            <path d="M4 10.5l8-6 8 6"></path>
-            <path d="M6.5 10.5V17h11v-6.5"></path>
-            <path d="M9.5 20h11"></path>
+        @case('vacations')
+            <path fill="currentColor" stroke="none" fill-rule="evenodd" d="M7.5 4.5 1.75 9.5h1.75V17h8V9.5h1.75zM6.5 11.5h2v2h-2z"></path>
+            <path fill="currentColor" stroke="none" d="M13.5 15.5h9l-1.8 3.2h-5.6z"></path>
+            <path fill="currentColor" stroke="none" d="M17.6 5.5v9.2h-4.1zM18.6 8v6.7h3.2z"></path>
+            <path d="M2 21.5q2.5-1.8 5 0t5 0 5 0 5 0" stroke-width="1.25"></path>
             @break
         @case('nav-home')
             <path d="M4 11l8-7 8 7"></path>

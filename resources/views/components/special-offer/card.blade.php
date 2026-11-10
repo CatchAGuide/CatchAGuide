@@ -13,9 +13,12 @@
         $pricingExtras = $specialOffer['pricing_extras'] ?? [];
         $price = $specialOffer['price'] ?? [];
         $priceAmount = (float) ($price['amount'] ?? 0);
+        $hasPrice = $priceAmount > 0;
         $currency = $price['currency'] ?? 'EUR';
         $specialOfferModalTitle = translate($specialOffer['title'] ?? null) ?: __('vacations.special_offer_singular');
-        $specialOfferPriceDisplay = ($currency === 'EUR' ? '€' : $currency).number_format($priceAmount, 2, ',', '.');
+        $specialOfferPriceDisplay = $hasPrice
+            ? (($currency === 'EUR' ? '€' : $currency).number_format($priceAmount, 2, ',', '.'))
+            : null;
         $chipPresenter = CampAttachmentChipPresenter::class;
     @endphp
 
@@ -87,10 +90,12 @@
 
                 <div class="special-offer-card__actions">
                     <div class="special-offer-card__actions-column">
-                        <div class="special-offer-card__pricing">
-                            <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
-                            <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
-                        </div>
+                        @if($hasPrice)
+                            <div class="special-offer-card__pricing">
+                                <div class="special-offer-card__price-label">{{ __('vacations.per_person') }}</div>
+                                <div class="special-offer-card__price-amount">{{ $currency === 'EUR' ? '€' : $currency }}{{ number_format($priceAmount, 2, ',', '.') }}</div>
+                            </div>
+                        @endif
                         <button class="attachment-expand-btn special-offer-card__expand-btn special-offer-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
@@ -209,7 +214,7 @@
         :title="$specialOfferModalTitle"
         type="tour"
         :badge="__('vacations.special_offer_singular')"
-        :price-prefix="__('vacations.per_person')"
+        :price-prefix="$hasPrice ? __('vacations.per_person') : null"
         :price-display="$specialOfferPriceDisplay"
     />
 </div>

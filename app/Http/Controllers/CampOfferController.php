@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use App\Domain\Vacation\VacationListingFilter;
 use App\Models\SpecialOffer;
 use App\Presenters\Reviews\ReviewSectionPresenter;
+use App\Services\Camp\CampBestTravelTimesParser;
 use App\Services\Search\ListingSearchStateService;
 use App\Services\Seo\StructuredDataBuilder;
 use App\Services\Translation\ListingTranslationService;
@@ -30,6 +31,7 @@ class CampOfferController extends Controller
         private VacationReviewService $vacationReviews,
         private VacationReviewStats $vacationReviewStats,
         private ReviewSectionPresenter $reviewSections,
+        private CampBestTravelTimesParser $bestTravelTimesParser,
     ) {}
 
     private function getImageUrl($path)
@@ -279,72 +281,28 @@ class CampOfferController extends Controller
     }
     
     /**
-     * Parse best travel times text into structured format with titles and descriptions
-     * Titles are rendered as headings, descriptions as bullet points
-     */
-    private function parseBestTravelTimesText($text)
-    {
-        if (empty($text)) {
-            return [];
-        }
-        
-        // Normalize line endings (handle \r\n, \r, and \n)
-        $text = str_replace(["\r\n", "\r"], "\n", $text);
-        
-        // Split by double newlines to get sections (each section is title + description)
-        $sections = preg_split('/\n\s*\n/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
-        
-        $parsed = [];
-        
-        foreach ($sections as $section) {
-            $lines = array_map('trim', explode("\n", $section));
-            $lines = array_filter($lines, function($line) {
-                return !empty($line);
-            });
-            
-            if (empty($lines)) {
-                continue;
-            }
-            
-            // First line is the title, rest are description lines
-            $title = array_shift($lines);
-            
-            // Join description lines with space (in case description spans multiple lines)
-            $description = implode(' ', $lines);
-            
-            if (!empty($title)) {
-                $parsed[] = [
-                    'title' => $title,
-                    'description' => $description
-                ];
-            }
-        }
-        
-        return $parsed;
-    }
-    
-    /**
      * Map Camp model to view format
      */
     private function mapCampData(Camp $camp)
     {
         $targetFish = $camp->getTargetFishNames();
-        
-        // Process best travel times - currently stored as text, not structured data
+
+        // Free-text seasons from admin, or legacy month/note JSON arrays.
         $bestTravelTimes = [];
         $bestTravelTimesParsed = [];
-        if (!empty($camp->best_travel_times)) {
-            if (is_string($camp->best_travel_times)) {
-                // Try JSON decode first
-                $decoded = json_decode($camp->best_travel_times, true);
+        $rawTravelTimes = $camp->best_travel_times;
+        if (! empty($rawTravelTimes)) {
+            if (is_string($rawTravelTimes)) {
+                $decoded = json_decode($rawTravelTimes, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $bestTravelTimes = $decoded;
-                } else {
-                    // Parse text format: title on one line, description on next, separated by empty lines
-                    $bestTravelTimesParsed = $this->parseBestTravelTimesText($camp->best_travel_times);
+                    $rawTravelTimes = $decoded;
                 }
-            } elseif (is_array($camp->best_travel_times)) {
-                $bestTravelTimes = $camp->best_travel_times;
+            }
+
+            if (is_array($rawTravelTimes) && $this->bestTravelTimesParser->isStructuredMonthNoteList($rawTravelTimes)) {
+                $bestTravelTimes = $rawTravelTimes;
+            } else {
+                $bestTravelTimesParsed = $this->bestTravelTimesParser->parse($rawTravelTimes);
             }
         }
         

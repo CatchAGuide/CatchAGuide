@@ -40,7 +40,8 @@ class VoucherOrderMailTest extends TestCase
 
         $this->assertStringContainsString(e(__('emails.voucher_order_guest.payment_title')), $html);
         $this->assertStringContainsString(e(__('emails.voucher_order_guest.disclaimer')), $html);
-        $this->assertStringContainsString('CAG-V-7KQ3PX', $html);
+        $this->assertStringNotContainsString('CAG-V-7KQ3PX', $html, 'The code is on the voucher the guide sends once paid.');
+        $this->assertStringNotContainsString(e($mail->order->valid_until->format($locale === 'de' ? 'd.m.Y' : 'M j, Y')), $html, 'So is the valid-until date.');
         $this->assertStringContainsString(e(__('emails.voucher_order_guest.payment_text', ['guide' => 'Thomas'])), $html);
         $this->assertStringNotContainsString('Berger Angelguiding', $html, 'The guest sees only the guide first name.');
         // The personal message must not collide with the $message every mail view receives.

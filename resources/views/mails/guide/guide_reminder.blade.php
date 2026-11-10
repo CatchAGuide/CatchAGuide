@@ -50,7 +50,7 @@
                     </p>
                     <ul style="padding-left: 18px; margin-top: 0;">
                         @php
-                            $extras = $booking->extras ? @unserialize($booking->extras) : [];
+                            $extras = $booking->extrasList();
                         @endphp
                         @if(is_array($extras) && count($extras))
                             @foreach($extras as $extra)

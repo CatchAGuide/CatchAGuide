@@ -34,7 +34,7 @@
             @if($booking->extras)
                 <p style="font-size:14px;"><strong>{{__('emails.extras')}}:</strong>
                     @php
-                        $extras = $booking->extras ? unserialize($booking->extras) : [];
+                        $extras = $booking->extrasList();
                     @endphp
                     @foreach($extras as $extra) 
                         {{$extra['extra_name']}} 

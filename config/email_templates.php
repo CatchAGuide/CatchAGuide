@@ -452,7 +452,7 @@ return [
         'guest_voucher_order' => [
             'name' => 'Gift Voucher Order Confirmation (Guest)',
             'category' => 'guest',
-            'description' => 'Confirmation to the buyer of a gift voucher: order summary, voucher code and validity, and that payment goes directly to the guide. No PDF attached: the guide sends the voucher once paid. CaG takes no payment. Language: the language of the page they ordered on.',
+            'description' => 'Confirmation to the buyer of a gift voucher: order summary (no voucher code or valid-until date; those are on the voucher), and that payment goes directly to the guide. No PDF attached: the guide sends the voucher once paid. CaG takes no payment. Language: the language of the page they ordered on.',
             'view' => 'mails.guest.voucher_order',
             'log_type' => 'guest_voucher_order',
             'status' => 'active',

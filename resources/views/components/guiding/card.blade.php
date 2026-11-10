@@ -15,6 +15,7 @@
         $tourType = CampAttachmentChipPresenter::fishingFromChipValue($guiding['type'] ?? null);
         $waterTypes = $guiding['water_types'] ?? [];
         $priceAmount = (float) ($guiding['price']['amount'] ?? 0);
+        $hasPrice = $priceAmount > 0;
         $displayPriceType = $guiding['price']['display_type'] ?? __('vacations.per_tour');
         $guidingModalTitle = translate($guiding['title'] ?? null) ?? ($guiding['title'] ?? 'Guiding');
         $guidingPersonsChip = CampAttachmentChipPresenter::personsValue($maxPersons);
@@ -27,7 +28,7 @@
             ],
             array_column($waterTypeChips, 'value')
         )));
-        $guidingPriceDisplay = '€'.number_format($priceAmount, 2);
+        $guidingPriceDisplay = $hasPrice ? '€'.number_format($priceAmount, 2) : null;
     @endphp
 
     <div class="guiding-card__grid">
@@ -91,13 +92,12 @@
 
                 <div class="guiding-card__actions">
                     <div class="guiding-card__actions-column">
-                        <div class="guiding-card__pricing">
-                            <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
-                            <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
-                        </div>
-                        {{-- <button class="guiding-card__select-btn">
-                            {{ __('Select This Guiding') }}
-                        </button> --}}
+                        @if($hasPrice)
+                            <div class="guiding-card__pricing">
+                                <div class="guiding-card__price-type">{{ $displayPriceType }}</div>
+                                <div class="guiding-card__price-amount">€{{ number_format($priceAmount, 2) }}</div>
+                            </div>
+                        @endif
                         <button class="attachment-expand-btn guiding-card__expand-btn guiding-card__expand-btn--secondary" data-toggle-btn data-label-more="{{ __('vacations.show_more') }}" data-label-less="{{ __('vacations.show_less') }}">
                             <span data-toggle-text>{{ __('vacations.show_more') }}</span>
                             <span data-toggle-icon>▼</span>
@@ -247,7 +247,7 @@
         type="tour"
         :badge="__('offers.badge_tour')"
         :specs="$guidingModalSpecs"
-        :price-prefix="$displayPriceType"
+        :price-prefix="$hasPrice ? $displayPriceType : null"
         :price-display="$guidingPriceDisplay"
     />
 </div>

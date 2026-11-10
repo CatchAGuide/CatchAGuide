@@ -568,8 +568,6 @@ return [
         'guide' => 'Guide',
         'guide_phone' => 'Guide phone',
         'guide_email' => 'Guide email',
-        'code' => 'Voucher code',
-        'valid_until' => 'Valid until',
         'price' => 'Voucher price',
         'section_message' => 'Your message',
         'quote' => '“:message”',
