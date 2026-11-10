@@ -1,0 +1,246 @@
+// Catch A Guide design tokens — single source of truth for the public site.
+// Spec and rationale: docs/design-system.md. Values are taken from the homepage
+// (resources/sass/page/home.scss + _home-mobile.scss), which is the reference design.
+//
+// This file emits NO CSS on import: only variables and mixins. Pages opt in by
+// using them, so importing it can never change how an existing page looks.
+// Audit drift with: node .claude/skills/design-sync-audit/scripts/design-audit.mjs
+
+// ---------------------------------------------------------------------------
+// Color
+// ---------------------------------------------------------------------------
+
+$cag-coral: #e8604c; // primary action: filled CTAs, links, active states, accents
+$cag-coral-hover: #e85b40; // text-link hover only (filled buttons hover to slate)
+$cag-coral-tint: #f2856d; // light coral for decorative fills on dark backgrounds
+
+$cag-slate: #313041; // headings, strong text, dark bands, filled-button hover
+$cag-slate-deep: #1f1e2a; // gradient end / darkest band
+$cag-gray: #787780; // body copy on light bg, subtitles, meta
+$cag-border: #ece8e0; // card + divider borders
+$cag-sand: #faf5ee; // warm surface (cards, callouts)
+$cag-bg: #f7f9fb; // page canvas behind sections
+$cag-white: #ffffff;
+$cag-star: #ffce00; // rating stars only
+
+$cag-success: #22c55e;
+$cag-danger: #b91c1c;
+
+// On-dark text (hero, dark bands)
+$cag-on-dark: #ffffff;
+$cag-on-dark-muted: rgba(255, 255, 255, 0.82);
+$cag-on-dark-subtle: rgba(255, 255, 255, 0.6);
+
+// Product-type identity colors live in settings/_category-colors.scss
+// ($category-tour / $category-camp / $category-trip). Coral stays the CTA color.
+
+// ---------------------------------------------------------------------------
+// Typography
+// ---------------------------------------------------------------------------
+
+// One family site-wide. DM Sans is self-hosted in settings/_fonts.scss at
+// 400 / 500 / 700 only — 600 is NOT loaded and renders as 700.
+$cag-font: "DM Sans", sans-serif;
+
+$cag-fw-regular: 400;
+$cag-fw-medium: 500;
+$cag-fw-bold: 700;
+
+// Type scale (rem, 16px root). Role → token; see docs/design-system.md §3.
+$cag-fs-display: clamp(2rem, 4vw, 3rem); // page H1 in a hero (one per page)
+$cag-fs-display-sm: clamp(1.65rem, 3.2vw, 2.6rem); // H2 of a full-width CTA band
+$cag-fs-h1-solid: clamp(1.55rem, 3vw, 2.35rem); // page H1 on a solid (non-hero) header
+$cag-fs-h2: 1.5rem; // section title, desktop
+$cag-fs-h2-mobile: 1.375rem; // section title, < 768px
+$cag-fs-h3: 1.15rem; // block / large card title, desktop
+$cag-fs-h3-mobile: 1.05rem; // card title (all sizes) / block title mobile
+$cag-fs-lead: 1.125rem; // hero subline, intro paragraph
+$cag-fs-body: 1rem; // running text, desktop
+$cag-fs-body-mobile: 0.95rem; // running text, mobile
+$cag-fs-subtitle: 0.9rem; // section subtitle, button label
+$cag-fs-small: 0.85rem; // meta, rating line, helper text
+$cag-fs-button-sm: 0.8rem; // small button label
+$cag-fs-caption: 0.72rem; // uppercase meta / eyebrow
+$cag-fs-micro: 0.7rem; // badges on media
+
+$cag-lh-tight: 1.15; // display
+$cag-lh-heading: 1.25; // h2 / h3
+$cag-lh-body: 1.55; // paragraphs
+$cag-lh-ui: 1.4; // compact UI text, meta
+
+$cag-ls-eyebrow: 0.16em; // hero eyebrow
+$cag-ls-caps: 0.02em; // small uppercase meta / badges
+
+// ---------------------------------------------------------------------------
+// Spacing, radius, elevation
+// ---------------------------------------------------------------------------
+
+$cag-space-1: 0.25rem;
+$cag-space-2: 0.5rem;
+$cag-space-3: 0.75rem;
+$cag-space-4: 1rem;
+$cag-space-5: 1.25rem;
+$cag-space-6: 1.5rem;
+$cag-space-8: 2rem;
+$cag-space-10: 2.5rem;
+$cag-space-14: 3.5rem;
+
+$cag-section-pad-y: 3.5rem; // desktop section padding
+$cag-section-pad-y-mobile: 2rem; // mobile section padding (32px top / ~28px bottom)
+$cag-section-header-gap: 1.25rem; // section header → content
+$cag-gutter-mobile: 16px; // side padding < 768px
+
+$cag-radius-sm: 0.35rem; // badges, chips on media
+$cag-radius-md: 0.5rem; // buttons, inputs
+$cag-radius-lg: 0.75rem; // panels, search box, small cards
+$cag-radius-xl: 1rem; // listing / content cards
+$cag-radius-pill: 999px; // pills, icon buttons, rating chips
+
+$cag-shadow-rest: 0 4px 14px rgba(49, 48, 65, 0.06);
+$cag-shadow-raised: 0 8px 24px rgba(49, 48, 65, 0.08);
+$cag-shadow-overlay: 0 14px 32px rgba(49, 48, 65, 0.14);
+$cag-shadow-badge: 0 4px 12px rgba(17, 24, 39, 0.18);
+
+$cag-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$cag-duration: 0.2s;
+
+// ---------------------------------------------------------------------------
+// Mixins — apply a role in one line instead of re-declaring sizes per page
+// ---------------------------------------------------------------------------
+
+@mixin cag-text-display {
+  font-size: $cag-fs-display;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-tight;
+}
+
+@mixin cag-text-h2 {
+  margin: 0;
+  font-size: $cag-fs-h2-mobile;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-heading;
+  color: $cag-slate;
+
+  @media (min-width: 768px) {
+    font-size: $cag-fs-h2;
+  }
+}
+
+@mixin cag-text-h3 {
+  margin: 0;
+  font-size: $cag-fs-h3-mobile;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-heading;
+  color: $cag-slate;
+
+  @media (min-width: 768px) {
+    font-size: $cag-fs-h3;
+  }
+}
+
+@mixin cag-text-card-title {
+  margin: 0;
+  font-size: $cag-fs-h3-mobile;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-heading;
+  color: $cag-slate;
+}
+
+@mixin cag-text-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: $cag-fs-subtitle;
+  line-height: 1.5;
+  color: $cag-gray;
+}
+
+@mixin cag-text-body {
+  font-size: $cag-fs-body-mobile;
+  line-height: $cag-lh-body;
+  color: $cag-gray;
+
+  @media (min-width: 768px) {
+    font-size: $cag-fs-body;
+  }
+}
+
+@mixin cag-text-caption {
+  font-size: $cag-fs-caption;
+  font-weight: $cag-fw-bold;
+  letter-spacing: $cag-ls-caps;
+  text-transform: uppercase;
+  color: $cag-gray;
+}
+
+@mixin cag-section {
+  padding: $cag-section-pad-y-mobile 0;
+
+  @media (min-width: 768px) {
+    padding: $cag-section-pad-y 0;
+  }
+}
+
+@mixin cag-section-link {
+  color: $cag-coral;
+  font-weight: $cag-fw-bold;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    color: $cag-coral-hover;
+    text-decoration: underline;
+  }
+}
+
+@mixin cag-button($variant: coral) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: $cag-radius-md;
+  font-size: $cag-fs-subtitle;
+  font-weight: $cag-fw-bold;
+  text-decoration: none;
+  transition: background $cag-duration ease, color $cag-duration ease, border-color $cag-duration ease;
+
+  @if $variant == coral {
+    background: $cag-coral;
+    color: $cag-white;
+
+    &:hover {
+      background: $cag-slate;
+      color: $cag-white;
+    }
+  } @else if $variant == ghost-dark {
+    background: transparent;
+    color: $cag-white;
+    border-color: rgba(255, 255, 255, 0.35);
+
+    &:hover {
+      border-color: $cag-white;
+      color: $cag-white;
+    }
+  } @else if $variant == outline {
+    background: $cag-white;
+    color: $cag-slate;
+    border-color: $cag-border;
+
+    &:hover {
+      border-color: $cag-slate;
+    }
+  }
+}
+
+@mixin cag-card {
+  background: $cag-white;
+  border: 1px solid $cag-border;
+  border-radius: $cag-radius-xl;
+  overflow: hidden;
+  transition: box-shadow $cag-duration ease, transform $cag-duration ease, border-color $cag-duration ease;
+
+  &:hover {
+    box-shadow: $cag-shadow-raised;
+    transform: translateY(-2px);
+  }
+}

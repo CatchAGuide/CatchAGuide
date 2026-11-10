@@ -3,6 +3,7 @@
 
 // Settings
 @import "./settings/variables";
+@import "./settings/tokens"; // Design-system tokens + mixins (no CSS output) — docs/design-system.md
 @import "./settings/breakpoints";
 @import "./settings/colors";
 @import "./settings/category-colors";
@@ -58,6 +59,7 @@
 @import "./page/tour-checkout"; // Tour checkout (mobile + desktop layouts)
 @import "./page/voucher-checkout"; // Gift voucher checkout (extends the tour checkout)
 @import "./page/voucher-landing"; // Gift voucher landing page (/guidings/voucher)
+@import "./components/voucher-promo"; // Gift voucher promo banner + listing row linking to /guidings/voucher
 @import "./page/camp-checkout"; // Camp checkout / availability request (mobile + desktop layouts)
 @import "./page/trip-checkout"; // Trip checkout: date dropdown, wish window and party row on top of the camp checkout styles
 @import "./components/rental-boat-form"; // The rental boat multi-step form component

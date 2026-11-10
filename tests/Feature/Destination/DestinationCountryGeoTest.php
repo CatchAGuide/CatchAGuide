@@ -63,6 +63,8 @@ class DestinationCountryGeoTest extends TestCase
         $response->assertSee($region->name, false);
         $response->assertSee('Unique Dest City '.$country->slug, false);
         $response->assertSee('Fishing in Spain', false);
+        $response->assertSee("speciesViewport.addEventListener('mouseenter'", false);
+        $response->assertSee("speciesViewport.addEventListener('touchstart', pauseForInteract", false);
     }
 
     public function test_destination_region_url_renders_region_page(): void
