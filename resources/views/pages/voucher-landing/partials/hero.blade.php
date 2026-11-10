@@ -1,26 +1,19 @@
 @php
     $copy = 'guidings.voucher_landing.';
-    $heroSlides = [
-        asset('assets/images/vouchers/landing-hero-a.webp'),
-        asset('assets/images/vouchers/landing-hero-b.webp'),
-    ];
 @endphp
 <div class="cag-site-nav-shell vl-hero-shell" data-vl-nav-shell>
     @include('layouts.partials.site-nav', ['overlay' => true, 'idPrefix' => 'voucher'])
 
     <section class="vl-hero" id="top" data-vl-hero>
         <div class="vl-hero__media" aria-hidden="true">
-            @foreach($heroSlides as $index => $src)
-                <img
-                    class="vl-hero__image{{ $index === 0 ? ' is-active' : '' }}{{ $index === 1 ? ' vl-hero__image--b' : '' }}"
-                    src="{{ $src }}"
-                    alt=""
-                    width="1920"
-                    height="1440"
-                    @if($index === 0) fetchpriority="high" @else loading="lazy" @endif
-                    data-vl-hero-slide
-                >
-            @endforeach
+            <img
+                class="vl-hero__image is-active"
+                src="{{ asset('assets/images/vouchers/landing-hero.webp') }}"
+                alt=""
+                width="1191"
+                height="1000"
+                fetchpriority="high"
+            >
         </div>
         <div class="vl-hero__shade" aria-hidden="true"></div>
         @if($xmas)
@@ -28,7 +21,7 @@
         @endif
         <div class="vl-hero__inner">
             <div class="vl-hero__copy">
-                <p class="vl-hero__eyebrow">{{ __($copy.($xmas ? 'eyebrow_xmas' : 'eyebrow')) }}</p>
+                <p class="vl-hero__eyebrow">{{ __($copy.'eyebrow') }}</p>
                 <h1 class="vl-hero__title">{{ __($copy.'hero_title') }}</h1>
                 <p class="vl-hero__text">{{ __($copy.'hero_text') }}</p>
                 <div class="vl-hero__actions">

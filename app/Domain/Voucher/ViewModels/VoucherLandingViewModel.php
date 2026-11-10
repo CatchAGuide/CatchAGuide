@@ -16,7 +16,7 @@ use Illuminate\Support\ViewErrorBag;
 /**
  * Page data for the /guidings/voucher landing page (pages/voucher-landing): live tiles, gallery,
  * reviews and admin-managed FAQs (Faq page "gift-voucher"), the request form's options and, on the
- * thank-you URL, the submitted request. The Christmas touches (eyebrow, sparkles, countdown) show
+ * thank-you URL, the submitted request. The Christmas touches (sparkles, countdown) show
  * from 1 November until Christmas Eve.
  */
 final class VoucherLandingViewModel

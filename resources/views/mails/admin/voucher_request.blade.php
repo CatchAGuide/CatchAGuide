@@ -9,7 +9,6 @@
             [__($copy.'.code'), e($code)],
             [__($copy.'.amount'), e($amount)],
             [__($copy.'.where'), e($where)],
-            $recipient !== '' ? [__($copy.'.recipient'), e($recipient)] : null,
             [__($copy.'.requested_on'), e($requestedOn)],
         ])),
         'section_buyer' => [
@@ -45,6 +44,12 @@
 </table>
 </td></tr></table></td></tr>
 @endforeach
+
+{{-- Comment or instructions from the request form --}}
+@if($recipient !== '')
+<tr><td class="px t-label" style="{{ $label }}">{{ __($copy.'.message') }}</td></tr>
+<tr><td class="px" style="padding:0 32px;"><table role="presentation" class="bd" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E6E8EC;border-radius:12px;border-collapse:separate;"><tr><td style="padding:16px 18px;"><p class="t-main" style="margin:0;{{ $font }}font-size:15px;line-height:1.55;color:#1A1B30;">{!! nl2br(e($recipient)) !!}</p></td></tr></table></td></tr>
+@endif
 
 <tr><td class="px" style="padding:28px 32px 36px;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:999px;background:#E8604C;"><a href="{{ $adminUrl }}" style="display:inline-block;padding:12px 22px;{{ $font }}font-size:14px;font-weight:700;color:#FFFFFF;text-decoration:none;">{{ __($copy.'.open_admin') }}</a></td></tr></table>

@@ -6,11 +6,10 @@
     $label = 'padding:26px 32px 10px;'.$font.'font-size:11px;line-height:1.2;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;color:#3B5583;';
     $kvLabel = $font.'font-size:14px;line-height:1.45;color:#5A6478;';
     $kvValue = $font.'font-size:14px;line-height:1.45;color:#1A1B30;text-align:right;font-weight:500;';
-    $rows = array_values(array_filter([
+    $rows = [
         [__($copy.'.where'), $where],
-        $recipient !== '' ? [__($copy.'.recipient'), $recipient] : null,
         [__($copy.'.code'), $code],
-    ]));
+    ];
 @endphp
 {{-- Header, footer and base styles come from the shared CaG mail shell. --}}
 <x-mail.cag-shell :title="__($copy.'.title')" :preheader="__($copy.'.preheader')" :reason="__($copy.'.footer_reason', ['site' => $site])">
@@ -49,6 +48,12 @@
 <tr><td class="t-main bd" valign="bottom" style="padding:14px 12px 12px 0;{{ $font }}font-size:14px;line-height:1.4;font-weight:600;color:#1A1B30;border-top:1px solid #E6E8EC;">{{ __($copy.'.amount') }}</td><td class="t-main bd" align="right" valign="bottom" style="padding:14px 0 12px;{{ $mono }}font-size:18px;line-height:1.3;font-weight:600;color:#1A1B30;white-space:nowrap;border-top:1px solid #E6E8EC;">{{ $amount }}</td></tr>
 </table>
 </td></tr></table></td></tr>
+
+{{-- Comment or instructions from the request form --}}
+@if($recipient !== '')
+<tr><td class="px t-label" style="{{ $label }}">{{ __($copy.'.message') }}</td></tr>
+<tr><td class="px" style="padding:0 32px;"><table role="presentation" class="bd" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E6E8EC;border-radius:12px;border-collapse:separate;"><tr><td style="padding:16px 18px;"><p class="t-main" style="margin:0;{{ $font }}font-size:15px;line-height:1.55;color:#1A1B30;">{!! nl2br(e($recipient)) !!}</p></td></tr></table></td></tr>
+@endif
 
 {{-- Note + contact --}}
 <tr><td class="px" style="padding:24px 32px 36px;">

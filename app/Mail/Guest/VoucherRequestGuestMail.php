@@ -10,8 +10,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Confirmation to someone who requested a gift voucher on /guidings/voucher: the request summary
- * and that CaG gets in touch. Interim copy until the final text is ready; nothing is charged.
+ * Confirmation to someone who requested a gift voucher on /guidings/voucher: the request summary,
+ * including their message, and that CaG gets in touch. Nothing is charged.
  */
 class VoucherRequestGuestMail extends Mailable
 {
@@ -45,7 +45,7 @@ class VoucherRequestGuestMail extends Mailable
             'request_city' => 'Rügen',
             'price_total' => 150,
             'currency' => 'EUR',
-            'recipient_names' => $de ? 'Papa' : 'Dad',
+            'recipient_names' => $de ? "Geschenk für Papa.\nWunschtermine im Mai." : "Gift for Dad.\nPreferred dates in May.",
             'buyer_first_name' => 'Lena Schmidt',
             'buyer_email' => 'lena.schmidt@example.com',
             'buyer_phone_country_code' => '+49',

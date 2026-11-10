@@ -85,14 +85,17 @@ class VoucherLandingTest extends TestCase
     {
         $this->get(route('guidings.voucher'))
             ->assertOk()
+            ->assertSee(__('guidings.voucher_landing.eyebrow'))
             ->assertSee(__('guidings.voucher_landing.hero_title'))
+            ->assertDontSee('Geschenkidee für Weihnachten', false)
+            ->assertDontSee('Christmas gift idea', false)
             ->assertSee(route('guidings.voucher.store'), false)
             ->assertSee('voucherLandingSearchPlace', false)
             ->assertSee(__('guidings.voucher_landing.recipient'))
             ->assertSee('Ebro')
             ->assertSee('Angeltouren ab 63 €')
             ->assertSee('https://cdn.example.com/regions/ebro.webp', false)
-            ->assertSee('assets/images/vouchers/landing-hero-a.webp', false)
+            ->assertSee('assets/images/vouchers/landing-hero.webp', false)
             ->assertDontSee('noindex', false);
     }
 
@@ -256,11 +259,19 @@ class VoucherLandingTest extends TestCase
         foreach (['de', 'en'] as $locale) {
             app()->setLocale($locale);
 
-            $guest = VoucherRequestGuestMail::sample();
-            $this->assertStringContainsString('150', $guest->render());
+            $guestHtml = VoucherRequestGuestMail::sample()->render();
+            $this->assertStringContainsString('150', $guestHtml);
+            $this->assertStringContainsString(e(__('emails.voucher_request_guest.message')), $guestHtml);
+            $this->assertMatchesRegularExpression(
+                $locale === 'de' ? '/Geschenk für Papa\.<br\s*\/?>/' : '/Gift for Dad\.<br\s*\/?>/',
+                $guestHtml,
+            );
+            $this->assertStringNotContainsString('>'.e(__('emails.voucher_order_guest.recipients')).'<', $guestHtml);
 
-            $admin = VoucherRequestAdminMail::sample();
-            $this->assertStringContainsString('lena.schmidt@example.com', $admin->render());
+            $adminHtml = VoucherRequestAdminMail::sample()->render();
+            $this->assertStringContainsString('lena.schmidt@example.com', $adminHtml);
+            $this->assertStringContainsString(e(__('emails.voucher_request_admin.message')), $adminHtml);
+            $this->assertStringContainsString($locale === 'de' ? 'Wunschtermine im Mai.' : 'Preferred dates in May.', $adminHtml);
         }
     }
 }

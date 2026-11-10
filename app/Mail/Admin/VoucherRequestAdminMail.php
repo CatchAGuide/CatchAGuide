@@ -10,8 +10,8 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * A new /guidings/voucher request for CaG (mail.admin_email): amount, destination, recipient and
- * the buyer's contact, with Reply-To the buyer. CaG follows up and issues the voucher.
+ * A new /guidings/voucher request for CaG (mail.admin_email): amount, destination, the guest's
+ * message and contact details, with Reply-To the buyer. CaG follows up and issues the voucher.
  */
 class VoucherRequestAdminMail extends Mailable
 {

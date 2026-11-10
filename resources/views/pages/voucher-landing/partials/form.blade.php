@@ -35,7 +35,7 @@
                     <div class="vl-success">
                         <div class="vl-confetti" aria-hidden="true">
                             @for($i = 0; $i < 46; $i++)
-                                <span style="--x: {{ mt_rand(0, 100) }}%; --w: {{ mt_rand(6, 12) }}px; --h: {{ mt_rand(10, 18) }}px; --d: {{ mt_rand(16, 32) / 10 }}s; --delay: {{ mt_rand(0, 6) / 10 }}s; --r: {{ mt_rand(0, 1) ? '2px' : '99px' }}; --c: var(--vl-{{ ['yellow', 'coral', 'slate', 'yellow'][$i % 4] }})"></span>
+                                <span style="--x: {{ mt_rand(0, 100) }}%; --w: {{ mt_rand(6, 12) }}px; --h: {{ mt_rand(10, 18) }}px; --d: {{ mt_rand(16, 32) / 10 }}s; --delay: {{ mt_rand(0, 6) / 10 }}s; --r: {{ mt_rand(0, 1) ? '2px' : '99px' }}; --c: var(--vl-{{ ['coral', 'slate', 'coral', 'slate'][$i % 4] }})"></span>
                             @endfor
                         </div>
                         <span class="vl-success__check">@include($icon, ['name' => 'check'])</span>

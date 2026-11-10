@@ -183,7 +183,6 @@ return [
     'voucher_landing' => [
         'meta_title' => 'Give a fishing trip voucher',
         'meta_description' => 'Give a day on the water: the Catch A Guide fishing trip voucher. Pick a region and an amount, we take care of the rest.',
-        'eyebrow_xmas' => '✦ Christmas gift idea',
         'eyebrow' => 'Gift idea for anglers',
         'hero_title' => 'Give a day on the water.',
         'hero_text' => 'The Catch A Guide fishing trip voucher: with real guides on the best waters in Europe. You pick the region and the amount, we take care of the rest.',

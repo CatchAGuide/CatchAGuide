@@ -181,7 +181,6 @@ return [
     'voucher_landing' => [
         'meta_title' => 'Angeltour-Gutschein verschenken',
         'meta_description' => 'Verschenk einen Tag am Wasser: der Angeltouren-Gutschein von Catch A Guide. Region und Wert wählen, wir kümmern uns um den Rest.',
-        'eyebrow_xmas' => '✦ Geschenkidee für Weihnachten',
         'eyebrow' => 'Geschenkidee für Angler:innen',
         'hero_title' => 'Verschenk einen Tag am Wasser.',
         'hero_text' => 'Der Angeltouren-Gutschein von Catch A Guide: mit echten Guides an den besten Gewässern Europas. Du wählst Region und Wert, wir kümmern uns um den Rest.',
