@@ -6,9 +6,11 @@ use App\Domain\Offers\DestinationOfferScope;
 use App\Models\CategoryEntity;
 use App\Models\Guiding;
 use App\Models\Review;
+use App\Models\User;
 use App\Repositories\Guiding\GuidingCategoryAvailabilityRepository;
 use App\Services\Offers\OfferCatalogPageService;
 use Collator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Intl\Countries;
@@ -40,6 +42,9 @@ class VoucherLandingCatalog
     private const REVIEW_MIN_SCORE = 9.5;
 
     private const REVIEW_MIN_LENGTH = 60;
+
+    /** Reviews read before dropping test/staff/self reviews down to REVIEW_LIMIT. */
+    private const REVIEW_CANDIDATES = 20;
 
     public function __construct(
         private readonly OfferCatalogPageService $offerCatalog,
@@ -182,7 +187,8 @@ class VoucherLandingCatalog
     }
 
     /**
-     * Recent top-rated tour reviews with real text, in the page language.
+     * Recent top-rated tour reviews by real customers, in the page language. Reviews from test
+     * or staff accounts, and guides reviewing their own tour, are left out.
      *
      * @return list<array{text: string, name: string, tour: string}>
      */
@@ -190,22 +196,63 @@ class VoucherLandingCatalog
     {
         $locale = app()->getLocale();
 
-        return Cache::remember("voucher_landing_reviews_v1_{$locale}", now()->addMinutes(self::CACHE_MINUTES), function () {
+        return Cache::remember("voucher_landing_reviews_v2_{$locale}", now()->addMinutes(self::CACHE_MINUTES), function () {
             return Review::query()
-                ->with(['user:id,firstname', 'guiding:id,title'])
+                ->with([
+                    'guiding:id,title,user_id',
+                    'booking:id,user_id,is_guest',
+                    'booking.guestUser:id,firstname,lastname,email',
+                    'booking.registeredUser:id,firstname,lastname,email',
+                ])
                 ->where('is_automatic', false)
                 ->where('grandtotal_score', '>=', self::REVIEW_MIN_SCORE)
                 ->whereRaw('CHAR_LENGTH(comment) >= ?', [self::REVIEW_MIN_LENGTH])
-                ->latest()
-                ->limit(self::REVIEW_LIMIT)
+                ->newestFirst()
+                ->limit(self::REVIEW_CANDIDATES)
                 ->get()
-                ->map(fn (Review $review) => [
-                    'text' => (string) translate($review->comment),
-                    'name' => trim((string) $review->user?->firstname),
-                    'tour' => $review->guiding ? (string) translate($review->guiding->title) : '',
+                ->map(fn (Review $review) => ['review' => $review, 'reviewer' => $this->reviewer($review)])
+                ->filter(fn (array $row) => $this->isCustomerReview($row['review'], $row['reviewer']))
+                ->take(self::REVIEW_LIMIT)
+                ->map(fn (array $row) => [
+                    'text' => (string) translate($row['review']->comment),
+                    'name' => trim((string) $row['reviewer']->firstname),
+                    'tour' => $row['review']->guiding ? (string) translate($row['review']->guiding->title) : '',
                 ])
+                ->values()
                 ->all();
         });
+    }
+
+    /**
+     * The customer who wrote the review. A guest booking's user_id points at user_guests, so the
+     * name comes from the booking; Review::user() would look a guest's id up in users when
+     * eager-loaded and show an unrelated account's name.
+     */
+    private function reviewer(Review $review): ?Model
+    {
+        $booking = $review->booking;
+
+        if ($booking !== null) {
+            return $booking->is_guest ? $booking->guestUser : $booking->registeredUser;
+        }
+
+        return $review->user_id ? User::query()->find($review->user_id, ['id', 'firstname', 'lastname', 'email']) : null;
+    }
+
+    private function isCustomerReview(Review $review, ?Model $reviewer): bool
+    {
+        if ($reviewer === null || trim((string) $reviewer->firstname) === '') {
+            return false;
+        }
+
+        $identity = $reviewer->firstname.' '.$reviewer->lastname.' '.$reviewer->email;
+        if (preg_match('/\btest|catch\s*a\s*guide|@catchaguide\./i', $identity)) {
+            return false;
+        }
+
+        $isGuest = (bool) $review->booking?->is_guest;
+
+        return $isGuest || $review->guiding === null || (int) $review->guiding->user_id !== (int) $reviewer->getKey();
     }
 
     /**

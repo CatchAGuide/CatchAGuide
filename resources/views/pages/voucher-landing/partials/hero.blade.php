@@ -10,8 +10,8 @@
                 class="vl-hero__image is-active"
                 src="{{ asset('assets/images/vouchers/landing-hero.webp') }}"
                 alt=""
-                width="1191"
-                height="1000"
+                width="1920"
+                height="1440"
                 fetchpriority="high"
             >
         </div>
