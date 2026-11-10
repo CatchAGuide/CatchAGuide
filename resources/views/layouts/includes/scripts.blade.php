@@ -214,7 +214,8 @@
         { input: 'offersCatalogSearchPlace', lat: 'LocationLatOffersCatalog', lng: 'LocationLngOffersCatalog', city: 'LocationCityOffersCatalog', country: 'LocationCountryOffersCatalog', region: 'LocationRegionOffersCatalog' },
         { input: 'guidingsCatalogSearchPlace', lat: 'LocationLatGuidingsCatalog', lng: 'LocationLngGuidingsCatalog', city: 'LocationCityGuidingsCatalog', country: 'LocationCountryGuidingsCatalog', region: 'LocationRegionGuidingsCatalog' },
         { input: 'categoryHeroSearchPlace', lat: 'LocationLatCategoryHero', lng: 'LocationLngCategoryHero', city: 'LocationCityCategoryHero', country: 'LocationCountryCategoryHero', region: 'LocationRegionCategoryHero' },
-        { input: 'sitePageSearchPlace', lat: 'LocationLatSitePage', lng: 'LocationLngSitePage', city: 'LocationCitySitePage', country: 'LocationCountrySitePage', region: 'LocationRegionSitePage' }
+        { input: 'sitePageSearchPlace', lat: 'LocationLatSitePage', lng: 'LocationLngSitePage', city: 'LocationCitySitePage', country: 'LocationCountrySitePage', region: 'LocationRegionSitePage' },
+        { input: 'voucherLandingSearchPlace', lat: 'LocationLatVoucherLanding', lng: 'LocationLngVoucherLanding', city: 'LocationCityVoucherLanding', country: 'LocationCountryVoucherLanding', region: 'LocationRegionVoucherLanding' }
     ];
 
     function initAutocompleteForConfig(MapsManager, config, callback) {

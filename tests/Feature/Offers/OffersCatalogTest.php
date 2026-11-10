@@ -109,6 +109,24 @@ class OffersCatalogTest extends TestCase
         $response->assertSee('<select name="country"', false);
     }
 
+    public function test_offers_index_shows_gift_voucher_row_between_listing_and_faq(): void
+    {
+        $this->bindCatalog(fn () => $this->viewModel(
+            type: 'all',
+            cards: collect([$this->card('tour', 'Dawn Pike Tour')]),
+        ));
+
+        $response = $this->get(route('offers.index'));
+
+        $response->assertOk();
+        $response->assertSeeInOrder([
+            'offers-catalog__pagination',
+            'data-analytics-section="voucher-promo-row"',
+            'data-offers-faq',
+        ], false);
+        $response->assertSee('href="'.route('guidings.voucher').'"', false);
+    }
+
     public function test_region_filter_is_disabled_when_header_place_search_is_active(): void
     {
         $this->bindCatalog(fn () => $this->viewModel(

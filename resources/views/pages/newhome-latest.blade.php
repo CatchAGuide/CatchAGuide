@@ -39,6 +39,7 @@
         'viewAllLabel' => __('homepage.landing_destinations_see_all'),
     ])
     @include('pages.guidings.partials.landing.how-it-works')
+    @include('pages.voucher-landing.partials.promo-banner')
     @include('pages.guidings.partials.landing.tour-type-pills')
     <section class="cag-home-section vacation-hub__fish" data-analytics-vacation-rail="guidings-landing-methods">
         <div class="cag-home-container">

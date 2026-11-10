@@ -142,6 +142,25 @@ class GuidingsDestinationTest extends TestCase
         );
     }
 
+    public function test_guidings_destination_shows_gift_voucher_row_after_listing(): void
+    {
+        $country = $this->createCountry('spanien-voucher-row');
+
+        $this->bindToursCatalog(fn () => $this->viewModel(
+            catalogUrl: route('guidings.destination', ['country' => $country->slug]),
+        ));
+
+        $response = $this->get(route('guidings.destination', ['country' => $country->slug]));
+
+        $response->assertOk();
+        $response->assertSeeInOrder([
+            'offers-catalog-page',
+            'data-analytics-section="voucher-promo-row"',
+        ], false);
+        $response->assertSee('href="'.route('guidings.voucher').'"', false);
+        $response->assertDontSee('voucher-promo-banner', false);
+    }
+
     public function test_guidings_destination_country_shows_country_switch_dropdown_targeting_guidings_pages(): void
     {
         $country = $this->createCountry('spanien-country-switch');
@@ -196,6 +215,10 @@ class GuidingsDestinationTest extends TestCase
         $response->assertDontSee('cag-home-species__cta', false);
         $response->assertSee('cag-dest-geo-rail', false);
         $response->assertSee('data-species-spotlight', false);
+        $response->assertSee("speciesViewport.addEventListener('mouseenter'", false);
+        $response->assertSee('hoverPaused = true', false);
+        $response->assertSee("speciesViewport.addEventListener('touchstart', pauseForInteract", false);
+        $response->assertSee('scheduleInteractResume(2000)', false);
         $response->assertSeeInOrder([
             'cag-dest-intro',
             'data-geo-rail="regions"',

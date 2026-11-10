@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\Admin\CampCheckoutAdminMail;
 use App\Mail\Admin\TripCheckoutAdminMail;
+use App\Mail\Admin\VoucherRequestAdminMail;
 use App\Mail\Guest\CampCheckoutGuestMail;
 use App\Mail\Guest\VacationReviewRequestMail;
 use App\Mail\Guest\TripCheckoutGuestMail;
 use App\Mail\Guest\VoucherOrderGuestMail;
+use App\Mail\Guest\VoucherRequestGuestMail;
 use App\Mail\Guide\VoucherOrderGuideMail;
 use App\Models\Method;
 use App\Models\Target;
@@ -798,6 +800,12 @@ HTML;
 
             case 'guide_voucher_order':
                 return VoucherOrderGuideMail::sample()->viewData();
+
+            case 'guest_voucher_request':
+                return VoucherRequestGuestMail::sample()->viewData();
+
+            case 'admin_voucher_request':
+                return VoucherRequestAdminMail::sample()->viewData();
 
             case 'ceo_booking_notification':
             case 'booking_reject_mail_to_ceo':

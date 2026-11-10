@@ -2,6 +2,7 @@
 
 namespace App\Services\Voucher;
 
+use App\Enums\VoucherOrderKind;
 use App\Models\Guiding;
 use App\Models\User;
 use App\Models\VoucherOrder;
@@ -46,6 +47,7 @@ class VoucherOrderService
 
         $order = VoucherOrder::create([
             'voucher_code' => $this->codes->generate(),
+            'kind' => VoucherOrderKind::Order,
             'guiding_id' => $guiding->id,
             'guide_id' => $guiding->user_id,
             'user_id' => $currentUser?->getKey(),

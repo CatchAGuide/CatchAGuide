@@ -82,6 +82,10 @@
         var spotlightIndex = 0;
         var spotlightTimer = null;
         var spotlightPaused = false;
+        var hoverPaused = false;
+        var focusPaused = false;
+        var interactPaused = false;
+        var interactResumeTimer = null;
         var entranceTimer = null;
 
         var clearSpotlight = function () {
@@ -132,26 +136,52 @@
             }
         };
 
+        var shouldHold = function () {
+            return hoverPaused
+                || focusPaused
+                || interactPaused
+                || (speciesViewport && speciesViewport.classList.contains('is-dragging'));
+        };
+
         var startSpotlight = function () {
-            if (speciesReduceMotion || speciesCards.length < 2 || spotlightPaused) return;
+            if (speciesReduceMotion || speciesCards.length < 2 || shouldHold()) return;
+            spotlightPaused = false;
             stopSpotlight();
             setSpotlight(spotlightIndex);
             spotlightTimer = window.setInterval(function () {
-                if (spotlightPaused) return;
+                if (shouldHold()) return;
                 setSpotlight(spotlightIndex + 1);
             }, 2400);
         };
 
-        var pauseSpotlight = function () {
-            spotlightPaused = true;
-            clearSpotlight();
-            stopSpotlight();
+        var syncSpotlightHold = function () {
+            if (shouldHold()) {
+                spotlightPaused = true;
+                clearSpotlight();
+                stopSpotlight();
+                return;
+            }
+            startSpotlight();
         };
 
-        var resumeSpotlight = function () {
-            if (speciesViewport && speciesViewport.classList.contains('is-dragging')) return;
-            spotlightPaused = false;
-            startSpotlight();
+        var pauseForInteract = function () {
+            interactPaused = true;
+            if (interactResumeTimer) {
+                window.clearTimeout(interactResumeTimer);
+                interactResumeTimer = null;
+            }
+            syncSpotlightHold();
+        };
+
+        var scheduleInteractResume = function (delay) {
+            interactPaused = true;
+            if (interactResumeTimer) window.clearTimeout(interactResumeTimer);
+            interactResumeTimer = window.setTimeout(function () {
+                interactPaused = false;
+                interactResumeTimer = null;
+                syncSpotlightHold();
+            }, delay || 2000);
+            syncSpotlightHold();
         };
 
         var beginMotion = function () {
@@ -178,21 +208,43 @@
         }
 
         speciesCards.forEach(function (card) {
-            card.addEventListener('mouseenter', pauseSpotlight);
-            card.addEventListener('mouseleave', resumeSpotlight);
-            card.addEventListener('focusin', pauseSpotlight);
-            card.addEventListener('focusout', resumeSpotlight);
+            card.addEventListener('focusin', function () {
+                focusPaused = true;
+                syncSpotlightHold();
+            });
+            card.addEventListener('focusout', function (e) {
+                var next = e.relatedTarget;
+                if (next && speciesSection.contains(next)) return;
+                focusPaused = false;
+                syncSpotlightHold();
+            });
         });
 
         if (speciesViewport) {
-            enableDragScroll(speciesViewport, { onInteract: pauseSpotlight });
-            speciesViewport.addEventListener('touchstart', pauseSpotlight, { passive: true });
+            // Hold auto-advance for the whole rail (not per-card) so gaps/scroll don't resume it.
+            speciesViewport.addEventListener('mouseenter', function () {
+                hoverPaused = true;
+                syncSpotlightHold();
+            });
+            speciesViewport.addEventListener('mouseleave', function () {
+                hoverPaused = false;
+                syncSpotlightHold();
+            });
+
+            enableDragScroll(speciesViewport, { onInteract: pauseForInteract });
+
+            // Mobile: hold while touching, then keep paused briefly so users can pick a card.
+            speciesViewport.addEventListener('touchstart', pauseForInteract, { passive: true });
             speciesViewport.addEventListener('touchend', function () {
-                window.setTimeout(resumeSpotlight, 1200);
+                scheduleInteractResume(2000);
             }, { passive: true });
-            speciesViewport.addEventListener('pointerup', function () {
-                if (!spotlightPaused) return;
-                window.setTimeout(resumeSpotlight, 1200);
+            speciesViewport.addEventListener('touchcancel', function () {
+                scheduleInteractResume(2000);
+            }, { passive: true });
+            speciesViewport.addEventListener('pointerup', function (e) {
+                if (e.pointerType === 'touch') return;
+                if (!interactPaused) return;
+                scheduleInteractResume(2000);
             });
         }
     };

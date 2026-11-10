@@ -1,0 +1,377 @@
+// Gift voucher promos linking to /guidings/voucher.
+// .vp-banner — design 5a: dark band + ticket (homepage, /guidings landing).
+// .vp-row    — design 2a: white row with € badge (tour listings, after pagination).
+// Views: resources/views/pages/voucher-landing/partials/promo-{banner,row}.blade.php
+
+// ---------------------------------------------------------------------------
+// Banner (5a)
+// ---------------------------------------------------------------------------
+
+.vp-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: $cag-space-8;
+  align-items: center;
+  overflow: hidden;
+  padding: $cag-space-8 $cag-space-5;
+  border-radius: $cag-radius-xl;
+  background: $cag-slate;
+  font-family: $cag-font;
+
+  @media (min-width: 992px) {
+    grid-template-columns: minmax(0, 1fr) 440px;
+    gap: $cag-space-10;
+    padding: $cag-space-10 $cag-space-14;
+  }
+}
+
+.vp-banner__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $cag-space-4;
+}
+
+.vp-banner__title {
+  margin: 0;
+  font-size: $cag-fs-display-sm;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-tight;
+  color: $cag-on-dark;
+  text-wrap: pretty;
+}
+
+.vp-banner__text {
+  max-width: 460px;
+  margin: 0;
+  font-size: $cag-fs-body-mobile;
+  line-height: $cag-lh-body;
+  color: $cag-on-dark-muted;
+  text-wrap: pretty;
+
+  @media (min-width: 768px) {
+    font-size: $cag-fs-lead;
+  }
+}
+
+.vp-banner__cta {
+  @include cag-button(coral);
+  margin-top: $cag-space-2;
+  padding: 0.875rem 1.5rem;
+
+  // Slate (the token hover) would vanish on the slate band.
+  &:hover,
+  &:focus-visible {
+    background: $cag-white;
+    color: $cag-slate;
+  }
+}
+
+.vp-banner__visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+
+  @media (min-width: 576px) {
+    height: 280px;
+  }
+}
+
+// The ticket is fixed-size artwork (400×210) scaled as a whole on narrow screens; its type uses
+// the rem type scale like the rest of the banner.
+.vp-ticket {
+  position: relative;
+  flex: none;
+  width: 400px;
+  height: 210px;
+  transform: rotate(-5deg) scale(0.75);
+  filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.45));
+  // Motion uses the individual translate/rotate properties, so it stacks on top of the base
+  // transform (tilt + mobile scale) instead of replacing it.
+  animation: vp-ticket-float 6s ease-in-out infinite;
+  transition: rotate 0.6s $cag-ease, translate 0.6s $cag-ease;
+
+  @media (min-width: 576px) {
+    transform: rotate(-5deg);
+  }
+
+  .vp-banner:hover & {
+    animation-play-state: paused;
+    rotate: 5deg;
+    translate: 0 -10px;
+  }
+}
+
+@keyframes vp-ticket-float {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+
+  50% {
+    translate: 0 -12px;
+    rotate: 1.5deg;
+  }
+}
+
+// Light sweep across the ticket every few seconds.
+.vp-ticket__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.14) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-position: 150% 0;
+  animation: vp-ticket-shine 5s ease-in-out 1s infinite;
+}
+
+@keyframes vp-ticket-shine {
+  0% {
+    background-position: 150% 0;
+  }
+
+  40%,
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+.vp-ticket__bow,
+.vp-ticket__knot {
+  animation: vp-ticket-bow 6s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes vp-ticket-bow {
+  0%,
+  100% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.12;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vp-ticket,
+  .vp-ticket__shine,
+  .vp-ticket__bow,
+  .vp-ticket__knot {
+    animation: none;
+    transition: none;
+  }
+
+  .vp-banner:hover .vp-ticket {
+    rotate: 0deg;
+    translate: none;
+  }
+}
+
+.vp-ticket__card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: linear-gradient(140deg, lighten($cag-slate, 8%), $cag-slate-deep);
+}
+
+.vp-ticket__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: $cag-space-5 22px;
+  color: $cag-on-dark;
+}
+
+.vp-ticket__kicker,
+.vp-ticket__side {
+  font-size: $cag-fs-micro;
+  font-weight: $cag-fw-bold;
+  letter-spacing: 0.18em;
+  color: $cag-on-dark-subtle;
+}
+
+.vp-ticket__brand {
+  font-size: $cag-fs-subtitle;
+  font-weight: $cag-fw-bold;
+  letter-spacing: $cag-ls-caps;
+}
+
+.vp-ticket__amount {
+  margin-top: 6px;
+  font-size: $cag-fs-display-sm;
+  font-weight: $cag-fw-bold;
+  line-height: 1;
+}
+
+.vp-ticket__where {
+  margin-top: 6px;
+  font-size: $cag-fs-subtitle;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-ui;
+}
+
+.vp-ticket__serial {
+  margin-top: auto;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: $cag-fs-micro;
+  color: $cag-on-dark-subtle;
+}
+
+.vp-ticket__diamond {
+  position: absolute;
+  border-radius: 1px;
+  background: $cag-coral;
+  transform: rotate(45deg);
+
+  &--a {
+    top: 30px;
+    right: 34px;
+    width: 9px;
+    height: 9px;
+  }
+
+  &--b {
+    top: 58px;
+    right: 22px;
+    width: 6px;
+    height: 6px;
+  }
+}
+
+.vp-ticket__stub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.22);
+}
+
+.vp-ticket__side {
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.vp-ticket__ribbon {
+  position: absolute;
+  top: 0;
+  right: 24px;
+  bottom: 0;
+  width: 22px;
+  background: $cag-coral;
+}
+
+// Bow on top of the ribbon.
+.vp-ticket__bow {
+  position: absolute;
+  top: -16px;
+  width: 14px;
+  height: 14px;
+  border: 4px solid $cag-coral;
+
+  &--l {
+    right: 38px;
+    border-radius: 50% 50% 0 50%;
+    transform: rotate(-30deg);
+  }
+
+  &--r {
+    right: 20px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(30deg);
+  }
+}
+
+.vp-ticket__knot {
+  position: absolute;
+  top: -6px;
+  right: 33px;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: $cag-coral;
+}
+
+// ---------------------------------------------------------------------------
+// Row (2a)
+// ---------------------------------------------------------------------------
+
+.vp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $cag-space-4;
+  margin-top: $cag-space-6;
+  padding: 18px $cag-space-5;
+  border: 1px solid $cag-border;
+  border-radius: $cag-radius-lg;
+  background: $cag-white;
+  font-family: $cag-font;
+
+  @media (min-width: 768px) {
+    flex-wrap: nowrap;
+    gap: 18px;
+  }
+}
+
+.vp-row__badge {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba($cag-coral, 0.14);
+  color: $cag-coral;
+  font-size: $cag-fs-h3;
+  font-weight: $cag-fw-bold;
+}
+
+.vp-row__copy {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vp-row__title {
+  margin: 0;
+  font-size: $cag-fs-body-mobile;
+  font-weight: $cag-fw-bold;
+  line-height: $cag-lh-ui;
+  color: $cag-slate;
+
+  @media (min-width: 768px) {
+    font-size: $cag-fs-body;
+  }
+}
+
+.vp-row__text {
+  margin: 0;
+  font-size: $cag-fs-small;
+  line-height: $cag-lh-ui;
+  color: $cag-gray;
+}
+
+.vp-row__cta {
+  @include cag-button(coral);
+  flex: none;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    width: auto;
+  }
+}

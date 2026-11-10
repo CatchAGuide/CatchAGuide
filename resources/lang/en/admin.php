@@ -736,7 +736,7 @@ return [
 
     'voucher_orders' => [
         'title' => 'Gift voucher orders',
-        'intro' => 'Tours bought as gift vouchers. The guide collects the payment and sends the voucher; there is no date or status. Commission is tracked under Finance › Invoices.',
+        'intro' => 'Tours bought as gift vouchers (Order: the guide collects the payment and sends the voucher) and requests from the voucher landing page /guidings/voucher (Request: no tour yet, CaG contacts the buyer and issues the voucher). Commission on orders is tracked under Finance › Invoices.',
         'total' => 'Total',
         'volume' => 'Order value',
         'commission' => 'Commission',
@@ -772,5 +772,14 @@ return [
         'comment_load_failed' => 'Failed to load comment.',
         'comment_save_failed' => 'Failed to save comment.',
         'pdf_missing' => 'The voucher PDF could not be created.',
+        'filter_all' => 'All',
+        'col_kind' => 'Type',
+        'kind_order' => 'Order',
+        'kind_request' => 'Request',
+        'filter_orders' => 'Orders',
+        'filter_requests' => 'Requests',
+        'col_status' => 'Status',
+        'request_tour' => 'Voucher request',
+        'request_open' => 'Region open',
     ],
 ];

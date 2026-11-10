@@ -92,7 +92,7 @@ class SitemapXmlWriterAndPagesContributorTest extends TestCase
             ->map(fn (SitemapEntry $entry) => $entry->loc)
             ->all();
 
-        foreach (['', '/offers', '/guidings', '/vacations', '/vacations/trips', '/vacations/camps', '/faq', '/partner', '/for-agents', '/about-us'] as $path) {
+        foreach (['', '/offers', '/guidings', '/vacations', '/vacations/trips', '/vacations/camps', '/guidings/voucher', '/faq', '/partner', '/for-agents', '/about-us'] as $path) {
             $this->assertContains('https://www.catchaguide.com'.$path, $locs);
         }
 

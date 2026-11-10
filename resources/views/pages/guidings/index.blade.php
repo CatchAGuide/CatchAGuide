@@ -106,6 +106,7 @@
             <x-offers.catalog-listing
                 :vm="$vm"
                 analytics-page="guidings-catalog"
+                :show-voucher-promo="true"
             />
         </div>
     </section>

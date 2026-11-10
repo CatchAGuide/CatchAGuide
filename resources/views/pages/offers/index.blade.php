@@ -23,7 +23,7 @@
     @include('pages.offers.partials.catalog-header')
 
     <div class="container offers-catalog-page__body offers-page-header__anim" style="--offers-anim-i: 4">
-        <x-offers.catalog-listing :vm="$vm" />
+        <x-offers.catalog-listing :vm="$vm" :show-voucher-promo="true" />
     </div>
 </div>
 @endsection

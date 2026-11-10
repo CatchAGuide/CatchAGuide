@@ -265,6 +265,17 @@ Guide-written listing text (guidings, trips, camps, vacations, …) is translate
 - Translation rows are one per (`source_id`, `type`, `language`). Don't add other columns to the
   `updateOrCreate` match. Matching on `title` once left duplicate rows, and pages kept showing the stale one.
 
+### UI design system
+
+The homepage is the reference design. `docs/design-system.md` is the spec: type scale, colors, h1/h2/h3 roles,
+alignment, components and UI wording. `resources/sass/settings/_tokens.scss` holds the `$cag-*` tokens and
+`cag-*` mixins. It emits no CSS, so importing it changes nothing. New or changed public-site SCSS uses those tokens
+instead of literals. Font is inherited DM Sans at 400/500/700 only (600 isn't loaded and renders as 700). One `h1`
+per page. Migrate a component onto tokens when you touch it, never in bulk. To find drift, use the
+`design-sync-audit` skill (`node .claude/skills/design-sync-audit/scripts/design-audit.mjs --changed` for a quick
+check). Cursor gets the same rules from `.cursor/rules/design-system.mdc`. If you change a token, update the doc,
+`_tokens.scss` and the audit script's constants together.
+
 ### Guide status
 
 `app/Enums/GuideStatus.php` + `app/Services/Guide/GuideStatusService.php` (with a `HasGuideStatus` trait) model the

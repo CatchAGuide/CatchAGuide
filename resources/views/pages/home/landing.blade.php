@@ -25,6 +25,7 @@
     @include('pages.home.partials.country-grid')
     @include('pages.home.partials.trust-strip')
     @include('pages.home.partials.target-species')
+    @include('pages.voucher-landing.partials.promo-banner')
     @include('pages.home.partials.season-module')
     @include('pages.home.partials.mixed-offers-rail')
     @include('pages.home.partials.testimonials')
