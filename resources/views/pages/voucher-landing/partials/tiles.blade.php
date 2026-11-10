@@ -9,7 +9,8 @@
             <h2 class="vl-h2">{{ __($copy.'where_title') }}</h2>
             <p>{{ __($copy.'where_text') }}</p>
         </div>
-        <div class="vl-tiles">
+        <div class="vl-picks">
+            <div class="vl-tiles">
             @foreach($tiles as $tile)
                 <button type="button" class="vl-tile" @click="pickTile(@js($tile['country']), @js($tile['region']))"
                         @if($tile['image']) style="background-image: url('{{ $tile['image'] }}')" @endif>
@@ -27,6 +28,7 @@
                     </span>
                 </button>
             @endforeach
+            </div>
             <button type="button" class="vl-tile vl-tile--open" @click="pickTile(null, null)">
                 <span class="vl-tile__open-icon">@include('pages.voucher-landing.partials.icon', ['name' => 'compass'])</span>
                 <span class="vl-tile__title">{{ __($copy.'tile_open_title') }}</span>

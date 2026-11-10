@@ -658,6 +658,12 @@ $vl-night: darken($vl-slate, 8%);
 
 // ---------------------------------------------------------------- tiles
 
+.vl-picks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .vl-tiles {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -761,51 +767,69 @@ $vl-night: darken($vl-slate, 8%);
   }
 
   &--open {
-    grid-column: 1 / -1;
+    flex: none;
+    width: 100%;
     height: auto;
-    padding: 16px 18px;
+    padding: 10px 16px;
     border: 2px dashed rgba($vl-slate, 0.45);
     background: var(--vl-sand);
     box-shadow: none;
     color: var(--vl-ink);
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px 14px;
 
-    .vl-tile__title { font-size: 1rem; }
+    .vl-tile__title {
+      flex: none;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
 
     &:hover,
     &:focus-visible { background: var(--vl-sand-hover); }
 
-    @include media("<tablet") { height: 180px; }
+    @include media("<tablet") {
+      flex: none;
+      width: 100%;
+      gap: 8px;
+
+      // The sentence does not fit beside the title and link on a phone.
+      .vl-tile__text { display: none; }
+    }
   }
 
   &__open-icon {
-    width: 32px;
-    height: 32px;
+    flex: none;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--vl-slate);
     color: var(--vl-white);
     display: grid;
     place-items: center;
-    font-size: 16px;
+    font-size: 15px;
   }
 
   &__text {
-    max-width: 28em;
+    flex: 0 1 auto;
+    min-width: 0;
     font-size: 0.85rem;
-    line-height: 1.4;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__cta {
+    flex: none;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-weight: 700;
     font-size: 0.9rem;
     color: var(--vl-slate);
+    white-space: nowrap;
 
     .vl-icon { font-size: 14px; }
   }
