@@ -51,7 +51,7 @@
                                             <th class="wd-22p border-bottom-0">Offer</th>
                                             <th class="wd-8p border-bottom-0 text-center">Images</th>
                                             <th class="wd-10p border-bottom-0">Status</th>
-                                            <th class="wd-18p border-bottom-0">Created By</th>
+                                            <th class="wd-18p border-bottom-0">{{ __('admin.listing_owner.column') }}</th>
                                             <th class="wd-12p border-bottom-0">Created At</th>
                                             <th class="wd-18p border-bottom-0">Actions</th>
                                         </tr>

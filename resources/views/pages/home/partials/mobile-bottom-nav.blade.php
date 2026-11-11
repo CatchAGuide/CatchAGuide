@@ -10,12 +10,29 @@
             };
         @endphp
         <a href="{{ $item['url'] }}"
-           @class(['cag-home-bottom-nav__item', 'is-active' => $item['active']])
+           @class([
+               'cag-home-bottom-nav__item',
+               'is-active' => $item['active'],
+               'is-label-nowrap' => ($item['key'] ?? '') === 'offers',
+           ])
            @if ($item['active']) aria-current="page" @endif
            @if ($item['opens_login']) data-bs-toggle="modal" data-bs-target="#loginModal" @endif
         >
             @include('pages.home.partials.cag-icon', ['name' => $navIcon, 'size' => 19])
-            <span>{{ $item['label'] }}</span>
+            @php
+                // Two-word EN catalog labels (Fishing Tours / Fishing Holidays) wrap to match.
+                // Offers ("Alle Erlebnisse" / "All Experiences") always stays one line.
+                $wrapCatalogLabel = in_array($item['key'] ?? '', ['tours', 'vacations'], true)
+                    && str_contains($item['label'], ' ');
+                $labelParts = $wrapCatalogLabel ? explode(' ', $item['label'], 2) : null;
+            @endphp
+            <span>
+                @if ($labelParts)
+                    {{ $labelParts[0] }}<br>{{ $labelParts[1] }}
+                @else
+                    {{ $item['label'] }}
+                @endif
+            </span>
         </a>
     @endforeach
 </nav>

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreCustomerRequest;
 use App\Http\Requests\Admin\UpdateCustomerRequest;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Services\Admin\CustomerCreator;
+use App\Services\Admin\ListingOwnerSearch;
 use Illuminate\Http\Request;
 
 class CustomersController extends Controller
@@ -17,14 +20,31 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function create()
+    /**
+     * JSON search for listing owner pickers (Admin › trips/camps/…).
+     */
+    public function search(Request $request, ListingOwnerSearch $search)
     {
-        //
+        return response()->json([
+            'results' => $search->search((string) $request->input('q', '')),
+        ]);
     }
 
-    public function store(Request $request)
+    public function create()
     {
-        //
+        return redirect()->route('admin.customers.index', ['create' => 1]);
+    }
+
+    public function store(StoreCustomerRequest $request, CustomerCreator $creator)
+    {
+        $customer = $creator->create(
+            $request->validated(),
+            $request->user('employees')?->id
+        );
+
+        return redirect()
+            ->route('admin.customers.edit', $customer)
+            ->with('success', __('admin.customers.created'));
     }
 
     public function show(User $customer)

@@ -5,6 +5,8 @@ namespace App\Presenters\Sales;
 use App\Enums\Sales\SalesDocumentOutput;
 use App\Enums\Sales\SalesDocumentStatus;
 use App\Models\SalesDocument;
+use App\Models\User;
+use App\Services\Sales\SalesCatalog;
 use App\Services\Sales\SalesDocumentCalculator;
 use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesFormat;
@@ -47,6 +49,7 @@ class SalesDocumentPresenter
         private readonly SalesDocumentStateMapper $mapper,
         private readonly SalesLinks $links,
         private readonly SalesTexts $texts,
+        private readonly SalesCatalog $catalog,
     ) {}
 
     /**
@@ -113,9 +116,11 @@ class SalesDocumentPresenter
             )),
             'goodToKnow' => trim((string) ($header['good_to_know'] ?? '')),
             'paymentNote' => trim((string) ($header['payment_note'] ?? '')),
-            'partners' => $isOffer ? [] : array_map(fn (array $partner) => $partner + [
-                'firstName' => strtok($partner['name'], ' ') ?: $partner['name'],
-            ], $quote->partners()),
+            // Confirmation host block: resolve the live vacation provider / guide so older
+            // snapshots (or listings that got an owner later) still show phone + address.
+            'partners' => $isOffer ? [] : $this->confirmationPartners($quote),
+            // Guest contact on confirmation (page + mail) so CC'd hosts can reach the guest.
+            'guest' => $isOffer ? null : $this->guest($header),
             'validUntil' => $validUntil !== null ? SalesFormat::date($validUntil->toDateString(), $locale) : null,
             'state' => $this->state($status, $validUntil),
             'signature' => trim((string) ($context['creator'] ?? '')),
@@ -124,6 +129,124 @@ class SalesDocumentPresenter
             'subject' => $this->subject($output, $quote, $period, (string) ($context['number'] ?? ''), $locale),
             'quote' => $quote,
         ];
+    }
+
+    /**
+     * Recipient shown on the booking confirmation for the guest and the CC'd host.
+     *
+     * @param  array<string, mixed>  $header
+     * @return array{name: string, email: string, phone: string, travellers: list<string>}|null
+     */
+    private function guest(array $header): ?array
+    {
+        $name = trim(trim((string) ($header['first_name'] ?? '')).' '.trim((string) ($header['last_name'] ?? '')));
+        $email = trim((string) ($header['email'] ?? ''));
+        $phone = trim((string) ($header['phone'] ?? ''));
+        $travellers = SalesDocumentStateMapper::travellers((string) ($header['travellers'] ?? ''));
+
+        if ($name === '' && $email === '' && $phone === '' && $travellers === []) {
+            return null;
+        }
+
+        return [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'travellers' => $travellers,
+        ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function confirmationPartners(SalesQuote $quote): array
+    {
+        $partners = [];
+
+        foreach ($quote->groups as $group) {
+            $partner = $this->resolvePartner($group);
+            if ($partner === null) {
+                continue;
+            }
+
+            $partner = $this->enrichPartner($partner);
+            $key = (string) (($partner['id'] ?? null) ?: ('name:'.($partner['name'] ?? '')));
+            if ($key === '' || $key === 'name:') {
+                continue;
+            }
+
+            $partners[$key] ??= $partner;
+        }
+
+        return array_values($partners);
+    }
+
+    /**
+     * Prefer the live listing owner for contact fields; keep a trip's provider_name when set.
+     *
+     * @param  array<string, mixed>  $group
+     * @return array<string, mixed>|null
+     */
+    private function resolvePartner(array $group): ?array
+    {
+        $snapshot = is_array($group['partner'] ?? null) ? $group['partner'] : null;
+        $live = $this->catalog->listingPartner((string) ($group['type'] ?? ''), (int) ($group['listing_id'] ?? 0));
+
+        if ($live === null) {
+            return $snapshot;
+        }
+
+        if ($snapshot === null) {
+            return $live;
+        }
+
+        $merged = $live;
+        // Trips may advertise a provider_name distinct from the linked user account.
+        if (($group['type'] ?? null) === 'trip' && filled($snapshot['name'] ?? null)) {
+            $merged['name'] = (string) $snapshot['name'];
+        }
+
+        return $merged;
+    }
+
+    /**
+     * Keep the snapshot name (trips may use provider_name) but refresh contact fields.
+     *
+     * @param  array<string, mixed>  $partner
+     * @return array<string, mixed>
+     */
+    private function enrichPartner(array $partner): array
+    {
+        $partner['phone'] = (string) ($partner['phone'] ?? '');
+        $partner['address'] = (string) ($partner['address'] ?? '');
+        $partner['email'] = (string) ($partner['email'] ?? '');
+        $partner['role'] = (string) ($partner['role'] ?? 'host');
+        $partner['firstName'] = strtok((string) ($partner['name'] ?? ''), ' ') ?: (string) ($partner['name'] ?? '');
+
+        $id = (int) ($partner['id'] ?? 0);
+        if ($id <= 0) {
+            return $partner;
+        }
+
+        $live = $this->catalog->partnerContact(User::query()->with('information')->find($id));
+        if ($live === null) {
+            return $partner;
+        }
+
+        $partner['phone'] = $live['phone'];
+        $partner['address'] = $live['address'];
+        $partner['role'] = $live['role'];
+        if ($live['email'] !== '') {
+            $partner['email'] = $live['email'];
+        }
+        // Prefer the live company/display name only when the snapshot had none (trips may
+        // keep a distinct provider_name from the listing).
+        if (! filled($partner['name']) && filled($live['name'])) {
+            $partner['name'] = $live['name'];
+            $partner['firstName'] = strtok($live['name'], ' ') ?: $live['name'];
+        }
+
+        return $partner;
     }
 
     /**

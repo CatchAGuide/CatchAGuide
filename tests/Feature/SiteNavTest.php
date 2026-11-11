@@ -210,10 +210,24 @@ class SiteNavTest extends TestCase
         $this->assertStringNotContainsString(__('homepage.mobile_nav_saved'), $html);
         $this->assertNavItemIsActive($html, route('welcome'));
         $this->assertLessThan(
-            strpos($html, __('offers.nav_label')),
-            strpos($html, __('homepage.header-home')),
+            $this->labelPosition($html, __('offers.nav_label')),
+            $this->labelPosition($html, __('homepage.header-home')),
             'Home should render before the catalog links.'
         );
+
+        $offersLabel = __('offers.nav_label');
+        $this->assertStringContainsString('is-label-nowrap', $html);
+        $this->assertStringContainsString($offersLabel, $html);
+        if (str_contains($offersLabel, ' ')) {
+            [$offersLine1, $offersLine2] = explode(' ', $offersLabel, 2);
+            $this->assertStringNotContainsString($offersLine1.'<br>'.$offersLine2, $html);
+        }
+
+        $toursLabel = __('homepage.filter-fishing-near-me');
+        if (str_contains($toursLabel, ' ')) {
+            [$toursLine1, $toursLine2] = explode(' ', $toursLabel, 2);
+            $this->assertStringContainsString($toursLine1.'<br>'.$toursLine2, $html);
+        }
     }
 
     public function test_mobile_bottom_nav_highlights_active_catalog_section(): void
@@ -304,15 +318,34 @@ class SiteNavTest extends TestCase
 
     private function assertPrimaryNavOrder(string $html): void
     {
-        $offersPos = strpos($html, __('offers.nav_label'));
-        $toursPos = strpos($html, __('homepage.filter-fishing-near-me'));
-        $vacationsPos = strpos($html, __('homepage.header-vacations'));
+        $offersPos = $this->labelPosition($html, __('offers.nav_label'));
+        $toursPos = $this->labelPosition($html, __('homepage.filter-fishing-near-me'));
+        $vacationsPos = $this->labelPosition($html, __('homepage.header-vacations'));
 
         $this->assertNotFalse($offersPos);
         $this->assertNotFalse($toursPos);
         $this->assertNotFalse($vacationsPos);
         $this->assertLessThan($toursPos, $offersPos);
         $this->assertLessThan($vacationsPos, $toursPos);
+    }
+
+    /**
+     * Bottom nav may insert <br> between the first two words of tours/vacations labels.
+     */
+    private function labelPosition(string $html, string $label): int|false
+    {
+        $pos = strpos($html, $label);
+        if ($pos !== false) {
+            return $pos;
+        }
+
+        if (! str_contains($label, ' ')) {
+            return false;
+        }
+
+        [$line1, $line2] = explode(' ', $label, 2);
+
+        return strpos($html, $line1.'<br>'.$line2);
     }
 
     private function assertNavItemIsActive(string $html, string $url): void

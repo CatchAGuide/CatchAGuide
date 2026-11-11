@@ -34,6 +34,7 @@ class User extends Authenticatable
         'password',
         'is_active',
         'is_guide',
+        'is_provider',
         'guide_status',
         'guide_type',
         'guide_submitted_at',
@@ -71,7 +72,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'guide_submitted_at' => 'datetime',
         'guide_verified_at' => 'datetime',
+        'is_provider' => 'boolean',
     ];
+
+    public function isProvider(): bool
+    {
+        return (bool) $this->is_provider;
+    }
 
     /**
      * @return BelongsTo

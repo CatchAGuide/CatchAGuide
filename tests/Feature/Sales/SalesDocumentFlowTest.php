@@ -9,7 +9,10 @@ use App\Enums\Sales\SalesItemType;
 use App\Mail\Sales\SalesDocumentMail;
 use App\Mail\Sales\SalesOfferAcceptedMail;
 use App\Models\SalesDocument;
+use App\Models\User;
+use App\Models\UserInformation;
 use App\Services\Sales\SalesCatalog;
+use Illuminate\Support\Str;
 use App\Services\Sales\SalesDocumentSender;
 use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesDocumentWriter;
@@ -42,6 +45,8 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(['per_person', 'per_person', 'per_item'], array_column($product['extras'], 'unit'));
         $this->assertSame(['e0', 'e1', 'e2'], array_column($product['extras'], 'key'));
         $this->assertSame('Tobias Brandt', $product['partner']['name']);
+        $this->assertSame('+49 170 000 0000', $product['partner']['phone']);
+        $this->assertSame('Hafenstraße 12 · 40213 Düsseldorf', $product['partner']['address']);
         $this->assertStringContainsString('/guidings/offer/'.$tour->slug, $product['url']);
         $this->assertSame('Düsseldorf, Deutschland', $product['location']);
         $this->assertContains(['id' => $tour->id, 'label' => '#'.$tour->id.' · Zander-Guiding am Rhein'], app(SalesCatalog::class)->options('tour'));
@@ -280,8 +285,170 @@ class SalesDocumentFlowTest extends TestCase
             ->assertSee('Ihre Buchungsbestätigung')
             ->assertSee('Ihr Gastgeber &amp; Guide vor Ort', false)
             ->assertSee('Tobias Brandt')
+            ->assertSee('+49 170 000 0000')
+            ->assertSee('Hafenstraße 12 · 40213 Düsseldorf')
             ->assertSee('Ab hier übernimmt Tobias')
             ->assertDontSee('Angebot annehmen');
+    }
+
+    public function test_confirmation_shows_guest_contact_details(): void
+    {
+        $document = $this->savedDocument(null, [
+            'first_name' => 'Finn',
+            'last_name' => 'Kruse',
+            'email' => 'finn.kruse+'.Str::random(4).'@example.com',
+            'phone' => '+49 170 555 1212',
+            'travellers' => 'Leo, Max',
+        ]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('Kontaktdaten des Gastes')
+            ->assertSee('Finn Kruse')
+            ->assertSee($document->email)
+            ->assertSee('+49 170 555 1212')
+            ->assertSee('Weitere Reisende')
+            ->assertSee('Leo, Max')
+            ->assertDontSee('Hilfe oder Fragen?');
+
+        $mail = new SalesDocumentMail($document, SalesDocumentOutput::Confirmation);
+        $html = $mail->render();
+        $this->assertStringContainsString('Kontaktdaten des Gastes', $html);
+        $this->assertStringContainsString('Finn Kruse', $html);
+        $this->assertStringContainsString($document->email, $html);
+        $this->assertStringContainsString('Hilfe oder Fragen?', $html);
+    }
+
+    public function test_offer_page_does_not_show_guest_contact_details(): void
+    {
+        $document = $this->savedDocument(null, [
+            'first_name' => 'Finn',
+            'last_name' => 'Kruse',
+            'email' => 'finn.offer+'.Str::random(4).'@example.com',
+            'phone' => '+49 170 555 1212',
+        ]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Offer, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('Ihr persönliches Angebot')
+            ->assertDontSee('Kontaktdaten des Gastes')
+            ->assertDontSee('+49 170 555 1212');
+    }
+
+    public function test_confirmation_host_block_refreshes_phone_and_address_from_the_live_guide_profile(): void
+    {
+        $tour = $this->makeTour();
+        $card = $this->tourCard($tour);
+        $card['product']['partner'] = [
+            'id' => $this->partner->id,
+            'name' => 'Tobias Brandt',
+            'email' => $this->partner->email,
+            'phone' => '',
+            'address' => '',
+        ];
+
+        $document = $this->savedDocument([$card]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('+49 170 000 0000')
+            ->assertSee('Hafenstraße 12 · 40213 Düsseldorf');
+    }
+
+    public function test_confirmation_shows_vacation_provider_details_for_a_camp(): void
+    {
+        $provider = User::factory()->create([
+            'firstname' => 'Fishcoast',
+            'lastname' => 'Lodge',
+            'email' => 'provider+'.Str::random(6).'@example.com',
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+            'phone' => '',
+        ]);
+        UserInformation::query()->whereKey($provider->user_information_id)->update([
+            'company_name' => 'Fishcoast Lodge SL',
+            'phone' => '151 55495574',
+            'phone_country_code' => '+49',
+            'address' => 'Carrer del Port',
+            'address_number' => '8',
+            'postal' => '43790',
+            'city' => 'La Pobla de Massaluca',
+        ]);
+        $provider->unsetRelation('information');
+
+        $camp = $this->makeCamp();
+        $camp->forceFill(['user_id' => $provider->id])->save();
+
+        $document = $this->savedDocument([$this->campCard($camp)]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('Ihr Anbieter vor Ort')
+            ->assertSee('Fishcoast Lodge SL')
+            ->assertSee('+49 151 55495574')
+            ->assertSee('Carrer del Port 8 · 43790 La Pobla de Massaluca');
+    }
+
+    public function test_confirmation_fills_provider_details_when_camp_owner_was_assigned_after_snapshot(): void
+    {
+        $camp = $this->makeCamp();
+        $camp->forceFill(['user_id' => null])->save();
+
+        $card = $this->campCard($camp);
+        $card['product']['partner'] = null;
+
+        $document = $this->savedDocument([$card]);
+
+        $provider = User::factory()->create([
+            'firstname' => 'Massaluca',
+            'lastname' => 'Host',
+            'email' => 'camp-host+'.Str::random(6).'@example.com',
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+            'phone' => '',
+        ]);
+        UserInformation::query()->whereKey($provider->user_information_id)->update([
+            'phone' => '600 111222',
+            'phone_country_code' => '+34',
+            'address' => 'Avenida Ebro',
+            'address_number' => '1',
+            'postal' => '43790',
+            'city' => 'Massaluca',
+        ]);
+        $camp->forceFill(['user_id' => $provider->id])->save();
+
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('Ihr Anbieter vor Ort')
+            ->assertSee('Massaluca Host')
+            ->assertSee('+34 600 111222')
+            ->assertSee('Avenida Ebro 1 · 43790 Massaluca');
+    }
+
+    public function test_confirmation_shows_trip_provider_name_with_live_owner_contact(): void
+    {
+        $trip = $this->makeTrip();
+        $trip->forceFill([
+            'provider_name' => 'Harbour Host Nordics',
+            'user_id' => $this->partner->id,
+        ])->save();
+
+        $document = $this->savedDocument([$this->tripCard($trip)]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('Harbour Host Nordics')
+            ->assertSee('+49 170 000 0000')
+            ->assertSee('Hafenstraße 12 · 40213 Düsseldorf');
     }
 
     public function test_cancelled_documents_cannot_be_confirmed(): void

@@ -41,12 +41,13 @@
                                     <thead>
                                         <tr>
                                             <th class="wd-8p border-bottom-0">ID</th>
-                                            <th class="wd-20p border-bottom-0">Accommodation</th>
-                                            <th class="wd-12p border-bottom-0">Type</th>
-                                            <th class="wd-15p border-bottom-0">Details</th>
+                                            <th class="wd-18p border-bottom-0">Accommodation</th>
+                                            <th class="wd-14p border-bottom-0">{{ __('admin.listing_owner.column') }}</th>
+                                            <th class="wd-10p border-bottom-0">Type</th>
+                                            <th class="wd-12p border-bottom-0">Details</th>
                                             <th class="wd-8p border-bottom-0 text-center">Images</th>
                                             <th class="wd-10p border-bottom-0">Status</th>
-                                            <th class="wd-12p border-bottom-0">Created</th>
+                                            <th class="wd-10p border-bottom-0">Created</th>
                                             <th class="wd-18p border-bottom-0">Actions</th>
                                         </tr>
                                     </thead>
@@ -68,6 +69,9 @@
                                                             <small class="text-muted">{{ $accommodation->city }}, {{ $accommodation->country }}</small>
                                                         @endif
                                                     </div>
+                                                </td>
+                                                <td>
+                                                    <x-admin.owner-cell :user="$accommodation->user" :employee="$accommodation->employee" :listing="$accommodation" />
                                                 </td>
                                                 <td>
                                                     @if($accommodation->accommodationType)
@@ -148,5 +152,5 @@
 @endsection
 
 @section('js_after')
-    @include('admin.partials.listing-datatable-script', ['tableId' => 'accommodations-datatable', 'actionsColumn' => 7])
+    @include('admin.partials.listing-datatable-script', ['tableId' => 'accommodations-datatable', 'actionsColumn' => 8])
 @endsection

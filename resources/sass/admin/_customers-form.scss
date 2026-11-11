@@ -1,0 +1,241 @@
+// Admin › Customers create / listing owner picker
+
+.admin-customer-create-modal {
+  .modal-header {
+    border-bottom-color: #e6e8ec;
+  }
+
+  .modal-footer {
+    border-top-color: #e6e8ec;
+    gap: 0.5rem;
+  }
+
+  .admin-customer-form--modal {
+    max-width: none;
+  }
+
+  .admin-customer-form__section {
+    margin-bottom: 1rem;
+    padding: 0.95rem 1rem 1rem;
+  }
+
+  .admin-customer-form__footnote {
+    margin-bottom: 0;
+  }
+}
+
+.admin-customer-form {
+  max-width: 52rem;
+
+  &__section {
+    margin-bottom: 1.5rem;
+    padding: 1.15rem 1.25rem 1.25rem;
+    border: 1px solid #e6e8ec;
+    border-radius: 12px;
+    background: #fafbfc;
+  }
+
+  &__section-title {
+    margin: 0 0 0.85rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5a6478;
+  }
+
+  &__section-hint {
+    margin: -0.35rem 0 0.9rem;
+    font-size: 0.82rem;
+    color: #6b7489;
+  }
+
+  &__req {
+    color: #e8604c;
+    font-weight: 700;
+    margin-left: 0.15rem;
+  }
+
+  &__optional {
+    color: #8b93a7;
+    font-weight: 400;
+    font-size: 0.8rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #1a1b30;
+    margin-bottom: 0.35rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 8px;
+    border-color: #d5d9e2;
+    min-height: 2.5rem;
+
+    &:focus {
+      border-color: #7c9cff;
+      box-shadow: 0 0 0 0.2rem rgba(45, 79, 214, 0.12);
+    }
+  }
+
+  .form-group {
+    margin-bottom: 0.95rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: flex-end;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e6e8ec;
+    margin-top: 0.5rem;
+  }
+
+  &__footnote {
+    margin: 0 0 1rem;
+    font-size: 0.82rem;
+    color: #6b7489;
+  }
+}
+
+.admin-choice-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  &__item {
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 2.4rem;
+      padding: 0.45rem 0.95rem;
+      border: 1px solid #d5d9e2;
+      border-radius: 999px;
+      background: #fff;
+      color: #5a6478;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:checked + span {
+      border-color: #2d4fd6;
+      background: #e8edff;
+      color: #1c2233;
+      box-shadow: 0 0 0 1px #2d4fd6 inset;
+    }
+
+    input:focus-visible + span {
+      outline: 2px solid rgba(45, 79, 214, 0.35);
+      outline-offset: 2px;
+    }
+
+    &:hover span {
+      border-color: #b8c0d4;
+    }
+  }
+}
+
+.admin-listing-owner-picker {
+  position: relative;
+  max-width: 40rem;
+  margin-bottom: 1.35rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid #e6e8ec;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fbfcfe 0%, #f5f7fb 100%);
+
+  &__title {
+    margin: 0 0 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1b30;
+  }
+
+  &__help {
+    margin: 0 0 0.75rem;
+    font-size: 0.82rem;
+    color: #6b7489;
+  }
+
+  &__controls {
+    display: flex;
+    gap: 0.45rem;
+    align-items: stretch;
+  }
+
+  &__search {
+    flex: 1 1 auto;
+    border-radius: 8px !important;
+    border-color: #d5d9e2;
+    min-height: 2.5rem;
+  }
+
+  &__btn {
+    flex: 0 0 auto;
+    width: 2.55rem;
+    border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__results {
+    position: absolute;
+    z-index: 30;
+    left: 1.1rem;
+    right: 1.1rem;
+    max-height: 16rem;
+    overflow: auto;
+    margin-top: 0.35rem;
+    border: 1px solid #e6e8ec;
+    border-radius: 10px;
+    box-shadow: 0 0.75rem 1.5rem rgba(17, 24, 39, 0.12);
+
+    .list-group-item {
+      border: 0;
+      border-bottom: 1px solid #eef0f4;
+      font-size: 0.875rem;
+      padding: 0.7rem 0.85rem;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      &:hover,
+      &:focus {
+        background: #eef3ff;
+      }
+    }
+  }
+
+  &__meta {
+    margin-top: 0.55rem;
+    min-height: 1.35rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+
+    .badge {
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: 0.02em;
+    }
+  }
+}

@@ -46,16 +46,23 @@ final class SalesQuote
     /**
      * Guides and hosts of the products, once each (confirmation CC and host block).
      *
-     * @return list<array{id: int, name: string, email: string, phone: string}>
+     * @return list<array{id: int, name: string, email: string, phone: string, address?: string}>
      */
     public function partners(): array
     {
         $partners = [];
         foreach ($this->groups as $group) {
             $partner = $group['partner'] ?? null;
-            if (is_array($partner) && ! isset($partners[$partner['id']])) {
-                $partners[$partner['id']] = $partner;
+            if (! is_array($partner)) {
+                continue;
             }
+
+            $key = (string) (($partner['id'] ?? null) ?: ('name:'.($partner['name'] ?? '')));
+            if ($key === '' || $key === 'name:' || isset($partners[$key])) {
+                continue;
+            }
+
+            $partners[$key] = $partner;
         }
 
         return array_values($partners);

@@ -82,7 +82,7 @@ class SalesCatalog
      */
     public function tour(int $id, string $locale): ?array
     {
-        $guiding = Guiding::with('user')->find($id);
+        $guiding = Guiding::with('user.information')->find($id);
         if ($guiding === null) {
             return null;
         }
@@ -122,7 +122,12 @@ class SalesCatalog
      */
     public function camp(int $id, string $locale): ?array
     {
-        $camp = Camp::with(CampCheckoutPricing::relations())->with('user')->find($id);
+        $camp = Camp::with(array_merge(CampCheckoutPricing::relations(), [
+            'user.information',
+            'accommodations.user.information',
+            'rentalBoats.user.information',
+            'guidings.user.information',
+        ]))->find($id);
         if ($camp === null) {
             return null;
         }
@@ -163,7 +168,7 @@ class SalesCatalog
             'title' => trim((string) $camp->title),
             'location' => $this->location([$camp->city, $camp->country], $camp->location),
             'url' => $camp->slug ? $this->links->listing('vacations.camps.show', ['slug' => $camp->slug], $locale) : null,
-            'partner' => $this->partner($camp->user),
+            'partner' => $this->campPartner($camp),
             'accommodations' => $accommodations,
             'boats' => $boats,
             'guidings' => $guidings,
@@ -181,7 +186,7 @@ class SalesCatalog
      */
     public function trip(int $id, string $locale): ?array
     {
-        $trip = Trip::with('user')->find($id);
+        $trip = Trip::with('user.information')->find($id);
         if ($trip === null) {
             return null;
         }
@@ -193,17 +198,6 @@ class SalesCatalog
             fn ($row) => trim((string) (is_array($row) ? ($row['name'] ?? $row['value'] ?? '') : $row)),
             (array) (decode_if_json($trip->included, true) ?: []),
         )));
-
-        $partner = $this->partner($trip->user);
-        if (filled($trip->provider_name)) {
-            $partner ??= [
-                'id' => null,
-                'name' => '',
-                'email' => '',
-                'phone' => '',
-            ];
-            $partner['name'] = trim((string) $trip->provider_name);
-        }
 
         $price = round((float) $trip->price_per_person, 2);
         $min = max(1, (int) $trip->group_size_min);
@@ -220,10 +214,35 @@ class SalesCatalog
             'min' => $min,
             'max' => $max,
             'inclusions' => $inclusions,
-            'partner' => $partner,
+            'partner' => $this->tripPartner($trip),
             'cancellation_policy' => $this->policy($trip->cancellation_policy),
             'translation_missing' => $missing,
         ], ['price' => $price, 'nights' => (int) $trip->duration_nights]);
+    }
+
+    /**
+     * Live owner/provider for a listing — used when the confirmation host block needs to
+     * refresh contact details (or fill them in after an owner was assigned later).
+     *
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
+     */
+    public function listingPartner(string $type, int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+
+        return match ($type) {
+            self::TOUR => $this->partner(Guiding::with('user.information')->find($id)?->user),
+            self::CAMP => $this->campPartner(Camp::with([
+                'user.information',
+                'accommodations.user.information',
+                'rentalBoats.user.information',
+                'guidings.user.information',
+            ])->find($id)),
+            self::TRIP => $this->tripPartner(Trip::with('user.information')->find($id)),
+            default => null,
+        };
     }
 
     /**
@@ -251,7 +270,75 @@ class SalesCatalog
     }
 
     /**
-     * @return array{id: int, name: string, email: string, phone: string}|null
+     * Guide/host shown on the booking confirmation (and CC'd). Phone prefers the profile
+     * entry on user_information (where guides store it); address is "Street 12 · 40213 City".
+     *
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
+     */
+    public function partnerContact(?User $user): ?array
+    {
+        return $this->partner($user);
+    }
+
+    /**
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
+     */
+    private function campPartner(?Camp $camp): ?array
+    {
+        if ($camp === null) {
+            return null;
+        }
+
+        return $this->partner($camp->user)
+            ?? $this->firstPartnerAmong($camp->accommodations)
+            ?? $this->firstPartnerAmong($camp->rentalBoats)
+            ?? $this->firstPartnerAmong($camp->guidings);
+    }
+
+    /**
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
+     */
+    private function tripPartner(?Trip $trip): ?array
+    {
+        if ($trip === null) {
+            return null;
+        }
+
+        $partner = $this->partner($trip->user);
+        if (filled($trip->provider_name)) {
+            $partner ??= [
+                'id' => null,
+                'name' => '',
+                'email' => '',
+                'phone' => '',
+                'address' => '',
+                'role' => 'provider',
+            ];
+            $partner['name'] = trim((string) $trip->provider_name);
+            $partner['role'] = $partner['role'] ?? 'provider';
+        }
+
+        return $partner;
+    }
+
+    /**
+     * @param  iterable<int, object>  $listings
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
+     */
+    private function firstPartnerAmong(iterable $listings): ?array
+    {
+        foreach ($listings as $listing) {
+            $partner = $this->partner($listing->user ?? null);
+            if ($partner !== null) {
+                return $partner;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array{id: int|null, name: string, email: string, phone: string, address: string, role: string}|null
      */
     private function partner(?User $user): ?array
     {
@@ -261,10 +348,45 @@ class SalesCatalog
 
         return [
             'id' => (int) $user->id,
-            'name' => trim($user->firstname.' '.$user->lastname),
-            'email' => (string) $user->email,
-            'phone' => trim((string) $user->phone),
+            'name' => $this->partnerName($user),
+            'email' => (string) ($user->email ?? ''),
+            'phone' => $this->partnerPhone($user),
+            'address' => $this->partnerAddress($user),
+            'role' => $user->isVerifiedGuide() ? 'guide' : ($user->isProvider() ? 'provider' : 'host'),
         ];
+    }
+
+    private function partnerName(User $user): string
+    {
+        $company = trim((string) ($user->information?->company_name ?? ''));
+        if ($company !== '') {
+            return $company;
+        }
+
+        return trim($user->firstname.' '.$user->lastname);
+    }
+
+    private function partnerPhone(User $user): string
+    {
+        $info = $user->information;
+        $fromInfo = filled($info?->phone);
+        $phone = trim((string) ($fromInfo ? $info->phone : $user->phone));
+        $code = trim((string) ($fromInfo ? $info->phone_country_code : $user->phone_country_code));
+
+        return $phone === '' ? '' : trim($code.' '.$phone);
+    }
+
+    private function partnerAddress(User $user): string
+    {
+        $info = $user->information;
+        if ($info === null) {
+            return '';
+        }
+
+        $street = trim(trim((string) $info->address).' '.trim((string) $info->address_number));
+        $place = trim(trim((string) $info->postal).' '.trim((string) $info->city));
+
+        return implode(' · ', array_filter([$street, $place], fn (string $part) => $part !== ''));
     }
 
     /**

@@ -25,7 +25,19 @@
             <div class="row row-sm">
                 <div class="col-lg-12">
                     <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">@yield('title')</h3>
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#admin-customer-create-modal">
+                                <i class="fa fa-plus"></i> {{ __('admin.customers.create') }}
+                            </button>
+                        </div>
                         <div class="card-body">
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
                             <div class="table-responsive">
                                 <table class="table table-bordered text-nowrap border-bottom" id="responsive-datatable">
                                     <thead>
@@ -33,7 +45,7 @@
                                         <th class="wd-15p border-bottom-0">ID</th>
                                         <th class="wd-15p border-bottom-0">Name</th>
                                         <th class="wd-20p border-bottom-0">E-Mail Adresse</th>
-                                        <th class="wd-25p border-bottom-0 text-center">Guide?</th>
+                                        <th class="wd-25p border-bottom-0 text-center">{{ __('admin.customers.fields.role') }}</th>
                                         <th class="wd-25p border-bottom-0 text-center">Aktionen</th>
                                     </tr>
                                     </thead>
@@ -45,9 +57,11 @@
                                                 <td>{{ $customer->email }}</td>
                                                 <td class="text-center">
                                                     @if($customer->isVerifiedGuide())
-                                                        <span class="badge badge-success-light">Ja</span>
+                                                        <span class="badge badge-success-light">{{ __('admin.customers.role_guide') }}</span>
+                                                    @elseif($customer->isProvider())
+                                                        <span class="badge badge-primary-light">{{ __('admin.customers.role_provider') }}</span>
                                                     @else
-                                                        <span class="badge badge-danger-light">Nein</span>
+                                                        <span class="badge badge-secondary-light">{{ __('admin.customers.role_customer') }}</span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
@@ -83,7 +97,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -100,4 +114,6 @@
         <!-- CONTAINER CLOSED -->
 
     </div>
+
+    @include('admin.pages.customers.partials.create-modal')
 @endsection

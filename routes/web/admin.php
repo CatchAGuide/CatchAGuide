@@ -69,6 +69,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:employees')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
 
+        Route::get('customers/search', [CustomersController::class, 'search'])->name('customers.search');
         Route::resource('customers', CustomersController::class);
         Route::get('customersdelete/{id}', [CustomersController::class, 'customersdelete'])->name('customersdelete');
         Route::resource('guides', GuidesController::class);

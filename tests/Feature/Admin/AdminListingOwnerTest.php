@@ -78,6 +78,80 @@ class AdminListingOwnerTest extends TestCase
         $this->assertStringNotContainsString(route('admin.guides.edit', $employee->id), $html);
     }
 
+    public function test_owner_cell_links_providers_to_the_customer_edit_page(): void
+    {
+        $provider = User::factory()->create([
+            'firstname' => 'Harbour',
+            'lastname' => 'Host',
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+        ]);
+
+        $html = view('components.admin.owner-cell', [
+            'user' => $provider->load('information'),
+            'employee' => null,
+            'listing' => null,
+        ])->render();
+
+        $this->assertStringContainsString('Harbour Host', $html);
+        $this->assertStringContainsString(route('admin.customers.edit', $provider), $html);
+        $this->assertStringContainsString(__('admin.customers.role_provider'), $html);
+        $this->assertStringNotContainsString(route('admin.guides.edit', $provider), $html);
+    }
+
+    public function test_customer_search_returns_providers_for_listing_owner_picker(): void
+    {
+        $employee = Employee::factory()->create();
+        $this->actingAs($employee, 'employees');
+
+        $provider = User::factory()->create([
+            'firstname' => 'Searchable',
+            'lastname' => 'Provider'.Str::random(5),
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+        ]);
+
+        $response = $this->getJson(route('admin.customers.search', ['q' => 'Searchable']));
+
+        $response->assertOk();
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertContains($provider->id, $ids);
+        $match = collect($response->json('results'))->firstWhere('id', $provider->id);
+        $this->assertSame('provider', $match['role']);
+    }
+
+    public function test_trips_index_shows_the_owner_column(): void
+    {
+        $employee = Employee::factory()->create();
+        $provider = User::factory()->create([
+            'firstname' => 'Trip',
+            'lastname' => 'Owner'.Str::random(5),
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+        ]);
+        $this->actingAs($employee, 'employees');
+
+        $trip = new Trip;
+        $trip->forceFill([
+            'title' => 'Owner column trip '.Str::random(6),
+            'slug' => 'owner-trip-'.Str::random(8),
+            'location' => 'Hitra',
+            'status' => 'active',
+            'user_id' => $provider->id,
+            'employee_id' => $employee->id,
+        ]);
+        $trip->save();
+
+        $this->get(route('admin.trips.index'))
+            ->assertOk()
+            ->assertSee(__('admin.listing_owner.column'))
+            ->assertSee($provider->firstname)
+            ->assertSee('admin/customers/'.$provider->id.'/edit', false);
+    }
+
     public function test_trip_provider_name_is_not_replaced_by_a_guide_contact(): void
     {
         $trip = new Trip;

@@ -70,6 +70,12 @@
 @include('sales.partials.contact', ['locale' => $doc['locale']])
 </td></tr>
 
+@if(! $doc['isOffer'] && ($doc['guest'] ?? null))
+<tr><td class="px" style="padding:18px 32px 0;">
+@include('sales.partials.guest-contact')
+</td></tr>
+@endif
+
 <tr><td class="px t-main" style="padding:26px 32px 30px;{{ $font }}font-size:14px;line-height:1.55;color:#1A1B30;">
 {{ $doc['signatureText'] }}<br>
 @if($doc['signature'] !== ''){{ $doc['signature'] }}<br>@endif

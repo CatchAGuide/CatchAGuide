@@ -10,6 +10,7 @@ use App\Models\RentalBoat;
 use App\Models\SalesDocument;
 use App\Models\Trip;
 use App\Models\User;
+use App\Models\UserInformation;
 use App\Services\Sales\SalesCatalog;
 use App\Services\Sales\SalesDocumentWriter;
 use Illuminate\Support\Facades\URL;
@@ -34,8 +35,17 @@ trait SalesFixtures
             'firstname' => 'Tobias',
             'lastname' => 'Brandt',
             'email' => 'tobias+'.Str::random(6).'@example.com',
-            'phone' => '+49 170 000 0000',
+            'phone' => '',
         ]);
+        UserInformation::query()->whereKey($this->partner->user_information_id)->update([
+            'phone' => '170 000 0000',
+            'phone_country_code' => '+49',
+            'address' => 'Hafenstraße',
+            'address_number' => '12',
+            'postal' => '40213',
+            'city' => 'Düsseldorf',
+        ]);
+        $this->partner->unsetRelation('information');
     }
 
     protected function makeTour(array $attributes = []): Guiding
@@ -168,6 +178,45 @@ trait SalesFixtures
             'persons' => 3,
             'override' => '',
             'extras' => ['e0' => ['qty' => 3, 'follow' => true]],
+            'subs' => [],
+        ], $overrides);
+    }
+
+    protected function campCard(Camp $camp, array $overrides = []): array
+    {
+        $product = app(SalesCatalog::class)->camp($camp->id, 'de');
+        $accommodationId = (int) array_key_first($product['accommodations'] ?? []);
+        $from = now()->addMonth()->toDateString();
+        $to = now()->addMonth()->addDays(2)->toDateString();
+
+        return array_merge([
+            'key' => 'camp1',
+            'type' => 'camp',
+            'listing_id' => $camp->id,
+            'product' => $product,
+            'persons' => 2,
+            'subs' => $accommodationId > 0 ? [[
+                'key' => 'acc1',
+                'kind' => 'accommodation',
+                'option_id' => $accommodationId,
+                'from' => $from,
+                'to' => $to,
+                'qty' => 1,
+                'override' => '',
+            ]] : [],
+        ], $overrides);
+    }
+
+    protected function tripCard(Trip $trip, array $overrides = []): array
+    {
+        return array_merge([
+            'key' => 'trip1',
+            'type' => 'trip',
+            'listing_id' => $trip->id,
+            'product' => app(SalesCatalog::class)->trip($trip->id, 'de'),
+            'date' => now()->addMonth()->toDateString(),
+            'persons' => max(1, (int) $trip->group_size_min),
+            'override' => '',
             'subs' => [],
         ], $overrides);
     }

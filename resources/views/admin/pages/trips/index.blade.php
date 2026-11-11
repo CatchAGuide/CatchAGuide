@@ -48,7 +48,8 @@
                                     <thead>
                                         <tr>
                                             <th class="wd-8p border-bottom-0">ID</th>
-                                            <th class="wd-22p border-bottom-0">Trip</th>
+                                            <th class="wd-20p border-bottom-0">Trip</th>
+                                            <th class="wd-15p border-bottom-0">{{ __('admin.listing_owner.column') }}</th>
                                             <th class="wd-12p border-bottom-0">Duration</th>
                                             <th class="wd-10p border-bottom-0">Price from</th>
                                             <th class="wd-8p border-bottom-0 text-center">Images</th>
@@ -69,6 +70,9 @@
                                                         <div class="fw-bold">{{ $trip->title ?: 'Untitled' }}</div>
                                                         <div class="text-info">{{ $trip->location ?: 'No location' }}</div>
                                                     </div>
+                                                </td>
+                                                <td>
+                                                    <x-admin.owner-cell :user="$trip->user" :employee="$trip->employee" :listing="$trip" />
                                                 </td>
                                                 <td>
                                                     @if($nights || $days)
@@ -161,5 +165,5 @@
 @endsection
 
 @section('js_after')
-    @include('admin.partials.listing-datatable-script', ['tableId' => 'trips-datatable', 'actionsColumn' => 6])
+    @include('admin.partials.listing-datatable-script', ['tableId' => 'trips-datatable', 'actionsColumn' => 7])
 @endsection
