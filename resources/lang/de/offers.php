@@ -18,7 +18,7 @@ return [
     'subtitle_camps' => 'Angelcamps und Lodges mit Übernachtung, Booten und Guide-Optionen.',
     'subtitle_vacations' => 'Mehrtägige Angeltrips und Camps mit Unterkunft und Guide-Paketen.',
     'breadcrumb' => 'Erlebnisse',
-    'nav_label' => 'Alle Angelerlebnisse',
+    'nav_label' => 'Alle Erlebnisse',
 
     'filter_all' => 'Alle',
     'filter_tours' => 'Touren',

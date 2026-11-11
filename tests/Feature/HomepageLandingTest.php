@@ -301,8 +301,21 @@ class HomepageLandingTest extends TestCase
         $response->assertSee('Direkt registrieren', false);
         $response->assertSee('Mehr erfahren', false);
         $response->assertSee('cag-home-bottom-nav', false);
+        $bottomNavLabel = static function (string $label): string {
+            $parts = preg_split('/\s+/', $label) ?: [$label];
+
+            return implode('(?:\s|<br\s*\/?>)+', array_map(
+                static fn (string $part): string => preg_quote($part, '/'),
+                $parts
+            ));
+        };
         $this->assertMatchesRegularExpression(
-            '/cag-home-bottom-nav[\s\S]*'.preg_quote(__('homepage.header-home'), '/').'[\s\S]*'.preg_quote(__('offers.nav_label'), '/').'[\s\S]*'.preg_quote(__('homepage.filter-fishing-near-me'), '/').'[\s\S]*'.preg_quote(__('homepage.header-vacations'), '/').'/',
+            '/cag-home-bottom-nav[\s\S]*'
+            .preg_quote(__('homepage.header-home'), '/')
+            .'[\s\S]*'.$bottomNavLabel(__('offers.nav_label'))
+            .'[\s\S]*'.$bottomNavLabel(__('homepage.filter-fishing-near-me'))
+            .'[\s\S]*'.$bottomNavLabel(__('homepage.header-vacations'))
+            .'/',
             $response->getContent()
         );
         $response->assertSee('cag-footer', false);

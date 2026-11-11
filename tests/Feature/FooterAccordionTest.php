@@ -102,6 +102,8 @@ class FooterAccordionTest extends TestCase
         $this->assertStringContainsString('&.is-vv-pinned', $home);
         $this->assertStringContainsString('--cag-bottom-nav-top', $home);
         $this->assertStringContainsString('z-index: 400', $home);
+        $this->assertStringContainsString('&.is-label-nowrap span', $home);
+        $this->assertStringContainsString('white-space: nowrap', $home);
     }
 
     public function test_footer_mobile_styles_hide_duplicate_contact_and_scroll_top(): void

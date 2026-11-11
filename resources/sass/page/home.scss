@@ -2133,6 +2133,14 @@ $white: #ffffff;
     max-width: 100%;
   }
 
+  &.is-label-nowrap span {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
   &.is-active {
     color: var(--cag-coral);
     background: rgba(232, 96, 76, 0.08);
