@@ -116,8 +116,9 @@ class SalesDocumentPresenter
             )),
             'goodToKnow' => trim((string) ($header['good_to_know'] ?? '')),
             'paymentNote' => trim((string) ($header['payment_note'] ?? '')),
-            // Phone/address come from the live guide profile so older snapshots still show them.
-            'partners' => $isOffer ? [] : array_map(fn (array $partner) => $this->enrichPartner($partner), $quote->partners()),
+            // Confirmation host block: resolve the live vacation provider / guide so older
+            // snapshots (or listings that got an owner later) still show phone + address.
+            'partners' => $isOffer ? [] : $this->confirmationPartners($quote),
             'validUntil' => $validUntil !== null ? SalesFormat::date($validUntil->toDateString(), $locale) : null,
             'state' => $this->state($status, $validUntil),
             'signature' => trim((string) ($context['creator'] ?? '')),
@@ -126,6 +127,58 @@ class SalesDocumentPresenter
             'subject' => $this->subject($output, $quote, $period, (string) ($context['number'] ?? ''), $locale),
             'quote' => $quote,
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function confirmationPartners(SalesQuote $quote): array
+    {
+        $partners = [];
+
+        foreach ($quote->groups as $group) {
+            $partner = $this->resolvePartner($group);
+            if ($partner === null) {
+                continue;
+            }
+
+            $partner = $this->enrichPartner($partner);
+            $key = (string) (($partner['id'] ?? null) ?: ('name:'.($partner['name'] ?? '')));
+            if ($key === '' || $key === 'name:') {
+                continue;
+            }
+
+            $partners[$key] ??= $partner;
+        }
+
+        return array_values($partners);
+    }
+
+    /**
+     * Prefer the live listing owner for contact fields; keep a trip's provider_name when set.
+     *
+     * @param  array<string, mixed>  $group
+     * @return array<string, mixed>|null
+     */
+    private function resolvePartner(array $group): ?array
+    {
+        $snapshot = is_array($group['partner'] ?? null) ? $group['partner'] : null;
+        $live = $this->catalog->listingPartner((string) ($group['type'] ?? ''), (int) ($group['listing_id'] ?? 0));
+
+        if ($live === null) {
+            return $snapshot;
+        }
+
+        if ($snapshot === null) {
+            return $live;
+        }
+
+        $merged = $live;
+        if (filled($snapshot['name'] ?? null)) {
+            $merged['name'] = (string) $snapshot['name'];
+        }
+
+        return $merged;
     }
 
     /**
@@ -138,6 +191,8 @@ class SalesDocumentPresenter
     {
         $partner['phone'] = (string) ($partner['phone'] ?? '');
         $partner['address'] = (string) ($partner['address'] ?? '');
+        $partner['email'] = (string) ($partner['email'] ?? '');
+        $partner['role'] = (string) ($partner['role'] ?? 'host');
         $partner['firstName'] = strtok((string) ($partner['name'] ?? ''), ' ') ?: (string) ($partner['name'] ?? '');
 
         $id = (int) ($partner['id'] ?? 0);
@@ -152,8 +207,15 @@ class SalesDocumentPresenter
 
         $partner['phone'] = $live['phone'];
         $partner['address'] = $live['address'];
+        $partner['role'] = $live['role'];
         if ($live['email'] !== '') {
             $partner['email'] = $live['email'];
+        }
+        // Company providers store the trading name on user_information — prefer it when
+        // the snapshot still has a person name from an older pick.
+        if (($live['role'] ?? '') === 'provider' && filled($live['name'])) {
+            $partner['name'] = $live['name'];
+            $partner['firstName'] = strtok($live['name'], ' ') ?: $live['name'];
         }
 
         return $partner;
