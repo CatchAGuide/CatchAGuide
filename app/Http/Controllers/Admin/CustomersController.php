@@ -32,7 +32,7 @@ class CustomersController extends Controller
 
     public function create()
     {
-        return view('admin.pages.customers.create');
+        return redirect()->route('admin.customers.index', ['create' => 1]);
     }
 
     public function store(StoreCustomerRequest $request, CustomerCreator $creator)

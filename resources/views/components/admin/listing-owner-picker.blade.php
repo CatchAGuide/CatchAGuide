@@ -15,55 +15,53 @@
         ? app(ListingOwnerSearch::class)->presentOne(User::query()->with('information')->find($selectedId))
         : null;
     $searchUrl = route('admin.customers.search');
-    $createUrl = route('admin.customers.create');
+    $createUrl = route('admin.customers.index', ['create' => 1]);
 @endphp
 
 <div
-    class="admin-listing-owner-picker mb-4"
+    class="admin-listing-owner-picker"
     data-owner-picker
     data-search-url="{{ $searchUrl }}"
     data-sync-provider-name="{{ $syncProviderName ? '1' : '0' }}"
     data-provider-name-input="{{ $providerNameInputId }}"
 >
-    <label class="form-label fw-bold" for="{{ $inputId }}_search">
-        {{ __('admin.listing_owner.label') }}
-    </label>
-    <p class="text-muted small mb-2">{{ __('admin.listing_owner.help') }}</p>
+    <h3 class="admin-listing-owner-picker__title">{{ __('admin.listing_owner.label') }}</h3>
+    <p class="admin-listing-owner-picker__help">{{ __('admin.listing_owner.help') }}</p>
 
     <input type="hidden" name="{{ $inputName }}" id="{{ $inputId }}" value="{{ $selected['id'] ?? '' }}" data-owner-id>
 
-    <div class="input-group">
+    <div class="admin-listing-owner-picker__controls">
         <input
             type="search"
-            class="form-control"
+            class="form-control admin-listing-owner-picker__search"
             id="{{ $inputId }}_search"
             data-owner-search
             value="{{ $selected['label'] ?? '' }}"
             placeholder="{{ __('admin.listing_owner.search_placeholder') }}"
             autocomplete="off"
         >
-        <button type="button" class="btn btn-outline-secondary" data-owner-clear title="{{ __('admin.listing_owner.clear') }}">
+        <button type="button" class="btn btn-outline-secondary admin-listing-owner-picker__btn" data-owner-clear title="{{ __('admin.listing_owner.clear') }}" aria-label="{{ __('admin.listing_owner.clear') }}">
             <i class="fa fa-times"></i>
         </button>
-        <a href="{{ $createUrl }}" class="btn btn-outline-primary" target="_blank" rel="noopener" title="{{ __('admin.listing_owner.create') }}">
+        <a href="{{ $createUrl }}" class="btn btn-outline-primary admin-listing-owner-picker__btn" target="_blank" rel="noopener" title="{{ __('admin.listing_owner.create') }}" aria-label="{{ __('admin.listing_owner.create') }}">
             <i class="fa fa-plus"></i>
         </a>
     </div>
 
-    <div class="admin-listing-owner-picker__meta mt-1" data-owner-meta>
+    <div class="admin-listing-owner-picker__meta" data-owner-meta>
         @if($selected)
             <span class="badge bg-{{ $selected['role'] === 'guide' ? 'success' : ($selected['role'] === 'provider' ? 'primary' : 'secondary') }}-light">
                 {{ __('admin.customers.role_'.$selected['role']) }}
             </span>
             @if($selected['city'] !== '')
-                <span class="text-muted small ms-1">{{ $selected['city'] }}</span>
+                <span class="text-muted small">{{ $selected['city'] }}</span>
             @endif
         @else
             <span class="text-muted small">{{ __('admin.listing_owner.none') }}</span>
         @endif
     </div>
 
-    <ul class="admin-listing-owner-picker__results list-group mt-1" data-owner-results hidden></ul>
+    <ul class="list-group admin-listing-owner-picker__results" data-owner-results hidden></ul>
 </div>
 
 @once

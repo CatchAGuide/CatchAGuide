@@ -12,6 +12,14 @@ class StoreCustomerRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Keep failed validation on the customers index so the create modal can reopen.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return route('admin.customers.index', ['create' => 1]);
+    }
+
     public function rules(): array
     {
         return [

@@ -27,11 +27,17 @@
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h3 class="card-title mb-0">@yield('title')</h3>
-                            <a href="{{ route('admin.customers.create') }}" class="btn btn-primary btn-sm">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#admin-customer-create-modal">
                                 <i class="fa fa-plus"></i> {{ __('admin.customers.create') }}
-                            </a>
+                            </button>
                         </div>
                         <div class="card-body">
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
                             <div class="table-responsive">
                                 <table class="table table-bordered text-nowrap border-bottom" id="responsive-datatable">
                                     <thead>
@@ -91,7 +97,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -108,4 +114,6 @@
         <!-- CONTAINER CLOSED -->
 
     </div>
+
+    @include('admin.pages.customers.partials.create-modal')
 @endsection

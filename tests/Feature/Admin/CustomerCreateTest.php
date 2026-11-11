@@ -66,16 +66,25 @@ class CustomerCreateTest extends TestCase
             ->first();
     }
 
-    public function test_create_page_requires_an_employee_and_defaults_to_provider(): void
+    public function test_create_route_opens_modal_on_customers_index(): void
     {
         $this->get(route('admin.customers.create'))->assertRedirect();
 
         $this->actingAs($this->employee, 'employees')
             ->get(route('admin.customers.create'))
+            ->assertRedirect(route('admin.customers.index', ['create' => 1]));
+
+        $this->actingAs($this->employee, 'employees')
+            ->get(route('admin.customers.index', ['create' => 1]))
             ->assertOk()
             ->assertSee(__('admin.customers.create_title'))
+            ->assertSee('admin-customer-create-modal', false)
+            ->assertSee('admin-customer-form', false)
+            ->assertSee('admin-choice-seg', false)
             ->assertSee('value="provider"', false)
-            ->assertSee(__('admin.customers.role_provider'));
+            ->assertSee(__('admin.customers.role_provider'))
+            ->assertSee(__('admin.customers.section_type'))
+            ->assertSee('data-open-on-load="1"', false);
     }
 
     public function test_store_creates_a_provider_without_email(): void
@@ -136,7 +145,7 @@ class CustomerCreateTest extends TestCase
     public function test_store_requires_address_and_phone(): void
     {
         $this->actingAs($this->employee, 'employees')
-            ->from(route('admin.customers.create'))
+            ->from(route('admin.customers.index', ['create' => 1]))
             ->post(route('admin.customers.store'), $this->payload([
                 'information' => [
                     'phone' => '',
@@ -146,7 +155,7 @@ class CustomerCreateTest extends TestCase
                     'city' => '',
                 ],
             ]))
-            ->assertRedirect(route('admin.customers.create'))
+            ->assertRedirect(route('admin.customers.index', ['create' => 1]))
             ->assertSessionHasErrors([
                 'information.phone',
                 'information.address',
