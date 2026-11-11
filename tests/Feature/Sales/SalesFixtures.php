@@ -182,6 +182,45 @@ trait SalesFixtures
         ], $overrides);
     }
 
+    protected function campCard(Camp $camp, array $overrides = []): array
+    {
+        $product = app(SalesCatalog::class)->camp($camp->id, 'de');
+        $accommodationId = (int) array_key_first($product['accommodations'] ?? []);
+        $from = now()->addMonth()->toDateString();
+        $to = now()->addMonth()->addDays(2)->toDateString();
+
+        return array_merge([
+            'key' => 'camp1',
+            'type' => 'camp',
+            'listing_id' => $camp->id,
+            'product' => $product,
+            'persons' => 2,
+            'subs' => $accommodationId > 0 ? [[
+                'key' => 'acc1',
+                'kind' => 'accommodation',
+                'option_id' => $accommodationId,
+                'from' => $from,
+                'to' => $to,
+                'qty' => 1,
+                'override' => '',
+            ]] : [],
+        ], $overrides);
+    }
+
+    protected function tripCard(Trip $trip, array $overrides = []): array
+    {
+        return array_merge([
+            'key' => 'trip1',
+            'type' => 'trip',
+            'listing_id' => $trip->id,
+            'product' => app(SalesCatalog::class)->trip($trip->id, 'de'),
+            'date' => now()->addMonth()->toDateString(),
+            'persons' => max(1, (int) $trip->group_size_min),
+            'override' => '',
+            'subs' => [],
+        ], $overrides);
+    }
+
     protected function savedDocument(?array $cards = null, array $header = []): SalesDocument
     {
         $cards ??= [$this->tourCard($this->makeTour())];

@@ -132,6 +132,8 @@ return [
         'contact_title' => 'Help or questions?',
         'contact_text' => 'We are happy to help – give us a call or send us an email.',
         'contact_label' => 'Get in touch',
+        'guest_title' => 'Guest contact details',
+        'guest_travellers' => 'Further travellers',
         'selection' => 'Your selection & price overview',
         'view_offer' => 'View offer',
         'view_booking' => 'View booking',

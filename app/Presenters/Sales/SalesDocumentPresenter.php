@@ -119,6 +119,8 @@ class SalesDocumentPresenter
             // Confirmation host block: resolve the live vacation provider / guide so older
             // snapshots (or listings that got an owner later) still show phone + address.
             'partners' => $isOffer ? [] : $this->confirmationPartners($quote),
+            // Guest contact on confirmation (page + mail) so CC'd hosts can reach the guest.
+            'guest' => $isOffer ? null : $this->guest($header),
             'validUntil' => $validUntil !== null ? SalesFormat::date($validUntil->toDateString(), $locale) : null,
             'state' => $this->state($status, $validUntil),
             'signature' => trim((string) ($context['creator'] ?? '')),
@@ -126,6 +128,31 @@ class SalesDocumentPresenter
             'token' => $context['token'] ?? null,
             'subject' => $this->subject($output, $quote, $period, (string) ($context['number'] ?? ''), $locale),
             'quote' => $quote,
+        ];
+    }
+
+    /**
+     * Recipient shown on the booking confirmation for the guest and the CC'd host.
+     *
+     * @param  array<string, mixed>  $header
+     * @return array{name: string, email: string, phone: string, travellers: list<string>}|null
+     */
+    private function guest(array $header): ?array
+    {
+        $name = trim(trim((string) ($header['first_name'] ?? '')).' '.trim((string) ($header['last_name'] ?? '')));
+        $email = trim((string) ($header['email'] ?? ''));
+        $phone = trim((string) ($header['phone'] ?? ''));
+        $travellers = SalesDocumentStateMapper::travellers((string) ($header['travellers'] ?? ''));
+
+        if ($name === '' && $email === '' && $phone === '' && $travellers === []) {
+            return null;
+        }
+
+        return [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'travellers' => $travellers,
         ];
     }
 
@@ -174,7 +201,8 @@ class SalesDocumentPresenter
         }
 
         $merged = $live;
-        if (filled($snapshot['name'] ?? null)) {
+        // Trips may advertise a provider_name distinct from the linked user account.
+        if (($group['type'] ?? null) === 'trip' && filled($snapshot['name'] ?? null)) {
             $merged['name'] = (string) $snapshot['name'];
         }
 
@@ -211,9 +239,9 @@ class SalesDocumentPresenter
         if ($live['email'] !== '') {
             $partner['email'] = $live['email'];
         }
-        // Company providers store the trading name on user_information — prefer it when
-        // the snapshot still has a person name from an older pick.
-        if (($live['role'] ?? '') === 'provider' && filled($live['name'])) {
+        // Prefer the live company/display name only when the snapshot had none (trips may
+        // keep a distinct provider_name from the listing).
+        if (! filled($partner['name']) && filled($live['name'])) {
             $partner['name'] = $live['name'];
             $partner['firstName'] = strtok($live['name'], ' ') ?: $live['name'];
         }

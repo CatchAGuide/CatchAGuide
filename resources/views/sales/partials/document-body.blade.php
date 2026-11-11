@@ -162,10 +162,12 @@
 </div>
 @endif
 
-{{-- Help or questions? --}}
+{{-- CaG "Help or questions?" lives in the email only (mails/sales/document). --}}
+@if(! $doc['isOffer'] && ($doc['guest'] ?? null))
 <div style="margin-top:18px;">
-@include('sales.partials.contact', ['locale' => $doc['locale']])
+@include('sales.partials.guest-contact')
 </div>
+@endif
 </div>
 </div>
 

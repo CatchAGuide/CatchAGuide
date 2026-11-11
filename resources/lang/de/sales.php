@@ -132,6 +132,8 @@ return [
         'contact_title' => 'Hilfe oder Fragen?',
         'contact_text' => 'Wir helfen gerne weiter – rufen Sie uns an oder schreiben Sie uns eine E-Mail.',
         'contact_label' => 'Kontakt',
+        'guest_title' => 'Kontaktdaten des Gastes',
+        'guest_travellers' => 'Weitere Reisende',
         'selection' => 'Ihre Auswahl & Preisübersicht',
         'view_offer' => 'Angebot ansehen',
         'view_booking' => 'Buchung ansehen',
