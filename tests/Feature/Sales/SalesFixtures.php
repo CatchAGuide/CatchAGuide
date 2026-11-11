@@ -10,6 +10,7 @@ use App\Models\RentalBoat;
 use App\Models\SalesDocument;
 use App\Models\Trip;
 use App\Models\User;
+use App\Models\UserInformation;
 use App\Services\Sales\SalesCatalog;
 use App\Services\Sales\SalesDocumentWriter;
 use Illuminate\Support\Facades\URL;
@@ -34,8 +35,17 @@ trait SalesFixtures
             'firstname' => 'Tobias',
             'lastname' => 'Brandt',
             'email' => 'tobias+'.Str::random(6).'@example.com',
-            'phone' => '+49 170 000 0000',
+            'phone' => '',
         ]);
+        UserInformation::query()->whereKey($this->partner->user_information_id)->update([
+            'phone' => '170 000 0000',
+            'phone_country_code' => '+49',
+            'address' => 'Hafenstraße',
+            'address_number' => '12',
+            'postal' => '40213',
+            'city' => 'Düsseldorf',
+        ]);
+        $this->partner->unsetRelation('information');
     }
 
     protected function makeTour(array $attributes = []): Guiding

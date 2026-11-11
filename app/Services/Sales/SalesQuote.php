@@ -46,7 +46,7 @@ final class SalesQuote
     /**
      * Guides and hosts of the products, once each (confirmation CC and host block).
      *
-     * @return list<array{id: int, name: string, email: string, phone: string}>
+     * @return list<array{id: int, name: string, email: string, phone: string, address?: string}>
      */
     public function partners(): array
     {

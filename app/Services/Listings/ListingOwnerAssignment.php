@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Separates the guide who owns a listing from the staff member who created it.
+ * Separates the user/provider who owns a listing from the staff member who created it.
  *
  * Admin routes authenticate the employees guard, then Auth::id() is that
- * employee's primary key. Saving it as user_id attaches the listing to
- * whichever guide happens to share the number.
+ * employee's primary key. Saving it as user_id would attach the listing to
+ * whichever user happens to share the number — never treat employee ids as owners.
  */
 class ListingOwnerAssignment
 {
@@ -26,40 +26,45 @@ class ListingOwnerAssignment
     public function forRequest(Request $request, ?Model $existing = null): array
     {
         $employee = Auth::guard('employees')->user();
+        $submitted = $request->exists('user_id');
         $requested = $this->positiveInt($request->input('user_id'));
 
         if ($employee instanceof Employee) {
             $employeeId = (int) $employee->getKey();
 
             return [
-                'user_id' => $this->guideIdWhenAdmin($requested, $employeeId, $existing),
+                'user_id' => $submitted
+                    ? $this->ownerIdFromSubmission($requested, $employeeId)
+                    : $this->keptOwnerId($existing),
                 'employee_id' => $this->existingEmployeeId($existing) ?? $employeeId,
             ];
         }
 
         return [
-            'user_id' => $this->realGuideId($requested)
+            'user_id' => $this->realOwnerId($requested)
                 ?? $this->positiveInt(Auth::guard('web')->id())
-                ?? $this->keptGuideId($existing),
+                ?? $this->keptOwnerId($existing),
             'employee_id' => $this->existingEmployeeId($existing),
         ];
     }
 
-    private function guideIdWhenAdmin(?int $requested, int $employeeId, ?Model $existing): ?int
+    /**
+     * Explicit picker submit: empty / employee id clears the owner; a real user id assigns them.
+     */
+    private function ownerIdFromSubmission(?int $requested, int $employeeId): ?int
     {
-        $explicit = $this->realGuideId($requested);
-        if ($explicit !== null && $explicit !== $employeeId) {
-            return $explicit;
+        if ($requested === null || $requested === $employeeId) {
+            return null;
         }
 
-        return $this->keptGuideId($existing);
+        return $this->realOwnerId($requested);
     }
 
     /**
-     * A stored guide stays on the listing. A stored id that is really an
+     * A stored owner stays on the listing. A stored id that is really an
      * employee primary key does not.
      */
-    private function keptGuideId(?Model $existing): ?int
+    private function keptOwnerId(?Model $existing): ?int
     {
         $current = $this->positiveInt($existing?->getAttribute('user_id'));
         if ($current === null || $this->isEmployeeId($current)) {
@@ -69,7 +74,7 @@ class ListingOwnerAssignment
         return User::query()->whereKey($current)->exists() ? $current : null;
     }
 
-    private function realGuideId(?int $id): ?int
+    private function realOwnerId(?int $id): ?int
     {
         if ($id === null || $this->isEmployeeId($id)) {
             return null;

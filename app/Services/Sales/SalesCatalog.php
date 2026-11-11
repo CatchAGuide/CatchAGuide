@@ -82,7 +82,7 @@ class SalesCatalog
      */
     public function tour(int $id, string $locale): ?array
     {
-        $guiding = Guiding::with('user')->find($id);
+        $guiding = Guiding::with('user.information')->find($id);
         if ($guiding === null) {
             return null;
         }
@@ -122,7 +122,7 @@ class SalesCatalog
      */
     public function camp(int $id, string $locale): ?array
     {
-        $camp = Camp::with(CampCheckoutPricing::relations())->with('user')->find($id);
+        $camp = Camp::with(CampCheckoutPricing::relations())->with('user.information')->find($id);
         if ($camp === null) {
             return null;
         }
@@ -181,7 +181,7 @@ class SalesCatalog
      */
     public function trip(int $id, string $locale): ?array
     {
-        $trip = Trip::with('user')->find($id);
+        $trip = Trip::with('user.information')->find($id);
         if ($trip === null) {
             return null;
         }
@@ -201,6 +201,7 @@ class SalesCatalog
                 'name' => '',
                 'email' => '',
                 'phone' => '',
+                'address' => '',
             ];
             $partner['name'] = trim((string) $trip->provider_name);
         }
@@ -251,7 +252,18 @@ class SalesCatalog
     }
 
     /**
-     * @return array{id: int, name: string, email: string, phone: string}|null
+     * Guide/host shown on the booking confirmation (and CC'd). Phone prefers the profile
+     * entry on user_information (where guides store it); address is "Street 12 · 40213 City".
+     *
+     * @return array{id: int, name: string, email: string, phone: string, address: string}|null
+     */
+    public function partnerContact(?User $user): ?array
+    {
+        return $this->partner($user);
+    }
+
+    /**
+     * @return array{id: int, name: string, email: string, phone: string, address: string}|null
      */
     private function partner(?User $user): ?array
     {
@@ -263,8 +275,32 @@ class SalesCatalog
             'id' => (int) $user->id,
             'name' => trim($user->firstname.' '.$user->lastname),
             'email' => (string) $user->email,
-            'phone' => trim((string) $user->phone),
+            'phone' => $this->partnerPhone($user),
+            'address' => $this->partnerAddress($user),
         ];
+    }
+
+    private function partnerPhone(User $user): string
+    {
+        $info = $user->information;
+        $fromInfo = filled($info?->phone);
+        $phone = trim((string) ($fromInfo ? $info->phone : $user->phone));
+        $code = trim((string) ($fromInfo ? $info->phone_country_code : $user->phone_country_code));
+
+        return $phone === '' ? '' : trim($code.' '.$phone);
+    }
+
+    private function partnerAddress(User $user): string
+    {
+        $info = $user->information;
+        if ($info === null) {
+            return '';
+        }
+
+        $street = trim(trim((string) $info->address).' '.trim((string) $info->address_number));
+        $place = trim(trim((string) $info->postal).' '.trim((string) $info->city));
+
+        return implode(' · ', array_filter([$street, $place], fn (string $part) => $part !== ''));
     }
 
     /**

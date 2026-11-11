@@ -75,8 +75,18 @@ class SalesDocumentBuilder extends Component
             $this->previewOutput = $document->status === SalesDocumentStatus::Confirmed ? 'confirmation' : 'offer';
 
             $catalog = app(SalesCatalog::class);
-            foreach ($this->cards as $card) {
-                if (is_array($card['product'] ?? null) && $catalog->pricesChanged($card['product'])) {
+            foreach ($this->cards as $index => $card) {
+                if (! is_array($card['product'] ?? null)) {
+                    continue;
+                }
+
+                // Refresh guide/host phone + address from the live profile (not frozen prices).
+                $fresh = $catalog->product($card['type'], (int) $card['product']['id'], $this->locale());
+                if ($fresh !== null && array_key_exists('partner', $fresh)) {
+                    $this->cards[$index]['product']['partner'] = $fresh['partner'];
+                }
+
+                if ($catalog->pricesChanged($card['product'])) {
                     $this->staleCards[] = $card['key'];
                 }
             }
@@ -562,7 +572,7 @@ class SalesDocumentBuilder extends Component
      */
     private static function relocalized(array $stored, array $fresh): array
     {
-        foreach (['title', 'location', 'url', 'duration', 'inclusions', 'translation_missing'] as $field) {
+        foreach (['title', 'location', 'url', 'duration', 'inclusions', 'translation_missing', 'partner'] as $field) {
             if (array_key_exists($field, $fresh)) {
                 $stored[$field] = $fresh[$field];
             }

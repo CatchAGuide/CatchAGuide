@@ -49,7 +49,6 @@
             <input type="hidden" name="trip_id" id="trip_id" value="{{ $formData['id'] ?? 0 }}">
             <input type="hidden" name="thumbnail_path" id="thumbnail_path" value="{{ $formData['thumbnail_path'] ?? '' }}">
             <input type="hidden" name="existing_images" id="existing_images" value="{{ isset($formData['gallery_images']) && is_array($formData['gallery_images']) ? json_encode($formData['gallery_images']) : (isset($formData['gallery_images']) ? $formData['gallery_images'] : '') }}">
-            <input type="hidden" name="user_id" id="user_id" value="{{ $formData['user_id'] ?? '' }}">
             <input type="hidden" name="status" id="status" value="{{ $formData['status'] ?? 'active' }}">
             <input type="hidden" id="image_list" name="image_list">
 
@@ -61,6 +60,11 @@
 
             {{-- STEP 1 — IMAGES & BASICS --}}
             <div class="step active" id="step1">
+                <x-admin.listing-owner-picker
+                    :selected-id="$formData['user_id'] ?? null"
+                    :sync-provider-name="true"
+                />
+
                 <h5>{{ __('trips.upload_images_title') }}</h5>
 
                 <label for="title_image" class="form-label fw-bold fs-5">

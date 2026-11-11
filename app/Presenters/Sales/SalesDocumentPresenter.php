@@ -5,6 +5,8 @@ namespace App\Presenters\Sales;
 use App\Enums\Sales\SalesDocumentOutput;
 use App\Enums\Sales\SalesDocumentStatus;
 use App\Models\SalesDocument;
+use App\Models\User;
+use App\Services\Sales\SalesCatalog;
 use App\Services\Sales\SalesDocumentCalculator;
 use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesFormat;
@@ -47,6 +49,7 @@ class SalesDocumentPresenter
         private readonly SalesDocumentStateMapper $mapper,
         private readonly SalesLinks $links,
         private readonly SalesTexts $texts,
+        private readonly SalesCatalog $catalog,
     ) {}
 
     /**
@@ -113,9 +116,8 @@ class SalesDocumentPresenter
             )),
             'goodToKnow' => trim((string) ($header['good_to_know'] ?? '')),
             'paymentNote' => trim((string) ($header['payment_note'] ?? '')),
-            'partners' => $isOffer ? [] : array_map(fn (array $partner) => $partner + [
-                'firstName' => strtok($partner['name'], ' ') ?: $partner['name'],
-            ], $quote->partners()),
+            // Phone/address come from the live guide profile so older snapshots still show them.
+            'partners' => $isOffer ? [] : array_map(fn (array $partner) => $this->enrichPartner($partner), $quote->partners()),
             'validUntil' => $validUntil !== null ? SalesFormat::date($validUntil->toDateString(), $locale) : null,
             'state' => $this->state($status, $validUntil),
             'signature' => trim((string) ($context['creator'] ?? '')),
@@ -124,6 +126,37 @@ class SalesDocumentPresenter
             'subject' => $this->subject($output, $quote, $period, (string) ($context['number'] ?? ''), $locale),
             'quote' => $quote,
         ];
+    }
+
+    /**
+     * Keep the snapshot name (trips may use provider_name) but refresh contact fields.
+     *
+     * @param  array<string, mixed>  $partner
+     * @return array<string, mixed>
+     */
+    private function enrichPartner(array $partner): array
+    {
+        $partner['phone'] = (string) ($partner['phone'] ?? '');
+        $partner['address'] = (string) ($partner['address'] ?? '');
+        $partner['firstName'] = strtok((string) ($partner['name'] ?? ''), ' ') ?: (string) ($partner['name'] ?? '');
+
+        $id = (int) ($partner['id'] ?? 0);
+        if ($id <= 0) {
+            return $partner;
+        }
+
+        $live = $this->catalog->partnerContact(User::query()->with('information')->find($id));
+        if ($live === null) {
+            return $partner;
+        }
+
+        $partner['phone'] = $live['phone'];
+        $partner['address'] = $live['address'];
+        if ($live['email'] !== '') {
+            $partner['email'] = $live['email'];
+        }
+
+        return $partner;
     }
 
     /**

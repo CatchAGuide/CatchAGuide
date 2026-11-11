@@ -35,7 +35,7 @@
                                         <th class="wd-10p border-bottom-0">ID</th>
                                         <th class="wd-20p border-bottom-0">Boat</th>
                                         <th class="wd-12p border-bottom-0">Type</th>
-                                        <th class="wd-15p border-bottom-0">Owner</th>
+                                        <th class="wd-15p border-bottom-0">{{ __('admin.listing_owner.column') }}</th>
                                         <th class="wd-8p border-bottom-0 text-center">Images</th>
                                         <th class="wd-10p border-bottom-0">Status</th>
                                         <th class="wd-12p border-bottom-0">Price</th>

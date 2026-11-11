@@ -114,7 +114,7 @@ return [
         'good_to_know' => 'Good to know',
         'payment' => 'Payment',
         'host' => 'Your host & guide on site',
-        'takeover' => 'From here on, :name takes over – arrival, key handover, the exact address, licences and everything on site.',
+        'takeover' => 'From here on, :name takes over – arrival, key handover, licences and everything on site.',
         'accept' => 'Accept offer',
         'valid_until' => 'This offer is valid until :date.',
         'terms' => 'I accept the :terms and the :policy.',

@@ -3,6 +3,12 @@
 @php
     $subject = $user ?: $employee;
     $fullName = trim((string) ($user?->full_name ?? $user?->name ?? $employee?->name ?? ''));
+    if ($user) {
+        $company = trim((string) ($user->information?->company_name ?? ''));
+        if ($company !== '') {
+            $fullName = $company;
+        }
+    }
     $nameParts = $fullName !== '' ? preg_split('/\s+/', $fullName) : [];
     $initials = '';
     if (! empty($nameParts)) {
@@ -13,11 +19,21 @@
     }
     $photoUrl = $user ? guide_profile_photo_url($user, $listing) : null;
     $isPlaceholder = $photoUrl && str_contains($photoUrl, 'placeholder_guide');
+    $profileUrl = null;
+    $roleLabel = null;
+    if ($user) {
+        $profileUrl = $user->isVerifiedGuide()
+            ? route('admin.guides.edit', $user->id)
+            : route('admin.customers.edit', $user->id);
+        $roleLabel = $user->isVerifiedGuide()
+            ? __('admin.customers.role_guide')
+            : ($user->isProvider() ? __('admin.customers.role_provider') : null);
+    }
 @endphp
 
 @if($subject)
-    @if($user)
-        <a href="{{ route('admin.guides.edit', $user->id) }}" class="text-decoration-none">
+    @if($profileUrl)
+        <a href="{{ $profileUrl }}" class="text-decoration-none">
     @endif
         <div class="admin-listing-owner-cell">
             @if($photoUrl && ! $isPlaceholder)
@@ -35,14 +51,16 @@
             @endif
             <span class="admin-listing-owner-name">
                 {{ $fullName ?: 'Unknown' }}
-                @if($user && ($user->information->city ?? null))
+                @if($roleLabel)
+                    <small>{{ $roleLabel }}@if($user->information->city ?? null) · {{ $user->information->city }}@endif</small>
+                @elseif($user && ($user->information->city ?? null))
                     <small>{{ $user->information->city }}</small>
                 @elseif($employee)
                     <small>{{ __('admin.listing_owner.admin') }}</small>
                 @endif
             </span>
         </div>
-    @if($user)
+    @if($profileUrl)
         </a>
     @endif
 @else

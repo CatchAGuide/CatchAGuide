@@ -114,7 +114,7 @@ return [
         'good_to_know' => 'Gut zu wissen',
         'payment' => 'Zahlung',
         'host' => 'Ihr Gastgeber & Guide vor Ort',
-        'takeover' => 'Ab hier übernimmt :name – für Anreise, Schlüsselübergabe, die genaue Adresse, Lizenzen und alles vor Ort.',
+        'takeover' => 'Ab hier übernimmt :name – für Anreise, Schlüsselübergabe, Lizenzen und alles vor Ort.',
         'accept' => 'Angebot annehmen',
         'valid_until' => 'Dieses Angebot ist gültig bis :date.',
         'terms' => 'Ich akzeptiere die :terms und die :policy.',

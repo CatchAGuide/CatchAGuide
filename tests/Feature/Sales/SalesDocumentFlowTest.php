@@ -42,6 +42,8 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(['per_person', 'per_person', 'per_item'], array_column($product['extras'], 'unit'));
         $this->assertSame(['e0', 'e1', 'e2'], array_column($product['extras'], 'key'));
         $this->assertSame('Tobias Brandt', $product['partner']['name']);
+        $this->assertSame('+49 170 000 0000', $product['partner']['phone']);
+        $this->assertSame('Hafenstraße 12 · 40213 Düsseldorf', $product['partner']['address']);
         $this->assertStringContainsString('/guidings/offer/'.$tour->slug, $product['url']);
         $this->assertSame('Düsseldorf, Deutschland', $product['location']);
         $this->assertContains(['id' => $tour->id, 'label' => '#'.$tour->id.' · Zander-Guiding am Rhein'], app(SalesCatalog::class)->options('tour'));
@@ -280,8 +282,31 @@ class SalesDocumentFlowTest extends TestCase
             ->assertSee('Ihre Buchungsbestätigung')
             ->assertSee('Ihr Gastgeber &amp; Guide vor Ort', false)
             ->assertSee('Tobias Brandt')
+            ->assertSee('+49 170 000 0000')
+            ->assertSee('Hafenstraße 12 · 40213 Düsseldorf')
             ->assertSee('Ab hier übernimmt Tobias')
             ->assertDontSee('Angebot annehmen');
+    }
+
+    public function test_confirmation_host_block_refreshes_phone_and_address_from_the_live_guide_profile(): void
+    {
+        $tour = $this->makeTour();
+        $card = $this->tourCard($tour);
+        $card['product']['partner'] = [
+            'id' => $this->partner->id,
+            'name' => 'Tobias Brandt',
+            'email' => $this->partner->email,
+            'phone' => '',
+            'address' => '',
+        ];
+
+        $document = $this->savedDocument([$card]);
+        app(SalesDocumentSender::class)->send($document, SalesDocumentOutput::Confirmation, $this->employee);
+
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)
+            ->assertOk()
+            ->assertSee('+49 170 000 0000')
+            ->assertSee('Hafenstraße 12 · 40213 Düsseldorf');
     }
 
     public function test_cancelled_documents_cannot_be_confirmed(): void

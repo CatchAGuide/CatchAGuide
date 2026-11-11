@@ -97,7 +97,12 @@
 <div class="bd" style="margin-top:22px;border:1px solid #E6E8EC;border-radius:10px;padding:14px 16px;">
 <p class="t-label" style="{{ $label }}">{{ $copy('host') }}</p>
 <div style="font-weight:700;font-size:15px;">{{ $partner['name'] }}</div>
-<div>{{ implode(' · ', array_filter([$partner['email'], $partner['phone']])) }}</div>
+@if(($partner['email'] ?? '') !== '' || ($partner['phone'] ?? '') !== '')
+<div>{{ implode(' · ', array_filter([$partner['email'] ?? '', $partner['phone'] ?? ''])) }}</div>
+@endif
+@if(($partner['address'] ?? '') !== '')
+<div class="t-soft" style="color:#6B7489;margin-top:2px;">{{ $partner['address'] }}</div>
+@endif
 <div class="t-soft" style="color:#6B7489;margin-top:6px;">{{ $copy('takeover', ['name' => $partner['firstName']]) }}</div>
 </div>
 @endforeach
