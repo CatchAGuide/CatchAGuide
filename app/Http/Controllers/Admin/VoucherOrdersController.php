@@ -17,9 +17,9 @@ use Illuminate\Validation\Rule;
 /**
  * Admin › Bookings › Vouchers: gift voucher orders (a tour bought as a voucher; the guide handles
  * payment and delivery) and the /guidings/voucher landing page requests (no tour yet; CaG follows
- * up and moves them through open → in process → done, logged like the other request lists). They
+ * up). Both move through open → in process → done, logged like the other request lists. They
  * have no date, so they get their own list instead of a column in the tours table.
- * ?kind=order|request narrows the list, ?status=open|in_process|done the requests.
+ * ?kind=order|request narrows the list, ?status=open|in_process|done either kind.
  */
 class VoucherOrdersController extends Controller
 {
@@ -30,9 +30,6 @@ class VoucherOrdersController extends Controller
         $search = trim((string) $request->query('q', ''));
         $kind = VoucherOrderKind::tryFrom((string) $request->query('kind', ''));
         $status = array_key_exists((string) $request->query('status'), VoucherOrder::statusOptions()) ? (string) $request->query('status') : null;
-        if ($status !== null) {
-            $kind = VoucherOrderKind::Request;
-        }
         $filtered = fn () => VoucherOrder::query()
             ->search($search)
             ->when($kind, fn ($query) => $query->where('kind', $kind->value))
@@ -54,11 +51,9 @@ class VoucherOrdersController extends Controller
         return view('admin.pages.voucher-orders.index', compact('orders', 'search', 'kind', 'status', 'statusOptions', 'statusHistory', 'totals'));
     }
 
-    /** Status of a landing page request (orders have none). */
+    /** Status of an order or a landing page request. */
     public function updateStatus(Request $request, VoucherOrder $voucherOrder, BookingStatusHistory $history)
     {
-        abort_unless($voucherOrder->isRequest(), 404);
-
         $validated = $request->validate([
             'status' => ['required', 'string', Rule::in(array_keys(VoucherOrder::statusOptions()))],
             'done_reason' => ['nullable', Rule::enum(DoneReason::class)],
@@ -82,8 +77,6 @@ class VoucherOrdersController extends Controller
 
     public function statusHistory(VoucherOrder $voucherOrder, BookingStatusHistory $history)
     {
-        abort_unless($voucherOrder->isRequest(), 404);
-
         return response()->json([
             'success' => true,
             'items' => $history->timeline($voucherOrder),

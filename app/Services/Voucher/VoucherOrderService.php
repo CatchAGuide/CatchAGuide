@@ -48,6 +48,7 @@ class VoucherOrderService
         $order = VoucherOrder::create([
             'voucher_code' => $this->codes->generate(),
             'kind' => VoucherOrderKind::Order,
+            'status' => VoucherOrder::STATUS_OPEN,
             'guiding_id' => $guiding->id,
             'guide_id' => $guiding->user_id,
             'user_id' => $currentUser?->getKey(),

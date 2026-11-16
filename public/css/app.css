@@ -3240,6 +3240,13 @@ body .main-menu .main-menu-wrapper__nav {
   overflow: hidden;
   max-width: 100%;
 }
+.cag-home-bottom-nav__item.is-label-nowrap span {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  white-space: nowrap;
+  overflow: visible;
+}
 .cag-home-bottom-nav__item.is-active {
   color: var(--cag-coral);
   background: rgba(232, 96, 76, 0.08);

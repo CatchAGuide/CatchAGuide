@@ -171,7 +171,7 @@ class VoucherOrdersAdminTest extends TestCase
             ->assertSee('Ebro, Spanien')
             ->assertSee(__('admin.voucher_orders.kind_request'))
             ->assertSee(route('admin.voucher-orders.update-status', $request), false)
-            ->assertDontSee(route('admin.voucher-orders.update-status', $order), false)
+            ->assertSee(route('admin.voucher-orders.update-status', $order), false)
             ->assertSee('Bea Orderbuyer');
 
         $this->get(route('admin.voucher-orders.index', ['kind' => 'request']))
@@ -231,14 +231,31 @@ class VoucherOrdersAdminTest extends TestCase
             ->assertDontSee($request->voucher_code);
     }
 
-    public function test_orders_have_no_request_status(): void
+    public function test_admin_can_mark_a_purchased_voucher_as_settled(): void
     {
         $this->actingAsEmployee();
-        $order = $this->order('Nostatus');
+        $employee = auth('employees')->user();
+        $order = $this->order('Settledbuyer');
 
-        $this->patchJson(route('admin.voucher-orders.update-status', $order), ['status' => 'done'])->assertNotFound();
-        $this->getJson(route('admin.voucher-orders.status-history', $order))->assertNotFound();
-        $this->assertNull($order->fresh()->status);
+        $this->patchJson(route('admin.voucher-orders.update-status', $order), ['status' => 'in_process'])
+            ->assertOk()
+            ->assertJson(['success' => true, 'status' => 'in_process']);
+
+        $this->patchJson(route('admin.voucher-orders.update-status', $order), ['status' => 'done', 'done_reason' => 'booked'])
+            ->assertOk()
+            ->assertJson(['status' => 'done', 'done_reason' => 'booked', 'status_label' => __('message.contact_request_status.done').' · '.__('admin.done_reason.booked')]);
+
+        $order->refresh();
+        $this->assertSame('done', $order->status);
+        $this->assertSame('booked', $order->done_reason);
+        $this->assertSame($employee->id, $order->latestStatusChange->employee_id);
+
+        $this->get(route('admin.voucher-orders.index', ['kind' => 'order', 'status' => 'done']))
+            ->assertOk()
+            ->assertSee($order->voucher_code);
+        $this->get(route('admin.voucher-orders.index', ['kind' => 'order', 'status' => 'open']))
+            ->assertOk()
+            ->assertDontSee($order->voucher_code);
     }
 
     public function test_invalid_statuses_and_guests_are_refused(): void

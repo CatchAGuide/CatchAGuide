@@ -10,6 +10,7 @@ use App\Services\Listings\ListingOwnerAssignment;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ListingOwnerAssignmentTest extends TestCase
@@ -115,5 +116,55 @@ class ListingOwnerAssignmentTest extends TestCase
 
         $this->assertNull($data['user_id']);
         $this->assertSame($employee->id, $data['employee_id']);
+    }
+
+    public function test_picker_assigns_a_user_whose_id_also_belongs_to_an_employee(): void
+    {
+        $staff = Employee::factory()->create();
+        $provider = User::factory()->create(['is_provider' => true]);
+        $this->shadowEmployee($provider->id);
+
+        Auth::guard('employees')->login($staff);
+
+        $assigned = (new ListingOwnerAssignment())->forRequest(Request::create('/admin/camps', 'POST', [
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+        ]));
+
+        $this->assertSame($provider->id, $assigned['user_id']);
+        $this->assertSame($staff->id, $assigned['employee_id']);
+    }
+
+    public function test_a_stored_owner_is_kept_when_their_id_also_belongs_to_an_employee(): void
+    {
+        $staff = Employee::factory()->create();
+        $provider = User::factory()->create(['is_provider' => true]);
+        $this->shadowEmployee($provider->id);
+        Auth::guard('employees')->login($staff);
+
+        $existing = new RentalBoat([
+            'user_id' => $provider->id,
+            'employee_id' => $staff->id,
+        ]);
+
+        $assigned = (new ListingOwnerAssignment())->forRequest(
+            Request::create('/admin/rental-boats', 'POST', ['title' => 'Keep owner']),
+            $existing
+        );
+
+        $this->assertSame($provider->id, $assigned['user_id']);
+    }
+
+    private function shadowEmployee(int $userId): void
+    {
+        if (Employee::withTrashed()->whereKey($userId)->exists()) {
+            return;
+        }
+
+        $shadow = Employee::factory()->make([
+            'email' => 'shadow-'.$userId.'-'.Str::random(6).'@example.test',
+        ]);
+        $shadow->id = $userId;
+        $shadow->save();
     }
 }

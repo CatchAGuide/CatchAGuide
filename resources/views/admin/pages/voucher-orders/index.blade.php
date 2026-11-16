@@ -101,15 +101,13 @@
                                    class="btn {{ ($kind?->value ?? '') === $value ? 'btn-primary' : 'btn-outline-primary' }}">{{ __('admin.voucher_orders.'.$label) }}</a>
                             @endforeach
                         </div>
-                        @if($kind?->value === 'request')
-                            {{-- Second click on the active status clears it. --}}
-                            <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('admin.voucher_orders.col_status') }}">
-                                @foreach($statusOptions as $value => $label)
-                                    <a href="{{ route('admin.voucher-orders.index', array_filter(['kind' => 'request', 'status' => $status === $value ? null : $value, 'q' => $search])) }}"
-                                       class="btn {{ $status === $value ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ $label }}</a>
-                                @endforeach
-                            </div>
-                        @endif
+                        {{-- Second click on the active status clears it. Applies to orders and requests. --}}
+                        <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('admin.voucher_orders.col_status') }}">
+                            @foreach($statusOptions as $value => $label)
+                                <a href="{{ route('admin.voucher-orders.index', array_filter(['kind' => $kind?->value, 'status' => $status === $value ? null : $value, 'q' => $search])) }}"
+                                   class="btn {{ $status === $value ? 'btn-secondary' : 'btn-outline-secondary' }}">{{ $label }}</a>
+                            @endforeach
+                        </div>
                     </div>
                     <div class="d-flex flex-wrap gap-3">
                         <span class="meta-pill"><i class="fa fa-gift"></i> {{ __('admin.voucher_orders.total') }}: <strong>{{ (int) $totals->orders }}</strong></span>
@@ -172,16 +170,12 @@
                                                 <span class="vo-kind vo-kind--{{ $order->kind->value }}">{{ __('admin.voucher_orders.kind_'.$order->kind->value) }}</span>
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_status') }}" class="vo-status-cell">
-                                                @if($isRequest)
-                                                    @include('admin.partials.request-status-dropdown', [
-                                                        'item' => $order,
-                                                        'updateUrl' => route('admin.voucher-orders.update-status', $order),
-                                                        'historyUrl' => route('admin.voucher-orders.status-history', $order),
-                                                        'summary' => $statusHistory->summary($order),
-                                                    ])
-                                                @else
-                                                    <span class="vo-muted">&mdash;</span>
-                                                @endif
+                                                @include('admin.partials.request-status-dropdown', [
+                                                    'item' => $order,
+                                                    'updateUrl' => route('admin.voucher-orders.update-status', $order),
+                                                    'historyUrl' => route('admin.voucher-orders.status-history', $order),
+                                                    'summary' => $statusHistory->summary($order),
+                                                ])
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_buyer') }}">
                                                 <span class="vo-ellipsis">{{ $order->buyerName() ?: '—' }}</span>
