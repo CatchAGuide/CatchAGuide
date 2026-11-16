@@ -10,6 +10,7 @@ use App\Models\GuideRequest;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -17,6 +18,20 @@ use Illuminate\Support\Facades\Mail;
 
 class GuideOnboardingService
 {
+    /** user_information columns the verification wizard (onboarding page + application modal) submits. */
+    public const VERIFICATION_INFORMATION_FIELDS = [
+        'address',
+        'address_number',
+        'postal',
+        'city',
+        'country',
+        'phone',
+        'birthday',
+        'tax_number',
+        'company_name',
+        'legal_form',
+    ];
+
     public function __construct(
         protected GuideStatusService $guideStatusService,
     ) {}
@@ -80,7 +95,12 @@ class GuideOnboardingService
         $user->tax_id = $request->input('information.taxId', $request->input('taxId', $user->tax_id));
         $user->save();
 
-        $infoData = array_filter($request->input('information', []), fn ($v) => $v !== null && $v !== '');
+        // Allowlist: UserInformation's $fillable also covers request_as_guide, the trade-register
+        // fields, company_profile and the public profile text, none of which this form edits.
+        $infoData = array_filter(
+            Arr::only((array) $request->input('information', []), self::VERIFICATION_INFORMATION_FIELDS),
+            fn ($v) => $v !== null && $v !== ''
+        );
 
         if ($user->information) {
             $user->information->update($infoData);
