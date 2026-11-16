@@ -1532,6 +1532,7 @@
 
 .admin-listing-owner-picker {
   position: relative;
+  z-index: 20;
   max-width: 40rem;
   margin-bottom: 1.35rem;
   padding: 1rem 1.1rem 1.05rem;
@@ -1571,12 +1572,13 @@
 }
 .admin-listing-owner-picker__results {
   position: absolute;
-  z-index: 30;
+  z-index: 40;
   left: 1.1rem;
   right: 1.1rem;
   max-height: 16rem;
   overflow: auto;
   margin-top: 0.35rem;
+  background: #fff;
   border: 1px solid #e6e8ec;
   border-radius: 10px;
   box-shadow: 0 0.75rem 1.5rem rgba(17, 24, 39, 0.12);

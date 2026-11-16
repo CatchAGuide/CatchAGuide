@@ -794,7 +794,7 @@ return [
 
     'voucher_orders' => [
         'title' => 'Gift voucher orders',
-        'intro' => 'Tours bought as gift vouchers (Order: the guide collects the payment and sends the voucher) and requests from the voucher landing page /guidings/voucher (Request: no tour yet, CaG contacts the buyer and issues the voucher). Commission on orders is tracked under Finance › Invoices.',
+        'intro' => 'Tours bought as gift vouchers (Order: the guide collects the payment and sends the voucher) and requests from the voucher landing page /guidings/voucher (Request: no tour yet, CaG contacts the buyer and issues the voucher). Set the status on either one, from Open to Done, so you can see what is already settled. Commission on orders is tracked under Finance › Invoices.',
         'total' => 'Total',
         'volume' => 'Order value',
         'commission' => 'Commission',

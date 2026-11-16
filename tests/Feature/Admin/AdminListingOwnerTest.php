@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Accommodation;
+use App\Models\Camp;
 use App\Models\Employee;
 use App\Models\RentalBoat;
+use App\Models\SpecialOffer;
 use App\Models\Trip;
 use App\Models\User;
 use App\Services\Sales\SalesCatalog;
@@ -170,5 +173,197 @@ class AdminListingOwnerTest extends TestCase
         $this->assertSame('Harbour Host', $product['partner']['name']);
         $this->assertSame('', $product['partner']['email']);
         $this->assertNull($product['partner']['id']);
+    }
+
+    public function test_camp_update_saves_the_chosen_provider(): void
+    {
+        [$employee, $provider] = $this->staffAndProvider();
+        $camp = Camp::query()->create([
+            'title' => 'Owner camp '.Str::random(6),
+            'slug' => 'owner-camp-'.Str::random(8),
+            'description_camp' => 'Camp',
+            'description_area' => 'Area',
+            'description_fishing' => 'Fishing',
+            'location' => 'Kiel',
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+        ]);
+
+        $this->putJson(route('admin.camps.update', $camp), [
+            'title' => $camp->title,
+            'location' => $camp->location,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $camp->refresh()->user_id);
+        $this->assertSame($employee->id, (int) $camp->employee_id);
+    }
+
+    public function test_trip_update_saves_the_chosen_provider(): void
+    {
+        [$employee, $provider] = $this->staffAndProvider();
+        $trip = new Trip;
+        $trip->forceFill([
+            'title' => 'Owner trip '.Str::random(6),
+            'slug' => 'owner-trip-'.Str::random(8),
+            'location' => 'Hitra',
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+        ]);
+        $trip->save();
+
+        $this->putJson(route('admin.trips.update', $trip), [
+            'title' => $trip->title,
+            'location' => $trip->location,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $trip->refresh()->user_id);
+    }
+
+    public function test_accommodation_update_saves_the_chosen_provider(): void
+    {
+        [$employee, $provider] = $this->staffAndProvider();
+        $accommodation = Accommodation::query()->create([
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+            'title' => 'Owner stay '.Str::random(6),
+            'slug' => 'owner-stay-'.Str::random(8),
+            'location' => 'Kiel',
+            'city' => 'Kiel',
+            'country' => 'Germany',
+            'region' => 'Schleswig-Holstein',
+            'accommodation_type' => 'cabin',
+        ]);
+
+        $this->putJson(route('admin.accommodations.update', $accommodation), [
+            'title' => $accommodation->title,
+            'location' => $accommodation->location,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $accommodation->refresh()->user_id);
+    }
+
+    public function test_rental_boat_update_saves_the_chosen_provider(): void
+    {
+        [$employee, $provider] = $this->staffAndProvider();
+        $boat = RentalBoat::query()->create([
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+            'title' => 'Owner boat '.Str::random(6),
+            'slug' => 'owner-boat-'.Str::random(8),
+            'location' => 'Kiel',
+            'city' => 'Kiel',
+            'country' => 'Germany',
+            'boat_type' => 'skiff',
+            'desc_of_boat' => 'A boat',
+            'price_type' => 'per_day',
+            'prices' => [],
+        ]);
+
+        $this->putJson(route('admin.rental-boats.update', $boat), [
+            'title' => $boat->title,
+            'location' => $boat->location,
+            'city' => $boat->city,
+            'country' => $boat->country,
+            'boat_type' => $boat->boat_type,
+            'desc_of_boat' => $boat->desc_of_boat,
+            'price_type' => $boat->price_type,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $boat->refresh()->user_id);
+    }
+
+    public function test_special_offer_update_saves_the_chosen_provider(): void
+    {
+        [$employee, $provider] = $this->staffAndProvider();
+        $offer = SpecialOffer::query()->create([
+            'title' => 'Owner offer '.Str::random(6),
+            'slug' => 'owner-offer-'.Str::random(8),
+            'location' => 'Kiel',
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+        ]);
+
+        $this->putJson(route('admin.special-offers.update', $offer), [
+            'title' => $offer->title,
+            'location' => $offer->location,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $offer->refresh()->user_id);
+    }
+
+    public function test_camp_update_saves_a_provider_whose_id_matches_an_employee(): void
+    {
+        $employee = Employee::factory()->create();
+        $provider = User::factory()->create([
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+        ]);
+        $shadow = Employee::factory()->make([
+            'email' => 'shadow-camp-'.$provider->id.'-'.Str::random(4).'@example.test',
+        ]);
+        $shadow->id = $provider->id;
+        $shadow->save();
+        $this->actingAs($employee, 'employees');
+
+        $camp = Camp::query()->create([
+            'title' => 'Collision camp '.Str::random(6),
+            'slug' => 'collision-camp-'.Str::random(8),
+            'description_camp' => 'Camp',
+            'description_area' => 'Area',
+            'description_fishing' => 'Fishing',
+            'location' => 'Kiel',
+            'status' => 'active',
+            'user_id' => null,
+            'employee_id' => $employee->id,
+        ]);
+
+        $this->putJson(route('admin.camps.update', $camp), [
+            'title' => $camp->title,
+            'location' => $camp->location,
+            'user_id' => $provider->id,
+            'listing_owner_assigned' => '1',
+            'is_draft' => '0',
+        ])->assertOk();
+
+        $this->assertSame($provider->id, (int) $camp->refresh()->user_id);
+    }
+
+    /**
+     * @return array{0: Employee, 1: User}
+     */
+    private function staffAndProvider(): array
+    {
+        $employee = Employee::factory()->create();
+        $provider = User::factory()->create([
+            'firstname' => 'Saved',
+            'lastname' => 'Provider'.Str::random(4),
+            'is_provider' => true,
+            'is_guide' => null,
+            'guide_status' => null,
+        ]);
+        $this->actingAs($employee, 'employees');
+
+        return [$employee, $provider];
     }
 }

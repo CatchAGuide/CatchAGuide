@@ -7,7 +7,7 @@ namespace App\Enums;
  */
 enum VoucherOrderKind: string
 {
-    /** A tour bought as a voucher at /checkout/vouchers/{slug}; the guide handles it. */
+    /** A tour bought as a voucher at /checkout/vouchers/{slug}; the guide handles it. Same status as a request. */
     case Order = 'order';
 
     /**

@@ -20,9 +20,10 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  *
  * Requests from the /guidings/voucher landing page live here too (kind Request): a destination
  * (request_country/region/city) and an amount (price_total), but no tour, guide, design or
- * commission. CaG contacts the buyer and issues the voucher, and moves the request through
- * open → in process → done (booked / no reply) in Admin › Bookings › Vouchers; every change is
- * logged (HasStatusHistory). Orders have no status.
+ * commission. CaG contacts the buyer and issues the voucher. Both orders and requests move
+ * through open → in process → done (booked / no reply) in Admin › Bookings › Vouchers, so the
+ * list shows what is still open and what the guide has already settled. Every change is logged
+ * (HasStatusHistory).
  */
 class VoucherOrder extends Model implements HasDoneReasonContract
 {

@@ -61,6 +61,7 @@
                 li.type = 'button';
                 li.className = 'list-group-item list-group-item-action';
                 li.textContent = item.label + (item.role ? ' (' + roleLabel(item.role) + ')' : '');
+                li.addEventListener('mousedown', function (event) { event.preventDefault(); });
                 li.addEventListener('click', function () { select(item); });
                 results.appendChild(li);
             });
@@ -82,6 +83,15 @@
                     results.hidden = true;
                 });
         }
+
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            var first = results.querySelector('button');
+            if (first && !results.hidden) {
+                first.click();
+            }
+        });
 
         searchInput.addEventListener('input', function () {
             clearTimeout(timer);

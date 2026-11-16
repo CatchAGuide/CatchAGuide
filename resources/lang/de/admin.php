@@ -794,7 +794,7 @@ return [
 
     'voucher_orders' => [
         'title' => 'Gutscheinbestellungen',
-        'intro' => 'Als Gutschein gekaufte Touren (Bestellung: der Guide kassiert und schickt den Gutschein) und Anfragen von der Gutschein-Landingpage /guidings/voucher (Anfrage: noch keine Tour, CaG meldet sich beim Käufer und stellt den Gutschein aus). Die Provision auf Bestellungen läuft über Finanzen › Rechnungen.',
+        'intro' => 'Als Gutschein gekaufte Touren (Bestellung: der Guide kassiert und schickt den Gutschein) und Anfragen von der Gutschein-Landingpage /guidings/voucher (Anfrage: noch keine Tour, CaG meldet sich beim Käufer und stellt den Gutschein aus). Den Status setzt ihr bei beiden, von Offen bis Erledigt, damit sichtbar ist, was schon geklärt ist. Die Provision auf Bestellungen läuft über Finanzen › Rechnungen.',
         'total' => 'Gesamt',
         'volume' => 'Bestellwert',
         'commission' => 'Provision',
