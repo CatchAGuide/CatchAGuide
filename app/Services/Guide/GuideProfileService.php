@@ -4,6 +4,7 @@ namespace App\Services\Guide;
 
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Services\Media\GuideProfilePhotoUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
@@ -16,6 +17,8 @@ class GuideProfileService
         'favorite_fish',
         'fishing_start_year',
     ];
+
+    public function __construct(private readonly GuideProfilePhotoUploadService $photos) {}
 
     public function update(User $user, Request $request): User
     {
@@ -30,10 +33,8 @@ class GuideProfileService
         $user->paypaldetails = $request->input('paypaldetails');
 
         if ($request->hasFile('profil_image')) {
-            $image = $request->file('profil_image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->move(public_path('images'), $imageName);
-            $user->profil_image = $imageName;
+            // WebP onto the media storage, like /guide/profile (never public/images).
+            $this->photos->store($user, $request->file('profil_image'));
         }
 
         // Allowlist: UserInformation's $fillable also covers request_as_guide, contact and the

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Guide profile photos: converted to WebP and written to the configured upload storage under
+ * Profile photos (guides, and customers via /profile/settings and Admin › Customers): converted to WebP and written to the configured upload storage under
  * {guide_area.photo.folder}/{user-id}/. Deliberately not a sitewide_folders entry: the orphan
  * image scan would treat these files as unreferenced.
  */

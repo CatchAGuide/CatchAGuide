@@ -32,6 +32,7 @@ use App\Models\Inclussion;
 use App\Models\ExtrasPrice;
 use App\Models\BoatExtras;
 use App\Services\Voucher\GuideVoucherOrders;
+use App\Services\Media\GuideProfilePhotoUploadService;
 
 class ProfileController extends Controller
 {
@@ -72,16 +73,14 @@ class ProfileController extends Controller
 
     }
 
-    public function accountUpdate(UpdateUserRequest $request)
+    public function accountUpdate(UpdateUserRequest $request, GuideProfilePhotoUploadService $photos)
     {   
 
         $user = auth()->user();
 
-        if($request->hasFile('image')){
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
-            // public/images/file.png
-            $user->profil_image = $imageName;
+        if ($request->hasFile('image')) {
+            // WebP onto the media storage (never public/images).
+            $photos->store($user, $request->file('image'));
         }
 
         // $user->number_of_guides = $request->numguides;

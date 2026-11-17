@@ -252,7 +252,7 @@
             <div class="profile-image-section">
                 <div id="imagePreviewContainer">
                     @if(Auth::user()->profil_image)
-                        <img src="{{asset('images/'. Auth::user()->profil_image)}}" 
+                        <img src="{{ guide_profile_photo_url(Auth::user()) }}" 
                              alt="Profile Image" class="current-image" id="profileImagePreview">
                     @else
                         <img src="" alt="Profile Image" class="current-image" id="profileImagePreview" style="display: none;">
@@ -420,7 +420,7 @@
             } else {
                 // If no file selected, hide preview or show original image
                 @if(Auth::user()->profil_image)
-                    preview.src = "{{asset('images/'. Auth::user()->profil_image)}}";
+                    preview.src = "{{ guide_profile_photo_url(Auth::user()) }}";
                     preview.style.display = 'block';
                 @else
                     preview.style.display = 'none';
