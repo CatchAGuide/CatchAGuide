@@ -32,6 +32,8 @@ class UserInformation extends Model
         'trade_register_court',
         'tax_number',
         'company_profile',
+        'display_name',
+        'crew_size',
     ];
 
     protected $casts = [

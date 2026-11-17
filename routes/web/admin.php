@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsController;
 use App\Http\Controllers\Auth\LoginAuthController;
+use App\Http\Controllers\Admin\GuideCertificatesController;
 use App\Http\Controllers\GuideRequestsController;
 use App\Http\Controllers\VacationsController;
 use Illuminate\Support\Facades\Route;
@@ -350,6 +351,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');
         Route::post('guide-requests/{guideRequest}/approve', [GuideRequestReviewController::class, 'approve'])->name('guide-requests.approve');
         Route::post('guide-requests/{guideRequest}/reject', [GuideRequestReviewController::class, 'reject'])->name('guide-requests.reject');
+
+        Route::get('guide-certificates', [GuideCertificatesController::class, 'index'])->name('guide-certificates.index');
+        Route::get('guide-certificates/{certificate}/file', [GuideCertificatesController::class, 'file'])->name('guide-certificates.file');
+        Route::post('guide-certificates/{certificate}/verify', [GuideCertificatesController::class, 'verify'])->name('guide-certificates.verify');
+        Route::post('guide-certificates/{certificate}/reject', [GuideCertificatesController::class, 'reject'])->name('guide-certificates.reject');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('email-logs/{emailLog}', [EmailLogsController::class, 'show'])->name('email-logs.show');

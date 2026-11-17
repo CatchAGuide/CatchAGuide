@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Api\EventsController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Guide\GuideCertificateFileController;
 use App\Http\Controllers\GuideOnboardingController;
+use App\Http\Livewire\Guide\Profile as GuideAreaProfile;
 use App\Http\Controllers\GuideVoucherSettingsController;
 use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\ProfileController;
@@ -71,6 +73,12 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
 
 Route::get('/guide/onboarding', [GuideOnboardingController::class, 'show'])->name('guide.onboarding');
 Route::post('/guide/onboarding', [GuideOnboardingController::class, 'store'])->name('guide.onboarding.store');
+
+// Guide Area redesign (beta): per-guide flag users.guide_area_beta, kill switch config('guide_area.enabled').
+Route::prefix('guide')->name('guide.area.')->middleware(['auth:web', 'guide.area'])->group(function () {
+    Route::get('/profile', GuideAreaProfile::class)->name('profile');
+    Route::get('/certificates/{certificate}/file', [GuideCertificateFileController::class, 'show'])->name('certificates.file');
+});
 
 Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');
 

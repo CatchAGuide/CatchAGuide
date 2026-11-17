@@ -61,6 +61,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'banktransfer_holder',
+        'banktransfer_iban',
+        'banktransfer_bic',
     ];
 
     /**
@@ -73,7 +76,22 @@ class User extends Authenticatable
         'guide_submitted_at' => 'datetime',
         'guide_verified_at' => 'datetime',
         'is_provider' => 'boolean',
+        // Not fillable on purpose: set explicitly (admin / GuideProfileFormService).
+        'guide_area_beta' => 'boolean',
+        'banktransfer_holder' => 'encrypted',
+        'banktransfer_iban' => 'encrypted',
+        'banktransfer_bic' => 'encrypted',
     ];
+
+    public function guideTags(): HasMany
+    {
+        return $this->hasMany(GuideTag::class)->orderBy('position');
+    }
+
+    public function guideCertificates(): HasMany
+    {
+        return $this->hasMany(GuideCertificate::class);
+    }
 
     public function isProvider(): bool
     {

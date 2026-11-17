@@ -1,0 +1,225 @@
+$ga-sidebar-width: 240px;
+$ga-sidebar-bp: 992px;
+
+[x-cloak] {
+    display: none !important;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.ga-body {
+    margin: 0;
+    background: $cag-bg;
+    color: $cag-slate;
+    font-family: $cag-font;
+    font-weight: $cag-fw-regular;
+    font-size: $cag-fs-subtitle;
+    line-height: $cag-lh-ui;
+    -webkit-font-smoothing: antialiased;
+
+    // :where() keeps this at class specificity so component link colours win without !important.
+    :where(a) {
+        color: $cag-slate;
+    }
+}
+
+.ga-shell {
+    display: flex;
+    min-height: 100vh;
+    gap: $cag-space-6;
+    padding: $cag-space-4;
+
+    @media (max-width: $ga-sidebar-bp - 1) {
+        flex-direction: column;
+        gap: $cag-space-3;
+        padding: $cag-space-3 $cag-gutter-mobile;
+    }
+}
+
+.ga-nav-toggle {
+    display: none;
+
+    @media (max-width: $ga-sidebar-bp - 1) {
+        display: inline-flex;
+        align-items: center;
+        gap: $cag-space-2;
+        align-self: flex-start;
+        padding: $cag-space-2 $cag-space-4;
+        border: 1px solid $cag-border;
+        border-radius: $cag-radius-md;
+        background: $cag-white;
+        color: $cag-slate;
+        font: inherit;
+        font-weight: $cag-fw-medium;
+        cursor: pointer;
+    }
+}
+
+.ga-sidebar {
+    flex: 0 0 $ga-sidebar-width;
+    align-self: flex-start;
+    position: sticky;
+    top: $cag-space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $cag-space-4;
+    padding: $cag-space-4;
+    background: $cag-white;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+
+    @media (max-width: $ga-sidebar-bp - 1) {
+        display: none;
+        position: static;
+        width: 100%;
+        flex-basis: auto;
+
+        &.is-open {
+            display: flex;
+        }
+    }
+
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-3;
+        padding-bottom: $cag-space-3;
+        border-bottom: 1px solid $cag-border;
+    }
+
+    &__name {
+        font-weight: $cag-fw-bold;
+    }
+
+    &__home {
+        font-size: $cag-fs-small;
+        color: $cag-coral;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__section {
+        margin: $cag-space-2 0 $cag-space-1;
+        padding: 0 $cag-space-3;
+        font-size: $cag-fs-caption;
+        font-weight: $cag-fw-bold;
+        letter-spacing: $cag-ls-caps;
+        text-transform: uppercase;
+        color: $cag-gray;
+    }
+
+    &__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    &__link {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-3;
+        padding: $cag-space-2 $cag-space-3;
+        border-radius: $cag-radius-md;
+        color: $cag-slate;
+        text-decoration: none;
+        transition: background $cag-duration $cag-ease;
+
+        i {
+            width: 16px;
+            text-align: center;
+            color: $cag-gray;
+        }
+
+        &:hover {
+            background: $cag-bg;
+        }
+
+        &.is-active {
+            background: $cag-slate;
+            color: $cag-on-dark;
+            font-weight: $cag-fw-medium;
+
+            i {
+                color: $cag-on-dark;
+            }
+        }
+    }
+
+    &__help {
+        margin-top: auto;
+        padding: $cag-space-3;
+        border-radius: $cag-radius-md;
+        background: $cag-sand;
+        font-size: $cag-fs-small;
+
+        p {
+            margin: $cag-space-1 0 $cag-space-3;
+            color: $cag-gray;
+        }
+    }
+
+    &__help-title {
+        font-weight: $cag-fw-bold;
+    }
+}
+
+.ga-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ga-page {
+    max-width: 1440px;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: $cag-space-4;
+        margin-bottom: $cag-space-4;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: $cag-fs-h1-solid;
+        font-weight: $cag-fw-bold;
+        line-height: $cag-lh-tight;
+    }
+
+    &__subtitle {
+        margin: $cag-space-1 0 0;
+        color: $cag-gray;
+    }
+}
+
+.ga-toast {
+    position: fixed;
+    right: $cag-space-6;
+    bottom: $cag-space-6;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: $cag-space-2;
+    padding: $cag-space-3 $cag-space-4;
+    border-radius: $cag-radius-md;
+    background: $cag-slate;
+    color: $cag-on-dark;
+    box-shadow: $cag-shadow-overlay;
+
+    i {
+        color: $cag-success;
+    }
+
+    @media (max-width: $ga-sidebar-bp - 1) {
+        left: $cag-gutter-mobile;
+        right: $cag-gutter-mobile;
+        bottom: $cag-space-4;
+    }
+}
