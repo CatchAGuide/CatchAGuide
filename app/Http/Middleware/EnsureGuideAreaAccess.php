@@ -24,7 +24,7 @@ class EnsureGuideAreaAccess
             return redirect()->route('profile.becomeguide');
         }
 
-        if (! config('guide_area.enabled') || ! $user->guide_area_beta) {
+        if (! $user->usesGuideArea()) {
             return redirect()->route('profile.guide-profile');
         }
 

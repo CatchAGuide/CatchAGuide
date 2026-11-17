@@ -371,7 +371,7 @@
         @if(auth()->user()->canAccessGuideDashboard())
             <div class="alert alert-info mb-4">
                 {{ __('profile.guide_profile_on_separate_page') }}
-                <a href="{{ route('profile.guide-profile') }}">{{ __('profile.guide_profile') }}</a>
+                <a href="{{ route(auth()->user()->guideProfileRouteName()) }}">{{ __('profile.guide_profile') }}</a>
             </div>
         @endif
 

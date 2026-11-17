@@ -162,6 +162,10 @@ class ProfileController extends Controller
             return redirect()->route('profile.becomeguide');
         }
 
+        if (auth()->user()->usesGuideArea()) {
+            return redirect()->route('guide.area.profile');
+        }
+
         return view('pages.profile.guide-profile');
     }
 

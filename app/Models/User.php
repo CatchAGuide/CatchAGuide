@@ -83,6 +83,26 @@ class User extends Authenticatable
         'banktransfer_bic' => 'encrypted',
     ];
 
+    /**
+     * Whether this guide gets the redesigned Guide Area (/guide/*) instead of the old
+     * /profile/* guide pages: per-guide beta flag plus the global kill switch.
+     */
+    public function usesGuideArea(): bool
+    {
+        return (bool) config('guide_area.enabled')
+            && (bool) $this->guide_area_beta
+            && $this->canViewGuideTools();
+    }
+
+    /**
+     * Route name of this user's guide profile page: the new one for Guide Area guides,
+     * the old one for everyone else.
+     */
+    public function guideProfileRouteName(): string
+    {
+        return $this->usesGuideArea() ? 'guide.area.profile' : 'profile.guide-profile';
+    }
+
     public function guideTags(): HasMany
     {
         return $this->hasMany(GuideTag::class)->orderBy('position');

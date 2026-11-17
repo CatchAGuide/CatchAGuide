@@ -75,6 +75,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('customersdelete/{id}', [CustomersController::class, 'customersdelete'])->name('customersdelete');
         Route::resource('guides', GuidesController::class);
         Route::get('guides/change-status/{guide}', [GuidesController::class, 'changeGuideStatus'])->name('guides.change-status');
+        Route::post('guides/{guide}/guide-area-beta', [GuidesController::class, 'toggleGuideAreaBeta'])->name('guides.guide-area-beta');
         Route::get('guide-analytics', [GuideAnalyticsController::class, 'index'])->name('guide-analytics.index');
         Route::get('security/threats', [SecurityThreatsController::class, 'index'])->name('security.threats');
 

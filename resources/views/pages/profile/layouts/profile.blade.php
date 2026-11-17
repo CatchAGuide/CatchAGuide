@@ -401,7 +401,7 @@
                             ]);
 
                             if (Auth::user()->canViewGuideTools()) {
-                                $profileNavItems->push(['route' => 'profile.guide-profile', 'routeIs' => ['profile.guide-profile'], 'icon' => 'fas fa-fish', 'label' => __('profile.guide_profile')]);
+                                $profileNavItems->push(['route' => Auth::user()->guideProfileRouteName(), 'routeIs' => ['profile.guide-profile', 'guide.area.profile'], 'icon' => 'fas fa-fish', 'label' => __('profile.guide_profile')]);
                             }
 
                             $profileNavItems->push(['route' => 'profile.bookings', 'routeIs' => ['profile.bookings', 'profile.showbooking', 'profile.guidebookings'], 'icon' => 'fas fa-calendar-check', 'label' => __('profile.all_bookings')]);
@@ -469,7 +469,7 @@
 
                                     @if(Auth::user()->canViewGuideTools())
                                         <li class="nav-item">
-                                            <a href="{{ route('profile.guide-profile') }}" class="nav-link {{ Request::routeIs('profile.guide-profile') ? 'active' : '' }}">
+                                            <a href="{{ route(Auth::user()->guideProfileRouteName()) }}" class="nav-link {{ Request::routeIs('profile.guide-profile') ? 'active' : '' }}">
                                                 <i class="fas fa-fish"></i>
                                                 <span>{{ __('profile.guide_profile') }}</span>
                                             </a>

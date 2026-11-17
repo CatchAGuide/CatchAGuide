@@ -35,7 +35,7 @@ class GuideAreaNav
             ]],
             ['section' => __('guide_area.nav.section_account'), 'items' => [
                 $item('profile', 'fa-user', 'guide.area.profile'),
-                $item('account', 'fa-lock', 'profile.account'),
+                $item('account', 'fa-lock', 'profile.settings'),
             ]],
         ];
     }

@@ -231,5 +231,16 @@ return [
         'empty' => 'No certificates here.',
         'verified_flash' => 'Certificate verified. The guide has been notified.',
         'rejected_flash' => 'Certificate rejected. The guide has been notified.',
+        'beta' => [
+            'title' => 'Guide Area (beta)',
+            'status_on' => 'New Guide Area on',
+            'status_off' => 'New Guide Area off',
+            'help' => 'When on, this guide uses the redesigned pages under /guide/* (currently the guide profile) instead of the old profile pages.',
+            'kill_switch_off' => 'The Guide Area is switched off globally (GUIDE_AREA_ENABLED), so nobody sees it right now.',
+            'enable' => 'Turn on new Guide Area',
+            'disable' => 'Turn off new Guide Area',
+            'enabled_flash' => 'New Guide Area turned on for :name.',
+            'disabled_flash' => 'New Guide Area turned off for :name.',
+        ],
     ],
 ];

@@ -12,6 +12,7 @@ use App\Models\UserInformation;
 use App\Services\Guide\GuideOnboardingService;
 use App\Services\Guide\GuideProfileService;
 use App\Services\Guide\GuideVerificationService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -111,6 +112,18 @@ class GuidesController extends Controller
         $findGuide->phone = $request->information['phone'];
         $findGuide->update();
         return redirect()->route('admin.guides.edit', $findGuide)->with(['message' => 'Erfolgreich gespeichert!']);
+    }
+
+    /**
+     * Switches the redesigned Guide Area (/guide/*) on or off for one guide (beta rollout).
+     */
+    public function toggleGuideAreaBeta(User $guide): RedirectResponse
+    {
+        $guide->forceFill(['guide_area_beta' => ! $guide->guide_area_beta])->save();
+
+        return back()->with('message', __($guide->guide_area_beta
+            ? 'guide_area.admin.beta.enabled_flash'
+            : 'guide_area.admin.beta.disabled_flash', ['name' => $guide->full_name]));
     }
 
     public function changeGuideStatus(User $guide)
