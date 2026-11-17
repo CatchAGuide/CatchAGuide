@@ -45,7 +45,7 @@
                 </div>
                 <div class="ga-type">
                     <span class="ga-badge"><i class="far {{ $isCompany ? 'fa-building' : 'fa-user' }}" aria-hidden="true"></i> {{ __('guide_area.profile.type_'.($isCompany ? 'company' : 'private')) }}</span>
-                    <span class="ga-type__hint">{!! __('guide_area.profile.type_change_hint', ['link' => '<a href="'.e(route('profile.account')).'">'.e(__('guide_area.nav.account')).'</a>']) !!}</span>
+                    <span class="ga-type__hint">{!! __('guide_area.profile.type_change_hint', ['link' => '<a href="'.e(route('profile.settings')).'">'.e(__('guide_area.nav.account')).'</a>']) !!}</span>
                 </div>
             </div>
 
@@ -288,7 +288,7 @@
         </section>
 
         <div class="ga-savebar">
-            <p>{!! __('guide_area.profile.account_hint', ['link' => '<a href="'.e(route('profile.account')).'">'.e(__('guide_area.nav.account')).'</a>']) !!}</p>
+            <p>{!! __('guide_area.profile.account_hint', ['link' => '<a href="'.e(route('profile.settings')).'">'.e(__('guide_area.nav.account')).'</a>']) !!}</p>
             <button type="submit" class="ga-btn ga-btn--dark" wire:loading.attr="disabled" wire:target="save">
                 <span wire:loading.remove wire:target="save">{{ __('guide_area.profile.save') }}</span>
                 <span wire:loading wire:target="save">{{ __('guide_area.common.saving') }}</span>

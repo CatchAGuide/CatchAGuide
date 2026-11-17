@@ -1440,10 +1440,17 @@ class Guiding extends Model
      */
     public function isCompleteForPublishing(): bool
     {
-        if (! filled($this->title) || ! filled($this->location)) {
-            return false;
-        }
+        return $this->publishingGaps() === [];
+    }
 
+    /**
+     * What a tour still lacks before it can go live, as stable keys (labels in
+     * guide_area.tours.gaps.*). Empty when isCompleteForPublishing() is true; same rules.
+     *
+     * @return list<string>
+     */
+    public function publishingGaps(): array
+    {
         $hasItems = static function ($jsonOrArray): bool {
             if (is_array($jsonOrArray)) {
                 return count(array_filter($jsonOrArray, static fn ($v) => filled($v))) > 0;
@@ -1456,63 +1463,31 @@ class Guiding extends Model
                 && count(array_filter($decoded, static fn ($v) => filled($v))) > 0;
         };
 
-        if (! $hasItems($this->getAttribute('target_fish'))) {
-            return false;
-        }
-        if (! $hasItems($this->getAttribute('fishing_methods'))) {
-            return false;
-        }
-        if (! $hasItems($this->getAttribute('water_types'))) {
-            return false;
-        }
-
-        if (! filled($this->fishing_type_id)) {
-            return false;
-        }
-
-        foreach (['desc_course_of_action', 'desc_meeting_point', 'desc_tour_unique', 'desc_starting_time'] as $field) {
-            if (! filled($this->{$field})) {
-                return false;
-            }
-        }
-
-        if (! filled($this->tour_type)) {
-            return false;
-        }
-
-        if (! filled($this->duration_type) || (int) $this->duration <= 0) {
-            return false;
-        }
-
-        if ((int) $this->max_guests <= 0) {
-            return false;
-        }
-
-        if (! filled($this->price_type) || (float) $this->price <= 0) {
-            return false;
-        }
-
-        if (! filled($this->allowed_booking_advance) || ! filled($this->booking_window)) {
-            return false;
-        }
-
-        if (! filled($this->seasonal_trip)) {
-            return false;
-        }
-
-        if ((int) $this->is_boat === 1 && ! filled($this->boat_type)) {
-            return false;
-        }
-
         $gallery = $this->gallery_images;
         if (is_string($gallery)) {
             $gallery = json_decode($gallery, true) ?? [];
         }
-        if (! is_array($gallery) || count(array_filter($gallery, static fn ($v) => filled($v))) < 5) {
-            return false;
-        }
 
-        return true;
+        $gaps = [
+            'title' => ! filled($this->title),
+            'location' => ! filled($this->location),
+            'target_fish' => ! $hasItems($this->getAttribute('target_fish')),
+            'fishing_methods' => ! $hasItems($this->getAttribute('fishing_methods')),
+            'water_types' => ! $hasItems($this->getAttribute('water_types')),
+            'fishing_type' => ! filled($this->fishing_type_id),
+            'description' => collect(['desc_course_of_action', 'desc_meeting_point', 'desc_tour_unique', 'desc_starting_time'])
+                ->contains(fn (string $field) => ! filled($this->{$field})),
+            'tour_type' => ! filled($this->tour_type),
+            'duration' => ! filled($this->duration_type) || (int) $this->duration <= 0,
+            'max_guests' => (int) $this->max_guests <= 0,
+            'price' => ! filled($this->price_type) || (float) $this->price <= 0,
+            'booking_rules' => ! filled($this->allowed_booking_advance) || ! filled($this->booking_window),
+            'season' => ! filled($this->seasonal_trip),
+            'boat_type' => (int) $this->is_boat === 1 && ! filled($this->boat_type),
+            'photos' => ! is_array($gallery) || count(array_filter($gallery, static fn ($v) => filled($v))) < 5,
+        ];
+
+        return array_keys(array_filter($gaps));
     }
 
     /**

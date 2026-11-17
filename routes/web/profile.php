@@ -7,6 +7,9 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\Guide\GuideCertificateFileController;
 use App\Http\Controllers\GuideOnboardingController;
 use App\Http\Livewire\Guide\Profile as GuideAreaProfile;
+use App\Http\Livewire\Guide\Tours as GuideAreaTours;
+use App\Http\Livewire\Guide\VoucherSettings as GuideAreaVoucherSettings;
+use App\Http\Livewire\Guide\Vouchers as GuideAreaVouchers;
 use App\Http\Controllers\GuideVoucherSettingsController;
 use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\ProfileController;
@@ -78,6 +81,9 @@ Route::post('/guide/onboarding', [GuideOnboardingController::class, 'store'])->n
 Route::prefix('guide')->name('guide.area.')->middleware(['auth:web', 'guide.area'])->group(function () {
     Route::get('/profile', GuideAreaProfile::class)->name('profile');
     Route::get('/certificates/{certificate}/file', [GuideCertificateFileController::class, 'show'])->name('certificates.file');
+    Route::get('/tours', GuideAreaTours::class)->name('tours');
+    Route::get('/vouchers', GuideAreaVouchers::class)->name('vouchers');
+    Route::get('/vouchers/settings', GuideAreaVoucherSettings::class)->name('vouchers.settings');
 });
 
 Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');

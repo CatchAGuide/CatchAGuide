@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 /**
  * A tour bought as a gift voucher (see the voucher_orders migrations). CaG takes no payment:
@@ -74,7 +75,43 @@ class VoucherOrder extends Model implements HasDoneReasonContract
         'commission_rate' => 'decimal:4',
         'commission_amount' => 'decimal:2',
         'valid_until' => 'date',
+        // Guide Area › Vouchers; written by GuideVoucherOrders::mark(), not fillable.
+        'is_paid' => 'boolean',
+        'paid_at' => 'datetime',
+        'is_sent' => 'boolean',
+        'sent_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        // Short reference ("G-0001") for guides and buyers; tour orders only.
+        static::created(function (VoucherOrder $order) {
+            // kind is null in memory when the column default ('order') was used.
+            if (($order->kind ?? VoucherOrderKind::Order) === VoucherOrderKind::Order && $order->public_id === null) {
+                $order->assignPublicId();
+            }
+        });
+    }
+
+    /** Next free "G-nnnn" number; retried when two orders are created at the same moment. */
+    public function assignPublicId(): void
+    {
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $last = (int) static::query()
+                ->whereNotNull('public_id')
+                ->selectRaw('MAX(CAST(SUBSTRING(public_id, 3) AS UNSIGNED)) AS n')
+                ->value('n');
+            $candidate = 'G-'.str_pad((string) ($last + 1 + $attempt), 4, '0', STR_PAD_LEFT);
+
+            try {
+                $this->forceFill(['public_id' => $candidate])->saveQuietly();
+
+                return;
+            } catch (UniqueConstraintViolationException) {
+                continue;
+            }
+        }
+    }
 
     public function guiding(): BelongsTo
     {

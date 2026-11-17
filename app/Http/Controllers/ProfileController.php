@@ -177,8 +177,13 @@ class ProfileController extends Controller
 
     public function myguidings(Request $request)
     {
-        // Get all guidings for the authenticated user and check for duplicates
-        $allGuidings = Guiding::where('user_id', auth()->user()->id)->get();
+        if (auth()->user()->usesGuideArea()) {
+            return redirect()->route('guide.area.tours');
+        }
+
+        // Get all guidings for the authenticated user and check for duplicates. Tours copied on
+        // purpose with Guide Area › Duplicate (duplicated_from_id) are never treated as duplicates.
+        $allGuidings = Guiding::where('user_id', auth()->user()->id)->whereNull('duplicated_from_id')->get();
         $duplicatesRemoved = false;
         
         // Group guidings by their attributes to find duplicates

@@ -1,0 +1,164 @@
+// Guide Area › My fishing tours and › Vouchers lists.
+
+.ga-tour-list,
+.ga-voucher-list {
+    display: flex;
+    flex-direction: column;
+    gap: $cag-space-3;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ga-tour {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    gap: $cag-space-4;
+    align-items: start;
+    padding: $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+
+    &__img {
+        width: 120px;
+        height: 90px;
+        border-radius: $cag-radius-md;
+        object-fit: cover;
+        background: $cag-bg;
+    }
+
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-2;
+        margin-bottom: $cag-space-1;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: $cag-fs-h3-mobile;
+        font-weight: $cag-fw-bold;
+        line-height: $cag-lh-heading;
+        color: $cag-slate;
+    }
+
+    &__meta {
+        margin: $cag-space-1 0 0;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__gaps {
+        margin-top: $cag-space-2;
+        font-size: $cag-fs-small;
+        color: $cag-slate;
+
+        summary {
+            cursor: pointer;
+            color: $cag-danger;
+        }
+
+        ul {
+            margin: $cag-space-1 0 0;
+            padding-left: $cag-space-5;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: $cag-space-2;
+    }
+
+    @media (max-width: 767px) {
+        grid-template-columns: 88px minmax(0, 1fr);
+
+        &__img {
+            width: 88px;
+            height: 66px;
+        }
+
+        &__actions {
+            grid-column: 1 / -1;
+            justify-content: flex-start;
+        }
+    }
+}
+
+.ga-voucher {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: $cag-space-4;
+    padding: $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+
+    &__head {
+        display: flex;
+        gap: $cag-space-3;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__id {
+        font-weight: $cag-fw-bold;
+        color: $cag-slate;
+    }
+
+    &__title {
+        margin: $cag-space-1 0 0;
+        font-size: $cag-fs-h3-mobile;
+        font-weight: $cag-fw-bold;
+        color: $cag-slate;
+    }
+
+    &__meta {
+        margin: $cag-space-1 0 $cag-space-2;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__people {
+        display: grid;
+        gap: $cag-space-1;
+        margin: 0;
+        font-size: $cag-fs-small;
+
+        div {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $cag-space-2;
+        }
+
+        dt {
+            min-width: 96px;
+            font-weight: $cag-fw-medium;
+            color: $cag-gray;
+        }
+
+        dd {
+            margin: 0;
+            color: $cag-slate;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $cag-space-3;
+    }
+
+    @media (max-width: 767px) {
+        grid-template-columns: minmax(0, 1fr);
+
+        &__actions {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+    }
+}

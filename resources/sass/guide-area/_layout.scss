@@ -180,6 +180,7 @@ $ga-sidebar-bp: 992px;
 
     &__header {
         display: flex;
+        flex-wrap: wrap;
         justify-content: space-between;
         align-items: flex-start;
         gap: $cag-space-4;

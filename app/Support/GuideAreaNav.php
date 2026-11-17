@@ -15,12 +15,12 @@ class GuideAreaNav
      */
     public static function sections(): array
     {
-        $item = fn (string $key, string $icon, string $route) => [
+        $item = fn (string $key, string $icon, string $route, ?string $activePattern = null) => [
             'key' => $key,
             'label' => __('guide_area.nav.'.$key),
             'url' => Route::has($route) ? route($route) : '#',
             'icon' => $icon,
-            'active' => request()->routeIs($route),
+            'active' => request()->routeIs($activePattern ?? $route),
         ];
 
         return [
@@ -30,8 +30,8 @@ class GuideAreaNav
                 $item('calendar', 'fa-calendar', 'profile.calendar'),
             ]],
             ['section' => __('guide_area.nav.section_offers'), 'items' => [
-                $item('tours', 'fa-fish', 'profile.myguidings'),
-                $item('vouchers', 'fa-ticket-alt', 'profile.vouchers'),
+                $item('tours', 'fa-fish', 'guide.area.tours'),
+                $item('vouchers', 'fa-ticket-alt', 'guide.area.vouchers', 'guide.area.vouchers*'),
             ]],
             ['section' => __('guide_area.nav.section_account'), 'items' => [
                 $item('profile', 'fa-user', 'guide.area.profile'),
