@@ -26,7 +26,8 @@ class CleanUrlParametersTest extends TestCase
      */
     public function test_clean_urls_pass_through()
     {
-        $cleanUrl = '/guidings?placeLat=39.6952629&placeLng=3.0175712&page=3';
+        // The listing itself: /guidings (the landing) 301s any search params to here.
+        $cleanUrl = '/guidings/alloffers?placeLat=39.6952629&placeLng=3.0175712&page=3';
         
         $response = $this->get($cleanUrl);
         

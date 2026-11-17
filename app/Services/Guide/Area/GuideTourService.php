@@ -121,7 +121,7 @@ class GuideTourService
             $copy->slug = $this->seo->generateSlug((string) $copy->title, (string) ($copy->location ?: 'location'));
             $copy->save();
 
-            // Legacy pivots the old editors still write. (fishing_equipment has no table any more.)
+            // Legacy pivots the old editors still write.
             foreach (['guidingTargets', 'guidingMethods', 'guidingWaters', 'inclussions', 'levels'] as $relation) {
                 $ids = $original->{$relation}()->pluck($original->{$relation}()->getRelated()->getQualifiedKeyName())->all();
                 if ($ids !== []) {

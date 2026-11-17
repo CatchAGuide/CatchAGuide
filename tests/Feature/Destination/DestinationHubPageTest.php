@@ -91,8 +91,9 @@ class DestinationHubPageTest extends TestCase
         $response = $this->get(route('destination'));
 
         $response->assertOk();
-        $response->assertSee(__('destination.title'), false);
-        $response->assertSee(__('destination.header_sub_title'), false);
+        // Escaped: the copy contains "&", which the page correctly renders as &amp;.
+        $response->assertSee(__('destination.title'));
+        $response->assertSee(__('destination.header_sub_title'));
         $response->assertSee('cag-site-nav', false);
         $response->assertSee('cag-site-nav-shell', false);
         $response->assertSee('cag-site-nav--overlay', false);

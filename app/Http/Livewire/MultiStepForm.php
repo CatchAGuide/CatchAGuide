@@ -515,7 +515,6 @@ class MultiStepForm extends Component
         $guiding->guidingTargets()->attach($this->targets);
         $guiding->guidingMethods()->attach($this->methods);
         $guiding->guidingWaters()->attach($this->water);
-        $guiding->fishing_equipment()->attach($this->guidingequipment);
 
         foreach($this->extras as $extra){
             if($extra){

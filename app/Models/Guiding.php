@@ -24,7 +24,6 @@ use App\Models\Levels;
 use App\Models\FishingFrom;
 use App\Models\FishingType;
 use App\Models\EquipmentStatus;
-use App\Models\FishingEquipment;
 use App\Models\Rating;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingAdditionalInformation;
@@ -373,11 +372,6 @@ class Guiding extends Model
     public function inclussions()
     {
         return $this->belongsToMany(Inclussion::class,'guiding_inclussions')->withTimestamps();
-    }
-
-    public function fishing_equipment()
-    {
-        return $this->belongsToMany(FishingEquipment::class, 'guiding_equipment');
     }
 
     public function levels()
