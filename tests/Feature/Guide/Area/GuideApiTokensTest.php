@@ -116,7 +116,11 @@ class GuideApiTokensTest extends TestCase
             ->assertForbidden()
             ->assertJsonPath('message', __('guide_area.api.not_a_guide'));
 
-        $this->signIn($this->user(beta: false))
+        // Every guide uses the Guide Area; only the kill switch closes it.
+        $this->signIn($this->user(beta: false))->assertCreated();
+
+        config(['guide_area.enabled' => false]);
+        $this->signIn($this->user())
             ->assertForbidden()
             ->assertJsonPath('message', __('guide_area.api.not_enabled'));
     }
@@ -128,7 +132,8 @@ class GuideApiTokensTest extends TestCase
 
     public function test_api_messages_follow_the_visitors_language(): void
     {
-        $guide = $this->user(beta: false);
+        $guide = $this->user();
+        config(['guide_area.enabled' => false]);
 
         $this->withSession(['locale' => 'en'])->actingAs($guide)
             ->getJson('/api/guide/tours', ['Referer' => 'http://localhost/'])

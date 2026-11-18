@@ -144,6 +144,8 @@ class GuideVoucherOrdersTest extends TestCase
     {
         $guide = $this->guide();
         $order = $this->order($guide);
+        // Old page: only reachable while the Guide Area kill switch is off.
+        config(['guide_area.enabled' => false]);
 
         $this->actingAs($guide)->get(route('profile.vouchers'))
             ->assertOk()

@@ -5,9 +5,9 @@
 | Guide Area (redesigned guide dashboard under /guide/*)
 |--------------------------------------------------------------------------
 |
-| Ships behind a per-guide beta flag (users.guide_area_beta). `enabled` is the global kill
-| switch: false hides /guide/* for everyone, flagged or not. The old /profile/* guide pages
-| stay live until rollout.
+| Every guide uses it (the per-guide beta flag users.guide_area_beta is no longer checked;
+| the column stays). `enabled` is the global kill switch: false sends guides back to the old
+| /profile/* guide pages.
 |
 */
 

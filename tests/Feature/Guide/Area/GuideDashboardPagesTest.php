@@ -83,10 +83,10 @@ class GuideDashboardPagesTest extends TestCase
         }
     }
 
-    public function test_guides_without_the_beta_go_to_the_matching_old_page(): void
+    public function test_kill_switch_sends_guides_to_the_matching_old_page(): void
     {
         $guide = $this->guide();
-        $guide->forceFill(['guide_area_beta' => false])->save();
+        config(['guide_area.enabled' => false]);
 
         $this->actingAs($guide)->get(route('guide.area.overview'))->assertRedirect(route('profile.index'));
         $this->actingAs($guide)->get(route('guide.area.bookings'))->assertRedirect(route('profile.bookings'));

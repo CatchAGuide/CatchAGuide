@@ -256,11 +256,14 @@ class GuideToursTest extends TestCase
             ->assertJsonPath('data.duplicated_from_id', $original->id);
     }
 
-    public function test_api_requires_auth_and_the_beta_flag(): void
+    public function test_api_requires_auth_and_the_guide_area_switched_on(): void
     {
         $this->getJson(route('api.guide.tours.index'))->assertUnauthorized();
 
         Sanctum::actingAs($this->guide(beta: false));
+        $this->getJson(route('api.guide.tours.index'))->assertOk();
+
+        config(['guide_area.enabled' => false]);
         $this->getJson(route('api.guide.tours.index'))->assertForbidden();
     }
 

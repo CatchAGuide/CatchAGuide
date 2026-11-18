@@ -38,10 +38,11 @@ class GuideAreaEntryPointsTest extends TestCase
         return $guide->fresh();
     }
 
-    public function test_uses_guide_area_needs_flag_kill_switch_and_guide_tools(): void
+    public function test_every_guide_uses_the_guide_area_unless_the_kill_switch_is_off(): void
     {
         $this->assertTrue($this->guide(true)->usesGuideArea());
-        $this->assertFalse($this->guide(false)->usesGuideArea());
+        // The old per-guide beta flag is no longer checked.
+        $this->assertTrue($this->guide(false)->usesGuideArea());
 
         $customer = User::factory()->create(['is_guide' => 0, 'guide_status' => null]);
         $customer->forceFill(['guide_area_beta' => true])->save();
@@ -58,8 +59,10 @@ class GuideAreaEntryPointsTest extends TestCase
             ->assertRedirect(route('guide.area.profile'));
     }
 
-    public function test_old_guide_profile_still_serves_guides_without_the_flag(): void
+    public function test_old_guide_profile_still_serves_guides_when_the_kill_switch_is_off(): void
     {
+        config(['guide_area.enabled' => false]);
+
         $this->actingAs($this->guide(false))
             ->get(route('profile.guide-profile'))
             ->assertOk();
@@ -71,7 +74,7 @@ class GuideAreaEntryPointsTest extends TestCase
             ->get(route('profile.index'))
             ->assertRedirect(route('guide.area.overview'));
 
-        $this->actingAs($this->guide(false))->get(route('profile.index'))->assertOk();
+        $this->actingAs($this->guide(false))->get(route('profile.index'))->assertRedirect(route('guide.area.overview'));
 
         $customer = User::factory()->create(['is_guide' => 0, 'guide_status' => null]);
         $this->actingAs($customer)->get(route('profile.index'))->assertOk();
@@ -85,32 +88,7 @@ class GuideAreaEntryPointsTest extends TestCase
             ->assertSee(route('guide.area.profile'), false);
     }
 
-    public function test_admin_can_toggle_the_beta_flag(): void
-    {
-        $guide = $this->guide(false);
-        $employee = Employee::query()->first() ?? Employee::factory()->create();
-
-        $this->actingAs($employee, 'employees')
-            ->post(route('admin.guides.guide-area-beta', $guide))
-            ->assertRedirect();
-        $this->assertTrue($guide->fresh()->guide_area_beta);
-
-        $this->actingAs($employee, 'employees')
-            ->post(route('admin.guides.guide-area-beta', $guide))
-            ->assertRedirect();
-        $this->assertFalse($guide->fresh()->guide_area_beta);
-    }
-
-    public function test_guides_cannot_toggle_their_own_flag_through_the_admin_route(): void
-    {
-        $guide = $this->guide(false);
-
-        $this->actingAs($guide)->post(route('admin.guides.guide-area-beta', $guide));
-
-        $this->assertFalse($guide->fresh()->guide_area_beta);
-    }
-
-    public function test_admin_guide_edit_page_shows_the_switch(): void
+    public function test_admin_guide_edit_page_has_no_beta_switch_any_more(): void
     {
         $guide = $this->guide(false);
         $employee = Employee::query()->first() ?? Employee::factory()->create();
@@ -118,7 +96,7 @@ class GuideAreaEntryPointsTest extends TestCase
         $this->actingAs($employee, 'employees')
             ->get(route('admin.guides.edit', $guide))
             ->assertOk()
-            ->assertSee(__('guide_area.admin.beta.enable'));
+            ->assertDontSee('guide-area-beta');
     }
 
     public function test_every_sidebar_link_is_a_page_that_opens_with_get(): void

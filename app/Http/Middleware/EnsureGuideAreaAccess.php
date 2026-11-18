@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * /guide/* pages and /api/guide/* (redesigned guide dashboard): guides with
- * users.guide_area_beta only, while the global kill switch config('guide_area.enabled') is on.
+ * every guide, while the global kill switch config('guide_area.enabled') is on.
  * Pages send everyone else to the old page; the API answers 401 / 403 JSON.
  */
 class EnsureGuideAreaAccess

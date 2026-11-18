@@ -46,11 +46,11 @@ class GuideProfilePageTest extends TestCase
         return $guide->fresh(['information']);
     }
 
-    public function test_guides_without_the_beta_flag_go_to_the_old_page(): void
+    public function test_guides_without_the_old_beta_flag_get_the_new_page(): void
     {
         $this->actingAs($this->guide(beta: false))
             ->get(route('guide.area.profile'))
-            ->assertRedirect(route('profile.guide-profile'));
+            ->assertOk();
     }
 
     public function test_kill_switch_hides_the_page_for_flagged_guides(): void

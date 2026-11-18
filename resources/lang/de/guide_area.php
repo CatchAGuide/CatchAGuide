@@ -702,16 +702,5 @@ return [
         'empty' => 'Hier sind keine Nachweise.',
         'verified_flash' => 'Nachweis verifiziert. Der Guide wurde benachrichtigt.',
         'rejected_flash' => 'Nachweis abgelehnt. Der Guide wurde benachrichtigt.',
-        'beta' => [
-            'title' => 'Guide-Bereich (Beta)',
-            'status_on' => 'Neuer Guide-Bereich an',
-            'status_off' => 'Neuer Guide-Bereich aus',
-            'help' => 'Wenn aktiviert, nutzt dieser Guide die neu gestalteten Seiten unter /guide/* (derzeit das Guide-Profil) statt der alten Profilseiten.',
-            'kill_switch_off' => 'Der Guide-Bereich ist global ausgeschaltet (GUIDE_AREA_ENABLED), daher sieht ihn gerade niemand.',
-            'enable' => 'Neuen Guide-Bereich aktivieren',
-            'disable' => 'Neuen Guide-Bereich deaktivieren',
-            'enabled_flash' => 'Neuer Guide-Bereich für :name aktiviert.',
-            'disabled_flash' => 'Neuer Guide-Bereich für :name deaktiviert.',
-        ],
     ],
 ];

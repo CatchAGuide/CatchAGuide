@@ -110,30 +110,6 @@
 
                     </div>
                 </div>
-                <div class="col-xl-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">{{ __('guide_area.admin.beta.title') }}</h3>
-                        </div>
-                        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-2">
-                            <div>
-                                <span class="badge {{ $guide->guide_area_beta ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ $guide->guide_area_beta ? __('guide_area.admin.beta.status_on') : __('guide_area.admin.beta.status_off') }}
-                                </span>
-                                <p class="mb-0 mt-2 text-muted">{{ __('guide_area.admin.beta.help') }}</p>
-                                @unless(config('guide_area.enabled'))
-                                    <p class="mb-0 mt-1 text-warning">{{ __('guide_area.admin.beta.kill_switch_off') }}</p>
-                                @endunless
-                            </div>
-                            <form method="post" action="{{ route('admin.guides.guide-area-beta', $guide) }}">
-                                @csrf
-                                <button type="submit" class="btn {{ $guide->guide_area_beta ? 'btn-outline-danger' : 'btn-primary' }}">
-                                    {{ $guide->guide_area_beta ? __('guide_area.admin.beta.disable') : __('guide_area.admin.beta.enable') }}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
             <!-- End Row -->
         </div>

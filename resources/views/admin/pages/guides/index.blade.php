@@ -62,13 +62,6 @@
                                                     @endif
                                                     <a href="{{ route('admin.guides.edit', $guide) }}" title="Guide bearbeiten" class="btn btn-sm btn-danger"><i class="fa fa-pen"></i></a>
                                                     <a href="{{ route('admin.guides.show', $guide) }}" title="Guide ansehen" class="btn btn-sm btn-primary"><i class="fa fa-search"></i></a>
-                                                    <form method="post" action="{{ route('admin.guides.guide-area-beta', $guide) }}" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm {{ $guide->guide_area_beta ? 'btn-info' : 'btn-outline-info' }}"
-                                                                title="{{ $guide->guide_area_beta ? __('guide_area.admin.beta.disable') : __('guide_area.admin.beta.enable') }}">
-                                                            <i class="fa fa-flask"></i>
-                                                        </button>
-                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>

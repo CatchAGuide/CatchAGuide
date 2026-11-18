@@ -85,12 +85,11 @@ class User extends Authenticatable
 
     /**
      * Whether this guide gets the redesigned Guide Area (/guide/*) instead of the old
-     * /profile/* guide pages: per-guide beta flag plus the global kill switch.
+     * /profile/* guide pages: every guide, unless the global kill switch is off.
      */
     public function usesGuideArea(): bool
     {
         return (bool) config('guide_area.enabled')
-            && (bool) $this->guide_area_beta
             && $this->canViewGuideTools();
     }
 
