@@ -126,6 +126,22 @@ class GuideApiTokensTest extends TestCase
         $this->postJson('/api/guide/tokens', [])->assertStatus(422)->assertJsonValidationErrors(['email', 'password', 'device_name']);
     }
 
+    public function test_api_messages_follow_the_visitors_language(): void
+    {
+        $guide = $this->user(beta: false);
+
+        $this->withSession(['locale' => 'en'])->actingAs($guide)
+            ->getJson('/api/guide/tours', ['Referer' => 'http://localhost/'])
+            ->assertForbidden()
+            ->assertJsonPath('message', trans('guide_area.api.not_enabled', [], 'en'));
+
+        $this->app['auth']->forgetGuards();
+        $this->withSession(['locale' => 'de'])->actingAs($guide)
+            ->getJson('/api/guide/tours', ['Referer' => 'http://localhost/'])
+            ->assertForbidden()
+            ->assertJsonPath('message', trans('guide_area.api.not_enabled', [], 'de'));
+    }
+
     public function test_signing_out_needs_a_signed_in_guide(): void
     {
         $this->deleteJson('/api/guide/tokens/current')->assertUnauthorized();

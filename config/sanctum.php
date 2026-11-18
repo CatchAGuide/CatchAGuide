@@ -17,7 +17,8 @@ return [
         '%s%s',
         // Both live domains share one codebase (APP_URL names only one of them).
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1,catchaguide.com,www.catchaguide.com,catchaguide.de,www.catchaguide.de',
-        env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
+        // Tolerates an APP_URL without a scheme (the local .env has APP_URL=cag.local).
+        env('APP_URL') ? ','.parse_url(str_contains((string) env('APP_URL'), '://') ? env('APP_URL') : 'http://'.env('APP_URL'), PHP_URL_HOST) : ''
     ))),
 
     /*

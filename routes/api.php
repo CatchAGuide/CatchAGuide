@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Guide\TokensController as GuideTokensController;
 use App\Http\Controllers\Api\Guide\ToursController as GuideToursController;
 use App\Http\Controllers\Api\Guide\VoucherOrdersController as GuideVoucherOrdersController;
 use App\Http\Controllers\Api\Guide\VoucherSettingsController as GuideVoucherSettingsController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -24,15 +25,15 @@ Route::prefix('catalog')
 
 // Guide Area API (plan decision D-3): same services as the /guide/* pages. Auth: Sanctum bearer
 // token, or the site session for first-party requests from a stateful domain (config/sanctum.php).
-// Same beta gate as the pages (guide.area).
+// Same beta gate as the pages (guide.area). SetLocale: messages follow the domain / language switch.
 // Sign in for a bearer token. Wrong passwords are throttled per email + IP (LoginThrottle).
 Route::post('/guide/tokens', [GuideTokensController::class, 'store'])
-    ->middleware('throttle:20,1')
+    ->middleware([SetLocale::class, 'throttle:20,1'])
     ->name('api.guide.tokens.store');
 
 Route::prefix('guide')
     ->name('api.guide.')
-    ->middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum', 'guide.area', 'throttle:120,1'])
+    ->middleware([EnsureFrontendRequestsAreStateful::class, SetLocale::class, 'auth:sanctum', 'guide.area', 'throttle:120,1'])
     ->group(function () {
         Route::delete('/tokens/current', [GuideTokensController::class, 'destroy'])->name('tokens.destroy');
 
