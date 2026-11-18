@@ -2835,3 +2835,154 @@ li:first-child .ga-link-list__item {
 .ga-list-foot .ga-pager {
   margin: 0;
 }
+
+.ga-btn--coral {
+  background: #e8604c;
+  color: #ffffff;
+}
+.ga-btn--coral:hover {
+  background: #313041;
+  color: #ffffff;
+}
+
+.ga-sidebar__cta {
+  margin-top: auto;
+  padding: 0.75rem;
+  border: 1px solid rgba(232, 96, 76, 0.35);
+  border-radius: 0.5rem;
+  background: rgba(232, 96, 76, 0.06);
+  font-size: 0.85rem;
+}
+.ga-sidebar__cta p {
+  margin: 0.25rem 0 0.75rem;
+  color: #787780;
+}
+.ga-sidebar__cta + .ga-sidebar__help {
+  margin-top: 0.75rem;
+}
+
+.ga-status--info {
+  background: rgba(49, 48, 65, 0.08);
+  color: #313041;
+}
+
+.ga-tiles--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 767px) {
+  .ga-tiles--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.ga-tiles--4 .ga-tile {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ga-customer-note {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0 0 1rem;
+}
+
+.ga-card--sand {
+  border-color: transparent;
+  background: #faf5ee;
+}
+
+.ga-become-guide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.ga-become-guide > div {
+  flex: 1 1 320px;
+}
+
+.ga-fav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.ga-fav-grid--compact {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin-bottom: 0;
+}
+
+.ga-fav {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #ece8e0;
+  border-radius: 0.75rem;
+  background: #ffffff;
+}
+.ga-fav__media {
+  display: block;
+  aspect-ratio: 16/10;
+  background: #f7f9fb;
+}
+.ga-fav__media img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.ga-fav__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+}
+.ga-fav__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.ga-fav__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #787780;
+}
+.ga-fav__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+.ga-fav__price {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ga-phone {
+  display: flex;
+  gap: 0.5rem;
+}
+.ga-phone__code {
+  flex: 0 0 9rem;
+  max-width: 9rem;
+}
+
+.ga-grid-address {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 0 1rem;
+}
+@media (max-width: 575px) {
+  .ga-grid-address {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ga-field--narrow {
+  max-width: 26rem;
+}

@@ -94,6 +94,17 @@ class User extends Authenticatable
     }
 
     /**
+     * The customer pages of /profile/* (overview, my bookings, favourites, account) in the
+     * Guide Area design. Guides only get them while they use the Guide Area, so a guide is
+     * never shown the new pages next to the old guide menu.
+     */
+    public function usesCustomerArea(): bool
+    {
+        return (bool) config('guide_area.customer_enabled')
+            && (! $this->canViewGuideTools() || $this->usesGuideArea());
+    }
+
+    /**
      * Route name of this user's guide profile page: the new one for Guide Area guides,
      * the old one for everyone else.
      */

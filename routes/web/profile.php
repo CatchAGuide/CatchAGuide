@@ -53,6 +53,8 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
 
     Route::get('/bookings', [ProfileController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/load-more', [ProfileController::class, 'loadMoreBookings'])->name('bookings.load-more');
+    // The user's own bookings as a guest (customer page); guides reach it from the Guide Area sidebar.
+    Route::get('/my-bookings', [ProfileController::class, 'myBookings'])->name('my-bookings');
 
     Route::get('showbooking/{bookingid}', [ProfileController::class, 'showbooking'])->name('showbooking');
     Route::get('stornobooking/{bookingid}', [ProfileController::class, 'stornobooking'])->name('stornobooking');

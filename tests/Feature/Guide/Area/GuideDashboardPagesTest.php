@@ -202,7 +202,8 @@ class GuideDashboardPagesTest extends TestCase
 
         $items = collect(GuideAreaNav::sections($guide))->pluck('items')->flatten(1)->keyBy('key');
 
-        $this->assertSame(['overview', 'bookings', 'todos', 'calendar', 'tours', 'vouchers', 'reviews', 'invoices', 'profile', 'account'], $items->keys()->all());
+        $this->assertSame(['overview', 'bookings', 'todos', 'calendar', 'tours', 'vouchers', 'reviews', 'invoices', 'profile', 'my_bookings', 'account'], $items->keys()->all());
+        $this->assertSame(route('profile.my-bookings'), $items['my_bookings']['url']);
         $this->assertSame(1, $items['bookings']['badge']);
         $this->assertSame(route('guide.area.vouchers.settings'), $items['vouchers']['url']);
     }

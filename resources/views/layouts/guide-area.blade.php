@@ -1,7 +1,11 @@
-{{-- Guide Area pages sit inside the public site layout, so they keep the site header and footer. --}}
+{{-- Guide Area pages sit inside the public site layout, so they keep the site header and footer.
+     The customer pages of /profile/* use it too: Livewire pages fill $slot, controller pages
+     (customer-area.page) fill the area-main section. The sidebar follows the user. --}}
 @extends('layouts.app-v2-1')
 
-@section('title', $title ?? __('guide_area.title'))
+@use('App\Support\CustomerAreaNav')
+
+@section('title', $title ?? (auth('web')->user()?->usesGuideArea() ? __('guide_area.title') : __('guide_area.customer.title')))
 
 @section('meta_robots')
     <meta name="robots" content="NOINDEX,NOFOLLOW">
@@ -17,6 +21,9 @@
     $gaUser = auth('web')->user();
     $gaName = trim(($gaUser?->firstname ?? '').' '.($gaUser?->lastname ?? ''));
     $gaInitials = mb_strtoupper(mb_substr((string) $gaUser?->firstname, 0, 1).mb_substr((string) $gaUser?->lastname, 0, 1));
+    $gaSections = CustomerAreaNav::forUser($gaUser);
+    $gaBecomeGuideUrl = CustomerAreaNav::becomeGuideUrl($gaUser);
+    $gaNavLabel = $gaUser?->usesGuideArea() ? __('guide_area.title') : __('guide_area.customer.title');
 @endphp
 
 <div class="ga-shell" x-data="{ navOpen: false }">
@@ -34,8 +41,8 @@
             </div>
         </div>
 
-        <nav aria-label="{{ __('guide_area.title') }}">
-            @foreach (\App\Support\GuideAreaNav::sections() as $section)
+        <nav aria-label="{{ $gaNavLabel }}">
+            @foreach ($gaSections as $section)
                 @if ($section['section'])
                     <div class="ga-sidebar__section">{{ $section['section'] }}</div>
                 @endif
@@ -58,6 +65,16 @@
             @endforeach
         </nav>
 
+        @if ($gaBecomeGuideUrl)
+            <div class="ga-sidebar__cta">
+                <div class="ga-sidebar__help-title">{{ __('guide_area.customer.become_guide.title') }}</div>
+                <p>{{ __('guide_area.customer.become_guide.body') }}</p>
+                <a href="{{ $gaBecomeGuideUrl }}" class="ga-btn ga-btn--coral ga-btn--block become-guide-link">
+                    <i class="fas fa-fish" aria-hidden="true"></i> {{ __('guide_area.customer.become_guide.cta') }}
+                </a>
+            </div>
+        @endif
+
         <div class="ga-sidebar__help">
             <div class="ga-sidebar__help-title">{{ __('guide_area.help.title') }}</div>
             <p>{{ __('guide_area.help.body') }}</p>
@@ -68,7 +85,8 @@
     </aside>
 
     <main class="ga-main">
-        {{ $slot }}
+        {{ $slot ?? '' }}
+        @yield('area-main')
     </main>
 </div>
 

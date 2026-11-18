@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Route;
 /**
  * Sidebar of the Guide Area (/guide/*), same idea as SitePrimaryNav (spec 2.1). Badges: open
  * bookings (requests + voucher orders not yet paid and sent), open to-dos, NEW reviews, and a
- * dot when a commission invoice is overdue. Account & security still links to the old page.
+ * dot when a commission invoice is overdue. My bookings and Account & security open the
+ * customer pages of /profile/*, shown in this sidebar (CustomerAreaNav::forUser).
  */
 class GuideAreaNav
 {
@@ -25,7 +26,7 @@ class GuideAreaNav
         $guide ??= auth('web')->user();
         $badges = $guide ? self::badges($guide) : [];
 
-        $item = fn (string $key, string $icon, string $route, ?string $activePattern = null) => [
+        $item = fn (string $key, string $icon, string $route, string|array|null $activePattern = null) => [
             'key' => $key,
             'label' => __('guide_area.nav.'.$key),
             'url' => Route::has($route) ? route($route) : '#',
@@ -51,7 +52,9 @@ class GuideAreaNav
             ['section' => __('guide_area.nav.section_account'), 'items' => [
                 $item('invoices', 'fa-file-invoice', 'guide.area.invoices', 'guide.area.invoices*'),
                 $item('profile', 'fa-user', 'guide.area.profile'),
-                $item('account', 'fa-lock', 'profile.settings'),
+                // The guide's own bookings as a guest (customer page, same design).
+                $item('my_bookings', 'fa-suitcase-rolling', 'profile.my-bookings'),
+                $item('account', 'fa-lock', 'profile.settings', ['profile.settings', 'profile.password']),
             ]],
         ];
     }

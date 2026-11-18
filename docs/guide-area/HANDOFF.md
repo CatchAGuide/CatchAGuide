@@ -76,7 +76,7 @@ Commits, oldest first:
 | `/guide/reviews` | Done | Summary, 8 per page, "New" until seen (`reviews.seen_by_guide_at`) |
 | `/guide/invoices` | Read-only | Per-booking invoices from `finance_items`; View opens the emailed invoice HTML (`GuideInvoiceController`) |
 | `/guide/profile` | Done | Includes certificates (private file route) |
-| Account & security | **Old page** | Sidebar links to `profile.settings` |
+| Account & security | Done (customer page) | `profile.settings` / `profile.password`, see "Customer pages" below |
 | Contact support modal | **Not built** | |
 
 **Bookings**
@@ -105,6 +105,47 @@ Commits, oldest first:
   - options for pending requests and manual blocks;
   - entries read "Booked: …" or "Request pending: …";
   - "Create a new link" turns the old link off.
+
+## Customer pages (18 Nov)
+
+Non-guides get the same design on `/profile/*`, showing only what they can use. Guides on the Guide Area get the
+same pages inside the guide sidebar.
+
+- Switch: `config('guide_area.customer_enabled')` (env `CUSTOMER_AREA_ENABLED`, default true). `User::usesCustomerArea()`
+  = switch && (not a guide, or a guide who uses the Guide Area). Off → the old profile pages come back.
+- Routes and names are unchanged. `ProfileController` renders `customer-area.page`, which embeds a Livewire component
+  (`app/Http/Livewire/Customer/*`, views in `resources/views/livewire/customer/`) inside `layouts.guide-area`. The
+  layout now supports both `$slot` (Livewire pages) and `@yield('area-main')`, and chooses the sidebar with
+  `CustomerAreaNav::forUser()`.
+- Pages:
+  - `/profile` Overview: next trips, requests waiting for an answer, trips to rate, counts per type, favourites,
+    a Become a guide box.
+  - `/profile/bookings` My bookings, with tabs for tours (status tiles), camps, trips and vouchers they bought.
+    The guide's contact details and meeting point show only once the guide confirms. A declined request shows the
+    guide's message, suggested dates and the reschedule link; a finished trip shows the rating link. It is
+    read-only, like the old page (customers can't cancel there; the old `stornobooking` was never linked).
+  - `/profile/favoriteguides` Favourites: live saved tours, with Remove.
+  - `/profile/settings` and `/profile/password`: one Account page with Personal details, Password and Cookie
+    settings tabs, switched in the browser so the cookie panel's script keeps working. The email is read-only.
+    Tax ID is shown to guides only.
+- Guides:
+  - The sidebar has a new "My bookings" item → `/profile/my-bookings` (new route), and "Account & security" now
+    opens the new page.
+  - `/profile/bookings` sends Guide Area guides to `/guide/bookings` (with `?id=` → `?booking=`), because guide
+    reminder and voucher emails link there.
+  - `/profile/showbooking/{id}` redirects to the matching card.
+- The header search band is hidden on these routes (`SitePrimaryNav::CUSTOMER_AREA_ROUTES`).
+- Code: `CustomerBookingService`, `CustomerFavouriteService`, `CustomerAccountService` (`app/Services/Customer/`),
+  `CustomerBookingPresenter`, `CustomerAreaNav`. SCSS is in `guide-area/_customer.scss`. Copy is under
+  `guide_area.customer.*`. Tests: `tests/Feature/Customer/CustomerAreaTest.php` (13).
+- Demo data: `php artisan db:seed --class=CustomerAreaDemoSeeder` (local only). It creates a non-guide customer
+  with every booking type and favourites, plus its own demo guide and tours, and can be rerun. The login details are
+  in the seeder. Claude may only type test credentials on a local host such as 127.0.0.1, not on cag.local. So serve
+  the app with `php -S 127.0.0.1:8010 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php`,
+  run from `public/`. `artisan serve` loads `.env.local` (Docker DB host `db`) and fails.
+- Browser check (18 Nov, as the demo customer): every page, tab, the save toast and phone width passed. Not tried:
+  photo upload (it uses the live Spaces bucket). On both the account page and `/cookie-settings`, the Marketing
+  switch showed as on after the banner's "necessary only"; this still needs checking.
 
 ## Decisions
 

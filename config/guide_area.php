@@ -15,6 +15,16 @@ return [
 
     'enabled' => (bool) env('GUIDE_AREA_ENABLED', true),
 
+    // Customer pages of /profile/* (overview, my bookings, favourites, account) in the Guide Area
+    // design. false brings back the old profile pages for customers. Guides get these pages
+    // inside the Guide Area sidebar while `enabled` is on.
+    'customer_enabled' => (bool) env('CUSTOMER_AREA_ENABLED', true),
+
+    'customer' => [
+        'per_page' => 8,
+        'password_min' => 8,
+    ],
+
     'api' => [
         // Lifetime of bearer tokens from POST /api/guide/tokens; 0 = never expire.
         'token_days' => (int) env('GUIDE_AREA_API_TOKEN_DAYS', 90),
