@@ -65,6 +65,18 @@ class GuideAreaEntryPointsTest extends TestCase
             ->assertOk();
     }
 
+    public function test_profile_sends_guide_area_guides_to_the_overview_and_keeps_customers(): void
+    {
+        $this->actingAs($this->guide(true))
+            ->get(route('profile.index'))
+            ->assertRedirect(route('guide.area.overview'));
+
+        $this->actingAs($this->guide(false))->get(route('profile.index'))->assertOk();
+
+        $customer = User::factory()->create(['is_guide' => 0, 'guide_status' => null]);
+        $this->actingAs($customer)->get(route('profile.index'))->assertOk();
+    }
+
     public function test_profile_menu_links_beta_guides_to_the_new_page(): void
     {
         $this->actingAs($this->guide(true))

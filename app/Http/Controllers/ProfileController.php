@@ -38,6 +38,11 @@ class ProfileController extends Controller
 {
     public function index()
     {
+        // Guides on the new Guide Area land on its Overview; customers keep /profile.
+        if (auth()->user()?->usesGuideArea()) {
+            return redirect()->route('guide.area.overview');
+        }
+
         return view('pages.profile.index');
     }
 
