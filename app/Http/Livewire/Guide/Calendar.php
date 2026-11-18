@@ -7,6 +7,7 @@ use App\Services\Guide\Area\GuideCalendarSyncService;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\Rule;
 use App\Services\Guide\Area\GuideOptimizationService;
+use App\Support\GuideAreaNav;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -81,7 +82,11 @@ class Calendar extends Component
             'blockTo' => [Rule::requiredIf($this->blockMode === 'period'), 'nullable', 'date_format:Y-m-d', 'after_or_equal:blockFrom'],
             'blockTour' => ['integer', 'min:0'],
             'blockNote' => ['nullable', 'string', 'max:255'],
-        ], [], [
+        ], [
+            'blockFrom.after_or_equal' => __('guide_area.calendar.block.from_past'),
+            'blockTo.after_or_equal' => __('guide_area.calendar.block.to_before_from'),
+            'blockTo.required' => __('guide_area.calendar.block.to_required'),
+        ], [
             'blockFrom' => __('guide_area.calendar.block.from'),
             'blockTo' => __('guide_area.calendar.block.to'),
         ]);
@@ -196,5 +201,7 @@ class Calendar extends Component
     private function toast(string $message, string $type = 'success'): void
     {
         $this->dispatch('guide-area-toast', message: $message, type: $type);
+        app(GuideOptimizationService::class)->forget(auth()->user());
+        $this->dispatch('guide-area-badges', badges: GuideAreaNav::badges(auth()->user()));
     }
 }

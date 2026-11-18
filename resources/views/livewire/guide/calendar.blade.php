@@ -141,12 +141,12 @@
                         <p class="ga-day-panel__subhead">{{ __('guide_area.calendar.panel.tours') }}</p>
                         <ul class="ga-toggle-list">
                             @foreach ($day['tours'] as $tour)
-                                @php $locked = in_array($day['state'], ['booked', 'pending', 'blocked'], true) || $tour['reason'] === 'rules'; @endphp
+                                @php $locked = in_array($day['state'], ['booked', 'pending', 'blocked'], true) || in_array($tour['reason'], ['rules', 'declined'], true); @endphp
                                 <li class="ga-toggle-list__item" wire:key="day-tour-{{ $tour['id'] }}">
                                     <span class="ga-day-panel__tour">
                                         {{ $tour['title'] }}
-                                        @if ($tour['reason'] === 'rules' && ! in_array($day['state'], ['booked', 'pending', 'blocked'], true))
-                                            <small class="ga-muted">{{ __('guide_area.calendar.panel.closed_by_rules') }}</small>
+                                        @if (in_array($tour['reason'], ['rules', 'declined'], true) && ! in_array($day['state'], ['booked', 'pending', 'blocked'], true))
+                                            <small class="ga-muted">{{ __('guide_area.calendar.panel.closed_by_'.$tour['reason']) }}</small>
                                         @endif
                                     </span>
                                     <span @class(['ga-day-panel__state', 'is-off' => ! $tour['bookable']])>{{ $tour['bookable'] ? __('guide_area.calendar.panel.bookable') : __('guide_area.calendar.panel.not_bookable') }}</span>

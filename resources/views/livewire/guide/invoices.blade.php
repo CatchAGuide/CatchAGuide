@@ -28,7 +28,11 @@
                 <span class="ga-stat__value">{{ $money($data['commission']) }}</span>
                 <span class="ga-stat__hint">
                     @if ($data['open_commission'] > 0)
-                        {{ __('guide_area.invoices.open_amount', ['amount' => $money($data['open_commission'])]) }}@if ($data['open_due']) · {{ __('guide_area.invoices.due', ['date' => $data['open_due']->translatedFormat('j M')]) }}@endif
+                        @if ($data['open_due'] && $data['open_due']->isPast())
+                            <span class="ga-urgent">{{ __('guide_area.invoices.overdue_amount', ['amount' => $money($data['open_commission']), 'date' => $data['open_due']->translatedFormat('j M Y')]) }}</span>
+                        @else
+                            {{ __('guide_area.invoices.open_amount', ['amount' => $money($data['open_commission'])]) }}@if ($data['open_due']) · {{ __('guide_area.invoices.due', ['date' => $data['open_due']->translatedFormat('j M')]) }}@endif
+                        @endif
                     @else
                         {{ __('guide_area.invoices.nothing_open') }}
                     @endif

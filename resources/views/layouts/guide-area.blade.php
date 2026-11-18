@@ -45,8 +45,9 @@
                             <a href="{{ $navItem['url'] }}" @class(['ga-sidebar__link', 'is-active' => $navItem['active']]) @if ($navItem['active']) aria-current="page" @endif>
                                 <i class="fas {{ $navItem['icon'] }}" aria-hidden="true"></i>
                                 <span>{{ $navItem['label'] }}</span>
-                                @if ($navItem['badge'])
-                                    <span class="ga-sidebar__badge ga-sidebar__badge--{{ $navItem['badge_tone'] }}">{{ $navItem['badge'] > 99 ? '99+' : $navItem['badge'] }}</span>
+                                @if (in_array($navItem['key'], ['bookings', 'todos', 'reviews'], true))
+                                    {{-- Updated live after actions: event guide-area-badges --}}
+                                    <span class="ga-sidebar__badge ga-sidebar__badge--{{ $navItem['badge_tone'] }}" data-ga-badge="{{ $navItem['key'] }}" @unless ($navItem['badge']) hidden @endunless>{{ $navItem['badge'] > 99 ? '99+' : $navItem['badge'] }}</span>
                                 @elseif ($navItem['dot'])
                                     <span class="ga-sidebar__dot" title="{{ __('guide_area.invoices.status.overdue') }}"></span>
                                 @endif
@@ -74,6 +75,7 @@
 <div class="ga-toast" role="status" aria-live="polite"
      x-data="{ show: false, message: '', error: false, timer: null }"
      x-on:guide-area-toast.window="message = $event.detail.message; error = $event.detail.type === 'error'; show = true; clearTimeout(timer); timer = setTimeout(() => show = false, error ? 6000 : 3500)"
+     x-on:guide-area-badges.window="Object.entries($event.detail.badges || {}).forEach(([key, count]) => document.querySelectorAll('[data-ga-badge=' + key + ']').forEach(el => { el.hidden = !(count > 0); el.textContent = count > 99 ? '99+' : count; }))"
      x-on:guide-area-scroll.window="$nextTick(() => setTimeout(() => document.getElementById($event.detail.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150))"
      x-show="show" x-transition.opacity x-cloak :class="{ 'ga-toast--error': error }">
     <i class="fas" :class="error ? 'fa-exclamation-circle' : 'fa-check-circle'" aria-hidden="true"></i> <span x-text="message"></span>

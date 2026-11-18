@@ -13,6 +13,7 @@ use App\Services\Guide\Area\GuideBookingService;
 use App\Services\Guide\Area\GuideOptimizationService;
 use App\Services\Guide\Area\GuideReviewService;
 use App\Services\Guide\Area\GuideVoucherService;
+use App\Support\GuideAreaNav;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -33,6 +34,7 @@ class Overview extends Component
         try {
             $bookings->accept($booking);
             $this->dispatch('guide-area-toast', message: __('guide_area.bookings.accepted'));
+            $this->dispatch('guide-area-badges', badges: GuideAreaNav::badges(auth()->user()));
         } catch (GuideBookingActionException $e) {
             $this->dispatch('guide-area-toast', message: $e->getMessage(), type: 'error');
         }

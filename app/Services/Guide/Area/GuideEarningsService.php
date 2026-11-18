@@ -93,7 +93,8 @@ class GuideEarningsService
             ->count();
         $answered = $accepted + $declined + $expired;
 
-        $open = $this->invoiceQuery($guide)->where('paid_status', '!=', 'paid')->where('invoice_status', 'sent')->with('billable')->get();
+        // Unpaid invoices of this year (the same set the invoice table below lists).
+        $open = $this->invoices($guide, $year)->filter(fn (FinanceItem $item) => $item->paid_status !== 'paid');
         $due = $open->whereNotNull('invoice_due_at')->min('invoice_due_at');
 
         return [

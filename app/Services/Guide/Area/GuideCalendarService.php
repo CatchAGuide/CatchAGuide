@@ -101,6 +101,15 @@ class GuideCalendarService
             ->get()
             ->groupBy(fn (Booking $b) => substr((string) $b->book_date, 0, 10));
 
+        // Declined requests keep their tour closed that day (spec 5.2); named in the day panel.
+        $declined = Booking::query()
+            ->whereIn('guiding_id', Guiding::query()->select('id')->where('user_id', $guide->id))
+            ->where('status', 'rejected')
+            ->whereBetween('book_date', [$fromDate, $to->endOfDay()->toDateTimeString()])
+            ->get(['guiding_id', 'book_date'])
+            ->groupBy(fn (Booking $b) => substr((string) $b->book_date, 0, 10))
+            ->map(fn ($rows) => $rows->pluck('guiding_id')->map(fn ($id) => (int) $id)->all());
+
         $blocks = CalendarSchedule::query()
             ->where('user_id', $guide->id)
             ->whereIn('type', self::GUIDE_BLOCK_TYPES)
@@ -119,9 +128,17 @@ class GuideCalendarService
             $confirmed = $dayBookings->firstWhere('status', 'accepted');
             $pending = $dayBookings->firstWhere('status', 'pending');
 
-            $tourStates = $tours->map(function (Guiding $tour) use ($key, $blockedByTour, $dayBlocks) {
+            $declinedTours = $declined->get($key, []);
+
+            $tourStates = $tours->map(function (Guiding $tour) use ($key, $blockedByTour, $dayBlocks, $declinedTours) {
                 $bookable = ! $this->inRanges($key, $blockedByTour[$tour->id]);
                 $manual = $dayBlocks->where('guiding_id', $tour->id)->isNotEmpty();
+                $reason = match (true) {
+                    $bookable => null,
+                    $manual => 'manual',
+                    in_array((int) $tour->id, $declinedTours, true) => 'declined',
+                    default => 'rules',
+                };
 
                 return [
                     'id' => (int) $tour->id,
@@ -129,7 +146,7 @@ class GuideCalendarService
                     'bookable' => $bookable,
                     // Off because the guide switched it off (can be switched on again here), or
                     // because of something else (tour rules, a booking, a whole-day block).
-                    'reason' => $bookable ? null : ($manual ? 'manual' : 'rules'),
+                    'reason' => $reason,
                 ];
             })->values()->all();
 
@@ -164,7 +181,8 @@ class GuideCalendarService
                 'blocks' => $wholeDay->map(fn (CalendarSchedule $s) => [
                     'id' => (int) $s->id,
                     'source' => $s->source === CalendarSchedule::SOURCE_ICAL ? 'ical' : 'manual',
-                    'note' => $this->blockNote($s),
+                    // Private calendar: only "busy", never what the event is (spec 7.2).
+                    'note' => $s->source === CalendarSchedule::SOURCE_ICAL ? null : $this->blockNote($s),
                 ])->values()->all(),
             ];
         }

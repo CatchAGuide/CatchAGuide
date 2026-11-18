@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Guide;
 use App\Models\VoucherOrder;
 use App\Presenters\Voucher\GuideVoucherOrderPresenter;
 use App\Services\Guide\Area\GuideVoucherService;
+use App\Support\GuideAreaNav;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -45,6 +46,7 @@ class Vouchers extends Component
         $order = $this->order($id);
         $vouchers->mark($order, paid: ! $order->is_paid);
         $this->dispatch('guide-area-toast', message: __($order->is_paid ? 'guide_area.vouchers.marked_paid' : 'guide_area.vouchers.unmarked_paid'));
+        $this->dispatch('guide-area-badges', badges: GuideAreaNav::badges(auth()->user()));
     }
 
     public function toggleSent(int $id, GuideVoucherService $vouchers): void
@@ -52,6 +54,7 @@ class Vouchers extends Component
         $order = $this->order($id);
         $vouchers->mark($order, sent: ! $order->is_sent);
         $this->dispatch('guide-area-toast', message: __($order->is_sent ? 'guide_area.vouchers.marked_sent' : 'guide_area.vouchers.unmarked_sent'));
+        $this->dispatch('guide-area-badges', badges: GuideAreaNav::badges(auth()->user()));
     }
 
     public function render(GuideVoucherService $vouchers, GuideVoucherOrderPresenter $presenter)

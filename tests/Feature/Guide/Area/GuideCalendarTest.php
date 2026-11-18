@@ -165,6 +165,20 @@ class GuideCalendarTest extends TestCase
         $day = $this->state($guide, $this->day(60));
         $this->assertSame('blocked', $day['state']);
         $this->assertSame('ical', $day['blocks'][0]['source']);
+        // Only "busy" — never what the private event is.
+        $this->assertNull($day['blocks'][0]['note']);
+    }
+
+    public function test_a_declined_request_names_why_its_tour_is_closed(): void
+    {
+        $guide = $this->guide();
+        $boat = $this->tour($guide);
+        $this->tour($guide);
+        $this->booking($boat, 'rejected', $this->day(45)->toDateString());
+
+        $day = $this->state($guide, $this->day(45));
+        $this->assertSame('partial', $day['state']);
+        $this->assertSame('declined', collect($day['tours'])->firstWhere('id', $boat->id)['reason']);
     }
 
     public function test_block_days_form_validates_and_blocks_one_tour(): void

@@ -12,6 +12,7 @@ use App\Services\Guide\Area\GuideBookingActionException;
 use App\Services\Guide\Area\GuideBookingService;
 use App\Services\Guide\Area\GuideVoucherService;
 use Illuminate\Validation\Rule;
+use App\Support\GuideAreaNav;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -101,6 +102,7 @@ class Bookings extends Component
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'tour', 'period'], true)) {
+            $this->booking = 0;
             $this->resetPage();
         }
     }
@@ -108,12 +110,14 @@ class Bookings extends Component
     public function setTab(string $tab): void
     {
         $this->tab = in_array($tab, self::TABS, true) ? $tab : 'tours';
+        $this->booking = 0;
     }
 
     public function setStatus(string $status): void
     {
         // Clicking the selected tile again resets the filter (spec BK-03).
         $this->status = in_array($status, GuideBookingService::FILTERS, true) && $status !== $this->status ? $status : GuideBookingService::FILTER_ALL;
+        $this->booking = 0;
         $this->resetPage();
     }
 
@@ -262,5 +266,6 @@ class Bookings extends Component
     private function toast(string $message, string $type = 'success'): void
     {
         $this->dispatch('guide-area-toast', message: $message, type: $type);
+        $this->dispatch('guide-area-badges', badges: GuideAreaNav::badges(auth()->user()));
     }
 }

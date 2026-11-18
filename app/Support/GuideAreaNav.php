@@ -56,8 +56,13 @@ class GuideAreaNav
         ];
     }
 
-    /** @return array{bookings: int, todos: int, reviews: int, invoices_overdue: bool} */
-    private static function badges(User $guide): array
+    /**
+     * Badge counts, also sent to the open page after an action (event guide-area-badges) so the
+     * sidebar updates without a reload (spec 2.1).
+     *
+     * @return array{bookings: int, todos: int, reviews: int, invoices_overdue: bool}
+     */
+    public static function badges(User $guide): array
     {
         return [
             'bookings' => app(GuideBookingService::class)->openCount($guide) + app(GuideVoucherService::class)->counts($guide)[GuideVoucherService::FILTER_TODO],

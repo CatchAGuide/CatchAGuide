@@ -150,6 +150,8 @@ class GuideBookingsTest extends TestCase
         Livewire::actingAs($guide)->test(Bookings::class)
             ->call('accept', $booking->id)
             ->assertDispatched('guide-area-toast', message: __('guide_area.bookings.accepted'))
+            // The sidebar badge updates without a reload.
+            ->assertDispatched('guide-area-badges', fn ($name, $params) => ($params['badges']['bookings'] ?? null) === 0)
             ->assertSee('+49 151 2345 6789');
 
         $this->assertSame('accepted', $booking->fresh()->status);
