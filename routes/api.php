@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\Guide\TokensController as GuideTokensController;
 use App\Http\Controllers\Api\Guide\ToursController as GuideToursController;
 use App\Http\Controllers\Api\Guide\VoucherOrdersController as GuideVoucherOrdersController;
 use App\Http\Controllers\Api\Guide\VoucherSettingsController as GuideVoucherSettingsController;
@@ -24,11 +25,18 @@ Route::prefix('catalog')
 // Guide Area API (plan decision D-3): same services as the /guide/* pages. Auth: Sanctum bearer
 // token, or the site session for first-party requests from a stateful domain (config/sanctum.php).
 // Same beta gate as the pages (guide.area).
+// Sign in for a bearer token. Wrong passwords are throttled per email + IP (LoginThrottle).
+Route::post('/guide/tokens', [GuideTokensController::class, 'store'])
+    ->middleware('throttle:20,1')
+    ->name('api.guide.tokens.store');
+
 Route::prefix('guide')
     ->name('api.guide.')
     ->middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum', 'guide.area', 'throttle:120,1'])
     ->group(function () {
-        Route::get('/tours', [GuideToursController::class, 'index'])->name('tours.index');
+        Route::delete('/tokens/current', [GuideTokensController::class, 'destroy'])->name('tokens.destroy');
+
+        Route::get('/tours',[GuideToursController::class, 'index'])->name('tours.index');
         Route::post('/tours/{guiding}/go-live', [GuideToursController::class, 'goLive'])->whereNumber('guiding')->name('tours.go-live');
         Route::post('/tours/{guiding}/deactivate', [GuideToursController::class, 'deactivate'])->whereNumber('guiding')->name('tours.deactivate');
         Route::post('/tours/{guiding}/duplicate', [GuideToursController::class, 'duplicate'])->whereNumber('guiding')->name('tours.duplicate');

@@ -15,6 +15,11 @@ return [
 
     'enabled' => (bool) env('GUIDE_AREA_ENABLED', true),
 
+    'api' => [
+        // Lifetime of bearer tokens from POST /api/guide/tokens; 0 = never expire.
+        'token_days' => (int) env('GUIDE_AREA_API_TOKEN_DAYS', 90),
+    ],
+
     'profile' => [
         'display_name_max' => 60,
         'about_me_max' => 1000,

@@ -13,8 +13,17 @@ Both call the same services (`app/Services/Guide/Area/*`), so rules live in one 
   `users.guide_area_beta` while `GUIDE_AREA_ENABLED` is on. Otherwise `401` (not signed in) or
   `403` (not a guide / not switched on), as JSON `{message}`.
 - **Throttle.** 120 requests per minute.
-- **Not built yet.** No endpoint issues tokens; a login/token flow is needed before an app can
-  use bearer auth.
+
+## Tokens
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/api/guide/tokens` | `{email, password, device_name}` → `201 {token, token_type: "Bearer", expires_at, user}`. No auth needed. Wrong password or unknown email → the same `422`; after 5 misses per email + IP in 5 minutes → `429 {message, retry_after}` (`LoginThrottle`). Right password but not a Guide Area guide → `403` as above. |
+| DELETE | `/api/guide/tokens/current` | Signs out: deletes the bearer token used for this request (`204`). |
+
+Tokens are named `guide-area:{device_name}`, carry the ability `guide-area` and expire after
+`GUIDE_AREA_API_TOKEN_DAYS` (default 90; `0` = never). Needs the migration that adds
+`personal_access_tokens.expires_at`.
 
 ## Tours
 
@@ -43,4 +52,4 @@ Tour status is the stored `guidings.status`: `2` draft, `1` live, `0` deactivate
 | GET | `/api/guide/voucher-settings` | Design and every tour with `voucher_enabled`. |
 | PUT | `/api/guide/voucher-settings` | `{design, enabled_tour_ids: []}`. Tours not listed are switched off. |
 
-Tests: `tests/Feature/Guide/Area/GuideToursTest.php`, `GuideVouchersTest.php`.
+Tests: `tests/Feature/Guide/Area/GuideToursTest.php`, `GuideVouchersTest.php`, `GuideApiTokensTest.php`.
