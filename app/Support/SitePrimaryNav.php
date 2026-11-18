@@ -258,6 +258,16 @@ final class SitePrimaryNav
             && ! static::isCheckoutPage($request);
     }
 
+    /**
+     * The catalog search band under the page header. The Guide Area is a work tool, so it has none.
+     */
+    public static function usesPageHeaderSearch(?Request $request = null): bool
+    {
+        $request ??= request();
+
+        return ! $request->routeIs('guide.area.*');
+    }
+
     private static function iconFor(string $key): string
     {
         return match ($key) {

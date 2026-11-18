@@ -1,19 +1,18 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+{{-- Guide Area pages sit inside the public site layout, so they keep the site header and footer. --}}
+@extends('layouts.app-v2-1')
+
+@section('title', $title ?? __('guide_area.title'))
+
+@section('meta_robots')
     <meta name="robots" content="NOINDEX,NOFOLLOW">
-    <title>{{ $title ?? __('guide_area.title') }} · {{ config('app.name', 'Catch A Guide') }}</title>
+@endsection
 
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    @include('layouts.partials.tag-manager-head')
-
-    <link rel="stylesheet" href="{{ asset('assets/vendors/fontawesome/css/all.min.css') }}" />
+@section('css_after')
     <link rel="stylesheet" href="{{ mix('css/guide-area.css') }}" />
-</head>
-<body class="ga-body">
+@endsection
+
+@section('content')
+<div class="ga-body">
 @php
     $gaUser = auth('web')->user();
     $gaName = trim(($gaUser?->firstname ?? '').' '.($gaUser?->lastname ?? ''));
@@ -46,6 +45,11 @@
                             <a href="{{ $navItem['url'] }}" @class(['ga-sidebar__link', 'is-active' => $navItem['active']]) @if ($navItem['active']) aria-current="page" @endif>
                                 <i class="fas {{ $navItem['icon'] }}" aria-hidden="true"></i>
                                 <span>{{ $navItem['label'] }}</span>
+                                @if ($navItem['badge'])
+                                    <span class="ga-sidebar__badge ga-sidebar__badge--{{ $navItem['badge_tone'] }}">{{ $navItem['badge'] > 99 ? '99+' : $navItem['badge'] }}</span>
+                                @elseif ($navItem['dot'])
+                                    <span class="ga-sidebar__dot" title="{{ __('guide_area.invoices.status.overdue') }}"></span>
+                                @endif
                             </a>
                         </li>
                     @endforeach
@@ -68,10 +72,11 @@
 </div>
 
 <div class="ga-toast" role="status" aria-live="polite"
-     x-data="{ show: false, message: '', timer: null }"
-     x-on:guide-area-toast.window="message = $event.detail.message; show = true; clearTimeout(timer); timer = setTimeout(() => show = false, 3500)"
-     x-show="show" x-transition.opacity x-cloak>
-    <i class="fas fa-check-circle" aria-hidden="true"></i> <span x-text="message"></span>
+     x-data="{ show: false, message: '', error: false, timer: null }"
+     x-on:guide-area-toast.window="message = $event.detail.message; error = $event.detail.type === 'error'; show = true; clearTimeout(timer); timer = setTimeout(() => show = false, error ? 6000 : 3500)"
+     x-on:guide-area-scroll.window="$nextTick(() => setTimeout(() => document.getElementById($event.detail.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150))"
+     x-show="show" x-transition.opacity x-cloak :class="{ 'ga-toast--error': error }">
+    <i class="fas" :class="error ? 'fa-exclamation-circle' : 'fa-check-circle'" aria-hidden="true"></i> <span x-text="message"></span>
 </div>
-</body>
-</html>
+</div>
+@endsection

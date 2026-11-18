@@ -70,6 +70,23 @@ class GuideProfilePageTest extends TestCase
         $this->actingAs($user)->get(route('guide.area.profile'))->assertRedirect(route('profile.becomeguide'));
     }
 
+    public function test_guide_area_pages_keep_the_site_header_and_footer(): void
+    {
+        $guide = $this->guide();
+
+        foreach (['guide.area.overview', 'guide.area.bookings', 'guide.area.todos', 'guide.area.calendar', 'guide.area.profile', 'guide.area.tours', 'guide.area.vouchers.settings', 'guide.area.reviews', 'guide.area.invoices'] as $route) {
+            $html = $this->actingAs($guide)->get(route($route))->assertOk()->getContent();
+
+            $this->assertStringContainsString('data-site-page-header', $html, $route);
+            $this->assertStringContainsString('<footer class="site-footer', $html, $route);
+            $this->assertStringContainsString('class="ga-shell"', $html, $route);
+            $this->assertSame(1, substr_count($html, '<title>'), $route);
+            $this->assertStringContainsString('NOINDEX,NOFOLLOW', $html, $route);
+            // No catalog search band in the Guide Area.
+            $this->assertStringNotContainsString('data-site-page-header-search', $html, $route);
+        }
+    }
+
     public function test_flagged_guide_sees_the_prefilled_page(): void
     {
         $this->actingAs($this->guide())

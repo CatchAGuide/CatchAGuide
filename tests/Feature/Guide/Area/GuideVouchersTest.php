@@ -106,7 +106,7 @@ class GuideVouchersTest extends TestCase
         $mine = $this->order($guide, 'Mine');
         $other = $this->order($this->guide(), 'Theirs');
 
-        $this->actingAs($guide)->get(route('guide.area.vouchers'))
+        $this->actingAs($guide)->get(route('guide.area.bookings', ['tab' => 'vouchers']))
             ->assertOk()
             ->assertSee($mine->fresh()->public_id)
             ->assertSee('mine@example.com')

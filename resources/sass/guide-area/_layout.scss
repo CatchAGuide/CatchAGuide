@@ -12,6 +12,7 @@ $ga-sidebar-bp: 992px;
 }
 
 .ga-body {
+    // A wrapper inside the site layout (between the site header and footer), not <body>.
     margin: 0;
     background: $cag-bg;
     color: $cag-slate;
@@ -29,7 +30,9 @@ $ga-sidebar-bp: 992px;
 
 .ga-shell {
     display: flex;
-    min-height: 100vh;
+    max-width: 1440px;
+    min-height: 70vh;
+    margin: 0 auto;
     gap: $cag-space-6;
     padding: $cag-space-4;
 
@@ -152,6 +155,31 @@ $ga-sidebar-bp: 992px;
         }
     }
 
+    &__badge {
+        margin-left: auto;
+        min-width: 22px;
+        padding: 1px $cag-space-2;
+        border-radius: $cag-radius-pill;
+        background: $cag-bg;
+        font-size: $cag-fs-caption;
+        font-weight: $cag-fw-bold;
+        text-align: center;
+        color: $cag-slate;
+
+        &--warning {
+            background: $cag-coral;
+            color: $cag-white;
+        }
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+        margin-left: auto;
+        border-radius: 50%;
+        background: $cag-danger;
+    }
+
     &__help {
         margin-top: auto;
         padding: $cag-space-3;
@@ -222,5 +250,20 @@ $ga-sidebar-bp: 992px;
         left: $cag-gutter-mobile;
         right: $cag-gutter-mobile;
         bottom: $cag-space-4;
+    }
+}
+
+// The site's mobile bottom nav (fixed, 4rem, hidden from 768px) would cover the save bar and toast.
+$ga-site-bottom-nav: calc(4rem + env(safe-area-inset-bottom, 0px));
+
+@media (max-width: 767px) {
+    .has-cag-bottom-nav {
+        .ga-savebar {
+            bottom: calc(#{$ga-site-bottom-nav} + #{$cag-space-3});
+        }
+
+        .ga-toast {
+            bottom: calc(#{$ga-site-bottom-nav} + #{$cag-space-4});
+        }
     }
 }

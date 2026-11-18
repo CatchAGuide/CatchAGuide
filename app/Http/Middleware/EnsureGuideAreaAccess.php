@@ -13,6 +13,13 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureGuideAreaAccess
 {
+    /** Old page for each new page; anything else goes to the old guide profile. */
+    private const FALLBACK = [
+        'guide.area.overview' => 'profile.index',
+        'guide.area.bookings' => 'profile.bookings',
+        'guide.area.calendar' => 'profile.calendar',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
         $api = $request->is('api/*');
@@ -33,7 +40,7 @@ class EnsureGuideAreaAccess
         if (! $user->usesGuideArea()) {
             return $api
                 ? response()->json(['message' => __('guide_area.api.not_enabled')], 403)
-                : redirect()->route('profile.guide-profile');
+                : redirect()->route(self::FALLBACK[$request->route()?->getName()] ?? 'profile.guide-profile');
         }
 
         return $next($request);

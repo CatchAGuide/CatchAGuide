@@ -789,7 +789,19 @@ class Guiding extends Model
         // - this guiding's own `tour_schedule` rows (availability-based blocks)
         // - dates that belong to bookings of THIS guiding
         // - guide-level blocks like vacation/custom schedules
-        $bookingBlockedEventIds = $this->bookings()
+        //
+        // Guide Area spec (2.10, "one tour per guide per day"):
+        // - an open request or a confirmed booking on ANY of the guide's tours locks the day here too;
+        // - this tour's declined requests keep the day locked (the guide was asked and said no);
+        // - cancelled bookings and expired requests (stored as cancelled) release the day.
+        $bookingBlockedEventIds = Booking::query()
+            ->whereNotNull('blocked_event_id')
+            ->whereIn('guiding_id', Guiding::query()->select('id')->where('user_id', $this->user_id))
+            ->where(function ($q) {
+                $q->where('status', 'accepted')
+                    ->orWhere(fn ($p) => $p->where('status', 'pending')->where(fn ($e) => $e->whereNull('expires_at')->orWhere('expires_at', '>', now())))
+                    ->orWhere(fn ($own) => $own->where('guiding_id', $this->id)->where('status', 'rejected'));
+            })
             ->pluck('blocked_event_id')
             ->filter()
             ->unique()
@@ -805,7 +817,14 @@ class Guiding extends Model
             ->select(['id', 'date', 'type', 'guiding_id', 'user_id'])
             ->where('user_id', $this->user_id)
             ->where(function ($q) use ($bookingBlockedEventIdsInt) {
-                $q->whereIn('type', ['vacation_schedule', 'vacation_request', 'custom_schedule']);
+                $q->whereIn('type', ['vacation_schedule', 'vacation_request']);
+
+                // Guide blocks: without a tour they close the whole day; with one, only that tour
+                // ("blocking a single tour leaves the other tours bookable", Guide Area spec 7).
+                $q->orWhere(function ($custom) {
+                    $custom->where('type', 'custom_schedule')
+                        ->where(fn ($g) => $g->whereNull('guiding_id')->orWhere('guiding_id', $this->id));
+                });
 
                 $q->orWhere(function ($q2) {
                     $q2->where('type', 'tour_schedule')

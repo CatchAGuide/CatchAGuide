@@ -53,20 +53,8 @@ class RejectionRequest extends FormRequest
                     return;
                 }
 
-                $requested = substr((string) $booking->book_date, 0, 10);
-                $blocked = BlockedDateRanges::merge($booking->guiding->getBlockedEvents());
-
-                foreach ($this->alternativeDates() as $date) {
-                    $taken = $date === $requested;
-                    foreach ($blocked as $range) {
-                        $taken = $taken || ($date >= $range['from'] && $date <= $range['due']);
-                    }
-
-                    if ($taken) {
-                        $validator->errors()->add('alternative_dates', __('checkout.reject.errors.date_unavailable'));
-
-                        return;
-                    }
+                if (self::unavailableDates($booking, $this->alternativeDates()) !== []) {
+                    $validator->errors()->add('alternative_dates', __('checkout.reject.errors.date_unavailable'));
                 }
             },
         ];
@@ -85,6 +73,36 @@ class RejectionRequest extends FormRequest
             'alternative_dates.max' => __('checkout.reject.errors.dates_max', ['max' => self::MAX_DATES]),
             'alternative_dates.*.after' => __('checkout.reject.errors.date_unavailable'),
         ];
+    }
+
+    /**
+     * Suggested dates the customer couldn't book: the requested day itself or a blocked day of
+     * the tour. Shared with Guide Area › Bookings, so both decline forms follow one rule.
+     *
+     * @param  list<string>  $dates  Y-m-d
+     * @return list<string>
+     */
+    public static function unavailableDates(Booking $booking, array $dates): array
+    {
+        if (! $booking->guiding) {
+            return $dates;
+        }
+
+        $requested = substr((string) $booking->book_date, 0, 10);
+        $blocked = BlockedDateRanges::merge($booking->guiding->getBlockedEvents());
+
+        return array_values(array_filter($dates, function (string $date) use ($requested, $blocked) {
+            if ($date === $requested) {
+                return true;
+            }
+            foreach ($blocked as $range) {
+                if ($date >= $range['from'] && $date <= $range['due']) {
+                    return true;
+                }
+            }
+
+            return false;
+        }));
     }
 
     public function booking(): ?Booking

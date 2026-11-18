@@ -1,4 +1,6 @@
-<div class="ga-page">
+{{-- Also embedded as Bookings › Vouchers (embedded: no page header). --}}
+<div @class(['ga-page' => ! $embedded])>
+    @unless ($embedded)
     <header class="ga-page__header">
         <div>
             <h1 class="ga-page__title">{{ __('guide_area.vouchers.title') }}</h1>
@@ -8,6 +10,7 @@
             <i class="fas fa-cog" aria-hidden="true"></i> {{ __('guide_area.vouchers.settings_link') }}
         </a>
     </header>
+    @endunless
 
     <div class="ga-tiles">
         @foreach ($filters as $key)

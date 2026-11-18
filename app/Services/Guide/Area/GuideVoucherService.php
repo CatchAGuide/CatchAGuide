@@ -8,6 +8,7 @@ use App\Models\VoucherOrder;
 use App\Services\Booking\BookingStatusHistory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -27,12 +28,21 @@ class GuideVoucherService
 
     public function __construct(private readonly BookingStatusHistory $history) {}
 
-    public function paginate(User $guide, string $filter = self::FILTER_ALL, string $search = '', int $perPage = self::PER_PAGE): LengthAwarePaginator
+    public function paginate(User $guide, string $filter = self::FILTER_ALL, string $search = '', int $perPage = self::PER_PAGE, string $pageName = 'page'): LengthAwarePaginator
     {
         return $this->filtered($this->query($guide, $search), $filter)
             ->latest()
-            ->paginate($perPage)
+            ->paginate($perPage, ['*'], $pageName)
             ->withQueryString();
+    }
+
+    /** Orders that still need Paid or Sent, oldest first (Bookings › New & open, Overview). */
+    public function open(User $guide, ?int $limit = null): Collection
+    {
+        return $this->filtered($this->query($guide, ''), self::FILTER_TODO)
+            ->oldest()
+            ->when($limit, fn (Builder $q) => $q->limit($limit))
+            ->get();
     }
 
     /** @return array{all: int, todo: int, done: int} */

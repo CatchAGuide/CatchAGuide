@@ -11,6 +11,7 @@ use App\Services\Guide\Area\GuideProfileFormService;
 use App\Services\Guide\Area\GuideTagService;
 use App\Services\Media\GuideProfilePhotoUploadService;
 use Illuminate\Validation\Rule;
+use App\Services\Guide\Area\GuideOptimizationService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -158,6 +159,9 @@ class Profile extends Component
         GuideCertificateService $certificates,
         GuideProfileFormService $form,
     ) {
+        // Profile / calendar changes can change the optimization score (sidebar badge, Overview).
+        app(GuideOptimizationService::class)->forget(auth()->user());
+
         $guide = $this->guide();
 
         return view('livewire.guide.profile', [

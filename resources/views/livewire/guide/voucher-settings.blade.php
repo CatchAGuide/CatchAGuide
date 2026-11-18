@@ -5,7 +5,7 @@
 <div class="ga-page">
     <header class="ga-page__header">
         <div>
-            <a href="{{ route('guide.area.vouchers') }}" class="ga-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ __('guide_area.vouchers.title') }}</a>
+            <a href="{{ route('guide.area.bookings', ['tab' => 'vouchers']) }}" class="ga-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ __('guide_area.vouchers.orders_link') }}</a>
             <h1 class="ga-page__title">{{ __('profile.vouchers.title') }}</h1>
             <p class="ga-page__subtitle">{{ __('profile.vouchers.subtitle') }}</p>
         </div>
