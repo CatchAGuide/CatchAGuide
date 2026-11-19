@@ -1,0 +1,167 @@
+// Customer pages of /profile/* (overview, my bookings, favourites, account) in the Guide Area
+// design. Only what the guide pages don't already have.
+
+// Filled coral CTA (Become a guide); hover to slate like every filled button on the site.
+.ga-btn--coral {
+    background: $cag-coral;
+    color: $cag-on-dark;
+
+    &:hover {
+        background: $cag-slate;
+        color: $cag-on-dark;
+    }
+}
+
+.ga-sidebar__cta {
+    margin-top: auto;
+    padding: $cag-space-3;
+    border: 1px solid rgba($cag-coral, 0.35);
+    border-radius: $cag-radius-md;
+    background: rgba($cag-coral, 0.06);
+    font-size: $cag-fs-small;
+
+    p {
+        margin: $cag-space-1 0 $cag-space-3;
+        color: $cag-gray;
+    }
+
+    + .ga-sidebar__help {
+        margin-top: $cag-space-3;
+    }
+}
+
+.ga-status--info {
+    background: rgba($cag-slate, 0.08);
+    color: $cag-slate;
+}
+
+.ga-tiles--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    @media (max-width: 767px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ga-tile {
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+.ga-customer-note {
+    display: flex;
+    gap: $cag-space-2;
+    align-items: baseline;
+    margin: 0 0 $cag-space-4;
+}
+
+.ga-card--sand {
+    border-color: transparent;
+    background: $cag-sand;
+}
+
+.ga-become-guide {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: $cag-space-4;
+
+    > div {
+        flex: 1 1 320px;
+    }
+}
+
+// Saved tours
+.ga-fav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: $cag-space-4;
+    margin-bottom: $cag-space-4;
+
+    &--compact {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        margin-bottom: 0;
+    }
+}
+
+.ga-fav {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+
+    &__media {
+        display: block;
+        aspect-ratio: 16 / 10;
+        background: $cag-bg;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: $cag-space-1;
+        padding: $cag-space-3;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: $cag-fs-body;
+        font-weight: $cag-fw-bold;
+        line-height: $cag-lh-tight;
+    }
+
+    &__meta {
+        margin: 0;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $cag-space-2;
+        margin-top: auto;
+        padding-top: $cag-space-2;
+    }
+
+    &__price {
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+    }
+}
+
+// Account form
+.ga-phone {
+    display: flex;
+    gap: $cag-space-2;
+
+    &__code {
+        flex: 0 0 9rem;
+        max-width: 9rem;
+    }
+}
+
+.ga-grid-address {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 0 $cag-space-4;
+
+    @media (max-width: 575px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ga-field--narrow {
+    max-width: 26rem;
+}

@@ -3,6 +3,7 @@
 namespace App\Services\Guide;
 
 use App\Models\User;
+use App\Services\Media\GuideProfilePhotoUploadService;
 use Illuminate\Database\Eloquent\Model;
 
 class GuideProfilePhotoService
@@ -49,6 +50,11 @@ class GuideProfilePhotoService
 
         if (str_starts_with($stored, 'http://') || str_starts_with($stored, 'https://')) {
             return $stored;
+        }
+
+        // Uploaded through the Guide Area (GuideProfilePhotoUploadService).
+        if (GuideProfilePhotoUploadService::owns($stored)) {
+            return app(GuideProfilePhotoUploadService::class)->url($stored);
         }
 
         foreach ($this->candidateLocalPaths($stored) as $relative) {

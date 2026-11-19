@@ -26,9 +26,9 @@ class GuidingsLandingTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('pages.newhome-latest');
-        $response->assertViewHas('CategoryPage');
-        $response->assertViewHas('CategoryPageMethods');
         $response->assertViewHas('featuredCountries');
+        $response->assertViewHas('methods');
+        $response->assertViewHas('targetSpecies');
     }
 
     public function test_guidings_landing_shows_header_search_and_category_nav(): void
@@ -96,6 +96,7 @@ class GuidingsLandingTest extends TestCase
                 'countrycode' => 'DK',
             ],
         ]));
+        $countries->shouldReceive('totalCount')->andReturn(3);
         $this->app->instance(HomepageCountrySelector::class, $countries);
 
         $response = $this->get(route('guidings.landing'));
@@ -113,14 +114,18 @@ class GuidingsLandingTest extends TestCase
         $response->assertDontSee('from €90 / Person', false);
         $response->assertDontSee('cag-home-destinations__price', false);
         $response->assertDontSee(__('homepage.countries_all'), false);
-        $response->assertDontSee(route('guidings.countries', [], false), false);
+        // "See all" leads to the tours country hub, not the cross-type /destination page.
+        $response->assertSee(route('guidings.countries', [], false), false);
+        $response->assertSee(__('homepage.landing_destinations_see_all'), false);
         $response->assertDontSee('/destination/deutschland', false);
         $response->assertDontSee('/guidings/Denmark', false);
         $response->assertDontSee('href="'.route('destination', [], false).'"', false);
         $response->assertSee(route('guidings.methods', [], false), false);
         $response->assertDontSee(route('category.types', ['type' => 'methods'], false), false);
         $response->assertSee(route('guidings.targets.index'), false);
-        $response->assertDontSee(route('targets.index'), false);
+        // The footer links the cross-type /targets hub on purpose; the landing's own rails must not.
+        $body = explode('<footer class="site-footer', (string) $response->getContent())[0];
+        $this->assertStringNotContainsString('href="'.route('targets.index').'"', $body);
         $response->assertDontSee(route('category.types', ['type' => 'targets'], false), false);
     }
 }

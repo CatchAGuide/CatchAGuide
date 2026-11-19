@@ -1,0 +1,696 @@
+// Guide Area › Overview, To-dos, Reviews, Invoices: progress bars, checklists, score card,
+// review grid, stat tiles, the monthly chart and the invoice table. Tokens only.
+
+.ga-page__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $cag-space-2;
+}
+
+.ga-plain-link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.ga-small {
+    font-size: $cag-fs-small;
+}
+
+// Progress bar
+.ga-progress {
+    height: 8px;
+    margin: $cag-space-3 0;
+    border-radius: $cag-radius-pill;
+    background: $cag-bg;
+    overflow: hidden;
+
+    &__bar {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: $cag-success;
+    }
+}
+
+.ga-pct {
+    display: inline-block;
+    padding: 1px $cag-space-2;
+    border-radius: $cag-radius-pill;
+    background: rgba($cag-coral, 0.12);
+    font-size: $cag-fs-caption;
+    font-weight: $cag-fw-bold;
+    color: darken($cag-coral, 14%);
+    white-space: nowrap;
+
+    &--done {
+        background: rgba($cag-success, 0.14);
+        color: darken($cag-success, 14%);
+    }
+}
+
+.ga-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $cag-space-2;
+
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: $cag-space-2;
+        padding: $cag-space-1 $cag-space-3;
+        border: 1px solid $cag-border;
+        border-radius: $cag-radius-pill;
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-medium;
+        color: $cag-slate;
+        text-decoration: none;
+
+        &:hover {
+            border-color: $cag-slate;
+        }
+    }
+}
+
+// To-dos
+.ga-todo-section {
+    scroll-margin-top: $cag-space-6;
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-3;
+    }
+}
+
+.ga-checks {
+    margin: $cag-space-3 0 0;
+    padding: 0;
+    list-style: none;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-3;
+        padding: $cag-space-2 0;
+        border-top: 1px solid $cag-border;
+
+        &:first-child {
+            border-top: 0;
+        }
+    }
+
+    &__mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: $cag-success;
+        font-size: $cag-fs-micro;
+        color: $cag-white;
+
+        .is-open & {
+            border: 2px solid $cag-coral;
+            background: transparent;
+        }
+    }
+
+    &__text {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    &__label {
+        display: block;
+        font-size: $cag-fs-small;
+
+        .is-open & {
+            font-weight: $cag-fw-bold;
+        }
+    }
+
+    &__hint {
+        display: block;
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+
+    @media (max-width: 575px) {
+        &__item {
+            flex-wrap: wrap;
+        }
+
+        &__item .ga-btn {
+            margin-left: calc(20px + #{$cag-space-3});
+        }
+    }
+}
+
+.ga-todo-tour {
+    margin-top: $cag-space-3;
+    padding: $cag-space-3 $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-md;
+
+    &--done {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-2;
+        border-color: rgba($cag-success, 0.3);
+        background: rgba($cag-success, 0.06);
+    }
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-2;
+    }
+
+    &__name {
+        flex: 1 1 auto;
+        font-weight: $cag-fw-bold;
+    }
+}
+
+// Overview
+.ga-action-row__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $cag-space-2;
+    margin-top: $cag-space-2;
+}
+
+.ga-upcoming {
+    display: flex;
+    gap: $cag-space-3;
+    margin-top: $cag-space-3;
+    padding: $cag-space-3;
+    border-radius: $cag-radius-md;
+    background: $cag-bg;
+
+    &__tour {
+        margin: 0;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__meta {
+        margin: 0;
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+
+    &__guest {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-1 $cag-space-3;
+        margin: 2px 0 0;
+        font-size: $cag-fs-small;
+
+        a {
+            color: $cag-slate;
+        }
+    }
+}
+
+.ga-date-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    height: 56px;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-md;
+    background: $cag-white;
+    font-size: $cag-fs-micro;
+    font-weight: $cag-fw-bold;
+    line-height: 1.1;
+    text-transform: uppercase;
+
+    strong {
+        font-size: $cag-fs-body;
+    }
+
+    &--dark {
+        border-color: $cag-slate;
+        background: $cag-slate;
+        color: $cag-on-dark;
+    }
+}
+
+.ga-link-list {
+    margin: $cag-space-2 0 0;
+    padding: 0;
+    list-style: none;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $cag-space-3;
+        padding: $cag-space-2 0;
+        border-top: 1px solid $cag-border;
+        color: $cag-slate;
+        text-decoration: none;
+
+        > span {
+            display: flex;
+            flex-direction: column;
+        }
+
+        &:hover .ga-link-list__title {
+            text-decoration: underline;
+        }
+    }
+
+    li:first-child &__item {
+        border-top: 0;
+    }
+
+    &__title {
+        font-weight: $cag-fw-bold;
+    }
+
+    &__hint {
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+}
+
+.ga-quote {
+    margin: $cag-space-2 0 $cag-space-1;
+}
+
+// Stat tiles (Invoices, Overview)
+.ga-stat-grid {
+    display: grid;
+    gap: $cag-space-3;
+    margin-top: $cag-space-3;
+
+    &--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &--3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    &--4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @media (max-width: 767px) {
+        &--3,
+        &--4 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+.ga-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $cag-space-3 $cag-space-4;
+    border-radius: $cag-radius-md;
+    background: $cag-bg;
+
+    &--plain {
+        border: 1px solid $cag-border;
+        background: $cag-white;
+    }
+
+    &--positive {
+        background: rgba($cag-success, 0.1);
+
+        .ga-stat__value {
+            color: darken($cag-success, 14%);
+        }
+    }
+
+    &__label {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__value {
+        font-size: $cag-fs-h3-mobile;
+        font-weight: $cag-fw-bold;
+        line-height: $cag-lh-tight;
+    }
+
+    &__hint {
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+}
+
+// Monthly chart
+.ga-chart {
+    margin-top: $cag-space-5;
+
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: $cag-space-2;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__readout {
+        margin: 0;
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+
+    &__plot {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: $cag-space-1;
+        height: 180px;
+        margin-top: $cag-space-3;
+        border-bottom: 1px solid $cag-border;
+    }
+
+    &__col {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 0 0 $cag-space-5;
+        border: 0;
+        border-radius: $cag-radius-sm $cag-radius-sm 0 0;
+        background: transparent;
+        cursor: default;
+
+        &.is-active {
+            background: $cag-bg;
+        }
+    }
+
+    &__bar {
+        display: block;
+        width: 60%;
+        max-width: 28px;
+        border-radius: $cag-radius-sm $cag-radius-sm 0 0;
+        background: $cag-coral;
+
+        .is-active & {
+            background: $cag-coral-hover;
+        }
+    }
+
+    &__month {
+        position: absolute;
+        bottom: $cag-space-1;
+        font-size: $cag-fs-micro;
+        color: $cag-gray;
+    }
+}
+
+// Invoice table
+.ga-table-wrap {
+    // relative: keeps absolutely positioned children (visually hidden labels) inside the scroller.
+    position: relative;
+    margin-top: $cag-space-3;
+    overflow-x: auto;
+}
+
+.ga-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $cag-fs-small;
+
+    th {
+        padding: $cag-space-2;
+        border-bottom: 1px solid $cag-border;
+        font-size: $cag-fs-caption;
+        font-weight: $cag-fw-medium;
+        text-align: left;
+        color: $cag-gray;
+        white-space: nowrap;
+    }
+
+    td {
+        padding: $cag-space-2;
+        border-bottom: 1px solid $cag-border;
+        vertical-align: middle;
+
+        a {
+            color: $cag-slate;
+        }
+    }
+
+    .is-num {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    tr.is-open td {
+        background: rgba($cag-coral, 0.04);
+    }
+}
+
+// Reviews
+.ga-score-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    margin-bottom: $cag-space-5;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+    overflow: hidden;
+
+    @media (max-width: 767px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__total {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $cag-space-2;
+        padding: $cag-space-5;
+        background: $cag-slate;
+        color: $cag-on-dark;
+    }
+
+    &__label {
+        padding: 2px $cag-space-3;
+        border-radius: $cag-radius-pill;
+        background: $cag-coral;
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+        color: $cag-white;
+    }
+
+    &__count {
+        font-size: $cag-fs-caption;
+        color: $cag-on-dark-muted;
+    }
+
+    &__bars {
+        padding: $cag-space-5;
+    }
+
+    &__note {
+        margin: $cag-space-3 0 0;
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+
+        strong,
+        i {
+            color: darken($cag-success, 12%);
+        }
+    }
+}
+
+.ga-score-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 104px;
+    height: 104px;
+    border: 4px solid $cag-coral;
+    border-radius: 50%;
+
+    &__value {
+        font-size: $cag-fs-h2;
+        font-weight: $cag-fw-bold;
+        line-height: 1;
+    }
+
+    &__max {
+        font-size: $cag-fs-caption;
+        color: $cag-on-dark-muted;
+    }
+}
+
+.ga-score-bar {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) 56px;
+    align-items: center;
+    gap: $cag-space-3;
+    margin-bottom: $cag-space-2;
+    font-size: $cag-fs-small;
+
+    &__segments {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 3px;
+    }
+
+    &__segment {
+        height: 6px;
+        border-radius: $cag-radius-sm;
+        background: $cag-bg;
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background: $cag-coral;
+        }
+    }
+
+    &__value {
+        font-weight: $cag-fw-bold;
+        text-align: right;
+
+        small {
+            font-weight: $cag-fw-regular;
+            color: $cag-gray;
+        }
+    }
+}
+
+.ga-reviews-title {
+    margin-bottom: $cag-space-3;
+}
+
+.ga-review-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $cag-space-3;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    @media (max-width: 1199px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 575px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.ga-review {
+    display: flex;
+    flex-direction: column;
+    gap: $cag-space-2;
+    padding: $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-2;
+    }
+
+    &__who {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    &__name {
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__date {
+        font-size: $cag-fs-micro;
+        text-transform: uppercase;
+        color: $cag-gray;
+    }
+
+    &__text {
+        margin: 0;
+        font-size: $cag-fs-small;
+    }
+
+    &__tour {
+        margin: auto 0 0;
+        padding-top: $cag-space-2;
+        border-top: 1px solid $cag-border;
+        font-size: $cag-fs-caption;
+        color: $cag-gray;
+    }
+
+    .ga-badge {
+        align-self: flex-start;
+    }
+}
+
+.ga-avatar--xs {
+    width: 28px;
+    height: 28px;
+    font-size: $cag-fs-caption;
+}
+
+.ga-new {
+    padding: 1px $cag-space-2;
+    border-radius: $cag-radius-sm;
+    background: $cag-coral;
+    font-size: $cag-fs-micro;
+    font-weight: $cag-fw-bold;
+    text-transform: uppercase;
+    color: $cag-white;
+}
+
+.ga-score-pill {
+    display: inline-block;
+    padding: 1px $cag-space-2;
+    border-radius: $cag-radius-sm;
+    background: rgba($cag-coral, 0.12);
+    font-size: $cag-fs-caption;
+    font-weight: $cag-fw-bold;
+    color: darken($cag-coral, 14%);
+    white-space: nowrap;
+
+    small {
+        font-weight: $cag-fw-regular;
+    }
+}
+
+.ga-list-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: $cag-space-3;
+    margin-top: $cag-space-4;
+    font-size: $cag-fs-small;
+
+    .ga-pager {
+        margin: 0;
+    }
+}

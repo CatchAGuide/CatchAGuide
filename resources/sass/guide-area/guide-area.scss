@@ -1,0 +1,14 @@
+// Guide Area (/guide/*) — own entry (public/css/guide-area.css) because the area has its own
+// layout and should not grow the public site's app.css. Built on the design-system tokens.
+@import "../settings/fonts";
+@import "../settings/tokens";
+
+@import "layout";
+@import "components";
+@import "profile";
+@import "lists";
+@import "tours";
+@import "bookings";
+@import "calendar";
+@import "dashboard";
+@import "customer";

@@ -28,6 +28,7 @@ use App\Mail\GuidingRequestMail;
 use App\Mail\SearchRequestUserMail;
 use Illuminate\Support\Facades\Log;
 use App\Models\ExtrasPrice;
+use App\Presenters\Guiding\GuidePublicProfilePresenter;
 use App\Presenters\Reviews\ReviewSectionPresenter;
 use App\Services\CalendarScheduleService;
 use App\Models\BoatExtras;
@@ -199,6 +200,7 @@ class GuidingsController extends Controller
         private SimilarGuidingsService $similarGuidings,
         private ListingSearchStateService $searchState,
         private ReviewSectionPresenter $reviewSections,
+        private GuidePublicProfilePresenter $guidePublicProfile,
     )
     {
         $this->initializeOptimizationServices();
@@ -416,6 +418,7 @@ class GuidingsController extends Controller
             'blocked_events' => $guiding->getBlockedEvents(),
             'preselectedGuests' => $preselectedGuests,
             'productPageQuery' => $productPageQuery,
+            'guideProfile' => $guiding->user ? $this->guidePublicProfile->present($guiding->user) : null,
         ]);
     }
 

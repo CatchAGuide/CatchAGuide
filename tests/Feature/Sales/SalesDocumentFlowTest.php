@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use App\Services\Sales\SalesDocumentSender;
 use App\Services\Sales\SalesDocumentStateMapper;
 use App\Services\Sales\SalesDocumentWriter;
+use App\Services\Sales\SalesTexts;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -255,7 +256,9 @@ class SalesDocumentFlowTest extends TestCase
         $this->assertSame(1, $event->payload['revision']);
         Mail::assertSent(SalesOfferAcceptedMail::class, fn ($mail) => $mail->hasTo('sales@example.com') && $mail->hasTo($this->employee->email));
 
-        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertSee('Vielen Dank!')->assertDontSee('Verbindlich annehmen');
+        // The thanks text can be edited in the admin, so compare with whatever is in effect.
+        $thanks = app(SalesTexts::class)->get('thanks', $document->locale());
+        $this->get('/'.$document->locale().'/offer/'.$document->public_token)->assertSee($thanks)->assertDontSee('Verbindlich annehmen');
     }
 
     public function test_expired_and_cancelled_offers_cannot_be_accepted(): void

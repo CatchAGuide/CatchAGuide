@@ -24479,6 +24479,35 @@ input:-webkit-autofill:active {
   border-radius: 50%;
   display: block;
 }
+.tour-details-two__about .guide-verified-docs {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #313041;
+}
+.tour-details-two__about .guide-verified-docs li + li {
+  margin-top: 0.25rem;
+}
+.tour-details-two__about .guide-verified-docs .fa {
+  color: #22c55e;
+  margin-right: 0.25rem;
+}
+.tour-details-two__about .guide-tags__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+}
+.tour-details-two__about .guide-tags__chip {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #ece8e0;
+  border-radius: 999px;
+  background: #faf5ee;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #313041;
+}
 
 /* Contact modal: keep reCAPTCHA + send button on-screen on mobile */
 #contactModal .modal-content,

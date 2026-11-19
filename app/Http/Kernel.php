@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
         'check_domain' => \App\Http\Middleware\CheckDomain::class,
         'ddos' => \App\Http\Middleware\DDoSProtectionMiddleware::class,
         'booking.assistant.access' => \App\Http\Middleware\EnsureBookingAssistantAccessible::class,
+        'guide.area' => \App\Http\Middleware\EnsureGuideAreaAccess::class,
     ];
 }

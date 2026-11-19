@@ -25,6 +25,7 @@ class Review extends Model
 
     protected $casts = [
         'is_automatic' => 'boolean',
+        'seen_by_guide_at' => 'datetime',
     ];
 
     protected static function boot()

@@ -258,6 +258,24 @@ final class SitePrimaryNav
             && ! static::isCheckoutPage($request);
     }
 
+    /** Customer pages of /profile/* that use the Guide Area design (ProfileController). */
+    public const CUSTOMER_AREA_ROUTES = ['profile.index', 'profile.bookings', 'profile.my-bookings', 'profile.favoriteguides', 'profile.settings', 'profile.password'];
+
+    /**
+     * The catalog search band under the page header. The Guide Area and the customer pages in
+     * its design are work tools, so they have none.
+     */
+    public static function usesPageHeaderSearch(?Request $request = null): bool
+    {
+        $request ??= request();
+
+        if ($request->routeIs('guide.area.*')) {
+            return false;
+        }
+
+        return ! ($request->routeIs(self::CUSTOMER_AREA_ROUTES) && $request->user('web')?->usesCustomerArea());
+    }
+
     private static function iconFor(string $key): string
     {
         return match ($key) {

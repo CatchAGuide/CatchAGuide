@@ -31,6 +31,10 @@ class GuideVoucherSettingsController extends Controller
             return redirect()->route('profile.becomeguide');
         }
 
+        if ($guide->usesGuideArea()) {
+            return redirect()->route('guide.area.vouchers.settings');
+        }
+
         return view('pages.profile.vouchers', [
             'tours' => $this->settings->tours($guide),
             'design' => $guide->voucherDesign(),

@@ -1,0 +1,554 @@
+// Guide Area › Bookings, plus small pieces the Overview, Reviews and Invoices pages share
+// (counts, eyebrows, action rows, facts grid, section heads). Tokens only.
+
+.ga-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    margin-left: $cag-space-2;
+    padding: 0 $cag-space-2;
+    border-radius: $cag-radius-pill;
+    background: $cag-bg;
+    font-size: $cag-fs-caption;
+    font-weight: $cag-fw-bold;
+    color: $cag-slate;
+    vertical-align: middle;
+
+    &--warning {
+        background: rgba($cag-coral, 0.12);
+        color: darken($cag-coral, 14%);
+    }
+}
+
+.ga-card__aside {
+    font-size: $cag-fs-small;
+    color: $cag-gray;
+}
+
+.ga-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-1;
+    font-size: $cag-fs-small;
+    font-weight: $cag-fw-medium;
+    color: $cag-slate;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.ga-eyebrow {
+    margin: 0;
+    font-size: $cag-fs-caption;
+    font-weight: $cag-fw-bold;
+    letter-spacing: $cag-ls-caps;
+    text-transform: uppercase;
+    color: $cag-gray;
+
+    &--warning {
+        color: darken($cag-coral, 14%);
+    }
+
+    &--info {
+        color: $cag-slate;
+    }
+}
+
+.ga-urgent {
+    color: darken($cag-coral, 14%);
+    font-weight: $cag-fw-bold;
+}
+
+.ga-muted {
+    color: $cag-gray;
+}
+
+.ga-positive {
+    color: darken($cag-success, 12%);
+    font-weight: $cag-fw-bold;
+}
+
+.ga-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: $cag-fs-small;
+    font-weight: $cag-fw-medium;
+    color: $cag-slate;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.ga-btn--success {
+    background: $cag-success;
+    color: $cag-white;
+
+    &:hover {
+        background: darken($cag-success, 8%);
+    }
+}
+
+.ga-btn--danger {
+    background: $cag-danger;
+    color: $cag-white;
+
+    &:hover {
+        background: darken($cag-danger, 8%);
+    }
+}
+
+.ga-status--neutral {
+    background: $cag-bg;
+    color: $cag-slate;
+}
+
+.ga-check {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-2;
+    margin: 0;
+    padding: $cag-space-1 $cag-space-3;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-md;
+    background: $cag-white;
+    font-size: $cag-fs-button-sm;
+    font-weight: $cag-fw-medium;
+    cursor: pointer;
+
+    &:has(input:checked) {
+        border-color: $cag-success;
+        color: darken($cag-success, 12%);
+    }
+
+    input {
+        accent-color: $cag-success;
+    }
+}
+
+.ga-empty--inline {
+    flex-direction: row;
+    justify-content: center;
+    padding: $cag-space-5 $cag-space-4;
+    margin-top: $cag-space-3;
+
+    i {
+        font-size: $cag-fs-body;
+        color: $cag-success;
+    }
+}
+
+// Rows that need an action (Bookings › New & open, Overview › Waiting for you)
+.ga-action-list {
+    margin: $cag-space-3 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ga-action-row {
+    display: flex;
+    align-items: center;
+    gap: $cag-space-3;
+    padding: $cag-space-3 0;
+    border-top: 1px solid $cag-border;
+
+    &:first-child {
+        border-top: 0;
+    }
+
+    &--highlight {
+        margin: $cag-space-2 0;
+        padding: $cag-space-3;
+        border: 1px solid rgba($cag-coral, 0.45);
+        border-radius: $cag-radius-lg;
+        background: rgba($cag-coral, 0.06);
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 36px;
+        height: 36px;
+        border-radius: $cag-radius-md;
+        background: $cag-bg;
+        color: $cag-slate;
+
+        &--warning {
+            background: rgba($cag-coral, 0.12);
+            color: darken($cag-coral, 14%);
+        }
+
+        &--info {
+            background: rgba($cag-slate, 0.08);
+        }
+    }
+
+    &__body {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    &__title {
+        margin: 2px 0 0;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__meta {
+        margin: 2px 0 0;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: $cag-space-2;
+    }
+
+    @media (max-width: 767px) {
+        flex-wrap: wrap;
+
+        &__actions {
+            justify-content: flex-start;
+            width: 100%;
+            padding-left: calc(36px + #{$cag-space-3});
+        }
+    }
+}
+
+// Tabs as an underline bar (Bookings: Tours / Vouchers)
+.ga-tabs--underline {
+    margin-bottom: $cag-space-4;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid $cag-border;
+    border-radius: 0;
+    background: transparent;
+
+    .ga-tabs__tab {
+        margin-bottom: -1px;
+        padding: $cag-space-2 $cag-space-3;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+
+        &.is-active {
+            border-bottom-color: $cag-slate;
+            background: transparent;
+            color: $cag-slate;
+        }
+    }
+}
+
+.ga-tabs__count--warning,
+.ga-tabs__count--info {
+    padding: 1px $cag-space-2;
+    border-radius: $cag-radius-pill;
+    font-weight: $cag-fw-bold;
+    color: $cag-white;
+    opacity: 1;
+}
+
+.ga-tabs__count--warning {
+    background: $cag-coral;
+}
+
+.ga-tabs__count--info {
+    background: $cag-slate;
+}
+
+.ga-tiles--5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    @media (max-width: 991px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.ga-tile--warning .ga-tile__value {
+    color: darken($cag-coral, 14%);
+}
+
+.ga-search--grow {
+    flex: 1 1 320px;
+}
+
+.ga-inline-field {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-2;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    font-size: $cag-fs-small;
+    color: $cag-gray;
+
+    .ga-input {
+        width: auto;
+        min-width: 150px;
+        max-width: 320px;
+    }
+
+    @media (max-width: 767px) {
+        flex: 1 1 100%;
+
+        .ga-input {
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: none;
+        }
+    }
+}
+
+.ga-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $cag-space-3;
+    margin: $cag-space-5 0 $cag-space-3;
+
+    &__title {
+        margin: 0;
+        font-size: $cag-fs-h3-mobile;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__aside {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+}
+
+// Booking cards
+.ga-booking-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ga-booking {
+    margin-bottom: $cag-space-3;
+    padding: $cag-space-4 $cag-space-5;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+    scroll-margin-top: $cag-space-6;
+
+    &--open {
+        border-color: rgba($cag-coral, 0.45);
+    }
+
+    &.is-focused {
+        box-shadow: 0 0 0 2px $cag-slate;
+    }
+
+    @media (max-width: 767px) {
+        padding: $cag-space-4;
+    }
+
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: $cag-space-2;
+    }
+
+    &__badges {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-2;
+    }
+
+    &__reply {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__title {
+        margin: $cag-space-2 0 0;
+        font-size: $cag-fs-body;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__location {
+        margin: 2px 0 0;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__guest {
+        margin: $cag-space-3 0 0;
+        font-size: $cag-fs-small;
+
+        a {
+            color: $cag-slate;
+        }
+    }
+
+    &__note {
+        margin: $cag-space-2 0 0;
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $cag-space-2;
+        margin-top: $cag-space-3;
+        padding-top: $cag-space-3;
+        border-top: 1px solid $cag-border;
+    }
+
+    &__cancel {
+        margin-left: auto;
+    }
+}
+
+.ga-id {
+    padding: 2px $cag-space-2;
+    border-radius: $cag-radius-sm;
+    background: $cag-slate;
+    font-size: $cag-fs-caption;
+    font-weight: $cag-fw-bold;
+    color: $cag-on-dark;
+}
+
+.ga-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $cag-space-3;
+    margin: $cag-space-3 0 0;
+    padding: $cag-space-3;
+    border-radius: $cag-radius-md;
+    background: $cag-bg;
+
+    dt {
+        font-size: $cag-fs-caption;
+        font-weight: $cag-fw-regular;
+        color: $cag-gray;
+    }
+
+    dd {
+        margin: 0;
+        font-weight: $cag-fw-bold;
+    }
+
+    @media (max-width: 767px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.ga-disclosure {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-1;
+    margin-top: $cag-space-2;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: $cag-fs-small;
+    font-weight: $cag-fw-medium;
+    color: $cag-slate;
+    cursor: pointer;
+}
+
+.ga-details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: $cag-space-5;
+    margin-top: $cag-space-3;
+    padding-top: $cag-space-3;
+    border-top: 1px solid $cag-border;
+
+    @media (max-width: 991px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 575px) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    &__head {
+        margin: 0 0 $cag-space-2;
+        padding-bottom: $cag-space-1;
+        border-bottom: 2px solid $cag-slate;
+        font-size: $cag-fs-caption;
+        font-weight: $cag-fw-bold;
+        letter-spacing: $cag-ls-caps;
+        text-transform: uppercase;
+    }
+
+    dl {
+        margin: 0;
+    }
+
+    dl > div {
+        display: flex;
+        justify-content: space-between;
+        gap: $cag-space-3;
+        padding: $cag-space-1 0;
+        border-bottom: 1px solid $cag-border;
+        font-size: $cag-fs-small;
+    }
+
+    dt {
+        font-weight: $cag-fw-regular;
+        color: $cag-gray;
+    }
+
+    dd {
+        margin: 0;
+        text-align: right;
+        font-weight: $cag-fw-medium;
+
+        // Amounts ("− €19.90") stay on one line.
+        &.ga-amount {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        a {
+            color: $cag-slate;
+        }
+    }
+}
+
+.ga-inline-form {
+    margin-top: $cag-space-4;
+    padding-top: $cag-space-4;
+    border-top: 1px solid $cag-border;
+
+    &__title {
+        margin: 0 0 $cag-space-3;
+        font-weight: $cag-fw-bold;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-2;
+    }
+
+    &--danger &__title {
+        color: $cag-danger;
+    }
+}
+
+.ga-toast--error {
+    background: $cag-danger;
+
+    i {
+        color: $cag-white;
+    }
+}

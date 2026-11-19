@@ -61,6 +61,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'banktransfer_holder',
+        'banktransfer_iban',
+        'banktransfer_bic',
     ];
 
     /**
@@ -73,7 +76,52 @@ class User extends Authenticatable
         'guide_submitted_at' => 'datetime',
         'guide_verified_at' => 'datetime',
         'is_provider' => 'boolean',
+        // Not fillable on purpose: set explicitly (admin / GuideProfileFormService).
+        'guide_area_beta' => 'boolean',
+        'banktransfer_holder' => 'encrypted',
+        'banktransfer_iban' => 'encrypted',
+        'banktransfer_bic' => 'encrypted',
     ];
+
+    /**
+     * Whether this guide gets the redesigned Guide Area (/guide/*) instead of the old
+     * /profile/* guide pages: every guide, unless the global kill switch is off.
+     */
+    public function usesGuideArea(): bool
+    {
+        return (bool) config('guide_area.enabled')
+            && $this->canViewGuideTools();
+    }
+
+    /**
+     * The customer pages of /profile/* (overview, my bookings, favourites, account) in the
+     * Guide Area design. Guides only get them while they use the Guide Area, so a guide is
+     * never shown the new pages next to the old guide menu.
+     */
+    public function usesCustomerArea(): bool
+    {
+        return (bool) config('guide_area.customer_enabled')
+            && (! $this->canViewGuideTools() || $this->usesGuideArea());
+    }
+
+    /**
+     * Route name of this user's guide profile page: the new one for Guide Area guides,
+     * the old one for everyone else.
+     */
+    public function guideProfileRouteName(): string
+    {
+        return $this->usesGuideArea() ? 'guide.area.profile' : 'profile.guide-profile';
+    }
+
+    public function guideTags(): HasMany
+    {
+        return $this->hasMany(GuideTag::class)->orderBy('position');
+    }
+
+    public function guideCertificates(): HasMany
+    {
+        return $this->hasMany(GuideCertificate::class);
+    }
 
     public function isProvider(): bool
     {

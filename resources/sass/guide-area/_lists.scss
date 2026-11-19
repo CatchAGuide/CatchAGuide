@@ -1,0 +1,324 @@
+// Guide Area shared list components: toolbar, tabs, search, stat tiles, switch, pager,
+// empty state, option cards, steps. Used by My fishing tours and Vouchers.
+
+.ga-back {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-1;
+    margin-bottom: $cag-space-2;
+    font-size: $cag-fs-small;
+    color: $cag-gray;
+    text-decoration: none;
+
+    &:hover {
+        color: $cag-slate;
+    }
+}
+
+.ga-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: $cag-space-3;
+    margin-bottom: $cag-space-4;
+
+    &--end {
+        justify-content: flex-end;
+    }
+}
+
+.ga-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $cag-space-1;
+    padding: $cag-space-1;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-md;
+    background: $cag-white;
+
+    &__tab {
+        display: inline-flex;
+        align-items: center;
+        gap: $cag-space-2;
+        padding: $cag-space-1 $cag-space-3;
+        border: 0;
+        border-radius: $cag-radius-sm;
+        background: transparent;
+        font: inherit;
+        font-size: $cag-fs-subtitle;
+        font-weight: $cag-fw-medium;
+        color: $cag-gray;
+        cursor: pointer;
+
+        &:hover {
+            color: $cag-slate;
+        }
+
+        &.is-active {
+            background: $cag-slate;
+            color: $cag-on-dark;
+        }
+    }
+
+    &__count {
+        font-size: $cag-fs-caption;
+        opacity: 0.8;
+    }
+}
+
+.ga-search {
+    position: relative;
+    flex: 0 1 280px;
+    margin: 0;
+
+    i {
+        position: absolute;
+        top: 50%;
+        left: $cag-space-3;
+        transform: translateY(-50%);
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    .ga-input {
+        padding-left: $cag-space-8;
+    }
+
+    @media (max-width: 767px) {
+        flex-basis: 100%;
+    }
+}
+
+.ga-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: $cag-space-3;
+    margin-bottom: $cag-space-4;
+}
+
+.ga-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $cag-space-1;
+    padding: $cag-space-3 $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &.is-active {
+        border-color: $cag-slate;
+    }
+
+    &.is-active {
+        box-shadow: inset 0 0 0 1px $cag-slate;
+    }
+
+    &__value {
+        font-size: $cag-fs-h2;
+        font-weight: $cag-fw-bold;
+        line-height: $cag-lh-tight;
+        color: $cag-slate;
+    }
+
+    &__label {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+}
+
+.ga-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: $cag-space-2;
+    margin: 0;
+    cursor: pointer;
+
+    &--row {
+        flex: 1 1 auto;
+        justify-content: space-between;
+    }
+
+    &__input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+    }
+
+    &__track {
+        position: relative;
+        flex: 0 0 auto;
+        width: 36px;
+        height: 20px;
+        border-radius: $cag-radius-pill;
+        background: $cag-border;
+        transition: background $cag-duration $cag-ease;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: $cag-white;
+            box-shadow: $cag-shadow-rest;
+            transition: transform $cag-duration $cag-ease;
+        }
+    }
+
+    &__input:checked + &__track {
+        background: $cag-success;
+
+        &::after {
+            transform: translateX(16px);
+        }
+    }
+
+    &__input:focus-visible + &__track {
+        outline: 2px solid $cag-slate;
+        outline-offset: 2px;
+    }
+
+    &__label {
+        font-size: $cag-fs-subtitle;
+        color: $cag-slate;
+    }
+}
+
+.ga-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $cag-space-3;
+    margin-top: $cag-space-5;
+
+    &__text {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+}
+
+.ga-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $cag-space-3;
+    padding: $cag-space-10 $cag-space-4;
+    border: 1px dashed $cag-border;
+    border-radius: $cag-radius-lg;
+    background: $cag-white;
+    text-align: center;
+    color: $cag-gray;
+
+    i {
+        font-size: $cag-fs-h2;
+    }
+
+    p {
+        margin: 0;
+    }
+}
+
+.ga-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $cag-space-3;
+}
+
+.ga-option {
+    display: flex;
+    flex-direction: column;
+    gap: $cag-space-1;
+    margin: 0;
+    padding: $cag-space-4;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-lg;
+    cursor: pointer;
+
+    &.is-selected {
+        border-color: $cag-slate;
+        box-shadow: inset 0 0 0 1px $cag-slate;
+    }
+
+    &__icon {
+        font-size: $cag-fs-h3;
+        color: $cag-coral;
+    }
+
+    &__name {
+        font-weight: $cag-fw-bold;
+        color: $cag-slate;
+    }
+
+    &__text {
+        font-size: $cag-fs-small;
+        color: $cag-gray;
+    }
+
+    &__link {
+        margin-top: $cag-space-1;
+        font-size: $cag-fs-small;
+        color: $cag-coral;
+    }
+}
+
+.ga-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $cag-space-3;
+    margin: 0 0 $cag-space-4;
+    padding: 0;
+    list-style: none;
+
+    &__item {
+        display: flex;
+        gap: $cag-space-3;
+        padding: $cag-space-3;
+        border-radius: $cag-radius-md;
+        background: $cag-sand;
+        font-size: $cag-fs-small;
+        color: $cag-slate;
+
+        small {
+            display: block;
+            color: $cag-gray;
+        }
+    }
+
+    &__icon {
+        color: $cag-coral;
+    }
+}
+
+.ga-bulk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $cag-space-2;
+}
+
+.ga-toggle-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: $cag-space-3;
+        padding: $cag-space-3 0;
+        border-top: 1px solid $cag-border;
+
+        &:first-child {
+            border-top: 0;
+        }
+    }
+}

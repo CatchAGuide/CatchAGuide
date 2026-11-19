@@ -57,7 +57,7 @@ class ICalGeneratorService
         
         switch ($feed->feed_type) {
             case 'bookings_only':
-                $events = $this->getBookingEvents($user);
+                $events = $this->getBookingEvents($user, (array) ($feed->feed_settings ?? []));
                 break;
                 
             case 'all_events':
@@ -75,15 +75,20 @@ class ICalGeneratorService
     /**
      * Get booking events
      */
-    private function getBookingEvents(User $user): array
+    private function getBookingEvents(User $user, array $settings = []): array
     {
         $events = [];
-        
+
+        // Only what still happens: confirmed bookings and (unless switched off in Guide Area ›
+        // Calendar › Export) open requests. Declined / cancelled ones used to stay in the feed.
+        $statuses = ($settings['include_pending'] ?? true) ? ['accepted', 'pending'] : ['accepted'];
+
         // Get user's guiding IDs
         $guidingIds = $user->guidings()->pluck('id')->toArray();
         
         // Get bookings as guide
         $guideBookings = Booking::whereIn('guiding_id', $guidingIds)
+            ->whereIn('status', $statuses)
             ->with(['registeredUser', 'guestUser', 'guiding', 'calendar_schedule'])
             ->get();
         
@@ -100,7 +105,9 @@ class ICalGeneratorService
             
             $events[] = [
                 'uid' => "booking_{$booking->id}@catchaguide.com",
-                'summary' => "Fishing Trip: {$booking->user->firstname} {$booking->user->lastname}",
+                'summary' => $booking->status === 'pending'
+                    ? "Request pending: {$booking->guiding->title}"
+                    : "Booked: {$booking->guiding->title} · {$booking->user->firstname} {$booking->user->lastname}",
                 'description' => "Fishing trip with {$booking->count_of_users} person(s)",
                 'start_time' => $bookingDate->copy()->startOfDay(),
                 // iCal all-day DTEND is exclusive (next day)
@@ -112,8 +119,34 @@ class ICalGeneratorService
             ];
         }
         
+        // Days the guide blocked for all tours (Guide Area › Calendar › Export option).
+        if ($settings['include_blocks'] ?? false) {
+            $blocks = CalendarSchedule::where('user_id', $user->id)
+                ->where('type', 'custom_schedule')
+                ->whereNull('guiding_id')
+                ->where(fn ($q) => $q->whereNull('source')->orWhere('source', '!=', CalendarSchedule::SOURCE_ICAL))
+                ->whereDate('date', '>=', Carbon::today()->subMonths(3)->toDateString())
+                ->get();
+
+            foreach ($blocks as $block) {
+                $day = Carbon::parse($block->date)->startOfDay();
+                $events[] = [
+                    'uid' => "block_{$block->id}@catchaguide.com",
+                    'summary' => 'Blocked',
+                    'description' => (string) ($block->note ?? ''),
+                    'start_time' => $day,
+                    'end_time' => $day->copy()->addDay(),
+                    'all_day' => true,
+                    'location' => '',
+                    'status' => 'blocked',
+                    'type' => 'block',
+                ];
+            }
+        }
+
         // Get bookings as client
         $clientBookings = Booking::where('user_id', $user->id)
+            ->whereIn('status', ['accepted', 'pending'])
             ->where('is_guest', false)
             ->with(['guiding', 'guiding.user', 'calendar_schedule'])
             ->get();

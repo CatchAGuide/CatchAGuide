@@ -32,16 +32,48 @@ use App\Models\Inclussion;
 use App\Models\ExtrasPrice;
 use App\Models\BoatExtras;
 use App\Services\Voucher\GuideVoucherOrders;
+use App\Services\Media\GuideProfilePhotoUploadService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ProfileController extends Controller
 {
     public function index()
     {
+        // Guides on the new Guide Area land on its Overview; customers keep /profile.
+        if (auth()->user()?->usesGuideArea()) {
+            return redirect()->route('guide.area.overview');
+        }
+
+        if (auth()->user()->usesCustomerArea()) {
+            return $this->customerArea('customer.overview', __('guide_area.customer.overview.title'));
+        }
+
         return view('pages.profile.index');
     }
 
-    public function settings()
+    /**
+     * A customer page of /profile/* in the Guide Area design (layouts.guide-area): the routes
+     * and their names stay, only the page behind them changes. Guides on the Guide Area see
+     * these pages inside its sidebar.
+     */
+    private function customerArea(string $component, string $title, array $params = []): View
     {
+        return view('customer-area.page', [
+            'component' => $component,
+            'params' => $params,
+            'title' => $title,
+        ]);
+    }
+
+    public function settings(Request $request)
+    {
+        if (auth()->user()->usesCustomerArea()) {
+            $tab = $request->query('tab') === 'privacy' ? 'privacy' : 'details';
+
+            return $this->customerArea('customer.account', __('guide_area.customer.account.title'), ['tab' => $tab]);
+        }
+
         return view('pages.profile.account',[
             'user'=> auth()->user(),
             'authUser' => auth()->user()
@@ -50,6 +82,10 @@ class ProfileController extends Controller
 
     public function password()
     {
+        if (auth()->user()->usesCustomerArea()) {
+            return $this->customerArea('customer.account', __('guide_area.customer.account.title'), ['tab' => 'password']);
+        }
+
         return view('pages.profile.password-security');
     }
 
@@ -72,16 +108,14 @@ class ProfileController extends Controller
 
     }
 
-    public function accountUpdate(UpdateUserRequest $request)
+    public function accountUpdate(UpdateUserRequest $request, GuideProfilePhotoUploadService $photos)
     {   
 
         $user = auth()->user();
 
-        if($request->hasFile('image')){
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
-            // public/images/file.png
-            $user->profil_image = $imageName;
+        if ($request->hasFile('image')) {
+            // WebP onto the media storage (never public/images).
+            $photos->store($user, $request->file('image'));
         }
 
         // $user->number_of_guides = $request->numguides;
@@ -162,6 +196,10 @@ class ProfileController extends Controller
             return redirect()->route('profile.becomeguide');
         }
 
+        if (auth()->user()->usesGuideArea()) {
+            return redirect()->route('guide.area.profile');
+        }
+
         return view('pages.profile.guide-profile');
     }
 
@@ -174,8 +212,13 @@ class ProfileController extends Controller
 
     public function myguidings(Request $request)
     {
-        // Get all guidings for the authenticated user and check for duplicates
-        $allGuidings = Guiding::where('user_id', auth()->user()->id)->get();
+        if (auth()->user()->usesGuideArea()) {
+            return redirect()->route('guide.area.tours');
+        }
+
+        // Get all guidings for the authenticated user and check for duplicates. Tours copied on
+        // purpose with Guide Area › Duplicate (duplicated_from_id) are never treated as duplicates.
+        $allGuidings = Guiding::where('user_id', auth()->user()->id)->whereNull('duplicated_from_id')->get();
         $duplicatesRemoved = false;
         
         // Group guidings by their attributes to find duplicates
@@ -309,8 +352,20 @@ class ProfileController extends Controller
         return view('pages.profile.newguiding', array_merge($collections, ['pageTitle' => $pageTitle]));
     }
 
-    public function bookings(GuideVoucherOrders $voucherOrders)
+    public function bookings(Request $request, GuideVoucherOrders $voucherOrders)
     {
+        $user = auth()->user();
+
+        // Guides on the Guide Area: this URL is in their reminder and voucher emails, so it opens
+        // the requests guests sent them. Their own bookings are at /profile/my-bookings.
+        if ($user->usesGuideArea() && ! $request->ajax()) {
+            return $this->guideAreaBookingsRedirect($request);
+        }
+
+        if ($user->usesCustomerArea() && ! $request->ajax()) {
+            return $this->customerArea('customer.bookings', __('guide_area.customer.bookings.title'));
+        }
+
         // Get user's own bookings with pagination (5 items per page) - pending first
         $bookings = Booking::with(['guiding', 'guiding.user', 'blocked_event', 'calendar_schedule'])
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
@@ -349,6 +404,24 @@ class ProfileController extends Controller
            // Gift voucher orders have no date or status, so they get their own list below the bookings.
            'voucherOrders' => auth()->user()->canAccessGuideDashboard() ? $voucherOrders->forGuide(auth()->user()) : null,
         ]);
+    }
+
+    /** The signed-in user's own bookings as a guest; linked from the Guide Area sidebar. */
+    public function myBookings()
+    {
+        if (! auth()->user()->usesCustomerArea()) {
+            return redirect()->route('profile.bookings');
+        }
+
+        return $this->customerArea('customer.bookings', __('guide_area.customer.bookings.title'));
+    }
+
+    private function guideAreaBookingsRedirect(Request $request): RedirectResponse
+    {
+        $id = (int) $request->query('id', $request->query('booking', 0));
+        $query = $id > 0 ? ['booking' => $id] : [];
+
+        return redirect()->route('guide.area.bookings', $query);
     }
 
     public function loadMoreBookings(Request $request)
@@ -448,6 +521,10 @@ class ProfileController extends Controller
 
     public function favoriteguides()
     {
+        if (auth()->user()->usesCustomerArea()) {
+            return $this->customerArea('customer.favourites', __('guide_area.customer.favourites.title'));
+        }
+
         return view('pages.profile.favoriteguides',[
             'wishlist_items' => auth()->user()->wishlist_items
         ]);
@@ -533,6 +610,15 @@ class ProfileController extends Controller
         }
         $isCustomer = !$booking->is_guest && $booking->user_id == auth()->user()->id;
         $isGuide = $booking->guiding && $booking->guiding->user_id == auth()->user()->id;
+
+        // New pages: open the booking's card on the matching bookings list.
+        if ($isGuide && auth()->user()->usesGuideArea()) {
+            return redirect()->route('guide.area.bookings', ['booking' => $booking->id]);
+        }
+        if ($isCustomer && auth()->user()->usesCustomerArea()) {
+            return redirect()->route(auth()->user()->usesGuideArea() ? 'profile.my-bookings' : 'profile.bookings', ['booking' => $booking->id]);
+        }
+
         if($isCustomer || $isGuide){
             $guiding = Guiding::where('id',$booking->guiding_id)->first();
             if(!$guiding){
