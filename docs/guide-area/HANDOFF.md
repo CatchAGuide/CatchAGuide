@@ -145,7 +145,9 @@ same pages inside the guide sidebar.
   run from `public/`. `artisan serve` loads `.env.local` (Docker DB host `db`) and fails.
 - Browser check (18 Nov, as the demo customer): every page, tab, the save toast and phone width passed. Not tried:
   photo upload (it uses the live Spaces bucket). On both the account page and `/cookie-settings`, the Marketing
-  switch showed as on after the banner's "necessary only"; this still needs checking.
+  switch showed as on after the banner's "necessary only". Rechecked 18 Nov with a clean Playwright browser: "necessary
+  only" leaves it off, and turning it off after "Accept all" sticks. Most likely an earlier "Accept all" cookie in that
+  browser. Not a bug.
 
 ## Decisions
 
