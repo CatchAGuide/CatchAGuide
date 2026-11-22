@@ -130,6 +130,14 @@ class StoreNewGuidingRequest extends FormRequest
         ]);
 
         $this->merge($trimmedData);
+
+        // An unfilled duration is stored as 0 and prefilled back into the edit form as "0". Without this, every
+        // step save of that draft failed "min:1" from step 1 on, so the guide could never reach the duration step.
+        foreach (['duration_hours', 'duration_days'] as $field) {
+            if ($this->has($field) && in_array(trim((string) $this->input($field)), ['', '0'], true)) {
+                $this->merge([$field => null]);
+            }
+        }
     }
 
     protected function failedValidation(Validator $validator)

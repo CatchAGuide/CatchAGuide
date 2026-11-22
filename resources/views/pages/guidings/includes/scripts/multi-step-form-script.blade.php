@@ -643,7 +643,8 @@
             }
             
             const durationType = '{{ $formData['duration_type'] ?? '' }}';
-            const durationCount = '{{ $formData['duration'] ?? '' }}';
+            // A draft saved without a duration stores 0; show that as empty, not as an invalid "0".
+            const durationCount = '{{ !empty($formData['duration']) ? $formData['duration'] : '' }}';
             if (durationType) {
                 const durationRadio = document.querySelector(`input[name="duration"][value="${durationType}"]`);
                 if (durationRadio) {
@@ -1652,22 +1653,18 @@
                     errors.push('Please select a tour type.');
                     isValid = false;
                 }
-                if (!document.querySelector('input[name="duration"]:checked')) {
+                const checkedDuration = document.querySelector('input[name="duration"]:checked');
+                if (!checkedDuration) {
                     errors.push('Please select a duration.');
                     isValid = false;
-
-                    const selectedDuration = document.querySelector('input[name="duration"]:checked').value;
-                    if (selectedDuration === 'multi_day') {
-                        if (!document.getElementById('duration_days').value.trim()) {
-                            errors.push('Number of days is required.');
-                            isValid = false;
-                        }
-                    } else {
-                        if (!document.getElementById('duration_hours').value.trim()) {
-                            errors.push('Number of hours is required.');
-                            isValid = false;
-                        }
+                } else if (checkedDuration.value === 'multi_day') {
+                    if (!(parseInt(document.getElementById('duration_days').value, 10) >= 1)) {
+                        errors.push('Number of days is required.');
+                        isValid = false;
                     }
+                } else if (!(parseInt(document.getElementById('duration_hours').value, 10) >= 1)) {
+                    errors.push('Number of hours is required.');
+                    isValid = false;
                 }
                 if (!document.getElementById('no_guest').value.trim()) {
                     errors.push('Number of guests is required.');
