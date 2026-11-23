@@ -34,11 +34,13 @@ class UserInformation extends Model
         'company_profile',
         'display_name',
         'crew_size',
+        'vat_not_registered',
     ];
 
     protected $casts = [
         'birthday' => 'date',
         'company_profile' => 'array',
+        'vat_not_registered' => 'boolean',
     ];
 
     /**

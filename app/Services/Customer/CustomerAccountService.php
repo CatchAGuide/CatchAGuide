@@ -2,10 +2,12 @@
 
 namespace App\Services\Customer;
 
+use App\Mail\Account\PasswordChangedMail;
 use App\Models\User;
 use App\Models\UserInformation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Personal details and password of /profile/settings and /profile/password (customer pages in
@@ -79,9 +81,14 @@ class CustomerAccountService
         });
     }
 
+    /** Also used by the guides' Account & security page. Sends the security notice (N-36). */
     public function changePassword(User $user, string $newPassword): void
     {
         $user->password = Hash::make($newPassword);
+        $user->password_changed_at = now();
         $user->save();
+
+        $locale = in_array($user->language, ['de', 'en'], true) ? $user->language : app()->getLocale();
+        Mail::to($user)->queue((new PasswordChangedMail($user))->locale($locale));
     }
 }

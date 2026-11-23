@@ -9,6 +9,7 @@ use App\Models\GuideTag;
 use App\Models\Guiding;
 use App\Models\ICalFeed;
 use App\Models\User;
+use App\Support\CountryList;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -16,8 +17,7 @@ use Illuminate\Support\Facades\Cache;
  * fix each one. Feeds the To-dos page, the Overview card and the sidebar badge. Payment
  * methods for guests are not part of it; drafts and deactivated tours are left out.
  *
- * Not checked yet: "Excluded services" (the tour editor has no such field) and "not VAT
- * registered" (no field to confirm it; a tax number passes the VAT check).
+ * Not checked yet: "Excluded services" (the tour editor has no such field).
  */
 class GuideOptimizationService
 {
@@ -180,13 +180,15 @@ class GuideOptimizationService
         $account = route('profile.settings');
         $isCompany = $guide->guide_type === GuideType::COMPANY;
 
-        $address = filled($info?->address) && filled($info?->postal) && filled($info?->city) && filled($info?->country)
-            && (! $isCompany || filled($info?->company_name));
+        // Complete address per account type (spec 2.7), set in Account & security.
+        $address = filled($info?->address) && filled($info?->address_number) && filled($info?->postal) && filled($info?->city)
+            && CountryList::normalize($info?->country) !== null
+            && ($isCompany ? filled($info?->company_name) && filled($info?->legal_form) : filled($info?->birthday));
 
         return [
             $this->check('bank_details', filled($guide->banktransfer_iban) && filled($guide->banktransfer_holder), $profile.'#ga-pay-title'),
-            $this->check('billing_address', $address, $account),
-            $this->check('vat', filled($guide->tax_id) || filled($info?->tax_number), $account),
+            $this->check('billing_address', $address, $account.'#billing'),
+            $this->check('vat', filled($guide->tax_id) || filled($info?->tax_number) || (bool) $info?->vat_not_registered, $account.'#billing'),
         ];
     }
 

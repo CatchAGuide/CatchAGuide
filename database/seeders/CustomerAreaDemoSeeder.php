@@ -31,7 +31,7 @@ use RuntimeException;
  *   php artisan db:seed --class=CustomerAreaDemoSeeder
  *
  * Sign in on a local host (http://127.0.0.1:8000 via `php artisan serve`) with CUSTOMER_EMAIL /
- * CUSTOMER_PASSWORD below. Rerunning first removes everything it created before; to only remove
+ * CUSTOMER_PASSWORD below (or GUIDE_EMAIL / GUIDE_PASSWORD for the demo guide). Rerunning first removes everything it created before; to only remove
  * it: php artisan tinker --execute="(new Database\Seeders\CustomerAreaDemoSeeder)->clean()".
  *
  * It creates its own demo guide and tour, so no real guide's calendar is touched. Rows are
@@ -42,6 +42,8 @@ class CustomerAreaDemoSeeder extends Seeder
     public const CUSTOMER_EMAIL = 'customer-area-demo@example.test';
     public const CUSTOMER_PASSWORD = 'Demo-Customer-2026!';
     public const GUIDE_EMAIL = 'customer-area-demo-guide@example.test';
+    // The demo guide can sign in too, to try the guides' Account & security page.
+    public const GUIDE_PASSWORD = 'Demo-Guide-2026!';
     private const TOKEN_PREFIX = 'cust-demo-';
 
     public function run(): void
@@ -63,7 +65,8 @@ class CustomerAreaDemoSeeder extends Seeder
                 ]);
                 $guide = $this->user(self::GUIDE_EMAIL, [
                     'firstname' => 'Lars', 'lastname' => 'Demoguide', 'is_guide' => 1, 'guide_status' => GuideStatus::VERIFIED,
-                    'password' => Hash::make(str()->random(40)), 'phone' => '1709998877', 'phone_country_code' => '+49',
+                    'password' => Hash::make(self::GUIDE_PASSWORD), 'phone' => '1709998877', 'phone_country_code' => '+49',
+                    'guide_type' => 'private', 'account_verification_status' => 'verified', 'account_verified_at' => now(),
                 ]);
 
                 $tour = $this->tour($guide, 'Demo: Pike fishing on the Elbe', 'Hamburg');

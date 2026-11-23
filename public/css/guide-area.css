@@ -2986,3 +2986,102 @@ li:first-child .ga-link-list__item {
 .ga-field--narrow {
   max-width: 26rem;
 }
+
+.ga-account {
+  max-width: 56rem;
+}
+.ga-account__title {
+  margin-bottom: 1rem;
+}
+.ga-account__subtitle-tight {
+  margin-bottom: 0;
+}
+.ga-account .ga-card__head {
+  margin-bottom: 0.75rem;
+}
+.ga-account .ga-card__head .ga-card__subtitle {
+  margin-bottom: 0;
+}
+.ga-account__lead {
+  margin: 0 0 0.75rem;
+}
+.ga-account__types {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 16rem));
+}
+.ga-account__type {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+.ga-account__type > span {
+  display: flex;
+  flex-direction: column;
+}
+.ga-account__radio {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: #313041;
+}
+.ga-account__other {
+  margin-top: 0.5rem;
+}
+.ga-account__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ece8e0;
+}
+.ga-account__footer .ga-help {
+  margin: 0;
+}
+.ga-account__footer a {
+  color: #313041;
+  font-weight: 700;
+  text-decoration: underline;
+}
+@media (max-width: 575px) {
+  .ga-account__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.ga-account__password {
+  margin-top: 1rem;
+}
+.ga-account__password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 1rem;
+}
+@media (max-width: 767px) {
+  .ga-account__password-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ga-account__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ga-note--warning {
+  background: rgba(255, 206, 0, 0.14);
+  color: rgb(61.2, 49.44, 0);
+}
+.ga-note--warning i {
+  color: rgb(153, 123.6, 0);
+}
+
+.ga-note--danger {
+  background: rgba(185, 28, 28, 0.08);
+  color: #b91c1c;
+}
+.ga-note--danger i {
+  color: #b91c1c;
+}

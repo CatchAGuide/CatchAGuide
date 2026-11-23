@@ -1,0 +1,116 @@
+// Guide Area › Account & security (spec chapter 13)
+
+.ga-account {
+    max-width: 56rem;
+
+    &__title {
+        margin-bottom: $cag-space-4;
+    }
+
+    &__subtitle-tight {
+        margin-bottom: 0;
+    }
+
+    .ga-card__head {
+        margin-bottom: $cag-space-3;
+
+        .ga-card__subtitle {
+            margin-bottom: 0;
+        }
+    }
+
+    &__lead {
+        margin: 0 0 $cag-space-3;
+    }
+
+    &__types {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 16rem));
+    }
+
+    &__type {
+        flex-direction: row;
+        align-items: center;
+        gap: $cag-space-3;
+        padding: $cag-space-3 $cag-space-4;
+
+        > span {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    &__radio {
+        flex: 0 0 auto;
+        width: 1.1rem;
+        height: 1.1rem;
+        margin: 0;
+        accent-color: $cag-slate;
+    }
+
+    &__other {
+        margin-top: $cag-space-2;
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: $cag-space-4;
+        margin-top: $cag-space-4;
+        padding-top: $cag-space-4;
+        border-top: 1px solid $cag-border;
+
+        .ga-help {
+            margin: 0;
+        }
+
+        a {
+            color: $cag-slate;
+            font-weight: $cag-fw-bold;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 575px) {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    &__password {
+        margin-top: $cag-space-4;
+    }
+
+    &__password-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0 $cag-space-4;
+
+        @media (max-width: 767px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-2;
+    }
+}
+
+.ga-note--warning {
+    background: rgba($cag-star, 0.14);
+    color: darken($cag-star, 38%);
+
+    i {
+        color: darken($cag-star, 20%);
+    }
+}
+
+.ga-note--danger {
+    background: rgba($cag-danger, 0.08);
+    color: $cag-danger;
+
+    i {
+        color: $cag-danger;
+    }
+}

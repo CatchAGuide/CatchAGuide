@@ -1,4 +1,4 @@
-# Guide Area redesign: handoff (state on 18 Nov 2026)
+# Guide Area redesign: handoff (state on 23 Nov 2026)
 
 Read this first when you pick up Guide Area work. It records what is built, the decisions behind it, how to test it
 safely, and what the spec still asks for.
@@ -17,8 +17,7 @@ security, Contact support (sidebar).
 
 ## Branch and PR
 
-- Branch `feature/guide-area-profile`, PR **#528 → `dev`**. Everything is pushed; the working tree was clean at
-  `76b48fe0`.
+- Branch `feature/guide-area-profile`, PR **#528 → `dev`**.
 - Full suite: **1661 passed**, 10 risky, 0 failures (18 Nov).
 - **Not merged.** The user still has to approve the public availability change (see "Decisions") before it merges
   into `dev`.
@@ -41,6 +40,8 @@ Commits, oldest first:
 | 33b373e7 | `/profile` sends guides to `/guide` |
 | 61cbc2ad | Beta check dropped: every guide uses the Guide Area |
 | 76b48fe0 | Fixes from the hands-on local test |
+| 18cd3136 | Customer pages of `/profile/*` in the Guide Area design |
+| (23 Nov) | Account & security for guides (see below) |
 
 ## Access and layout
 
@@ -76,7 +77,7 @@ Commits, oldest first:
 | `/guide/reviews` | Done | Summary, 8 per page, "New" until seen (`reviews.seen_by_guide_at`) |
 | `/guide/invoices` | Read-only | Per-booking invoices from `finance_items`; View opens the emailed invoice HTML (`GuideInvoiceController`) |
 | `/guide/profile` | Done | Includes certificates (private file route) |
-| Account & security | Done (customer page) | `profile.settings` / `profile.password`, see "Customer pages" below |
+| Account & security | Done | Guides: `Guide\Account` on `profile.settings` / `profile.password`, see "Account & security" below |
 | Contact support modal | **Not built** | |
 
 **Bookings**
@@ -148,6 +149,52 @@ same pages inside the guide sidebar.
   switch showed as on after the banner's "necessary only". Rechecked 18 Nov with a clean Playwright browser: "necessary
   only" leaves it off, and turning it off after "Accept all" sticks. Most likely an earlier "Accept all" cookie in that
   browser. Not a bug.
+
+## Account & security (23 Nov)
+
+Spec chapter 13 and the prototype board "Account & security". Guides on the Guide Area get `Guide\Account`
+(`resources/views/livewire/guide/account.blade.php`) on `/profile/settings` and `/profile/password`. Customers
+keep `Customer\Account`. It is one page with four cards, each with its own save button: Personal details,
+Verification & billing, Password and Cookie settings.
+
+- **Data:** the existing columns are reused: `users.guide_type` (private/company), `phone`, `tax_id` (= VAT ID), and
+  `user_information` for address, country, birthday, `company_name` and `legal_form`. New (migration
+  `2026_11_23_100000`):
+  - `users.account_verification_status` / `account_verified_at` / `account_verified_by` /
+    `account_rejection_reason`;
+  - `account_type_changed_at` and `password_changed_at`;
+  - `user_information.vat_not_registered`.
+
+  The migration also backfills the account type (company when a company name or legal form exists) and sets the
+  status to verified for verified guides and pending for applicants.
+- **Why not `guide_status`:** "pending" there takes the tours offline. A billing re-verification must not (spec
+  2.4), so it has its own status (`AccountVerificationStatus`). `GuideStatusService` sets it when an application is
+  submitted or approved.
+- **Rules:**
+  - Any change of the type or a billing field (not the phone) → pending, N-33 to the guide, and N-34 to ops (mail to
+    `guide_onboarding.admin_notification_email` plus an admin notification), unless a review was already pending.
+  - Individual: date of birth (18+).
+  - Company: company name, plus a legal form from `config('guide_area.account.legal_forms')` (grouped by country,
+    "Other" = free text, stored as the form's name).
+  - Country is an ISO code (`App\Support\CountryList`, PHP intl; old free-text values like "Deutschland" are read
+    as codes).
+  - VAT ID format per country (`App\Rules\VatId`; the VIES check is P2), or "I am not VAT registered".
+- **Type switch:** the other type's fields stay stored and are restored on a switch back. After 30 days
+  `guide-area:purge-account-type-data` (daily 03:20, in Kernel + `config/scheduled_tasks.php`) clears them.
+- **Password:** `CustomerAccountService::changePassword` (shared with customers) stamps `password_changed_at` and
+  sends N-36 (`App\Mail\Account\PasswordChangedMail`) to everyone who changes it on the account page.
+- **Admin:** Admin › Guide billing verification (`admin.guide-billing.*`, next to Guide certificates) lists the
+  data, with Approve and Reject + reason → N-35 (`GuideAccountVerificationMail`).
+- **API:** `GET /api/guide/account`, `PUT /account/personal`, `PUT /account/billing`, `POST /account/password`
+  (`docs/api/guide-area.md`).
+- **To-dos:** "Billing address" now needs the full address, a valid country and (individual) a date of birth or
+  (company) the name and legal form. "VAT" also passes with "not VAT registered". Fix links open `#billing`.
+- **Left out on purpose:** bank details for payouts (AC-05). Guides pay Catch A Guide; Catch A Guide never pays out
+  (user, 23 Nov). The guest-facing IBAN stays on the profile and still feeds the "Bank details" to-do.
+- **Tests:** `tests/Feature/Guide/Area/GuideAccountTest.php` (17), `tests/Unit/Rules/VatIdTest.php`,
+  `tests/Unit/Support/CountryListTest.php`.
+- **Demo:** `CustomerAreaDemoSeeder` now gives its demo guide a fixed test password (`GUIDE_PASSWORD`), so the page
+  can be tried on 127.0.0.1.
 
 ## Decisions
 
@@ -238,18 +285,7 @@ same pages inside the guide sidebar.
 - Tour editor redesign is out of scope (chapter 17).
 
 **Phase 3, profile, account and optimization**
-- **Account & security page (chapter 13):**
-  - Personal details: name, read-only email, UI language.
-  - Verification & billing:
-    - individual or company radio;
-    - legal forms grouped by country;
-    - date of birth at least 18;
-    - VAT ID or "not VAT registered";
-    - IBAN/BIC with checksum validation.
-  - Switching account type resets verification to pending and keeps the other type's data for 30 days.
-  - Password change, the cookie settings link, and a save bar per section.
-  - Tables `guide_legal` / `guide_bank` and endpoints `GET/PUT /api/guide/account*`.
-  - Notifications N-33 … N-36.
+- ~~Account & security page (chapter 13)~~: done 23 Nov, see above (payout bank details left out on purpose).
 - **Account type model (2.4) end to end:** company profile fields (founded in, crew), "About us" label, company
   optimization checks.
 - Certificate admin review flow (Q-04) and certificate expiry job J-11.
@@ -278,11 +314,7 @@ contact details stay visible), Q-15, Q-17. D-1 needs Finance.
 ## Where to start next
 
 Possible work that isn't blocked:
-1. The Account & security page.
-2. The Contact support modal, once Q-13 is answered.
-3. REST endpoints for the six new pages.
-4. The calendar tour-rules drawer.
-5. The "Day no longer available" card state.
-6. A notification dedupe log.
+Agreed order (23 Nov): ~~Account & security~~ (done) → guest booking access Phase 1 (plan doc in memory) →
+REST endpoints for the six newer pages and the "Day no longer available" state → Contact support, once Q-13 is
+answered. Still unblocked too: the calendar tour-rules drawer and a notification dedupe log.
 
-Confirm the order with the user.

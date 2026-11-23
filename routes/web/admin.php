@@ -54,6 +54,7 @@ use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThrea
 use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsController;
 use App\Http\Controllers\Auth\LoginAuthController;
 use App\Http\Controllers\Admin\GuideCertificatesController;
+use App\Http\Controllers\Admin\GuideBillingVerificationsController;
 use App\Http\Controllers\GuideRequestsController;
 use App\Http\Controllers\VacationsController;
 use Illuminate\Support\Facades\Route;
@@ -356,6 +357,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('guide-certificates/{certificate}/file', [GuideCertificatesController::class, 'file'])->name('guide-certificates.file');
         Route::post('guide-certificates/{certificate}/verify', [GuideCertificatesController::class, 'verify'])->name('guide-certificates.verify');
         Route::post('guide-certificates/{certificate}/reject', [GuideCertificatesController::class, 'reject'])->name('guide-certificates.reject');
+        Route::get('guide-billing', [GuideBillingVerificationsController::class, 'index'])->name('guide-billing.index');
+        Route::post('guide-billing/{guide}/approve', [GuideBillingVerificationsController::class, 'approve'])->whereNumber('guide')->name('guide-billing.approve');
+        Route::post('guide-billing/{guide}/reject', [GuideBillingVerificationsController::class, 'reject'])->whereNumber('guide')->name('guide-billing.reject');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('email-logs/{emailLog}', [EmailLogsController::class, 'show'])->name('email-logs.show');

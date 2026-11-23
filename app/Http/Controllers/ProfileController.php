@@ -68,6 +68,11 @@ class ProfileController extends Controller
 
     public function settings(Request $request)
     {
+        // Guides: Account & security with verification & billing (spec chapter 13).
+        if (auth()->user()->usesGuideArea()) {
+            return $this->customerArea('guide.account', __('guide_area.account.title'));
+        }
+
         if (auth()->user()->usesCustomerArea()) {
             $tab = $request->query('tab') === 'privacy' ? 'privacy' : 'details';
 
@@ -82,6 +87,10 @@ class ProfileController extends Controller
 
     public function password()
     {
+        if (auth()->user()->usesGuideArea()) {
+            return $this->customerArea('guide.account', __('guide_area.account.title'), ['section' => 'password']);
+        }
+
         if (auth()->user()->usesCustomerArea()) {
             return $this->customerArea('customer.account', __('guide_area.customer.account.title'), ['tab' => 'password']);
         }

@@ -266,5 +266,19 @@ return [
             'run_in_background' => true,
             'append_output_to' => 'logs/finance-invoices.log',
         ],
+
+        'guide_area_purge_account_type_data' => [
+            'label' => 'Clear old account type data',
+            'description' => 'Clears a guide\'s previous account type data 30 days after a switch (guide-area:purge-account-type-data).',
+            'command' => 'guide-area:purge-account-type-data',
+            'default' => [
+                'enabled' => true,
+                'frequency' => 'daily_at',
+                'schedule_time' => '03:20',
+                'day_of_week' => null,
+                'cron_expression' => null,
+            ],
+            'without_overlapping' => true,
+        ],
     ],
 ];

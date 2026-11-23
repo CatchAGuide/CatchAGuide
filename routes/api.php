@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\Guide\AccountController as GuideAccountController;
 use App\Http\Controllers\Api\Guide\TokensController as GuideTokensController;
 use App\Http\Controllers\Api\Guide\ToursController as GuideToursController;
 use App\Http\Controllers\Api\Guide\VoucherOrdersController as GuideVoucherOrdersController;
@@ -48,4 +49,9 @@ Route::prefix('guide')
 
         Route::get('/voucher-settings', [GuideVoucherSettingsController::class, 'show'])->name('voucher-settings.show');
         Route::put('/voucher-settings', [GuideVoucherSettingsController::class, 'update'])->name('voucher-settings.update');
+
+        Route::get('/account', [GuideAccountController::class, 'show'])->name('account.show');
+        Route::put('/account/personal', [GuideAccountController::class, 'updatePersonal'])->name('account.personal');
+        Route::put('/account/billing', [GuideAccountController::class, 'updateBilling'])->name('account.billing');
+        Route::post('/account/password', [GuideAccountController::class, 'password'])->middleware('throttle:10,1')->name('account.password');
     });

@@ -52,4 +52,17 @@ Tour status is the stored `guidings.status`: `2` draft, `1` live, `0` deactivate
 | GET | `/api/guide/voucher-settings` | Design and every tour with `voucher_enabled`. |
 | PUT | `/api/guide/voucher-settings` | `{design, enabled_tour_ids: []}`. Tours not listed are switched off. |
 
-Tests: `tests/Feature/Guide/Area/GuideToursTest.php`, `GuideVouchersTest.php`, `GuideApiTokensTest.php`.
+## Account (Account & security, spec chapter 13)
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/guide/account` | `{email, personal, billing, verification: {status, verified_at, rejection_reason}, password_changed_at}`. `billing.country` is an ISO code (old free-text countries are converted). |
+| PUT | `/api/guide/account/personal` | `{firstname, lastname, language: en\|de}`. No new verification. |
+| PUT | `/api/guide/account/billing` | `{account_type: private\|company, birthday (private, 18+), company_name + legal_form (company), address, address_number, postal, city, country, phone_country_code, phone, vat_id?, vat_not_registered?}`. `vat_id` is checked per country (`App\Rules\VatId`) and must be empty when `vat_not_registered` is true. `meta: {type_changed, review_requested}`: a change of the type or any field but the phone sets the verification to `pending` and sends N-33 (guide) and N-34 (ops). Tours stay online. |
+| POST | `/api/guide/account/password` | `{current_password, password, password_confirmation}` → sends N-36. Throttled to 10 per minute. |
+
+Bank details for payouts are not part of it: guides pay Catch A Guide the commission, Catch A
+Guide never pays guides (user decision, 23 Nov 2026). The guest-facing IBAN stays on the profile.
+
+Tests: `tests/Feature/Guide/Area/GuideToursTest.php`, `GuideVouchersTest.php`, `GuideApiTokensTest.php`,
+`GuideAccountTest.php`.

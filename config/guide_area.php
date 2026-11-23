@@ -128,4 +128,33 @@ return [
         'folder' => 'guide-profiles',
         'quality' => 82,
     ],
+
+    /*
+    | Account & security (spec chapter 13). Legal forms per country (13.2) for the company
+    | select; the stored value is the form's name. "Other" lets the guide type their own.
+    */
+    'account' => [
+        'min_age' => 18,
+        // After a type switch the other type's data is kept this long, then cleared (13.6).
+        'retain_other_type_days' => 30,
+        'legal_forms' => [
+            'DE' => ['GmbH', 'UG (haftungsbeschränkt)', 'GbR', 'OHG', 'KG', 'GmbH & Co. KG', 'e.K.', 'AG', 'Einzelunternehmen'],
+            'AT' => ['GmbH', 'OG', 'KG', 'e.U.', 'Einzelunternehmen'],
+            'CH' => ['GmbH', 'AG', 'Einzelunternehmen', 'Kollektivgesellschaft'],
+            'NL' => ['B.V.', 'V.O.F.', 'Eenmanszaak'],
+            'BE' => ['BV', 'SRL', 'VOF'],
+            'DK' => ['ApS', 'A/S', 'I/S', 'Enkeltmandsvirksomhed'],
+            'SE' => ['AB', 'HB', 'Enskild firma'],
+            'NO' => ['AS', 'ENK', 'ANS'],
+            'FI' => ['Oy', 'Toiminimi'],
+            'ES' => ['S.L.', 'S.A.', 'Autónomo'],
+            'IT' => ['S.r.l.', 'S.p.A.', 'Ditta individuale'],
+            'PT' => ['Lda.', 'Empresário em nome individual'],
+            'HR' => ['d.o.o.', 'obrt'],
+            'FR' => ['SARL', 'SAS', 'EURL', 'EI'],
+            'PL' => ['sp. z o.o.', 'JDG'],
+            'IE' => ['Ltd', 'LLP', 'Sole trader'],
+            'GB' => ['Ltd', 'LLP', 'Sole trader'],
+        ],
+    ],
 ];

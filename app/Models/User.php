@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AccountVerificationStatus;
 use App\Enums\VoucherDesign;
 use Auth;
 use Bavix\Wallet\Traits\HasWallet;
@@ -81,6 +82,11 @@ class User extends Authenticatable
         'banktransfer_holder' => 'encrypted',
         'banktransfer_iban' => 'encrypted',
         'banktransfer_bic' => 'encrypted',
+        // Billing verification (Account & security); not fillable, set by GuideAccountService.
+        'account_verification_status' => AccountVerificationStatus::class,
+        'account_verified_at' => 'datetime',
+        'account_type_changed_at' => 'datetime',
+        'password_changed_at' => 'datetime',
     ];
 
     /**

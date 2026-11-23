@@ -2,6 +2,7 @@
 
 namespace App\Services\Guide;
 
+use App\Enums\AccountVerificationStatus;
 use App\Enums\GuideStatus;
 use App\Models\GuideRequest;
 use App\Models\GuideStatusLog;
@@ -37,6 +38,21 @@ class GuideStatusService
 
             if ($toStatus === GuideStatus::VERIFIED) {
                 $user->guide_verified_at = now();
+            }
+
+            // Billing verification (Account & security): approving the application verifies the
+            // data it was submitted with; a new application starts pending. Later changes are
+            // handled by GuideAccountVerificationService.
+            if ($user->account_verification_status === null && in_array($toStatus, [GuideStatus::VERIFIED, GuideStatus::PENDING], true)) {
+                $user->account_verification_status = $toStatus === GuideStatus::VERIFIED
+                    ? AccountVerificationStatus::Verified
+                    : AccountVerificationStatus::Pending;
+                $user->account_verified_at = $toStatus === GuideStatus::VERIFIED ? now() : null;
+                $user->account_verified_by = $toStatus === GuideStatus::VERIFIED ? $changedBy : null;
+            } elseif ($toStatus === GuideStatus::VERIFIED && $user->account_verification_status === AccountVerificationStatus::Pending && $fromStatus !== GuideStatus::VERIFIED) {
+                $user->account_verification_status = AccountVerificationStatus::Verified;
+                $user->account_verified_at = now();
+                $user->account_verified_by = $changedBy;
             }
 
             $user->save();
