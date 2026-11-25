@@ -31,9 +31,14 @@
         <p class="ga-booking__note">{{ __('guide_area.customer.bookings.your_message') }} “{{ str($item['message'])->limit(300) }}”</p>
     @endif
 
-    @if ($item['rate_url'])
+    @if ($item['rate_url'] || ! empty($item['guest_url']))
         <div class="ga-booking__actions">
-            <a href="{{ $item['rate_url'] }}" class="ga-btn ga-btn--dark ga-btn--sm"><i class="fas fa-star" aria-hidden="true"></i> {{ __('guide_area.customer.bookings.rate') }}</a>
+            @if ($item['rate_url'])
+                <a href="{{ $item['rate_url'] }}" class="ga-btn ga-btn--dark ga-btn--sm"><i class="fas fa-star" aria-hidden="true"></i> {{ __('guide_area.customer.bookings.rate') }}</a>
+            @endif
+            @if (! empty($item['guest_url']))
+                <a href="{{ $item['guest_url'] }}" class="ga-btn ga-btn--outline ga-btn--sm" rel="nofollow">{{ __('guest_bookings.find.open_booking') }}</a>
+            @endif
         </div>
     @endif
 </li>

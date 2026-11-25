@@ -1,9 +1,15 @@
 <div class="ga-page">
     <header class="ga-page__header">
         <div>
-            <h1 class="ga-page__title">{{ __('guide_area.customer.bookings.title') }}</h1>
-            <p class="ga-page__subtitle">{{ __('guide_area.customer.bookings.subtitle') }}</p>
+            <h1 class="ga-page__title">{{ __($guest ? 'guest_bookings.find.list_title' : 'guide_area.customer.bookings.title') }}</h1>
+            <p class="ga-page__subtitle">{{ __($guest ? 'guest_bookings.find.list_subtitle' : 'guide_area.customer.bookings.subtitle') }}</p>
         </div>
+        @if ($guest)
+            <form method="POST" action="{{ route('guest-bookings.sign-out') }}" class="gb-page__signout">
+                @csrf
+                <button type="submit" class="ga-btn ga-btn--outline ga-btn--sm">{{ __('guest_bookings.find.sign_out') }}</button>
+            </form>
+        @endif
     </header>
 
     <div class="ga-tabs ga-tabs--underline" role="tablist" aria-label="{{ __('guide_area.customer.bookings.tabs_label') }}">

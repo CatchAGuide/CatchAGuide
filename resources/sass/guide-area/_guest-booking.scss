@@ -1,4 +1,5 @@
-// Guest booking link (/your-booking/{id}): the customer area's card without the sidebar.
+// Guest booking pages without the sidebar: the per-booking link (/your-booking/{id}) and
+// "Find my booking" (/my-bookings).
 
 .gb-page {
     max-width: 52rem;
@@ -24,9 +25,34 @@
         border: 1px solid $cag-border;
     }
 
-    // The card opens with its details shown; the toggle needs Alpine, which this page doesn't load.
-    .ga-disclosure {
+    // The single-booking page opens its card with the details shown; the toggle needs Alpine,
+    // which only the Livewire list ("Find my booking", --live) loads.
+    &:not(.gb-page--live) .ga-disclosure {
         display: none;
+    }
+
+    &--narrow {
+        max-width: 36rem;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $cag-space-3;
+        margin-top: $cag-space-3;
+
+        .ga-field {
+            width: 100%;
+        }
+    }
+
+    &__signout {
+        flex-shrink: 0;
+    }
+
+    &__all {
+        margin-top: $cag-space-4;
     }
 
     &__actions {

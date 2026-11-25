@@ -49,6 +49,22 @@ class GuestBookingPresenter
         $type = GuestBookingType::forModel($bookable);
         $redacted = $this->isRedacted($bookable, $today);
 
+        return [
+            'type' => $type->value,
+            'item' => $this->card($bookable, $today),
+            'redacted' => $redacted,
+            'calendar' => $this->calendarDate($bookable) !== null,
+            'voucher_pdf' => ! $redacted && $bookable instanceof VoucherOrder && $this->voucherPdfAvailable($bookable),
+        ];
+    }
+
+    /**
+     * The card alone, with the guest rules applied (also the "Find my booking" list).
+     *
+     * @return array<string, mixed>
+     */
+    public function card(Model $bookable, ?CarbonInterface $today = null): array
+    {
         $item = match (true) {
             $bookable instanceof Booking => $this->tour($bookable),
             $bookable instanceof CampVacationBooking => $this->cards->camp($bookable),
@@ -56,17 +72,7 @@ class GuestBookingPresenter
             $bookable instanceof VoucherOrder => $this->cards->voucher($bookable),
         };
 
-        if ($redacted) {
-            $item = $this->redact($item);
-        }
-
-        return [
-            'type' => $type->value,
-            'item' => $item,
-            'redacted' => $redacted,
-            'calendar' => $this->calendarDate($bookable) !== null,
-            'voucher_pdf' => ! $redacted && $bookable instanceof VoucherOrder && $this->voucherPdfAvailable($bookable),
-        ];
+        return $this->isRedacted($bookable, $today) ? $this->redact($item) : $item;
     }
 
     public function isRedacted(Model $bookable, ?CarbonInterface $today = null): bool

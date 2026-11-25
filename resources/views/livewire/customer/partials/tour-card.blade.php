@@ -60,6 +60,9 @@
         @if (in_array($item['status'], ['declined', 'expired', 'cancelled', 'completed'], true) && $item['url'])
             <a href="{{ $item['url'] }}" class="ga-btn ga-btn--outline ga-btn--sm">{{ __('guide_area.customer.bookings.book_again') }}</a>
         @endif
+        @if (! empty($item['guest_url']))
+            <a href="{{ $item['guest_url'] }}" class="ga-btn ga-btn--outline ga-btn--sm" rel="nofollow">{{ __('guest_bookings.find.open_booking') }}</a>
+        @endif
         <button type="button" class="ga-disclosure" @click="details = !details" :aria-expanded="details.toString()">
             <span x-text="details ? @js(__('guide_area.bookings.hide_details')) : @js(__('guide_area.bookings.show_details'))">{{ $focused ? __('guide_area.bookings.hide_details') : __('guide_area.bookings.show_details') }}</span>
             <i class="fas fa-caret-down" :class="{ 'fa-rotate-180': details }" aria-hidden="true"></i>

@@ -62,6 +62,10 @@
             <a href="{{ route('additional.contact') }}" class="ga-btn ga-btn--dark ga-btn--sm">{{ __('guest_bookings.contact_support') }}</a>
         </section>
 
+        <p class="gb-page__all">
+            <a href="{{ route('guest-bookings.find') }}" class="ga-plain-link">{{ __('guest_bookings.find.see_all') }} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        </p>
+
         <p class="ga-help gb-page__privacy">
             {{ __('guest_bookings.privacy') }}
             <a href="{{ route('law.data-protection') }}">{{ __('guest_bookings.privacy_link') }}</a>

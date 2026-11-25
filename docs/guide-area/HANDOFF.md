@@ -220,10 +220,36 @@ booking; nothing here creates an account, and the copy says "your booking", neve
 - **Admin (Q12):** link and unlink buttons on the camp, trip and voucher lists, and in the tour list's "…" menu:
   "Send booking link" emails the link to the booking's own address; "Turn link off and send a new one" revokes and
   resends. Logged in `booking_access_events` (created, sent, opened, revoked; admin id; no IP or browser, F5).
-- **Not built (later phases):** "Find my booking" email sign-in (Phase 2), guest actions and the message queue
+- **Not built (later phases):** guest actions and the message queue
   (Phase 3), customer lookup / merge / view as guest (Phase 4). No backfill command: links are made on demand, so
   any later email for an older booking gets one.
 - **Tests:** `tests/Feature/GuestBooking/GuestBookingLinkTest.php` (13).
+
+## Guest booking access, Phase 2: "Find my booking" (25 Nov)
+
+- **Page:** `/my-bookings` (footer "Find my booking", a line in the login modal, the per-booking page's "See all
+  your bookings" link, and the "link doesn't work here" page). The guest enters an email; the answer is always "If
+  we have bookings for this email, we've sent you a link", and a mail goes out only when bookings exist.
+- **Link:** single use, 30 minutes, sha256 in `guest_login_links`. `/my-bookings/sign-in/{token}` parks the token
+  in the session and 303-redirects to `/my-bookings/sign-in`, so it never reaches the page URL, analytics or a
+  referrer. The "Show my bookings" button (POST) uses it up, so mail scanners that open links don't spend it.
+- **Sign-in:** 7 days (Q4). The login session lasts 2 hours, so it lives in an encrypted HTTP-only cookie
+  `cag_find_booking` holding only the login-link id; the row's `session_expires_at` / `signed_out_at` decide.
+  "Sign out" ends it for good (`GuestBookingEmailSession`).
+- **List:** `/my-bookings/list`, Livewire `Customer\GuestBookings` (extends `Customer\Bookings`, same tabs and
+  tiles), cards through `GuestBookingPresenter::card()` so Q3 / the 90-day view apply. Each card has "Open booking"
+  (`/my-bookings/open/{type}/{id}`), which checks ownership and opens the Phase 1 page (calendar, voucher PDF).
+- **Matching (`BookingOwner`, `CustomerBookingService`):** the email trimmed and lowercased; the column collation
+  ignores case. Tours: `bookings.email`, or guest rows (`is_guest = 1`) whose `user_guests.email` matches, or
+  account rows (`is_guest = 0`) whose `users.email` matches (Q9). Camps/trips: `email` or the account. Vouchers:
+  `buyer_email` or the account, buyer only (Q5). Signed-in users keep their own rows only (Q14/F2 not built).
+- **Limits:** 3 links per email and 10 per IP per hour (`RateLimiter`); over the email limit nothing is sent but
+  the answer is the same; the IP limit shows "try again in an hour".
+- **Log:** `booking_access_events` gets `login_sent`, `login_used`, `signed_out` (email only, no IP or browser).
+- **Not built:** `/meine-buchungen` alias for .de (same page on `/my-bookings`); a link on the thank-you and
+  FAQ pages; F2 "Show your earlier bookings here" for users who register later; GTM `RT - Page Type` row for
+  `^/my-bookings` (optional, no token reaches a URL).
+- **Tests:** `tests/Feature/GuestBooking/FindMyBookingTest.php` (12). Checked on a local server with curl (sign-in, list, open, sign out); the browser extension was blocked, so no screenshot or phone-width check.
 
 ## Decisions
 
@@ -258,6 +284,7 @@ booking; nothing here creates an account, and the copy says "your booking", neve
 - `2026_11_18_110002`: `reviews.seen_by_guide_at`. Existing reviews are backfilled as seen.
 - `2026_11_23_100000`: account verification columns (Account & security)
 - `2026_11_23_120000`: `booking_access_tokens`, `booking_access_events` (guest booking links)
+- `2026_11_25_120000`: `guest_login_links` ("Find my booking")
 
 ## Testing
 
@@ -345,7 +372,7 @@ contact details stay visible), Q-15, Q-17. D-1 needs Finance.
 ## Where to start next
 
 Possible work that isn't blocked:
-Agreed order (23 Nov): ~~Account & security~~ (done) → ~~guest booking access Phase 1~~ (done) →
+Agreed order (23 Nov): ~~Account & security~~ (done) → ~~guest booking access Phase 1~~ (done) → ~~Phase 2 "Find my booking"~~ (done) →
 REST endpoints for the six newer pages and the "Day no longer available" state → Contact support, once Q-13 is
 answered. Still unblocked too: the calendar tour-rules drawer and a notification dedupe log.
 

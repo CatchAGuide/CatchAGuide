@@ -3109,8 +3109,27 @@ li:first-child .ga-link-list__item {
   background: #ffffff;
   border: 1px solid #ece8e0;
 }
-.gb-page .ga-disclosure {
+.gb-page:not(.gb-page--live) .ga-disclosure {
   display: none;
+}
+.gb-page--narrow {
+  max-width: 36rem;
+}
+.gb-page__form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.gb-page__form .ga-field {
+  width: 100%;
+}
+.gb-page__signout {
+  flex-shrink: 0;
+}
+.gb-page__all {
+  margin-top: 1rem;
 }
 .gb-page__actions {
   display: flex;

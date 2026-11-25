@@ -16,6 +16,11 @@ class BookingAccessEvent extends Model
     public const OPENED = 'opened';
     public const REVOKED = 'revoked';
 
+    // "Find my booking" sign-in links (no booking attached).
+    public const LOGIN_SENT = 'login_sent';
+    public const LOGIN_USED = 'login_used';
+    public const SIGNED_OUT = 'signed_out';
+
     public const UPDATED_AT = null;
 
     protected $fillable = [

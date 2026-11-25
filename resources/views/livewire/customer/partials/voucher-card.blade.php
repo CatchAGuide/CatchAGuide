@@ -25,4 +25,9 @@
     @if ($item['code'])
         <p class="ga-booking__note">{{ __('guide_area.customer.bookings.voucher_code', ['code' => $item['code']]) }}</p>
     @endif
+    @if (! empty($item['guest_url']))
+        <div class="ga-booking__actions">
+            <a href="{{ $item['guest_url'] }}" class="ga-btn ga-btn--outline ga-btn--sm" rel="nofollow">{{ __('guest_bookings.find.open_booking') }}</a>
+        </div>
+    @endif
 </li>

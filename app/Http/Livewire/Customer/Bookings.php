@@ -5,9 +5,12 @@ namespace App\Http\Livewire\Customer;
 use App\Models\Booking;
 use App\Models\CampVacationBooking;
 use App\Models\TripBooking;
+use App\Models\User;
 use App\Models\VoucherOrder;
 use App\Presenters\Booking\CustomerBookingPresenter;
+use App\Services\Customer\BookingOwner;
 use App\Services\Customer\CustomerBookingService;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -37,7 +40,7 @@ class Bookings extends Component
         $this->normalize();
 
         if ($this->booking > 0) {
-            if ($bookings->findTour(auth()->user(), $this->booking) === null) {
+            if ($bookings->findTour($this->owner(), $this->booking) === null) {
                 $this->booking = 0;
 
                 return;
@@ -45,7 +48,7 @@ class Bookings extends Component
 
             $this->tab = CustomerBookingService::TAB_TOURS;
             $this->status = CustomerBookingService::FILTER_ALL;
-            $this->setPage($bookings->tourPage(auth()->user(), $this->booking));
+            $this->setPage($bookings->tourPage($this->owner(), $this->booking));
             $this->dispatch('guide-area-scroll', target: 'booking-'.$this->booking);
         }
     }
@@ -68,7 +71,7 @@ class Bookings extends Component
 
     public function render(CustomerBookingService $bookings, CustomerBookingPresenter $presenter)
     {
-        $user = auth()->user();
+        $user = $this->owner();
 
         $page = match ($this->tab) {
             CustomerBookingService::TAB_CAMPS => $bookings->paginateCamps($user),
@@ -77,20 +80,38 @@ class Bookings extends Component
             default => $bookings->paginateTours($user, $this->status),
         };
 
-        $page->setCollection($page->getCollection()->map(fn ($row) => match (true) {
-            $row instanceof Booking => $presenter->tour($row),
-            $row instanceof CampVacationBooking => $presenter->camp($row),
-            $row instanceof TripBooking => $presenter->trip($row),
-            $row instanceof VoucherOrder => $presenter->voucher($row),
-        }));
+        $page->setCollection($page->getCollection()->map(fn (Model $row) => $this->card($row, $presenter)));
 
         return view('livewire.customer.bookings', [
+            'guest' => $this->isGuest(),
             'items' => $page,
             'tabs' => CustomerBookingService::TABS,
             'tabCounts' => $bookings->tabCounts($user),
             'filters' => CustomerBookingService::FILTERS,
             'counts' => $this->tab === CustomerBookingService::TAB_TOURS ? $bookings->tourCounts($user) : [],
         ]);
+    }
+
+    /** Whose bookings: the signed-in user here, the verified email in GuestBookings. */
+    protected function owner(): User|BookingOwner
+    {
+        return auth()->user();
+    }
+
+    protected function isGuest(): bool
+    {
+        return false;
+    }
+
+    /** @return array<string, mixed> */
+    protected function card(Model $row, CustomerBookingPresenter $presenter): array
+    {
+        return match (true) {
+            $row instanceof Booking => $presenter->tour($row),
+            $row instanceof CampVacationBooking => $presenter->camp($row),
+            $row instanceof TripBooking => $presenter->trip($row),
+            $row instanceof VoucherOrder => $presenter->voucher($row),
+        };
     }
 
     private function normalize(): void

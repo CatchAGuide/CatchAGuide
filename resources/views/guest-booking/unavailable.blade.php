@@ -23,7 +23,8 @@
             <h1 class="ga-page__title">{{ __('guest_bookings.unavailable.title') }}</h1>
             <p>{{ __('guest_bookings.unavailable.text') }}</p>
             <div class="gb-page__actions">
-                <a href="{{ route('additional.contact') }}" class="ga-btn ga-btn--dark ga-btn--sm">{{ __('guest_bookings.contact_support') }}</a>
+                <a href="{{ route('guest-bookings.find') }}" class="ga-btn ga-btn--dark ga-btn--sm">{{ __('guest_bookings.find.nav') }}</a>
+                <a href="{{ route('additional.contact') }}" class="ga-btn ga-btn--outline ga-btn--sm">{{ __('guest_bookings.contact_support') }}</a>
                 @auth('web')
                     <a href="{{ route('profile.bookings') }}" class="ga-btn ga-btn--outline ga-btn--sm">{{ __('guest_bookings.unavailable.signed_in') }}</a>
                 @endauth

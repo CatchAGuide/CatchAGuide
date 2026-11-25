@@ -55,6 +55,7 @@
             'items' => [
                 ['label' => __('homepage.filter-magazine'), 'url' => route($blogPrefix.'.index')],
                 ['label' => __('message.contact'), 'url' => route('additional.contact')],
+                ['label' => __('guest_bookings.find.nav'), 'url' => route('guest-bookings.find')],
                 ['label' => __('message.about-us'), 'url' => route('additional.about_us')],
                 ['label' => __('message.myaccount'), 'url' => route('profile.settings')],
                 ['label' => __('message.for_agents'), 'url' => route('additional.for_agents')],
