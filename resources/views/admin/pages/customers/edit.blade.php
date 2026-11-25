@@ -52,7 +52,7 @@
                                             <div class="text-center mt-2">
                                                 @if($customer->profil_image)
                                                     <img id="profile_preview" 
-                                                         src="{{ asset('/uploads/profile_images/' . $customer->profil_image) }}" 
+                                                         src="{{ guide_profile_photo_url($customer) }}" 
                                                          alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">
                                                 @else
                                                     <div id="profile_preview" class="d-inline-block p-3 border rounded" style="color: #6c757d;">
@@ -305,7 +305,7 @@
                 // Reset to original image if no file selected
                 @if($customer->profil_image)
                     $('#current-image-label').text('Aktuelles Profilbild');
-                    $('#profile_preview').replaceWith('<img id="profile_preview" src="{{ asset('/uploads/profile_images/' . $customer->profil_image) }}" alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">');
+                    $('#profile_preview').replaceWith('<img id="profile_preview" src="{{ guide_profile_photo_url($customer) }}" alt="Profilbild" class="img-thumbnail" style="max-height: 120px; max-width: 120px;">');
                 @else
                     $('#current-image-label').text('Profilbild Vorschau');
                     $('#profile_preview').replaceWith('<div id="profile_preview" class="d-inline-block p-3 border rounded" style="color: #6c757d;"><svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><p class="mt-1 mb-0 small">Kein Bild</p></div>');

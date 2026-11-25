@@ -1,0 +1,84 @@
+// Guest booking pages without the sidebar: the per-booking link (/your-booking/{id}) and
+// "Find my booking" (/my-bookings).
+
+.gb-page {
+    max-width: 52rem;
+    min-height: 60vh;
+    margin: 0 auto;
+    padding: $cag-space-6 $cag-space-4;
+
+    @media (max-width: 575px) {
+        padding: $cag-space-4 $cag-gutter-mobile;
+    }
+
+    &__eyebrow {
+        margin: 0 0 $cag-space-1;
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $cag-gray;
+    }
+
+    &__note {
+        background: $cag-white;
+        border: 1px solid $cag-border;
+    }
+
+    // The single-booking page opens its card with the details shown; the toggle needs Alpine,
+    // which only the Livewire list ("Find my booking", --live) loads.
+    &:not(.gb-page--live) .ga-disclosure {
+        display: none;
+    }
+
+    &--narrow {
+        max-width: 36rem;
+    }
+
+    &__form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $cag-space-3;
+        margin-top: $cag-space-3;
+
+        .ga-field {
+            width: 100%;
+        }
+    }
+
+    &__signout {
+        flex-shrink: 0;
+    }
+
+    &__all {
+        margin-top: $cag-space-4;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-2;
+        margin-top: $cag-space-3;
+    }
+
+    &__help {
+        margin-top: $cag-space-6;
+
+        p {
+            margin: 0 0 $cag-space-3;
+        }
+    }
+
+    &__privacy {
+        margin-top: $cag-space-4;
+
+        a {
+            text-decoration: underline;
+        }
+    }
+
+    &__state p {
+        margin: $cag-space-2 0 0;
+    }
+}

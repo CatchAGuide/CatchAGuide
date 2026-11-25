@@ -72,6 +72,9 @@
 </table>
 </td></tr>
 
+{{-- View your booking --}}
+@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null, 'layout' => 'row'])
+
 {{-- CTA --}}
 <tr><td class="px" align="center" style="padding:16px 32px 36px;">
 <table role="presentation" class="btn-t" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#E8604C" style="background:#E8604C;border-radius:10px;">

@@ -37,11 +37,11 @@ class OfferCardPartialTest extends TestCase
         ])->render();
     }
 
-    public function test_new_tours_show_neu_as_an_image_badge_not_body_copy(): void
+    public function test_new_camps_and_trips_show_neu_as_an_image_badge_not_body_copy(): void
     {
         app()->setLocale('de');
 
-        $html = $this->render($this->card());
+        $html = $this->render($this->card(['type' => 'camp']));
 
         $this->assertStringContainsString('cag-home-offer__new-badge', $html);
         $this->assertStringContainsString('cag-home-offer__media', $html);
@@ -54,9 +54,17 @@ class OfferCardPartialTest extends TestCase
         );
     }
 
-    public function test_rated_tours_do_not_show_the_new_image_badge(): void
+    public function test_tours_never_show_the_new_image_badge(): void
+    {
+        $html = $this->render($this->card(['type' => 'tour', 'is_new' => true]));
+
+        $this->assertStringNotContainsString('cag-home-offer__new-badge', $html);
+    }
+
+    public function test_rated_camps_do_not_show_the_new_image_badge(): void
     {
         $html = $this->render($this->card([
+            'type' => 'camp',
             'is_new' => true,
             'rating' => '4.8',
             'review_count' => 12,

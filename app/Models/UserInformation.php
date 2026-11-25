@@ -32,11 +32,15 @@ class UserInformation extends Model
         'trade_register_court',
         'tax_number',
         'company_profile',
+        'display_name',
+        'crew_size',
+        'vat_not_registered',
     ];
 
     protected $casts = [
         'birthday' => 'date',
         'company_profile' => 'array',
+        'vat_not_registered' => 'boolean',
     ];
 
     /**

@@ -1267,14 +1267,21 @@
                             <div class="tour-details__review-comment-top-img">
                                 <img class="center-block rounded-circle"
                                      src="{{ guide_profile_photo_url($guiding->user, $guiding) }}"
-                                     alt="{{ $guiding->user->firstname }}"
+                                     alt="{{ $guideProfile['name'] ?? $guiding->user->firstname }}"
                                      width="180"
                                      height="180"
                                      loading="lazy"
                                      decoding="async">
                             </div>
                             <h4 class="mt-3"
-                                style="text-align: center">{{$guiding->user->firstname}}</h4>
+                                style="text-align: center">{{ $guideProfile['name'] ?? $guiding->user->firstname }}</h4>
+                            @if(! empty($guideProfile['verified_documents']))
+                                <ul class="guide-verified-docs list-unstyled">
+                                    @foreach($guideProfile['verified_documents'] as $document)
+                                        <li><i class="fa fa-check-circle" aria-hidden="true"></i> {{ __('guidings.guide_document_verified', ['document' => $document]) }}</li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1312,6 +1319,19 @@
                             </li>
                         </ul>
 
+                        @foreach(['specialties' => 'guidings.guide_specialties', 'good_for' => 'guidings.guide_good_for'] as $tagKey => $tagHeading)
+                            @if(! empty($guideProfile[$tagKey]))
+                                <div class="guide-tags mb-3">
+                                    <b>{{ __($tagHeading) }}:</b>
+                                    <ul class="guide-tags__list list-unstyled">
+                                        @foreach($guideProfile[$tagKey] as $tagLabel)
+                                            <li class="guide-tags__chip">{{ $tagLabel }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        @endforeach
+
                         <p class="js-trigger-more-text"><b>{{ __('guidings.About_me') }}:</b>
                             {!! translate($guiding->aboutme()[0]) !!}
                             {!! translate($guiding->aboutme()[1]) !!}
@@ -1334,7 +1354,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 col-sm-12">
-                    <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{$guiding->user->firstname}}</h3>
+                    <h3 class="tour-details-two__title">@lang('guidings.More_Fishing') {{ $guideProfile['name'] ?? $guiding->user->firstname }}</h3>
                     <div class="tours-list__right">
                         <div class="tours-list__inner" id="same-guide-guidings-list">
                             @include('pages.guidings.partials.tour-list-rows', [

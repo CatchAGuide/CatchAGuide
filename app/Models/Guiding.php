@@ -24,7 +24,6 @@ use App\Models\Levels;
 use App\Models\FishingFrom;
 use App\Models\FishingType;
 use App\Models\EquipmentStatus;
-use App\Models\FishingEquipment;
 use App\Models\Rating;
 use App\Models\GuidingRequirements;
 use App\Models\GuidingAdditionalInformation;
@@ -373,11 +372,6 @@ class Guiding extends Model
     public function inclussions()
     {
         return $this->belongsToMany(Inclussion::class,'guiding_inclussions')->withTimestamps();
-    }
-
-    public function fishing_equipment()
-    {
-        return $this->belongsToMany(FishingEquipment::class, 'guiding_equipment');
     }
 
     public function levels()
@@ -795,7 +789,19 @@ class Guiding extends Model
         // - this guiding's own `tour_schedule` rows (availability-based blocks)
         // - dates that belong to bookings of THIS guiding
         // - guide-level blocks like vacation/custom schedules
-        $bookingBlockedEventIds = $this->bookings()
+        //
+        // Guide Area spec (2.10, "one tour per guide per day"):
+        // - an open request or a confirmed booking on ANY of the guide's tours locks the day here too;
+        // - this tour's declined requests keep the day locked (the guide was asked and said no);
+        // - cancelled bookings and expired requests (stored as cancelled) release the day.
+        $bookingBlockedEventIds = Booking::query()
+            ->whereNotNull('blocked_event_id')
+            ->whereIn('guiding_id', Guiding::query()->select('id')->where('user_id', $this->user_id))
+            ->where(function ($q) {
+                $q->where('status', 'accepted')
+                    ->orWhere(fn ($p) => $p->where('status', 'pending')->where(fn ($e) => $e->whereNull('expires_at')->orWhere('expires_at', '>', now())))
+                    ->orWhere(fn ($own) => $own->where('guiding_id', $this->id)->where('status', 'rejected'));
+            })
             ->pluck('blocked_event_id')
             ->filter()
             ->unique()
@@ -811,7 +817,14 @@ class Guiding extends Model
             ->select(['id', 'date', 'type', 'guiding_id', 'user_id'])
             ->where('user_id', $this->user_id)
             ->where(function ($q) use ($bookingBlockedEventIdsInt) {
-                $q->whereIn('type', ['vacation_schedule', 'vacation_request', 'custom_schedule']);
+                $q->whereIn('type', ['vacation_schedule', 'vacation_request']);
+
+                // Guide blocks: without a tour they close the whole day; with one, only that tour
+                // ("blocking a single tour leaves the other tours bookable", Guide Area spec 7).
+                $q->orWhere(function ($custom) {
+                    $custom->where('type', 'custom_schedule')
+                        ->where(fn ($g) => $g->whereNull('guiding_id')->orWhere('guiding_id', $this->id));
+                });
 
                 $q->orWhere(function ($q2) {
                     $q2->where('type', 'tour_schedule')
@@ -1440,10 +1453,17 @@ class Guiding extends Model
      */
     public function isCompleteForPublishing(): bool
     {
-        if (! filled($this->title) || ! filled($this->location)) {
-            return false;
-        }
+        return $this->publishingGaps() === [];
+    }
 
+    /**
+     * What a tour still lacks before it can go live, as stable keys (labels in
+     * guide_area.tours.gaps.*). Empty when isCompleteForPublishing() is true; same rules.
+     *
+     * @return list<string>
+     */
+    public function publishingGaps(): array
+    {
         $hasItems = static function ($jsonOrArray): bool {
             if (is_array($jsonOrArray)) {
                 return count(array_filter($jsonOrArray, static fn ($v) => filled($v))) > 0;
@@ -1456,63 +1476,31 @@ class Guiding extends Model
                 && count(array_filter($decoded, static fn ($v) => filled($v))) > 0;
         };
 
-        if (! $hasItems($this->getAttribute('target_fish'))) {
-            return false;
-        }
-        if (! $hasItems($this->getAttribute('fishing_methods'))) {
-            return false;
-        }
-        if (! $hasItems($this->getAttribute('water_types'))) {
-            return false;
-        }
-
-        if (! filled($this->fishing_type_id)) {
-            return false;
-        }
-
-        foreach (['desc_course_of_action', 'desc_meeting_point', 'desc_tour_unique', 'desc_starting_time'] as $field) {
-            if (! filled($this->{$field})) {
-                return false;
-            }
-        }
-
-        if (! filled($this->tour_type)) {
-            return false;
-        }
-
-        if (! filled($this->duration_type) || (int) $this->duration <= 0) {
-            return false;
-        }
-
-        if ((int) $this->max_guests <= 0) {
-            return false;
-        }
-
-        if (! filled($this->price_type) || (float) $this->price <= 0) {
-            return false;
-        }
-
-        if (! filled($this->allowed_booking_advance) || ! filled($this->booking_window)) {
-            return false;
-        }
-
-        if (! filled($this->seasonal_trip)) {
-            return false;
-        }
-
-        if ((int) $this->is_boat === 1 && ! filled($this->boat_type)) {
-            return false;
-        }
-
         $gallery = $this->gallery_images;
         if (is_string($gallery)) {
             $gallery = json_decode($gallery, true) ?? [];
         }
-        if (! is_array($gallery) || count(array_filter($gallery, static fn ($v) => filled($v))) < 5) {
-            return false;
-        }
 
-        return true;
+        $gaps = [
+            'title' => ! filled($this->title),
+            'location' => ! filled($this->location),
+            'target_fish' => ! $hasItems($this->getAttribute('target_fish')),
+            'fishing_methods' => ! $hasItems($this->getAttribute('fishing_methods')),
+            'water_types' => ! $hasItems($this->getAttribute('water_types')),
+            'fishing_type' => ! filled($this->fishing_type_id),
+            'description' => collect(['desc_course_of_action', 'desc_meeting_point', 'desc_tour_unique', 'desc_starting_time'])
+                ->contains(fn (string $field) => ! filled($this->{$field})),
+            'tour_type' => ! filled($this->tour_type),
+            'duration' => ! filled($this->duration_type) || (int) $this->duration <= 0,
+            'max_guests' => (int) $this->max_guests <= 0,
+            'price' => ! filled($this->price_type) || (float) $this->price <= 0,
+            'booking_rules' => ! filled($this->allowed_booking_advance) || ! filled($this->booking_window),
+            'season' => ! filled($this->seasonal_trip),
+            'boat_type' => (int) $this->is_boat === 1 && ! filled($this->boat_type),
+            'photos' => ! is_array($gallery) || count(array_filter($gallery, static fn ($v) => filled($v))) < 5,
+        ];
+
+        return array_keys(array_filter($gaps));
     }
 
     /**

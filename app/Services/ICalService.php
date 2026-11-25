@@ -394,12 +394,14 @@ class ICalService
                     // Update existing event
                     $existingEvent->update([
                         'type' => $event['event_type'] ?? 'custom_schedule',
+                        'source' => CalendarSchedule::SOURCE_ICAL,
                         'note' => $note,
                     ]);
                 } else {
                     // Create new event
                     CalendarSchedule::create([
                         'type' => $event['event_type'] ?? 'custom_schedule',
+                        'source' => CalendarSchedule::SOURCE_ICAL,
                         'date' => $event['start_time']->format('Y-m-d'),
                         'note' => $note,
                         'user_id' => $feed->user_id,

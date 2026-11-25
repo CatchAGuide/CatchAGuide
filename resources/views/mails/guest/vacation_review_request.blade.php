@@ -46,4 +46,7 @@
 @endif
 </td></tr>
 
+{{-- View your booking (second button) --}}
+@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null, 'layout' => 'row'])
+
 </x-mail.cag-shell>

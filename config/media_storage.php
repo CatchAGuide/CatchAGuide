@@ -7,6 +7,13 @@ return [
     'local_disk' => env('MEDIA_STORAGE_LOCAL_DISK', 'public'),
 
     /*
+    | Private documents (guide certificates): never publicly readable, streamed to the owner
+    | and admins through authorized routes only. Point at a private object-storage disk in
+    | production if local storage is not shared across servers.
+    */
+    'private_disk' => env('MEDIA_PRIVATE_DISK', 'local'),
+
+    /*
     | Force CDN bucket folder (production|staging). When empty, derived from APP_ENV
     | (production → production, everything else → staging). Use production locally
     | when browsing a production DB dump so listing images resolve.

@@ -10,6 +10,8 @@
   </testsuites>
   <php>
     <server name="APP_ENV" value="testing"/>
+    <!-- The local .env has APP_URL=cag.local (no scheme), which made test requests go to http://localhost/cag.local/... -->
+    <server name="APP_URL" value="http://cag.local"/>
     <server name="BCRYPT_ROUNDS" value="4"/>
     <server name="CACHE_DRIVER" value="array"/>
     <!-- <server name="DB_CONNECTION" value="sqlite"/> -->

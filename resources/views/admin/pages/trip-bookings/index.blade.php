@@ -295,6 +295,7 @@
                                                     <form id="offer-from-request-{{ $request->id }}" method="POST" action="{{ route('admin.sales.offers.from-trip-request', $request) }}" class="d-none">@csrf</form>
                                                 @endunless
                                                 @include('admin.pages.vacation-reviews.partials.request-button', ['booking' => $request, 'url' => route('admin.trip-bookings.review-request', $request), 'part' => 'form'])
+                                                @include('admin.partials.booking-link-buttons', ['type' => 'trip', 'id' => $request->id, 'email' => $request->email, 'part' => 'form'])
                                                 <div class="btn-group btn-group-sm">
                                                     @if(isset($offers[$request->id]))
                                                         <a href="{{ route('admin.sales.offers.edit', $offers[$request->id]['id']) }}"
@@ -350,6 +351,7 @@
                                                         </button>
                                                         @include('admin.pages.vacation-reviews.partials.request-button', ['booking' => $request, 'url' => route('admin.trip-bookings.review-request', $request)])
                                                     @endif
+                                                    @include('admin.partials.booking-link-buttons', ['type' => 'trip', 'id' => $request->id, 'email' => $request->email])
                                                 </div>
                                             </td>
                                         </tr>

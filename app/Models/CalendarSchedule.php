@@ -11,8 +11,14 @@ class CalendarSchedule extends Model
     
     protected $table = 'calendar_schedule';
 
+    public const SOURCE_MANUAL = 'manual';
+
+    /** Busy day imported from a guide's private calendar (ICalService). */
+    public const SOURCE_ICAL = 'ical';
+
     protected $fillable = [
         'type',
+        'source',
         'date',
         'note',
         'guiding_id',

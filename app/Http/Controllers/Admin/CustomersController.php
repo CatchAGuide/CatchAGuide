@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserInformation;
 use App\Services\Admin\CustomerCreator;
 use App\Services\Admin\ListingOwnerSearch;
+use App\Services\Media\GuideProfilePhotoUploadService;
 use Illuminate\Http\Request;
 
 class CustomersController extends Controller
@@ -59,7 +60,7 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function update(UpdateCustomerRequest $request, User $customer)
+    public function update(UpdateCustomerRequest $request, User $customer, GuideProfilePhotoUploadService $photos)
     {
         $userFields = [
             'firstname',
@@ -82,21 +83,8 @@ class CustomersController extends Controller
         }
 
         if ($request->hasFile('profile_image')) {
-            $image = $request->file('profile_image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-
-            $uploadPath = public_path('uploads/profile_images');
-            if (!file_exists($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
-            }
-
-            $image->move($uploadPath, $imageName);
-
-            if ($customer->profil_image && file_exists(public_path('uploads/profile_images/' . $customer->profil_image))) {
-                unlink(public_path('uploads/profile_images/' . $customer->profil_image));
-            }
-
-            $customer->profil_image = $imageName;
+            // WebP onto the media storage, like the guide's own upload (never public/).
+            $photos->store($customer, $request->file('profile_image'));
         }
 
         if ($userData !== []) {

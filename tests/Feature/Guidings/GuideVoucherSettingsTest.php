@@ -86,6 +86,8 @@ class GuideVoucherSettingsTest extends TestCase
         $tour = $this->tour($guide);
         $draft = $this->tour($guide, ['status' => 2]);
         $other = $this->tour($this->guide());
+        // Old page: guides get the Guide Area version unless its kill switch is off.
+        config(['guide_area.enabled' => false]);
 
         $this->actingAs($guide)
             ->get(route('profile.vouchers'))

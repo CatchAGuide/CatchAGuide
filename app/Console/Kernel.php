@@ -39,6 +39,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('update:booking-status')->hourly();
         $schedule->command('bookings:send-guest-reviews')->hourly();
         $schedule->command('bookings:create-automatic-reviews')->dailyAt('02:15');
+        // Account & security: clear the old account type's data 30 days after a switch.
+        $schedule->command('guide-area:purge-account-type-data')->dailyAt('03:20')->withoutOverlapping();
         $schedule->command('bookings:send-guest-tour-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders')->hourly();
         $schedule->command('bookings:send-guide-reminders-12hrs')->hourly();

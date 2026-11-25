@@ -77,6 +77,11 @@
                             @lang('homepage.header-signup')
                         </a>
                     </p>
+                    {{-- Guest checkout: no account needed to see a booking (plan "Guest Booking Access"). --}}
+                    <p>
+                        {{ __('guest_bookings.find.login_hint') }}
+                        <a href="{{ route('guest-bookings.find') }}">{{ __('guest_bookings.find.login_hint_link') }}</a>
+                    </p>
                 </div>
             </div>
         </div>

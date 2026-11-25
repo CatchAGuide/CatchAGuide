@@ -19,6 +19,41 @@
       display: block;
     }
   }
+
+  // Guide Area data: documents Catch A Guide verified, and the guide's tags.
+  .guide-verified-docs {
+    margin: $cag-space-3 0 0;
+    text-align: center;
+    font-size: $cag-fs-small;
+    line-height: $cag-lh-ui;
+    color: $cag-slate;
+
+    li + li {
+      margin-top: $cag-space-1;
+    }
+
+    .fa {
+      color: $cag-success;
+      margin-right: $cag-space-1;
+    }
+  }
+
+  .guide-tags__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $cag-space-2;
+    margin: $cag-space-2 0 0;
+  }
+
+  .guide-tags__chip {
+    padding: $cag-space-1 $cag-space-3;
+    border: 1px solid $cag-border;
+    border-radius: $cag-radius-pill;
+    background: $cag-sand;
+    font-size: $cag-fs-small;
+    line-height: $cag-lh-ui;
+    color: $cag-slate;
+  }
 }
 
 /* Contact modal: keep reCAPTCHA + send button on-screen on mobile */

@@ -23,15 +23,16 @@ class GuidingSeoServiceTest extends TestCase
 
     public function test_generate_slug_uses_title_and_location(): void
     {
+        $expected = 'eisangeln-in-nord-varmland-in-bograngen-zweden';
+        // Runs against the dev database, where a real tour may already own this slug.
+        Guiding::query()->where('slug', $expected)->update(['slug' => $expected.'-taken-'.uniqid()]);
+
         $slug = $this->seo->generateSlug(
             'Eisangeln in Nord-Värmland',
             'Bograngen, Zweden'
         );
 
-        $this->assertSame(
-            'eisangeln-in-nord-varmland-in-bograngen-zweden',
-            $slug
-        );
+        $this->assertSame($expected, $slug);
     }
 
     public function test_generate_slug_appends_counter_when_taken(): void

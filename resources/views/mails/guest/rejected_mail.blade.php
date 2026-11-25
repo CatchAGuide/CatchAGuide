@@ -59,6 +59,7 @@
         <div style="padding: 0 20px;">
             <p style="font-size: 14px; font-family: 'Morrison', sans-serif;"> @lang('emails.guest_booking_request_cancelled_text_6')</p>
         </div>
+        <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
         <div style="text-align: center; margin: 2rem 0;">
             <a style="background-color: #313041; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
         </div>

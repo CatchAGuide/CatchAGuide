@@ -36,6 +36,7 @@
                 {{-- <p style="margin-bottom:2rem; font-size: 14px;">@lang('emails.guest_tour_review_text_3')</p> --}}
                 <a  class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{$reviewUrl}}">@lang('emails.guest_tour_review_text_6')</a>
             </div>
+            <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
             <div>
             </div>
             <div style="margin-top:3rem;">

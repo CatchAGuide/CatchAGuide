@@ -3,6 +3,8 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingRescheduleController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FindMyBookingController;
+use App\Http\Controllers\GuestBookingController;
 use App\Http\Controllers\SalesOfferController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,40 @@ Route::post('/booking/reschedule/store', [BookingRescheduleController::class, 's
 Route::get('/booking/reschedule/{token}', [BookingRescheduleController::class, 'enter'])
     ->middleware('throttle:10,1')
     ->name('booking.reschedule');
+
+// Guest booking link (plan "Guest Booking Access", Part 1): /b/{token} from the guest emails
+// is exchanged for a session entry and redirected to /your-booking/{id} (no token in the page
+// URL). Registered before catalog's catch-alls.
+Route::get('/b/{token}', [GuestBookingController::class, 'enter'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->middleware('throttle:30,1')
+    ->name('guest-booking.enter');
+Route::middleware('throttle:60,1')->prefix('your-booking/{access}')->whereNumber('access')->group(function () {
+    Route::get('/', [GuestBookingController::class, 'show'])->name('guest-booking.show');
+    Route::get('/calendar.ics', [GuestBookingController::class, 'calendar'])->name('guest-booking.calendar');
+    Route::get('/voucher.pdf', [GuestBookingController::class, 'voucherPdf'])->name('guest-booking.voucher-pdf');
+});
+
+// "Find my booking" (plan "Guest Booking Access", Part 2): email → single-use sign-in link →
+// every booking under that email for 7 days. The emailed link parks its token in the session
+// and redirects; the "Show my bookings" button uses it up.
+Route::prefix('my-bookings')->name('guest-bookings.')->group(function () {
+    Route::get('/', [FindMyBookingController::class, 'form'])->name('find');
+    Route::post('/', [FindMyBookingController::class, 'send'])->middleware('throttle:20,1')->name('send');
+    Route::get('/sign-in/{token}', [FindMyBookingController::class, 'enter'])
+        ->where('token', '[A-Za-z0-9]{48}')
+        ->middleware('throttle:30,1')
+        ->name('enter');
+    Route::get('/sign-in', [FindMyBookingController::class, 'confirm'])->name('confirm');
+    Route::post('/sign-in', [FindMyBookingController::class, 'start'])->middleware('throttle:30,1')->name('start');
+    Route::get('/list', [FindMyBookingController::class, 'list'])->name('list');
+    Route::post('/sign-out', [FindMyBookingController::class, 'signOut'])->name('sign-out');
+    Route::get('/open/{type}/{id}', [FindMyBookingController::class, 'open'])
+        ->whereIn('type', ['tour', 'camp', 'trip', 'voucher'])
+        ->whereNumber('id')
+        ->middleware('throttle:60,1')
+        ->name('open');
+});
 
 Route::get('/reject/success', function () {
     return view('pages.additional.reject_success');

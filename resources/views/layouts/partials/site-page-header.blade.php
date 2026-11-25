@@ -2,6 +2,7 @@
 @php
     use App\Domain\Offers\OfferListingFilter;
     use App\Services\Search\ListingSearchStateService;
+    use App\Support\SitePrimaryNav;
 
     $hasPageTitle = $__env->hasSection('header_title');
     $offersGuests = max(1, min(OfferListingFilter::MAX_GUESTS, (int) (request()->num_guests ?: OfferListingFilter::DEFAULT_GUESTS)));
@@ -10,6 +11,7 @@
     $headerCarry = OfferListingFilter::headerCarryParams(request()->query());
     // Profile pages don't benefit from the catalog search band on small screens — hide it there to free up space.
     $hideSearchOnMobile = request()->routeIs('profile.*', 'guidings.edit');
+    $showSearch = SitePrimaryNav::usesPageHeaderSearch();
 @endphp
 <div class="offers-page-header-shell cag-site-nav-shell" data-site-page-header-shell>
     @include('layouts.partials.site-nav', [
@@ -32,6 +34,7 @@
             @endif
         </div>
 
+        @if($showSearch)
         <div class="offers-page-header__inner offers-page-header__inner--search {{ $hideSearchOnMobile ? 'd-none d-md-block' : '' }}">
             <form
                 class="offers-page-header__search"
@@ -89,6 +92,7 @@
                 </div>
             </form>
         </div>
+        @endif
     </section>
 </div>
 @once

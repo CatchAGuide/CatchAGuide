@@ -4,7 +4,18 @@ use App\Http\Controllers\Admin\GuidesController;
 use App\Http\Controllers\Api\EventsController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\Guide\GuideCertificateFileController;
+use App\Http\Controllers\Guide\GuideInvoiceController;
 use App\Http\Controllers\GuideOnboardingController;
+use App\Http\Livewire\Guide\Bookings as GuideAreaBookings;
+use App\Http\Livewire\Guide\Calendar as GuideAreaCalendar;
+use App\Http\Livewire\Guide\Invoices as GuideAreaInvoices;
+use App\Http\Livewire\Guide\Overview as GuideAreaOverview;
+use App\Http\Livewire\Guide\Profile as GuideAreaProfile;
+use App\Http\Livewire\Guide\Reviews as GuideAreaReviews;
+use App\Http\Livewire\Guide\Todos as GuideAreaTodos;
+use App\Http\Livewire\Guide\Tours as GuideAreaTours;
+use App\Http\Livewire\Guide\VoucherSettings as GuideAreaVoucherSettings;
 use App\Http\Controllers\GuideVoucherSettingsController;
 use App\Http\Controllers\GuidingsController;
 use App\Http\Controllers\ProfileController;
@@ -42,6 +53,8 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
 
     Route::get('/bookings', [ProfileController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/load-more', [ProfileController::class, 'loadMoreBookings'])->name('bookings.load-more');
+    // The user's own bookings as a guest (customer page); guides reach it from the Guide Area sidebar.
+    Route::get('/my-bookings', [ProfileController::class, 'myBookings'])->name('my-bookings');
 
     Route::get('showbooking/{bookingid}', [ProfileController::class, 'showbooking'])->name('showbooking');
     Route::get('stornobooking/{bookingid}', [ProfileController::class, 'stornobooking'])->name('stornobooking');
@@ -71,6 +84,23 @@ Route::prefix('profile')->name('profile.')->middleware('auth:web')->group(functi
 
 Route::get('/guide/onboarding', [GuideOnboardingController::class, 'show'])->name('guide.onboarding');
 Route::post('/guide/onboarding', [GuideOnboardingController::class, 'store'])->name('guide.onboarding.store');
+
+// Guide Area redesign (beta): per-guide flag users.guide_area_beta, kill switch config('guide_area.enabled').
+Route::prefix('guide')->name('guide.area.')->middleware(['auth:web', 'guide.area'])->group(function () {
+    Route::get('/', GuideAreaOverview::class)->name('overview');
+    Route::get('/profile', GuideAreaProfile::class)->name('profile');
+    Route::get('/certificates/{certificate}/file', [GuideCertificateFileController::class, 'show'])->name('certificates.file');
+    Route::get('/tours', GuideAreaTours::class)->name('tours');
+    Route::get('/bookings', GuideAreaBookings::class)->name('bookings');
+    Route::get('/calendar', GuideAreaCalendar::class)->name('calendar');
+    Route::get('/todos', GuideAreaTodos::class)->name('todos');
+    Route::get('/reviews', GuideAreaReviews::class)->name('reviews');
+    Route::get('/invoices', GuideAreaInvoices::class)->name('invoices');
+    Route::get('/invoices/{invoice}', [GuideInvoiceController::class, 'show'])->whereNumber('invoice')->name('invoices.show');
+    // Voucher orders live in Bookings › Vouchers (spec 5); the sidebar's Vouchers item is the settings page.
+    Route::get('/vouchers', fn () => redirect()->route('guide.area.bookings', ['tab' => 'vouchers']))->name('vouchers');
+    Route::get('/vouchers/settings', GuideAreaVoucherSettings::class)->name('vouchers.settings');
+});
 
 Route::post('/guide', [GuidesController::class, 'store'])->middleware('auth:web')->name('guide');
 

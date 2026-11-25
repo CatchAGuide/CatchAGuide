@@ -48,6 +48,8 @@
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.guides.index') }}" class="slide-item {{ request()->routeIs('admin.guides.*') && !request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">All guides</a></li>
                         <li><a href="{{ route('admin.guide-requests.index') }}" class="slide-item {{ request()->routeIs('admin.guide-requests.*') ? 'active' : '' }}">Guide requests</a></li>
+                        <li><a href="{{ route('admin.guide-certificates.index') }}" class="slide-item {{ request()->routeIs('admin.guide-certificates.*') ? 'active' : '' }}">{{ __('guide_area.admin.nav') }}</a></li>
+                        <li><a href="{{ route('admin.guide-billing.index') }}" class="slide-item {{ request()->routeIs('admin.guide-billing.*') ? 'active' : '' }}">{{ __('guide_area.account.admin.nav') }}</a></li>
                         <li><a href="{{ route('admin.guide-analytics.index') }}" class="slide-item {{ request()->routeIs('admin.guide-analytics.*') ? 'active' : '' }}">Guide analytics</a></li>
                     </ul>
                 </li>

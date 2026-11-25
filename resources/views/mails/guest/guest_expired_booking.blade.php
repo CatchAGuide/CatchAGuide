@@ -22,6 +22,7 @@
                     <a class="btn-theme" style="background-color: #e8604c;padding:10px 20px;color:#fff !important;border:0;text-decoration: none;margin-top:30px;" href="{{route('guidings.index')}}" target="_blank">@lang('emails.guest_booking_request_expired_find_other_fishing_tours')</a>
                 </div>
             </div>
+            <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
             <div style="margin-top:20px;">
                 <p>
                 @lang('emails.guest_booking_request_expired_text_3')

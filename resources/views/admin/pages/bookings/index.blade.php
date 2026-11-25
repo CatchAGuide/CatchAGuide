@@ -260,6 +260,20 @@
                                                                         <i class="fa fa-paper-plane me-2"></i> Resend booking emails
                                                                     </button>
                                                                 </li>
+                                                                @if($guestLinkEmail = $booking->customerEmail())
+                                                                    <li>
+                                                                        <form method="POST" action="{{ route('admin.booking-links.send', ['type' => 'tour', 'id' => $booking->id]) }}" onsubmit="return confirm(@js(__('guest_bookings.admin.confirm_send', ['email' => $guestLinkEmail])));">
+                                                                            @csrf
+                                                                            <button class="dropdown-item" type="submit"><i class="fa fa-link me-2"></i> {{ __('guest_bookings.admin.send') }}</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li>
+                                                                        <form method="POST" action="{{ route('admin.booking-links.revoke', ['type' => 'tour', 'id' => $booking->id]) }}" onsubmit="return confirm(@js(__('guest_bookings.admin.confirm_revoke', ['email' => $guestLinkEmail])));">
+                                                                            @csrf
+                                                                            <button class="dropdown-item" type="submit"><i class="fa fa-unlink me-2"></i> {{ __('guest_bookings.admin.revoke') }}</button>
+                                                                        </form>
+                                                                    </li>
+                                                                @endif
                                                                 @if($canSendGuideInvoice)
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>

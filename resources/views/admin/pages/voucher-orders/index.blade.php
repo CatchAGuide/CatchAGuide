@@ -223,6 +223,9 @@
                                                 @endif
                                             </td>
                                             <td data-label="{{ __('admin.voucher_orders.col_actions') }}" class="text-end text-nowrap">
+                                                @unless($isRequest)
+                                                    @include('admin.partials.booking-link-buttons', ['type' => 'voucher', 'id' => $order->id, 'email' => $order->buyer_email, 'part' => 'form'])
+                                                @endunless
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button"
                                                             class="btn {{ $order->admin_comment ? 'btn-warning' : 'btn-outline-secondary' }} js-voucher-comment"
@@ -243,6 +246,9 @@
                                                             <i class="fa fa-comment"></i>
                                                         </button>
                                                     @endif
+                                                    @unless($isRequest)
+                                                        @include('admin.partials.booking-link-buttons', ['type' => 'voucher', 'id' => $order->id, 'email' => $order->buyer_email])
+                                                    @endunless
                                                     @if($order->design_type?->generatesPdf())
                                                         <a href="{{ route('admin.voucher-orders.pdf', $order) }}"
                                                            class="btn btn-outline-primary"

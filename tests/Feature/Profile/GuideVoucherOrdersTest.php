@@ -19,7 +19,8 @@ class GuideVoucherOrdersTest extends TestCase
     {
         parent::setUp();
 
-        config(['app.url' => 'http://localhost', 'vouchers.pdf_disk' => 'local']);
+        // Old /profile/bookings page: Guide Area guides are redirected to /guide/bookings.
+        config(['app.url' => 'http://localhost', 'vouchers.pdf_disk' => 'local', 'guide_area.enabled' => false]);
         URL::forceRootUrl('http://localhost');
         Storage::fake('local');
         $this->withoutMiddleware([
@@ -144,6 +145,8 @@ class GuideVoucherOrdersTest extends TestCase
     {
         $guide = $this->guide();
         $order = $this->order($guide);
+        // Old page: only reachable while the Guide Area kill switch is off.
+        config(['guide_area.enabled' => false]);
 
         $this->actingAs($guide)->get(route('profile.vouchers'))
             ->assertOk()

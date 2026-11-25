@@ -1,3 +1,4 @@
+@inject('guidePublicProfile', 'App\Presenters\Guiding\GuidePublicProfilePresenter')
 @if(request('view') == 'map')
 <div class="col-xxl-12 col-lg-12 map__wrap" id="mapContainer">
     <div id="map">
@@ -129,7 +130,7 @@
 
                     <div class="tours-list__rates">
                         <p class="tours-list__rate">
-                            {{$guiding->user->firstname}}
+                            {{ $guidePublicProfile->name($guiding->user) }}
                             @if(count($guiding->user->received_ratings) > 0)
 
                                 @switch(two($guiding->user->average_rating()))

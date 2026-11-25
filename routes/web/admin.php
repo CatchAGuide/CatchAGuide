@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CampVacationBookingsController;
+use App\Http\Controllers\Admin\GuestBookingLinksController;
 use App\Http\Controllers\Admin\CampsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
@@ -53,6 +54,8 @@ use App\Http\Controllers\Admin\Blog\ThreadsController as AdminThreadsController;
 use App\Http\Controllers\Admin\NewBlog\GuideThreadsController as AdminGuideThreadsController;
 use App\Http\Controllers\Admin\RentalBoatsController as AdminRentalBoatsController;
 use App\Http\Controllers\Auth\LoginAuthController;
+use App\Http\Controllers\Admin\GuideCertificatesController;
+use App\Http\Controllers\Admin\GuideBillingVerificationsController;
 use App\Http\Controllers\GuideRequestsController;
 use App\Http\Controllers\VacationsController;
 use Illuminate\Support\Facades\Route;
@@ -185,6 +188,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('voucher-orders/{voucherOrder}/status', [VoucherOrdersController::class, 'updateStatus'])->name('voucher-orders.update-status')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/status-history', [VoucherOrdersController::class, 'statusHistory'])->name('voucher-orders.status-history')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
+        // Guest booking link (tour, camp, trip or voucher): send it, or turn it off and send a new one.
+        Route::post('booking-links/{type}/{id}/send', [GuestBookingLinksController::class, 'send'])->name('booking-links.send')->whereIn('type', ['tour', 'camp', 'trip', 'voucher'])->whereNumber('id');
+        Route::post('booking-links/{type}/{id}/revoke', [GuestBookingLinksController::class, 'revoke'])->name('booking-links.revoke')->whereIn('type', ['tour', 'camp', 'trip', 'voucher'])->whereNumber('id');
 
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');
         Route::get('vacation-reviews/create', [VacationReviewsController::class, 'create'])->name('vacation-reviews.create');
@@ -350,6 +356,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('request-as-guide', [GuideRequestsController::class, 'index'])->name('guide-requests.index');
         Route::post('guide-requests/{guideRequest}/approve', [GuideRequestReviewController::class, 'approve'])->name('guide-requests.approve');
         Route::post('guide-requests/{guideRequest}/reject', [GuideRequestReviewController::class, 'reject'])->name('guide-requests.reject');
+
+        Route::get('guide-certificates', [GuideCertificatesController::class, 'index'])->name('guide-certificates.index');
+        Route::get('guide-certificates/{certificate}/file', [GuideCertificatesController::class, 'file'])->name('guide-certificates.file');
+        Route::post('guide-certificates/{certificate}/verify', [GuideCertificatesController::class, 'verify'])->name('guide-certificates.verify');
+        Route::post('guide-certificates/{certificate}/reject', [GuideCertificatesController::class, 'reject'])->name('guide-certificates.reject');
+        Route::get('guide-billing', [GuideBillingVerificationsController::class, 'index'])->name('guide-billing.index');
+        Route::post('guide-billing/{guide}/approve', [GuideBillingVerificationsController::class, 'approve'])->whereNumber('guide')->name('guide-billing.approve');
+        Route::post('guide-billing/{guide}/reject', [GuideBillingVerificationsController::class, 'reject'])->whereNumber('guide')->name('guide-billing.reject');
 
         Route::get('email-logs', [EmailLogsController::class, 'index'])->name('email-logs.index');
         Route::get('email-logs/{emailLog}', [EmailLogsController::class, 'show'])->name('email-logs.show');
