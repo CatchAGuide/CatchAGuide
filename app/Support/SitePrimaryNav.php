@@ -269,7 +269,8 @@ final class SitePrimaryNav
     {
         $request ??= request();
 
-        if ($request->routeIs('guide.area.*')) {
+        // The guest booking link page is about one booking, not a place to search from.
+        if ($request->routeIs('guide.area.*', 'guest-booking.*')) {
             return false;
         }
 

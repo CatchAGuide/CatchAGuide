@@ -80,6 +80,9 @@
 @endforeach
 </table>
 
+{{-- View your booking --}}
+@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])
+
 {{-- CTA --}}
 <table role="presentation" class="btn-t" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:20px auto 0;"><tr><td align="center" bgcolor="#E25C45" style="background:#E25C45;border-radius:10px;">
 <a class="btn-a" href="{{ $tripUrl }}" target="_blank" style="display:inline-block;min-width:220px;height:48px;line-height:48px;padding:0 32px;box-sizing:border-box;{{ $font }}font-size:16px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;text-align:center;">{{ __($copy.'.cta') }}</a>

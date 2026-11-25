@@ -196,6 +196,35 @@ Verification & billing, Password and Cookie settings.
 - **Demo:** `CustomerAreaDemoSeeder` now gives its demo guide a fixed test password (`GUIDE_PASSWORD`), so the page
   can be tried on 127.0.0.1.
 
+## Guest booking access, Phase 1 (23 Nov)
+
+Plan doc "Guest Booking Access: Plan" (Claude Doc, link in memory). Guests without an account get a link to each
+booking; nothing here creates an account, and the copy says "your booking", never "account" or "profile".
+
+- **Link:** `/b/{token}` (48 random characters), one per booking, for tours, camps, trips and vouchers
+  (`booking_access_tokens`, `bookable_type` = `tour|camp|trip|voucher`, `App\Enums\GuestBookingType`). Made the
+  first time an email renders it and reused by every later email (`BookingAccessTokenService::urlFor`). Stored as a
+  sha256 for the lookup plus an encrypted copy, so later emails repeat the same link. Never expires.
+- **Page:** `/b/{token}` puts the link in the session and 303-redirects to `/your-booking/{id}`, so the token never
+  reaches the page URL, GTM/GA4 or a referrer (same pattern as the reschedule link). Opening `/your-booking/{id}`
+  in a browser that never clicked the link shows "this link doesn't work here". `no-referrer`, `no-store`, noindex.
+  No GTM change is needed for privacy; `^/your-booking/` can get an `RT - Page Type` row later.
+- **Rules (GuestBookingPresenter):** the customer area's card. Guide phone, email and meeting point show from
+  confirmation through the tour day, hidden after (Q3). From 90 days after the last day the view is reduced (F4).
+  Read-only: no cancelling (Q6). "Add to calendar" (.ics, all-day) for confirmed upcoming tours and open camp/trip
+  wish dates. Voucher PDF only once the guide marked the voucher sent.
+- **Emails with the "View your booking" button (11):** tour request received, accepted, declined, cancelled,
+  expired, reminder, review; camp and trip confirmations; voucher order; camp/trip review request. Partial
+  `mails.partials.booking-link-button` (renders nothing for unsaved admin-preview samples). There is no
+  "voucher sent" email to the buyer (the guide sends the voucher), and no guest invoice PDF exists.
+- **Admin (Q12):** link and unlink buttons on the camp, trip and voucher lists, and in the tour list's "…" menu:
+  "Send booking link" emails the link to the booking's own address; "Turn link off and send a new one" revokes and
+  resends. Logged in `booking_access_events` (created, sent, opened, revoked; admin id; no IP or browser, F5).
+- **Not built (later phases):** "Find my booking" email sign-in (Phase 2), guest actions and the message queue
+  (Phase 3), customer lookup / merge / view as guest (Phase 4). No backfill command: links are made on demand, so
+  any later email for an older booking gets one.
+- **Tests:** `tests/Feature/GuestBooking/GuestBookingLinkTest.php` (13).
+
 ## Decisions
 
 - **D-2:** the new pages are used on every screen size.
@@ -227,6 +256,8 @@ Verification & billing, Password and Cookie settings.
 - `2026_11_18_110000`: `bookings.cancel_reason`, `cancelled_by`, `cancelled_at`
 - `2026_11_18_110001`: `calendar_schedule.source` (manual or ical)
 - `2026_11_18_110002`: `reviews.seen_by_guide_at`. Existing reviews are backfilled as seen.
+- `2026_11_23_100000`: account verification columns (Account & security)
+- `2026_11_23_120000`: `booking_access_tokens`, `booking_access_events` (guest booking links)
 
 ## Testing
 
@@ -314,7 +345,7 @@ contact details stay visible), Q-15, Q-17. D-1 needs Finance.
 ## Where to start next
 
 Possible work that isn't blocked:
-Agreed order (23 Nov): ~~Account & security~~ (done) → guest booking access Phase 1 (plan doc in memory) →
+Agreed order (23 Nov): ~~Account & security~~ (done) → ~~guest booking access Phase 1~~ (done) →
 REST endpoints for the six newer pages and the "Day no longer available" state → Contact support, once Q-13 is
 answered. Still unblocked too: the calendar tour-rules drawer and a notification dedupe log.
 

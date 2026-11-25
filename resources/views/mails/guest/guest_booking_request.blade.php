@@ -48,6 +48,7 @@
     <div style="margin: 0 20px 20px 20px;">
         <p style="font-size:14px;">{{$alternativeText}}</p>
     </div>
+    <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
     <div style="text-align: center; margin-top: 2rem; padding: 0 20px;">
         <p style="margin-bottom: 2rem; font-size:14px;"> {{$booking->alternativeText}}</p>
         <a style="background-color: #e8604c; padding:10px 20px; color:#fff !important; border:0; text-decoration: none; margin-top:30px; display: inline-block;" href="{{route('additional.contact')}}">@lang('emails.contact_us')</a>

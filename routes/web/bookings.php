@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingRescheduleController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\GuestBookingController;
 use App\Http\Controllers\SalesOfferController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,19 @@ Route::post('/booking/reschedule/store', [BookingRescheduleController::class, 's
 Route::get('/booking/reschedule/{token}', [BookingRescheduleController::class, 'enter'])
     ->middleware('throttle:10,1')
     ->name('booking.reschedule');
+
+// Guest booking link (plan "Guest Booking Access", Part 1): /b/{token} from the guest emails
+// is exchanged for a session entry and redirected to /your-booking/{id} (no token in the page
+// URL). Registered before catalog's catch-alls.
+Route::get('/b/{token}', [GuestBookingController::class, 'enter'])
+    ->where('token', '[A-Za-z0-9]{48}')
+    ->middleware('throttle:30,1')
+    ->name('guest-booking.enter');
+Route::middleware('throttle:60,1')->prefix('your-booking/{access}')->whereNumber('access')->group(function () {
+    Route::get('/', [GuestBookingController::class, 'show'])->name('guest-booking.show');
+    Route::get('/calendar.ics', [GuestBookingController::class, 'calendar'])->name('guest-booking.calendar');
+    Route::get('/voucher.pdf', [GuestBookingController::class, 'voucherPdf'])->name('guest-booking.voucher-pdf');
+});
 
 Route::get('/reject/success', function () {
     return view('pages.additional.reject_success');

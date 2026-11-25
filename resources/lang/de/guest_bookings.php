@@ -1,0 +1,57 @@
+<?php
+
+// Gast-Buchungslink (/b/{token} → /your-booking/{id}). Wording: "deine Buchung", nie "dein Konto"
+// oder "dein Profil" (Plan "Guest Booking Access").
+
+return [
+    'title' => 'Deine Buchung',
+    'eyebrow' => 'Buchungsdetails',
+    'eyebrow_voucher' => 'Gutscheinbestellung',
+    'subtitle' => 'Alles zu deiner Buchung an einem Ort. Heb die E-Mail mit diesem Link auf: Er öffnet immer diese Seite.',
+    'redacted_note' => 'Diese Reise liegt mehr als 90 Tage zurück. Wir zeigen deshalb nur noch die wichtigsten Angaben, Kontaktdaten und Nachrichten sind ausgeblendet.',
+    'contact_hidden' => 'Nach der Tour ausgeblendet',
+    'add_to_calendar' => 'In den Kalender',
+    'download_voucher' => 'Gutschein herunterladen (PDF)',
+    'calendar_description' => 'Deine Buchung bei Catch A Guide. Guide: :guide',
+    'help_title' => 'Möchtest du etwas ändern?',
+    'help_tour' => 'Für einen anderen Termin, mehr Personen oder eine Stornierung schreib deinem Guide oder uns. Wir klären das mit deinem Guide.',
+    'help_other' => 'Bei Fragen oder Änderungswünschen schreib uns. Wir melden uns so schnell wie möglich.',
+    'contact_support' => 'Support kontaktieren',
+    'privacy' => 'Wir zeigen dir die Angaben, die du bei der Buchung gemacht hast, damit du und dein Guide alles für die Tour habt. Wir legen dafür kein Konto an und nutzen diese Seite nicht für Werbung.',
+    'privacy_link' => 'Datenschutzerklärung',
+
+    'types' => [
+        'tour' => 'Tourbuchung',
+        'camp' => 'Anfrage für ein Angelcamp',
+        'trip' => 'Anfrage für eine Angelreise',
+        'voucher' => 'Gutscheinbestellung',
+    ],
+
+    'unavailable' => [
+        'title' => 'Dieser Link funktioniert hier nicht',
+        'text' => 'Öffne deine Buchung über den Link aus deiner Buchungs-E-Mail. Klappt es dann immer noch nicht, wurde der Link vielleicht ersetzt: Schreib uns, und wir schicken dir den aktuellen.',
+        'signed_in' => 'Meine Buchungen',
+        'home' => 'Zur Startseite',
+    ],
+
+    'mail' => [
+        'button' => 'Buchung ansehen',
+        'button_voucher' => 'Bestellung ansehen',
+        'hint' => 'Deine Buchung jederzeit, ganz ohne Passwort. Heb diese E-Mail auf.',
+        'link_subject' => 'Der Link zu deiner Buchung',
+        'link_title' => 'Der Link zu deiner Buchung',
+        'link_greeting' => 'Hallo,',
+        'link_body' => 'hier ist der Link zu deiner :type. Dort siehst du den aktuellen Stand und alle Details, ohne Passwort.',
+        'link_not_you' => 'Du hast das nicht angefordert? Dann kannst du diese E-Mail ignorieren. Der Link zeigt nur diese eine Buchung.',
+    ],
+
+    'admin' => [
+        'send' => 'Buchungslink senden',
+        'revoke' => 'Link sperren und neuen senden',
+        'confirm_send' => 'Link zu dieser Buchung an :email senden?',
+        'confirm_revoke' => 'Den aktuellen Link sperren (er funktioniert sofort nicht mehr) und einen neuen an :email senden?',
+        'sent' => 'Buchungslink an :email gesendet.',
+        'revoked' => 'Alter Link gesperrt. Neuer Link an :email gesendet.',
+        'no_email' => 'Diese Buchung hat keine E-Mail-Adresse, daher kann kein Link gesendet werden.',
+    ],
+];

@@ -1,0 +1,58 @@
+// Guest booking link (/your-booking/{id}): the customer area's card without the sidebar.
+
+.gb-page {
+    max-width: 52rem;
+    min-height: 60vh;
+    margin: 0 auto;
+    padding: $cag-space-6 $cag-space-4;
+
+    @media (max-width: 575px) {
+        padding: $cag-space-4 $cag-gutter-mobile;
+    }
+
+    &__eyebrow {
+        margin: 0 0 $cag-space-1;
+        font-size: $cag-fs-small;
+        font-weight: $cag-fw-bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $cag-gray;
+    }
+
+    &__note {
+        background: $cag-white;
+        border: 1px solid $cag-border;
+    }
+
+    // The card opens with its details shown; the toggle needs Alpine, which this page doesn't load.
+    .ga-disclosure {
+        display: none;
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $cag-space-2;
+        margin-top: $cag-space-3;
+    }
+
+    &__help {
+        margin-top: $cag-space-6;
+
+        p {
+            margin: 0 0 $cag-space-3;
+        }
+    }
+
+    &__privacy {
+        margin-top: $cag-space-4;
+
+        a {
+            text-decoration: underline;
+        }
+    }
+
+    &__state p {
+        margin: $cag-space-2 0 0;
+    }
+}

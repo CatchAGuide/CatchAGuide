@@ -70,6 +70,9 @@
 <tr><td class="px" style="padding:0 32px;"><table role="presentation" class="bd" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E6E8EC;border-radius:12px;border-collapse:separate;"><tr><td style="padding:16px 18px;"><p class="t-main" style="margin:0;{{ $font }}font-size:15px;line-height:1.55;font-style:italic;color:#1A1B30;">{!! nl2br(e(__($copy.'.quote', ['message' => $personalMessage]))) !!}</p></td></tr></table></td></tr>
 @endif
 
+{{-- View your order --}}
+@include('mails.partials.booking-link-button', ['bookable' => $order ?? null, 'layout' => 'row'])
+
 {{-- Responsibilities + contact --}}
 <tr><td class="px" style="padding:24px 32px 36px;">
 <p class="t-soft" style="margin:0;{{ $font }}font-size:12px;line-height:1.55;color:#6B7489;">{{ __($copy.'.disclaimer') }}</p>

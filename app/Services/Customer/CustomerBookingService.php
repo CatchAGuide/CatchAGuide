@@ -181,10 +181,24 @@ class CustomerBookingService
         return $index === false ? 1 : intdiv((int) $index, $perPage ?? $this->perPage()) + 1;
     }
 
+    /**
+     * One tour booking with what its card needs, whoever it belongs to. Only for callers that
+     * already checked access (the per-booking guest link).
+     */
+    public function tourForCard(int $id): ?Booking
+    {
+        return $this->withCardData(Booking::query())->whereKey($id)->first();
+    }
+
     /** Tour bookings with what the cards need. */
     private function tours(User $user): Builder
     {
-        return $this->tourScope($user)
+        return $this->withCardData($this->tourScope($user));
+    }
+
+    private function withCardData(Builder $query): Builder
+    {
+        return $query
             ->select('bookings.*')
             ->with(['guiding.user', 'calendar_schedule', 'blocked_event'])
             ->withExists(['statusChanges as expired_by_job' => fn (Builder $q) => $q

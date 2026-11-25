@@ -1,4 +1,5 @@
-{{-- One tour booking as the guest sees it. $item from CustomerBookingPresenter::tour(). --}}
+{{-- One tour booking as the guest sees it. $item from CustomerBookingPresenter::tour() (or
+     GuestBookingPresenter, which may set contact_placeholder once contact details are hidden). --}}
 <li id="booking-{{ $item['id'] }}" wire:key="c-booking-{{ $item['id'] }}"
     @class(['ga-booking', 'ga-booking--open' => $item['status'] === 'open', 'is-focused' => $focused])
     x-data="{ details: @js($focused) }">
@@ -70,7 +71,7 @@
             <p class="ga-details__head">{{ __('guide_area.bookings.d_tour') }}</p>
             <dl>
                 <div><dt>{{ __('guide_area.bookings.d_location') }}</dt><dd>{{ $item['location'] ?: '—' }}</dd></div>
-                <div><dt>{{ __('guide_area.bookings.d_meeting_point') }}</dt><dd>{{ $item['meeting_point'] ?: __('guide_area.customer.bookings.after_accept') }}</dd></div>
+                <div><dt>{{ __('guide_area.bookings.d_meeting_point') }}</dt><dd>{{ $item['meeting_point'] ?: ($item['contact_placeholder'] ?? __('guide_area.customer.bookings.after_accept')) }}</dd></div>
                 <div><dt>{{ __('guide_area.bookings.d_duration') }}</dt><dd>{{ $item['duration'] ?? '—' }}</dd></div>
             </dl>
         </div>
@@ -86,8 +87,8 @@
             <p class="ga-details__head">{{ __('guide_area.customer.bookings.guide') }}</p>
             <dl>
                 <div><dt>{{ __('guide_area.bookings.d_name') }}</dt><dd>{{ $item['guide']['name'] }}</dd></div>
-                <div><dt>{{ __('guide_area.bookings.d_email') }}</dt><dd>{{ $item['guide']['email'] ?? __('guide_area.customer.bookings.after_accept') }}</dd></div>
-                <div><dt>{{ __('guide_area.bookings.d_phone') }}</dt><dd>{{ $item['guide']['phone'] ?? __('guide_area.customer.bookings.after_accept') }}</dd></div>
+                <div><dt>{{ __('guide_area.bookings.d_email') }}</dt><dd>{{ $item['guide']['email'] ?? ($item['contact_placeholder'] ?? __('guide_area.customer.bookings.after_accept')) }}</dd></div>
+                <div><dt>{{ __('guide_area.bookings.d_phone') }}</dt><dd>{{ $item['guide']['phone'] ?? ($item['contact_placeholder'] ?? __('guide_area.customer.bookings.after_accept')) }}</dd></div>
             </dl>
         </div>
         <div class="ga-details__col">

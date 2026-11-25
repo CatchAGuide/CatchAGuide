@@ -3085,3 +3085,51 @@ li:first-child .ga-link-list__item {
 .ga-note--danger i {
   color: #b91c1c;
 }
+
+.gb-page {
+  max-width: 52rem;
+  min-height: 60vh;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+@media (max-width: 575px) {
+  .gb-page {
+    padding: 1rem 16px;
+  }
+}
+.gb-page__eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #787780;
+}
+.gb-page__note {
+  background: #ffffff;
+  border: 1px solid #ece8e0;
+}
+.gb-page .ga-disclosure {
+  display: none;
+}
+.gb-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.gb-page__help {
+  margin-top: 1.5rem;
+}
+.gb-page__help p {
+  margin: 0 0 0.75rem;
+}
+.gb-page__privacy {
+  margin-top: 1rem;
+}
+.gb-page__privacy a {
+  text-decoration: underline;
+}
+.gb-page__state p {
+  margin: 0.5rem 0 0;
+}

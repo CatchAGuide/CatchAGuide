@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthenticationController;
 use App\Http\Controllers\Admin\BookingsController;
 use App\Http\Controllers\Admin\CampVacationBookingsController;
+use App\Http\Controllers\Admin\GuestBookingLinksController;
 use App\Http\Controllers\Admin\CampsController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCityController;
 use App\Http\Controllers\Admin\Category\AdminCategoryCountryController;
@@ -187,6 +188,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('voucher-orders/{voucherOrder}/status', [VoucherOrdersController::class, 'updateStatus'])->name('voucher-orders.update-status')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/status-history', [VoucherOrdersController::class, 'statusHistory'])->name('voucher-orders.status-history')->whereNumber('voucherOrder');
         Route::get('voucher-orders/{voucherOrder}/pdf', [VoucherOrdersController::class, 'pdf'])->name('voucher-orders.pdf')->whereNumber('voucherOrder');
+        // Guest booking link (tour, camp, trip or voucher): send it, or turn it off and send a new one.
+        Route::post('booking-links/{type}/{id}/send', [GuestBookingLinksController::class, 'send'])->name('booking-links.send')->whereIn('type', ['tour', 'camp', 'trip', 'voucher'])->whereNumber('id');
+        Route::post('booking-links/{type}/{id}/revoke', [GuestBookingLinksController::class, 'revoke'])->name('booking-links.revoke')->whereIn('type', ['tour', 'camp', 'trip', 'voucher'])->whereNumber('id');
 
         Route::get('vacation-reviews', [VacationReviewsController::class, 'index'])->name('vacation-reviews.index');
         Route::get('vacation-reviews/create', [VacationReviewsController::class, 'create'])->name('vacation-reviews.create');

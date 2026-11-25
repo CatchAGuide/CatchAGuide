@@ -83,6 +83,7 @@
                 <p style="font-size: 14px; font-family: 'Morrison', sans-serif;">
                     @lang('emails.guest_booking_request_accepted_text_4') 
                 </p>
+                <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
                 <div style="text-align: center; margin-top: 2rem; font-family: 'Morrison', sans-serif;">
                     <a class="btn-theme" style="background-color: #e8604c; padding: 10px 20px; color: #fff !important; border: 0; text-decoration: none; margin-top: 30px; font-family: 'Morrison', sans-serif; display: inline-block;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
                 </div>

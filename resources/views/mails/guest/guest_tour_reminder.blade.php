@@ -34,6 +34,7 @@
             <p style="font-size: 14px;">
                 {!! __('emails.guest_tour_reminder_text_4')!!}
             </p>
+            <div style="padding: 0 20px;">@include('mails.partials.booking-link-button', ['bookable' => $booking ?? null])</div>
             <div style="text-align: center; margin-top: 2rem;">
                 <p style="font-size: 14px; text-align: left; " >{!!__('emails.guest_tour_reminder_text_6')!!}</p>
                 <a style="background-color: #e8604c; padding: 10px 20px; color: #fff; border: 0; text-decoration: none; margin-top: 30px; display: inline-block; font-size: 14px;" href="{{route('additional.contact')}}" target="_blank">@lang('emails.contact_us')</a>
